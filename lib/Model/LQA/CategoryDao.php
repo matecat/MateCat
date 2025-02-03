@@ -161,7 +161,8 @@ class CategoryDao extends \DataAccess_AbstractDao {
         return array_map( function ( $element ) {
             $return = [
                     'label'   => $element[ 'label' ],
-                    'penalty' => $element[ 'penalty' ]
+                    'penalty' => $element[ 'penalty' ],
+                    'sort'    => $element[ 'sort' ] ?? null
             ];
 
             if ( isset( $element[ 'code' ] ) ) {
@@ -181,13 +182,22 @@ class CategoryDao extends \DataAccess_AbstractDao {
 
         $map     = [];
         $options = json_decode( $json[ 'options' ], true );
+
         if ( !empty( $options ) ) {
 
             foreach ( $options as $key => $value ) {
-                if ( $key != 'code' ) {
-                    continue;
+
+                $allowedKeys = [
+                    'code',
+                    'sort'
+                ];
+
+                if(in_array($key, $allowedKeys)){
+                    $map[] = [
+                        'key' => $key,
+                        'value' => $value
+                    ];
                 }
-                $map[] = [ 'key' => $key, 'value' => $value ];
             }
         }
 

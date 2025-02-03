@@ -12,7 +12,14 @@ import usePortal from '../../../../hooks/usePortal'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {getCodeFromLabel} from './CategoriesSeveritiesTable'
 
-export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
+export const ModifySeverity = ({
+  target,
+  label,
+  code,
+  index,
+  sort,
+  setIsEditingName,
+}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {modifyingCurrentTemplate, currentTemplate} = useContext(
     QualityFrameworkTabContext,
@@ -49,12 +56,13 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
       ...prevTemplate,
       categories: prevTemplate.categories.map((category) => ({
         ...category,
-        severities: category.severities.map((severity, indexSeverity) => ({
+        severities: category.severities.map((severity) => ({
           ...severity,
-          ...(indexSeverity === index && {
-            label: labelState,
-            code: getCodeFromLabel(labelState),
-          }),
+          ...(severity.label === label &&
+            severity.code === code && {
+              label: labelState,
+              code: getCodeFromLabel(labelState),
+            }),
         })),
       })),
     }))
@@ -152,6 +160,8 @@ export const ModifySeverity = ({target, label, index, setIsEditingName}) => {
 ModifySeverity.propTypes = {
   target: PropTypes.any.isRequired,
   label: PropTypes.string.isRequired,
+  code: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
+  sort: PropTypes.number.isRequired,
   setIsEditingName: PropTypes.func.isRequired,
 }

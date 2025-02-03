@@ -7,12 +7,21 @@ import {SettingsPanelContext} from '../../SettingsPanelContext'
 import IconEdit from '../../../icons/IconEdit'
 import Trash from '../../../../../../../img/icons/Trash'
 import IconDown from '../../../icons/IconDown'
-import {switchArrayIndex} from '../../../../utils/commonUtils'
 import LabelWithTooltip from '../../../common/LabelWithTooltip'
 import ChevronDown from '../../../../../../../img/icons/ChevronDown'
 import {ModifySeverity} from './ModifySeverity'
 
-export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
+export const orderSeverityBySort = (severities) =>
+  severities.sort((a, b) => (a.sort > b.sort ? 1 : -1))
+
+export const SeverityColumn = ({
+  label,
+  code,
+  index,
+  sort,
+  numbersOfColumns,
+  shouldScrollIntoView,
+}) => {
   const {portalTarget} = useContext(SettingsPanelContext)
   const {templates, currentTemplate, modifyingCurrentTemplate} = useContext(
     QualityFrameworkTabContext,
@@ -56,27 +65,53 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
 
   const isNotSaved = checkIsNotSaved()
 
+  const switchSort = ({severities, sort, newSort}) =>
+    orderSeverityBySort(
+      severities.map((severity) => {
+        const modifiedSort =
+          severity.sort === sort
+            ? newSort
+            : newSort < sort && severity.sort < sort && newSort <= severity.sort
+              ? severity.sort + 1
+              : newSort > sort &&
+                  severity.sort > sort &&
+                  newSort >= severity.sort
+                ? severity.sort - 1
+                : severity.sort
+
+        return {...severity, sort: modifiedSort}
+      }),
+    )
+
   const moveLeft = () => {
-    const newIndex = index - 1
-    if (newIndex >= 0) {
+    const newSort = sort - 1
+    if (newSort >= 1) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         categories: prevTemplate.categories.map((category) => ({
           ...category,
-          severities: switchArrayIndex(category.severities, index, newIndex),
+          severities: switchSort({
+            severities: category.severities,
+            sort,
+            newSort,
+          }),
         })),
       }))
     }
   }
 
   const moveRight = () => {
-    const newIndex = index + 1
-    if (newIndex <= currentTemplate.categories[0].severities.length - 1) {
+    const newSort = sort + 1
+    if (newSort <= numbersOfColumns) {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         categories: prevTemplate.categories.map((category) => ({
           ...category,
-          severities: switchArrayIndex(category.severities, index, newIndex),
+          severities: switchSort({
+            severities: category.severities,
+            sort,
+            newSort,
+          }),
         })),
       }))
     }
@@ -87,17 +122,23 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
       ...prevTemplate,
       categories: prevTemplate.categories.map((category) => ({
         ...category,
-        severities: category.severities.filter(
-          (severity, indexSeverity) => indexSeverity !== index,
-        ),
+        severities: category.severities
+          .filter(
+            (severity) => !(severity.label === label && severity.code === code),
+          )
+          .map((severity) => ({
+            ...severity,
+            sort: severity.sort > sort ? severity.sort - 1 : severity.sort,
+          })),
       })),
     }))
   }
 
-  const isMoveLeftDisabled = index === 0
-  const isMoveRightDisabled =
-    index === currentTemplate.categories[0].severities.length - 1
-  const isDeleteDisabled = currentTemplate.categories[0].severities.length === 1
+  const isMoveLeftDisabled = sort === 1
+  const isMoveRightDisabled = sort === numbersOfColumns
+  const isDeleteDisabled = currentTemplate.categories.every(
+    ({severities}) => severities.length === 1,
+  )
 
   const menu = (
     <MenuButton
@@ -160,7 +201,9 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
           {...{
             target: ref.current,
             label,
+            code,
             index,
+            sort,
             setIsEditingName,
           }}
         />
@@ -171,6 +214,9 @@ export const SeverityColumn = ({label, index, shouldScrollIntoView}) => {
 
 SeverityColumn.propTypes = {
   label: PropTypes.string.isRequired,
+  code: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
+  sort: PropTypes.number.isRequired,
+  numbersOfColumns: PropTypes.number.isRequired,
   shouldScrollIntoView: PropTypes.bool,
 }

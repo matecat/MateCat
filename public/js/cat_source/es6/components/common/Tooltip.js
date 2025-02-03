@@ -69,7 +69,11 @@ const Tooltip = ({
       {content}
     </div>
   ) : children ? (
-    <div onPointerEnter={showToolTip} onPointerLeave={hideToolTip}>
+    <div
+      onPointerEnter={showToolTip}
+      onPointerLeave={hideToolTip}
+      style={style}
+    >
       {children}
       {isVisible && (
         <Portal id="portal-root">
