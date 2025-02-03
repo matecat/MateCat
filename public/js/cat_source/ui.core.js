@@ -333,7 +333,7 @@ window.UI = {
         self.displayedMessages.indexOf(this.token) < 0
       ) {
         var notification = {
-          title: 'Notice',
+          title: elem.title ? elem.title : 'Notice',
           text: this.msg,
           type: 'warning',
           autoDismiss: false,

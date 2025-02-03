@@ -7,11 +7,12 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.key
  * @returns {Promise<object>}
  */
-export const deleteTmKey = async ({key}) => {
+export const deleteTmKey = async ({key, removeFrom}) => {
   const paramsData = {
     action: 'userKeys',
     exec: 'delete',
     key,
+    remove_from: removeFrom,
   }
   const formData = new FormData()
 

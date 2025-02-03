@@ -74,6 +74,7 @@ route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
     route( '/[:id_job]/[:password]', 'GET', [ '\API\App\TmKeyManagementController', 'getByJob' ] );
+    route( '/engines/info/[:key]', 'GET', [ '\API\App\TmKeyManagementController', 'getByUserAndKey' ] );
 } );
 
 // Glossary

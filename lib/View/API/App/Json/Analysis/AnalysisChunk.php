@@ -134,8 +134,8 @@ class AnalysisChunk implements JsonSerializable {
         $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
 
         return [
-                'tm' => ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRow() ),
-                'mt' => ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRow() )
+                'tm' => ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ),
+                'mt' => ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() )
         ];
     }
 

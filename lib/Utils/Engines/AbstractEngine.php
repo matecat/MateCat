@@ -12,7 +12,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @var EnginesModel_EngineStruct
      */
-    protected $engineRecord;
+    protected EnginesModel_EngineStruct $engineRecord;
 
     protected $className;
     protected $_config = [];
@@ -29,7 +29,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @var bool True if the engine can receive contributions through a `set/update` method.
      */
-    protected bool $_isAdaptive = false;
+    protected bool $_isAdaptiveMT = false;
 
     /**
      * @var bool
@@ -263,17 +263,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $this->engineRecord->name;
     }
 
-    /**
-     * Read Only
-     *
-     * @return EnginesModel_EngineStruct
-     */
-    public function getEngineRow() {
-        return clone $this->engineRecord;
+    public function isTMS(): bool {
+        return false;
     }
 
-    public function isAdaptive(): bool {
-        return $this->_isAdaptive;
+    public function isAdaptiveMT(): bool {
+        return $this->_isAdaptiveMT && !$this->isTMS();
     }
 
     /**
@@ -347,6 +342,38 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      */
     public function syncMemories( array $projectRow, ?array $segments = [] ) {
 
+    }
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     *
+     * @return ?array Returns the memory, otherwise null.
+     * @throws Exception
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        return null;
+    }
+
+    /**
+     * @param array $memoryKey
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function deleteMemory( array $memoryKey ): array {
+        return [];
+    }
+
+    /**
+     * Determines if the provided memory belongs to the caller.
+     *
+     *
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey *
+     *
+     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey): ?array {
+        return null;
     }
 
 }
