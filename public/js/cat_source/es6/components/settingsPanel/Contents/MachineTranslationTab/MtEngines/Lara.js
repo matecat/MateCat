@@ -26,7 +26,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
           <div className="provider-field">
             <div className="provider-field-row">
               <label>
-                Lara Access key ID<sup>*</sup>
+                Lara Access Key ID<sup>*</sup>
               </label>
               <input
                 className="required"
@@ -37,7 +37,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
             </div>
             <div className="provider-field-row">
               <label>
-                Lara License<sup>*</sup>
+                Lara Access Key Secret<sup>*</sup>
               </label>
               <input
                 className="required"
@@ -93,8 +93,8 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
           translation by understanding context and learning from previously
           translated content, delivering high-quality, nuanced translations.
           <br />
-          Lara currently supports all combinations of ten languages, with more
-          on the way soon. For languages not yet supported, translation is
+          Lara currently supports all combinations of eleven languages, with
+          more on the way soon. For languages not yet supported, translation is
           provided through ModernMT Lite, or your personal ModernMT Full if a
           valid license is provided.
           <br />

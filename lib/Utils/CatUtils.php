@@ -687,9 +687,9 @@ class CatUtils {
      * @param $jid
      * @param $password
      *
-     * @return bool|null
+     * @return bool
      */
-    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ): ?bool {
+    public static function isRevisionFromIdJobAndPassword( $jid, $password ): bool {
 
         $jobValidator = new IsJobRevisionValidator();
 
@@ -704,7 +704,7 @@ class CatUtils {
         } catch ( Exception $ignore ) {
         }
 
-        return null;
+        return false;
     }
 
     /**

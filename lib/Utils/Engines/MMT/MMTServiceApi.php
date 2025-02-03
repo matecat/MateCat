@@ -148,7 +148,7 @@ class MMTServiceApi {
     /**
      * @param $id
      *
-     * @return mixed
+     * @return array
      * @throws MMTServiceApiException
      */
     public function deleteMemory( $id ) {
@@ -545,7 +545,7 @@ class MMTServiceApi {
             throw MMTServiceApiException::fromJSONResponse( $json );
         }
 
-        return isset( $json[ 'data' ] ) ? $json[ 'data' ] : null;
+        return $json[ 'data' ] ?? null;
     }
 
 }
