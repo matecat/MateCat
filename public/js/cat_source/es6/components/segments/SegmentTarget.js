@@ -10,7 +10,6 @@ import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import OfflineUtils from '../../utils/offlineUtils'
 import {removeTagsFromText} from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import RemoveTagsIcon from '../../../../../img/icons/RemoveTagsIcon'
@@ -20,6 +19,7 @@ import LowerCaseIcon from '../../../../../img/icons/LowerCaseIcon'
 import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
 import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
+import OfflineUtils from '../../utils/offlineUtils'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -138,12 +138,15 @@ class SegmentTarget extends React.Component {
           </div>
           <div className="toolbar">
             {config.isReview ? (
-              <a
-                href="#"
-                className="revise-lock-editArea active"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
-              />
+                className="revise-lock-editArea-active"
+              >
+                <ReviseLockIcon />
+              </Button>
             ) : null}
           </div>
         </div>
