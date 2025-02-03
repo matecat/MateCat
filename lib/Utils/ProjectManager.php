@@ -2315,9 +2315,9 @@ class ProjectManager {
                 // get metadata
                 $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
-                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
-                $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-                $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
+            $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
+            $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+            $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
                 if ( $this->gdriveSession ) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
@@ -2341,13 +2341,12 @@ class ProjectManager {
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                $fileStructures[ $fid ] = [
-                        'fid'               => $fid,
-                        'original_filename' => $originalFileName,
-                        'path_cached_xliff' => $cachedXliffFilePathName,
-                        'mime_type'         => $mimeType
-                ];
-            }
+            $fileStructures[ $fid ] = [
+                    'fid'               => $fid,
+                    'original_filename' => $originalFileName,
+                    'path_cached_xliff' => $cachedXliffFilePathName,
+                    'mime_type'         => $mimeType
+            ];
         }
 
         return $fileStructures;

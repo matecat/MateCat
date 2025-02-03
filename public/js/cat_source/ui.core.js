@@ -335,7 +335,7 @@ window.UI = {
         var notification = {
           title: elem.title ? elem.title : 'Notice',
           text: this.msg,
-          type: 'warning',
+          type: elem.level ? elem.level : 'warning',
           autoDismiss: false,
           position: 'bl',
           allowHtml: true,
