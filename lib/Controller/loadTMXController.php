@@ -126,8 +126,8 @@ class loadTMXController extends ajaxController {
                             $fileInfo->name
                     );
 
-                    $this->TMService->addTmxInMyMemory( $file, $this->user );
-                    $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
+                    $warnings = $this->TMService->addTmxInMyMemory( $file, $this->user );
+                    $uuids[]  = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
 
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key
@@ -155,14 +155,16 @@ class loadTMXController extends ajaxController {
 
                     }
 
+                    $this->result[ 'warnings' ][] = $warnings;
+
                 }
 
                 $this->result[ 'data' ][ 'uuids' ] = $uuids;
 
             } else {
 
-                $status                      = $this->TMService->tmxUploadStatus( $this->uuid );
-                $this->result[ 'data' ]      = $status[ 'data' ];
+                $status                 = $this->TMService->tmxUploadStatus( $this->uuid );
+                $this->result[ 'data' ] = $status[ 'data' ];
 
             }
 
