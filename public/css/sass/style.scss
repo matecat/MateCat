@@ -1399,6 +1399,9 @@ section.opened {
     button {
       padding: 0;
     }
+    .revise-lock-editArea-active {
+      background-color: $grey4;
+    }
   }
 }
 

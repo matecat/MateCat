@@ -138,12 +138,15 @@ class SegmentTarget extends React.Component {
           </div>
           <div className="toolbar">
             {config.isReview ? (
-              <a
-                href="#"
-                className="revise-lock-editArea active"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
-              />
+                className="revise-lock-editArea-active"
+              >
+                <ReviseLockIcon />
+              </Button>
             ) : null}
           </div>
         </div>
