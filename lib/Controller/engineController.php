@@ -290,9 +290,11 @@ class engineController extends ajaxController {
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
 
+            $engine_type = explode( "\\", $newEngineStruct->class_load );
+            $engine_type = array_pop( $engine_type );
             $this->result[ 'errors' ][] = $this->featureSet->filter(
                     'engineCreationFailed',
-                    [ 'code' => -9, 'message' => "Creation failed. Generic error" ],
+                    [ 'code' => 403, 'message' => "Creation failed. Only one $engine_type engine is allowed." ],
                     $newEngineStruct->class_load
             );
 
@@ -349,7 +351,7 @@ class engineController extends ajaxController {
             try {
                 $newTestCreatedMT->get( $config );
             } catch ( LaraException $e ) {
-                $this->result[ 'errors' ][] = [ "code" => 404, "message" => $e->getMessage() ];
+                $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => $e->getMessage() ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 

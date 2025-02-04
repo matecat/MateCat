@@ -98,7 +98,10 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
           <br />
           Lara currently supports all combinations of{' '}
           <strong>
-            <a href="https://guides.matecat.com/what-languages-does-lara-support">
+            <a
+              href="https://guides.matecat.com/what-languages-does-lara-support"
+              target={'_blank'}
+            >
               200+ languages
             </a>
           </strong>

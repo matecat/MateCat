@@ -160,7 +160,10 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @inheritDoc
-     * @throws LaraException
+     *
+     * @param $_config
+     *
+     * @return array|\Engines_Results_AbstractResponse
      * @throws ReflectionException
      * @throws Exception
      */
@@ -192,12 +195,6 @@ class Lara extends Engines_AbstractEngine {
         }
 
         $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
-
-//        $languagesList = $this->getAvailableLanguages();
-//        $s_c           = explode( '-', $_config[ 'source' ] )[ 0 ];
-//        $t_c           = explode( '-', $_config[ 'target' ] )[ 0 ];
-
-//        if ( in_array( $s_c, $languagesList ) && in_array( $t_c, $languagesList ) ) {
 
         try {
 
@@ -244,7 +241,14 @@ class Lara extends Engines_AbstractEngine {
                 }
             }
 
-        } catch ( Throwable $t ) {
+        } catch ( LaraException $t ) {
+            if ( $t->getCode() == 429 ) {
+                Log::doJsonLog( "Quota finished." );
+            } elseif ( $t->getCode() == 401 || $t->getCode() == 403 ) {
+                Log::doJsonLog( [ "Missing or invalid authentication header.", $t->getMessage(), $t->getCode() ] );
+                throw new LaraException( "Lara credentials not valid, please verify their validity and try again", $t->getCode(), $t );
+            }
+
             // mmt fallback
             return $this->mmt_GET_Fallback->get( $_config );
         }
