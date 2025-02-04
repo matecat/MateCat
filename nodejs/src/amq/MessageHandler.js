@@ -42,7 +42,7 @@ module.exports.MessageHandler = class {
     switch (message._type) {
       case RELOAD:
         logger.info('RELOAD: ' + RELOAD + ' message received...');
-        notifyUpgrade(this.application, RELOAD);
+        notifyUpgrade(this.application, false);
         return;
       case LOGOUT:
         logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
@@ -52,7 +52,14 @@ module.exports.MessageHandler = class {
         room = message.data.id_job.toString();
         break;
       case GLOBAL_MESSAGES:
-        notifyUpgrade(this.application, GLOBAL_MESSAGES, message.data.payload.messages);
+        this.application.sendBroadcastServiceMessage(
+            MESSAGE_NAME,
+            {
+              _type: GLOBAL_MESSAGES,
+              data: message.data.payload.messages
+            }
+        );
+
         return;
       default:
         room = message.data.id_client;
@@ -76,28 +83,25 @@ module.exports.MessageHandler = class {
   }
 }
 
-module.exports.notifyUpgrade = notifyUpgrade = (application, _type, data = null) => {
+module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true) => {
 
-  const message = {
+  const disconnectMessage = {
     payload: {
-      data: data,
-      _type: _type
+      _type: isRebooting ? UPGRADE : RELOAD
     }
   };
 
-  if(_type === UPGRADE || _type === RELOAD){
-    logger.info(['Disconnecting clients...', message]);
-  }
+  logger.info(['Disconnecting clients...', disconnectMessage]);
 
   application.sendBroadcastServiceMessage(
     MESSAGE_NAME,
     {
-      _type: _type,
-      data: message.payload
+      _type: (isRebooting ? UPGRADE : RELOAD),
+      data: disconnectMessage.payload
     }
   );
 
-  if (_type === UPGRADE) {
+  if (isRebooting) {
     setTimeout(() => {
       logger.info('Exit...');
       application._socketIOServer.disconnectSockets(true);
