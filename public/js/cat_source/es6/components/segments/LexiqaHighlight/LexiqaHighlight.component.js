@@ -1,53 +1,14 @@
-import React, {Component} from 'react'
+import React, {Component, createRef} from 'react'
 import {find} from 'lodash'
 
 import LexiqaTooltipInfo from '../TooltipInfo/LexiqaTooltipInfo.component'
 import LexiqaUtils from '../../../utils/lxq.main'
+import Tooltip from '../../common/Tooltip'
 
 class LexiqaHighlight extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      showTooltip: false,
-    }
-    this.delayHideLoop = null
-    this.delayShowLoop = null
-  }
-
-  clearTimer() {
-    clearTimeout(this.delayHideLoop)
-    clearTimeout(this.delayShowLoop)
-  }
-
-  toggleTooltip = (show = false) => {
-    this.setState({
-      showTooltip: show,
-    })
-  }
-
-  showTooltip = (delayShow) => {
-    this.clearTimer()
-    if (delayShow) {
-      this.delayShowLoop = setTimeout(
-        () => this.toggleTooltip(true),
-        parseInt(delayShow, 10),
-      )
-    } else {
-      this.toggleTooltip(true)
-    }
-  }
-
-  hideTooltip = (delayHide) => {
-    this.clearTimer()
-
-    if (delayHide) {
-      this.delayHideLoop = setTimeout(
-        this.toggleTooltip,
-        parseInt(delayHide, 10),
-      )
-    } else {
-      this.toggleTooltip()
-    }
+    this.contentRef = createRef()
   }
 
   getWarning = () => {
@@ -68,29 +29,34 @@ class LexiqaHighlight extends Component {
     return warning
   }
 
-  componentWillUnmount() {
-    this.clearTimer()
-  }
-
   render() {
-    const {children, sid, getUpdatedSegmentInfo} = this.props
-    const {showTooltip} = this.state
+    const {children, getUpdatedSegmentInfo} = this.props
     const {segmentOpened} = getUpdatedSegmentInfo()
     const warning = this.getWarning()
-    return warning ? (
-      <div
-        className="lexiqahighlight"
-        onMouseEnter={() => this.showTooltip(300)}
-        onMouseLeave={() => this.hideTooltip(300)}
-      >
-        {showTooltip && segmentOpened && warning && warning.messages && (
-          <LexiqaTooltipInfo messages={warning.messages} />
-        )}
-        <span style={{backgroundColor: warning.messages ? warning.color : ''}}>
-          {children}
-        </span>
-      </div>
-    ) : null
+
+    return (
+      warning && (
+        <Tooltip
+          stylePointerElement={{display: 'inline-block', position: 'relative'}}
+          content={
+            segmentOpened &&
+            warning &&
+            warning.messages && (
+              <LexiqaTooltipInfo messages={warning.messages} />
+            )
+          }
+          isInteractiveContent={true}
+        >
+          <div ref={this.contentRef} className="lexiqahighlight">
+            <span
+              style={{backgroundColor: warning.messages ? warning.color : ''}}
+            >
+              {children}
+            </span>
+          </div>
+        </Tooltip>
+      )
+    )
   }
 }
 
