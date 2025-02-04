@@ -269,8 +269,6 @@ class newProjectController extends viewController {
         $this->template->show_tag_projection    = true;
         $this->template->tag_projection_default = true;
 
-        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
-
         $this->intOauthClients();
 
     }

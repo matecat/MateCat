@@ -21,11 +21,12 @@ const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 const LOGOUT = 'logout';
-
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
-
 const MESSAGE_NAME = 'message';
+const GLOBAL_MESSAGES = 'global_messages';
+
+
 module.exports.MESSAGE_NAME = MESSAGE_NAME;
 
 module.exports.MessageHandler = class {
@@ -41,7 +42,7 @@ module.exports.MessageHandler = class {
     switch (message._type) {
       case RELOAD:
         logger.info('RELOAD: ' + RELOAD + ' message received...');
-        notifyUpgrade(this.application, false);
+        notifyUpgrade(this.application, RELOAD);
         return;
       case LOGOUT:
         logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
@@ -50,6 +51,9 @@ module.exports.MessageHandler = class {
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
+      case GLOBAL_MESSAGES:
+        notifyUpgrade(this.application, GLOBAL_MESSAGES, message.data.payload.messages);
+        return;
       default:
         room = message.data.id_client;
         break;
@@ -69,29 +73,31 @@ module.exports.MessageHandler = class {
       MESSAGE_NAME,
       {data: message.data.payload}
     );
-
   }
 }
 
-module.exports.notifyUpgrade = notifyUpgrade = (application, isRebooting = true) => {
+module.exports.notifyUpgrade = notifyUpgrade = (application, _type, data = null) => {
 
-  const disconnectMessage = {
+  const message = {
     payload: {
-      _type: isRebooting ? UPGRADE : RELOAD
+      data: data,
+      _type: _type
     }
   };
 
-  logger.info(['Disconnecting clients...', disconnectMessage]);
+  if(_type === UPGRADE || _type === RELOAD){
+    logger.info(['Disconnecting clients...', message]);
+  }
 
   application.sendBroadcastServiceMessage(
     MESSAGE_NAME,
     {
-      _type: (isRebooting ? UPGRADE : RELOAD),
-      data: disconnectMessage.payload
+      _type: _type,
+      data: message.payload
     }
   );
 
-  if (isRebooting) {
+  if (_type === UPGRADE) {
     setTimeout(() => {
       logger.info('Exit...');
       application._socketIOServer.disconnectSockets(true);
