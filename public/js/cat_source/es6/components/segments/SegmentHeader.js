@@ -137,6 +137,9 @@ class SegmentHeader extends React.PureComponent {
       charactersCounter?.sid === sid &&
       (isActiveCharactersCounter || charactersCounter.limit)
 
+    const isGroupTransUnit =
+      charactersCounter.counter !== charactersCounter.segmentCharacters
+
     return segmentOpened ? (
       <div className="header toggle" id={'segment-' + sid + '-header'}>
         {autopropagated ? autopropagatedHtml : percentageHtml}
@@ -151,18 +154,28 @@ class SegmentHeader extends React.PureComponent {
                   : ''
             }`}
           >
-            <span>Character count: </span>
-            <span className="segment-counter-current">
-              {charactersCounter.counter}
-            </span>
-            {charactersCounter.limit > 0 && (
-              <>
-                /
-                <span className={'segment-counter-limit'}>
-                  {charactersCounter.limit}
-                </span>
-              </>
+            {isGroupTransUnit && (
+              <div>
+                <span>Segment characters: </span>{' '}
+                <span>{charactersCounter.segmentCharacters}</span>
+              </div>
             )}
+            <div>
+              <span>
+                {isGroupTransUnit ? 'Unit characters' : 'Characters'}:{' '}
+              </span>
+              <span className="segment-counter-current">
+                {charactersCounter.counter}
+              </span>
+              {charactersCounter.limit > 0 && (
+                <>
+                  /
+                  <span className={'segment-counter-limit'}>
+                    {charactersCounter.limit}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         )}
         {saving ? savingHtml : null}{' '}

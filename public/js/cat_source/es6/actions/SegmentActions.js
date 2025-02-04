@@ -1605,11 +1605,12 @@ const SegmentActions = {
       actionType: SegmentConstants.HIDE_AI_ASSISTANT,
     })
   },
-  characterCounter: ({sid, counter, limit}) => {
+  characterCounter: ({sid, counter, segmentCharacters, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
       counter,
+      segmentCharacters,
       limit,
     })
   },

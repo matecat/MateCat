@@ -53,7 +53,7 @@ body.cattool {
 
 section {
   .header {
-    height: 20px;
+    height: 24px;
     width: 100%;
     color: $grey1;
     font-size: 12px;
@@ -256,11 +256,14 @@ section {
   top: 0;
   line-height: 16px;
   font-size: 15px;
-  margin-top: 2px;
+  margin-top: 4px;
   margin-right: 2%;
   font-size: 14px;
 
-  > span:first-of-type {
+  display: flex;
+  gap: 30px;
+
+  > div > span:first-of-type {
     font-weight: bold;
   }
 
@@ -278,6 +281,9 @@ section {
   &.segment-counter-limit-error {
     .segment-counter-current {
       color: $notification-error;
+      background-color: rgba($notification-error, 0.2);
+      border-radius: 4px;
+      padding: 2px;
     }
   }
 }
