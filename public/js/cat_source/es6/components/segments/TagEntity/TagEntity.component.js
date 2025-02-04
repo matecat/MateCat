@@ -1,13 +1,12 @@
 import React, {Component, createRef} from 'react'
 import {debounce, find} from 'lodash'
-
-import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
 import {tagSignatures, getTooltipTag} from '../utils/DraftMatecatUtils/tagModel'
 import SegmentStore from '../../../stores/SegmentStore'
 import SegmentConstants from '../../../constants/SegmentConstants'
 import EditAreaConstants from '../../../constants/EditAreaConstants'
 import SegmentActions from '../../../actions/SegmentActions'
 import SearchUtils from '../../header/cattol/search/searchUtils'
+import Tooltip from '../../common/Tooltip'
 
 class TagEntity extends Component {
   constructor(props) {
@@ -19,7 +18,6 @@ class TagEntity extends Component {
     } = contentState.getEntity(entityKey)
 
     this.state = {
-      showTooltip: false,
       tagStyle: this.selectCorrectStyle(),
       tagWarningStyle: '',
       tooltipAvailable: getTooltipTag().includes(entityName),
@@ -35,13 +33,9 @@ class TagEntity extends Component {
       500,
     )
 
+    this.contentRef = createRef()
     this.focusedState = createRef({})
     this.focusedState.current = {}
-  }
-
-  tooltipToggle = (show = false) => {
-    // this will trigger a rerender in the main Editor Component
-    this.setState({showTooltip: show})
   }
 
   markSearch = (text, searchParams) => {
@@ -221,12 +215,11 @@ class TagEntity extends Component {
       tagStyle,
       tagWarningStyle,
       tooltipAvailable,
-      showTooltip,
       shouldTooltipOnHover,
       searchParams,
       focused,
     } = this.state
-    const {tooltipToggle, markSearch} = this
+    const {markSearch} = this
     const style =
       this.props.entityKey === this.state.entityKey
         ? tagStyle
@@ -240,46 +233,53 @@ class TagEntity extends Component {
       : children.props.decoratedText
 
     return (
-      <div className={'tag-container'}>
-        <span
-          ref={(ref) => (this.tagRef = ref)}
-          className={`tag ${style}${
-            focused ? ' tag-focused' : ''
-          } ${tagWarningStyle}`}
-          data-offset-key={this.props.offsetkey}
-          unselectable="on"
-          suppressContentEditableWarning={true}
-          onMouseEnter={() => tooltipToggle(shouldTooltipOnHover)}
-          onMouseLeave={() => tooltipToggle()}
-          onClick={(e) => {
-            e.stopPropagation()
-            this.onClickBound(entityId, entityPlaceholder)
-            !openSplit &&
-              setTimeout(() => {
-                SegmentActions.highlightTags(
-                  entityId,
-                  entityPlaceholder,
-                  entityKey,
-                )
-              })
-            this.focusedState.current = {
-              skipTmOut: true,
-            }
-          }}
-        >
-          {tooltipAvailable && showTooltip && (
-            <TooltipInfo text={entityPlaceholder} isTag tagStyle={style} />
-          )}
-          {searchParams.active && markSearch(decoratedText, searchParams)}
-          {searchParams.active ? (
-            <span style={{display: 'none'}}>
-              {this.getChildrenContent(index)}
+      <Tooltip
+        stylePointerElement={{display: 'inline-block', position: 'relative'}}
+        content={
+          shouldTooltipOnHover &&
+          tooltipAvailable && (
+            <span className={`tag ${style}`}>
+              <span>{entityPlaceholder}</span>
             </span>
-          ) : (
-            this.getChildrenContent(index)
-          )}
-        </span>
-      </div>
+          )
+        }
+      >
+        <div ref={this.contentRef} className={'tag-container'}>
+          <span
+            ref={(ref) => (this.tagRef = ref)}
+            className={`tag ${style}${
+              focused ? ' tag-focused' : ''
+            } ${tagWarningStyle}`}
+            data-offset-key={this.props.offsetkey}
+            unselectable="on"
+            suppressContentEditableWarning={true}
+            onClick={(e) => {
+              e.stopPropagation()
+              this.onClickBound(entityId, entityPlaceholder)
+              !openSplit &&
+                setTimeout(() => {
+                  SegmentActions.highlightTags(
+                    entityId,
+                    entityPlaceholder,
+                    entityKey,
+                  )
+                })
+              this.focusedState.current = {
+                skipTmOut: true,
+              }
+            }}
+          >
+            {searchParams.active && markSearch(decoratedText, searchParams)}
+            {searchParams.active ? (
+              <span style={{display: 'none'}}>
+                {this.getChildrenContent(index)}
+              </span>
+            ) : (
+              this.getChildrenContent(index)
+            )}
+          </span>
+        </div>
+      </Tooltip>
     )
   }
 

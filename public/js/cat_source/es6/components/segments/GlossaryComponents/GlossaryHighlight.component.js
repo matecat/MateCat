@@ -1,29 +1,11 @@
-import React, {Component} from 'react'
-import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
+import React, {Component, createRef} from 'react'
 import SegmentActions from '../../../actions/SegmentActions'
+import Tooltip from '../../common/Tooltip'
 
 class GlossaryHighlight extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      showTooltip: false,
-    }
-    this.tooltipDelay
-  }
-  tooltipToggle = () => {
-    // this will trigger a rerender in the main Editor Component
-    clearTimeout(this.tooltipDelay)
-    this.tooltipDelay = setTimeout(() => {
-      this.setState({
-        showTooltip: true,
-      })
-    }, 400)
-  }
-  removeTooltip = () => {
-    clearTimeout(this.tooltipDelay)
-    this.setState({
-      showTooltip: false,
-    })
+    this.contentRef = createRef()
   }
   onClickTerm = () => {
     const {glossary, children, sid} = this.props
@@ -40,18 +22,16 @@ class GlossaryHighlight extends Component {
   }
   render() {
     const {children} = this.props
-    const {showTooltip} = this.state
+
     return (
-      <div className={'glossaryItem'}>
-        {showTooltip && <TooltipInfo text={'Glossary term'} />}
-        <span
-          onMouseEnter={() => this.tooltipToggle()}
-          onMouseLeave={() => this.removeTooltip()}
-          onClick={() => this.onClickTerm()}
-        >
-          {children}
-        </span>
-      </div>
+      <Tooltip
+        stylePointerElement={{display: 'inline-block', position: 'relative'}}
+        content="Glossary term"
+      >
+        <div ref={this.contentRef} className="glossaryItem">
+          <span onClick={() => this.onClickTerm()}>{children}</span>
+        </div>
+      </Tooltip>
     )
   }
 }

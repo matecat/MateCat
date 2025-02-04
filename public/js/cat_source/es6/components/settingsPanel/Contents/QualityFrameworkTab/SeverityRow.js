@@ -118,7 +118,10 @@ export const SeveritiyRow = ({severity}) => {
           onFocus={selectAll}
           onBlur={onBlur}
         />
-        <Tooltip style={{position: 'absolute'}} content="Remove severity">
+        <Tooltip
+          stylePointerElement={{position: 'absolute'}}
+          content="Remove severity"
+        >
           <Button
             ref={removeSeverityRef}
             size={BUTTON_SIZE.ICON_SMALL}

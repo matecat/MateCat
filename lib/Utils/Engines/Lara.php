@@ -193,11 +193,14 @@ class Lara extends Engines_AbstractEngine {
 
         $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
 
-        $languagesList = $this->getAvailableLanguages();
-        $s_c           = explode( '-', $_config[ 'source' ] )[ 0 ];
-        $t_c           = explode( '-', $_config[ 'target' ] )[ 0 ];
+//        $languagesList = $this->getAvailableLanguages();
+//        $s_c           = explode( '-', $_config[ 'source' ] )[ 0 ];
+//        $t_c           = explode( '-', $_config[ 'target' ] )[ 0 ];
 
-        if ( in_array( $s_c, $languagesList ) && in_array( $t_c, $languagesList ) ) {
+//        if ( in_array( $s_c, $languagesList ) && in_array( $t_c, $languagesList ) ) {
+
+        try {
+
             // call lara
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
@@ -241,7 +244,7 @@ class Lara extends Engines_AbstractEngine {
                 }
             }
 
-        } else {
+        } catch ( Throwable $t ) {
             // mmt fallback
             return $this->mmt_GET_Fallback->get( $_config );
         }
