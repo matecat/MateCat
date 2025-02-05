@@ -42,7 +42,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
               <input
                 className="required"
                 type="text"
-                placeholder="Enter your license"
+                placeholder="Enter your access key secret"
                 {...register('secret', {required: true})}
               />
             </div>
@@ -53,8 +53,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
                   content={
                     <div>
                       (Optional) Enter your ModernMT license to use your
-                      personal engine for language combinations not supported by
-                      Lara
+                      personal ModernMT Full engine for pre-translation.
                     </div>
                   }
                 >
@@ -66,7 +65,7 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
               <input
                 className="required"
                 type="text"
-                placeholder="Enter your license"
+                placeholder="Enter your ModernMT license (optional)"
                 {...register('mmt-license')}
               />
             </div>
@@ -90,18 +89,28 @@ export const Lara = ({addMTEngine, error, isRequestInProgress}) => {
         <p>
           <strong>Lara</strong> is a groundbreaking machine translation engine
           powered by Large Language Models. It surpasses traditional machine
-          translation by understanding context and learning from previously
-          translated content, delivering high-quality, nuanced translations.
+          translation by{' '}
+          <b>
+            understanding context and learning from previously translated
+            content
+          </b>
+          , delivering high-quality, nuanced translations.
           <br />
-          Lara currently supports all combinations of eleven languages, with
-          more on the way soon. For languages not yet supported, translation is
-          provided through ModernMT Lite, or your personal ModernMT Full if a
-          valid license is provided.
-          <br />
+          Lara currently supports all combinations of{' '}
+          <strong>
+            <a
+              href="https://guides.matecat.com/what-languages-does-lara-support"
+              target={'_blank'}
+            >
+              200+ languages
+            </a>
+          </strong>
+          . <br />
           Lara is only available for machine translation post-editing,
-          pre-translation is always performed with ModernMT.
+          pre-translation is always performed with ModernMT Lite, or your
+          personal ModernMT Full engine if a valid license is provided.
         </p>
-
+        <br />
         <a
           href="https://lara.translated.com/about-lara"
           rel="noreferrer"
