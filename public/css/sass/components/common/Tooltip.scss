@@ -71,6 +71,10 @@
   }
 }
 
+.tooltip-container-interactive {
+  pointer-events: auto;
+}
+
 @keyframes showing {
   from {
     opacity: 0;
