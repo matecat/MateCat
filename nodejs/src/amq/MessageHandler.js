@@ -39,6 +39,7 @@ module.exports.MessageHandler = class {
   onReceive = (message) => {
 
     let room;
+    message.data.payload._type = message._type;
     switch (message._type) {
       case RELOAD:
         logger.info('RELOAD: ' + RELOAD + ' message received...');
@@ -54,10 +55,7 @@ module.exports.MessageHandler = class {
       case GLOBAL_MESSAGES:
         this.application.sendBroadcastServiceMessage(
             MESSAGE_NAME,
-            {
-              _type: GLOBAL_MESSAGES,
-              data: message.data.payload.messages
-            }
+            {data: message.data.payload}
         );
 
         return;
@@ -65,8 +63,6 @@ module.exports.MessageHandler = class {
         room = message.data.id_client;
         break;
     }
-
-    message.data.payload._type = message._type;
 
     logger.debug([
       "Sending message to room",

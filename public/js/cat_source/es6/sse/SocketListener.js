@@ -8,10 +8,12 @@ import CommentsActions from '../actions/CommentsActions'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import UserActions from '../actions/UserActions'
 import {v4 as uuidV4} from 'uuid'
+import Cookies from 'js-cookie'
+import useAuth from '../hooks/useAuth'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
-
+  const {isUserLogged} = useAuth()
   const eventHandlers = {
     disconnected: () => {
       CatToolActions.clientConnected(false)
@@ -169,6 +171,33 @@ const SocketListener = ({isAuthenticated, userId}) => {
         suggestion: data.message,
         isCompleted: data.completed,
         hasError: Boolean(data?.has_error),
+      })
+    },
+    global_messages: (data) => {
+      const messages = data.messages
+      messages.forEach((message) => {
+        if (
+          !isUserLogged ||
+          (typeof Cookies.get('msg-' + message.token) == 'undefined' &&
+            new Date(message.expire) > new Date())
+        ) {
+          const notification = {
+            title: message.title ? message.title : 'Notice',
+            text: message.msg,
+            type: message.level ? message.level : 'warning',
+            autoDismiss: false,
+            position: 'bl',
+            allowHtml: true,
+            closeCallback: function () {
+              const expireDate = new Date(message.expire)
+              Cookies.set('msg-' + message.token, '', {
+                expires: expireDate,
+                secure: true,
+              })
+            },
+          }
+          CatToolActions.addNotification(notification)
+        }
       })
     },
     logout: (data) => {
