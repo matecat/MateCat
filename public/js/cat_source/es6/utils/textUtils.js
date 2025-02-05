@@ -3,6 +3,7 @@ import {isUndefined} from 'lodash'
 import {regexWordDelimiter} from '../components/segments/utils/DraftMatecatUtils/textUtils'
 import CommonUtils from './commonUtils'
 import diff_match_patch from 'diff-match-patch'
+import {CHARS_SIZE_TYPE_GOOGLE_ADS} from './charsSizeCounterTypes'
 
 const TEXT_UTILS = {
   diffMatchPatch: new diff_match_patch(),
@@ -582,25 +583,7 @@ const TEXT_UTILS = {
     return result
   },
   /* specify how chars size should be count */
-  charsSizeMapping: {
-    default: (value) => TEXT_UTILS.getDefaultCharsSize(value),
-    custom: [
-      (value) => TEXT_UTILS.getCJKMatches(value, TEXT_UTILS.getUft16CharsSize),
-      (value) =>
-        TEXT_UTILS.getArmenianMatches(value, TEXT_UTILS.getUft16CharsSize),
-      (value) =>
-        TEXT_UTILS.getGeorgianMatches(value, TEXT_UTILS.getUft16CharsSize),
-      (value) =>
-        TEXT_UTILS.getSinhalaMatches(value, TEXT_UTILS.getUft16CharsSize),
-      (value) =>
-        TEXT_UTILS.getEmojiMatches(value, TEXT_UTILS.getUft16CharsSize),
-      (value) =>
-        TEXT_UTILS.getFullwidthVariantsMatches(
-          value,
-          TEXT_UTILS.getUft16CharsSize,
-        ),
-    ],
-  },
+  charsSizeMapping: CHARS_SIZE_TYPE_GOOGLE_ADS,
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
   stripUnderscore: (value) =>
     value.replace(/_[^_]/g, (match) => match[1].toUpperCase()),
