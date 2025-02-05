@@ -402,7 +402,7 @@ class NewController extends ajaxController {
                 throw new Exception( "Invalid MT Engine.", -2 );
             } else {
                 $testEngine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
-                if ( $testEngine->getEngineRow()->uid != $this->getUser()->uid ) {
+                if ( $testEngine->getEngineRecord()->uid != $this->getUser()->uid ) {
                     throw new Exception( "Invalid MT Engine.", -21 );
                 }
             }

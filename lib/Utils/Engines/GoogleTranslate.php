@@ -19,8 +19,8 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -64,9 +64,15 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
     public function get( $_config ) {
 
         $parameters = [];
+
         if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
+
+        if ( isset($_config['key']) and !empty($_config['key']) ) {
+            $parameters[ 'key' ] = $_config['key'];
+        }
+
         $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
         $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $parameters[ 'q' ]      = $_config[ 'segment' ];

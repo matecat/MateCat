@@ -28,7 +28,6 @@ use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;
-use Segments_SegmentDao;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
@@ -496,14 +495,12 @@ class FastAnalysis extends AbstractDaemon {
 
                 [ $id_job, ] = explode( ":", $id_job );
 
-                $segment = ( new Segments_SegmentDao() )->getById( $v[ 'id' ] );
-
                 $bind_values[] = (int)$id_job;
                 $bind_values[] = (int)$v[ 'id' ];
                 $bind_values[] = $v[ 'segment_hash' ];
                 $bind_values[] = $match_type;
-                $bind_values[] = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;
-                $bind_values[] = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
+                $bind_values[] = ( (float)$eq_word > $v[ 'raw_word_count' ] ) ? $v[ 'raw_word_count' ] : (float)$eq_word;
+                $bind_values[] = ( (float)$standard_words > $v[ 'raw_word_count' ] ) ? $v[ 'raw_word_count' ] : (float)$standard_words;
 
                 $tuple_list[] = "( ?,?,?,?,?,? )";
                 $totalSegmentsToAnalyze++;
@@ -522,8 +519,8 @@ class FastAnalysis extends AbstractDaemon {
                     $this->segments[ $k ][ 'pid' ]                   = (int)$pid;
                     $this->segments[ $k ][ 'ppassword' ]             = $projectStruct->password;
                     $this->segments[ $k ][ 'date_insert' ]           = date_create()->format( 'Y-m-d H:i:s' );
-                    $this->segments[ $k ][ 'eq_word_count' ]         = ( (float)$eq_word > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$eq_word;
-                    $this->segments[ $k ][ 'standard_word_count' ]   = ( (float)$standard_words > $segment->raw_word_count ) ? $segment->raw_word_count : (float)$standard_words;
+                    $this->segments[ $k ][ 'eq_word_count' ]         = ( (float)$eq_word > $v[ 'raw_word_count' ] ) ? $v[ 'raw_word_count' ] : (float)$eq_word;
+                    $this->segments[ $k ][ 'standard_word_count' ]   = ( (float)$standard_words > $v[ 'raw_word_count' ] ) ? $v[ 'raw_word_count' ] : (float)$standard_words;
                     $this->segments[ $k ][ 'match_type' ]            = $match_type;
                     $this->segments[ $k ][ 'fast_exact_match_type' ] = $v[ 'match_type' ];
 
@@ -618,7 +615,7 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         $engine = Engine::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
-        if( $engine->isAdaptive() ){
+        if ( $engine->isAdaptiveMT() ) {
             $engine->syncMemories( $this->actual_project_row, array_values( $this->segments ) );
         }
 
@@ -690,11 +687,11 @@ class FastAnalysis extends AbstractDaemon {
                         $queue_element[ 'id_job' ]        = $id_job;
                         $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
 
-                        $jobsMetadataDao = new MetadataDao();
-                        $tm_prioritization  = $jobsMetadataDao->get($id_job, $password, 'tm_prioritization', 10 * 60 );
+                        $jobsMetadataDao   = new MetadataDao();
+                        $tm_prioritization = $jobsMetadataDao->get( $id_job, $password, 'tm_prioritization', 10 * 60 );
 
                         if ( $tm_prioritization !== null ) {
-                            $queue_element['tm_prioritization'] = $tm_prioritization->value == 1;
+                            $queue_element[ 'tm_prioritization' ] = $tm_prioritization->value == 1;
                         }
 
                         $element            = new QueueElement();

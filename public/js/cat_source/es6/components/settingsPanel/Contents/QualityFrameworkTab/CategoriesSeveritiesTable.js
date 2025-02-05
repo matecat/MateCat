@@ -1,10 +1,11 @@
 import React, {useContext, useRef} from 'react'
 import {QualityFrameworkTabContext} from './QualityFrameworkTab'
 import {CategoryRow} from './CategoryRow'
-import {SeveritiyRow} from './SeveritiyRow'
+import {SeveritiyRow} from './SeverityRow'
 import {SeverityColumn} from './SeverityColumn'
 import {AddCategory} from './AddCategory'
 import {AddSeverity} from './AddSeverity'
+import {AddSeverityCell} from './AddSeverityCell'
 
 export const getCategoryLabelAndDescription = (category) => {
   const [line1, line2] = category.label.split('(')
@@ -43,6 +44,22 @@ export const CategoriesSeveritiesTable = () => {
   previousState.current.categories = categories
   previousState.current.severities = categories[0].severities
 
+  const severitiesColumns = categories
+    .reduce((acc, cur) => {
+      const {severities} = cur
+      const filtered = severities.filter(
+        (severity) =>
+          !acc.some(
+            ({code, label}) =>
+              severity?.code === code && severity?.label === label,
+          ),
+      )
+
+      return [...acc, ...filtered]
+    }, [])
+    .map(({code, label, sort}) => ({code, label, sort}))
+    .sort((a, b) => (a.sort > b.sort ? 1 : -1))
+
   return (
     <div className="quality-framework-categories-severities">
       <h2>Evaluation grid</h2>
@@ -72,12 +89,15 @@ export const CategoriesSeveritiesTable = () => {
             <div className="header">
               <span>Severities</span>
               <div className="row row-columns">
-                {categories[0]?.severities.map(({label}, index) => (
+                {severitiesColumns.map(({label, code, sort}, index) => (
                   <SeverityColumn
                     key={index}
                     {...{
                       label,
+                      code,
                       index,
+                      sort,
+                      numbersOfColumns: severitiesColumns.length,
                       ...(wasAddedSeverity &&
                         index === categories[0].severities.length - 1 && {
                           shouldScrollIntoView: true,
@@ -87,16 +107,29 @@ export const CategoriesSeveritiesTable = () => {
                 ))}
               </div>
             </div>
-            {categories.map(({severities}, index) => (
+            {categories.map(({id, severities}, index) => (
               <div key={index} className="row">
-                {severities.map((severity, index) => (
-                  <SeveritiyRow key={index} {...{severity}} />
-                ))}
+                {severitiesColumns.map((severityColumn) => {
+                  const severity = severities.find(
+                    (severity) =>
+                      severity.code === severityColumn.code &&
+                      severity.label === severityColumn.label,
+                  )
+                  return severity ? (
+                    <SeveritiyRow key={severity.id} {...{severity}} />
+                  ) : (
+                    <AddSeverityCell
+                      key={`${index}-${severityColumn.sort}`}
+                      idCategory={id}
+                      severityColumn={{...severityColumn}}
+                    />
+                  )
+                })}
               </div>
             ))}
           </div>
         </div>
-        <AddSeverity />
+        <AddSeverity numbersOfColumns={severitiesColumns.length} />
       </div>
       <AddCategory />
     </div>

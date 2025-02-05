@@ -321,3 +321,51 @@
 .quality-framework-modify-severity {
   transform: translateX(-30%) translateY(-100%);
 }
+
+.quality-framework-severity-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  width: 100%;
+  height: 40px;
+  border: 1px solid $grey4;
+  padding: 8px 4px 8px 0;
+  box-shadow: 2px 2px 4px 0px #00000014 inset;
+
+  input {
+    position: absolute;
+    width: 94%;
+    left: 3px;
+    border: none;
+    background-color: unset;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    text-align: center;
+  }
+
+  button {
+    width: 20px !important;
+    height: 20px !important;
+    z-index: 2;
+    color: $grey2 !important;
+
+    &:hover {
+      color: $grey1 !important;
+    }
+  }
+}
+
+.quality-framework-severity-add-severity-button {
+  align-items: center;
+
+  button {
+    color: $grey2 !important;
+    gap: unset;
+
+    &:hover {
+      color: $grey1 !important;
+    }
+  }
+}

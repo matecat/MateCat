@@ -126,7 +126,6 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
         }
         dispatchEventNotification(eventIdentifier, parsedData)
         // Log the raised event (optional)
-        console.log(`Event raised: ${eventIdentifier}`, parsedData)
       } catch (error) {
         console.error('Error parsing message:', error) // Handle parsing errors
       }
