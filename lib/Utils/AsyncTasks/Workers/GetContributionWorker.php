@@ -94,7 +94,6 @@ class GetContributionWorker extends AbstractWorker {
 
         [ $mt_result, $matches ] = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
-        $filter  = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
         $matches = $this->_sortMatches( $mt_result, $matches );
 
         if ( !$contributionStruct->concordanceSearch ) {

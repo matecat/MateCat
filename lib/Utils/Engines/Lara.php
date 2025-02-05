@@ -28,6 +28,7 @@ use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
+use TaskRunner\Exceptions\ReQueueException;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -331,14 +332,8 @@ class Lara extends Engines_AbstractEngine {
                     'sentence_after'  => $_config[ 'context_after' ],
             ] );
 
-        } catch ( LaraApiException $e ) {
-            // Lara license expired/changed (401) or account deleted (403)
-            Log::doJsonLog( $e->getMessage() );
-
-            // DO NOT REQUEUE FOR LARA FAILURE ONLY
-
         } catch ( Exception $e ) {
-            // for any other exception (HTTP connection or timeout) requeue
+            // for any exception (HTTP connection or timeout) requeue
             return false;
         }
 
