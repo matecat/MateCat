@@ -629,11 +629,7 @@ a.unarchive-project:after,
 .mbc-warnings:before,
   /* mbc chat */
 .text .alternatives:before,
-.autofillTag:before,
 header .filter:before,
-.editToolbar .uppercase:after,
-.editToolbar .lowercase:after,
-.editToolbar .capitalize:after,
 .export-button-label:before,
 .canceladd-export:before {
   font-family: 'icomoon';
@@ -651,25 +647,6 @@ header .filter:before,
 
 header .filter:before {
   content: '\f0b0';
-}
-
-.editToolbar .uppercase:after {
-  content: '\ea6c';
-  font-size: 20px;
-  display: block;
-}
-
-.editToolbar .lowercase:after {
-  content: '\ea6b';
-  font-size: 20px;
-  display: block;
-}
-
-.editToolbar .capitalize:after {
-  content: '\ea5f';
-  font-size: 16px;
-  padding: 3px 2px 1px 2px;
-  display: block;
 }
 
 .fileupload-buttonbar .fileinput-button:before,
