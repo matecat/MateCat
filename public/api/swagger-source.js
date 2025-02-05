@@ -729,7 +729,7 @@ var spec = {
             in: 'formData',
             description:
                 'The id of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
           {
@@ -737,7 +737,7 @@ var spec = {
             in: 'formData',
             description:
                 'The password of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
