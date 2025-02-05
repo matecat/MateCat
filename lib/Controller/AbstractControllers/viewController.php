@@ -7,6 +7,7 @@ use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use ConnectedServices\ProviderInterface;
+use GlobalMessages\GlobalMessagesPublisher;
 use Klein\HttpStatus;
 
 abstract class viewController extends controller {
@@ -29,6 +30,7 @@ abstract class viewController extends controller {
      * Class constructor
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct() {
 
@@ -42,11 +44,12 @@ abstract class viewController extends controller {
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
 
-        //SESSION ENABLED
+        // SESSION ENABLED
         $this->identifyUser();
 
-        $this->featureSet = new FeatureSet();
+        GlobalMessagesPublisher::emit(new AMQHandler());
 
+        $this->featureSet = new FeatureSet();
     }
 
     /**
@@ -103,7 +106,6 @@ abstract class viewController extends controller {
         if ( isset( $ignore ) ) {
             throw $ignore;
         }
-
     }
 
     /**
