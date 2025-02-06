@@ -43,7 +43,7 @@ class LoadTMXController extends KleinController {
                     $fileInfo->name
                 );
 
-                $TMService->addTmxInMyMemory( $file );
+                $TMService->addTmxInMyMemory( $file, $this->user );
                 $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
 
                 $this->featureSet->run( 'postPushTMX', $file, $this->user );
