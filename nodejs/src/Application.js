@@ -136,7 +136,7 @@ module.exports.Application = class {
         }
       });
 
-      this.dispatchGlobalMessages();
+      this.dispatchGlobalMessages(socket.uuid);
     });
 
     return this;
@@ -172,19 +172,19 @@ module.exports.Application = class {
   /**
    * Dispatch global messages
    */
-  dispatchGlobalMessages = () => {
+  dispatchGlobalMessages = (uuid) => {
     const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
     const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
 
     const pubClient = new Redis(this.options.redis);
     const socketIOServer = this._socketIOServer;
 
-    pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, function(err, ids) {
+    pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids)=> {
 
       ids.length > 0 && ids.map((id) => {
-        pubClient.get( GLOBAL_MESSAGES_ELEMENT_KEY + id, function (err, element) {
+        pubClient.get( GLOBAL_MESSAGES_ELEMENT_KEY + id,  (err, element) => {
           if ( element !== null ) {
-            socketIOServer.emit(MESSAGE_NAME, {
+            this.sendRoomNotifications( uuid, MESSAGE_NAME, {
               data: {
                 _type: GLOBAL_MESSAGES,
                 message: JSON.parse( element )
