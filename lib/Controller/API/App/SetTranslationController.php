@@ -6,6 +6,7 @@ use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
+use Constants_Engines;
 use Constants_JobStatus;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
@@ -139,22 +140,23 @@ class SetTranslationController extends KleinController {
                 if ( $old_suggestion->match == "MT" ) {
                     // case 1. is MT
                     $new_translation->suggestion_match  = 85;
-                    $new_translation->suggestion_source = 'MT';
+                    $new_translation->suggestion_source = Constants_Engines::MT;
                 } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
                     $new_translation->suggestion_source = 'NO_MATCH';
                 } else {
                     // case 3. otherwise is TM
                     $new_translation->suggestion_match  = $old_suggestion->match;
-                    $new_translation->suggestion_source = 'TM';
+                    $new_translation->suggestion_source = Constants_Engines::TM;
                 }
             }
 
             // time_to_edit should be increased only if the translation was changed
             $new_translation->time_to_edit = 0;
-            if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
+            if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
                 $new_translation->time_to_edit = $this->data['time_to_edit'];
             }
+
 
             /**
              * Update Time to Edit and
@@ -181,9 +183,9 @@ class SetTranslationController extends KleinController {
              * when the status of the translation changes, the auto propagation flag
              * must be removed
              */
-            if ( $new_translation->translation != $old_translation->translation ||
-                $this->data['status'] == Constants_TranslationStatus::STATUS_TRANSLATED ||
-                $this->data['status'] == Constants_TranslationStatus::STATUS_APPROVED ||
+            if ( $new_translation->translation != $old_translation->translation or
+                $this->data['status'] == Constants_TranslationStatus::STATUS_TRANSLATED or
+                $this->data['status'] == Constants_TranslationStatus::STATUS_APPROVED or
                 $this->data['status'] == Constants_TranslationStatus::STATUS_APPROVED2
             ) {
                 $new_translation->autopropagated_from = 'NULL';
@@ -242,7 +244,6 @@ class SetTranslationController extends KleinController {
                             $this->data['chunk'],
                             $this->data['id_segment'],
                             $this->data['project'],
-                            $this->VersionsHandler
                         );
                     }
 
