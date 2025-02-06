@@ -35,6 +35,7 @@ use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
+use Xliff\XliffConfigTemplateDao;
 
 class CreateProjectController extends KleinController {
 
@@ -149,6 +150,12 @@ class CreateProjectController extends KleinController {
             $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
 
+            $projectStructure[ 'dictation' ]         = $this->data['dictation'];
+            $projectStructure[ 'show_whitespace' ]   = $this->data['show_whitespace'];
+            $projectStructure[ 'character_counter' ] = $this->data['character_counter'];
+            $projectStructure[ 'ai_assistant' ]      = $this->data['ai_assistant'];
+            $projectStructure[ 'tm_prioritization' ] = $this->data['tm_prioritization'] ?? null;
+
             // MMT Glossaries
             // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
             $engine = Engine::getInstance( $this->data['mt_engine'] );
@@ -236,15 +243,21 @@ class CreateProjectController extends KleinController {
         $private_tm_key = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $pretranslate_100 = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101 = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
+        $tm_prioritization = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $mmt_glossaries = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $deepl_id_glossary = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $deepl_formality = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
         $project_completion = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $get_public_matches = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
+        $dictation = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
+        $show_whitespace = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
+        $character_counter = filter_var( $this->request->param( 'character_counter' ), FILTER_VALIDATE_BOOLEAN );
+        $ai_assistant = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
         $dialect_strict = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING  );
         $filters_extraction_parameters = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING  );
         $xliff_parameters = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING  );
+        $xliff_parameters_template_id = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $qa_model_template_id = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $payable_rate_template_id = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $target_language_mt_engine_id = filter_var( $this->request->param( 'target_language_mt_engine_id' ), FILTER_SANITIZE_NUMBER_INT );
@@ -306,15 +319,21 @@ class CreateProjectController extends KleinController {
             'disable_tms_engine' => $disable_tms_engine,
             'pretranslate_100' => $pretranslate_100,
             'pretranslate_101' => $pretranslate_101,
+            'tm_prioritization' => $tm_prioritization,
             'id_team' => $id_team,
             'mmt_glossaries' => $mmt_glossaries,
             'deepl_id_glossary' => $deepl_id_glossary,
             'deepl_formality' => $deepl_formality,
             'project_completion' => $project_completion,
             'get_public_matches' => $get_public_matches,
+            'dictation' => $dictation,
+            'show_whitespace' => $show_whitespace,
+            'character_counter' => $character_counter,
+            'ai_assistant' => $ai_assistant,
             'dialect_strict' => $dialect_strict,
             'filters_extraction_parameters' => $filters_extraction_parameters,
             'xliff_parameters' => $xliff_parameters,
+            'xliff_parameters_template_id' => $xliff_parameters_template_id,
             'qa_model_template_id' => $qa_model_template_id,
             'payable_rate_template_id' => $payable_rate_template_id,
             'array_keys' => $array_keys,
@@ -358,7 +377,7 @@ class CreateProjectController extends KleinController {
         $data['payable_rate_model_template']   = $this->validatePayableRateTemplate($data['payable_rate_template_id']);
         $data['dialect_strict']                = $this->validateDialectStrictParam($data['target_lang'], $data['dialect_strict'] );
         $data['filters_extraction_parameters'] = $this->validateFiltersExtractionParameters($data['filters_extraction_parameters']);
-        $data['xliff_parameters']              = $this->validateXliffParameters($data['xliff_parameters']);
+        $data['xliff_parameters']              = $this->validateXliffParameters($data['xliff_parameters'], $data['xliff_parameters_template_id']);
         $data['project_features']              = $this->appendFeaturesToProject($data['project_completion']);
         $data['target_language_mt_engine_id']  = $this->generateTargetEngineAssociation($data['target_lang'], $data['mt_engine'], $data['target_language_mt_engine_id']);
         $data['team']                          = $this->setTeam( $id_team );
@@ -612,10 +631,11 @@ class CreateProjectController extends KleinController {
 
     /**
      * @param null $xliff_parameters
+     * @param null xliff_parameters_template_id
      * @return object|null
      * @throws Exception
      */
-    private function validateXliffParameters($xliff_parameters = null): ?string
+    private function validateXliffParameters($xliff_parameters = null, $xliff_parameters_template_id = null): ?string
     {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
@@ -627,6 +647,15 @@ class CreateProjectController extends KleinController {
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
             $xliff_parameters = $validatorObject->decoded;
+        } elseif ( !empty( $xliff_parameters_template_id ) ) {
+
+            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $xliff_parameters_template_id, $this->getUser()->uid );
+
+            if ( $xliffConfigTemplate === null ) {
+                throw new Exception( "xliff_parameters_template_id not valid" );
+            }
+
+            $xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
         }
 
         return $xliff_parameters;
