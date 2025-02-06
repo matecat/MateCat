@@ -57,7 +57,12 @@ module.exports.Application = class {
         socket.handshake.headers['x-uuid']
       ) {
         auth = socket.handshake.headers;
-      } else if (socket.handshake.auth) {
+      } else if (
+        socket.handshake.auth &&
+        socket.handshake.auth['x-token'] &&
+        socket.handshake.auth['x-userid'] &&
+        socket.handshake.auth['x-uuid']
+      ) {
         auth = socket.handshake.auth;
       } else {
         next(new Error('Authentication not provided'));
