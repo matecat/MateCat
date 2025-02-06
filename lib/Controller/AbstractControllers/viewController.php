@@ -7,7 +7,6 @@ use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use ConnectedServices\ProviderInterface;
-use GlobalMessages\GlobalMessagesPublisher;
 use Klein\HttpStatus;
 
 abstract class viewController extends controller {
@@ -46,9 +45,6 @@ abstract class viewController extends controller {
 
         // SESSION ENABLED
         $this->identifyUser();
-
-        GlobalMessagesPublisher::emit(new AMQHandler());
-
         $this->featureSet = new FeatureSet();
     }
 

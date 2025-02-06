@@ -26,8 +26,8 @@ const RELOAD = 'force_reload';
 const MESSAGE_NAME = 'message';
 const GLOBAL_MESSAGES = 'global_messages';
 
-
 module.exports.MESSAGE_NAME = MESSAGE_NAME;
+module.exports.GLOBAL_MESSAGES = GLOBAL_MESSAGES;
 
 module.exports.MessageHandler = class {
 
@@ -55,7 +55,12 @@ module.exports.MessageHandler = class {
       case GLOBAL_MESSAGES:
         this.application.sendBroadcastServiceMessage(
             MESSAGE_NAME,
-            {data: message.data.payload}
+            {data: {
+                _type: GLOBAL_MESSAGES,
+                payload: {
+                  message: message.data.payload.message
+                }
+              }}
         );
 
         return;

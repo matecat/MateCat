@@ -7,7 +7,7 @@ const io = require("socket.io");
 const {setupWorker} = require("@socket.io/sticky");
 const {createAdapter} = require("@socket.io/redis-adapter");
 const {Reader} = require('./amq/AMQconnector');
-const {MessageHandler, MESSAGE_NAME} = require('./amq/MessageHandler');
+const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
 const Redis = require("ioredis");
@@ -136,6 +136,7 @@ module.exports.Application = class {
         }
       });
 
+      this.dispatchGlobalMessages();
     });
 
     return this;
@@ -168,5 +169,34 @@ module.exports.Application = class {
     this._socketIOServer.to(room).emit(type, message);
   };
 
+  /**
+   * Dispatch global messages
+   */
+  dispatchGlobalMessages = () => {
+    const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
+    const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
 
-}
+    const pubClient = new Redis(this.options.redis);
+    const socketIOServer = this._socketIOServer;
+
+    pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, function(err, ids) {
+
+      ids.length > 0 && ids.map((id) => {
+        pubClient.get( GLOBAL_MESSAGES_ELEMENT_KEY + id, function (err, element) {
+          if ( element !== null ) {
+            socketIOServer.emit(MESSAGE_NAME, {
+              data: {
+                _type: GLOBAL_MESSAGES,
+                payload: {
+                  message: JSON.parse( element )
+                }
+              }
+            });
+          } else {
+            pubClient.srem( GLOBAL_MESSAGES_LIST_KEY + id );
+          }
+        });
+      });
+    });
+  };
+};
