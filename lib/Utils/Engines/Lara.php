@@ -113,7 +113,7 @@ class Lara extends Engines_AbstractEngine {
             $this->mmt_SET_PrivateLicense = Engine::createTempInstance( $mmtStruct );
         }
 
-        $this->clientLoaded = new Translator( $credentials, new TranslatorOptions( [ 'serverUrl' => "https://lara-api.staging.translated.cloud/" ] ) ); // TODO Remove
+        $this->clientLoaded = new Translator( $credentials );
 
         return $this->clientLoaded;
     }
