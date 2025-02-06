@@ -48,11 +48,6 @@
         config.flash_messages = ${structure php: json_encode(flashMessages)} ;
         /*]]>*/
     </tal:block>
-    <tal:block tal:condition="php: !empty(globalMessage)">
-        /*<![CDATA[*/
-        config.global_message = ${structure php: json_encode(globalMessage)} ;
-        /*]]>*/
-    </tal:block>
     </script>
     <tal:block  tal:repeat="js_source footer_js">
         <script tal:attributes="src js_source; nonce x_nonce_unique_id"></script>
