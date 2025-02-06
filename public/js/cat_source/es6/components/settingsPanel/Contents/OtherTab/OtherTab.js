@@ -3,6 +3,7 @@ import {Team} from './Team'
 import {SourceLanguage} from './SourceLanguage'
 import {TargetLanguages} from './TargetLanguages'
 import {Subject} from './Subject'
+import {CharacterCounterRules} from './CharacterCounterRules'
 
 export const OtherTab = () => {
   return (
@@ -11,6 +12,7 @@ export const OtherTab = () => {
       <SourceLanguage />
       <TargetLanguages />
       <Subject />
+      <CharacterCounterRules />
     </div>
   )
 }
