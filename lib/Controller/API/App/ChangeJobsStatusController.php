@@ -5,6 +5,7 @@ namespace API\App;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
+use Constants_JobStatus;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;
@@ -76,46 +77,24 @@ class ChangeJobsStatusController extends KleinController {
 
     /**
      * @return array
+     * @throws Exception
      */
     private function validateTheRequest(): array
     {
-        $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $uuid = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $res_id = filter_var( $this->request->param( 'res_id' ), FILTER_VALIDATE_INT );
+        $pn = filter_var( $this->request->param( 'pn' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
+        $id = filter_var( $this->request->param( 'id' ), FILTER_VALIDATE_INT );
+        $res = filter_var( $this->request->param( 'res' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
         $new_status = filter_var( $this->request->param( 'new_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
 
-        if ( empty( $tm_key ) ) {
-
-            if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
-                throw new InvalidArgumentException("Please specify a TM key.", -2);
-            }
-
-            /*
-             * Added the default Key.
-             * This means if no private key are provided the TMX will be loaded in the default MyMemory key
-             */
-            $tm_key = INIT::$DEFAULT_TM_KEY;
-        }
-
-        if ( empty( $res_id) ) {
-            throw new InvalidArgumentException("No id job provided", -1);
-        }
-
-        if ( empty( $password ) ) {
-            throw new InvalidArgumentException("No job password provided", -2);
-        }
-
-        if ( empty( $new_status ) ) {
-            throw new InvalidArgumentException("No new status provided", -3);
+        if ( !Constants_JobStatus::isAllowedStatus( $new_status ) ) {
+            throw new Exception( "Invalid Status" );
         }
 
         return [
-            'name' => $name,
-            'tm_key' => $tm_key,
-            'uuid' => $uuid,
-            'res_id' => $res_id,
+            'pn' => $pn,
+            'res_type' => $res,
+            'res_id' => $id,
             'password' => $password,
             'new_status' => $new_status,
         ];
