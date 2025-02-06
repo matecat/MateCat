@@ -387,13 +387,13 @@ function CatTool() {
     Array.isArray(projectTemplates[1].tm)
 
   useEffect(() => {
-    if (
-      isFakeCurrentTemplateReady &&
-      typeof jobMetadata?.job?.tm_prioritization !== 'undefined'
-    ) {
+    if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+        characterCounterCountTags:
+          jobMetadata?.job?.character_counter_count_tags === 1,
+        characterCounterMode: jobMetadata?.job?.character_counter_mode,
       }))
     }
   }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])

@@ -420,6 +420,8 @@ const NewProject = () => {
       payableRateTemplateId,
       XliffConfigTemplateId,
       tmPrioritization,
+      characterCounterCountTags,
+      characterCounterMode,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -459,6 +461,8 @@ const NewProject = () => {
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
+      character_counter_mode: characterCounterMode,
+      character_counter_count_tags: characterCounterCountTags,
     })
 
     if (!projectSent) {
