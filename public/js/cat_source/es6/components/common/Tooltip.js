@@ -33,7 +33,7 @@ const Tooltip = ({
   const isCursorInsideTooltipContainer = useRef()
 
   useEffect(() => {
-    if (!isInteractiveContent) return
+    if (!isInteractiveContent || !refContainer?.current) return
 
     const onMouseMoveHandler = ({clientX, clientY}) => {
       const rect = refContainer.current.getBoundingClientRect()
