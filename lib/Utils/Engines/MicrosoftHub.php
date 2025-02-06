@@ -52,8 +52,8 @@ TAG;
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -220,7 +220,7 @@ TAG;
         $parameters[ 'to' ]       = $this->_fixLangCode( $_config[ 'target' ] );
         $parameters[ 'from' ]     = $this->_fixLangCode( $_config[ 'source' ] );
         $parameters[ 'text' ]     = $_config[ 'segment' ];
-        $parameters[ 'category' ] = $this->engineRecord->extra_parameters[ 'category' ];
+        $parameters[ 'category' ] = $this->getEngineRecord()->extra_parameters[ 'category' ];
 
         return $parameters;
 

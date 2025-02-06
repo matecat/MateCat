@@ -175,7 +175,9 @@ const NewProject = () => {
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getMMTKeys({engineId}).then((data) => {
             const projectTemplatesInvolved = projectTemplates.filter(
@@ -247,7 +249,9 @@ const NewProject = () => {
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getDeepLGlosssaries({engineId}).then(({glossaries}) => {
             const projectTemplatesInvolved = projectTemplates.filter(

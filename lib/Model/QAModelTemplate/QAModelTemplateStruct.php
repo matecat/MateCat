@@ -74,12 +74,20 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             $QAModelTemplateCategoryStruct->category_label = $category->label;
             $QAModelTemplateCategoryStruct->code           = $category->code;
 
+            if($category->sort){
+                $QAModelTemplateCategoryStruct->sort = $category->sort;
+            }
+
             foreach ( $category->severities as $index2 => $severity ) {
                 $severityModel                 = ( !empty( $QAModelTemplateCategoryStruct->severities[ $index2 ] ) ) ? $QAModelTemplateCategoryStruct->severities[ $index2 ] : new QAModelTemplateSeverityStruct();
                 $severityModel->id_category    = ( isset( $category->id ) ) ? $category->id : null;
                 $severityModel->severity_label = $severity->label;
                 $severityModel->severity_code  = $severity->code;
                 $severityModel->penalty        = $severity->penalty;
+
+                if($severity->sort){
+                    $severityModel->sort = $severity->sort;
+                }
 
                 $QAModelTemplateCategoryStruct->severities[ $index2 ] = $severityModel;
             }
@@ -117,6 +125,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
             $category[ 'id' ]         = (int)$categoryStruct->id;
             $category[ 'label' ]      = $categoryStruct->category_label;
             $category[ 'code' ]       = $categoryStruct->code;
+            $category[ 'sort' ]       = $categoryStruct->sort ? (int)$categoryStruct->sort : null;
             $category[ 'severities' ] = [];
 
             foreach ( $categoryStruct->severities as $severityStruct ) {
@@ -125,6 +134,7 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                         'label'   => $severityStruct->severity_label,
                         'code'    => $severityStruct->severity_code,
                         'penalty' => floatval( $severityStruct->penalty ),
+                        'sort'    => $severityStruct->sort ? (int)$severityStruct->sort : null,
                 ];
             }
 

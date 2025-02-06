@@ -39,7 +39,7 @@ class Engine {
         $className = 'Engines_' . $engineRecord->class_load;
         if ( !class_exists( $className ) ) {
             $className = $engineRecord->class_load;
-            if( !class_exists( $className ) ){
+            if ( !class_exists( $className ) ) {
                 throw new Exception( "Engine Class $className not Found" );
             }
         }
@@ -58,9 +58,14 @@ class Engine {
 
         $className = 'Engines_' . $engineRecord->class_load;
         if ( !class_exists( $className ) ) {
-            $className = $engineRecord->class_load;
-            if( !class_exists( $className ) ){
-                throw new Exception( "Engine Class $className not Found" );
+            $className = $engineRecord->class_load; // fully qualified class name
+            if ( !class_exists( $className ) ) {
+                $className = 'Utils\Engines\\' . $engineRecord->class_load; // guess
+                if ( !class_exists( $className ) ) {
+                    throw new Exception( "Engine Class $engineRecord->class_load not Found" );
+                }
+                // we found the right class name, overwrite the fake record
+                $engineRecord->class_load = $className;
             }
         }
 

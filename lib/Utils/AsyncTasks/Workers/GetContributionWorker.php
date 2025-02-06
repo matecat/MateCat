@@ -10,6 +10,7 @@
 namespace AsyncTasks\Workers;
 
 use Constants\Ices;
+use Constants_Engines;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Exception;
@@ -86,7 +87,6 @@ class GetContributionWorker extends AbstractWorker {
 
         [ $mt_result, $matches ] = $this->_getMatches( $contributionStruct, $jobStruct, $jobStruct->target, $featureSet );
 
-        $filter  = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
         $matches = $this->_sortMatches( $mt_result, $matches );
 
         if ( !$contributionStruct->concordanceSearch ) {
@@ -161,16 +161,16 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         $_object = [
-            '_type' => $type,
-            'data'  => [
-                'id_job'    => $contributionStruct->getJobStruct()->id,
-                'passwords' => $contributionStruct->getJobStruct()->password,
-                'payload'   => [
-                    'id_segment' => (string)$contributionStruct->segmentId,
-                    'matches'    => $content,
-                ],
-                'id_client' => $contributionStruct->id_client,
-            ]
+                '_type' => $type,
+                'data'  => [
+                        'id_job'    => $contributionStruct->getJobStruct()->id,
+                        'passwords' => $contributionStruct->getJobStruct()->password,
+                        'payload'   => [
+                                'id_segment' => (string)$contributionStruct->segmentId,
+                                'matches'    => $content,
+                        ],
+                        'id_client' => $contributionStruct->id_client,
+                ]
         ];
 
         $this->publishToNodeJsClients( $_object );
@@ -218,17 +218,17 @@ class GetContributionWorker extends AbstractWorker {
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
         $Filter = MateCatFilter::getInstance(
-            $featureSet,
-            $contributionStruct->getJobStruct()->source,
-            $targetLang,
-            $contributionStruct->dataRefMap
+                $featureSet,
+                $contributionStruct->getJobStruct()->source,
+                $targetLang,
+                $contributionStruct->dataRefMap
         );
 
         foreach ( $matches as &$match ) {
 
-            if ( strpos( $match[ 'created_by' ], 'MT' ) !== false ) {
+            if ( strpos( $match[ 'created_by' ], Constants_Engines::MT ) !== false ) {
 
-                $match[ 'match' ] = 'MT';
+                $match[ 'match' ] = Constants_Engines::MT;
 
                 $QA = new PostProcess( $match[ 'raw_segment' ], $match[ 'raw_translation' ] );
                 $QA->setFeatureSet( $featureSet );
@@ -248,11 +248,11 @@ class GetContributionWorker extends AbstractWorker {
 
             if ( $match[ 'created_by' ] == 'MT!' ) {
 
-                $match[ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
 
             } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
 
-                $match[ 'created_by' ] = 'MT'; //For now do not show differences
+                $match[ 'created_by' ] = Constants_Engines::MT; //For now do not show differences
 
             } else {
 
@@ -263,9 +263,9 @@ class GetContributionWorker extends AbstractWorker {
                 }
 
                 $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                    $match,
-                    $contributionStruct->getJobStruct()->tm_keys,
-                    $user->uid
+                        $match,
+                        $contributionStruct->getJobStruct()->tm_keys,
+                        $user->uid
                 );
             }
 
@@ -427,7 +427,7 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
         }
 
-        if ( !empty($contributionStruct->penalty_key) ) {
+        if ( !empty( $contributionStruct->penalty_key ) ) {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
         }
 
@@ -532,6 +532,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'project_id' ]          = $contributionStruct->getProjectStruct()->id;
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
+                $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
 
                 $mt_result = $mt_engine->get( $config );
             }
@@ -589,11 +590,11 @@ class GetContributionWorker extends AbstractWorker {
     private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
         if (
-            is_array( $matches ) and
-            count( $matches ) > 0 and
-            $contributionStruct->segmentId !== null and
-            $contributionStruct->getJobStruct() !== null and
-            !empty($contributionStruct->getJobStruct()->id)
+                is_array( $matches ) and
+                count( $matches ) > 0 and
+                $contributionStruct->segmentId !== null and
+                $contributionStruct->getJobStruct() !== null and
+                !empty( $contributionStruct->getJobStruct()->id )
         ) {
 
             $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
@@ -612,7 +613,7 @@ class GetContributionWorker extends AbstractWorker {
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
 
                     if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
-                        $matches[ $k ][ 'created_by' ] = 'MT'; //MyMemory returns MT!
+                        $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new Users_UserStruct();
 
@@ -621,9 +622,9 @@ class GetContributionWorker extends AbstractWorker {
                         }
 
                         $matches[ $k ][ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                            $m,
-                            $contributionStruct->getJobStruct()->tm_keys,
-                            $user->uid
+                                $m,
+                                $contributionStruct->getJobStruct()->tm_keys,
+                                $user->uid
                         );
                     }
                 }
@@ -638,9 +639,9 @@ class GetContributionWorker extends AbstractWorker {
                 $data[ 'suggestion_match' ]  = str_replace( '%', '', $match[ 'match' ] );
 
                 $where = [
-                    'id_segment' => $contributionStruct->segmentId,
-                    'id_job'     => $contributionStruct->getJobStruct()->id,
-                    'status'     => Constants_TranslationStatus::STATUS_NEW
+                        'id_segment' => $contributionStruct->segmentId,
+                        'id_job'     => $contributionStruct->getJobStruct()->id,
+                        'status'     => Constants_TranslationStatus::STATUS_NEW
                 ];
 
                 Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );

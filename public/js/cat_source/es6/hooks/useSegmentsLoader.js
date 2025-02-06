@@ -1,9 +1,10 @@
-import {useEffect, useRef, useState} from 'react'
+import {useContext, useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {getSegments} from '../api/getSegments'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 
 const INIT_NUM_SEGMENTS = 40
 const MORE_NUM_SEGMENTS = 25
@@ -15,6 +16,8 @@ function useSegmentsLoader({
   password = config.password,
   isAnalysisCompleted,
 }) {
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(undefined)
 
@@ -39,6 +42,7 @@ function useSegmentsLoader({
     const segmentIdValue =
       typeof segmentId === 'symbol' ? segmentId.description : segmentId
     if (
+      !isUserLogged ||
       !segmentIdValue ||
       current.isLoading ||
       (where === 'before' && current.thereAreNoItemsBefore) ||
@@ -110,7 +114,7 @@ function useSegmentsLoader({
       wasCleaned = true
       current.isLoading = false
     }
-  }, [segmentId, where, idJob, password])
+  }, [segmentId, where, idJob, password, isUserLogged])
 
   return {isLoading, result}
 }

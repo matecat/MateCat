@@ -17,10 +17,14 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptive
+     * @see Engines_AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
-    protected bool $_isAdaptive = true;
+    protected bool $_isAdaptiveMT = false;
+
+    public function isTMS(): bool {
+        return true;
+    }
 
     /**
      * @var string
@@ -54,8 +58,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "TM" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a TMS engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::TM ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -769,7 +773,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 ]
         );
 
-        $this->engineRecord[ 'base_url' ] = "https://analyze.mymemory.translated.net/api/v1";
+        $this->getEngineRecord()[ 'base_url' ] = "https://analyze.mymemory.translated.net/api/v1";
 
         $this->call( "analyze_url", array_values( $segs_array ), true, true );
 
@@ -827,8 +831,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 CURLOPT_FOLLOWLOCATION => true,
         ] );
 
-        $this->engineRecord->base_url                    = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
-        $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
+        $this->getEngineRecord()->base_url                    = parse_url( $this->getEngineRecord()->base_url, PHP_URL_HOST ) . ":10000";
+        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
         $this->call( 'tags_projection', $parameters );
 
         if ( !empty( $this->result->responseData ) ) {
