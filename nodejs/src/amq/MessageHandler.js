@@ -24,6 +24,7 @@ const LOGOUT = 'logout';
 
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
+const ENGINE_QUOTA_EXCEEDED = 'quota_exceeded';
 
 const MESSAGE_NAME = 'message';
 module.exports.MESSAGE_NAME = MESSAGE_NAME;
@@ -38,6 +39,7 @@ module.exports.MessageHandler = class {
   onReceive = (message) => {
 
     let room;
+    message.data.payload._type = message._type;
     switch (message._type) {
       case RELOAD:
         logger.info('RELOAD: ' + RELOAD + ' message received...');
@@ -47,6 +49,9 @@ module.exports.MessageHandler = class {
         logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
         room = message.data.uid.toString();
         break;
+      case ENGINE_QUOTA_EXCEEDED:
+        room = message.data.id_job.toString();
+        break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
@@ -54,8 +59,6 @@ module.exports.MessageHandler = class {
         room = message.data.id_client;
         break;
     }
-
-    message.data.payload._type = message._type;
 
     logger.debug([
       "Sending message to room",
