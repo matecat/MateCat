@@ -50,7 +50,7 @@ module.exports.MessageHandler = class {
         room = message.data.uid.toString();
         break;
       case ENGINE_QUOTA_EXCEEDED:
-        room = message.data.uid.toString();
+        room = message.data.id_job.toString();
         break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
