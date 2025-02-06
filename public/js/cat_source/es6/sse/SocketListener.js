@@ -191,7 +191,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
 
   const {connectionState, connectionError} = useSocketLayer(
     getSource(),
-    {userId: userId, uuidV4: uuidV4(), jobId: config.id_job},
+    {userId: userId?.toString(), uuidV4: uuidV4(), jobId: config.id_job},
     isAuthenticated,
     eventHandlers,
   )

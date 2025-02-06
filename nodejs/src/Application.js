@@ -78,10 +78,10 @@ module.exports.Application = class {
             logger.error(['Authentication error invalid user id', auth['x-userid'], decoded.context.uid]);
             return next(new Error('Authentication error invalid user id'));
           }
-          socket.user_id = auth['x-userid'];
-          socket.uuid = auth['x-uuid'];
+          socket.user_id = auth['x-userid'].toString();
+          socket.uuid = auth['x-uuid'].toString();
           if (auth['x-jobid']) {
-            socket.jobId = auth['x-jobid'];
+            socket.jobId = auth['x-jobid'].toString();
           }
           next();
         }
@@ -110,6 +110,8 @@ module.exports.Application = class {
       if (socket.jobId) {
         socket.join(socket.jobId);
       }
+
+      logger.debug("JOINED USER:", {'user_id': socket.user_id, 'uuid': socket.uuid, 'jobId': socket.jobId});
 
       this.logger.debug({
         message: 'Client connected ' + socket.id,

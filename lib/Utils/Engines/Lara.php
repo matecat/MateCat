@@ -254,7 +254,7 @@ class Lara extends Engines_AbstractEngine {
                 $message     = json_encode( [
                         '_type' => 'quota_exceeded',
                         'data'  => [
-                                'id_job'  => $_config[ 'job_id' ],
+                                'uid'     => $_config[ 'user_id' ],
                                 'payload' => [
                                         'engine'  => $engine_type,
                                         'code'    => $t->getCode(),

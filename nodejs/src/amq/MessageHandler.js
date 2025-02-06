@@ -49,8 +49,10 @@ module.exports.MessageHandler = class {
         logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
         room = message.data.uid.toString();
         break;
-      case COMMENTS_TYPE:
       case ENGINE_QUOTA_EXCEEDED:
+        room = message.data.uid.toString();
+        break;
+      case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
       default:
