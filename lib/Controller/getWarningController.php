@@ -148,8 +148,7 @@ class getWarningController extends ajaxController {
 
         $this->result = array_merge(
                 $this->result,
-                $qa->render(),
-                Utils::getGlobalMessage()
+                $qa->render()
         );
 
         $this->invokeGlobalWarningsOnFeatures();
