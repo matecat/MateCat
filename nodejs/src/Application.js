@@ -187,9 +187,7 @@ module.exports.Application = class {
             socketIOServer.emit(MESSAGE_NAME, {
               data: {
                 _type: GLOBAL_MESSAGES,
-                payload: {
-                  message: JSON.parse( element )
-                }
+                message: JSON.parse( element )
               }
             });
           } else {

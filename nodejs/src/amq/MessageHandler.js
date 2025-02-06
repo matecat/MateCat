@@ -55,12 +55,7 @@ module.exports.MessageHandler = class {
       case GLOBAL_MESSAGES:
         this.application.sendBroadcastServiceMessage(
             MESSAGE_NAME,
-            {data: {
-                _type: GLOBAL_MESSAGES,
-                payload: {
-                  message: message.data.payload.message
-                }
-              }}
+            {data: message.data.payload}
         );
 
         return;
