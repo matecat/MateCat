@@ -10,6 +10,7 @@ use LogicException;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 
 
@@ -20,11 +21,11 @@ abstract class BaseFeature implements IBaseFeature {
     protected $feature;
 
     /**
-     * @var Logger
+     * @var ?LoggerInterface
      */
-    private $log;
+    protected ?LoggerInterface $log = null;
 
-    protected $logger_name;
+    protected string $logger_name;
 
     /**
      * @var bool This property defines if the feature is automatically active when projects are created,
@@ -52,13 +53,16 @@ abstract class BaseFeature implements IBaseFeature {
         return static::$conflictingDependencies;
     }
 
+    /**
+     * @throws Exception
+     */
     public static function getConfig() {
         $config_file_path = realpath( self::getPluginBasePath() . '/../config.ini' );
         if ( !file_exists( $config_file_path ) ) {
             throw new Exception( 'Config file not found', 500 );
         }
 
-        return parse_ini_file( $config_file_path );
+        return parse_ini_file( $config_file_path, true );
     }
 
     /**
@@ -109,7 +113,7 @@ abstract class BaseFeature implements IBaseFeature {
         return $this->log;
     }
 
-    private function logFilePath() {
+    protected function logFilePath(): string {
         return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
