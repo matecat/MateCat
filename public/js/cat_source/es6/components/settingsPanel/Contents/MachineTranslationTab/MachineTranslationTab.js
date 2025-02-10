@@ -30,6 +30,10 @@ import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 
+let engineIdFromFromQueryString = new URLSearchParams(
+  window.location.search,
+).get('engineId')
+
 export const MachineTranslationTab = () => {
   const {
     mtEngines,
@@ -38,26 +42,6 @@ export const MachineTranslationTab = () => {
     currentProjectTemplate,
     projectTemplates,
   } = useContext(SettingsPanelContext)
-
-  const activeMTEngine = currentProjectTemplate.mt?.id
-  const setActiveMTEngine = ({id} = {}) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      mt:
-        typeof id === 'number'
-          ? {
-              id,
-            }
-          : {},
-    }))
-
-  const [addMTVisible, setAddMTVisible] = useState(false)
-  const [activeAddEngine, setActiveAddEngine] = useState()
-  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
-    useState(false)
-  const [error, setError] = useState()
-  const [MTRows, setMTRows] = useState([])
-  const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const enginesList = [
     {
@@ -87,6 +71,35 @@ export const MachineTranslationTab = () => {
     {name: 'SmartMATE', id: 'smartmate', component: SmartMate},
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
+
+  const activeMTEngine = currentProjectTemplate.mt?.id
+  const setActiveMTEngine = ({id} = {}) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      mt:
+        typeof id === 'number'
+          ? {
+              id,
+            }
+          : {},
+    }))
+
+  const [addMTVisible, setAddMTVisible] = useState(
+    typeof engineIdFromFromQueryString === 'string',
+  )
+  const [activeAddEngine, setActiveAddEngine] = useState(() => {
+    const initialState =
+      typeof engineIdFromFromQueryString === 'string' &&
+      enginesList.find((mt) => mt.id === engineIdFromFromQueryString)
+
+    engineIdFromFromQueryString = false
+    return initialState
+  })
+  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
+    useState(false)
+  const [error, setError] = useState()
+  const [MTRows, setMTRows] = useState([])
+  const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const COLUMNS_TABLE = config.is_cattool
     ? [{name: 'Engine Name'}, {name: 'Description'}]
@@ -295,7 +308,7 @@ export const MachineTranslationTab = () => {
       }),
     }
   }
-
+  console.log(activeAddEngine)
   return (
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
