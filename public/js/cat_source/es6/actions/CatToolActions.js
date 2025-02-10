@@ -311,8 +311,7 @@ let CatToolActions = {
             'Lara will stop translating until the limit is reset at the end of the billing cycle.<br><br>' +
             'To enjoy unlimited access to the best machine tranlsation, upgrade your plan.'
           : "The <strong>10k-character monthly limit</strong> for Lara's free plan has been reached.<br> " +
-            'Translation will pause until the limit resets at the end of the billing cycle or the project owner upgrades the plan.<br>' +
-            'The project owner has been notified.',
+            'Translation will pause until the limit resets at the end of the billing cycle or the project owner upgrades the plan.<br>',
         successText: config.ownerIsMe ? 'Upgrade your plan' : null,
         cancelText: 'Dismiss',
         successCallback: config.ownerIsMe
