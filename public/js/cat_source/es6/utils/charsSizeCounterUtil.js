@@ -17,7 +17,7 @@ Object.defineProperty(charsSizeCounter, 'map', {
 })
 
 // Counter chars size methods
-const getDefaultCharsSize = (value) => value.length * 1
+export const getDefaultCharsSize = (value) => value.length * 1
 const getUtf8CharsSize = (value) => new Blob([value]).size
 const getUft16CharsSize = (value) => value.length * 2
 const getCJKMatches = (value, getSize) => {

@@ -1,4 +1,7 @@
-import {charsSizeCounter} from '../../../../utils/charsSizeCounterUtil'
+import {
+  charsSizeCounter,
+  getDefaultCharsSize,
+} from '../../../../utils/charsSizeCounterUtil'
 import TEXT_UTILS from '../../../../utils/textUtils'
 import {unescapeHTMLinTags} from './tagUtils'
 
@@ -68,8 +71,9 @@ export const regexWordDelimiter =
   /(\s+|[-+*\\/]|\d+|[!@#$%^&*()_+\-=\\[\]{};':"\\|,.<>\\/?~°⇥])/
 
 export const getCharactersCounter = (value) => {
-  const {getDefaultCharsSize, removeHiddenCharacters} = TEXT_UTILS
-  const cleanedContent = removeHiddenCharacters(unescapeHTMLinTags(value))
+  const cleanedContent = TEXT_UTILS.removeHiddenCharacters(
+    unescapeHTMLinTags(value),
+  )
   const defaultCounter = charsSizeCounter.map.default ?? getDefaultCharsSize
 
   const matches = Array.isArray(charsSizeCounter.map.custom)
