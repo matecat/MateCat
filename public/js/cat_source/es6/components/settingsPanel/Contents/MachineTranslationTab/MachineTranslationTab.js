@@ -308,7 +308,7 @@ export const MachineTranslationTab = () => {
       }),
     }
   }
-  console.log(activeAddEngine)
+
   return (
     <div className="machine-translation-tab settings-panel-contentwrapper-tab-background">
       {!config.is_cattool && config.isLoggedIn && addMTVisible && (
