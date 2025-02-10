@@ -258,7 +258,7 @@ class createProjectController extends ajaxController {
             return false;
         }
 
-        $arFiles = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
+        $arFiles = array_filter( explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) ) );
 
         $default_project_name = $arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
