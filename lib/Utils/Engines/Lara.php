@@ -300,6 +300,12 @@ class Lara extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+
+        if( empty( $_keys ) ) {
+            Log::doJsonLog( [ "LARA: update skipped. No keys provided." ] );
+            return true;
+        }
+
         try {
 
             $time_start = microtime( true );
