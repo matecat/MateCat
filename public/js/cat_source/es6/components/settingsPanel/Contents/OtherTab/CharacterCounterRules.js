@@ -46,6 +46,8 @@ export const CharacterCounterRules = () => {
       characterCounterMode: value,
     }))
 
+  const isComponentsDisabled = config.is_cattool && !config.ownerIsMe === 1
+
   return (
     <div className="characters-counter-box">
       <div className="options-box">
@@ -71,6 +73,7 @@ export const CharacterCounterRules = () => {
             activeOption={OPTIONS.find(({id}) => id === counterRule)}
             checkSpaceToReverse={true}
             onSelect={(option) => setCounterRule(option.id)}
+            isDisabled={isComponentsDisabled}
           />
         </div>
       </div>
@@ -85,6 +88,7 @@ export const CharacterCounterRules = () => {
             active={isActive}
             onChange={onChange}
             testId="switch-chars-counter"
+            disabled={isComponentsDisabled}
           />
         </div>
       </div>
