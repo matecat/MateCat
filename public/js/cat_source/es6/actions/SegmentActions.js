@@ -1795,6 +1795,11 @@ const SegmentActions = {
       actionType: SegmentConstants.REFRESH_TAG_MAP,
     })
   },
+  changeCharactersCounterRules: function () {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+    })
+  },
 }
 
 export default SegmentActions

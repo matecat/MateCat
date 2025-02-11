@@ -40,6 +40,7 @@ import {
   ONBOARDING_PAGE,
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
+import {charsSizeCounter} from '../utils/charsSizeCounterUtil'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -377,6 +378,18 @@ function CatTool() {
       if (LXQ.enabled(metadata)) LXQ.init()
     }
   }, [userInfo?.metadata])
+
+  useEffect(() => {
+    CatToolStore.setCurrentProjectTemplate(currentProjectTemplate)
+
+    if (
+      typeof currentProjectTemplate?.characterCounterMode === 'string' ||
+      typeof currentProjectTemplate?.characterCounterCountTags === 'boolean'
+    ) {
+      charsSizeCounter.map = currentProjectTemplate.characterCounterMode
+      SegmentActions.changeCharactersCounterRules()
+    }
+  }, [currentProjectTemplate])
 
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&

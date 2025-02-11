@@ -3,9 +3,10 @@ import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
 import CatToolActions from '../../../../actions/CatToolActions'
+import {getTmDataStructureToSendServer} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
 
 export const EditorOtherTab = () => {
-  const {currentProjectTemplate} = useContext(SettingsPanelContext)
+  const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
 
   const previousCurrentProjectTemplate = useRef()
 
@@ -19,6 +20,7 @@ export const EditorOtherTab = () => {
           currentProjectTemplate?.characterCounterMode)
     ) {
       updateJobKeys({
+        dataTm: getTmDataStructureToSendServer({tmKeys}),
         characterCounterCountTags:
           currentProjectTemplate.characterCounterCountTags,
         characterCounterMode: currentProjectTemplate.characterCounterMode,
@@ -33,6 +35,7 @@ export const EditorOtherTab = () => {
   }, [
     currentProjectTemplate?.characterCounterCountTags,
     currentProjectTemplate?.characterCounterMode,
+    tmKeys,
   ])
 
   return (

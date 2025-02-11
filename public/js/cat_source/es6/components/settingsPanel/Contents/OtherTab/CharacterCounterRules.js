@@ -39,7 +39,9 @@ export const CharacterCounterRules = () => {
     setIsActive(isActive)
   }
 
-  const counterRule = currentProjectTemplate.characterCounterMode
+  const counterRule =
+    currentProjectTemplate.characterCounterMode ??
+    CHARS_SIZE_COUNTER_TYPES.GOOGLE_ADS
   const setCounterRule = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,

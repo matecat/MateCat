@@ -46,6 +46,7 @@ import {
   hasDataOriginalTags,
   checkXliffTagsInText,
   removePlaceholdersForGlossary,
+  transformSomeTagsToText,
 } from './tagUtils'
 import * as manageCaretPositionNearEntity from './manageCaretPositionNearEntity'
 
@@ -106,6 +107,7 @@ const DraftMatecatUtils = {
   encodeHtmlEntities,
   decodePlaceholdersToPlainText,
   removePlaceholdersForGlossary,
+  transformSomeTagsToText,
 }
 
 export default DraftMatecatUtils
