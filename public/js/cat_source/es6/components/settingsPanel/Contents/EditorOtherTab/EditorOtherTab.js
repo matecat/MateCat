@@ -40,7 +40,10 @@ export const EditorOtherTab = () => {
 
   return (
     <div className="editor-settings-options-box settings-panel-contentwrapper-tab-background">
-      <CharacterCounterRules />
+      <div className="settings-panel-contentwrapper-tab-subcategories">
+        <h2>Character counter</h2>
+        <CharacterCounterRules />
+      </div>
     </div>
   )
 }

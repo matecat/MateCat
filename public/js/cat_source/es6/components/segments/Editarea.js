@@ -145,7 +145,7 @@ class Editarea extends React.Component {
     const canCountTagsAsChars =
       CatToolStore.getCurrentProjectTemplate().characterCounterCountTags
     if (canCountTagsAsChars) {
-      return DraftMatecatUtils.transformSomeTagsToText(translation, [
+      return DraftMatecatUtils.excludeSomeTagsTransformToText(translation, [
         'g',
         'bx',
         'ex',

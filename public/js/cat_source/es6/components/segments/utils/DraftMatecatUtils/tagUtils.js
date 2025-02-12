@@ -90,7 +90,7 @@ export const transformTagsToText = (text) => {
   return text
 }
 
-export const transformSomeTagsToText = (text, excludeTags = []) => {
+export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
   try {
     for (let key in tagSignatures) {
       const {placeholderRegex, decodeNeeded, placeholder, regex, type} =

@@ -8,11 +8,17 @@ import {CharacterCounterRules} from './CharacterCounterRules'
 export const OtherTab = () => {
   return (
     <div className="other-options-box settings-panel-contentwrapper-tab-background">
-      <Team />
-      <SourceLanguage />
-      <TargetLanguages />
-      <Subject />
-      <CharacterCounterRules />
+      <div className="settings-panel-contentwrapper-tab-subcategories">
+        <h2>General settings</h2>
+        <Team />
+        <SourceLanguage />
+        <TargetLanguages />
+        <Subject />
+      </div>
+      <div className="settings-panel-contentwrapper-tab-subcategories">
+        <h2>Character counter</h2>
+        <CharacterCounterRules />
+      </div>
     </div>
   )
 }
