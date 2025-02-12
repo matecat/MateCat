@@ -167,11 +167,18 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $jobsMetadataDao = new \Jobs\MetadataDao();
+            $contextRs  = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
             $mt_context = @array_pop( $contextRs );
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
+            }
+
+            // mt evaluation => ice_mt
+            $mt_evaluation = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 )->value ?? null;
+            if ( $mt_evaluation ) {
+                $config[ 'include_score' ] = true;
             }
 
             $config[ 'job_id' ]     = $jobStruct->id;

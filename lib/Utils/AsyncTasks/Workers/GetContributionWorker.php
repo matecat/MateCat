@@ -319,8 +319,11 @@ class GetContributionWorker extends AbstractWorker {
             //else do not rewrite the match value
         }
 
-        //Allow the plugins to customize matches
-        return $featureSet->filter( 'matchRewriteForContribution', $match );
+        if ( !empty( $match[ 'score' ] ) && $match[ 'score' ] >= 0.9 ) {
+            $match[ 'match' ] = 'ICE_MT';
+        }
+
+        return $match;
 
     }
 
