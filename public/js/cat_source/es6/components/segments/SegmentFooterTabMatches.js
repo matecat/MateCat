@@ -60,7 +60,7 @@ class SegmentFooterTabMatches extends React.Component {
       }
 
       item.percentClass = TranslationMatches.getPercentuageClass(this.match)
-      item.percentText = this.match
+      item.percentText = this.match === 'ICE_MT' ? 'TQMT' : this.match
       item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.
