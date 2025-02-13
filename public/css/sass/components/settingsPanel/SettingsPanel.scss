@@ -311,6 +311,26 @@
   border-radius: 16px;
 }
 
+.settings-panel-contentwrapper-tab-subcategories {
+  &:not(:first-child) {
+    &::before {
+      display: inline-block;
+      width: 100%;
+      content: '';
+      border-top: solid 2px rgba($darkBlueTransparent, 0.5);
+    }
+
+    > h2 {
+      margin-top: 20px;
+    }
+  }
+
+  > h2 {
+    font-size: 24px;
+    padding: 0;
+  }
+}
+
 .settings-panel-templates-button-more {
   min-width: 240px;
   border: unset !important;

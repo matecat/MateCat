@@ -5,6 +5,7 @@ import {
   getProjectTemplates,
 } from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates from './useTemplates'
+import {cloneDeep, mergeWith} from 'lodash'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
 
@@ -37,6 +38,8 @@ const STANDARD_TEMPLATE = {
   target_language: [],
   tm_prioritization: false,
   dialect_strict: false,
+  character_counter_count_tags: false,
+  character_counter_mode: 'google_ads',
 }
 
 const CATTOOL_TEMPLATE = {
@@ -67,6 +70,8 @@ export const SCHEMA_KEYS = {
   targetLanguage: 'target_language',
   tmPrioritization: 'tm_prioritization',
   dialectStrict: 'dialect_strict',
+  characterCounterCountTags: 'character_counter_count_tags',
+  characterCounterMode: 'character_counter_mode',
 }
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
@@ -93,7 +98,19 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
-            const shouldStandardToBeDefault = items.every(
+            // check if users templates have some properties value to undefined or null and assign them default value
+            const templatesNormalized = items.map((template) =>
+              mergeWith(
+                cloneDeep(templateDefault),
+                cloneDeep(template),
+                (objValue, srcValue) =>
+                  typeof srcValue === 'undefined' || srcValue === null
+                    ? objValue
+                    : srcValue,
+              ),
+            )
+
+            const shouldStandardToBeDefault = templatesNormalized.every(
               ({is_default}) => !is_default,
             )
             setProjectTemplates(
@@ -102,7 +119,7 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
                   ...templateDefault,
                   ...(shouldStandardToBeDefault && {is_default: true}),
                 },
-                ...items,
+                ...templatesNormalized,
               ].map((template) => ({
                 ...template,
                 tm: template.tm.map((item) => ({
