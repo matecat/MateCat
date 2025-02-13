@@ -62,9 +62,7 @@ class SegmentHeader extends React.PureComponent {
 
     const {sid} = this.props
 
-    const prevInternalId = SegmentStore.getPrevSegment({
-      current_sid: sid,
-    })?.internal_id
+    const prevInternalId = SegmentStore.getPrevSegment(sid)?.internal_id
 
     const internalId = SegmentStore.getSegmentByIdToJS(sid)?.internal_id
 
