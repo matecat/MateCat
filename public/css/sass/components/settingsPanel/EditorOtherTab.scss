@@ -189,16 +189,6 @@
   flex-grow: 1;
 }
 
-.characters-counter-box {
-  display: flex;
-  flex-direction: column;
-  padding: 30px 0;
-
-  > :last-child {
-    padding-bottom: 0;
-  }
-}
-
 .option-characters-counter-rule-dropdown {
   .dropdown__option span {
     white-space: unset;

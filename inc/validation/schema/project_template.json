@@ -63,6 +63,17 @@
     },
     "dialect_strict": {
       "type":  ["null", "boolean"]
+    },
+    "character_counter_count_tags": {
+      "type": "boolean"
+    },
+    "character_counter_mode": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "exclude_cjk",
+        "all_one"
+      ]
     }
   },
   "required": [

@@ -421,6 +421,8 @@ const NewProject = () => {
       XliffConfigTemplateId,
       tmPrioritization,
       dialectStrict,
+      characterCounterCountTags,
+      characterCounterMode,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -471,6 +473,8 @@ const NewProject = () => {
           ),
         ),
       }),
+      character_counter_mode: characterCounterMode,
+      character_counter_count_tags: characterCounterCountTags,
     })
 
     if (!projectSent) {
