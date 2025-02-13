@@ -97,7 +97,6 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
                     $data = array_merge( $data, [
                             'match_type_100_public' => Constants_SegmentTranslationsMatchType::_100_PUBLIC,
                             'match_type_100'        => Constants_SegmentTranslationsMatchType::_100,
-                            'match_type_ice'        => Constants_SegmentTranslationsMatchType::ICE
                     ] );
                     break;
 
@@ -493,8 +492,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.match_type = :match_type_100_public 
-           OR st.match_type = :match_type_100 
-           OR st.match_type = :match_type_ice)
+           OR st.match_type = :match_type_100)
            WHERE 1
            $where->sql
            ORDER BY st.id_segment
