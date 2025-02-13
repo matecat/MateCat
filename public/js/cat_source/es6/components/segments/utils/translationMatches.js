@@ -249,8 +249,11 @@ let TranslationMatches = {
       case match > 0 && match <= 99:
         percentageClass = 'per-orange'
         break
-      case match == 'MT':
+      case match === 'MT':
         percentageClass = 'per-yellow'
+        break
+      case match === 'ICE_MT':
+        percentageClass = 'per-green'
         break
       default:
         percentageClass = ''
