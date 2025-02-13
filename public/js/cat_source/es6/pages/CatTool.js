@@ -40,6 +40,7 @@ import {
   ONBOARDING_PAGE,
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
+import {charsSizeCounter} from '../utils/charsSizeCounterUtil'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -378,6 +379,18 @@ function CatTool() {
     }
   }, [userInfo?.metadata])
 
+  useEffect(() => {
+    CatToolStore.setCurrentProjectTemplate(currentProjectTemplate)
+
+    if (
+      typeof currentProjectTemplate?.characterCounterMode === 'string' ||
+      typeof currentProjectTemplate?.characterCounterCountTags === 'boolean'
+    ) {
+      charsSizeCounter.map = currentProjectTemplate.characterCounterMode
+      SegmentActions.changeCharactersCounterRules()
+    }
+  }, [currentProjectTemplate])
+
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
     typeof projectTemplates[1] !== 'undefined' &&
@@ -387,13 +400,13 @@ function CatTool() {
     Array.isArray(projectTemplates[1].tm)
 
   useEffect(() => {
-    if (
-      isFakeCurrentTemplateReady &&
-      typeof jobMetadata?.job?.tm_prioritization !== 'undefined'
-    ) {
+    if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
+        characterCounterCountTags:
+          jobMetadata?.job?.character_counter_count_tags === 1,
+        characterCounterMode: jobMetadata?.job?.character_counter_mode,
       }))
     }
   }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])

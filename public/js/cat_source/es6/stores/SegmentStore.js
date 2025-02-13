@@ -1993,6 +1993,9 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
       )
       break
+    case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
+      SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
+      break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
   }
