@@ -133,14 +133,16 @@ class AnalyzeChunksResume extends React.Component {
     if (!sessionStorage.getItem(key)) {
       //Track Translate click
       const userInfo = UserStore.getUser()
-      const event = {
-        event: 'open_job',
-        userStatus: 'loggedUser',
-        userId: userInfo.user.uid,
-        idProject: parseInt(config.id_project),
+      if (userInfo) {
+        const event = {
+          event: 'open_job',
+          userStatus: 'loggedUser',
+          userId: userInfo.user.uid,
+          idProject: parseInt(config.id_project),
+        }
+        CommonUtils.dispatchAnalyticsEvents(event)
+        sessionStorage.setItem(key, 'true')
       }
-      CommonUtils.dispatchAnalyticsEvents(event)
-      sessionStorage.setItem(key, 'true')
     }
     window.open(chunk.urls.t, '_blank')
   }
