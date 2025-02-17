@@ -777,9 +777,9 @@ class setTranslationController extends ajaxController {
     private function updateJobPEE( array $old_translation, array $new_translation ) {
 
         //update total time to edit
-        $tte = $old_translation[ 'time_to_edit' ];
+        $jobTotalTTEForTranslation = $this->chunk[ 'total_time_to_edit' ];
         if ( !self::isRevision() ) {
-            $tte += $new_translation[ 'time_to_edit' ];
+            $jobTotalTTEForTranslation += $new_translation[ 'time_to_edit' ];
         }
 
         $segmentRawWordCount  = $this->segment->raw_word_count;
@@ -814,7 +814,7 @@ class setTranslationController extends ajaxController {
 
             Jobs_JobDao::updateFields(
 
-                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
@@ -825,14 +825,14 @@ class setTranslationController extends ajaxController {
             $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
             Jobs_JobDao::updateFields(
-                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
-        } elseif ( $tte != 0 ) {
+        } elseif ( $jobTotalTTEForTranslation != 0 ) {
             Jobs_JobDao::updateFields(
-                    [ 'total_time_to_edit' => $tte ],
+                    [ 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
