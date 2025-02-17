@@ -165,40 +165,42 @@ let CatToolActions = {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
     const haveKeysGlossary = CatToolStore.getHaveKeysGlossary()
-    if ((!jobKeys || forceUpdate) && CatToolStore.isClientConnected()) {
-      getTmKeysJob().then(({tm_keys: tmKeys}) => {
-        // filter not private keys
-        const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
-        getDomainsList({
-          keys: filteredKeys.map(({key}) => key),
+    if (CatToolStore.isClientConnected()) {
+      if (!jobKeys || forceUpdate) {
+        getTmKeysJob().then(({tm_keys: tmKeys}) => {
+          // filter not private keys
+          const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
+          getDomainsList({
+            keys: filteredKeys.map(({key}) => key),
+          })
+          const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.UPDATE_TM_KEYS,
+            keys,
+          })
         })
-        const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+
+        // check job keys have glossary (response sse channel)
+        checkJobKeysHaveGlossary()
+      } else {
         AppDispatcher.dispatch({
           actionType: CatToolConstants.UPDATE_TM_KEYS,
-          keys,
+          keys: jobKeys,
         })
-      })
-
-      // check job keys have glossary (response sse channel)
-      checkJobKeysHaveGlossary()
-    } else {
-      AppDispatcher.dispatch({
-        actionType: CatToolConstants.UPDATE_TM_KEYS,
-        keys: jobKeys,
-      })
-      //From sse channel
-      if (domains) {
-        AppDispatcher.dispatch({
-          actionType: CatToolConstants.UPDATE_DOMAINS,
-          entries: domains,
-        })
-      }
-      if (haveKeysGlossary !== undefined) {
-        AppDispatcher.dispatch({
-          actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
-          value: haveKeysGlossary,
-          wasAlreadyVerified: true,
-        })
+        //From sse channel
+        if (domains) {
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.UPDATE_DOMAINS,
+            entries: domains,
+          })
+        }
+        if (haveKeysGlossary !== undefined) {
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
+            value: haveKeysGlossary,
+            wasAlreadyVerified: true,
+          })
+        }
       }
     }
   },
