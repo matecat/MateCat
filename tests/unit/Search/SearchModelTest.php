@@ -133,6 +133,6 @@ class SearchModelTest extends AbstractTest {
                 'count'    => $expectedCount,
         ];
 
-        $this->assertEquals( $expected, $searchModel->search() );
+        $this->assertEquals( $expected, $searchModel->search( true ) );
     }
 }
