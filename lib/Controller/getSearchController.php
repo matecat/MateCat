@@ -21,7 +21,7 @@ class getSearchController extends ajaxController {
     private string $function; //can be search, replace
     private bool   $isMatchCaseRequested;
     private bool   $isExactMatchRequested;
-    private bool   $strictMode;
+    private bool   $inCurrentChunkOnly;
     private int    $revisionNumber;
 
     /**
@@ -35,9 +35,9 @@ class getSearchController extends ajaxController {
     protected Jobs_JobStruct $job_data;
 
     /**
-     * @var Database|IDatabase
+     * @var IDatabase
      */
-    private Database $db;
+    private IDatabase $db;
 
     /**
      * @var SearchModel
@@ -60,18 +60,18 @@ class getSearchController extends ajaxController {
         $this->identifyUser();
 
         $filterArgs = [
-                'function'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'job'             => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'token'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
-                'source'          => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'target'          => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'status'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
-                'replace'         => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'password'        => [ 'filter' => FILTER_UNSAFE_RAW ],
-                'matchcase'       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'exactmatch'      => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'strict_mode'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'revision_number' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
+                'function'           => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'job'                => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'token'              => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'target'             => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'status'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'replace'            => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'password'           => [ 'filter' => FILTER_UNSAFE_RAW ],
+                'matchcase'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'exactmatch'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'inCurrentChunkOnly' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'revision_number'    => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ]
         ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -86,7 +86,7 @@ class getSearchController extends ajaxController {
         $this->password              = $__postInput[ 'password' ];
         $this->isMatchCaseRequested  = (bool)$__postInput[ 'matchcase' ];
         $this->isExactMatchRequested = (bool)$__postInput[ 'exactmatch' ];
-        $this->strictMode            = (bool)$__postInput[ 'strict_mode' ];
+        $this->inCurrentChunkOnly    = (bool)$__postInput[ 'inCurrentChunkOnly' ];
         $this->revisionNumber        = (int)$__postInput[ 'revision_number' ];
 
         switch ( $this->status ) {
@@ -112,7 +112,7 @@ class getSearchController extends ajaxController {
                 'replacement'           => $this->replace,
                 'isMatchCaseRequested'  => $this->isMatchCaseRequested,
                 'isExactMatchRequested' => $this->isExactMatchRequested,
-                'strictMode'            => $this->strictMode,
+                'inCurrentChunkOnly'    => $this->inCurrentChunkOnly,
         ] );
 
         $this->db = Database::obtain();
@@ -166,6 +166,7 @@ class getSearchController extends ajaxController {
 
     /**
      * Perform a regular search
+     *
      */
     private function doSearch() {
 
@@ -184,8 +185,8 @@ class getSearchController extends ajaxController {
         }
 
         try {
-            $strictMode = ( null !== $this->queryParams[ 'strictMode' ] ) ? $this->queryParams[ 'strictMode' ] : true;
-            $res        = $this->searchModel->search( $strictMode );
+            $inCurrentChunkOnly = $this->queryParams[ 'inCurrentChunkOnly' ];
+            $res                = $this->searchModel->search( $inCurrentChunkOnly );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [ "code" => -1000, "message" => "internal error: see the log" ];
 
@@ -386,7 +387,7 @@ class getSearchController extends ajaxController {
                     );
 
                 } catch ( Exception $e ) {
-                    $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+                    $msg                        = $e->getMessage() . "\n\n" . $e->getTraceAsString();
                     $this->result[ 'errors' ][] = [ "code" => -102, "message" => $e->getMessage() ];
                     Log::doJsonLog( $msg );
                     $this->db->rollback();

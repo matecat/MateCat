@@ -25,7 +25,7 @@ export const searchTermIntoSegments = async ({
   status,
   matchcase,
   exactmatch,
-  strictMode,
+  inCurrentChunkOnly,
   replace,
   revisionNumber,
 }) => {
@@ -40,7 +40,7 @@ export const searchTermIntoSegments = async ({
     status,
     matchcase,
     exactmatch,
-    strict_mode: strictMode,
+    inCurrentChunkOnly: inCurrentChunkOnly,
     replace,
     revision_number: revisionNumber,
   }
