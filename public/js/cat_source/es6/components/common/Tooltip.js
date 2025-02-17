@@ -33,22 +33,24 @@ const Tooltip = ({
   const isCursorInsideTooltipContainer = useRef()
 
   useEffect(() => {
-    if (!isInteractiveContent || !refContainer?.current) return
+    if (!isInteractiveContent) return
 
     const onMouseMoveHandler = ({clientX, clientY}) => {
-      const rect = refContainer.current.getBoundingClientRect()
-      if (
-        clientX >= rect.left &&
-        clientX <= rect.right &&
-        clientY >= rect.top &&
-        clientY <= rect.bottom
-      ) {
-        isCursorInsideTooltipContainer.current = true
-      } else {
-        if (isCursorInsideTooltipContainer.current) {
-          isCursorInsideTooltipContainer.current = false
-          clearTimeout(tooltipTimeout.current)
-          setVisibility(false)
+      if (refContainer.current) {
+        const rect = refContainer.current.getBoundingClientRect()
+        if (
+          clientX >= rect.left &&
+          clientX <= rect.right &&
+          clientY >= rect.top &&
+          clientY <= rect.bottom
+        ) {
+          isCursorInsideTooltipContainer.current = true
+        } else {
+          if (isCursorInsideTooltipContainer.current) {
+            isCursorInsideTooltipContainer.current = false
+            clearTimeout(tooltipTimeout.current)
+            setVisibility(false)
+          }
         }
       }
     }
