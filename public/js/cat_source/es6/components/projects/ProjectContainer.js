@@ -481,7 +481,7 @@ class ProjectContainer extends React.Component {
         toggleButtonProps={{
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.SMALL,
-          children: teams.find(({id}) => id === idTeamSelected).name,
+          children: teams.find(({id}) => id === idTeamSelected)?.name,
           testId: 'teams-dropdown',
         }}
         items={items}
