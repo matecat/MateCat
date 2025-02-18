@@ -26,7 +26,7 @@ use TaskRunner\Commons\Params;
  */
 class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
-    protected array $cached_results = array();
+    protected array $cached_results = [];
 
     /**
      * @var int
@@ -103,7 +103,7 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
     /**
      * @var bool
      */
-    public $propagationRequest =true;
+    public $propagationRequest = true;
 
     /**
      * @var array
@@ -115,6 +115,8 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
      */
     public $id_mt;
 
+    public bool $contextIsSpice = false;
+
     /**
      * Global Cached record for jobs metadata
      *
@@ -125,17 +127,18 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
      *
      * @throws ValidationError
      */
-    public function getJobStruct( ){
+    public function getJobStruct() {
 
-        if( empty( $this->id_job ) ){
+        if ( empty( $this->id_job ) ) {
             throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );
         }
 
         return $this->cachable( '_contributionJob', $this, function () {
-            $JobDao = new Jobs_JobDao( Database::obtain() );
-            $jobStruct = new Jobs_JobStruct();
-            $jobStruct->id = $this->id_job;
+            $JobDao              = new Jobs_JobDao( Database::obtain() );
+            $jobStruct           = new Jobs_JobStruct();
+            $jobStruct->id       = $this->id_job;
             $jobStruct->password = $this->job_password;
+
             return @$JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];
         } );
 
@@ -145,15 +148,16 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
      * @return array
      * @throws ValidationError
      */
-    public function getProp(){
+    public function getProp() {
         $jobStruct = $this->getJobStruct();
-        $props = $this->props;
-        if( !is_array( $props ) ) {
+        $props     = $this->props;
+        if ( !is_array( $props ) ) {
             /**
              * @var $props Params
              */
             $props = $props->toArray();
         }
+
         return array_merge( $jobStruct->getTMProps(), $props );
     }
 
@@ -166,25 +170,27 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
      *
      * @throws ValidationError
      */
-    public function getUserInfo(){
+    public function getUserInfo() {
 
-        if( empty( $this->uid ) ){
+        if ( empty( $this->uid ) ) {
             throw new ValidationError( "Property " . get_class( $this ) . "::uid required." );
         }
 
         return $this->cachable( '_userCredentials', $this, function ( $contributionStruct ) {
-            $userDao = new \Users_UserDao( Database::obtain() );
-            $userCredentials = new \Users_UserStruct();
+            $userDao              = new \Users_UserDao( Database::obtain() );
+            $userCredentials      = new \Users_UserStruct();
             $userCredentials->uid = $contributionStruct->uid;
+
             return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
         } );
 
     }
 
-    public function getProject(){
+    public function getProject() {
 
         return $this->cachable( '_projectStruct', $this, function ( $contributionStruct ) {
             $jobStruct = $this->getJobStruct();
+
             return $jobStruct->getProject( 60 * 60 * 24 );
         } );
 
@@ -196,15 +202,16 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
      * @return Projects_MetadataStruct[]
      * @throws ValidationError
      */
-    public function getProjectMetaData(){
-        $jobStruct = $this->getJobStruct();
-        $projectMeta = array_filter( $jobStruct->getProjectMetadata(), function( $metadataStruct ){
+    public function getProjectMetaData() {
+        $jobStruct   = $this->getJobStruct();
+        $projectMeta = array_filter( $jobStruct->getProjectMetadata(), function ( $metadataStruct ) {
             return $metadataStruct->key != Projects_MetadataDao::FEATURES_KEY;
         } );
+
         return $projectMeta;
     }
 
-    public function getSegmentNotes(){
+    public function getSegmentNotes() {
         return $this->cachable( '_segmentNote', $this, function () {
             return \Segments_SegmentNoteDao::getBySegmentId( $this->id_segment );
         } );
@@ -213,9 +220,8 @@ class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implement
     /**
      * @return string
      */
-    public function getSessionId()
-    {
-        return md5($this->id_file. '-' . $this->id_job . '-' . $this->job_password);
+    public function getSessionId() {
+        return md5( $this->id_file . '-' . $this->id_job . '-' . $this->job_password );
     }
 
     /**

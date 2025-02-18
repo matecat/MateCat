@@ -206,19 +206,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
 
         // TM prioritization
-        $parameters[ 'priority_key' ] = (isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true) ? 1 : 0;
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true ) ? 1 : 0;
 
-        if(isset($_config[ 'penalty_key' ] ) and !empty($_config[ 'penalty_key' ]) ){
+        if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
             $penalties = [];
 
-            foreach ($_config[ 'penalty_key' ] as $penalty){
-                if(is_numeric($penalty)){
+            foreach ( $_config[ 'penalty_key' ] as $penalty ) {
+                if ( is_numeric( $penalty ) ) {
                     $penalties[] = $penalty / 100;
                 }
             }
 
-            if(!empty($penalties)){
-                $parameters[ 'penalty_key' ] = implode(",", $penalties);
+            if ( !empty( $penalties ) ) {
+                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
             }
         }
 
@@ -295,16 +295,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function update( $_config ) {
 
-        $parameters                = [];
-        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'newseg' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
-        $parameters[ 'newtra' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'prop' ]      = $_config[ 'prop' ];
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
+        $parameters                 = [];
+        $parameters[ 'seg' ]        = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]        = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'newseg' ]     = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
+        $parameters[ 'newtra' ]     = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
+        $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'prop' ]       = $_config[ 'prop' ];
+        $parameters[ 'client_id' ]  = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'de' ]         = $_config[ 'email' ];
+        $parameters[ 'mt' ]         = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
+        $parameters[ 'spiceMatch' ] = $_config[ 'spiceMatch' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = ( !empty( $_config[ 'context_after' ] ) ) ? preg_replace( "/^(-?@-?)/", "", $_config[ 'context_after' ] ) : null;
@@ -639,13 +640,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param string           $memoryKey
      * @param Users_UserStruct $user * Not used
      *
-* @return array|mixed
+     * @return array|mixed
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user) {
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
         $postFields = [
-                'tmx'  => $this->getCurlFile( $filePath ),
-                'key'  => trim( $memoryKey )
+                'tmx' => $this->getCurlFile( $filePath ),
+                'key' => trim( $memoryKey )
         ];
 
         $this->call( "tmx_import_relative_url", $postFields, true );
