@@ -48,22 +48,22 @@ class SearchModel {
     }
 
     /**
-     * @param bool $strictMode
+     * @param bool $inCurrentChunkOnly
      *
      * @return array
      * @throws Exception
      */
-    public function search( $strictMode = true ) {
+    public function search( bool $inCurrentChunkOnly ): array {
 
         switch ( $this->queryParams->key ) {
             case 'source':
-                $results = $this->_getQuery( $this->_loadSearchInSourceQuery( $strictMode ) );
+                $results = $this->_getQuery( $this->_loadSearchInSourceQuery( $inCurrentChunkOnly ) );
                 break;
             case 'target':
-                $results = $this->_getQuery( $this->_loadSearchInTargetQuery( $strictMode ) );
+                $results = $this->_getQuery( $this->_loadSearchInTargetQuery( $inCurrentChunkOnly ) );
                 break;
             case 'coupled':
-                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery( $strictMode ) ), $this->_getQuery( $this->_loadSearchInTargetQuery( $strictMode ) ) );
+                $rawResults = array_merge_recursive( $this->_getQuery( $this->_loadSearchInSourceQuery( $inCurrentChunkOnly ) ), $this->_getQuery( $this->_loadSearchInTargetQuery( $inCurrentChunkOnly ) ) );
                 $results    = [];
 
                 // in this case, $results is the merge of two queries results,
@@ -265,14 +265,14 @@ class SearchModel {
     }
 
     /**
-     * @param bool $strictMode
+     * @param bool $inCurrentChunkOnly
      *
      * @return string
      */
-    protected function _loadSearchInTargetQuery( $strictMode = false ) {
+    protected function _loadSearchInTargetQuery( bool $inCurrentChunkOnly = false ): string {
 
         $this->_loadParams();
-        $password_where = ( $strictMode ) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $password_where = ( $inCurrentChunkOnly ) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         $query = "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
@@ -290,14 +290,14 @@ class SearchModel {
     }
 
     /**
-     * @param bool $strictMode
+     * @param bool $inCurrentChunkOnly
      *
      * @return string
      */
-    protected function _loadSearchInSourceQuery( $strictMode = false ) {
+    protected function _loadSearchInSourceQuery( ?bool $inCurrentChunkOnly = false ): string {
 
         $this->_loadParams();
-        $password_where = ( $strictMode ) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
+        $password_where = ( $inCurrentChunkOnly ) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
         $query = "
         SELECT s.id, s.segment as text, od.map as original_map
