@@ -60,6 +60,9 @@
     },
     "filters_template_id": {
       "type": ["null", "integer", "string"]
+    },
+    "dialect_strict": {
+      "type":  ["null", "boolean"]
     }
   },
   "required": [
