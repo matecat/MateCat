@@ -12,8 +12,6 @@
     },
  */
 
-import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
-
 const tagSignaturesMap = {
   ph: {
     type: 'ph',
