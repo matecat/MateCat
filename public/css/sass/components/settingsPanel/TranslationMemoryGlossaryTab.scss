@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .translation-memory-glossary-tab {
   display: flex;
@@ -33,10 +33,10 @@
   align-items: center;
   gap: 8px;
   border-radius: 4px;
-  border: 1px dashed $grey8;
+  border: 1px dashed colors.$grey8;
   padding: 10px;
   margin-bottom: 20px;
-  background: $white;
+  background: colors.$white;
 }
 
 .translation-memory-glossary-tab-table-title {
@@ -55,7 +55,7 @@
 
 .translation-memory-glossary-tab-input-text {
   border-radius: 2px;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   padding: 6px;
 }
 
@@ -106,12 +106,12 @@
   }
 
   .settings-panel-row-content {
-    background-color: $white;
+    background-color: colors.$white;
   }
 
   .settings-panel-row-active {
     padding: 10px;
-    background-color: $transparentBlue;
+    background-color: colors.$transparentBlue;
   }
 
   .settings-panel-table-rowHeading-column {
@@ -164,7 +164,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   border-radius: 3px;
 
   &:focus,
@@ -186,7 +186,7 @@
 }
 
 .tm-key-row-button-item {
-  color: $grey6;
+  color: colors.$grey6;
 
   > :first-child {
     display: flex;
@@ -205,7 +205,7 @@
     > :last-child {
       border: none;
       background-color: unset;
-      color: $grey6;
+      color: colors.$grey6;
     }
   }
 
@@ -214,13 +214,13 @@
     border-radius: 2px;
     font-size: 16px;
     color: #000;
-    background: $grey4;
+    background: colors.$grey4;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid $grey7;
+    border: 1px solid colors.$grey7;
 
     &:hover {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 }
@@ -230,7 +230,7 @@
 }
 
 .tm-key-row-icons {
-  color: $grey;
+  color: colors.$grey;
 }
 
 .translation-memory-glossary-tab-buttons-group {
@@ -243,10 +243,10 @@
   width: 100%;
   padding: 4px;
   border-radius: 3px;
-  border: solid 1px $grey3;
+  border: solid 1px colors.$grey3;
 
   &.error {
-    border: solid 1px $redDefault;
+    border: solid 1px colors.$redDefault;
   }
 }
 
@@ -289,7 +289,7 @@
   }
   .action-form-error {
     input {
-      color: $redDefault;
+      color: colors.$redDefault;
     }
   }
 
@@ -316,12 +316,12 @@
         }
 
         .filename-error {
-          color: $redDefault;
+          color: colors.$redDefault;
         }
       }
 
       > li:nth-child(even) {
-        background-color: $grey4;
+        background-color: colors.$grey4;
       }
     }
 
@@ -329,24 +329,24 @@
       width: 260px;
       height: 6px;
       border-radius: 4px;
-      background-color: $grey8;
+      background-color: colors.$grey8;
 
       > :first-child {
-        background-color: $approvedGreen;
+        background-color: colors.$approvedGreen;
         height: 100%;
         border-radius: 4px;
       }
     }
 
     .import-completed {
-      color: $approvedGreenHover;
+      color: colors.$approvedGreenHover;
     }
 
     .message-error {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: $redDefault;
+      color: colors.$redDefault;
 
       > button {
         padding: 4px;
@@ -361,7 +361,7 @@
     margin-top: 6px;
 
     > :last-child {
-      color: $approvedGreenHover;
+      color: colors.$approvedGreenHover;
     }
   }
 }
@@ -374,7 +374,7 @@
 
 .translation-memory-glossary-tab-delete {
   border-top: 3px solid #ffcc01;
-  background-color: $orangeDefaultTransparent2;
+  background-color: colors.$orangeDefaultTransparent2;
 }
 
 .translation-memory-glossary-tab-active-table {
@@ -406,7 +406,7 @@
     justify-content: space-between;
     height: 56px;
     padding: 20px;
-    background-color: $grey3;
+    background-color: colors.$grey3;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
   }
@@ -422,7 +422,7 @@
     }
 
     span {
-      color: $grey6;
+      color: colors.$grey6;
     }
   }
 
@@ -437,14 +437,14 @@
     border-radius: 2px;
     font-size: 16px;
     color: #000 !important;
-    background: $grey4 !important;
+    background: colors.$grey4 !important;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid $grey7 !important;
+    border: 1px solid colors.$grey7 !important;
     font-size: 16px !important;
 
     &:hover {
-      background-color: $grey5 !important;
+      background-color: colors.$grey5 !important;
     }
   }
 
@@ -456,7 +456,7 @@
   .penalty-numeric-stepper-close-button {
     width: 28px !important;
     height: 28px !important;
-    color: $grey6 !important;
+    color: colors.$grey6 !important;
   }
 }
 

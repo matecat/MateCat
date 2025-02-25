@@ -1,3 +1,5 @@
+@use "../commons/colors";
+
 .sub-head {
   color: white;
   .ui.container.equal.width.grid {
@@ -251,7 +253,7 @@
 
       > svg {
         margin-right: 8px;
-        color: $grey6;
+        color: colors.$grey6;
       }
 
       > input {
@@ -261,7 +263,7 @@
         border: none;
 
         &::placeholder {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
 
@@ -275,7 +277,7 @@
         margin-right: 2px;
 
         > svg {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
       .reset_button--hidden {

@@ -85,6 +85,8 @@
     "sass": "^1.66.0",
     "sass-loader": "16.0.5",
     "style-loader": "4.0.0",
+    "terser-webpack-plugin": "^5.3.11",
+    "thread-loader": "^4.0.4",
     "undici": "^5.28.2",
     "webpack": "5.97.1",
     "webpack-bundle-analyzer": "^4.10.2",

@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .numeric-stepper-component {
   display: flex;
@@ -9,7 +9,7 @@
     width: 100%;
     height: 100%;
     outline: none;
-    border: 1px solid $grey8;
+    border: 1px solid colors.$grey8;
   }
 
   .container-controls {
@@ -20,12 +20,12 @@
       height: 14px !important;
       line-height: 1 !important;
       padding: 0 !important;
-      background: $grey4 !important;
-      border: 1px solid $grey7 !important;
+      background: colors.$grey4 !important;
+      border: 1px solid colors.$grey7 !important;
       border-radius: 0 !important;
 
       &:hover {
-        background-color: $grey5 !important;
+        background-color: colors.$grey5 !important;
       }
     }
 

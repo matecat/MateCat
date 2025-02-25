@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 header {
   .revision-mark {
     /*float: left;
@@ -17,10 +18,10 @@ header {
     border: 1px solid #ffffff;
 
     &.revision-r1 {
-      background: $approvedGreen;
+      background: colors.$approvedGreen;
     }
     &.revision-r2 {
-      background: $approved2Green;
+      background: colors.$approved2Green;
     }
   }
 

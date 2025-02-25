@@ -1,4 +1,4 @@
-@import "../../commons/colors";
+@use "../../commons/colors";
 @import url('https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&subset=latin');
 
 /******** Overwrite Semantic CSS  *********/
@@ -15,53 +15,53 @@
 
 .ui.blue.buttons .button,
 .ui.blue.button {
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
 }
 .ui.blue.buttons .button:hover,
 .ui.blue.button:hover {
-  background-color: $translatedBlueHover;
+  background-color: colors.$translatedBlueHover;
 }
 /* Basic */
 
 .ui.basic.blue.buttons .button,
 .ui.basic.blue.button {
-  box-shadow: 0px 0px 0px 1px $translatedBlue inset !important;
-  color: $translatedBlue !important;
+  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset !important;
+  color: colors.$translatedBlue !important;
 }
 
 .ui.basic.blue.buttons .button:hover,
 .ui.basic.blue.button:hover {
-  color: $translatedBlueHover !important;
+  color: colors.$translatedBlueHover !important;
 }
 
 .ui.basic.blue.buttons .button:focus,
 .ui.basic.blue.button:focus {
-  color: $translatedBlueHover !important;
+  color: colors.$translatedBlueHover !important;
 }
 
 /*--- Green ---*/
 
 .ui.green.buttons .button,
 .ui.green.button {
-  background-color: $greenDefault;
+  background-color: colors.$greenDefault;
   transition: 0.3s ease;
 }
 
 .ui.green.buttons .button:hover,
 .ui.green.button:hover {
-  background-color: $greenDefaultHover;
+  background-color: colors.$greenDefaultHover;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.green.buttons .button:focus,
 .ui.green.button:focus {
-  background-color: $greenDefaultHover;
+  background-color: colors.$greenDefaultHover;
   box-shadow: none !important;
 }
 
 .ui.green.buttons .button:active,
 .ui.green.button:active {
-  background-color: $greenDefaultHover;
+  background-color: colors.$greenDefaultHover;
   box-shadow: none !important;
   transition: none !important;
 }
@@ -77,24 +77,24 @@
 
 .ui.red.buttons .button,
 .ui.red.button {
-  background-color: $redDefault;
+  background-color: colors.$redDefault;
 }
 
 .ui.red.buttons .button:hover,
 .ui.red.button:hover {
-  background-color: $redDefaultHover;
+  background-color: colors.$redDefaultHover;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.red.buttons .button:focus,
 .ui.red.button:focus {
-  background-color: $redDefaultHover;
+  background-color: colors.$redDefaultHover;
   box-shadow: none !important;
 }
 
 .ui.red.buttons .button:active,
 .ui.red.button:active {
-  background-color: $redDefaultHover;
+  background-color: colors.$redDefaultHover;
   box-shadow: none !important;
 }
 
@@ -102,7 +102,7 @@
 .ui.red.buttons .active.button:active,
 .ui.red.active.button,
 .ui.red.button .active.button:active {
-  background-color: $redDefaultHover;
+  background-color: colors.$redDefaultHover;
   box-shadow: none !important;
 }
 
@@ -119,26 +119,26 @@
 }
 .ui.primary.buttons .button,
 .ui.primary.button {
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
   transition: 0.3s ease;
   align-items: center;
 }
 
 .ui.primary.buttons .button:hover,
 .ui.primary.button:hover {
-  background-color: $translatedBlueHover;
+  background-color: colors.$translatedBlueHover;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.primary.buttons .button:focus,
 .ui.primary.button:focus {
-  background-color: $translatedBlueActive;
+  background-color: colors.$translatedBlueActive;
   box-shadow: none !important;
 }
 
 .ui.primary.buttons .button:active,
 .ui.primary.button:active {
-  background-color: $translatedBlueActive;
+  background-color: colors.$translatedBlueActive;
   box-shadow: none !important;
   transition: none;
 }
@@ -154,18 +154,18 @@
 
 .ui.basic.primary.buttons .button,
 .ui.basic.primary.button {
-  box-shadow: 0px 0px 0px 1px $translatedBlue inset !important;
-  color: $translatedBlue !important;
+  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset !important;
+  color: colors.$translatedBlue !important;
 }
 
 .ui.basic.primary.buttons .button:hover,
 .ui.basic.primary.button:hover {
-  color: $translatedBlueHover !important;
+  color: colors.$translatedBlueHover !important;
 }
 
 .ui.basic.primary.buttons .button:focus,
 .ui.basic.primary.button:focus {
-  color: $translatedBlueActive !important;
+  color: colors.$translatedBlueActive !important;
 }
 
 /*---------------
@@ -204,7 +204,7 @@ i.flag.burma:before {
 /* Blue */
 
 i.blue.icon {
-  color: $translatedBlue !important;
+  color: colors.$translatedBlue !important;
 }
 
 i.inverted.blue.icon {
@@ -213,7 +213,7 @@ i.inverted.blue.icon {
 
 i.inverted.bordered.blue.icon,
 i.inverted.circular.blue.icon {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
   color: #ffffff !important;
 }
 
@@ -221,16 +221,16 @@ i.inverted.circular.blue.icon {
 
 .ui.blue.labels .label,
 .ui.blue.label {
-  background-color: $translatedBlue !important;
-  border-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
+  border-color: colors.$translatedBlue !important;
 }
 
 /* Link */
 
 .ui.blue.labels .label:hover,
 a.ui.blue.label:hover {
-  background-color: $translatedBlueHover !important;
-  border-color: $translatedBlueHover !important;
+  background-color: colors.$translatedBlueHover !important;
+  border-color: colors.$translatedBlueHover !important;
 }
 
 /* Ribbon */
@@ -238,14 +238,14 @@ a.ui.blue.label:hover {
 /* Basic */
 
 .ui.basic.blue.label {
-  color: $translatedBlue !important;
-  border-color: $translatedBlue !important;
+  color: colors.$translatedBlue !important;
+  border-color: colors.$translatedBlue !important;
 }
 
 .ui.basic.blue.labels a.label:hover,
 a.ui.basic.blue.label:hover {
-  color: $translatedBlueHover !important;
-  border-color: $translatedBlueHover !important;
+  color: colors.$translatedBlueHover !important;
+  border-color: colors.$translatedBlueHover !important;
 }
 
 /* Colors */
@@ -253,11 +253,11 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.segment:not(.inverted) {
-  border-top: 2px solid $translatedBlue;
+  border-top: 2px solid colors.$translatedBlue;
 }
 
 .ui.inverted.blue.segment {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
 }
 
 /*----------------------
@@ -267,7 +267,7 @@ a.ui.basic.blue.label:hover {
 .ui.grid > .blue.row,
 .ui.grid > .blue.column,
 .ui.grid > .row > .blue.column {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
 }
 
 /*--------------
@@ -277,8 +277,8 @@ a.ui.basic.blue.label:hover {
 /*--- Standard Colors  ---*/
 .ui.menu .blue.active.item,
 .ui.blue.menu .active.item {
-  border-color: $translatedBlue !important;
-  color: $translatedBlue !important;
+  border-color: colors.$translatedBlue !important;
+  color: colors.$translatedBlue !important;
 }
 /*--------------
     Inverted
@@ -294,14 +294,14 @@ a.ui.basic.blue.label:hover {
 
 .ui.inverted.menu .blue.active.item,
 .ui.inverted.blue.menu {
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
 }
 
 /* Colors Message */
 
 .ui.blue.message {
-  color: $translatedBlue;
-  box-shadow: 0px 0px 0px 1px $translatedBlue inset,
+  color: colors.$translatedBlue;
+  box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset,
     0px 0px 0px 0px rgba(0, 0, 0, 0);
 }
 
@@ -314,11 +314,11 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.table {
-  border-top: 0.2em solid $translatedBlue;
+  border-top: 0.2em solid colors.$translatedBlue;
 }
 
 .ui.inverted.blue.table {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
 }
 
 /* Blue */
@@ -326,19 +326,19 @@ a.ui.basic.blue.label:hover {
 .ui.blue.cards > .card,
 .ui.cards > .blue.card,
 .ui.blue.card {
-  box-shadow: 0px 0px 0px 1px #d4d4d5, 0px 2px 0px 0px $translatedBlue,
+  box-shadow: 0px 0px 0px 1px #d4d4d5, 0px 2px 0px 0px colors.$translatedBlue,
     0px 1px 3px 0px #d4d4d5;
 }
 
 .ui.blue.statistics .statistic > .value,
 .ui.statistics .blue.statistic > .value,
 .ui.blue.statistic > .value {
-  color: $translatedBlue;
+  color: colors.$translatedBlue;
 }
 
 .ui.toggle.checkbox input:checked ~ .box:before,
 .ui.toggle.checkbox input:checked ~ label:before {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
 }
 
 .ui.scrolling.dropdown .menu .item.item.item,
@@ -358,7 +358,7 @@ a.ui.basic.blue.label:hover {
 /* Blue */
 
 .ui.blue.progress .bar {
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
 }
 
 /********************************************/
@@ -393,12 +393,12 @@ i.icon {
   font-family: "Calibri", "Helvetica Neue", Arial, Helvetica, sans-serif;
   & > .item {
     font-size: 14px;
-    color: $black !important;
+    color: colors.$black !important;
     min-height: unset;
   }
 }
 .ui.dropdown .menu > .item a {
-  color: $black !important;
+  color: colors.$black !important;
 }
 
 .ui.header {

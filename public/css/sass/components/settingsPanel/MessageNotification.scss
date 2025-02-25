@@ -1,10 +1,11 @@
+@use "../../commons/colors";
 .settingsPanel-notification {
   display: flex;
   align-items: center;
   font-size: 15px;
   justify-content: space-between;
   padding: 15px 10px;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   margin: 15px 0;
   > div {
     display: flex;
@@ -15,16 +16,16 @@
     margin: 0;
   }
   &.settingsPanel-notification_success {
-    border-top: 3px solid $greenDefault;
-    background-color: $greenDefaultTransparent2;
+    border-top: 3px solid colors.$greenDefault;
+    background-color: colors.$greenDefaultTransparent2;
   }
   &.settingsPanel-notification_warning {
     border-top: 3px solid #ffcc01;
-    background-color: $orangeDefaultTransparent2;
+    background-color: colors.$orangeDefaultTransparent2;
   }
   &.settingsPanel-notification_error {
-    border-top: 3px solid $redDefault;
-    background-color: $redDefaultTransparent;
+    border-top: 3px solid colors.$redDefault;
+    background-color: colors.$redDefaultTransparent;
   }
   .button-close {
     padding: 2px 4px;
