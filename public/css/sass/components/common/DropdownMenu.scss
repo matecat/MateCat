@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .dropdownmenu {
   display: flex;
@@ -9,20 +9,20 @@
   padding: 8px;
   max-height: var(--radix-dropdown-menu-content-available-height);
   overflow-y: auto;
-  background-color: $white;
+  background-color: colors.$white;
   color: black;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   animation: 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards dropdownmenu-fadeIn;
 
   &.subDropdown {
-    background-color: $white;
+    background-color: colors.$white;
   }
 }
 
 .dropdownmenu-separator {
   margin: 2px 0;
   height: 1px;
-  background-color: $grey8;
+  background-color: colors.$grey8;
 }
 
 .dropdownmenu-item {
@@ -36,7 +36,7 @@
   width: 100%;
   padding: 8px;
   white-space: nowrap;
-  color: $black;
+  color: colors.$black;
   cursor: pointer;
   outline: none;
 
@@ -45,23 +45,23 @@
     padding-right: 40px;
   }
   &.critical:not([data-disabled]) {
-    color: $redDefault;
+    color: colors.$redDefault;
 
     &:hover {
-      background-color: rgba($redDefaultHover, 0.24);
-      color: $redDefault;
+      background-color: rgba(colors.$redDefaultHover, 0.24);
+      color: colors.$redDefault;
     }
   }
   &:not([data-disabled]):hover,
   &[data-highlighted]:not([data-disabled]),
   &:not([data-disabled]).selected,
   &[data-state='checked']:not([data-disabled]) {
-    background-color: rgba($translatedBlueTransparent, 0.14);
-    color: $translatedBlueActive;
+    background-color: rgba(colors.$translatedBlueTransparent, 0.14);
+    color: colors.$translatedBlueActive;
   }
   &[data-disabled],
   &[data-disabled]:hover {
-    color: $grey7;
+    color: colors.$grey7;
     cursor: not-allowed;
     opacity: 0.4;
   }
@@ -70,7 +70,7 @@
     &:not([data-disabled]):hover,
     &[data-highlighted]:not([data-disabled]),
     &[data-state='open'] {
-      background-color: rgba($grey7, 0.06);
+      background-color: rgba(colors.$grey7, 0.06);
       color: black;
     }
   }

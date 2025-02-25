@@ -1,3 +1,4 @@
+@use "commons/colors";
 /*popup*/
 .modal,
 #modal {
@@ -8,7 +9,7 @@
     //-webkit-box-shadow: 0 1px 20px #000;
     //box-shadow: 0 1px 20px #000;
     min-width: 600px;
-    background: $grey5;
+    background-color: colors.$grey5;
     margin: -200px 0 0 -250px;
     padding: 0 0px 20px 0px;
     position: fixed;
@@ -105,7 +106,7 @@
   .btn-ok,
   .btn-cancel {
     color: #fff;
-    background: $translatedBlue;
+    background: colors.$translatedBlue;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 10px;
@@ -115,20 +116,20 @@
     cursor: pointer;
   }
   .btn-ok:hover {
-    background-color: $translatedBlueHover;
+    background-color: colors.$translatedBlueHover;
   }
   .btn-ok:active {
-    background-color: $translatedBlueActive;
+    background-color: colors.$translatedBlueActive;
   }
 
   .btn-cancel {
-    color: $grey1 !important;
+    color: colors.$grey1 !important;
     background: white !important;
-    border: 1px solid $grey1 !important;
+    border: 1px solid colors.$grey1 !important;
   }
 
   .btn-cancel:hover {
     cursor: pointer;
-    background-color: $grey3 !important;
+    background-color: colors.$grey3 !important;
   }
 }

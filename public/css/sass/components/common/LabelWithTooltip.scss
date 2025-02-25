@@ -1,3 +1,5 @@
+@use "../../commons/colors";
+
 .label-with-tooltip {
   position: absolute;
   z-index: 14;
@@ -18,9 +20,9 @@
 .label-with-tooltip-content {
   border-radius: 4px;
   padding: 4px 8px;
-  background-color: $white;
-  box-shadow: 0 0 16px rgba($black, 0.25);
-  color: $grey6;
+  background-color: colors.$white;
+  box-shadow: 0 0 16px rgba(colors.$black, 0.25);
+  color: colors.$grey6;
   white-space: normal;
   font-size: 14px;
   font-weight: normal;

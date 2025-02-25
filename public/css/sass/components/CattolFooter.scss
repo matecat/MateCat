@@ -1,4 +1,4 @@
-@import '../commons/colors';
+@use '../commons/colors';
 
 .footer-body {
   display: flex;
@@ -30,7 +30,7 @@
   .grey-box {
     display: flex;
     flex-direction: column;
-    background-color: $grey5;
+    background-color: colors.$grey5;
     border-radius: 4px;
     padding: 5px 10px;
     line-height: 1.2;
@@ -40,7 +40,7 @@
     }
 
     > :last-child {
-      color: $grey6;
+      color: colors.$grey6;
     }
 
     .grey-box-row {
@@ -63,12 +63,12 @@
   .grey-box-speed-etc {
     font-weight: bold;
     > * {
-      color: $black !important;
+      color: colors.$black !important;
     }
   }
   .stats-foo {
     //height: 44px;
-    background-color: $white;
+    background-color: colors.$white;
     width: 100%;
     //position: fixed;
     bottom: 0;

@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .bulk-approve-bar {
   position: relative;
   z-index: 2;
@@ -58,15 +59,15 @@
           0 2px 4px rgba(0, 0, 0, 0.24) !important;
       }
       &.translated-all-bulked {
-        border: 1px solid $translatedBlue;
-        color: $translatedBlue;
+        border: 1px solid colors.$translatedBlue;
+        color: colors.$translatedBlue;
       }
       &.approved-all-bulked {
-        border: 1px solid $approvedGreen;
-        color: $approvedGreen;
+        border: 1px solid colors.$approvedGreen;
+        color: colors.$approvedGreen;
         &.approved-2nd-pass {
-          border: 1px solid $approved2Green;
-          color: $approved2Green;
+          border: 1px solid colors.$approved2Green;
+          color: colors.$approved2Green;
         }
       }
       i {

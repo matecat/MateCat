@@ -1,12 +1,12 @@
-@import 'commons/mixins';
-@import 'commons/_colors';
+@use 'commons/mixins';
+@use 'commons/_colors';
 body.cattool {
   //display: flex;
   height: 100vh;
   //flex-direction: column;
   overflow-y: hidden !important;
   padding: unset;
-  background-color: $grey5;
+  background-color: colors.$grey5;
 
   .page-content {
     display: flex;
@@ -48,7 +48,7 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: $darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
+    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
       center;
     background-size: 24px;
     border-radius: 50%;
@@ -59,7 +59,7 @@ body.cattool {
     bottom: 8px;
     cursor: pointer;
     &:hover {
-      background-color: $darkBlueHover;
+      background-color: colors.$darkBlueHover;
     }
   }
 }

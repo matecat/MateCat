@@ -1,16 +1,16 @@
-@import '../../common-main';
-@import '../../commons/icons';
-@import '../../commons/shadows';
-@import '../../commons/divider';
-@import '../../commons/progress-mc-bar';
-@import '../../commons/buttons';
-@import '../signin/OnBoarding';
-@import '../../common';
-@import '../segment/tagsMenu';
-@import '../segment/Tag';
-@import '../header/header';
-@import '../segment/Tag';
-@import '../../style';
+@use '../../common-main';
+@use '../../commons/icons';
+@use '../../commons/shadows';
+@use '../../commons/divider';
+@use '../../commons/progress-mc-bar';
+@use '../../commons/buttons';
+@use '../signin/OnBoarding';
+@use '../../common';
+@use '../segment/tagsMenu';
+@use '../segment/Tag';
+@use '../header/header';
+@use '../../style';
+@use "../../commons/colors";
 
 $color-red: #fb2a0d;
 $color-orange: #fbaa0d;
@@ -20,7 +20,7 @@ $color-yellow: #ffe600;
 body {
   font-family: Calibri, Arial, Helvetica, sans-serif;
   text-align: left;
-  background: $grey5;
+  background: colors.$grey5;
   font-size: 16px;
   min-width: 1024px;
   overflow-x: auto;
@@ -127,7 +127,7 @@ header {
         transition: 0.3s ease;
         .qr-bg-head {
           height: 258px;
-          background: $grey5;
+          background: colors.$grey5;
           position: absolute;
           width: 100%;
           z-index: -1;
@@ -159,7 +159,7 @@ header {
           .qr-production-quality {
             .qr-production {
               display: flex;
-              background: $grey3;
+              background: colors.$grey3;
               justify-content: space-between;
               width: 100%;
               padding-left: 15px;
@@ -218,10 +218,10 @@ header {
                 }
 
                 &.qr-pass {
-                  background: $greenDefaultTransparent;
+                  background: colors.$greenDefaultTransparent;
                 }
                 &.qr-fail {
-                  background: $redDefaultTransparent;
+                  background: colors.$redDefaultTransparent;
                 }
                 &.qr-pass,
                 &.qr-fail,
@@ -259,14 +259,14 @@ header {
             .qr-quality {
               margin-top: 20px;
               margin-bottom: 20px;
-              border-bottom: 2px solid $grey4;
+              border-bottom: 2px solid colors.$grey4;
               position: relative;
               z-index: 1;
               .qr-head {
                 display: flex;
                 align-items: center;
                 font-weight: 700;
-                background: $grey4;
+                background: colors.$grey4;
                 .qr-title {
                   text-align: center;
                   text-transform: capitalize;
@@ -279,20 +279,20 @@ header {
                 display: flex;
                 &:not(.severity_weight-line) {
                   &:not(.qr-body-list-first) {
-                    border-left: 2px solid $grey4;
-                    border-right: 2px solid $grey4;
-                    border-top: 2px solid $grey4;
+                    border-left: 2px solid colors.$grey4;
+                    border-right: 2px solid colors.$grey4;
+                    border-top: 2px solid colors.$grey4;
                   }
 
                   .qr-element {
-                    border-left: 1px solid $grey4;
+                    border-left: 1px solid colors.$grey4;
                   }
                 }
                 .qr-element {
                   background: white;
                   position: relative;
                   &.empty {
-                    background: $grey4;
+                    background: colors.$grey4;
                   }
                   &:first-child {
                     border: none;
@@ -301,7 +301,7 @@ header {
                     flex-direction: column;
                   }
                   &.severity_weight {
-                    background: $grey5 !important;
+                    background: colors.$grey5 !important;
                   }
                   span {
                     top: 50%;
@@ -335,7 +335,7 @@ header {
               .qr-total-severity,
               .total-severity {
                 width: 20%;
-                background: $grey1;
+                background: colors.$grey1;
               }
               .qr-total-severity {
                 padding: 20px 15px;
@@ -372,7 +372,7 @@ header {
                 &.kudos-total {
                   display: flex;
                   flex-direction: column;
-                  background: $grey3;
+                  background: colors.$grey3;
                   font-weight: 700;
                   text-transform: capitalize;
                 }
@@ -397,7 +397,7 @@ header {
             .qr-feedback {
               .qr-head {
                 padding: 10px 20px;
-                background: $grey4;
+                background: colors.$grey4;
                 .label.revision-color {
                   float: left;
 
@@ -425,7 +425,7 @@ header {
             align-items: center;
           }
           .qr-segment-details-container {
-            background: $grey4;
+            background: colors.$grey4;
             padding: 35px 15px 15px;
             .qr-segments-summary {
               h3 {
@@ -474,36 +474,36 @@ header {
                         }
                         .status-translated {
                           font-size: 20px;
-                          color: $translatedBlue;
+                          color: colors.$translatedBlue;
                         }
                         .status-approved {
                           font-size: 20px;
-                          color: $approvedGreen;
+                          color: colors.$approvedGreen;
                           &.approved-r2 {
-                            color: $approved2Green;
+                            color: colors.$approved2Green;
                           }
                         }
                         .status-approved2 {
-                          color: $approved2Green;
+                          color: colors.$approved2Green;
                           font-size: 20px;
                         }
                         .status-draft {
                           font-size: 20px;
-                          color: $grey1;
+                          color: colors.$grey1;
                         }
                         .status-rejected {
                           font-size: 20px;
-                          color: $rebuttedRed;
+                          color: colors.$rebuttedRed;
                         }
                       }
                     }
                     .qr-segment-body {
-                      border-bottom: 1px solid $grey2;
-                      border-left: 1px solid $grey2;
-                      border-right: 1px solid $grey2;
+                      border-bottom: 1px solid colors.$grey2;
+                      border-left: 1px solid colors.$grey2;
+                      border-right: 1px solid colors.$grey2;
                       .segment-container {
                         display: flex;
-                        background: $grey3;
+                        background: colors.$grey3;
                         &.qr-issues {
                           .qr-text {
                             width: 80%;
@@ -525,7 +525,7 @@ header {
 
                         .qr-segment-title {
                           width: 20%;
-                          background: $grey5;
+                          background: colors.$grey5;
                           justify-content: space-between;
 
                           button {
@@ -570,17 +570,17 @@ header {
                         }
                         &.qr-translated {
                           b {
-                            color: $translatedBlue;
+                            color: colors.$translatedBlue;
                           }
                         }
                         &.qr-revised {
                           b {
-                            color: $approvedGreen;
+                            color: colors.$approvedGreen;
                           }
                         }
                         &.qr-revised-2ndpass {
                           b {
-                            color: $approved2Green;
+                            color: colors.$approved2Green;
                           }
                         }
                         &.rtl-lang {
@@ -591,7 +591,7 @@ header {
                         }
                         .qr-text {
                           width: 66%;
-                          background: $white;
+                          background: colors.$white;
                           margin-right: 1px;
                           display: inline-block;
                           color: #5f5f5f;
@@ -613,7 +613,7 @@ header {
                               padding: 3px 10px;
                               margin-right: 5px;
                               margin-top: 5px;
-                              background: $grey4;
+                              background: colors.$grey4;
 
                               &.automated {
                                 padding: 0;
@@ -621,7 +621,7 @@ header {
                                 .box-icon {
                                   display: flex;
                                   padding: 5px 3px 5px 5px;
-                                  background: $grey5;
+                                  background: colors.$grey5;
                                   margin-right: 6px;
                                 }
                               }
@@ -657,17 +657,17 @@ header {
                                   font-size: 16px;
                                   margin-bottom: 0;
                                   .re-revisor {
-                                    color: $approvedGreen;
+                                    color: colors.$approvedGreen;
                                   }
                                   .re-revisor2 {
-                                    color: $approved2Green;
+                                    color: colors.$approved2Green;
                                   }
                                   .re-translator {
-                                    color: $translatedBlue;
+                                    color: colors.$translatedBlue;
                                   }
                                   .re-comment-date {
                                     font-size: 13px;
-                                    color: $grey1;
+                                    color: colors.$grey1;
                                   }
                                 }
                               }
@@ -700,7 +700,7 @@ header {
                         .segment-container {
                           box-shadow: none !important;
                           .segment-content {
-                            background: $grey5;
+                            background: colors.$grey5;
                             .qr-issues-list {
                               .qr-issue {
                                 background: #ffffff;
@@ -713,10 +713,10 @@ header {
                           &.shadow-1 {
                             position: relative;
                             .segment-content {
-                              background: $white;
+                              background: colors.$white;
                             }
                             .qr-segment-title {
-                              background: $grey4;
+                              background: colors.$grey4;
                               flex-shrink: 0;
                             }
                           }
@@ -742,7 +742,7 @@ header {
     display: flex;
     align-items: center;
     .dropdown {
-      background: $white !important;
+      background: colors.$white !important;
     }
     &:nth-child(2) {
       margin-left: 15px;
@@ -784,8 +784,8 @@ header {
     .not-filtered {
       .ui.basic.button {
         &:hover {
-          box-shadow: 0px 0px 0px 1px $translatedBlue inset;
-          color: $translatedBlue !important;
+          box-shadow: 0px 0px 0px 1px colors.$translatedBlue inset;
+          color: colors.$translatedBlue !important;
         }
         &.disabled {
           box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
@@ -846,23 +846,23 @@ header {
         background: #ffffff;
       }
       &.draft-color {
-        background: $grey1;
+        background: colors.$grey1;
       }
       &.translated-color {
-        background: $translatedBlue;
+        background: colors.$translatedBlue;
       }
       &.approved-color {
-        background: $approvedGreen;
+        background: colors.$approvedGreen;
       }
       &.rejected-color {
-        background: $rebuttedRed;
+        background: colors.$rebuttedRed;
       }
       &.revision-color {
-        background: $approvedGreen;
+        background: colors.$approvedGreen;
       }
       &.second-revision-color,
       &.approved-2ndpass-color {
-        background: $approved2Green;
+        background: colors.$approved2Green;
       }
     }
 
@@ -963,22 +963,22 @@ header {
   margin: 30px 15px 15px;
   z-index: 1;
   .ui.active.inverted.dimmer {
-    background: $grey4;
+    background: colors.$grey4;
   }
 }
 
 .per-orange {
-  background: $orangeDefault !important;
+  background: colors.$orangeDefault !important;
   color: #fff !important;
 }
 
 .per-blue {
-  background: $translatedBlue !important;
+  background: colors.$translatedBlue !important;
   color: #fff !important;
 }
 
 .per-green {
-  background: $approvedGreen !important;
+  background: colors.$approvedGreen !important;
   color: #fff !important;
 }
 
@@ -988,13 +988,13 @@ header {
 }
 
 .per-red {
-  background: $redDefault !important;
+  background: colors.$redDefault !important;
   color: #fff !important;
 }
 
 .per-gray {
   background: #aaa !important;
-  color: $grey1 !important;
+  color: colors.$grey1 !important;
 }
 
 .ui.popup.bottom.right.qr-score-popup {

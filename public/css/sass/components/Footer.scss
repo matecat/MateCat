@@ -1,5 +1,7 @@
+@use "../commons/colors";
+
 .normal-foo {
-  background-color: $grey4;
+  background-color: colors.$grey4;
   min-width: 992px;
   width: 100%;
   .footer-body {
@@ -24,7 +26,7 @@
         background-size: cover;
       }
       .description {
-        color: $grey1;
+        color: colors.$grey1;
         font-weight: 100;
         font-size: 12px;
         text-align: left;
@@ -48,7 +50,7 @@
       gap: 5px;
       a {
         margin: 0;
-        color: $grey1;
+        color: colors.$grey1;
         text-align: left;
         font-size: 16px;
         font-weight: bold;
@@ -57,11 +59,11 @@
         align-items: center;
         &.email-link {
           color: #fff;
-          background-color: $grey1;
+          background-color: colors.$grey1;
           padding: 6px 24px;
           border-radius: 2px;
           &:hover {
-            background-color: $grey6;
+            background-color: colors.$grey6;
           }
         }
       }
