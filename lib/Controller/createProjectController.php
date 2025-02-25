@@ -40,10 +40,14 @@ class createProjectController extends ajaxController {
     private $filters_extraction_parameters;
     private $xliff_parameters;
 
+    // LEGACY PARAMS TO BE REMOVED
     private $dictation;
     private $show_whitespace;
     private $character_counter;
     private $ai_assistant;
+
+    private $character_counter_count_tags;
+    private $character_counter_mode;
 
     /**
      * @var QAModelTemplateStruct
@@ -101,6 +105,8 @@ class createProjectController extends ajaxController {
                 'dictation'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'show_whitespace'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'character_counter'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter_count_tags'  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter_mode'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
                 'ai_assistant'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'dialect_strict'                => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
@@ -117,6 +123,8 @@ class createProjectController extends ajaxController {
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
 
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+
 
         //first we check the presence of a list from tm management panel
 
@@ -184,6 +192,9 @@ class createProjectController extends ajaxController {
         $this->ai_assistant      = $this->postInput[ 'ai_assistant' ] ?? null;
         $this->tm_prioritization = $this->postInput[ 'tm_prioritization' ] ?? null;
 
+        $this->character_counter_count_tags = $this->postInput[ 'character_counter_count_tags' ] ?? null;
+        $this->character_counter_mode       = $this->postInput[ 'character_counter_mode' ] ?? null;
+
         $this->__setMetadataFromPostInput();
 
         if ( $this->disable_tms_engine_flag ) {
@@ -209,6 +220,7 @@ class createProjectController extends ajaxController {
 
         $this->__validateSourceLang( Languages::getInstance() );
         $this->__validateTargetLangs( Languages::getInstance() );
+        $this->__validateCharacterCounterMode();
         $this->__validateUserMTEngine();
         $this->__validateMMTGlossaries();
         $this->__validateDeepLGlossaryParams();
@@ -363,6 +375,9 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'character_counter' ] = $this->character_counter;
         $projectStructure[ 'ai_assistant' ]      = $this->ai_assistant;
         $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization ?? null;
+
+        $projectStructure[ 'character_counter_mode' ] = $this->character_counter_mode ?? null;
+        $projectStructure[ 'character_counter_count_tags' ] = $this->character_counter_count_tags ?? null;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -636,6 +651,23 @@ class createProjectController extends ajaxController {
                 throw new Exception( 'Team and user memberships do not match' );
             } else {
                 $this->team = $team;
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateCharacterCounterMode() {
+        if ( !empty( $this->character_counter_mode ) ) {
+            $allowed = [
+                "google_ads",
+                "exclude_cjk",
+                "all_one"
+            ];
+
+            if(!in_array($this->postInput[ 'character_counter_mode' ], $allowed)){
+                $this->result[ 'errors' ][] = [ "code" => -2, "message" => "Invalid character counter mode." ];
             }
         }
     }

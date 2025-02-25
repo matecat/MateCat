@@ -1,5 +1,9 @@
 import {setTagSignatureMiddleware} from './tagModel'
-import {transformTagsToHtml, transformTagsToText} from './tagUtils'
+import {
+  excludeSomeTagsTransformToText,
+  transformTagsToHtml,
+  transformTagsToText,
+} from './tagUtils'
 
 setTagSignatureMiddleware('space', () => false)
 
@@ -30,4 +34,14 @@ test('Placeholders to text', () => {
     'test tag ph con \uf03d &lt; &gt; \n &amp;lt; \u21E5 &amp;gt; \u00B0 \\r <p> <strong> </strong>pippoL&apos; placeholder &nbsp; \u00B0elle-même'
 
   expect(transformTagsToText(text)).toBe(resultText)
+})
+
+test('Convert tags to text and exclude tag g', () => {
+  const text =
+    'test <g id="1">tag</g> ph con &lt; &gt; &amp;lt; <g id="2"></g> &amp;gt; <ph id="mtc_1" ctype="x-html" equiv-text="base64:Jmx0O3AmZ3Q7"/> <ph id="mtc_2" ctype="x-html" equiv-text="base64:Jmx0O3N0cm9uZyZndDs="/> <ph id="mtc_3" ctype="x-html" equiv-text="base64:Jmx0Oy9zdHJvbmcmZ3Q7"/>pippoL&apos; placeholder &nbsp; elle-même'
+
+  const resultText =
+    'test tag ph con &lt; &gt; &amp;lt;  &amp;gt; <p> <strong> </strong>pippoL&apos; placeholder &nbsp; elle-même'
+
+  expect(excludeSomeTagsTransformToText(text, ['g'])).toBe(resultText)
 })
