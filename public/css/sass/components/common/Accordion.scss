@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .accordion-component {
   overflow: hidden;
@@ -10,7 +10,7 @@
   align-items: center;
   padding: 14px 24px;
   font: 12px;
-  background-color: $grey3;
+  background-color: colors.$grey3;
   border-radius: 8px;
   cursor: pointer;
 
@@ -37,5 +37,5 @@
   transform-origin: top center;
   padding: 0 24px;
   border-radius: 0 0 8px 8px;
-  background-color: $grey4;
+  background-color: colors.$grey4;
 }

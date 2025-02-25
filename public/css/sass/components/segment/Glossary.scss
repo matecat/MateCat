@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .qaCheckGlossaryItem {
   display: inline-block;
@@ -11,7 +11,7 @@
 .glossaryItem {
   display: inline-block;
   position: relative;
-  border-bottom: 2px solid $translatedBlue;
+  border-bottom: 2px solid colors.$translatedBlue;
   cursor: pointer;
 }
 

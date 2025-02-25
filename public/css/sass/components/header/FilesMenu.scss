@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .breadcrumbs {
   display: grid;
   grid-template-columns: 25px auto;
@@ -33,7 +34,7 @@
   top: 50px;
   display: block;
   width: 315px;
-  background: $light-gray;
+  background: colors.$grey3;
   box-shadow: 0px 1px 12px #999;
   z-index: 2;
   padding: 0;
@@ -45,7 +46,7 @@
     padding: 12px 16px;
     cursor: pointer;
     display: flex;
-    border-bottom: 1px solid $gray-2;
+    border-bottom: 1px solid colors.$grey2;
     .icon-iconmoon:before {
       color: #acb3bd;
       font-size: 16px;
@@ -102,7 +103,7 @@
         }
       }
       &.current {
-        background: $matecat-blue;
+        background: colors.$darkBlue;
         color: #ffffff;
       }
     }
