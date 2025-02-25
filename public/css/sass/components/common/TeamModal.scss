@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .team-modal {
   display: flex;
@@ -33,7 +33,7 @@
       transition: none !important;
       &:hover {
         background-color: unset !important;
-        color: $black !important;
+        color: colors.$black !important;
       }
     }
   }
@@ -72,7 +72,7 @@
       margin-right: 2px;
 
       > svg {
-        color: $grey6;
+        color: colors.$grey6;
       }
     }
 
@@ -106,7 +106,7 @@
     }
 
     .removing-user-message {
-      color: $grey1;
+      color: colors.$grey1;
     }
 
     .button-remove {
@@ -147,7 +147,7 @@
       margin-left: auto;
 
       > span {
-        color: $grey1;
+        color: colors.$grey1;
         font-size: 14px;
       }
     }
@@ -167,7 +167,7 @@
     width: 40px;
     max-width: 40px;
     height: 40px;
-    background-color: $grey2;
+    background-color: colors.$grey2;
     border-radius: 50%;
     vertical-align: middle;
     text-align: center;
@@ -185,7 +185,7 @@
 
     > :not(:first-child) {
       font-size: 14px;
-      color: $grey1;
+      color: colors.$grey1;
     }
   }
 
@@ -206,7 +206,7 @@
 
   &:focus {
     outline: none;
-    border-color: $linkBlueTransparent;
+    border-color: colors.$linkBlueTransparent;
   }
 }
 

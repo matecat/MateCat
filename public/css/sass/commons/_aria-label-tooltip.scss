@@ -1,3 +1,5 @@
+@use "../commons/colors";
+
 // Tooltips
 [aria-label] {
   position: relative;
@@ -9,9 +11,9 @@
   z-index: 4;
   border-radius: 4px;
   padding: 4px 8px;
-  background-color: $white;
-  box-shadow: 0 0 16px rgba($black, 0.25);
-  color: $grey6;
+  background-color: colors.$white;
+  box-shadow: 0 0 16px rgba(colors.$black, 0.25);
+  color: colors.$grey6;
   pointer-events: none;
   white-space: pre;
   font-size: 14px;
@@ -62,7 +64,7 @@
 }
 [aria-label][tooltip-position='bottom']::before {
   bottom: -6px;
-  border-bottom: 6px solid $grey4;
+  border-bottom: 6px solid colors.$grey4;
 }
 
 [aria-label][tooltip-position='left']::before,
@@ -79,7 +81,7 @@
 }
 [aria-label][tooltip-position='left']::before {
   left: -6px;
-  border-left: 6px solid $grey4;
+  border-left: 6px solid colors.$grey4;
 }
 [aria-label][tooltip-position='right']::after {
   top: 50%;
@@ -88,5 +90,5 @@
 }
 [aria-label][tooltip-position='right']::before {
   right: -6px;
-  border-right: 6px solid $grey4;
+  border-right: 6px solid colors.$grey4;
 }

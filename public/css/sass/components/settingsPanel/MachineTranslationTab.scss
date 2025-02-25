@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -102,11 +103,11 @@
           }
         }
         .field-error {
-          color: $redDefault;
+          color: colors.$redDefault;
           font-size: 12px;
         }
         .mt-error {
-          color: $redDefault;
+          color: colors.$redDefault;
         }
       }
     }
@@ -114,7 +115,7 @@
       width: 50%;
       text-align: left;
       padding: 15px;
-      background: $grey5;
+      background: colors.$grey5;
       display: flex;
       flex-direction: column;
       .button {
@@ -164,11 +165,11 @@
   }
 
   .settings-panel-row-content {
-    background-color: $white;
+    background-color: colors.$white;
   }
 
   .settings-panel-row-active {
-    background-color: $transparentBlue;
+    background-color: colors.$transparentBlue;
   }
   .settings-panel-table-rowHeading-column:nth-child(3),
   .settings-panel-table-rowHeading-column:nth-child(4) {
@@ -273,7 +274,7 @@
 .mt-glossary {
   display: flex;
   flex-direction: column;
-  background-color: $white;
+  background-color: colors.$white;
 
   .expand-button {
     height: 32px;
@@ -364,7 +365,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -377,7 +378,7 @@
   }
 
   &.error {
-    border: solid 1px $redDefault;
+    border: solid 1px colors.$redDefault;
   }
 }
 
@@ -403,7 +404,7 @@
 
   .grey-button {
     &.error {
-      border: solid 1px $redDefault;
+      border: solid 1px colors.$redDefault;
     }
   }
 
@@ -449,7 +450,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: $grey5;
+    background-color: colors.$grey5;
   }
 
   &:disabled {

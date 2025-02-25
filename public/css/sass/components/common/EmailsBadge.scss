@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .email-badge {
   display: flex;
@@ -60,7 +60,7 @@
 .email-badge-placeholder {
   position: absolute;
   inset: 12px;
-  color: $grey7;
+  color: colors.$grey7;
 }
 
 .email-badge-item {
@@ -69,7 +69,7 @@
 }
 
 .email-badge-error {
-  color: $redDefault;
+  color: colors.$redDefault;
 }
 
 .email-badge-tag {
@@ -81,16 +81,16 @@
   cursor: default;
 
   &.default {
-    background-color: $grey7;
+    background-color: colors.$grey7;
     color: white;
   }
   &.selected {
-    background-color: $translatedBlue;
-    color: $white;
+    background-color: colors.$translatedBlue;
+    color: colors.$white;
   }
   &.invalid {
-    background-color: $redDefault;
-    color: $white;
+    background-color: colors.$redDefault;
+    color: colors.$white;
   }
 }
 
@@ -100,14 +100,14 @@
 
   &:hover {
     background-color: transparent !important;
-    color: $grey8 !important;
+    color: colors.$grey8 !important;
   }
 
   .selected & {
-    color: $grey9 !important;
+    color: colors.$grey9 !important;
 
     &:hover {
-      color: $grey8 !important;
+      color: colors.$grey8 !important;
     }
   }
 }

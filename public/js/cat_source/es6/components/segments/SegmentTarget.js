@@ -376,6 +376,7 @@ class SegmentTarget extends React.Component {
     let translation = this.props.segment.translation
 
     if (
+      !translation ||
       translation.trim().length === 0 ||
       OfflineUtils.offlineCacheRemaining <= 0
     ) {

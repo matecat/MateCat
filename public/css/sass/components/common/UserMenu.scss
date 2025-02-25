@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 .header-buttons {
   display: flex;
   gap: 20px;
@@ -7,10 +7,10 @@
   grid-column: 5;
   margin-left: 22px;
   .header-button-signin {
-    color: $white !important;
+    color: colors.$white !important;
   }
   .header-button-signup {
-    color: $darkBlue !important;
+    color: colors.$darkBlue !important;
   }
 
 }
@@ -31,7 +31,7 @@
     margin: 0;
     border: none;
     height: 1px;
-    background-color: $grey9;
+    background-color: colors.$grey9;
   }
 
   .user-info {
@@ -84,7 +84,7 @@
     width: 100%;
     display: block;
     text-decoration: none;
-    color: $grey6;
+    color: colors.$grey6;
     &:hover {
       background-color: #f2f5f7 !important;
       color: #0055b8 !important;

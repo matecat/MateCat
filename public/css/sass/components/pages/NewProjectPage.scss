@@ -1,20 +1,21 @@
-@import '../../common-main';
+@use '../../common-main';
 
-@import '../../commons/buttons';
-@import '../../commons/filter-teams';
-@import '../../commons/icons';
-@import '../../commons/team-member';
-@import '../../commons/aria-label-tooltip';
-@import '../../commons/tooltip';
+@use '../../commons/buttons';
+@use '../../commons/filter-teams';
+@use '../../commons/icons';
+@use '../../commons/team-member';
+@use '../../commons/aria-label-tooltip';
+@use '../../commons/tooltip';
 
-@import '../../common';
-@import '../../modals/language-selector';
-@import '../common/HomePageSection';
-@import '../../upload-page';
-@import '../signin/OnBoarding';
-@import '../Footer';
+@use '../../common';
+@use '../../modals/language-selector';
+@use '../common/HomePageSection';
+@use '../../upload-page';
+@use '../signin/OnBoarding';
+@use '../Footer';
 
-@import '../SettingsPanel';
+@use '../SettingsPanel';
+@use "../../commons/colors";
 
 .new_project__page {
   overflow-y: auto;
@@ -37,12 +38,12 @@
       opacity: 0.4;
       h2,
       label {
-        color: $grey1;
+        color: colors.$grey1;
       }
       input,
       .select-with-icon__wrapper .select {
         cursor: not-allowed;
-        background-color: $grey9;
+        background-color: colors.$grey9;
       }
     }
   }
@@ -99,7 +100,7 @@
     }
   }
   span {
-    color: $grey6;
+    color: colors.$grey6;
     font-size: 24px;
     line-height: 20px;
   }

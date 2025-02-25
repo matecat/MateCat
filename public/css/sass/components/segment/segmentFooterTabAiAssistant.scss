@@ -1,3 +1,5 @@
+@use "../../commons/colors";
+
 .ai-assistant-container {
   display: flex;
   justify-content: space-between;
@@ -25,7 +27,7 @@
 .feedback-container {
   display: flex;
   gap: 20px;
-  color: $grey6;
+  color: colors.$grey6;
 }
 
 .feedback-container-submited {
@@ -51,35 +53,35 @@
   align-content: center;
   justify-content: center;
   align-items: center;
-  border: solid 1px $grey8;
+  border: solid 1px colors.$grey8;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .like {
-  color: $approvedGreen;
+  color: colors.$approvedGreen;
   margin-right: 8px;
 
   &:hover,
   &.active {
-    border-color: $approvedGreen;
-    background-color: rgba($approvedGreen, 0.1);
+    border-color: colors.$approvedGreen;
+    background-color: rgba(colors.$approvedGreen, 0.1);
   }
 }
 
 .dislike {
-  color: $redDefault;
+  color: colors.$redDefault;
 
   &:hover,
   &.active {
-    border-color: $redDefault;
-    background-color: rgba($redDefault, 0.1);
+    border-color: colors.$redDefault;
+    background-color: rgba(colors.$redDefault, 0.1);
   }
 }
 
 .submited {
   border: none;
-  background-color: rgba($grey1, 0.1);
+  background-color: rgba(colors.$grey1, 0.1);
   cursor: unset;
 }
 
@@ -104,7 +106,7 @@
   display: flex;
   flex-direction: column;
 
-  border-top: solid 1px $grey3;
+  border-top: solid 1px colors.$grey3;
 }
 
 .tm-matches-title {

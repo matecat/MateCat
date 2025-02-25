@@ -1,4 +1,5 @@
-@import 'NewProjectPage';
+@use 'NewProjectPage';
+@use "../../commons/colors";
 
 .activity-log-content {
   display: flex;
@@ -17,7 +18,7 @@
 .activity-log-table {
   height: 100%;
   overflow-y: auto;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
 
   .activity-log-table-columns-name,
   .activity-log-table-columns-content {
@@ -46,7 +47,7 @@
   .activity-log-table-columns-content {
     > * {
       height: 40px;
-      border: 1px solid $grey8;
+      border: 1px solid colors.$grey8;
       border-top: unset;
       padding: 10px;
       border-left: unset;
@@ -57,13 +58,13 @@
     }
 
     &:nth-child(odd) {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 
   .activity-table-column-order {
-    background-color: $grey9;
-    border: 1px solid $grey8;
+    background-color: colors.$grey9;
+    border: 1px solid colors.$grey8;
     padding: 5px;
     justify-content: space-between;
     cursor: pointer;
@@ -96,7 +97,7 @@
       width: 160px;
 
       label {
-        color: $grey6;
+        color: colors.$grey6;
       }
 
       .select {
@@ -104,7 +105,7 @@
         padding: 5px;
 
         &:hover {
-          border-color: rgba($grey8, 0.8);
+          border-color: rgba(colors.$grey8, 0.8);
           box-shadow: none;
         }
       }
@@ -114,7 +115,7 @@
       width: 250px;
       font-size: 14px;
       border-radius: 2px;
-      border: 1px solid $grey2;
+      border: 1px solid colors.$grey2;
       padding: 7px;
     }
   }

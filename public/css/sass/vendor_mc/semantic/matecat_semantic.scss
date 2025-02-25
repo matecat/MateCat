@@ -1,6 +1,6 @@
-@import 'semantic';
-@import '../../commons/colors';
-@import 'semantic_overrides';
+@use 'semantic';
+@use '../../commons/colors';
+@use 'semantic_overrides';
 
 @font-face {
   font-family: 'Icons';
@@ -17,11 +17,11 @@
 }
 
 a {
-  color: $linkBlue;
+  color: colors.$linkBlue;
   &:hover {
-    color: $linkBlueHover;
+    color: colors.$linkBlueHover;
   }
   &:active {
-    color: $linkBlueActive;
+    color: colors.$linkBlueActive;
   }
 }
