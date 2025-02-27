@@ -18,6 +18,14 @@ input#markAsCompleteButton[disabled] {
   background: transparent;
   border: none;
 
+  &:disabled {
+    cursor: not-allowed;
+
+    &:hover {
+      opacity: 0.8;
+    }
+  }
+
   &.isMarkedComplete {
     background-image: url('/public/img/icons/icon-mark-active.svg');
     background-size: cover;

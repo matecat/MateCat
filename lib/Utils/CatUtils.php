@@ -745,6 +745,39 @@ class CatUtils {
     }
 
     /**
+     * @return int
+     */
+    public static function getRevisionNumberFromRequestUri(): int
+    {
+
+        if ( !isset( $_SERVER[ 'REQUEST_URI' ] ) ) {
+            return 0;
+        }
+
+        $_from_url = explode("/", @$_SERVER[ 'REQUEST_URI' ] );
+
+        if(empty($_from_url)){
+            return 0;
+        }
+
+        if(!isset($_from_url[1])){
+            return 0;
+        }
+
+        if($_from_url[1] === "revise"){
+            return 1;
+        }
+
+        if($_from_url[1] === "revise2"){
+            return 2;
+        }
+
+        return 0;
+    }
+
+
+
+    /**
      * Get a job from a combination of ID and ANY password (t,r1 or r2)
      *
      * @param $jobId

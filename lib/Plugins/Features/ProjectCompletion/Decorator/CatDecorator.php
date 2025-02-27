@@ -4,7 +4,10 @@ namespace Features\ProjectCompletion\Decorator;
 
 use AbstractDecorator;
 use catController;
+use CatUtils;
 use Chunks_ChunkCompletionEventDao;
+use Constants_TranslationStatus;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Projects_MetadataDao;
 
 class CatDecorator extends AbstractDecorator {
@@ -73,10 +76,19 @@ class CatDecorator extends AbstractDecorator {
     private function varsForComplete() {
         $this->template->job_marked_complete             = true;
         $this->template->header_main_button_class        = 'isMarkedComplete';
-        $this->template->header_main_button_enabled      = false;
-        $this->template->mark_as_complete_button_enabled = false;
+
+        if($this->markAsCompleteIsEnabled()){
+            $this->template->header_main_button_enabled      = true;
+            $this->template->mark_as_complete_button_enabled = true;
+        } else {
+            $this->template->header_main_button_enabled      = false;
+            $this->template->mark_as_complete_button_enabled = false;
+        }
     }
 
+    /**
+     * @return bool
+     */
     private function completable() {
 
         if ( $this->controller->getChunk()->getProject()->getWordCountType() != Projects_MetadataDao::WORD_COUNT_RAW ) {
@@ -108,4 +120,29 @@ class CatDecorator extends AbstractDecorator {
         return $completable;
     }
 
+    /**
+     * @return bool
+     */
+    private function markAsCompleteIsEnabled()
+    {
+        $revisionNumber = CatUtils::getRevisionNumberFromRequestUri();
+        $lastEvent      = (new TranslationEventDao())->getLatestEventForAJob($this->controller->getChunk()->id);
+
+        if(empty($lastEvent)){
+            return false;
+        }
+
+        switch($lastEvent->status){
+            case Constants_TranslationStatus::STATUS_TRANSLATED:
+                return true;
+
+            case Constants_TranslationStatus::STATUS_APPROVED:
+                return $revisionNumber === 1 or $revisionNumber === 2;
+
+            case Constants_TranslationStatus::STATUS_APPROVED2:
+                return $revisionNumber === 2;
+        }
+
+        return false;
+    }
 }
