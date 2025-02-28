@@ -119,3 +119,10 @@ $klein->with( '/api/app/project-template', function () {
 $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
+
+// Metadata
+$klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
+    route( '', 'GET', [ '\API\App\JobMetadataController', 'get' ] );
+    route( '', 'POST', [ '\API\App\JobMetadataController', 'save' ] );
+    route( '/[:key]', 'DELETE', [ '\API\App\JobMetadataController', 'delete' ] );
+} );
