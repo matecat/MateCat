@@ -79,6 +79,10 @@ class setTranslationController extends ajaxController {
      */
     private $VersionsHandler;
     private $revisionNumber;
+    /**
+     * @var false
+     */
+    private bool $contextIsSpice;
 
     public function __construct() {
 
@@ -291,6 +295,9 @@ class setTranslationController extends ajaxController {
         if ( isset( $segmentsList->id_after->segment ) ) {
             $this->context_after = $this->filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
         }
+
+        $this->contextIsSpice = $segmentsList->isSpice ?? false;
+
     }
 
     /**
@@ -902,6 +909,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->contextIsSpice       = $this->contextIsSpice;
 
         /*
          * This parameter is not used by the application, but we use it to for information integrity
