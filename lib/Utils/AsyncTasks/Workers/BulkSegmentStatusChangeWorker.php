@@ -84,7 +84,14 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
             $new_translations[] = $new_translation;
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
+
+                try {
+                    $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
+                } catch ( Exception $e ) {
+                    // job archived or deleted, runtime exception on TranslationEvent creation
+                    throw new EndQueueException( $e->getMessage(), $e->getCode(), $e );
+                }
+
                 $batchEventCreator->addEvent( $segmentTranslationEvent );
             }
 
