@@ -16,7 +16,7 @@ var spec = {
   schemes: ['https'],
   produces: ['application/json'],
   paths: {
-    '/api/v2/projects/{id_project}/{password}': {
+    '/api/v3/projects/{id_project}/{password}': {
       get: {
         tags: ['Project'],
         summary: 'Get project information',
@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).",
+              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -361,7 +361,111 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/analysis/status': {
+    '/api/v3/change-password': {
+      post: {
+        tags: ['Project', 'Job'],
+      },
+      summary: 'Change password',
+      description: 'Change the password of a project or a job.',
+      parameters: [
+        {
+          name: 'res',
+          in: 'formData',
+          description:
+              'Possible values: job, prj (if left empy, job is the default value)',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'id',
+          in: 'formData',
+          description:
+              'The id of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'integer',
+        },
+        {
+          name: 'password',
+          in: 'formData',
+          description:
+              'The current password of the resource (project or job) whose password you want to change.',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'new_password',
+          in: 'formData',
+          description:
+              'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+          required: false,
+          type: 'string',
+        },
+        {
+          name: 'revision_number',
+          in: 'formData',
+          description:
+              'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
+          required: false,
+          type: 'integer',
+        },
+        {
+          name: 'undo',
+          in: 'formData',
+          description:
+              'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
+          required: false,
+          type: 'boolean',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'An array of price estimates by product',
+          schema: {
+            $ref: '#/definitions/ChangePasswordResponse',
+          },
+        },
+        default: {
+          description: 'Unexpected error',
+        },
+      },
+    },
+    '/api/v3/projects/analysis/status/{id_project}/{password}': {
+      get: {
+        tags: ['Project'],
+        summary: 'Retrieve the status of a project',
+        description: 'Check Status of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description:
+                'The identifier of the project, should be the value returned by the /new method.',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+                'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of price estimates by product',
+            schema: {
+              $ref: '#/definitions/Status',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/projects/{id_project}/{password}/analysis/status': {
       get: {
         tags: ['Project'],
         summary: 'Retrieve the status of a project',
@@ -397,75 +501,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/change-password': {
-      post: {
-        tags: ['Project', 'Job'],
-      },
-      summary: 'Change password',
-      description: 'Change the password of a project or a job.',
-      parameters: [
-        {
-          name: 'res',
-          in: 'formData',
-          description:
-            'Possible values: job, prj (if left empy, job is the default value)',
-          required: false,
-          type: 'string',
-        },
-        {
-          name: 'id',
-          in: 'formData',
-          description:
-            'The id of the resource (project or job) whose password you want to change.',
-          required: true,
-          type: 'integer',
-        },
-        {
-          name: 'password',
-          in: 'formData',
-          description:
-            'The current password of the resource (project or job) whose password you want to change.',
-          required: true,
-          type: 'string',
-        },
-        {
-          name: 'new_password',
-          in: 'formData',
-          description:
-            'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
-          required: false,
-          type: 'string',
-        },
-        {
-          name: 'revision_number',
-          in: 'formData',
-          description:
-            'Fill this in if you want to change the password of a revision job. Use this field to specify the revision step whose password you are changing. If this field is filled in, the password sent in the "password" field should be the one for the corresponding revision step. Possible values: 1, 2.',
-          required: false,
-          type: 'integer',
-        },
-        {
-          name: 'undo',
-          in: 'formData',
-          description:
-            'Set this to "true" if you\'d like to define the new password of the resource you are updating, rather than having a random one generated for you.',
-          required: false,
-          type: 'boolean',
-        },
-      ],
-      responses: {
-        200: {
-          description: 'An array of price estimates by product',
-          schema: {
-            $ref: '#/definitions/ChangePasswordResponse',
-          },
-        },
-        default: {
-          description: 'Unexpected error',
-        },
-      },
-    },
-    '/api/v2/projects/{id_project}/{password}/creation_status': {
+    '/api/v3/projects/{id_project}/{password}/creation_status': {
       get: {
         tags: ['Project'],
         summary: 'Shows creation status of a project',
@@ -499,7 +535,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/completion_status': {
+    '/api/v3/projects/{id_project}/{password}/completion_status': {
       get: {
         tags: ['Project'],
         summary: 'Shows project completion statuses',
@@ -535,7 +571,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}': {
+    '/api/v3/jobs/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Job Info',
@@ -569,7 +605,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/translation/{id_job}/{password}': {
+    '/api/v3/translation/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Download Translation',
@@ -600,7 +636,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/cancel': {
+    '/api/v3/jobs/{id_job}/{password}/cancel': {
       post: {
         tags: ['Job'],
         summary: 'Cancel API',
@@ -634,7 +670,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/archive': {
+    '/api/v3/jobs/{id_job}/{password}/archive': {
       post: {
         tags: ['Job'],
         summary: 'Archive API',
@@ -668,7 +704,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/active': {
+    '/api/v3/jobs/{id_job}/{password}/active': {
       post: {
         tags: ['Job'],
         summary: 'Active API',
@@ -702,7 +738,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/r2': {
+    '/api/v3/projects/{id_project}/{password}/r2': {
       post: {
         tags: ['Project'],
         summary: 'Generate second pass review 2',
@@ -754,7 +790,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/urls': {
+    '/api/v3/projects/{id_project}/{password}/urls': {
       get: {
         tags: ['Project'],
         summary: 'Urls of a Project',
@@ -789,7 +825,7 @@ var spec = {
       },
     },
 
-    '/api/v2/projects/{id_project}/{password}/due_date': {
+    '/api/v3/projects/{id_project}/{password}/due_date': {
       post: {
         tags: ['Project'],
         summary: 'Create due date',
@@ -910,7 +946,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/cancel': {
+    '/api/v3/projects/{id_project}/{password}/cancel': {
       post: {
         tags: ['Project'],
         summary: 'Cancel API',
@@ -944,7 +980,41 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/archive': {
+    '/api/v3/projects/{id_project}/{password}/delete': {
+      post: {
+        tags: ['Project'],
+        summary: 'Delete API',
+        description: 'API to delete a Project',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'ChangeStatus',
+            schema: {
+              $ref: '#/definitions/ChangeStatus',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
+    },
+    '/api/v3/projects/{id_project}/{password}/archive': {
       post: {
         tags: ['Project'],
         summary: 'Archive API',
@@ -978,7 +1048,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/active': {
+    '/api/v3/projects/{id_project}/{password}/active': {
       post: {
         tags: ['Project'],
         summary: 'Active API',
@@ -1012,7 +1082,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/merge': {
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/merge': {
       post: {
         tags: ['Project'],
         summary: 'Merge',
@@ -1049,7 +1119,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check':
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check':
       {
         post: {
           tags: ['Project'],
@@ -1120,7 +1190,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply':
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply':
       {
         post: {
           tags: ['Project'],
@@ -1191,7 +1261,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/translator': {
+    '/api/v3/jobs/{id_job}/{password}/translator': {
       get: {
         tags: ['Job'],
         summary: 'Gets the translator assigned to a job',
@@ -1280,7 +1350,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/comments': {
+    '/api/v3/jobs/{id_job}/{password}/comments': {
       get: {
         tags: ['Job'],
         summary: 'Get segment comments in a job',
@@ -1321,7 +1391,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/quality-report': {
+    '/api/v3/jobs/{id_job}/{password}/quality-report': {
       get: {
         tags: ['Job', 'Quality Report'],
         summary: 'Quality report',
@@ -1355,7 +1425,41 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams': {
+    '/api/v3/jobs/{id_job}/{password}/quality-report/segments': {
+      get: {
+        tags: ['Job', 'Quality Report'],
+        summary: 'Quality report segments',
+        description: 'API for fetching segments for quality report',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Quality report segments',
+            schema: {
+              $ref: '#/definitions/QualityReportSegments',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      },
+    },
+    '/api/v3/teams': {
       get: {
         tags: ['Teams'],
         summary: 'List available teams',
@@ -1418,7 +1522,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}': {
+    '/api/v3/teams/{id_team}': {
       put: {
         tags: ['Teams'],
         summary: 'Update team',
@@ -1456,7 +1560,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/members': {
+    '/api/v3/teams/{id_team}/members': {
       get: {
         tags: ['Teams'],
         summary: 'List team members',
@@ -1516,7 +1620,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/members/{id_member}': {
+    '/api/v3/teams/{id_team}/members/{id_member}': {
       delete: {
         tags: ['Teams'],
         summary: 'List team members',
@@ -1549,7 +1653,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects': {
+    '/api/v3/teams/{id_team}/projects': {
       get: {
         tags: ['Teams'],
         summary: 'Get the list of projects in a team',
@@ -1575,7 +1679,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects/{id_project}': {
+    '/api/v3/teams/{id_team}/projects/{id_project}': {
       get: {
         tags: ['Teams'],
         summary: 'Get a project in a team scope',
@@ -1651,7 +1755,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects/{project_name}': {
+    '/api/v3/teams/{id_team}/projects/{project_name}': {
       get: {
         tags: ['Teams'],
         summary: 'Get projects in a team scope',
@@ -1684,7 +1788,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/translation-issues': {
+    '/api/v3/jobs/{id_job}/{password}/translation-issues': {
       get: {
         tags: ['Job', 'Translation Issues'],
         summary: 'Project translation issues',
@@ -1718,7 +1822,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/translation-versions': {
+    '/api/v3/jobs/{id_job}/{password}/translation-versions': {
       get: {
         tags: ['Job', 'Translation Versions'],
         summary: 'Project translation versions',
@@ -1752,7 +1856,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions':
       {
         get: {
           tags: ['Job', 'Translation Versions'],
@@ -1794,7 +1898,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}':
       {
         get: {
           tags: ['Job', 'Translation Versions'],
@@ -1843,7 +1947,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -1963,7 +2067,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -2060,7 +2164,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -2173,7 +2277,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/options': {
+    '/api/v3/jobs/{id_job}/{password}/options': {
       post: {
         tags: ['Job', 'Options'],
         summary: 'Update Options',
@@ -2228,7 +2332,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/TMX/{id_job}/{password}': {
+    '/api/v3/TMX/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Download Job TMX',
@@ -2259,7 +2363,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/check/': {
+    '/api/v3/glossaries/check/': {
       post: {
         tags: ['Glossary'],
         summary: 'Check Glossary',
@@ -2297,7 +2401,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/import/': {
+    '/api/v3/glossaries/import/': {
       post: {
         tags: ['Glossary'],
         summary: 'Import Glossary',
@@ -2338,7 +2442,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/import/status/{tm_key}': {
+    '/api/v3/glossaries/import/status/{tm_key}': {
       get: {
         summary: 'Glossary Upload status.',
         description: 'Glossary Upload status.',
@@ -2371,7 +2475,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/export/': {
+    '/api/v3/glossaries/export/': {
       post: {
         tags: ['Glossary'],
         summary: 'Download Glossary',
@@ -2395,7 +2499,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/engines/list': {
+    '/api/v3/engines/list': {
       get: {
         tags: ['Engines'],
         summary: 'Retrieve personal engine list.',
@@ -2415,7 +2519,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/keys/list': {
+    '/api/v3/keys/list': {
       get: {
         tags: ['TM keys'],
         summary: 'Retrieve private TM keys list.',
@@ -2434,7 +2538,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/languages': {
+    '/api/v3/languages': {
       get: {
         tags: ['Languages'],
         summary: 'Supported languages list.',
@@ -2453,7 +2557,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/files': {
+    '/api/v3/files': {
       get: {
         tags: ['Files'],
         summary: 'Supported file types list.',
@@ -2472,7 +2576,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate': {
+    '/api/v3/payable_rate': {
       get: {
         tags: ['Billing models'],
         summary:
@@ -2522,7 +2626,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/{id}': {
+    '/api/v3/payable_rate/{id}': {
       get: {
         tags: ['Billing models'],
         summary: 'Shows a particular billing model',
@@ -2610,7 +2714,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/validate': {
+    '/api/v3/payable_rate/validate': {
       post: {
         tags: ['Billing models'],
         summary: 'Validates a billing model before creation',
@@ -2638,7 +2742,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/schema': {
+    '/api/v3/payable_rate/schema': {
       get: {
         tags: ['Billing models'],
         summary: 'Shows the billing model creation schema',
@@ -3530,6 +3634,254 @@ var spec = {
         },
       },
     },
+    QualityReportSegments:{
+      type: 'object',
+      properties: {
+        segments: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/QualityReportSegment',
+          },
+        },
+        first_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        last_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        _params: {
+          type: 'object',
+          properties: {
+            ref_segment: {
+              type: 'integer',
+              format: 'int32',
+            },
+            where: {
+              type: 'string',
+            },
+            step: {
+              type: 'integer',
+              format: 'int32',
+            },
+            filter: {
+              type: 'string',
+            },
+          }
+        },
+        _links: {
+          type: 'object',
+          properties: {
+            base: {
+              type: 'string',
+            },
+            last_segment_id: {
+              type: 'integer',
+              format: 'int32',
+            },
+            pages: {
+              type: 'integer',
+            },
+            items_per_page: {
+              type: 'integer',
+            },
+            total_items: {
+              type: 'integer',
+            },
+            self: {
+              type: 'string',
+            },
+            next: {
+              type: 'string',
+              nullable: true
+            },
+            prev: {
+              type: 'string',
+              nullable: true
+            },
+          }
+        },
+      }
+    },
+    QualityReportSegment: {
+      type: 'object',
+      properties: {
+        comments: {
+          type: "array",
+          items: {},
+          nullable: true,
+        },
+        dataRefMap: {
+          type: "array",
+          items: {},
+          nullable: true,
+        },
+        edit_distance: {
+          type: "string",
+          nullable: true
+        },
+        file: {
+          type: "object",
+          properties: {
+            id: {
+              type: 'integer',
+              format: 'int32',
+            },
+            first_segment: {
+              type: 'integer',
+              format: 'int32',
+            },
+            last_segment: {
+              type: 'integer',
+              format: 'int32',
+            },
+            file_name: {
+              type: "string",
+            },
+            raw_words: {
+              type: 'integer',
+            },
+            weighted_words: {
+              type: 'integer',
+            },
+            standard_words: {
+              type: 'integer',
+            },
+            metadata: {
+              type: "array",
+              items: {},
+              nullable: true
+            },
+          }
+        },
+        ice_locked: {
+          type: "integer",
+        },
+        ice_modified: {
+          type: "boolean",
+        },
+        id: {
+          type: "integer",
+          format: 'int32',
+        },
+        is_pre_translated: {
+          type: "boolean",
+        },
+        issues: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/Issue',
+          },
+        },
+        last_revisions: {
+          type: "array",
+          items: {},
+          nullable: true,
+
+        },
+        last_translation: {
+          type: "string",
+        },
+        locked: {
+          type: "integer",
+        },
+        match_type: {
+          type: "string",
+        },
+        parsed_time_to_edit: {
+          type: "array",
+          items: {
+            type: "string"
+          },
+          nullable: true,
+        },
+        pee: {
+          type: "integer",
+        },
+        pee_translation_revise: {
+          type: "integer",
+        },
+        pee_translation_suggestion: {
+          type: "integer",
+        },
+        raw_word_count: {
+          type: "float",
+        },
+        revision_number: {
+          type: "integer",
+          nullable: true
+        },
+        secs_per_word: {
+          type: "float",
+        },
+        segment: {
+          type: "string",
+        },
+        segment_hash: {
+          type: "string",
+          nullable: true
+        },
+        source_page: {
+          type: "string",
+        },
+        status: {
+          type: "string",
+        },
+        suggestion: {
+          type: "string",
+        },
+        suggestion_match: {
+          type: "string",
+        },
+        suggestion_source: {
+          type: "string",
+        },
+        target: {
+          type: "string",
+        },
+        time_to_edit: {
+          type: "integer",
+        },
+        time_to_edit_revise: {
+          type: "integer",
+        },
+        time_to_edit_revise_2: {
+          type: "integer",
+        },
+        time_to_edit_translation: {
+          type: "integer",
+        },
+        translation: {
+          type: "string",
+        },
+        version: {
+          type: "string",
+        },
+        version_number: {
+          type: "string",
+        },
+        warnings: {
+          type: "object",
+          properties: {
+            details: {
+              type: "object",
+              properties: {
+                issues_info: {
+                  type: "object",
+                },
+                id_segment: {
+                  type: "string",
+                },
+                tag_mismatch: {
+                  type: "object",
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     TranslationVersions: {
       type: 'array',
       items: {
@@ -4185,6 +4537,8 @@ var spec = {
         },
       },
     },
+
+
 
     Split: {
       type: 'object',
