@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 .login-component {
   display: flex;
   flex-direction: column;
@@ -47,7 +47,7 @@
     flex-direction: column;
     gap: 30px;
     font-size: 16px;
-    color: $grey7;
+    color: colors.$grey7;
 
     > :first-child {
       display: flex;

@@ -1,3 +1,4 @@
+@use "../commons/colors";
 #manage-container .progress-bar {
   height: 20px;
   top: 15px;
@@ -51,19 +52,19 @@
     }
 
     .translated-bar {
-      background-color: $translatedBlue;
+      background-color: colors.$translatedBlue;
     }
     .approved-bar {
-      background-color: $approvedGreen;
+      background-color: colors.$approvedGreen;
     }
     .approved-bar-2nd-pass {
-      background-color: $approved2Green;
+      background-color: colors.$approved2Green;
     }
     .warning-bar {
-      background-color: $rebuttedRed;
+      background-color: colors.$rebuttedRed;
     }
     .draft-bar {
-      background-color: $grey4;
+      background-color: colors.$grey4;
     }
   }
 }

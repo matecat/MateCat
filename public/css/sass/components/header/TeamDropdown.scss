@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .team-dropdown {
   position: relative;
@@ -37,20 +37,20 @@
         padding: 10px;
 
         &:hover {
-          background-color: $grey9;
+          background-color: colors.$grey9;
 
           .container-icon-settings {
             visibility: visible;
-            color: $translatedBlue;
+            color: colors.$translatedBlue;
           }
         }
 
         &.active {
-          background-color: $darkBlueHover;
-          color: $white;
+          background-color: colors.$darkBlueHover;
+          color: colors.$white;
 
           .container-icon-settings {
-            color: $white;
+            color: colors.$white;
           }
         }
 
@@ -80,14 +80,14 @@
   }
 
   .create-new-team {
-    border-bottom: 1px solid $grey8;
+    border-bottom: 1px solid colors.$grey8;
     margin-bottom: 10px;
     text-transform: uppercase;
-    color: $translatedBlue;
+    color: colors.$translatedBlue;
     font-weight: bold;
 
     > svg {
-      border: 1px solid $translatedBlue;
+      border: 1px solid colors.$translatedBlue;
       border-radius: 50%;
     }
   }

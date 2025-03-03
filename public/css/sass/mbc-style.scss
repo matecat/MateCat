@@ -1,4 +1,4 @@
-@import 'commons/colors';
+@use 'commons/colors';
 /*
  ******
  ******
@@ -69,7 +69,7 @@
 }
 
 .mbc-comments-wrap .mbc-show-comment:not(:last-of-type) {
-  background-color: $grey5;
+  background-color: colors.$grey5;
   border-radius: 4px;
   padding: 8px;
   > .bc-show-comment-top {
@@ -79,7 +79,7 @@
   }
 }
 .mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
-  background-color: rgba($greenDefaultTransparent, 0.2);
+  background-color: rgba(colors.$greenDefaultTransparent, 0.2);
   border-radius: 4px;
 }
 
@@ -171,26 +171,26 @@
 }
 
 .mbc-comment-input__suggestions__list {
-  background-color: $white;
-  border: 1px solid $grey8;
+  background-color: colors.$white;
+  border: 1px solid colors.$grey8;
 }
 
 .mbc-comment-input__suggestions__item {
   padding: 5px 15px;
-  border-bottom: 1px solid $grey9;
+  border-bottom: 1px solid colors.$grey9;
 }
 
 .mbc-comment-input__suggestions__item--focused {
-  background-color: rgba($grey9, 0.6);
-  color: $translatedBlue;
+  background-color: rgba(colors.$grey9, 0.6);
+  color: colors.$translatedBlue;
 }
 
 .tagging-item {
-  color: $translatedBlue;
+  color: colors.$translatedBlue;
 }
 
 .tagging-item-textarea {
-  background-color: rgba($translatedBlue, 0.3);
+  background-color: rgba(colors.$translatedBlue, 0.3);
   border-radius: 10px;
   padding: 2px 0;
 }
@@ -222,7 +222,7 @@
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
   span {
-    color: $grey7;
+    color: colors.$grey7;
   }
 }
 /*
@@ -247,7 +247,7 @@
 }
 
 .mbc-comment-resolved-label {
-  color: $approvedGreen; /* per-green line 2350 style.css */
+  color: colors.$approvedGreen; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
 }
@@ -370,8 +370,8 @@ a.mbc-view-link:visited {
  Invitation element unique properties
  */
 .mbc-comment-highlight-invite {
-  background: $darkBlue;
-  color: $grey3;
+  background: colors.$darkBlue;
+  color: colors.$grey3;
   position: absolute;
 }
 
@@ -466,7 +466,7 @@ article .mbc-comment-balloon-outer {
     display: block;
   }
   .mbc-badge-resolved {
-    background-color: $greenDefaultTransparent;
+    background-color: colors.$greenDefaultTransparent;
   }
 }
 
@@ -678,7 +678,7 @@ section:hover .mbc-comment-icon-button,
   align-items: center;
   padding: 8px 4px;
   .input-checkbox > span {
-    color: $grey7;
+    color: colors.$grey7;
     font-size: 14px;
   }
 
@@ -689,6 +689,6 @@ section:hover .mbc-comment-icon-button,
   gap: 8px;
   padding-top: 20px;
   button {
-    color: $black !important;
+    color: colors.$black !important;
   }
 }
