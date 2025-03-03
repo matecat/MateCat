@@ -62,7 +62,7 @@ let TranslationMatches = {
       matches &&
       matches.length > 0 &&
       isUndefined(matches[0].error) &&
-      (parseInt(match) > 70 || match === 'MT')
+      (parseInt(match) > 70 || match === 'MT' || match === 'ICE_MT')
     ) {
       var editareaLength = segmentObj.translation.length
       var translation = matches[0].translation
