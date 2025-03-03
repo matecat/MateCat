@@ -1,4 +1,4 @@
-@import "../../commons/colors";
+@use "../../commons/colors";
 .input-checkbox {
     position: relative;
     display: flex;
@@ -14,10 +14,10 @@
         border-radius: 2px;
         width: 14px;
         height: 14px;
-        background-color: rgba($white, 0.72);
+        background-color: rgba(colors.$white, 0.72);
     }
     &.checked::before {
-        background-color: $white;
+        background-color: colors.$white;
     }
 
     &.isDisabled {
@@ -32,35 +32,35 @@
         position: relative;
         z-index: 1;
         flex-shrink: 0;
-        color: $grey6;
+        color: colors.$grey6;
     }
 
     input[type='checkbox']:not(:disabled):checked,
     input[type='checkbox']:not(:disabled):indeterminate {
         & + svg {
-            color: $translatedBlue;
+            color: colors.$translatedBlue;
         }
     }
 
     input[type='checkbox']:disabled {
         & + svg {
             opacity: 0.4;
-            color: $grey7;
+            color: colors.$grey7;
         }
 
         & ~ span {
-            color: $grey7 ;
+            color: colors.$grey7 ;
         }
     }
 
     > span {
         font-size: 12px;
-        color: $black;
+        color: colors.$black;
     }
 }
 
 .errorMessage {
     margin-top: 8px;
     font-size: 12px;
-    color: $redDefault;
+    color: colors.$redDefault;
 }
