@@ -78,7 +78,14 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $this->_saveEventsAndUpdateTranslations( $job_data->id, $job_data->password );
+        try {
+            $this->_saveEventsAndUpdateTranslations( $job_data->id, $job_data->password );
+        } catch ( Exception $e ) {
+            $errorCode                                         = -4;
+            self::$errorMap[ $errorCode ][ 'internalMessage' ] .= $e->getMessage();
+            $this->addError( $errorCode );
+        }
+
     }
 
     /**
@@ -93,20 +100,20 @@ class copyAllSource2TargetController extends ajaxController {
             return;
         }
 
-        $job_data = Jobs_JobDao::getByIdAndPassword( $job_id, $password );
-
-        if ( empty( $job_data ) ) {
-            $errorCode = -3;
-            $this->addError( $errorCode );
-
-            return;
-        }
-
         // BEGIN TRANSACTION
         $database = Database::obtain();
         $database->begin();
 
-        $chunk    = Chunks_ChunkDao::getByIdAndPassword( $job_id, $password );
+        $chunk = Jobs_JobDao::getByIdAndPassword( $job_id, $password );
+
+        if ( empty( $chunk ) ) {
+            $errorCode = -3;
+            $this->addError( $errorCode );
+            $database->rollback();
+
+            return;
+        }
+
         $features = $chunk->getProject()->getFeaturesSet();
 
         $batchEventCreator = new TranslationEventsHandler( $chunk );
@@ -147,7 +154,16 @@ class copyAllSource2TargetController extends ajaxController {
             }
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
+                try {
+                    $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
+                } catch ( Exception $e ) {
+                    // job archived or deleted, runtime exception on TranslationEvent creation
+                    $errorCode = -5;
+                    $this->addError( $errorCode );
+                    $database->rollback();
+
+                    return;
+                }
                 $batchEventCreator->addEvent( $segmentTranslationEventModel );
             }
         }
