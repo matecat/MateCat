@@ -1,5 +1,5 @@
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import Cookies from 'js-cookie'
 import {isUndefined} from 'lodash'
 import {isNull} from 'lodash/lang'
@@ -10,6 +10,8 @@ import GMTSelect from './GMTSelect'
 import {getOutsourceQuote} from '../../api/getOutsourceQuote'
 import {getChangeRates} from '../../api/getChangeRates'
 import CommonUtils from '../../utils/commonUtils'
+import UserStore from '../../stores/UserStore'
+
 import 'react-datepicker/dist/react-datepicker.css'
 class OutsourceVendor extends React.Component {
   constructor(props) {
@@ -107,7 +109,7 @@ class OutsourceVendor extends React.Component {
         }
 
         self.quoteResponse = quoteData.data[0]
-        let chunk = Immutable.fromJS(quoteData.data[0][0])
+        let chunk = fromJS(quoteData.data[0][0])
 
         self.url_ok = quoteData.return_url.url_ok
         self.url_ko = quoteData.return_url.url_ko
@@ -349,8 +351,9 @@ class OutsourceVendor extends React.Component {
   }
 
   getUserEmail() {
-    if (APP.USER.STORE.user) {
-      return APP.USER.STORE.user.email
+    const userInfo = UserStore.getUser()
+    if (userInfo.user) {
+      return userInfo.user.email
     } else {
       return ''
     }

@@ -37,6 +37,7 @@ class TeamsProjectsController extends KleinController {
      * @throws AuthorizationError
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     public function update() {
 
@@ -55,6 +56,9 @@ class TeamsProjectsController extends KleinController {
 
         $updatedStruct = $projectModel->update();
         $formatted     = new Project();
+
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [ 'project' => $formatted->renderItem( $updatedStruct ) ] );
 
     }

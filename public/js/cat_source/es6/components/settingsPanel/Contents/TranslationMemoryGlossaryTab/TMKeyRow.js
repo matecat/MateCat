@@ -18,7 +18,6 @@ import {ShareResource} from './ShareResource'
 import {DeleteResource} from './DeleteResource'
 import {updateTmKey} from '../../../../api/updateTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
-import ConfirmMessageModal from '../../../modals/ConfirmMessageModal'
 import {CreateProjectContext} from '../../../createProject/CreateProjectContext'
 
 import Earth from '../../../../../../../img/icons/Earth'
@@ -35,6 +34,10 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import {deleteTmKey} from '../../../../api/deleteTmKey'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
+import {Button, BUTTON_SIZE} from '../../../common/Button/Button'
+import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
+import IconClose from '../../../icons/IconClose'
+import {getTmKeyEnginesInfo} from '../../../../api/getTmKeyEnginesInfo/getTmKeyEnginesInfo'
 
 export const TMKeyRow = ({row, onExpandRow}) => {
   const {isImportTMXInProgress} = useContext(CreateProjectContext)
@@ -53,6 +56,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [name, setName] = useState(row.name)
 
   const valueChange = useRef(false)
+  const deleteTmKeyRemoveFrom = useRef()
+
+  const penalty = row.penalty ?? 0
+
+  const onChangePenalty = (value) => {
+    updateRow({isLookup, isUpdating, penalty: value})
+  }
 
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
@@ -66,34 +76,24 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
 
-    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
-    if (notUpdateRow) {
-      showModalLostPrivateTmKeyNotLoggedIn(setIsLookup)
-    } else {
-      updateRow({isLookup, isUpdating})
-      if (isMMSharedKey) {
-        modifyingCurrentTemplate((prevTemplate) => ({
-          ...prevTemplate,
-          getPublicMatches: isLookup,
-        }))
-      }
+    updateRow({isLookup, isUpdating})
+    if (isMMSharedKey) {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        getPublicMatches: isLookup,
+      }))
     }
+
     setIsLookup(isLookup)
   }
 
   const onChangeIsUpdating = (e) => {
     const isUpdating = e.currentTarget.checked
-
-    const notUpdateRow = !config.isLoggedIn && !isLookup && !isUpdating
-    if (notUpdateRow) {
-      showModalLostPrivateTmKeyNotLoggedIn(setIsUpdating)
-    } else {
-      updateRow({isLookup, isUpdating})
-    }
+    updateRow({isLookup, isUpdating})
     setIsUpdating(isUpdating)
   }
 
-  const updateRow = ({isLookup, isUpdating}) => {
+  const updateRow = ({isLookup, isUpdating, penalty}) => {
     if (!isMMSharedKey) {
       const updatedKeys = tmKeys.map((tm) =>
         tm.id === row.id
@@ -106,6 +106,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                   : true,
               r: isLookup,
               w: !tm.isActive ? isLookup : isUpdating,
+              penalty: typeof penalty === 'number' ? penalty : tm.penalty,
             }
           : tm,
       )
@@ -148,6 +149,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       if (name) {
         updateTmKey({
           key: row.key,
+          penalty: row.penalty,
           description: name,
         }).catch(() => {
           CatToolActions.addNotification({
@@ -174,32 +176,14 @@ export const TMKeyRow = ({row, onExpandRow}) => {
     }
   }
 
-  const showModalLostPrivateTmKeyNotLoggedIn = (restoreState) => {
-    ModalsActions.showModalComponent(
-      ConfirmMessageModal,
-      {
-        text: 'If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now.',
-        successText: 'Continue',
-        cancelText: 'Cancel',
-        successCallback: () =>
-          setTmKeys((prevState) =>
-            prevState.filter(({key}) => row.key !== key),
-          ),
-        cancelCallback: () => restoreState(true),
-        closeOnSuccess: true,
-      },
-      'Confirmation required',
-    )
-  }
-
-  const handleExpandeRow = (Component) => {
+  const handleExpandeRow = (Component, props = {}) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
     const onConfirm = onConfirmDeleteTmKey
 
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{row, onClose, onConfirm}} />,
+      content: <Component {...{...props, row, onClose, onConfirm}} />,
     })
   }
 
@@ -224,55 +208,54 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         }
 
   const onConfirmDeleteTmKey = () => {
-    if (config.isLoggedIn === 1) {
-      deleteTmKey({key: row.key})
-        .then(() => {
-          setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-          if (config.is_cattool) {
-            CatToolActions.onTMKeysChangeStatus()
-          } else {
-            const templatesInvolved = projectTemplates
-              .filter((template) =>
-                template.tm.some(({key}) => key === row.key),
-              )
-              .map((template) => ({
-                ...template,
-                [SCHEMA_KEYS.tm]: template.tm.filter(
-                  ({key}) => key !== row.key,
-                ),
-              }))
+    const removeFrom = Object.entries(deleteTmKeyRemoveFrom.current)
+      .filter(([, value]) => value)
+      .map(([key]) => key)
+      .join(',')
 
-            CreateProjectActions.updateProjectTemplates({
-              templates: templatesInvolved,
-              modifiedPropsCurrentProjectTemplate: {
-                tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
-              },
-            })
-          }
-          const notification = {
-            title: 'Resource deleted',
-            text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
-            type: 'success',
-            position: 'br',
-            allowHtml: true,
-            timer: 5000,
-          }
-          CatToolActions.addNotification(notification)
-        })
-        .catch(() => {
-          CatToolActions.addNotification({
-            title: 'Error deleting resource',
-            type: 'error',
-            text: 'There was an error saving your data. Please retry!',
-            position: 'br',
-            allowHtml: true,
-            timer: 5000,
+    deleteTmKeyRemoveFrom.current = {}
+
+    deleteTmKey({key: row.key, removeFrom})
+      .then(() => {
+        setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
+        if (config.is_cattool) {
+          !row.isActive && CatToolActions.onTMKeysChangeStatus()
+        } else {
+          const templatesInvolved = projectTemplates
+            .filter((template) => template.tm.some(({key}) => key === row.key))
+            .map((template) => ({
+              ...template,
+              [SCHEMA_KEYS.tm]: template.tm.filter(({key}) => key !== row.key),
+            }))
+
+          CreateProjectActions.updateProjectTemplates({
+            templates: templatesInvolved,
+            modifiedPropsCurrentProjectTemplate: {
+              tm: templatesInvolved.find(({isTemporary}) => isTemporary)?.tm,
+            },
           })
-          onExpandRow({row, shouldExpand: false})
+        }
+        const notification = {
+          title: 'Resource deleted',
+          text: `The resource (<b>${row.name}</b>) has been successfully deleted`,
+          type: 'success',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .catch(() => {
+        CatToolActions.addNotification({
+          title: 'Error deleting resource',
+          type: 'error',
+          text: 'There was an error saving your data. Please retry!',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
         })
-    } else {
-      setTmKeys((prevState) => prevState.filter(({key}) => key !== row.key))
-    }
+        onExpandRow({row, shouldExpand: false})
+      })
   }
 
   const showConfirmDelete = () => {
@@ -280,21 +263,147 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       .filter(({isTemporary}) => !isTemporary)
       .filter((template) => template.tm?.some(({key}) => key === row.key))
 
-    if (templatesInvolved.length) {
-      ModalsActions.showModalComponent(
-        ConfirmDeleteResourceProjectTemplates,
-        {
-          projectTemplatesInvolved: templatesInvolved,
-          successCallback: onConfirmDeleteTmKey,
-          content:
-            'The memory key you are about to delete is used in the following project creation template(s):',
-        },
-        'Confirm deletion',
-      )
-    } else {
-      handleExpandeRow(DeleteResource)
-    }
+    deleteTmKeyRemoveFrom.current = {}
+
+    getTmKeyEnginesInfo(row.key)
+      .then((data) => {
+        const isMMT = data.some((value) => value === 'MMT')
+        const isLara = data.some((value) => value === 'Lara')
+
+        const footerContent =
+          isMMT && !isLara ? (
+            <div className="tm-row-delete-remove-from-content">
+              {templatesInvolved.length >= 1 && (
+                <span>
+                  If you confirm, it will be removed from the template(s).
+                </span>
+              )}
+              <span>
+                This resource is also linked to your ModernMT account:
+              </span>
+              <div>
+                <input
+                  checked={deleteTmKeyRemoveFrom.current.MMT}
+                  onChange={(e) => {
+                    deleteTmKeyRemoveFrom.current.MMT = e.currentTarget.checked
+                  }}
+                  type="checkbox"
+                />
+                Permanently delete it from my ModernMT account
+              </div>
+            </div>
+          ) : !isMMT && isLara ? (
+            <div className="tm-row-delete-remove-from-content">
+              {templatesInvolved.length >= 1 && (
+                <span>
+                  If you confirm, it will be removed from the template(s).
+                </span>
+              )}
+              <span>This resource is also linked to your Lara account:</span>
+              <div>
+                <input
+                  checked={deleteTmKeyRemoveFrom.current.Lara}
+                  onChange={(e) => {
+                    deleteTmKeyRemoveFrom.current.Lara = e.currentTarget.checked
+                  }}
+                  type="checkbox"
+                />
+                Permanently delete it from my Lara account
+              </div>
+            </div>
+          ) : (
+            isMMT &&
+            isLara && (
+              <div className="tm-row-delete-remove-from-content">
+                {templatesInvolved.length >= 1 && (
+                  <span>
+                    If you confirm, it will be removed from the template(s).
+                  </span>
+                )}
+                <span>
+                  This resource is also linked to your ModernMT and Lara
+                  accounts:
+                </span>
+                <div>
+                  <input
+                    checked={deleteTmKeyRemoveFrom.current.Lara}
+                    onChange={(e) => {
+                      deleteTmKeyRemoveFrom.current.Lara =
+                        e.currentTarget.checked
+                    }}
+                    type="checkbox"
+                  />
+                  Permanently delete it from my Lara account
+                </div>
+                <div>
+                  <input
+                    checked={deleteTmKeyRemoveFrom.current.MMT}
+                    onChange={(e) => {
+                      deleteTmKeyRemoveFrom.current.MMT =
+                        e.currentTarget.checked
+                    }}
+                    type="checkbox"
+                  />
+                  Permanently delete it from my ModernMT account
+                </div>
+              </div>
+            )
+          )
+
+        if (templatesInvolved.length) {
+          ModalsActions.showModalComponent(
+            ConfirmDeleteResourceProjectTemplates,
+            {
+              projectTemplatesInvolved: templatesInvolved,
+              successCallback: onConfirmDeleteTmKey,
+              content:
+                'The memory key you are about to delete is used in the following project creation template(s):',
+              ...(footerContent && {footerContent}),
+            },
+            'Confirm deletion',
+          )
+        } else {
+          handleExpandeRow(DeleteResource, {footerContent})
+        }
+      })
+      .catch(() => {
+        const notification = {
+          title: 'Error',
+          text: `We got an error, please contact support`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
   }
+
+  const renderPenalty =
+    penalty > 0 ? (
+      <div className="tm-row-penalty-numeric-stepper">
+        <NumericStepper
+          value={penalty}
+          valuePlaceholder={`${penalty}%`}
+          onChange={onChangePenalty}
+          minimumValue={1}
+          maximumValue={100}
+          stepValue={1}
+        />
+        <Button
+          className="penalty-numeric-stepper-close-button"
+          size={BUTTON_SIZE.ICON_SMALL}
+          onClick={() => onChangePenalty(0)}
+        >
+          <IconClose />
+        </Button>
+      </div>
+    ) : (
+      <Button
+        className="tm-row-penalty-button"
+        size={BUTTON_SIZE.SMALL}
+        onClick={() => onChangePenalty(1)}
+      >
+        Add penalty
+      </Button>
+    )
 
   return (
     <Fragment>
@@ -336,10 +445,13 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           data-testid={`tmkey-row-name-${row.id}`}
         ></input>
       </div>
-      <div className="tm-key-row-key">{row.key}</div>
+      {!isMMSharedKey && <div className="tm-key-row-key">{row.key}</div>}
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
+      {!isMMSharedKey && isOwner && row.isActive && (
+        <div className="align-center tm-row-penalty">{renderPenalty}</div>
+      )}
       {!isMMSharedKey && isOwner ? (
         <div className="align-center">
           <MenuButton
@@ -347,6 +459,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             onClick={() => handleExpandeRow(ImportTMX)}
             icon={<DotsHorizontal />}
             className="tm-key-row-menu-button"
+            dropdownClassName="tm-key-row-menu-button-dropdown"
             disabled={isImportTMXInProgress}
             itemsTarget={portalTarget}
           >

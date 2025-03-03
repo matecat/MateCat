@@ -17,6 +17,7 @@
  */
 
 
+use Langs\Languages;
 use TestHelpers\AbstractTest;
 
 error_reporting( ~E_DEPRECATED );
@@ -34,7 +35,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
     }
 
     /**
-     * @covers Engines_MyMemory::import
+     * @covers Engines_MyMemory::importMemory
      * @covers Engines_MyMemory::getStatus
      * @covers Engines_MyMemory::createExport
      * @covers Engines_MyMemory::checkExport
@@ -59,7 +60,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
 
         $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
 
 
         /**
@@ -76,7 +77,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
         /**
          * Importing
          */
-        $result = $engine_MyMemory->import( $file_param, $key_param, $name_param );
+        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new Users_UserStruct() );
 
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );

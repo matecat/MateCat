@@ -11,6 +11,7 @@ namespace API\V2;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Exceptions\UnprocessableException;
 use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Jobs_JobStruct;
@@ -43,6 +44,7 @@ class JobSplitController extends KleinController {
             $this->filterJobsById( $this->project_struct->getJobs() );
         } );
         $this->appendValidator( $projectValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
@@ -97,7 +99,7 @@ class JobSplitController extends KleinController {
         $found      = false;
         $jid        = $this->job->id;
         $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid and !$jobStruct->wasDeleted(); // exclude every deleted job from merge
+            return $jobStruct->id == $jid and !$jobStruct->isDeleted(); // exclude every deleted job from merge
         } );
 
         if ( empty( $jobToMerge ) ) {

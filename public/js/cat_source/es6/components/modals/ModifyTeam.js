@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import CommonUtils from '../../utils/commonUtils'
 import TEXT_UTILS from '../../utils/textUtils'
@@ -11,8 +11,9 @@ import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import Close from '../../../../../img/icons/Close'
 import {EMAIL_PATTERN} from '../../constants/Constants'
-import TeamsStore from '../../stores/TeamsStore'
-import TeamConstants from '../../constants/TeamConstants'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import UserConstants from '../../constants/UserConstants'
+import UserStore from '../../stores/UserStore'
 import {
   BUTTON_MODE,
   BUTTON_SIZE,
@@ -21,6 +22,8 @@ import {
 } from '../common/Button/Button'
 
 export const ModifyTeam = ({team}) => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
   const [teamState, setTeamState] = useState(team)
   const [teamName, setTeamName] = useState(teamState.get('name'))
   const [isModifyingName, setIsModifyingName] = useState(false)
@@ -35,10 +38,9 @@ export const ModifyTeam = ({team}) => {
         setTeamState(teamUpdated)
     }
 
-    TeamsStore.addListener(TeamConstants.UPDATE_TEAM, updateTeam)
+    UserStore.addListener(UserConstants.UPDATE_TEAM, updateTeam)
 
-    return () =>
-      TeamsStore.removeListener(TeamConstants.UPDATE_TEAM, updateTeam)
+    return () => UserStore.removeListener(UserConstants.UPDATE_TEAM, updateTeam)
   }, [teamState])
 
   const confirmRemoveMember = (userId) => {
@@ -47,7 +49,7 @@ export const ModifyTeam = ({team}) => {
 
   const removeUser = (user) => {
     ManageActions.removeUserFromTeam(teamState, user)
-    if (user.get('uid') === APP.USER.STORE.user.uid) {
+    if (user.get('uid') === userInfo.user.uid) {
       ModalsActions.onCloseModal()
     }
     setRemoveUserId()
@@ -73,7 +75,7 @@ export const ModifyTeam = ({team}) => {
           const userMetadata = member.get('user_metadata')
 
           const isRemovingMe =
-            user.get('uid') == APP.USER.STORE.user.uid &&
+            user.get('uid') == userInfo.user.uid &&
             removeUserId == user.get('uid')
           const messageRemovingMe =
             isRemovingMe &&
@@ -95,7 +97,7 @@ export const ModifyTeam = ({team}) => {
                   {userMetadata ? (
                     <img
                       className="member-avatar"
-                      src={userMetadata.get('gplus_picture') + '?sz=80'}
+                      src={userMetadata.get('gplus_picture')}
                     />
                   ) : (
                     <span>{CommonUtils.getUserShortName(user)}</span>

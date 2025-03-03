@@ -9,30 +9,30 @@ class Database implements IDatabase {
 
     /**
      * Unique instance of the class (singleton design pattern)
-     * @var Database $instance
+     * @var ?IDatabase $instance
      */
-    private static $instance;
+    protected static ?IDatabase $instance = null;
 
     /**
      * Established connection
-     * @var PDO $connection
+     * @var ?PDO $connection
      */
-    private $connection;
+    protected ?PDO $connection = null;
 
     // Connection variables
-    private $server   = ""; //database server
-    private $user     = ""; //database login name
-    private $password = ""; //database login password
-    private $database = ""; //database name
+    protected string $server; //database server
+    protected string $user; //database login name
+    protected string $password; //database login password
+    protected string $database; //database name
 
     // Affected rows TODO: remove, it's not thread safe. Just kept for legacy support
-    public $affected_rows;
+    public int $affected_rows;
 
 
     const SEQ_ID_SEGMENT = 'id_segment';
     const SEQ_ID_PROJECT = 'id_project';
 
-    protected static $SEQUENCES = [
+    protected static array $SEQUENCES = [
             Database::SEQ_ID_SEGMENT,
             Database::SEQ_ID_PROJECT,
     ];
@@ -45,13 +45,7 @@ class Database implements IDatabase {
      * @param string $password
      * @param string $database
      */
-    private function __construct( $server = null, $user = null, $password = null, $database = null ) {
-
-        // Check that the variables are not empty
-        if ( $server == null || $user == null || $database == null ) {
-            throw new InvalidArgumentException( "Database information must be passed in when the object is first created." );
-        }
-
+    protected function __construct( string $server, string $user, string $password, string $database ) {
         // Set fields
         $this->server   = $server;
         $this->user     = $user;
@@ -64,7 +58,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public static function obtain( $server = null, $user = null, $password = null, $database = null ) {
+    public static function obtain( string $server = null, string $user = null, string $password = null, string $database = null ): IDatabase {
         if ( !self::$instance || $server != null && $user != null && $password != null && $database != null ) {
             self::$instance = new Database( $server, $user, $password, $database );
         }
@@ -82,10 +76,10 @@ class Database implements IDatabase {
     /**
      * @return PDO
      */
-    public function getConnection() {
-        if ( empty( $this->connection ) || !$this->connection instanceof PDO ) {
+    public function getConnection(): PDO {
+        if ( empty( $this->connection ) ) {
             $this->connection = new PDO(
-                    "mysql:host={$this->server};dbname={$this->database}",
+                    "mysql:host=$this->server;dbname=$this->database",
                     $this->user,
                     $this->password,
                     [
@@ -106,7 +100,7 @@ class Database implements IDatabase {
      * @return bool
      * @throws PDOException
      */
-    public function ping() {
+    public function ping(): bool {
         $this->getConnection()->query( "SELECT 1 FROM DUAL" );
 
         return true;
@@ -142,7 +136,7 @@ class Database implements IDatabase {
      * @Override
      * {@inheritdoc}
      */
-    public function begin() {
+    public function begin(): PDO {
         if ( !$this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
@@ -169,11 +163,11 @@ class Database implements IDatabase {
     }
 
     /**
-     * @Warning This method do not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, nesting "AND ( .. OR .. ) AND ( .. )" is not supported
+     * @Warning This method does not support all the SQL syntax features. Only AND key/value pair is supported, OR in WHERE condition is not supported, nesting "AND ( .. OR .. ) AND ( .. )" is not supported
      * @Override
      * {@inheritdoc}
      */
-    public function update( $table, $data, array $where = [ '1' => '0' ] ) {
+    public function update( string $table, array $data, array $where = [ '1' => '0' ] ): int {
 
         // Prepare the statement
         $valuesToBind = [];
@@ -181,8 +175,8 @@ class Database implements IDatabase {
         $currentIndex = 0;
 
         foreach ( $data as $key => $value ) {
-            $query                                   .= "$key = :value{$currentIndex}, ";
-            $valuesToBind[ ":value{$currentIndex}" ] = $value;
+            $query                                 .= "$key = :value$currentIndex, ";
+            $valuesToBind[ ":value$currentIndex" ] = $value;
             ++$currentIndex;
         }
 
@@ -219,7 +213,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      * @throws Exception
      */
-    public function insert( $table, array $data, &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = [] ) {
+    public function insert( string $table, array $data, array &$mask = [], $ignore = false, $no_nulls = false, array $onDuplicateKey = [] ): string {
 
         $query = static::buildInsertStatement( $table, $data, $mask, $ignore, $no_nulls, $onDuplicateKey );
 
@@ -243,7 +237,7 @@ class Database implements IDatabase {
 
     /**
      * Returns a string suitable for insert of the fields
-     * provided by the attributes array.
+     * provided by the attribute array.
      *
      * @param string $table    the table on which perform the insert
      * @param array  $attrs    array of full attributes to update
@@ -257,7 +251,7 @@ class Database implements IDatabase {
      * @throws Exception
      * @internal param array $options of options for the SQL statement
      */
-    public static function buildInsertStatement( $table, array $attrs, array &$mask = [], $ignore = false, $no_nulls = false, array $on_duplicate_fields = [] ) {
+    public static function buildInsertStatement( string $table, array $attrs, array &$mask = [], bool $ignore = false, bool $no_nulls = false, array $on_duplicate_fields = [] ): string {
 
         if ( empty( $table ) ) {
             throw new Exception( 'TABLE constant is not defined' );
@@ -305,7 +299,7 @@ class Database implements IDatabase {
                 } else {
                     //bind to PDO
                     $duplicate_statement                  .= ":dupUpdate_" . $key;
-                    $valuesToBind[ ":dupUpdate_" . $key ] = $value;
+                    $valuesToBind[ ":dupUpdate_" . $key ] = $value; //TODO this is a bug bind values are not returned and not inserted in the mask
                 }
                 $duplicate_statement .= ", ";
             }
@@ -329,7 +323,7 @@ class Database implements IDatabase {
             }
         }
 
-        $sql = "INSERT $sql_ignore INTO " . $table .
+        return "INSERT $sql_ignore INTO " . $table .
                 " (" .
                 implode( ', ', $first ) .
                 ") VALUES (" .
@@ -337,8 +331,6 @@ class Database implements IDatabase {
                 ")
                 $duplicate_statement ;
         ";
-
-        return $sql;
     }
 
     /**
@@ -366,10 +358,10 @@ class Database implements IDatabase {
      *
      * @return array
      */
-    public function nextSequence( $sequence_name, $seqIncrement = 1 ) {
+    public function nextSequence( string $sequence_name, int $seqIncrement = 1 ): array {
 
-        if ( array_search( $sequence_name, static::$SEQUENCES ) === false ) {
-            throw new \PDOException( "Undefined sequence " . $sequence_name );
+        if ( !in_array( $sequence_name, static::$SEQUENCES ) ) {
+            throw new PDOException( "Undefined sequence " . $sequence_name );
         }
 
         $this->getConnection()->beginTransaction();

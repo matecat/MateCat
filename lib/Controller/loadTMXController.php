@@ -42,7 +42,7 @@ class loadTMXController extends ajaxController {
     public function __construct() {
 
         parent::__construct();
-        parent::readLoginInfo();
+        parent::identifyUser();
 
         $filterArgs = [
                 'name'   => [
@@ -126,10 +126,8 @@ class loadTMXController extends ajaxController {
                             $fileInfo->name
                     );
 
-                    $this->TMService->addTmxInMyMemory( $file );
-                    $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
-
-                    $this->featureSet->run( 'postPushTMX', $file, $this->user );
+                    $warnings = $this->TMService->addTmxInMyMemory( $file, $this->user );
+                    $uuids[]  = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
 
                     /*
                      * We update the KeyRing only if this is NOT the Default MyMemory Key
@@ -157,14 +155,16 @@ class loadTMXController extends ajaxController {
 
                     }
 
+                    $this->result[ 'warnings' ][] = $warnings;
+
                 }
 
                 $this->result[ 'data' ][ 'uuids' ] = $uuids;
 
             } else {
 
-                $status                      = $this->TMService->tmxUploadStatus( $this->uuid );
-                $this->result[ 'data' ]      = $status[ 'data' ];
+                $status                 = $this->TMService->tmxUploadStatus( $this->uuid );
+                $this->result[ 'data' ] = $status[ 'data' ];
 
             }
 

@@ -40,9 +40,11 @@ abstract class ajaxController extends controller {
 
     /**
      * Class constructor, initialize the header content type.
+     * @throws ReflectionException
      */
     protected function __construct() {
 
+        $this->identifyUser();
         $this->startTimer();
 
         $buffer = ob_get_contents();
@@ -103,9 +105,9 @@ abstract class ajaxController extends controller {
         if (isset($controller->id_job) and isset($controller->received_password)){
             $jid        = $controller->id_job;
             $password   = $controller->received_password;
-            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
 
-            if ( null === $isRevision ) {
+            if ( !$isRevision ) {
                 $isRevision = CatUtils::getIsRevisionFromReferer();
             }
 

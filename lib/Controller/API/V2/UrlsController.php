@@ -9,6 +9,7 @@
 namespace API\V2;
 
 use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\ProjectUrls;
 use DataAccess\ShapelessConcreteStruct;
@@ -27,7 +28,7 @@ class UrlsController extends KleinController {
         // @TODO is correct here?
         $jobCheck = 0;
         foreach ($this->validator->getProject()->getJobs() as $job){
-            if (!$job->wasDeleted()) {
+            if (!$job->isDeleted()) {
                 $jobCheck++;
             }
         }
@@ -61,7 +62,8 @@ class UrlsController extends KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new \API\Commons\Validators\ProjectPasswordValidator( $this );
+        $this->validator = new ProjectPasswordValidator( $this );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

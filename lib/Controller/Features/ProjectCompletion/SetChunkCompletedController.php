@@ -10,7 +10,7 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     protected $password;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -75,7 +75,7 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
     }
 
     private function getUid() {
-        $this->readLoginInfo();
+        $this->identifyUser();
         if ( $this->userIsLogged ) {
             return $this->user->uid;
         } else {

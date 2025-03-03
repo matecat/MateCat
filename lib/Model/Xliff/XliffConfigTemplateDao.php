@@ -10,6 +10,7 @@ use Exception;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Utils;
 
@@ -48,7 +49,7 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         $default              = new XliffConfigTemplateStruct();
         $default->id          = 0;
         $default->uid         = $uid;
-        $default->name        = "default";
+        $default->name        = "Matecat original settings";
         $default->created_at  = date( "Y-m-d H:i:s" );
         $default->modified_at = date( "Y-m-d H:i:s" );
 
@@ -213,6 +214,8 @@ class XliffConfigTemplateDao extends DataAccess_AbstractDao {
         self::destroyQueryByIdAndUidCache( $conn, $id, $uid );
         self::destroyQueryByUidCache( $conn, $uid );
         self::destroyQueryPaginated( $uid );
+
+        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'xliff_config_template_id' );
 
         return $stmt->rowCount();
     }

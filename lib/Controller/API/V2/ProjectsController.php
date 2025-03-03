@@ -3,6 +3,7 @@
 namespace API\V2;
 
 use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Project;
@@ -123,7 +124,7 @@ class ProjectsController extends KleinController {
         foreach ( $chunks as $chunk ) {
 
             // update a job only if it is NOT deleted
-            if ( !$chunk->wasDeleted() ) {
+            if ( !$chunk->isDeleted() ) {
                 Jobs_JobDao::updateJobStatus( $chunk, $status );
 
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
@@ -144,7 +145,7 @@ class ProjectsController extends KleinController {
         } );
 
         $this->appendValidator( $projectValidator );
-
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

@@ -3,10 +3,10 @@
 
 namespace Translations;
 
-use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
+use Jobs_JobStruct;
 use ReflectionException;
 
 class WarningDao extends \DataAccess_AbstractDao {
@@ -56,11 +56,11 @@ class WarningDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( Chunks_ChunkStruct $chunk ): int {
+    public function getErrorsByChunk( Jobs_JobStruct $chunk ): int {
         $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk );
@@ -79,7 +79,7 @@ class WarningDao extends \DataAccess_AbstractDao {
         }
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 

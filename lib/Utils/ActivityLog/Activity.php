@@ -4,7 +4,6 @@ namespace ActivityLog;
 
 use Exception;
 use Log;
-use Utils;
 use WorkerClient;
 
 /**
@@ -15,19 +14,19 @@ use WorkerClient;
  */
 class Activity {
 
-    public static function save( ActivityLogStruct $activityLog ){
+    public static function save( ActivityLogStruct $activityLog ) {
 
-        try{
-            WorkerClient::enqueue( 'ACTIVITYLOG', '\AsyncTasks\Workers\ActivityLogWorker', $activityLog, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
-        } catch ( Exception $e ){
+        try {
+            WorkerClient::enqueue( 'ACTIVITYLOG', '\AsyncTasks\Workers\ActivityLogWorker', $activityLog, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        } catch ( Exception $e ) {
 
             # Handle the error, logging, ...
-            $output  = "**** Activity Log failed. AMQ Connection Error. ****\n\t";
+            $output = "**** Activity Log failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $activityLog, true );
             Log::doJsonLog( $output );
 
         }
     }
-    
+
 }

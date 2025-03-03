@@ -33,7 +33,10 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
 
     }
 
-    public function send() {
+    /**
+     * @throws Exception
+     */
+    public function send(): bool {
 
         $mailConf = $this->_getDefaultMailConf();
 
@@ -49,8 +52,7 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
 
     }
 
-    protected function _getTemplateVariables()
-    {
+    protected function _getTemplateVariables(): array {
         $params                     = [];
         $params[ "senderFullName" ] = $this->sender->fullName();
         $params[ "senderEmail" ]    = $this->sender->email;
@@ -61,10 +63,10 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
         return $params ;
     }
 
-    protected function _getLayoutVariables($messageBody = null) {
+    protected function _getLayoutVariables($messageBody = null): array {
         $vars = parent::_getLayoutVariables();
         $vars['showTitle'] = TRUE ;
-        $vars['title'] = "MateCat - Resource shared" ;
+        $vars['title'] = "Matecat - Resource shared" ;
 
         return $vars ;
     }

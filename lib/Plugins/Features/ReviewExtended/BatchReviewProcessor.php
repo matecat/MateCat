@@ -8,10 +8,10 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
+use Jobs_JobStruct;
 use Log;
 use LQA\ChunkReviewDao;
 use Projects_ProjectStruct;
@@ -29,7 +29,7 @@ class BatchReviewProcessor {
     /**
      * @var mixed
      */
-    private Chunks_ChunkStruct $chunk;
+    private Jobs_JobStruct $chunk;
 
     /**
      * @var TranslationEvent[]
@@ -40,11 +40,11 @@ class BatchReviewProcessor {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Chunks_ChunkStruct $chunk ): BatchReviewProcessor {
+    public function setChunk( Jobs_JobStruct $chunk ): BatchReviewProcessor {
         $this->chunk          = $chunk;
         $old_wStruct          = WordCountStruct::loadFromJob( $chunk );
         $this->jobWordCounter = new CounterModel( $old_wStruct );
@@ -89,7 +89,7 @@ class BatchReviewProcessor {
             ];
 
             $chunkReview = ChunkReviewDao::createRecord( $data );
-            $project->getFeaturesSet()->run( 'chunkReviewRecordCreated', $chunkReview, $project );
+            ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $project );
             $chunkReviews[] = $chunkReview;
 
             Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );

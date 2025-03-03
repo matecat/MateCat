@@ -35,6 +35,8 @@ class Engines_Results_MyMemory_Matches {
     public $source;
     public $target;
 
+    public $penalty;
+
     public function __construct() {
 
         //NEEDED TO UNIFORM DATA as array( $matches )
@@ -70,9 +72,9 @@ class Engines_Results_MyMemory_Matches {
      */
     public function getMatches( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
 
-        $match      = [];
+        $match = [];
 
-        if($source and $target){
+        if ( $source and $target ) {
             $this->source = $source;
             $this->target = $target;
         }
@@ -134,8 +136,9 @@ class Engines_Results_MyMemory_Matches {
         $this->memory_key       = array_key_exists( 'key', $match ) ? $match[ 'key' ] : '';
         $this->ICE              = array_key_exists( 'ICE', $match ) ? (bool)$match[ 'ICE' ] : false;
         $this->tm_properties    = array_key_exists( 'tm_properties', $match ) ? json_decode( $match[ 'tm_properties' ], true ) : [];
-        $this->target           = array_key_exists( 'target', $match) ? $match[ 'target' ] : $target;
-        $this->source           = array_key_exists( 'source', $match) ? $match[ 'source' ] : $source;
+        $this->target           = array_key_exists( 'target', $match ) ? $match[ 'target' ] : $target;
+        $this->source           = array_key_exists( 'source', $match ) ? $match[ 'source' ] : $source;
+        $this->penalty          = array_key_exists( 'penalty', $match ) ? $match[ 'penalty' ] : $source;
 
         $this->prop = $match[ 'prop' ];
 
@@ -153,8 +156,8 @@ class Engines_Results_MyMemory_Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
-        $featureSet = ($this->featureSet !== null) ? $this->featureSet : new FeatureSet();
-        $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $filter     = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
         switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );

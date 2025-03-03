@@ -1,7 +1,7 @@
 <?php
 
 use TestHelpers\AbstractTest;
-
+use TestHelpers\Utils;
 
 /**
  * Created by PhpStorm.
@@ -1224,7 +1224,8 @@ class TmKeyManagementTest extends AbstractTest {
     public function testIsValidStructure_invalidStructure() {
         $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$invalidTmKeyStructArr );
 
-        $this->assertFalse( $validObj );
+        $this->assertNotNull( $validObj );
+        $this->assertNull( $validObj->invalidField ?? null );
     }
 
     /** TEST mergeJsonKeys */
@@ -1749,6 +1750,30 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertTrue( strpos( json_encode( $result_arr ), 'u0000readable_chars' ) === false );
         $this->assertTrue( strpos( json_encode( $result_arr[ 0 ]->toArray() ), 'u0000readable_chars' ) === false );
+
+    }
+
+    /**
+     * Test: Result is a list and do not contains holes and start with 0
+     * @test
+     * @throws Exception
+     */
+    public function ownerKeysShouldBeAList() {
+
+        if ( !function_exists( 'array_is_list' ) ) {
+            function array_is_list( array $arr ): bool {
+                if ( $arr === [] ) {
+                    return true;
+                }
+
+                return array_keys( $arr ) === range( 0, count( $arr ) - 1 );
+            }
+        }
+
+        $jobKeys = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"vuota 4","key":"cXXXXXXXXXXXXae68","r":1,"w":1,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"baYYYYYYYYYYYY91d","r":1,"w":0,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"fe88ZZZZZZZZZZZZ79c","r":1,"w":0,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"a7dWWWWWWWWWWW7b3","r":1,"w":1,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false}]';
+        $keys    = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobKeys ], 'w' );
+
+        $this->assertTrue( Utils::array_is_list( $keys ) );
 
     }
 

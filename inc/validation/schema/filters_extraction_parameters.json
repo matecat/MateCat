@@ -95,11 +95,6 @@
     "yaml": {
       "type": "object",
       "properties": {
-        "extract_arrays": {
-          "type": "boolean",
-          "nullable": true,
-          "default": false
-        },
         "translate_keys": {
           "type": "array",
           "nullable": true
@@ -239,6 +234,17 @@
           }
         }
       },
+      "additionalProperties": false
+    },
+    "dita": {
+      "type": "object",
+      "properties": {
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "required": ["do_not_translate_elements"],
       "additionalProperties": false
     }
   }

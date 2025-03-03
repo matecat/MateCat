@@ -15,38 +15,36 @@ use Utils;
 
 trait TimeLogger {
 
-    protected $timingLogFileName  = 'ui_calls_time.log';
-    protected $timingCustomObject = [];
-
-    protected $startExecutionTime;
+    protected string $timingLogFileName  = 'ui_calls_time.log';
+    protected array  $timingCustomObject = [];
+    protected int    $startExecutionTime = 0;
 
     protected function startTimer() {
         $this->startExecutionTime = microtime( true );
     }
 
-    public function getTimer() {
+    public function getTimer(): float {
         return round( microtime( true ) - $this->startExecutionTime, 4 ); //get milliseconds
     }
 
+    /**
+     * @return void
+     */
     protected function logPageCall() {
-
-        if ( !$this->userIsLogged() && $this instanceof \controller ) {
-            $this->readLoginInfo( true );
-        }
 
         Log::$fileName = $this->timingLogFileName;
 
         /** @var $this IController|TimeLogger */
 
         $_request_uri = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        if( isset( $_request_uri[ 'query' ] ) ){
+        if ( isset( $_request_uri[ 'query' ] ) ) {
             parse_str( $_request_uri[ 'query' ], $str );
             $_request_uri[ 'query' ] = $str;
         }
 
         $object = [
                 "client_ip"     => Utils::getRealIpAddr(),
-                "user"          => ( $this->userIsLogged() ? [
+                "user"          => ( $this->isLoggedIn() ? [
                         "uid"        => $this->getUser()->getUid(),
                         "email"      => $this->getUser()->getEmail(),
                         "first_name" => $this->getUser()->getFirstName(),

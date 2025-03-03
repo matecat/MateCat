@@ -11,10 +11,11 @@ namespace API\V3;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
-use Chunks_ChunkStruct;
 use Exceptions\ValidationError;
 use Files\FilesInfoUtility;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -36,9 +37,10 @@ class FileInfoController extends BaseChunkController {
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    private function setChunk( Chunks_ChunkStruct $chunk ) {
+    private function setChunk( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 

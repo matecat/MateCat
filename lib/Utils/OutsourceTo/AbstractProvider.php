@@ -39,7 +39,7 @@ abstract class OutsourceTo_AbstractProvider {
     protected $_outsource_login_url_ko = "";
 
     /**
-     * These are the url that the vendor system must call in order to confirm the outsource to MateCat
+     * These are the url that the vendor system must call in order to confirm the outsource to Matecat
      *
      * Set them appropriately in the constructor.
      *
@@ -58,7 +58,8 @@ abstract class OutsourceTo_AbstractProvider {
      * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ko
      *
      */
-    public function __construct(){}
+    public function __construct() {
+    }
 
     /**
      * Object containing the quote result
@@ -102,7 +103,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @var array List of job ids and relative passwords
      */
-    protected $jobList = array();
+    protected $jobList = [];
 
     /**
      * Perform Quotes to the selected Provider
@@ -118,7 +119,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return Shop_AbstractItem[]
      */
-    public function getQuotesResult(){
+    public function getQuotesResult() {
         return $this->_quote_result;
     }
 
@@ -219,7 +220,7 @@ abstract class OutsourceTo_AbstractProvider {
         return $this->_outsource_login_url_ok;
     }
 
-    public function getOutsourceConfirm(){
+    public function getOutsourceConfirm() {
         return $this->_outsource_url_confirm;
     }
 

@@ -8,7 +8,6 @@ import CatToolConstants from '../constants/CatToolConstants'
 import SegmentStore from '../stores/SegmentStore'
 import TranslationMatches from '../components/segments/utils/translationMatches'
 import OfflineUtils from '../utils/offlineUtils'
-import CommonUtils from '../utils/commonUtils'
 import SegmentUtils from '../utils/segmentUtils'
 import CopySourceModal, {
   COPY_SOURCE_COOKIE,
@@ -39,7 +38,13 @@ import {getSegmentsIssues} from '../api/getSegmentsIssues'
 import {sendSegmentVersionIssue} from '../api/sendSegmentVersionIssue'
 import {getSegmentVersionsIssues} from '../api/getSegmentVersionsIssues'
 import {sendSegmentVersionIssueComment} from '../api/sendSegmentVersionIssueComment'
-import SegmentFilter from '../components/header/cattol/segment_filter/segment_filter'
+import {
+  HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE,
+  UnlockAllSegmentsModal,
+} from '../components/modals/UnlockAllSegmentsModal'
+import {getTagProjection} from '../api/getTagProjection'
+import {setCurrentSegment} from '../api/setCurrentSegment'
+import CommonUtils from '../utils/commonUtils'
 
 const SegmentActions = {
   localStorageCommentsClosed:
@@ -73,7 +78,9 @@ const SegmentActions = {
       .catch((errors) => {
         var notification = {
           title: 'Error',
-          text: errors[0].message,
+          text: errors?.length
+            ? errors[0].message
+            : 'We got an error, please contact support',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
@@ -139,18 +146,21 @@ const SegmentActions = {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
       //Check first if the segment is in the view
-      if (UI.isReadonlySegment(segment) && !SearchUtils.searchEnabled) {
+      if (
+        SegmentUtils.isReadonlySegment(segment) &&
+        !SearchUtils.searchEnabled
+      ) {
         UI.readonlyClickDisplay()
         return
       }
-      let $segment =
-        segment.splitted && sid.indexOf('-') === -1
-          ? UI.getSegmentById(sid + '-1')
-          : UI.getSegmentById(sid)
-      if ($segment.length === 0) {
-        this.scrollToSegment(sid, this.openSegment)
+      if (segment.splitted && sid.toString().indexOf('-') === -1) {
+        this.scrollToSegment(sid + '-1', this.openSegment)
         return
       }
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SCROLL_TO_SEGMENT,
+        sid: sid,
+      })
       AppDispatcher.dispatch({
         actionType: SegmentConstants.OPEN_SEGMENT,
         sid: sid,
@@ -178,9 +188,7 @@ const SegmentActions = {
           segment.status.toLowerCase() === 'new' ? 'draft' : segment.status,
       })
     } else {
-      var deferred = $.Deferred()
-      deferred.resolve()
-      return deferred.promise()
+      return Promise.resolve()
     }
   },
   scrollToCurrentSegment() {
@@ -302,7 +310,7 @@ const SegmentActions = {
 
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
-      CommonUtils.removeFromStorage('unlocked-' + sid)
+      SegmentUtils.removeUnlockedSegment(sid)
     }
   },
   openNextApproved: function (sid) {
@@ -324,13 +332,13 @@ const SegmentActions = {
       SegmentActions.openSegment(nextApprovedSegment.sid)
     } else {
       if (
-        UI.nextUntranslatedSegmentIdByServer ||
+        SegmentStore.nextUntranslatedFromServer ||
         nextApprovedSegmentInPrevious
       ) {
         // find in not loaded segments or go to the next approved
         SegmentActions.openSegment(
-          UI.nextUntranslatedSegmentIdByServer
-            ? UI.nextUntranslatedSegmentIdByServer
+          SegmentStore.nextUntranslatedFromServer
+            ? SegmentStore.nextUntranslatedFromServer
             : nextApprovedSegmentInPrevious.sid,
         )
       }
@@ -414,9 +422,74 @@ const SegmentActions = {
       from: from,
     })
   },
+  /*++++++++++  Tag Proj start ++++++++++*/
+  startSegmentTagProjection: function (sid) {
+    SegmentActions.getSegmentTagsProjection(sid)
+      .then(function (response) {
+        // Set as Tagged and restore source with taggedText
+        SegmentActions.setSegmentAsTagged(sid)
+        // Unescape HTML
+        let unescapedTranslation = response.data.translation
+
+        // Update target area
+        SegmentActions.copyTagProjectionInCurrentSegment(
+          sid,
+          unescapedTranslation,
+        )
+        // TODO: Autofill target based on Source Map, rewrite
+        //SegmentActions.autoFillTagsInTarget(sid);
+      })
+      .catch((errors) => {
+        if (errors && (errors.length > 0 || !isUndefined(errors.code))) {
+          UI.processErrors(errors, 'getTagProjection')
+          SegmentActions.disableTPOnSegment()
+          // Set as Tagged and restore source with taggedText
+          SegmentActions.setSegmentAsTagged(sid)
+          // Add missing tag at the end of the string
+          SegmentActions.autoFillTagsInTarget(sid)
+        } else {
+          SegmentActions.setSegmentAsTagged(sid)
+          SegmentActions.autoFillTagsInTarget(sid)
+        }
+      })
+      .finally(function () {
+        UI.registerQACheck()
+      })
+  },
+  /**
+   * Tag Projection: get the tag projection for the current segment
+   * @returns translation with the Tag projection
+   */
+  getSegmentTagsProjection: function (sid) {
+    const segmentObj = SegmentStore.getSegmentByIdToJS(sid)
+    const source = segmentObj.segment
+    //Retrieve the chosen suggestion if exist
+    let suggestion
+    let currentContribution = SegmentStore.getSegmentChoosenContribution(sid)
+    // Send the suggestion to Tag Projection only if is > 89% and is not MT
+    if (
+      !isUndefined(currentContribution) &&
+      currentContribution.match !== 'MT' &&
+      parseInt(currentContribution.match) > 89
+    ) {
+      suggestion = currentContribution.translation
+    }
+
+    const target = segmentObj.translation
+    return getTagProjection({
+      action: 'getTagProjection',
+      password: config.password,
+      id_job: config.id_job,
+      source: source,
+      target: target,
+      source_lang: config.source_rfc,
+      target_lang: config.target_rfc,
+      suggestion: suggestion,
+      id_segment: sid,
+    })
+  },
   changeTagProjectionStatus: function (enabled) {
     //TODO: transform paremeter to bool
-    config.tag_projection_enabled = enabled ? 1 : 0
     toggleTagProjectionJob({enabled}).then(() => {
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SET_GUESS_TAGS,
@@ -442,7 +515,6 @@ const SegmentActions = {
         currentSegment.sid,
         currentSegment.id_file,
       )
-      UI.getSegmentById(currentSegment.sid).data('tagprojection', 'tagged')
     }
   },
   setSegmentAsTagged: function (sid, fid) {
@@ -694,6 +766,27 @@ const SegmentActions = {
       saving,
     })
   },
+  translateAndGoToNext: function () {
+    const segment = SegmentStore.getCurrentSegment()
+    if (!segment || SegmentUtils.isReadonlySegment(segment)) {
+      return
+    }
+    if (config.isReview) {
+      setTimeout(function () {
+        SegmentActions.clickOnApprovedButton(segment, false)
+      })
+    } else {
+      if (!segment.tagged) {
+        setTimeout(function () {
+          SegmentActions.startSegmentTagProjection(segment.sid)
+        })
+      } else if (segment.translation.trim() !== '') {
+        setTimeout(function () {
+          SegmentActions.clickOnTranslatedButton(segment, false)
+        })
+      }
+    }
+  },
   /************ SPLIT ****************/
   openSplitSegment: function (sid) {
     if (OfflineUtils.offline) {
@@ -806,7 +899,7 @@ const SegmentActions = {
           DraftMatecatUtils.removeTagsFromText(text),
         ),
       }).catch(() => {
-        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
+        OfflineUtils.failedConnection()
       })
       return
     }
@@ -855,7 +948,7 @@ const SegmentActions = {
             DraftMatecatUtils.removeTagsFromText(request.text),
           ),
         }).catch(() => {
-          OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+          OfflineUtils.failedConnection()
         })
       }
     }
@@ -875,7 +968,7 @@ const SegmentActions = {
       sourceLanguage,
       targetLanguage,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'glossary')
+      OfflineUtils.failedConnection()
       SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
@@ -901,7 +994,7 @@ const SegmentActions = {
     deleteGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -942,7 +1035,7 @@ const SegmentActions = {
             message: errors[0].message,
           })
         } else {
-          OfflineUtils.failedConnection(0, 'addGlossaryItem')
+          OfflineUtils.failedConnection()
         }
       })
   },
@@ -974,7 +1067,7 @@ const SegmentActions = {
     updateGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -1036,10 +1129,10 @@ const SegmentActions = {
     })
   },
 
-  getContributions: function (sid, multiMatchLangs) {
-    TranslationMatches.getContribution(sid, 0, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 1, multiMatchLangs)
-    TranslationMatches.getContribution(sid, 2, multiMatchLangs)
+  getContributions: function (sid, multiMatchLangs, force) {
+    TranslationMatches.getContribution(sid, 0, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 1, multiMatchLangs, force)
+    TranslationMatches.getContribution(sid, 2, multiMatchLangs, force)
   },
 
   getContribution: function (sid, multiMatchLangs, force) {
@@ -1330,14 +1423,30 @@ const SegmentActions = {
     })
 
     if (!unlocked) {
-      //TODO: move this to SegmentActions
-      CommonUtils.removeFromStorage('unlocked-' + segment.sid)
+      SegmentUtils.removeUnlockedSegment(segment.sid)
       if (segment.inBulk) {
         this.toggleSegmentOnBulk(segment.sid, fid)
       }
     } else {
-      CommonUtils.addInStorage('unlocked-' + segment.sid, true)
+      SegmentUtils.addUnlockedSegment(segment.sid)
+      SegmentActions.checkUnlockAllSegmentsModal(segment)
       SegmentActions.openSegment(segment.sid)
+    }
+  },
+
+  checkUnlockAllSegmentsModal(segment) {
+    if (!SegmentUtils.isSecondPassLockedSegment(segment)) {
+      SegmentStore.consecutiveUnlockSegments.push(segment.sid)
+      if (
+        SegmentStore.consecutiveUnlockSegments.length >= 3 &&
+        !localStorage.getItem(HIDE_UNLOCK_ALL_SEGMENTS_MODAL_STORAGE)
+      ) {
+        ModalsActions.showModalComponent(
+          UnlockAllSegmentsModal,
+          {},
+          'Unlock all ICE segments',
+        )
+      }
     }
   },
 
@@ -1347,7 +1456,7 @@ const SegmentActions = {
       segments,
     })
     segments.forEach((segmentSid) => {
-      CommonUtils.addInStorage('unlocked-' + segmentSid, true)
+      SegmentUtils.addUnlockedSegment(segmentSid)
     })
   },
 
@@ -1450,12 +1559,12 @@ const SegmentActions = {
       if (nextTranslatedSegment) {
         SegmentActions.openSegment(nextTranslatedSegment.sid)
       } else if (
-        UI.nextUntranslatedSegmentIdByServer ||
+        SegmentStore.nextUntranslatedFromServer ||
         nextTranslatedSegmentInPrevious
       ) {
         SegmentActions.openSegment(
-          UI.nextUntranslatedSegmentIdByServer
-            ? UI.nextUntranslatedSegmentIdByServer
+          SegmentStore.nextUntranslatedFromServer
+            ? SegmentStore.nextUntranslatedFromServer
             : nextTranslatedSegmentInPrevious.sid,
         )
       }
@@ -1489,11 +1598,6 @@ const SegmentActions = {
       tagPlaceholder,
       entityKey,
       isTarget,
-    })
-  },
-  toggleCharacterCounter: () => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.TOGGLE_CHARACTER_COUNTER,
     })
   },
   hideAiAssistant: () => {
@@ -1557,7 +1661,7 @@ const SegmentActions = {
         })
       })
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'getWarning')
+        OfflineUtils.failedConnection()
       })
     // get tm keys
     new Promise((resolve) => {
@@ -1659,6 +1763,28 @@ const SegmentActions = {
       actionType: SegmentConstants.FOCUS_TAGS,
       tagsSelected,
     })
+  },
+  setCurrentSegment: function (id_segment) {
+    CommonUtils.setLastSegmentFromLocalStorage(id_segment.toString())
+    const requestData = {
+      action: 'setCurrentSegment',
+      password: config.password,
+      revision_number: config.revisionNumber,
+      id_segment: id_segment.toString(),
+      id_job: config.id_job,
+    }
+    setCurrentSegment(requestData)
+      .then((data) => {
+        SegmentActions.setNextUntranslatedSegmentFromServer(data.nextSegmentId)
+        const segment = SegmentStore.getSegmentByIdToJS(id_segment)
+        if (!segment) return
+        if (config.alternativesEnabled && !segment.alternatives) {
+          UI.getTranslationMismatches(id_segment)
+        }
+      })
+      .catch(() => {
+        OfflineUtils.failedConnection()
+      })
   },
   refreshTagMap: function () {
     SegmentActions.renderSegments(

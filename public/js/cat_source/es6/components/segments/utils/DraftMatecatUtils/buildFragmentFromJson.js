@@ -1,9 +1,7 @@
 import {ContentBlock, BlockMapBuilder, CharacterMetadata} from 'draft-js'
-import Immutable from 'immutable'
+import {OrderedMap, List, OrderedSet} from 'immutable'
 
 const buildFragmentFromJson = (fragmentObject) => {
-  const {OrderedMap, List, OrderedSet} = Immutable
-
   //const fragmentContent =  JSON.parse(text);
   const fragmentMap = OrderedMap(fragmentObject)
 

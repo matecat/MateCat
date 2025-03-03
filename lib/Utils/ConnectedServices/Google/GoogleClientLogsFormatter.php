@@ -14,7 +14,7 @@ class GoogleClientLogsFormatter implements FormatterInterface {
      * @return mixed The formatted record
      */
     public function format( array $record ) {
-        return json_encode($record) . PHP_EOL;
+        return json_encode( $record ) . PHP_EOL;
     }
 
     /**
@@ -24,11 +24,11 @@ class GoogleClientLogsFormatter implements FormatterInterface {
      *
      * @return mixed The formatted set of records
      */
-    public function formatBatch(array $records)
-    {
-        foreach ($records as $key => $record) {
-            $records[$key] = $this->format($record);
+    public function formatBatch( array $records ) {
+        foreach ( $records as $key => $record ) {
+            $records[ $key ] = $this->format( $record );
         }
+
         return $records;
     }
 }

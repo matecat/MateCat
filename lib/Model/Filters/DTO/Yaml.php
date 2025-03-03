@@ -2,23 +2,12 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class Yaml implements IDto, JsonSerializable, Countable {
+class Yaml implements IDto, JsonSerializable {
 
-    use DefaultTrait;
-
-    private bool  $extract_arrays        = false;
     private array $translate_keys        = [];
     private array $do_not_translate_keys = [];
-
-    /**
-     * @param bool|null $extract_arrays
-     */
-    public function setExtractArrays( bool $extract_arrays ): void {
-        $this->extract_arrays = $extract_arrays;
-    }
 
     /**
      * @param array $translate_keys
@@ -38,10 +27,6 @@ class Yaml implements IDto, JsonSerializable, Countable {
      * @param $data
      */
     public function fromArray( $data ) {
-        if ( isset( $data[ 'extract_arrays' ] ) ) {
-            $this->setExtractArrays( $data[ 'extract_arrays' ] );
-        }
-
         if ( isset( $data[ 'translate_keys' ] ) ) {
             $this->setTranslateKeys( $data[ 'translate_keys' ] );
         }
@@ -58,27 +43,15 @@ class Yaml implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->extract_arrays ) {
-            $format[ 'extract_arrays' ] = $this->extract_arrays;
-        }
-
-        if ( !empty( $this->translate_keys ) ) {
-            $format[ 'translate_keys' ] = $this->translate_keys;
-        }
+        $format[ 'translate_keys' ] = $this->translate_keys;
 
         if ( !empty( $this->do_not_translate_keys ) ) {
             $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
+            unset( $format[ 'translate_keys' ] );
         }
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

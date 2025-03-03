@@ -4,96 +4,80 @@ namespace API\Commons;
 
 use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
-use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Authentication\AuthenticationHelper;
+use API\Commons\Authentication\AuthenticationTrait;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
-use AuthCookie;
-use CookieManager;
+use Bootstrap;
 use Exception;
 use FeatureSet;
-use INIT;
-use Users_UserDao;
+use Klein\Request;
+use Klein\Response;
+use ReflectionException;
 
 /**
- * @property  int revision_number
+ * @property  int    revision_number
  * @property  string password
- * @property  int id_job
+ * @property  int    id_job
  */
 abstract class KleinController implements IController {
 
     use TimeLogger;
+    use AuthenticationTrait;
+
+    protected bool $useSession = false;
 
     /**
-     * @var \Klein\Request
+     * @var Request
      */
-    protected $request;
+    protected Request $request;
 
     /**
-     * @var \Klein\Response
+     * @var Response
      */
-    protected $response;
-    protected $service;
-    protected $app;
+    protected Response $response;
+    protected          $service;
+    protected          $app;
 
-    protected $downloadToken;
-
-    protected $api_key;
-    protected $api_secret;
+    protected ?string $api_key;
+    protected ?string $api_secret;
 
     /**
      * @var Base[]
      */
-    protected $validators = [];
+    protected array $validators = [];
 
     /**
-     * @var \Users_UserStruct
+     * @var ApiKeys_ApiKeyStruct|null
      */
-    protected $user;
-
-    /**
-     * @var ApiKeys_ApiKeyStruct
-     */
-    protected $api_record;
+    protected ?ApiKeys_ApiKeyStruct $api_record = null;
 
     /**
      * @var array
      */
-    public $params;
+    public array $params = [];
 
     /**
-     * @var FeatureSet
+     * @var ?FeatureSet
      */
-    protected $featureSet;
-
-    /**
-     * @var bool
-     */
-    protected $userIsLogged = false;
+    protected ?FeatureSet $featureSet = null;
 
     /**
      * @return FeatureSet
      */
-    public function getFeatureSet() {
+    public function getFeatureSet(): FeatureSet {
         return $this->featureSet;
     }
 
     /**
-     * @param FeatureSet $featuresSet
+     * @param FeatureSet $featureSet
      *
      * @return $this
      */
-    public function setFeatureSet( FeatureSet $featuresSet ) {
-        $this->featureSet = $featuresSet;
+    public function setFeatureSet( FeatureSet $featureSet ): KleinController {
+        $this->featureSet = $featureSet;
 
         return $this;
-    }
-
-    public function getUser(){
-        return $this->user;
-    }
-
-    public function userIsLogged(){
-        return $this->userIsLogged;
     }
 
     /**
@@ -111,39 +95,43 @@ abstract class KleinController implements IController {
      * @param $service
      * @param $app
      *
-     * @throws AuthenticationError
+     * @throws ReflectionException
      */
     public function __construct( $request, $response, $service, $app ) {
 
         $this->startTimer();
-        $this->timingLogFileName  = 'api_calls_time.log';
+        $this->timingLogFileName = 'api_calls_time.log';
 
         $this->request  = $request;
         $this->response = $response;
         $this->service  = $service;
         $this->app      = $app;
 
-        $paramsPut = $this->getPutParams();
-        $paramsGet = $this->request->paramsNamed()->getIterator()->getArrayCopy();
-        $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
-        $this->params = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
+        $paramsPut        = $this->getPutParams();
+        $paramsGet        = $this->request->paramsNamed()->getIterator()->getArrayCopy();
+        $this->params     = $this->request->paramsPost()->getIterator()->getArrayCopy();
+        $this->params     = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
         $this->featureSet = new FeatureSet();
-        $this->authenticate();
+        $this->getAuthKeys();
+        $this->identifyUser( $this->useSession, $this->api_key, $this->api_secret );
+        $this->afterConstruct();
     }
 
     /**
-     * @throws AuthenticationError
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function authenticate(){
-        $this->validateAuth();
-        $this->identifyUser();
-        $this->afterConstruct();
+    public function refreshClientSessionIfNotApi() {
+        if ( empty( $this->api_key ) ) {
+            Bootstrap::sessionStart();
+            AuthenticationHelper::refreshSession( $_SESSION );
+        }
     }
 
     /**
      * @throws Exception
      */
-    public function performValidations(){
+    public function performValidations() {
         $this->validateRequest();
     }
 
@@ -160,147 +148,55 @@ abstract class KleinController implements IController {
             $this->$method();
         }
 
-        $this->_logWithTime() ;
+        $this->_logWithTime();
 
     }
 
     public function getRequest() {
-        return $this->request  ;
+        return $this->request;
     }
 
-    protected function validateAuth() {
+    /**
+     * @return void
+     */
+    protected function getAuthKeys() {
         $headers = $this->request->headers();
 
         $this->api_key    = $headers[ 'x-matecat-key' ];
         $this->api_secret = $headers[ 'x-matecat-secret' ];
 
-        if ( FALSE !== strpos( $this->api_key, '-' ) ) {
-            [ $this->api_key, $this->api_secret ] = explode('-', $this->api_key ) ;
-        }
-
-        if ( !$this->validKeys() ) {
-            throw new AuthenticationError( "Invalid Login.", 401 );
+        if ( false !== strpos( $this->api_key, '-' ) ) {
+            [ $this->api_key, $this->api_secret ] = explode( '-', $this->api_key );
         }
 
     }
 
     public function getPutParams() {
-        return json_decode( file_get_contents( 'php://input' ), true ) ;
-    }
-
-    /**
-     * @return \Users_UserStruct
-     */
-    protected function identifyUser(){
-
-        if( !empty( $this->api_record ) ){
-            $this->user = $this->api_record->getUser();
-        } else { //check if there is an opened cookie
-
-            $user_credentials = [];
-            if( isset( $_SESSION[ 'uid' ] ) ){
-                $user_credentials[ 'uid' ] = $_SESSION[ 'uid' ];
-            } else {
-                $user_credentials = AuthCookie::getCredentials(); //validated cookie
-            }
-
-            if( !empty( $user_credentials ) && !empty( $user_credentials[ 'uid' ] ) ){
-                $dao = new Users_UserDao();
-                $dao->setCacheTTL( 3600 );
-                $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
-            }
-
-        }
-
-        if( !empty( $this->user ) ){
-            $this->userIsLogged = true;
-        }
-
-        return $this->user;
-    }
-
-    /**
-     * validKeys
-     *
-     * This was implemented to allow to pass a pair of keys just to identify the user, not to deny access.
-     * This function returns true even if keys are not provided.
-     *
-     * If keys are provided, it checks for them to be valid.
-     *
-     */
-    protected function validKeys() {
-
-        if ( $this->api_key && $this->api_secret ) {
-            $this->api_record = \ApiKeys_ApiKeyDao::findByKey( $this->api_key );
-
-            return $this->api_record &&
-                $this->api_record->validSecret( $this->api_secret );
-        }
-
-        return true;
+        return json_decode( file_get_contents( 'php://input' ), true );
     }
 
     /**
      * @throws Exception
      */
     protected function validateRequest() {
-        foreach( $this->validators as $validator ){
+        foreach ( $this->validators as $validator ) {
             $validator->validate();
         }
         $this->validators = [];
         $this->afterValidate();
     }
 
-    protected function appendValidator( Base $validator ){
+    protected function appendValidator( Base $validator ) {
         $this->validators[] = $validator;
+
         return $this;
     }
 
-    /**
-     *
-     * @param null $tokenContent
-     */
-    protected function unlockDownloadToken( $tokenContent = null ) {
-        if ( !isset( $this->downloadToken ) || empty( $this->downloadToken ) ) {
-            return;
-        }
-
-        if ( empty( $tokenContent ) ) {
-            $cookieContent = json_encode( array(
-                    "code"    => 0,
-                    "message" => "Download complete."
-            ) );
-        } else {
-            $cookieContent = $tokenContent;
-        }
-
-        CookieManager::setCookie( $this->downloadToken,
-                $cookieContent,
-                [
-                        'expires'  => time() + 3600,            // expires in 1 hour
-                        'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => true,
-                        'samesite' => 'None',
-                ]
-        );
-
-        $this->downloadToken = null;
+    protected function afterConstruct() {
     }
 
-    protected function afterConstruct() {}
-
     protected function _logWithTime() {
-
-        $log_object = [ "method" => $this->request->method(), "pathname" => $this->request->pathname() ];
-
-        if ( $this->api_key ) {
-            $log_object[ "key" ] = $this->api_key;
-        }
-
         $this->logPageCall();
-
     }
 
     protected function afterValidate() {
@@ -310,8 +206,7 @@ abstract class KleinController implements IController {
     /**
      * @return false|int
      */
-    protected function isJsonRequest()
-    {
-        return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ;
+    protected function isJsonRequest() {
+        return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) );
     }
 }

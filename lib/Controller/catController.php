@@ -2,7 +2,12 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\GoogleClientFactory;
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
+use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
@@ -44,7 +49,7 @@ class catController extends viewController {
     private $revision;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -68,6 +73,7 @@ class catController extends viewController {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         parent::makeTemplate( $this->templateName );
 
@@ -102,6 +108,7 @@ class catController extends viewController {
      * @throws \Exception
      */
     public function doAction() {
+
         $this->featureSet->run( 'beginDoAction', $this );
 
         try {
@@ -115,19 +122,19 @@ class catController extends viewController {
         //retrieve job owner. It will be useful also if the job is archived or cancelled
         $this->job_owner = ( $this->chunk->owner != "" ) ? $this->chunk->owner : INIT::$MAILER_RETURN_PATH;
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $this->chunk->isCanceled() ) {
             $this->job_cancelled = true;
 
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( $this->chunk->isArchived() ) {
             $this->job_archived = true;
 
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_DELETED ) {
+        if ( $this->chunk->isDeleted() ) {
             $this->job_not_found = true;
 
             return;
@@ -157,7 +164,7 @@ class catController extends viewController {
         //this gets all engines of the user
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
-            $engineQuery->type   = 'MT';
+            $engineQuery->type   = Constants_Engines::MT;
             $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
@@ -167,7 +174,7 @@ class catController extends viewController {
 
         // this gets MyMemory
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'TM';
+        $engineQuery->type   = Constants_Engines::TM;
         $engineQuery->active = 1;
         $tms_engine          = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
 
@@ -179,16 +186,17 @@ class catController extends viewController {
 
         $active_mt_engine_array = [];
         if ( !empty( $active_mt_engine ) ) {
+            $engine_type = explode("\\", $active_mt_engine[ 0 ]->class_load);
             $active_mt_engine_array = [
                     "id"          => $active_mt_engine[ 0 ]->id,
                     "name"        => $active_mt_engine[ 0 ]->name,
                     "type"        => $active_mt_engine[ 0 ]->type,
                     "description" => $active_mt_engine[ 0 ]->description,
-                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : $active_mt_engine[ 0 ]->class_load ),
+                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop($engine_type) ),
             ];
         }
 
-        $this->template->active_engine = Utils::escapeJsonEncode( $active_mt_engine_array );
+        $this->template->active_engine = $active_mt_engine_array;
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -339,8 +347,6 @@ class catController extends viewController {
             $this->template->job_not_found = $this->job_not_found;
             $this->template->job_archived  = ( $this->job_archived ) ? 1 : '';
             $this->template->job_cancelled = $this->job_cancelled;
-            $this->template->logged_user   = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-            $this->template->extended_user = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
             $this->template->password      = $this->password;
 
             return;
@@ -355,7 +361,7 @@ class catController extends viewController {
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
 
-            if(!isset($team)){
+            if ( !isset( $team ) ) {
                 $team = $this->project->getTeam();
             }
 
@@ -375,7 +381,6 @@ class catController extends viewController {
 
         $this->template->mt_engines                            = $this->translation_engines;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode( Intento::getProviderList() );
 
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
@@ -407,7 +412,6 @@ class catController extends viewController {
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
         $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->maxNumSegments      = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
 
         /*
@@ -438,7 +442,7 @@ class catController extends viewController {
 
         if ( INIT::$COMMENTS_ENABLED ) {
             $this->template->comments_enabled = true;
-            $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
+            $this->template->socket_base_url     = INIT::$SOCKET_BASE_URL;
         }
 
         $projectMetaDataDao              = new Projects_MetadataDao();
@@ -448,8 +452,7 @@ class catController extends viewController {
         //Maybe some plugin want to disable the Split from the config
         $this->template->splitSegmentEnabled = 'true';
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
+        $this->intOauthClients();
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
@@ -466,7 +469,7 @@ class catController extends viewController {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -511,7 +514,7 @@ class catController extends viewController {
     }
 
     public function isCurrentProjectGDrive() {
-        return \Projects_ProjectDao::isGDriveProject( $this->chunk->id_project );
+        return Projects_ProjectDao::isGDriveProject( $this->chunk->id_project );
     }
 
 }

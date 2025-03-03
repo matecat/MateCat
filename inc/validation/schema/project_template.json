@@ -11,13 +11,7 @@
     "id_team": {
       "type": ["integer", "string"]
     },
-    "speech2text": {
-      "type": "boolean"
-    },
-    "lexica": {
-      "type": "boolean"
-    },
-    "tag_projection": {
+    "tm_prioritization": {
       "type": "boolean"
     },
     "pretranslate_100": {
@@ -29,9 +23,17 @@
     "get_public_matches": {
       "type": "boolean"
     },
-    "cross_language_matches": {
-      "type": ["null", "object"],
-      "$ref": "#/definitions/cross_language_matches"
+    "team_id": {
+      "type":  ["null", "integer", "string"]
+    },
+    "subject": {
+      "type":  ["null", "string"]
+    },
+    "source_language": {
+      "type":  ["null", "string"]
+    },
+    "target_language": {
+      "type":  ["null", "array"]
     },
     "segmentation_rule": {
       "type": ["null", "object"]
@@ -63,24 +65,10 @@
   "required": [
     "name",
     "id_team",
-    "speech2text",
-    "lexica",
-    "tag_projection",
     "pretranslate_100",
     "get_public_matches"
   ],
   "definitions": {
-    "cross_language_matches": {
-      "type": ["null", "object"],
-      "properties": {
-        "primary": {
-          "type": ["null", "string"]
-        },
-        "secondary": {
-          "type": ["null", "string"]
-        }
-      }
-    },
     "tm": {
       "type": "object",
       "properties": {
@@ -107,6 +95,12 @@
         },
         "w": {
           "type": "boolean"
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
         }
       }
     },

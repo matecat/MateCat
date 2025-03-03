@@ -11,27 +11,22 @@ use Conversion\ConvertedFileModel;
  */
 class ConvertFileWrapper extends convertFileController {
 
-    public $file_name;
-    public $source_lang;
-    public $target_lang;
     public $intDir;
     public $errDir;
-    public $cookieDir;
-
     protected $fileStruct;
-    protected $resultStack = array();
+    protected $resultStack = [];
 
     public function __construct( $stdResult, $convertZipFile = true ) {
         $this->fileStruct     = $stdResult;
-        $this->convertZipFile = $convertZipFile;
-        $this->readLoginInfo();
+        $this->convertZipFile = (bool)$convertZipFile;
+        $this->identifyUser();
     }
 
-    public function setUser( Users_UserStruct $user = null ){
-        $this->user = new Users_UserStruct();
+    public function setUser( Users_UserStruct $user = null ) {
+        $this->user         = new Users_UserStruct();
         $this->userIsLogged = false;
-        if( !empty( $user ) ){
-            $this->user = $user;
+        if ( !empty( $user ) ) {
+            $this->user         = $user;
             $this->userIsLogged = true;
         }
     }
@@ -41,7 +36,7 @@ class ConvertFileWrapper extends convertFileController {
         foreach ( $this->fileStruct as $_file ) {
             $this->file_name = $_file->name;
             parent::doAction();
-            $this->resultStack[ ] = $this->result;
+            $this->resultStack[] = $this->result;
         }
 
     }

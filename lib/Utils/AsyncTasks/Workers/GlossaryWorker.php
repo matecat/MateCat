@@ -88,7 +88,7 @@ class GlossaryWorker extends AbstractWorker {
             $matches[ 'id_segment' ] = $id_segment;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_check',
                         $payload[ 'id_client' ],
@@ -140,7 +140,7 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_delete',
                         $payload[ 'id_client' ],
@@ -170,7 +170,7 @@ class GlossaryWorker extends AbstractWorker {
         $message[ 'entries' ]    = ( !empty( $domains->entries ) ) ? $domains->entries : [];
         $message[ 'id_segment' ] = $id_segment;
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_domains',
                         $payload[ 'id_client' ],
@@ -190,11 +190,11 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload ) {
 
         if (
-            empty( $payload[ 'source' ] ) ||
-            empty( $payload[ 'id_segment' ] ) ||
-            empty( $payload[ 'source' ] ) ||
-            empty ( $payload[ 'source_language' ] ) ||
-            empty ( $payload[ 'target_language' ] )
+                empty( $payload[ 'source' ] ) ||
+                empty( $payload[ 'id_segment' ] ) ||
+                empty( $payload[ 'source' ] ) ||
+                empty ( $payload[ 'source_language' ] ) ||
+                empty ( $payload[ 'target_language' ] )
         ) {
             throw new EndQueueException( "Invalid Payload" );
         }
@@ -208,17 +208,17 @@ class GlossaryWorker extends AbstractWorker {
 
         /** @var Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet(
-            $payload[ 'id_job' ],
-            $payload[ 'id_segment' ],
-            $payload[ 'source' ],
-            $payload[ 'source_language' ],
-            $payload[ 'target_language' ],
-            $keys
+                $payload[ 'id_job' ],
+                $payload[ 'id_segment' ],
+                $payload[ 'source' ],
+                $payload[ 'source_language' ],
+                $payload[ 'target_language' ],
+                $keys
         );
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_get',
                         $payload[ 'id_client' ],
@@ -242,7 +242,7 @@ class GlossaryWorker extends AbstractWorker {
         /** @var Engines_Results_MyMemory_KeysGlossaryResponse $response */
         $response = $client->glossaryKeys( $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_keys',
                         $payload[ 'id_client' ],
@@ -275,7 +275,7 @@ class GlossaryWorker extends AbstractWorker {
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_search',
                         $payload[ 'id_client' ],
@@ -393,7 +393,7 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_set',
                         $payload[ 'id_client' ],
@@ -456,7 +456,7 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_update',
                         $payload[ 'id_client' ],
@@ -503,13 +503,14 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return Engines_MyMemory
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
         $_TMS = Engine::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
+        /** @var Engines_MyMemory $_TMS */
         return $_TMS;
     }
 
@@ -532,17 +533,6 @@ class GlossaryWorker extends AbstractWorker {
      * @throws Exception
      */
     private function getMyMemoryClient() {
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = 1;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
-
-        return new Engines_MyMemory( $engineRecord );
+       return $this->getEngine( new FeatureSet() );
     }
 }

@@ -1,10 +1,15 @@
 <?php
 
+use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Conversion\ConvertedFileModel;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -14,6 +19,8 @@ use PayableRates\CustomPayableRateStruct;
 use ProjectQueue\Queue;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
 use TMS\TMSService;
 use Validator\EngineValidator;
@@ -46,6 +53,11 @@ class NewController extends ajaxController {
      */
     private $private_tm_key;
 
+    /**
+     * @var array
+     */
+    private $tm_prioritization = false;
+
     private $private_tm_user = null;
     private $private_tm_pass = null;
 
@@ -63,7 +75,7 @@ class NewController extends ajaxController {
 
     private $metadata = [];
 
-    const MAX_NUM_KEYS = 6;
+    const MAX_NUM_KEYS = 10;
 
     private static $allowed_seg_rules = [
             'standard',
@@ -128,6 +140,11 @@ class NewController extends ajaxController {
 
     private $xliff_parameters;
 
+    private $dictation;
+    private $show_whitespace;
+    private $character_counter;
+    private $ai_assistant;
+
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
     }
@@ -177,6 +194,7 @@ class NewController extends ajaxController {
                         'options' => [ 'default' => 1, 'min_range' => 0 ]
                 ],
                 'private_tm_key'             => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'private_tm_key_json'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'subject'                    => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -203,6 +221,10 @@ class NewController extends ajaxController {
                 'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'ai_assistant'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'instructions'               => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
@@ -230,7 +252,7 @@ class NewController extends ajaxController {
          * Note 2022-10-13
          * ----------------------------------
          *
-         * We trim every space private_tm_key
+         * We trim every space in instructions
          * in order to avoid mispelling errors
          *
          */
@@ -297,7 +319,7 @@ class NewController extends ajaxController {
      */
     private function __validateSubjects() {
 
-        $langDomains = Langs_LanguageDomains::getInstance();
+        $langDomains = LanguageDomains::getInstance();
         $subjectMap  = $langDomains::getEnabledHashMap();
 
         $this->postInput[ 'subject' ] = ( !empty( $this->postInput[ 'subject' ] ) ) ? $this->postInput[ 'subject' ] : 'general';
@@ -356,7 +378,7 @@ class NewController extends ajaxController {
                 throw new Exception( "Invalid MT Engine.", -2 );
             } else {
                 $testEngine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
-                if ( $testEngine->getEngineRow()->uid != $this->getUser()->uid ) {
+                if ( $testEngine->getEngineRecord()->uid != $this->getUser()->uid ) {
                     throw new Exception( "Invalid MT Engine.", -21 );
                 }
             }
@@ -370,6 +392,15 @@ class NewController extends ajaxController {
         echo $toJson;
     }
 
+    /**
+     * @throws ReQueueException
+     * @throws AuthenticationError
+     * @throws ValidationError
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function doAction() {
 
         $fs = FilesStorageFactory::create();
@@ -402,7 +433,7 @@ class NewController extends ajaxController {
         }
 
         //if fileupload was failed this index ( 0 = does not exists )
-        $default_project_name = @$arFiles[ 0 ];
+        $default_project_name = $arFiles[ 0 ] ?? null;
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
         }
@@ -411,8 +442,8 @@ class NewController extends ajaxController {
             $this->postInput[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $this->__validateSourceLang( Langs_Languages::getInstance() );
-        $this->__validateTargetLangs( Langs_Languages::getInstance() );
+        $this->__validateSourceLang( Languages::getInstance() );
+        $this->__validateTargetLangs( Languages::getInstance() );
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         //for now we sent to api output only the LAST error message, but we log all
@@ -551,7 +582,7 @@ class NewController extends ajaxController {
                 }
             } else {
 
-                $conversionHandler->doAction();
+                $conversionHandler->processConversion();
 
                 $result = $conversionHandler->getResult();
                 if ( $result->getCode() < 0 ) {
@@ -577,10 +608,8 @@ class NewController extends ajaxController {
 
         if ( isset( $this->result[ 'data' ] ) && !empty( $this->result[ 'data' ] ) ) {
             foreach ( $this->result[ 'data' ] as $zipFileName => $zipFiles ) {
-                $zipFiles = json_decode( $zipFiles, true );
-
-
-                $fileNames = Utils::array_column( $zipFiles, 'name' );
+                $zipFiles  = json_decode( $zipFiles, true );
+                $fileNames = array_column( $zipFiles, 'name' );
                 $arFiles   = array_merge( $arFiles, $fileNames );
             }
         }
@@ -634,21 +663,27 @@ class NewController extends ajaxController {
         $projectStructure[ 'project_name' ] = $this->postInput[ 'project_name' ];
         $projectStructure[ 'job_subject' ]  = $this->postInput[ 'subject' ];
 
-        $projectStructure[ 'private_tm_key' ]   = $this->private_tm_key;
-        $projectStructure[ 'private_tm_user' ]  = $this->private_tm_user;
-        $projectStructure[ 'private_tm_pass' ]  = $this->private_tm_pass;
-        $projectStructure[ 'uploadToken' ]      = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]      = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ] = $arMeta; //list of file metadata
-        $projectStructure[ 'source_language' ]  = $this->postInput[ 'source_lang' ];
-        $projectStructure[ 'target_language' ]  = explode( ',', $this->postInput[ 'target_lang' ] );
-        $projectStructure[ 'mt_engine' ]        = $this->postInput[ 'mt_engine' ];
-        $projectStructure[ 'tms_engine' ]       = $this->postInput[ 'tms_engine' ];
-        $projectStructure[ 'status' ]           = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-        $projectStructure[ 'owner' ]            = $this->user->email;
-        $projectStructure[ 'metadata' ]         = $this->metadata;
-        $projectStructure[ 'pretranslate_100' ] = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
-        $projectStructure[ 'pretranslate_101' ] = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+        $projectStructure[ 'private_tm_key' ]    = $this->private_tm_key;
+        $projectStructure[ 'private_tm_user' ]   = $this->private_tm_user;
+        $projectStructure[ 'private_tm_pass' ]   = $this->private_tm_pass;
+        $projectStructure[ 'uploadToken' ]       = $uploadFile->getDirUploadToken();
+        $projectStructure[ 'array_files' ]       = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]  = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]   = $this->postInput[ 'source_lang' ];
+        $projectStructure[ 'target_language' ]   = explode( ',', $this->postInput[ 'target_lang' ] );
+        $projectStructure[ 'mt_engine' ]         = $this->postInput[ 'mt_engine' ];
+        $projectStructure[ 'tms_engine' ]        = $this->postInput[ 'tms_engine' ];
+        $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization;
+        $projectStructure[ 'status' ]            = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'owner' ]             = $this->user->email;
+        $projectStructure[ 'metadata' ]          = $this->metadata;
+        $projectStructure[ 'pretranslate_100' ]  = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ]  = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
+
+        $projectStructure[ 'dictation' ]         = $this->postInput[ 'dictation' ] ?? null;
+        $projectStructure[ 'show_whitespace' ]   = $this->postInput[ 'show_whitespace' ] ?? null;
+        $projectStructure[ 'character_counter' ] = $this->postInput[ 'character_counter' ] ?? null;
+        $projectStructure[ 'ai_assistant' ]      = $this->postInput[ 'ai_assistant' ] ?? null;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -746,11 +781,11 @@ class NewController extends ajaxController {
      * @param $filename
      *
      * @return array
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
     private function getFileMetadata( $filename ) {
         $info          = XliffProprietaryDetect::getInfo( $filename );
@@ -817,7 +852,7 @@ class NewController extends ajaxController {
         $this->result[ 'errors' ] = $this->projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
-    private function __validateSourceLang( Langs_Languages $lang_handler ) {
+    private function __validateSourceLang( Languages $lang_handler ) {
         try {
             $lang_handler->validateLanguage( $this->postInput[ 'source_lang' ] );
         } catch ( Exception $e ) {
@@ -826,50 +861,36 @@ class NewController extends ajaxController {
         }
     }
 
-    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
-        $targets = explode( ',', $this->postInput[ 'target_lang' ] );
-        $targets = array_map( 'trim', $targets );
-        $targets = array_unique( $targets );
-
-        if ( empty( $targets ) ) {
-            $this->api_output[ 'message' ] = "Missing target language.";
-            $this->result[ 'errors' ][]    = [ "code" => -4, "message" => "Missing target language." ];
-        }
-
+    private function __validateTargetLangs( Languages $lang_handler ) {
         try {
-
-            foreach ( $targets as $target ) {
-                $lang_handler->validateLanguage( $target );
-            }
-
+            $this->postInput[ 'target_lang' ] = $lang_handler->validateLanguageListAsString( $this->postInput[ 'target_lang' ] );
         } catch ( Exception $e ) {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
         }
-
-        $this->postInput[ 'target_lang' ] = implode( ',', $targets );
     }
 
     /**
      * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
      *
      * @return bool
+     * @throws ReflectionException
      */
-    private function __validateAuthHeader() {
+    private function __validateAuthHeader(): bool {
 
-        $api_key    = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
+        $api_key    = $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null;
         $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
 
         if ( empty( $api_key ) ) {
             return false;
         }
 
-        if ( false !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
+        if ( false !== strpos( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null, '-' ) ) {
             [ $api_key, $api_secret ] = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
         }
 
         if ( $api_key && $api_secret ) {
-            $key = \ApiKeys_ApiKeyDao::findByKey( $api_key );
+            $key = ApiKeys_ApiKeyDao::findByKey( $api_key );
 
             if ( !$key || !$key->validSecret( $api_secret ) ) {
                 return false;
@@ -1016,10 +1037,44 @@ class NewController extends ajaxController {
     protected function __validateTmAndKeys() {
 
         try {
-            $this->private_tm_key = array_map(
+            if(!empty($this->postInput[ 'private_tm_key_json' ])){
+                $json = html_entity_decode( $this->postInput[ 'private_tm_key_json' ] );
+
+                // first check if `filters_extraction_parameters` is a valid JSON
+                if ( !Utils::isJson( $json ) ) {
+                    throw new Exception( "private_tm_key_json is not a valid JSON" );
+                }
+
+                $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
+
+                $validatorObject       = new JSONValidatorObject();
+                $validatorObject->json = $json;
+
+                $validator = new JSONValidator( $schema );
+                $validator->validate( $validatorObject );
+
+                $privateTmKeyJsonObject = json_decode($json);
+
+                $this->tm_prioritization = $privateTmKeyJsonObject->tm_prioritization;
+
+                $this->private_tm_key = array_map(
+                    function ($item){
+                        return [
+                            'key' => $item->key,
+                            'r' => $item->read,
+                            'w' => $item->write,
+                            'penalty' => $item->penalty,
+                        ];
+                    },
+                    $privateTmKeyJsonObject->keys
+                );
+
+            } else {
+                $this->private_tm_key = array_map(
                     [ 'NewController', '__parseTmKeyInput' ],
                     explode( ",", $this->postInput[ 'private_tm_key' ] )
-            );
+                );
+            }
         } catch ( Exception $e ) {
             throw new Exception( $e->getMessage(), -6 );
         }
@@ -1057,10 +1112,11 @@ class NewController extends ajaxController {
 
                     $this->private_tm_key[ $__key_idx ] =
                             [
-                                    'key'  => $newUser->key,
-                                    'name' => null,
-                                    'r'    => $tm_key[ 'r' ],
-                                    'w'    => $tm_key[ 'w' ]
+                                    'key'     => $newUser->key,
+                                    'name'    => null,
+                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'r'       => $tm_key[ 'r' ],
+                                    'w'       => $tm_key[ 'w' ],
 
                             ];
                     $this->new_keys[]                   = $newUser->key;
@@ -1075,10 +1131,11 @@ class NewController extends ajaxController {
                 $uid = $this->user->uid;
 
                 $this_tm_key = [
-                        'key'  => $tm_key[ 'key' ],
-                        'name' => null,
-                        'r'    => $tm_key[ 'r' ],
-                        'w'    => $tm_key[ 'w' ]
+                        'key'     => $tm_key[ 'key' ],
+                        'name'    => null,
+                        'penalty' => $tm_key[ 'penalty' ] ?? null,
+                        'r'       => $tm_key[ 'r' ],
+                        'w'       => $tm_key[ 'w' ]
                 ];
 
                 /**
@@ -1197,18 +1254,22 @@ class NewController extends ajaxController {
     private function __validateQaModel() {
         if ( !empty( $this->postInput[ 'id_qa_model' ] ) ) {
 
-            $qaModel = ModelDao::findById( $this->postInput[ 'id_qa_model' ] );
+            $qaModel = ModelDao::findByIdAndUser( $this->postInput[ 'id_qa_model' ], $this->getUser()->uid );
+
+            //XXX FALLBACK for models created before "required-login" feature (on these models there is no ownership check)
+            if ( empty( $qaModel ) ) {
+                $qaModel = ModelDao::findById( $this->postInput[ 'id_qa_model' ] );
+                $qaModel->uid = $this->getUser()->uid;
+            }
 
             // check if qa_model exists
-            if ( null === $qaModel ) {
+            if ( empty( $qaModel ) ) {
                 throw new Exception( 'This QA Model does not exists' );
             }
 
             // check featureSet
             $qaModelLabel    = strtolower( $qaModel->label );
-            $featureSetCodes = $this->getFeatureSet()->getCodes();
-
-            if ( $qaModelLabel !== 'default' and !in_array( $qaModelLabel, $featureSetCodes ) ) {
+            if ( $qaModelLabel !== 'default' and $qaModel->uid != $this->getUser()->uid ) {
                 throw new Exception( 'This QA Model does not belong to the authenticated user' );
             }
 

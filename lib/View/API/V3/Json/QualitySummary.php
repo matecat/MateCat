@@ -10,10 +10,10 @@
 namespace API\V3\Json;
 
 
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
@@ -24,7 +24,7 @@ use RevisionFactory;
 class QualitySummary {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
     /**
@@ -35,10 +35,10 @@ class QualitySummary {
     /**
      * QualitySummary constructor.
      *
-     * @param Chunks_ChunkStruct     $chunk
+     * @param Jobs_JobStruct     $chunk
      * @param Projects_ProjectStruct $project
      */
-    public function __construct( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project ) {
+    public function __construct( Jobs_JobStruct $chunk, Projects_ProjectStruct $project ) {
         $this->chunk   = $chunk;
         $this->project = $project;
     }
@@ -69,20 +69,20 @@ class QualitySummary {
      */
     protected function renderItem( ChunkReviewStruct $chunkReview ) {
 
-        list(
-            $passFail,
-            $reviseIssues,
-            $quality_overall,
-            $is_pass,
-            $score,
-            $total_issues_weight,
-            $total_reviewed_words_count,
-            $categories,
-            $model_version,
-            $model_id,
-            $model_label,
-            $model_template_id
-            ) = self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
+        [
+                $passFail,
+                $reviseIssues,
+                $quality_overall,
+                $is_pass,
+                $score,
+                $total_issues_weight,
+                $total_reviewed_words_count,
+                $categories,
+                $model_version,
+                $model_id,
+                $model_label,
+                $model_template_id
+        ] = self::revisionQualityVars( $this->chunk, $this->project, $chunkReview );
 
         return self::populateQualitySummarySection(
                 $chunkReview->source_page,
@@ -148,33 +148,33 @@ class QualitySummary {
         $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
 
         $feedback = null;
-        if($chunkReviewPassword){
+        if ( $chunkReviewPassword ) {
             $feedback = ( new FeedbackDAO() )->getFeedback( $jStruct->id, $chunkReviewPassword, $revisionNumber );
         }
 
         return [
-            'revision_number'            => $revisionNumber,
-            'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-            'model_version'              => ( $model_version ? (int)$model_version : null ),
-            'model_id'                   => ( !empty( $model_id ) ? (int)$model_id : null ),
-            'model_label'                => ( !empty( $model_label ) ? $model_label : null ),
-            'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
-            'is_pass'                    => $is_pass,
-            'quality_overall'            => $quality_overall,
-            'errors_count'               => (int)$jStruct->getErrorsCount(),
-            'revise_issues'              => $reviseIssues,
-            'score'                      => floatval( $score ),
-            'categories'                 => $categories,
-            'total_issues_weight'        => (float)$total_issues_weight,
-            'total_reviewed_words_count' => (int)$total_reviewed_words_count,
-            'passfail'                   => $passfail,
-            'total_time_to_edit'         => (int)$total_tte,
-            'details'                    => self::getDetails($jStruct->id, $jStruct->password, $revisionNumber+1),
+                'revision_number'            => $revisionNumber,
+                'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
+                'model_version'              => ( $model_version ? (int)$model_version : null ),
+                'model_id'                   => ( !empty( $model_id ) ? (int)$model_id : null ),
+                'model_label'                => ( !empty( $model_label ) ? $model_label : null ),
+                'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
+                'is_pass'                    => $is_pass,
+                'quality_overall'            => $quality_overall,
+                'errors_count'               => (int)$jStruct->getErrorsCount(),
+                'revise_issues'              => $reviseIssues,
+                'score'                      => floatval( $score ),
+                'categories'                 => $categories,
+                'total_issues_weight'        => (float)$total_issues_weight,
+                'total_reviewed_words_count' => (int)$total_reviewed_words_count,
+                'passfail'                   => $passfail,
+                'total_time_to_edit'         => (int)$total_tte,
+                'details'                    => self::getDetails( $jStruct->id, $jStruct->password, $revisionNumber + 1 ),
         ];
     }
 
     /**
-     * @param Chunks_ChunkStruct     $jStruct
+     * @param Jobs_JobStruct     $jStruct
      * @param Projects_ProjectStruct $project
      * @param                        $chunkReview
      *
@@ -182,7 +182,7 @@ class QualitySummary {
      * @throws Exception
      * @internal param $reviseIssues
      */
-    protected static function revisionQualityVars( Chunks_ChunkStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
+    protected static function revisionQualityVars( Jobs_JobStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
 
         $reviseIssues = [];
 
@@ -226,7 +226,7 @@ class QualitySummary {
         $model      = $project->getLqaModel();
         $categories = $model !== null ? $model->getCategoriesAndSeverities() : [];
 
-        if($model){
+        if ( $model ) {
             $passFail = [ 'type' => $model->pass_type, 'options' => [ 'limit' => $chunkReviewModel->getQALimit( $model ) ] ];
         } else {
             $passFail = true;
@@ -241,53 +241,53 @@ class QualitySummary {
                 $total_issues_weight,
                 $total_reviewed_words_count,
                 $categories,
-                ($model ? $model->hash : null),
-                ($model ? $model->id : null),
-                ($model ? $model->label : null),
-                ($model ? $model->qa_model_template_id : null)
+                ( $model ? $model->hash : null ),
+                ( $model ? $model->id : null ),
+                ( $model ? $model->label : null ),
+                ( $model ? $model->qa_model_template_id : null )
         ];
     }
 
-    private static function getDetails($idJob, $password, $revisionNumber) {
+    private static function getDetails( $idJob, $password, $revisionNumber ) {
 
         $details = [];
 
-        $fileParts = \Jobs_JobDao::getReviewedWordsCountGroupedByFileParts($idJob, $password, $revisionNumber);
+        $fileParts = Jobs_JobDao::getReviewedWordsCountGroupedByFileParts( $idJob, $password, $revisionNumber );
 
-        foreach ($fileParts as $filePart){
+        foreach ( $fileParts as $filePart ) {
 
             $originalFileName = $filePart->filename;
-            if(null !== $filePart->id_file_part_external_reference and $filePart->tag_key === 'original'){
+            if ( null !== $filePart->id_file_part_external_reference and $filePart->tag_key === 'original' ) {
                 $originalFileName = $filePart->tag_value;
             }
 
-            $issuesGroupedByIdFilePart = (new EntryDao())->getIssuesGroupedByIdFilePart($idJob, $password, $revisionNumber, $filePart->id_file_part);
+            $issuesGroupedByIdFilePart = ( new EntryDao() )->getIssuesGroupedByIdFilePart( $idJob, $password, $revisionNumber, $filePart->id_file_part );
 
-            $issues = [];
+            $issues       = [];
             $issuesWeight = 0;
 
-            foreach ($issuesGroupedByIdFilePart as $issue){
-                $issuesWeight = $issuesWeight +  $issue->penalty_points;
-                $catCode = json_decode($issue->cat_options);
-                $issues[] = [
-                    'segment_id' => (int)$issue->segment_id,
-                    'content_id' => $issue->content_id,
-                    'penalty_points' => floatval($issue->penalty_points),
-                    'category_code' => !empty($catCode) ? @$catCode->code : null,
-                    'category_label' => $issue->cat_label,
-                    'severity_code' =>  substr($issue->severity_label, 0, 3),
-                    'severity_label' => $issue->severity_label,
+            foreach ( $issuesGroupedByIdFilePart as $issue ) {
+                $issuesWeight = $issuesWeight + $issue->penalty_points;
+                $catCode      = json_decode( $issue->cat_options );
+                $issues[]     = [
+                        'segment_id'     => (int)$issue->segment_id,
+                        'content_id'     => $issue->content_id,
+                        'penalty_points' => floatval( $issue->penalty_points ),
+                        'category_code'  => !empty( $catCode ) ? @$catCode->code : null,
+                        'category_label' => $issue->cat_label,
+                        'severity_code'  => substr( $issue->severity_label, 0, 3 ),
+                        'severity_label' => $issue->severity_label,
                 ];
             }
 
             $details[] = [
-                    'id_file' => (int)$filePart->id_file,
-                    'id_file_part' => ($filePart->id_file_part !== null) ? (int)$filePart->id_file_part : null,
-                    'original_filename' => $originalFileName,
-                    'reviewed_words_count' => floatval($filePart->reviewed_words_count),
-                    'issues_weight' => floatval($issuesWeight),
-                    'issues_entries' => count($issuesGroupedByIdFilePart),
-                    'issues' => $issues,
+                    'id_file'              => (int)$filePart->id_file,
+                    'id_file_part'         => ( $filePart->id_file_part !== null ) ? (int)$filePart->id_file_part : null,
+                    'original_filename'    => $originalFileName,
+                    'reviewed_words_count' => floatval( $filePart->reviewed_words_count ),
+                    'issues_weight'        => floatval( $issuesWeight ),
+                    'issues_entries'       => count( $issuesGroupedByIdFilePart ),
+                    'issues'               => $issues,
             ];
         }
 

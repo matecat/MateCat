@@ -5,7 +5,7 @@ import {deleteGDriveUploadedFile} from './cat_source/es6/api/deleteGdriveUploade
 import {openGDriveFiles} from './cat_source/es6/api/openGDriveFiles'
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
-
+window.APP = {}
 APP.tryListGDriveFiles = function () {
   getGoogleDriveUploadedFiles()
     .then((listFiles) => {
@@ -104,8 +104,12 @@ APP.tryListGDriveFiles = function () {
 }
 
 APP.restartGDriveConversions = function () {
-  var sourceLang = CreateProjectStore.getSourceLang()
-  changeGDriveSourceLang(sourceLang).then((response) => {
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+  changeGDriveSourceLang({
+      sourceLang: CreateProjectStore.getSourceLang(),
+      segmentation_rule: UI.segmentationRule,
+      filters_extraction_parameters_template_id: filtersTemplate?.id,
+  }).then((response) => {
     if (response.success) {
       console.log('Source language changed.')
     }
@@ -143,11 +147,16 @@ APP.addGDriveFile = function (exportIds) {
     '</div>' +
     '</div>'
   $(html).appendTo($('body'))
-  openGDriveFiles(
+
+  const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+
+  openGDriveFiles({
     encodedJson,
-    CreateProjectStore.getSourceLang(),
-    CreateProjectStore.getTargetLangs(),
-  ).then((response) => {
+    sourceLang: CreateProjectStore.getSourceLang(),
+    targetLang: CreateProjectStore.getTargetLangs(),
+    segmentation_rule: UI.segmentationRule,
+    filters_extraction_parameters_template_id: filtersTemplate?.id,
+  }).then((response) => {
     $('.modal-gdrive').remove()
     CreateProjectActions.hideErrors()
     if (response.success) {

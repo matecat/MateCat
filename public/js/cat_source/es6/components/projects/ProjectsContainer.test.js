@@ -1,18 +1,19 @@
 import {render, screen, waitFor, act} from '@testing-library/react'
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
 import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import {mswServer} from '../../../../../mocks/mswServer'
+import userMock from '../../../../../mocks/userMock'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 // create modal div
 const modalElement = document.createElement('div')
 modalElement.id = 'modal'
 document.body.appendChild(modalElement)
 
-require('../../../../common')
 window.config = {
   enable_outsource: 1,
   basepath: 'http://localhost/',
@@ -613,9 +614,9 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, dataTeam, dataTeams, props} = fakeProperties
-  const projects = Immutable.fromJS(data)
-  const team = Immutable.fromJS(dataTeam)
-  const teams = Immutable.fromJS(dataTeams)
+  const projects = fromJS(data)
+  const team = fromJS(dataTeam)
+  const teams = fromJS(dataTeams)
 
   return {
     projects,
@@ -735,8 +736,13 @@ const executeMswServer = () => {
 test('Rendering elements', async () => {
   executeMswServer()
   const {props, projects} = getFakeProperties(fakeProjectsData.projects)
-
-  render(<ProjectsContainer {...props} />)
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectsContainer {...props} />
+    </ApplicationWrapperContext.Provider>,
+  )
 
   // set ProjectStore state
   const {data, dataTeam, dataTeams} = fakeProjectsData.projects
@@ -766,7 +772,7 @@ test('No projects found with team type general', () => {
 
   const {dataTeam} = fakeProjectsData.projects
   const dataTeamCopy = {...dataTeam, type: 'general'}
-  const team = Immutable.fromJS(dataTeamCopy)
+  const team = fromJS(dataTeamCopy)
 
   render(<ProjectsContainer {...{...props, team}} />)
 

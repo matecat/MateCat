@@ -9,23 +9,19 @@
 namespace API\V2;
 
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\V2\Json\Chunk;
-use Chunks_ChunkStruct;
 use Constants_JobStatus;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 
 class ChunkController extends BaseChunkController {
-
-    /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
 
     /**
      * @var Projects_ProjectStruct
@@ -40,7 +36,7 @@ class ChunkController extends BaseChunkController {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
@@ -130,6 +126,7 @@ class ChunkController extends BaseChunkController {
             $this->project = $Validator->getChunk()->getProject( 60 * 10 );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

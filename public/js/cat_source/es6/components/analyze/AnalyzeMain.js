@@ -15,8 +15,8 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     position: 'absolute',
     height: '100%',
     width: '100%',
-    backgroundColor: 'rgba(76, 69, 69, 0.3)',
-    top: $(parentRef.current).scrollTop(),
+    // backgroundColor: 'rgba(76, 69, 69, 0.3)',
+    // top: $(parentRef.current).scrollTop(),
     left: 0,
     zIndex: 3,
   }

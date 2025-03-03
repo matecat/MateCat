@@ -15,12 +15,12 @@ class JobStructTest extends AbstractTest {
     /**
      * @var Jobs_JobDao
      */
-    public $jobDao;
+    public $databaseInstance;
 
     /**
      * @var Jobs_JobStruct
      */
-    public $originalJobStruct;
+    public Jobs_JobStruct $originalJobStruct;
 
     public function setUp(): void {
 
@@ -74,13 +74,13 @@ class JobStructTest extends AbstractTest {
                 ]
         );
 
-        $this->jobDao = new Jobs_JobDao( Database::obtain() );
+        $this->databaseInstance = new Jobs_JobDao( Database::obtain() );
 
     }
 
     public function testAutoIncrementOnCreate() {
 
-        $jobStruct = $this->jobDao->createFromStruct( $this->originalJobStruct );
+        $jobStruct = $this->databaseInstance->createFromStruct( $this->originalJobStruct );
 
         $this->assertInstanceOf( 'Jobs_JobStruct', $jobStruct );
         $this->assertNotEquals( $jobStruct, $this->originalJobStruct );
@@ -93,14 +93,14 @@ class JobStructTest extends AbstractTest {
     }
 
     public function testArrayAccesSet() {
-        $jobStruct = $this->jobDao->createFromStruct( $this->originalJobStruct );
+        $jobStruct = $this->databaseInstance->createFromStruct( $this->originalJobStruct );
 
         $jobStruct[ 'password' ] = 123;
         $this->assertEquals( 123, $jobStruct[ 'password' ] );
     }
 
     public function testArrayAccessUnset() {
-        $jobStruct = $this->jobDao->createFromStruct( $this->originalJobStruct );
+        $jobStruct = $this->databaseInstance->createFromStruct( $this->originalJobStruct );
 
         unset( $jobStruct[ 'password' ] );
         $this->assertNull( $jobStruct[ 'password' ] );
@@ -112,7 +112,7 @@ class JobStructTest extends AbstractTest {
     }
 
     public function testPropertyAccess() {
-        $jobStruct = $this->jobDao->createFromStruct( $this->originalJobStruct );
+        $jobStruct = $this->databaseInstance->createFromStruct( $this->originalJobStruct );
 
         $id            = $jobStruct->id;
         $jobStruct->id = 1234;

@@ -104,11 +104,6 @@ class ExportTMXController extends AbstractDownloadController {
 
     protected function _saveActivity(){
 
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jobID;
         $activity->id_project = $this->jobInfo['id_project'];

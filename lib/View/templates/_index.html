@@ -36,7 +36,6 @@
                 isOpenAiEnabled: ${isOpenAiEnabled},
                 maxFileSize: ${maxFileSize},
                 maxTMXFileSize: ${maxTMXFileSize},
-                maxNumSegments: ${maxNumSegments},
                 id_customer: '${id_customer | string:unknown_customer}',
                 private_customer: '${private_customer | string:0}',
                 first_job_segment: '${first_job_segment}',
@@ -49,7 +48,7 @@
                 analysis_enabled: '${analysis_enabled}',
                 not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
                 footer_show_revise_link: ${footer_show_revise_link || string: false},
-                intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
+                intento_providers: JSON.parse(String.raw`${php: json_encode(translation_engines_intento_providers)}`),
                 get job_id() {
                   console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
                   return this.id_job ;
@@ -85,7 +84,7 @@
                 mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-                active_engine: JSON.parse('${active_engine}'),
+                active_engine: JSON.parse(String.raw`${php: json_encode(active_engine)}`),
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
@@ -103,7 +102,6 @@
                 */
                 lxq_license: '${lxq_license | string:}',
                 lxq_partnerid: '${lxq_partnerid | string:}',
-                lxq_enabled:  ${lxq_enabled},
                 lexiqa_languages: ${lexiqa_languages | string:[]},
                 lexiqaServer: '${lexiqaServer | string:}',
 
@@ -111,7 +109,6 @@
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 support_mail : '${support_mail}',
                 speech2text_enabled: ${speech2text_enabled | string:false},
-                tag_projection_enabled: ${tag_projection_enabled | string:false},
                 tag_projection_languages: ${tag_projection_languages},
                 segmentation_rule : '${segmentation_rule}',
                 segmentFilterEnabled: true,
@@ -151,7 +148,7 @@
         <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:comments_enabled" type="text/javascript">
           /*<![CDATA[*/
           config.comments_enabled = true;
-          config.sse_base_url = '${sse_base_url}';
+          config.socket_base_url = '${socket_base_url}';
           /*]]>*/
         </script>
 
@@ -194,6 +191,8 @@
         <div class="page-content"></div>
         <tal:block metal:use-macro="templates/common.html/footer_includes" />
         <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+        <!--Container for Matecat Notifications-->
+        <div class="notifications-wrapper"></div>
     </body>
 
 </html>

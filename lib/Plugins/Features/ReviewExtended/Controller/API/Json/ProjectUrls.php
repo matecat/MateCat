@@ -8,8 +8,8 @@
 
 namespace Features\ReviewExtended\Controller\API\Json;
 
-use Chunks_ChunkStruct;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Routes;
 
@@ -25,7 +25,7 @@ class ProjectUrls extends \API\V2\Json\ProjectUrls {
                     'translate_url' => $this->translateUrl( $record ),
             ];
 
-            $reviews = ( new ChunkReviewDao() )->findChunkReviews( new Chunks_ChunkStruct( [ 'id' => $record[ 'jid' ], 'password' => $record[ 'jpassword' ] ] ) );
+            $reviews = ( new ChunkReviewDao() )->findChunkReviews( new Jobs_JobStruct( [ 'id' => $record[ 'jid' ], 'password' => $record[ 'jpassword' ] ] ) );
 
             foreach ( $reviews as $review ) {
                 $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $review->source_page );

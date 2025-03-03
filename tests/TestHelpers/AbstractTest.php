@@ -15,7 +15,7 @@ abstract class AbstractTest extends TestCase {
 
     protected $thisTest;
 
-    protected $jobDao;
+    protected $databaseInstance;
     protected $reflectedMethod;
 
     public function setUp(): void {

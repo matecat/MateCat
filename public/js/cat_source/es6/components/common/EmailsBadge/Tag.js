@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Close from '../../../../../../img/icons/Close'
+import IconClose from '../../icons/IconClose'
 
 export const TAG_STATUS = {
   DEFAULT: 'default',
@@ -23,7 +24,7 @@ export const Tag = ({
     <div className={`email-badge-tag ${[status]}`}>
       {children}
       <div className="email-badge-tag-button-close" onClick={handleCLick}>
-        <Close size={18} />
+        <IconClose size={8} />
       </div>
     </div>
   )

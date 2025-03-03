@@ -199,7 +199,7 @@ CREATE TABLE `comments`
     `uid`          bigint(20)  DEFAULT NULL,
     `resolve_date` datetime    DEFAULT NULL,
     `source_page`  tinyint(4)  DEFAULT NULL,
-    `is_owner`     tinyint(4)   NOT NULL,
+    `is_anonymous` tinyint(4)  NOT NULL DEFAULT 0,
     `message_type` tinyint(4)  DEFAULT NULL,
     `message`      text,
     PRIMARY KEY (`id`),
@@ -786,36 +786,36 @@ CREATE TABLE `projects`
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `qa_archived_reports`
+-- Table structure for table `project_templates`
 --
 
 DROP TABLE IF EXISTS `project_templates`;
 /*!40101 SET @saved_cs_client = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `project_templates` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `is_default` tinyint(1) NOT NULL DEFAULT '0',
-  `uid` bigint(20) NOT NULL,
-  `id_team` int(11) NOT NULL,
-  `speech2text` tinyint(1) NOT NULL DEFAULT '0',
-  `lexica` tinyint(1) NOT NULL DEFAULT '0',
-  `tag_projection` tinyint(1) NOT NULL DEFAULT '0',
-  `pretranslate_100` tinyint(1) NOT NULL DEFAULT '0',
-  `pretranslate_101` tinyint(1) NOT NULL DEFAULT '1',
-  `get_public_matches` tinyint(1) NOT NULL DEFAULT '0',
-  `segmentation_rule` varchar(255) DEFAULT NULL,
-  `cross_language_matches` text,
-  `tm` text,
-  `mt` text,
-  `payable_rate_template_id` int(11) DEFAULT NULL,
-  `qa_model_template_id` int(11) DEFAULT NULL,
-  `filters_xliff_config_template_id` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uid_name_idx` (`uid`,`name`),
-  KEY `uid_idx` (`uid`)
+    `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `name` varchar(255) NOT NULL,
+    `is_default` tinyint(1) NOT NULL DEFAULT '0',
+    `uid` bigint(20) NOT NULL,
+    `id_team` int(11) NOT NULL,
+    `pretranslate_100` tinyint(1) NOT NULL DEFAULT '0',
+    `pretranslate_101` tinyint(1) NOT NULL DEFAULT '1',
+    `get_public_matches` tinyint(1) NOT NULL DEFAULT '0',
+    `segmentation_rule` varchar(255) DEFAULT NULL,
+    `tm` text,
+    `mt` text,
+    `payable_rate_template_id` int(11) DEFAULT NULL,
+    `qa_model_template_id` int(11) DEFAULT NULL,
+    `filters_template_id` int(11) DEFAULT NULL,
+    `xliff_config_template_id` int(11) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `modified_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+    `subject` varchar(255) DEFAULT NULL,
+    `source_language` varchar(45) DEFAULT NULL,
+    `target_language` varchar(2048) DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uid_name_idx` (`uid`,`name`),
+    KEY `uid_idx` (`uid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

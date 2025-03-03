@@ -2,5 +2,5 @@
 
 namespace Validator\Exception;
 
-class LogicException extends \Exception
-{}
+class LogicException extends \Exception {
+}

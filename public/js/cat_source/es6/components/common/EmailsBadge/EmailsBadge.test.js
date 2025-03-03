@@ -10,7 +10,7 @@ test('Component works properly', async () => {
   let emails = []
   const setEmails = (data) => (emails = data)
 
-  render(<EmailsBadge name="invite" onChange={setEmails} />)
+  render(<EmailsBadge name="invite" value={emails} onChange={setEmails} />)
 
   const inputElement = screen.getByTestId('email-input')
   const areaElement = screen.getByTestId('email-area')

@@ -14,10 +14,6 @@ const STANDARD_TEMPLATE = {
   is_default: true,
   uid: 1,
   id_team: 1,
-  speech2text: true,
-  lexica: true,
-  tag_projection: true,
-  cross_language_matches: null,
   segmentation_rule: {
     name: 'General',
     id: 'standard',
@@ -36,6 +32,9 @@ const STANDARD_TEMPLATE = {
   modified_at: 'Fri, 02 Feb 24 16:48:34 +0100',
   filtersTemplateId: null,
   XliffConfigTemplateId: null,
+  source_language: null,
+  subject: null,
+  target_language: [],
 }
 
 const CATTOOL_TEMPLATE = {
@@ -51,10 +50,6 @@ export const SCHEMA_KEYS = {
   modifiedAt: 'modified_at',
   name: 'name',
   idTeam: 'id_team',
-  speech2text: 'speech2text',
-  lexica: 'lexica',
-  tagProjection: 'tag_projection',
-  crossLanguageMatches: 'cross_language_matches',
   segmentationRule: 'segmentation_rule',
   mt: 'mt',
   tm: 'tm',
@@ -65,6 +60,10 @@ export const SCHEMA_KEYS = {
   pretranslate101: 'pretranslate_101',
   filtersTemplateId: 'filters_template_id',
   XliffConfigTemplateId: 'xliff_config_template_id',
+  sourceLanguage: 'source_language',
+  subject: 'subject',
+  targetLanguage: 'target_language',
+  tmPrioritization: 'tm_prioritization',
 }
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
@@ -87,7 +86,7 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 
     let cleanup = false
 
-    if (config.isLoggedIn === 1 && !config.is_cattool) {
+    if (!config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
@@ -138,7 +137,8 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
 }
 
 useProjectTemplates.propTypes = {
-  canRetrieveTemplates: PropTypes.bool,
+  tmKeys: PropTypes.array,
+  isCattool: PropTypes.bool,
 }
 
 export default useProjectTemplates

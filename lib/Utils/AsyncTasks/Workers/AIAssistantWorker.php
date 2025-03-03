@@ -33,6 +33,7 @@ class AIAssistantWorker extends AbstractWorker {
      * AIAssistantWorker constructor.
      *
      * @param AMQHandler $queueHandler
+     *
      * @throws ReflectionException
      */
     public function __construct( AMQHandler $queueHandler ) {
@@ -178,7 +179,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @throws StompException
      */
     private function emitMessage( $idClient, $idSegment, $message, $hasError = false, $completed = false ) {
-        $this->publishToSseTopic( [
+        $this->publishToNodeJsClients( [
                 '_type' => 'ai_assistant_explain_meaning',
                 'data'  => [
                         'id_client' => $idClient,

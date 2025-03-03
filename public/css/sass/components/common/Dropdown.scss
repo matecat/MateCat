@@ -1,14 +1,14 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 // General dropdown
 .custom-dropdown {
   position: relative;
   margin-top: 0px;
   border-radius: 4px;
-  box-shadow: 0 0 16px rgba($grey6, 0.4);
+  box-shadow: 0 0 16px rgba(colors.$grey6, 0.4);
   width: 100%;
   height: auto;
-  background-color: $grey5;
+  background-color: colors.$grey5;
 }
 /*.custom-dropdown::before {
   content: '';
@@ -23,7 +23,7 @@
 .custom-dropdown::before {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 6px solid $grey5;
+  border-bottom: 6px solid colors.$grey5;
 }
 
 .select__dropdown--setting-position {
@@ -42,14 +42,14 @@
 }
 .select__dropdown--is-reversed .custom-dropdown::before {
   margin-top: auto;
-  border-top: 6px solid $grey5;
+  border-top: 6px solid colors.$grey5;
   border-bottom: none;
 }
 
 // Search bar
 .dropdown__search-bar {
   position: relative;
-  background-color: $grey5;
+  background-color: colors.$grey5;
   box-shadow: none;
   padding: 0;
   input + svg {
@@ -57,31 +57,31 @@
     right: 12px;
     top: 50%;
     transform: translateY(-50%);
-    color: $grey;
+    color: colors.$grey;
     cursor: pointer;
     pointer-events: none;
   }
   input:not(:placeholder-shown) + svg {
-    color: $white;
+    color: colors.$white;
   }
 }
 .dropdown__search-bar input,
 .dropdown__search-bar input:hover,
 .dropdown__search-bar input:focus {
-  background-color: $grey5;
+  background-color: colors.$grey5;
   border: none !important;
   box-shadow: none;
 }
 .dropdown__search-bar button {
-  color: $white;
+  color: colors.$white;
 }
 
 .dropdown__search-bar-input::placeholder {
-  color: $grey;
+  color: colors.$grey;
 }
 
 .dropdown__search-bar-input--highlighted {
-  background-color: $grey4 !important;
+  background-color: colors.$grey4 !important;
 }
 
 // Most popular options
@@ -104,15 +104,15 @@
 }
 .dropdown__most-popular::before {
   left: 0;
-  background-image: linear-gradient(to right, $black, rgba($black, 0));
+  background-image: linear-gradient(to right, colors.$black, rgba(colors.$black, 0));
 }
 .dropdown__most-popular::after {
   right: 0;
-  background-image: linear-gradient(to right, rgba($black, 0), $black);
+  background-image: linear-gradient(to right, rgba(colors.$black, 0), colors.$black);
 }
 
 .dropdown__most-popular-option {
-  color: $translatedBlue;
+  color: colors.$translatedBlue;
   cursor: pointer;
 
   &:hover,
@@ -138,9 +138,13 @@
   z-index: 2;
   margin-top: 14px;
 
-  &::after,
-  &::before {
-    opacity: 1;
+  &[aria-label] {
+    position: absolute;
+
+    &::after,
+    &::before {
+      opacity: 1;
+    }
   }
 }
 
@@ -170,7 +174,7 @@
   padding: 4px 8px;
   background-color: transparent;
   cursor: pointer;
-  color: $black;
+  color: colors.$black;
   & span {
     white-space: nowrap;
     overflow: hidden;
@@ -185,13 +189,13 @@
 
 .dropdown__option--is-highlighted-option,
 .dropdown__option:hover {
-  background-color: $grey4;
+  background-color: colors.$grey4;
 }
 
 .dropdown__option--is-active-option,
 .dropdown__option.dropdown__option--is-active-option:hover {
-  color: $grey6;
-  background-color: $grey8;
+  color: colors.$grey6;
+  background-color: colors.$grey8;
 
   svg {
     opacity: 1;
@@ -201,8 +205,8 @@
 
 .dropdown__option--is-no-results-found,
 .dropdown__option.dropdown__option--is-no-results-found:hover {
-  color: $grey2;
-  background-color: $grey5;
+  color: colors.$grey2;
+  background-color: colors.$grey5;
   cursor: default;
 
   svg {
@@ -290,7 +294,7 @@
   align-items: center;
   height: 72px;
   padding: 0 40px;
-  box-shadow: inset 0 1px 0 0 $grey6;
+  box-shadow: inset 0 1px 0 0 colors.$grey6;
 }
 
 .dropdown__footer-copy {

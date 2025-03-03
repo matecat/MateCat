@@ -1,9 +1,13 @@
-import React, {useEffect, useRef, useState, useCallback, useMemo} from 'react'
-import PropTypes from 'prop-types'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
-import TeamsStore from '../stores/TeamsStore'
-import TeamConstants from '../constants/TeamConstants'
 import {Select} from '../components/common/Select'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
@@ -33,40 +37,49 @@ import ApplicationActions from '../actions/ApplicationActions'
 import useDeviceCompatibility from '../hooks/useDeviceCompatibility'
 import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
-import {checkLexiqaIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/Lexiqa'
-import {checkGuessTagIsEnabled} from '../components/settingsPanel/Contents/AdvancedOptionsTab/GuessTag'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
+import {
+  checkGDriveEvents,
+  getFilenameFromUploadedFiles,
+  handleCreationStatus,
+  restartConversions,
+} from '../utils/newProjectUtils'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {mountPage} from './mountPage'
+import {HomePageSection} from '../components/createProject/HomePageSection'
+import UserActions from '../actions/UserActions'
 import {getDeepLGlosssaries} from '../api/getDeepLGlosssaries/getDeepLGlosssaries'
+import SocketListener from '../sse/SocketListener'
+import {
+  Button,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../components/common/Button/Button'
+import {
+  ONBOARDING_PAGE,
+  OnboardingTooltips,
+} from '../components/header/OnboardingTooltips'
 
 const SELECT_HEIGHT = 324
-
-const historySourceTargets = {
-  // source: 'es-ES',
-  // targets: 'it-IT,es-ES,es-MX||',
-}
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
 let isTmKeyFromQueryStringAddedToTemplate = false
 
-const NewProject = ({
-  isLoggedIn = false,
-  sourceLanguageSelected,
-  targetLanguagesSelected,
-  subjectsArray,
-  conversionEnabled,
-  formatsNumber,
-  googleDriveEnabled,
-  restartConversions,
-}) => {
-  const [user, setUser] = useState()
+const subjectsArray = config.subject_array.map((item) => {
+  return {...item, id: item.key, name: item.display}
+})
+const conversionEnabled = Boolean(config.conversionEnabled)
+const formatsNumber = config.formats_number
+const googleDriveEnabled = Boolean(config.googleDriveEnabled)
+
+const headerMountPoint = document.querySelector('header.upload-page-header')
+
+const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
   const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
-  const [sourceLang, setSourceLang] = useState({})
-  const [targetLangs, setTargetLangs] = useState([])
-  const [subject, setSubject] = useState(subjectsArray[0])
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -90,6 +103,66 @@ const NewProject = ({
 
   const isDeviceCompatible = useDeviceCompatibility()
 
+  const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
+
+  const subject = useMemo(
+    () =>
+      currentProjectTemplate &&
+      subjectsArray.find(
+        ({id}) =>
+          id === (currentProjectTemplate.subject ?? subjectsArray[0].id),
+      ),
+    [currentProjectTemplate],
+  )
+  const setSubject = useCallback(
+    ({id}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        subject: id,
+      })),
+    [modifyingCurrentTemplate],
+  )
+
+  const sourceLang = useMemo(
+    () =>
+      supportedLanguages?.length && currentProjectTemplate
+        ? supportedLanguages.find(
+            ({id}) => id === (currentProjectTemplate.sourceLanguage ?? 'en-US'),
+          )
+        : {},
+    [currentProjectTemplate, supportedLanguages],
+  )
+  const setSourceLang = useCallback(
+    ({id}) => {
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        sourceLanguage: id,
+      }))
+    },
+    [modifyingCurrentTemplate],
+  )
+
+  const targetLangs = useMemo(() => {
+    if (supportedLanguages?.length && currentProjectTemplate) {
+      const targetLanguage = currentProjectTemplate.targetLanguage.length
+        ? currentProjectTemplate.targetLanguage
+        : ['fr-FR']
+      return supportedLanguages.filter(({id}) =>
+        targetLanguage.some((value) => value === id),
+      )
+    } else {
+      return []
+    }
+  }, [currentProjectTemplate, supportedLanguages])
+  const setTargetLangs = useCallback(
+    (value) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        targetLanguage: value.map(({id}) => id),
+      })),
+    [modifyingCurrentTemplate],
+  )
+
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
   const createProject = useRef()
@@ -102,7 +175,9 @@ const NewProject = ({
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getMMTKeys({engineId}).then((data) => {
             const projectTemplatesInvolved = projectTemplates.filter(
@@ -174,7 +249,9 @@ const NewProject = ({
         if (
           !wasChecked &&
           typeof engineId === 'number' &&
-          projectTemplates.length
+          projectTemplates.length &&
+          projectTemplates.find(({isSelected}) => isSelected)?.mt.id ===
+            engineId
         ) {
           getDeepLGlosssaries({engineId}).then(({glossaries}) => {
             const projectTemplatesInvolved = projectTemplates.filter(
@@ -241,19 +318,23 @@ const NewProject = ({
   const closeSettings = useCallback(() => setOpenSettings({isOpen: false}), [])
 
   const selectedTeam = useMemo(() => {
-    const team =
-      user?.teams.find(({id}) => id === currentProjectTemplate?.idTeam) ?? {}
+    const team = userInfo?.teams?.find(
+      ({id}) => id === currentProjectTemplate?.idTeam,
+    )
 
-    return {...team, id: team.id?.toString()}
-  }, [user?.teams, currentProjectTemplate?.idTeam])
-  const setSelectedTeam = ({id}) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      idTeam: parseInt(id),
-    }))
+    return team && {...team, id: team.id?.toString()}
+  }, [userInfo?.teams, currentProjectTemplate?.idTeam])
+  const setSelectedTeam = useCallback(
+    ({id}) =>
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        idTeam: parseInt(id),
+      })),
+    [modifyingCurrentTemplate],
+  )
 
-  const headerMountPoint = document.querySelector('header.upload-page-header')
   const HeaderPortal = usePortal(headerMountPoint)
+
   const swapLanguages = () => {
     if (targetLangs.length > 1) {
       ModalsActions.showModalComponent(
@@ -265,8 +346,11 @@ const NewProject = ({
       )
     } else {
       prevSourceLang.current = sourceLang
-      setSourceLang(targetLangs[0])
-      setTargetLangs([sourceLang])
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        sourceLanguage: targetLangs[0].id,
+        targetLanguage: [sourceLang.id],
+      }))
     }
   }
 
@@ -277,7 +361,7 @@ const NewProject = ({
     setSourceLang(option)
   }
 
-  const getTmKeys = () => {
+  const getTmKeys = useCallback(() => {
     // Create key from query string
     const keyFromQueryString = {
       r: true,
@@ -292,51 +376,41 @@ const NewProject = ({
       isActive: true,
     }
 
-    if (config.isLoggedIn) {
-      getTmKeysUser()
-        .then(({tm_keys}) => {
-          const isMatchingKeyFromQuery = tm_keys.some(
-            ({key}) => tmKeyFromQueryString === key,
-          )
-
-          setTmKeys([
-            ...tm_keys.map((key) => ({
-              ...key,
-              id: key.key,
-              ...(isMatchingKeyFromQuery &&
-                key.key === tmKeyFromQueryString && {
-                  isActive: true,
-                  r: true,
-                  w: true,
-                }),
-            })),
-            ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
-              ? [keyFromQueryString]
-              : []),
-          ])
-        })
-        .catch(() => setTmKeys([]))
-    } else {
-      setTmKeys([...(tmKeyFromQueryString ? [keyFromQueryString] : [])])
-    }
-  }
-
-  const getMTEngines = () => {
-    if (config.isLoggedIn) {
-      getMtEnginesApi().then((mtEngines) => {
-        mtEngines.push(DEFAULT_ENGINE_MEMORY)
-        setMtEngines(mtEngines)
+    getTmKeysUser()
+      .then(({tm_keys}) => {
+        const isMatchingKeyFromQuery = tm_keys.some(
+          ({key}) => tmKeyFromQueryString === key,
+        )
+        setTmKeys([
+          ...tm_keys.map((key) => ({
+            ...key,
+            id: key.key,
+            ...(isMatchingKeyFromQuery &&
+              key.key === tmKeyFromQueryString && {
+                isActive: true,
+                r: true,
+                w: true,
+              }),
+          })),
+          ...(tmKeyFromQueryString && !isMatchingKeyFromQuery
+            ? [keyFromQueryString]
+            : []),
+        ])
       })
-    }
-  }
+      .catch(() => setTmKeys([]))
+  }, [])
+
+  const getMTEngines = useCallback(() => {
+    getMtEnginesApi().then((mtEngines) => {
+      mtEngines.push(DEFAULT_ENGINE_MEMORY)
+      setMtEngines(mtEngines)
+    })
+  }, [])
 
   createProject.current = () => {
     const {
       mt,
       tm,
-      lexica,
-      speech2text,
-      tagProjection,
       pretranslate100,
       pretranslate101,
       segmentationRule,
@@ -344,18 +418,15 @@ const NewProject = ({
       getPublicMatches,
       qaModelTemplateId,
       payableRateTemplateId,
+      XliffConfigTemplateId,
+      tmPrioritization,
     } = currentProjectTemplate
 
-    const isLexiqaEnabled = !checkLexiqaIsEnabled({sourceLang, targetLangs})
-      .disableLexiQA
-    const isGuessTagEnabled =
-      checkGuessTagIsEnabled({sourceLang, targetLangs}).arrayIntersection
-        .length > 0
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      file_name: APP.getFilenameFromUploadedFiles(),
+      file_name: getFilenameFromUploadedFiles(),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
@@ -369,9 +440,6 @@ const NewProject = ({
       lang_detect_files: '',
       pretranslate_100: pretranslate100 ? 1 : 0,
       pretranslate_101: pretranslate101 ? 1 : 0,
-      lexiqa: isLexiqaEnabled && lexica,
-      speech2text: speech2text,
-      tag_projection: isGuessTagEnabled && tagProjection,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
       qa_model_template_id: qaModelTemplateId,
@@ -389,6 +457,8 @@ const NewProject = ({
       ...(mt?.extra?.deepl_formality && {
         deepl_formality: mt.extra.deepl_formality,
       }),
+      xliff_parameters_template_id: XliffConfigTemplateId,
+      tm_prioritization: tmPrioritization ? 1 : 0,
     })
 
     if (!projectSent) {
@@ -397,7 +467,7 @@ const NewProject = ({
       setProjectSent(true)
       createProjectApi(getParams())
         .then(({data}) => {
-          APP.handleCreationStatus(data.id_project, data.password)
+          handleCreationStatus(data.id_project, data.password)
         })
         .catch((errors) => {
           let errorMsg
@@ -432,18 +502,6 @@ const NewProject = ({
           return {...lang, id: lang.code}
         })
         setSupportedLanguages(languages)
-        setSourceLang(
-          sourceLanguageSelected
-            ? languages.find((lang) => lang.id === sourceLanguageSelected)
-            : languages[0],
-        )
-        setTargetLangs(
-          targetLanguagesSelected
-            ? languages.filter(
-                (lang) => targetLanguagesSelected.indexOf(lang.id) > -1,
-              )
-            : [languages[0]],
-        )
         ApplicationActions.setLanguages(data)
       })
       .catch((error) =>
@@ -455,13 +513,13 @@ const NewProject = ({
     switch (param) {
       case 'signin':
         if (!config.isLoggedIn) {
-          APP.openLoginModal()
+          ModalsActions.openLoginModal()
         }
         CommonUtils.removeParam('open')
         break
       case 'signup':
         if (!config.isLoggedIn) {
-          APP.openRegisterModal()
+          ModalsActions.openRegisterModal()
         }
         CommonUtils.removeParam('open')
         break
@@ -471,24 +529,23 @@ const NewProject = ({
   //TODO: Move it
   useEffect(() => {
     if (typeof selectedTeam?.id !== 'undefined') {
-      APP.setTeamInStorage(selectedTeam.id)
+      UserActions.setTeamInStorage(selectedTeam.id)
     }
   }, [selectedTeam])
 
   useEffect(() => {
     checkQueryStringParameter()
-    retrieveSupportedLanguages()
     getSupportedFiles()
       .then((data) => {
         setSupportedFiles(data)
       })
       .catch((error) => console.log('Error retrieving supported files', error))
+    if (!isUserLogged) return
+
+    retrieveSupportedLanguages()
 
     UI.addEvents()
 
-    const updateUser = (user) => {
-      setUser(user)
-    }
     const hideAllErrors = () => {
       setErrors()
       setWarnings()
@@ -501,7 +558,6 @@ const NewProject = ({
 
     getTmKeys()
     getMTEngines()
-    TeamsStore.addListener(TeamConstants.UPDATE_USER, updateUser)
     CreateProjectStore.addListener(
       NewProjectConstants.HIDE_ERROR_WARNING,
       hideAllErrors,
@@ -517,9 +573,8 @@ const NewProject = ({
       CommonUtils.getParameterByName('project_name')
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
-    APP.checkGDriveEvents()
+    checkGDriveEvents()
     return () => {
-      TeamsStore.removeListener(TeamConstants.UPDATE_USER, updateUser)
       CreateProjectStore.removeListener(
         NewProjectConstants.HIDE_ERROR_WARNING,
         hideAllErrors,
@@ -533,7 +588,7 @@ const NewProject = ({
         enableAnalizeButton,
       )
     }
-  }, [])
+  }, [getMTEngines, getTmKeys, isUserLogged])
 
   useEffect(() => {
     const createKeyFromTMXFile = ({extension, filename}) => {
@@ -604,18 +659,6 @@ const NewProject = ({
   }, [tmKeys])
 
   useEffect(() => {
-    if (sourceLang) {
-      const lang = sourceLang.id
-      if (lang && localStorage.getItem('currentSourceLang') !== lang) {
-        localStorage.setItem('currentSourceLang', lang)
-      }
-    }
-    if (targetLangs) {
-      const lang = targetLangs.map((lang) => lang.id).join()
-      if (lang && localStorage.getItem('currentTargetLang') !== lang) {
-        localStorage.setItem('currentTargetLang', lang)
-      }
-    }
     if (sourceLang && targetLangs) {
       CreateProjectActions.updateProjectParams({
         sourceLang,
@@ -660,7 +703,11 @@ const NewProject = ({
               r: false,
               w: false,
               isActive: false,
-              ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+              penalty: 0,
+              ...(tmFromTemplate && {
+                ...tmFromTemplate,
+                isActive: true,
+              }),
               name: tmItem.name,
             }
           })
@@ -677,7 +724,6 @@ const NewProject = ({
       tmKeys?.length
     ) {
       modifyingCurrentTemplate((prevTemplate) => {
-        console.log(prevTemplate)
         const isMatched = prevTemplate.tm.some(
           ({key}) => key === tmKeyFromQueryString,
         )
@@ -735,14 +781,18 @@ const NewProject = ({
         setIsImportTMXInProgress,
         projectTemplates,
         modifyingCurrentTemplate,
+        selectedTeam,
+        setSelectedTeam,
+        subject,
+        setSubject,
       }}
     >
       <HeaderPortal>
         <Header
           showModals={false}
           showLinks={true}
-          loggedUser={isLoggedIn}
-          user={user}
+          loggedUser={isUserLogged}
+          user={isUserLogged ? userInfo.user : undefined}
         />
       </HeaderPortal>
       <div className="wrapper-claim">
@@ -754,56 +804,69 @@ const NewProject = ({
       <div className="wrapper-upload">
         <div id="languageSelector" />
         <div className="translation-row">
-          <div className="translation-options">
+          <div
+            className={`translation-options ${!isUserLogged ? 'user-not-logged' : ''}`}
+          >
             {/*Project Name*/}
-            <div className="translate-box project-name">
+            <div className="translate-box project-name ">
               <h2>Project name</h2>
               <input
                 name="project-name"
                 type="text"
                 className="upload-input"
                 id="project-name"
-                autoFocus="autofocus"
+                autoFocus={isUserLogged ? 'autofocus' : false}
                 ref={projectNameRef}
+                readOnly={!isUserLogged}
+              />
+            </div>
+            <div className="translate-box">
+              <TemplateSelect
+                {...{
+                  label: 'Project template',
+                  maxHeightDroplist: SELECT_HEIGHT,
+                  projectTemplates,
+                  setProjectTemplates,
+                  currentProjectTemplate,
+                }}
               />
             </div>
             {/* Team Select*/}
-            {isLoggedIn && (
-              <div className="translate-box project-team">
-                <Select
-                  label="Team"
-                  id="project-team"
-                  name={'project-team'}
-                  maxHeightDroplist={SELECT_HEIGHT}
-                  showSearchBar={true}
-                  options={
-                    user?.teams
-                      ? user.teams.map((team) => ({
-                          ...team,
-                          id: team.id.toString(),
-                        }))
-                      : []
-                  }
-                  activeOption={selectedTeam}
-                  checkSpaceToReverse={false}
-                  isDisabled={
-                    !user || user.teams.length === 1 || !projectTemplates.length
-                  }
-                  onSelect={(option) => setSelectedTeam(option)}
-                />
-              </div>
-            )}
-            {/*Source Language*/}
-            <div className="translate-box source">
-              <SourceLanguageSelect
-                history={
-                  historySourceTargets?.source
-                    ? historySourceTargets.source.split(',')
+            <div className="translate-box project-team">
+              <Select
+                label="Team"
+                id="project-team"
+                name={'project-team'}
+                maxHeightDroplist={SELECT_HEIGHT}
+                showSearchBar={true}
+                options={
+                  userInfo?.teams
+                    ? userInfo.teams.map((team) => ({
+                        ...team,
+                        id: team.id.toString(),
+                      }))
                     : []
                 }
+                activeOption={selectedTeam}
+                checkSpaceToReverse={false}
+                isDisabled={
+                  !isUserLogged ||
+                  userInfo?.teams.length === 1 ||
+                  isLoadingTemplates
+                }
+                onSelect={(option) => setSelectedTeam(option)}
               />
             </div>
-            <a id="swaplang" title="Swap languages" onClick={swapLanguages}>
+            {/*Source Language*/}
+            <div className="translate-box source">
+              <SourceLanguageSelect />
+            </div>
+            <a
+              id="swaplang"
+              title="Swap languages"
+              {...(isUserLogged &&
+                !isLoadingTemplates && {onClick: swapLanguages})}
+            >
               <span>Swap languages</span>
             </a>
             {/*Target Language*/}
@@ -813,7 +876,7 @@ const NewProject = ({
             {/*Project Subject*/}
             <div className="translate-box project-subject">
               <Select
-                label="Select subject"
+                label="Subject"
                 id="project-subject"
                 name={'project-subject'}
                 maxHeightDroplist={SELECT_HEIGHT}
@@ -822,25 +885,13 @@ const NewProject = ({
                 activeOption={subject}
                 checkSpaceToReverse={false}
                 onSelect={(option) => setSubject(option)}
+                isDisabled={!isUserLogged || isLoadingTemplates}
               />
             </div>
             {/*TM and glossary*/}
             <div className="translate-box tmx-select">
               <TmGlossarySelect />
             </div>
-            {isLoggedIn && (
-              <div className="translate-box">
-                <TemplateSelect
-                  {...{
-                    label: 'Project template',
-                    maxHeightDroplist: SELECT_HEIGHT,
-                    projectTemplates,
-                    setProjectTemplates,
-                    currentProjectTemplate,
-                  }}
-                />
-              </div>
-            )}
 
             <div
               className={`translate-box settings${isLoadingTemplates ? ' settings-disabled' : ''}`}
@@ -865,8 +916,21 @@ const NewProject = ({
             <p>{errors}</p>
           </div>
         )}
-
-        <UploadFile />
+        {typeof isUserLogged === 'boolean' ? (
+          isUserLogged ? (
+            <UploadFile />
+          ) : (
+            <div className="upload-box-not-logged">
+              <h2>
+                <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create
+                a project.
+              </h2>
+              <span>Start translating now!</span>
+            </div>
+          )
+        ) : (
+          <div className="upload-waiting-logged"></div>
+        )}
       </div>
       <div className="wrapper-bottom">
         {conversionEnabled && (
@@ -899,14 +963,14 @@ const NewProject = ({
         )}
         <div className="uploadbtn-box">
           {!projectSent ? (
-            <input
+            <Button
+              size={BUTTON_SIZE.BIG}
+              type={BUTTON_TYPE.PRIMARY}
               disabled={
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
                 projectTemplates.length === 0
               }
-              name=""
-              type="button"
               className={`uploadbtn${
                 !isFormReadyToSubmit ||
                 isImportTMXInProgress ||
@@ -914,19 +978,22 @@ const NewProject = ({
                   ? ' disabled'
                   : ''
               }`}
-              value="Analyze"
               onClick={createProject.current}
-            />
+            >
+              {' '}
+              Analyze
+            </Button>
           ) : (
             <>
-              <span className="uploadloader" />
-              <input
-                name=""
-                type="button"
-                className="uploadbtn disabled"
-                value="Analyzing..."
-                disabled="disabled"
-              />
+              <Button
+                size={BUTTON_SIZE.BIG}
+                type={BUTTON_TYPE.PRIMARY}
+                className={'uploadbtn disabled'}
+                disabled={true}
+              >
+                <span className="uploadloader" />
+                Analyzing...
+              </Button>
             </>
           )}
         </div>
@@ -946,13 +1013,13 @@ const NewProject = ({
           }}
         />
       )}
-      {projectTemplates.length > 0 && (
+      {isUserLogged && projectTemplates.length > 0 && (
         <SettingsPanel
           {...{
             onClose: closeSettings,
             isOpened: openSettings.isOpen,
             tabOpen: openSettings.tab,
-            user,
+            user: userInfo,
             tmKeys,
             setTmKeys,
             mtEngines,
@@ -967,8 +1034,17 @@ const NewProject = ({
           }}
         />
       )}
-
+      <HomePageSection />
       <Footer />
+      <SocketListener
+        isAuthenticated={isUserLogged}
+        userId={isUserLogged ? userInfo.user.uid : null}
+      />
+      <OnboardingTooltips
+        show={isUserLogged && userInfo.user}
+        continous={true}
+        page={ONBOARDING_PAGE.HOME}
+      />
     </CreateProjectContext.Provider>
   ) : (
     <div>
@@ -995,14 +1071,9 @@ const NewProject = ({
     </div>
   )
 }
-NewProject.propTypes = {
-  isLoggedIn: PropTypes.bool,
-  sourceLanguageSelected: PropTypes.string,
-  targetLanguagesSelected: PropTypes.string,
-  subjectsArray: PropTypes.array,
-  conversionEnabled: PropTypes.bool,
-  formatsNumber: PropTypes.number,
-  googleDriveEnabled: PropTypes.bool,
-  restartConversions: PropTypes.func,
-}
 export default NewProject
+
+mountPage({
+  Component: NewProject,
+  rootElement: document.getElementsByClassName('new_project__page')[0],
+})

@@ -9,33 +9,85 @@
 namespace API\V2;
 
 
+use API\App\RateLimiterTrait;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
+use ApiKeys_ApiKeyDao;
+use Exception;
+use Klein\Response;
+use Utils;
 
 class KeyCheckController extends KleinController {
 
+    use RateLimiterTrait;
+
+    /**
+     * @throws AuthenticationError
+     * @throws Exception
+     */
     public function ping() {
-        if ( !$this->api_record ) {
-            throw new AuthenticationError() ;
+
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping', 3 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping', 3 );
+
+        if ( $checkRateLimitEmail ) {
+            $this->response = $checkRateLimitEmail;
+
+            return;
         }
 
-        $this->response->code(200) ;
+        if ( $checkRateLimitIp ) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
+        $this->incrementRateLimitCounter( $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/ping' );
+        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/ping' );
+
+        if ( !$this->getApiRecord() ) {
+            throw new AuthenticationError();
+        }
+
+        $this->response->code( 200 );
     }
 
-    public function getUID(){
+    /**
+     * @throws NotFoundException
+     * @throws AuthenticationError
+     * @throws Exception
+     */
+    public function getUID() {
 
-        if ( !$this->api_record ) {
-            throw new AuthenticationError( 'Unauthorized', 401 ) ;
+        $checkRateLimitEmail = $this->checkRateLimitResponse( $this->response, $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]', 3 );
+        $checkRateLimitIp    = $this->checkRateLimitResponse( $this->response, Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]', 3 );
+
+        if ( $checkRateLimitEmail ) {
+            $this->response = $checkRateLimitEmail;
+
+            return;
         }
 
-        [ $user_api_key, $user_api_secret ] = explode('-', $this->params[ 'user_api_key' ] ) ;
+        if ( $checkRateLimitIp ) {
+            $this->response = $checkRateLimitIp;
+
+            return;
+        }
+
+        if ( !$this->getApiRecord() ) {
+            $this->incrementRateLimitCounter( $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]' );
+            $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]' );
+            throw new AuthenticationError( 'Unauthorized', 401 );
+        }
+
+        [ $user_api_key, $user_api_secret ] = explode( '-', $this->params[ 'user_api_key' ] );
 
         if ( $user_api_key && $user_api_secret ) {
 
-            $api_record = \ApiKeys_ApiKeyDao::findByKey( $user_api_key );
+            $api_record = ApiKeys_ApiKeyDao::findByKey( $user_api_key );
 
-            if( $api_record && $api_record->validSecret( $user_api_secret ) ){
+            if ( $api_record && $api_record->validSecret( $user_api_secret ) ) {
 
                 /*
                     //for now the response is really simple, if more info are needed use the DAO
@@ -53,6 +105,9 @@ class KeyCheckController extends KleinController {
             }
 
         }
+
+        $this->incrementRateLimitCounter( $this->getUser()->email ?? "BLANK_EMAIL", '/api/v2/user/[:user_api_key]' );
+        $this->incrementRateLimitCounter( Utils::getRealIpAddr() ?? "127.0.0.1", '/api/v2/user/[:user_api_key]' );
 
         throw new NotFoundException( "User not found.", 404 );
 

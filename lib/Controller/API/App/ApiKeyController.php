@@ -4,6 +4,7 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
+use ApiKeys_ApiKeyDao;
 use ApiKeys_ApiKeyStruct;
 use Utils;
 
@@ -21,7 +22,7 @@ class ApiKeyController extends KleinController {
     public function create() {
 
         $this->allowOnlyInternalUsers();
-        $apiKeyDao = new \ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeys_ApiKeyDao();
 
         // check if logged user already has a key
         if ( $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
@@ -63,7 +64,7 @@ class ApiKeyController extends KleinController {
      */
     public function show() {
 
-        $apiKeyDao = new \ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeys_ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
             $this->response->status()->setCode( 404 );
@@ -77,7 +78,7 @@ class ApiKeyController extends KleinController {
 
         // hide api_secret
         $apiKey->api_secret = '***********';
-        
+
         $this->response->status()->setCode( 200 );
         $this->response->json( $apiKey );
     }
@@ -88,7 +89,7 @@ class ApiKeyController extends KleinController {
     public function delete() {
 
         $this->allowOnlyInternalUsers();
-        $apiKeyDao = new \ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeys_ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
             $this->response->status()->setCode( 404 );
@@ -109,7 +110,7 @@ class ApiKeyController extends KleinController {
                             'success'
                     ]
             ] );
-            
+
         } catch ( \Exception $e ) {
             $this->response->status()->setCode( 500 );
             $this->response->json( [

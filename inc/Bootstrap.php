@@ -44,7 +44,7 @@ class Bootstrap {
         spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
         @include_once 'vendor/autoload.php';
 
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
+        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
@@ -52,7 +52,6 @@ class Bootstrap {
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View/templates";
-
 
         //get the environment configuration
         self::initConfig();
@@ -94,7 +93,7 @@ class Bootstrap {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
             WorkerClient::init();
             Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
             Log::doJsonLog( $e->getMessage() );
         }
 
@@ -164,7 +163,7 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    public static function exceptionHandler( $exception ) {
+    public static function exceptionHandler( Throwable $exception ) {
 
         Log::$fileName = 'fatal_errors.txt';
 
@@ -191,7 +190,7 @@ class Bootstrap {
             $message          = "Conflict";
             $response_message = $exception->getMessage();
             Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( \PDOException $e ) {
+        } catch ( PDOException $e ) {
             $code    = 503;
             $message = "Service Unavailable";
 //            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
@@ -200,7 +199,7 @@ class Bootstrap {
             $code    = 500;
             $message = "Internal Server Error";
 //            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+            Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
@@ -328,12 +327,15 @@ class Bootstrap {
         @session_write_close();
     }
 
+    /**
+     * @throws Exception
+     */
     public static function sessionStart() {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_NONE ) {
             session_start();
         } elseif ( $session_status == PHP_SESSION_DISABLED ) {
-            throw new \Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+            throw new Exception( "MateCat needs to have sessions. Sessions must be enabled." );
         }
     }
 
@@ -496,29 +498,8 @@ class Bootstrap {
         return true;
     }
 
-    /**
-     * Check if the main OAuth keys are present
-     *
-     * @return bool true if the main OAuth keys are present, false otherwise
-     */
-    public static function areOauthKeysPresent() {
-        if ( empty( INIT::$OAUTH_CLIENT_ID ) ) {
-            return false;
-        }
-
-        if ( empty( INIT::$OAUTH_CLIENT_SECRET ) ) {
-            return false;
-        }
-
-        if ( empty( INIT::$OAUTH_CLIENT_APP_NAME ) ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static function isGDriveConfigured() {
-        if ( empty( INIT::$OAUTH_BROWSER_API_KEY ) ) {
+    public static function isGDriveConfigured(): bool {
+        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_ID ) || empty( INIT::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
             return false;
         }
 

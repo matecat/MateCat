@@ -1,5 +1,6 @@
 <?php
 
+use ConnectedServices\Google\GDrive\Session;
 use TMS\TMSService;
 
 /**
@@ -16,7 +17,6 @@ class ajaxUtilsController extends ajaxController {
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
         $posts = $_POST;
@@ -63,7 +63,7 @@ class ajaxUtilsController extends ajaxController {
                 break;
             case 'clearNotCompletedUploads':
                 try {
-                    ( new ConnectedServices\GDrive\Session() )->cleanupSessionFiles();
+                    ( new Session() )->cleanupSessionFiles();
                 } catch ( Exception $e ) {
                     Log::doJsonLog( "ajaxUtils::clearNotCompletedUploads : " . $e->getMessage() );
                 }

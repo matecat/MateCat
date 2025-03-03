@@ -42,12 +42,23 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
     )
 
     if (templatesInvolved.length) {
+      const templateCategoryName =
+        propConnectProjectTemplate === SCHEMA_KEYS.qaModelTemplateId
+          ? 'quality framework'
+          : propConnectProjectTemplate === SCHEMA_KEYS.payableRateTemplateId
+            ? 'analysis'
+            : propConnectProjectTemplate === SCHEMA_KEYS.filtersTemplateId
+              ? 'extraction parameters'
+              : propConnectProjectTemplate === SCHEMA_KEYS.XliffConfigTemplateId
+                ? 'XLIFF import settings'
+                : ''
+
       ModalsActions.showModalComponent(
         ConfirmDeleteResourceProjectTemplates,
         {
           projectTemplatesInvolved: templatesInvolved,
           successCallback: deleteTemplate,
-          content: `The ${propConnectProjectTemplate === SCHEMA_KEYS.qaModelTemplateId ? 'quality framework' : 'analysis'} template you are about to delete is used in the following project creation template(s):`,
+          content: `The ${templateCategoryName} template you are about to delete is used in the following project creation template(s):`,
         },
         'Confirm deletion',
       )
@@ -78,12 +89,14 @@ export const SubTemplateMoreMenu = ({portalTarget}) => {
   const cleanProjectTemplateAfterDelete = (id) => {
     if (
       id !==
-      projectTemplates.find(({isSelected}) => isSelected).qaModelTemplateId
+      projectTemplates.find(({isSelected}) => isSelected)[
+        propConnectProjectTemplate
+      ]
     )
       return
 
     const projectTemplatesUpdated = projectTemplates
-      .filter(({qaModelTemplateId}) => qaModelTemplateId === id)
+      .filter((template) => template[propConnectProjectTemplate] === id)
       .map((template) => ({...template, [propConnectProjectTemplate]: 0}))
 
     if (projectTemplatesUpdated.length) {

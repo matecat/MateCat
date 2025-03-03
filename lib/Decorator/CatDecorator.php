@@ -1,6 +1,8 @@
 <?php
 
+use Langs\Languages;
 use LexiQA\LexiQADecorator;
+use Projects\ChunkOptionsModel;
 
 class CatDecorator extends \AbstractDecorator {
 
@@ -15,7 +17,7 @@ class CatDecorator extends \AbstractDecorator {
     protected $template;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $job;
 
@@ -23,7 +25,7 @@ class CatDecorator extends \AbstractDecorator {
 
     private $isGDriveProject;
 
-    private $lang_handler;
+    private Languages $lang_handler;
 
     public function __construct( catController $controller, PHPTAL $template ) {
 
@@ -33,7 +35,7 @@ class CatDecorator extends \AbstractDecorator {
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
 
-        $this->lang_handler = Langs_Languages::getInstance();
+        $this->lang_handler = Languages::getInstance();
     }
 
     public function decorate() {
@@ -109,18 +111,19 @@ class CatDecorator extends \AbstractDecorator {
                 INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
 
+    /**
+     * @throws Exception
+     */
     private function assignOptions() {
         $chunk_options_model = new ChunkOptionsModel( $this->job );
 
         //show Tag Projection
         $this->template->show_tag_projection = true;
-
-        $this->template->tag_projection_enabled = $chunk_options_model->isEnabled( 'tag_projection' );
         $this->template->speech2text_enabled    = $chunk_options_model->isEnabled( 'speech2text' );
 
         LexiQADecorator::getInstance( $this->template )->checkJobHasLexiQAEnabled( $chunk_options_model )->decorateViewLexiQA();
 
-        $this->template->segmentation_rule        = @$chunk_options_model->project_metadata[ 'segmentation_rule' ];
+        $this->template->segmentation_rule        = $chunk_options_model->project_metadata[ 'segmentation_rule' ] ?? null;
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
 
     }
@@ -128,7 +131,7 @@ class CatDecorator extends \AbstractDecorator {
     private function decorateForCJK() {
 
         //check if language belongs to supported right-to-left languages ( decorate the HTML )
-        $lang_handler                = Langs_Languages::getInstance();
+        $lang_handler                = Languages::getInstance();
         $isSourceRTL                 = $lang_handler->isRTL( $this->controller->source_code );
         $isTargetRTL                 = $lang_handler->isRTL( $this->controller->target_code );
         $this->template->isTargetRTL = $isTargetRTL ?: 0;

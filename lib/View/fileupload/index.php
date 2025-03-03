@@ -1,14 +1,7 @@
 <?php
-/*
- * jQuery File Upload Plugin PHP Example 5.7
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
- */
+
+use ConnectedServices\Google\GDrive\Session;
+
 error_reporting( E_ALL | E_STRICT );
 
 ini_set( 'max_input_time', 3600 );
@@ -34,7 +27,7 @@ switch ( $_SERVER[ 'REQUEST_METHOD' ] ) {
         break;
     case 'HEAD':
     case 'GET':
-        if ( !( new ConnectedServices\GDrive\Session() )->sessionHasFiles() ) {
+        if ( !( new Session() )->sessionHasFiles() ) {
             $upload_handler->get();
         } else {
             echo json_encode( [] );

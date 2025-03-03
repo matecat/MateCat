@@ -2,7 +2,7 @@
 
 use Exceptions\ValidationError;
 use TestHelpers\AbstractTest;
-use Users\SignupModel;
+use Users\Authentication\SignupModel;
 
 class SignupTest extends AbstractTest {
 

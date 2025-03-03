@@ -1,14 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 
 import Switch from '../common/Switch'
 import {getUserApiKey} from '../../api/getUserApiKey'
-import {logoutUser as logoutUserApi} from '../../api/logoutUser'
 import {createUserApiKey} from '../../api/createUserApiKey'
 import {connectedServicesGDrive} from '../../api/connectedServicesGDrive'
 import {deleteUserApiKey} from '../../api/deleteUserApiKey'
 import IconEdit from '../icons/IconEdit'
 import {modifyUserInfo} from '../../api/modifyUserInfo/modifyUser'
-import TeamsActions from '../../actions/TeamsActions'
+import UserActions from '../../actions/UserActions'
 import {
   Button,
   BUTTON_MODE,
@@ -16,9 +15,19 @@ import {
   BUTTON_TYPE,
 } from '../common/Button/Button'
 import IconClose from '../icons/IconClose'
+import UserStore from '../../stores/UserStore'
+import {getUserData} from '../../api/getUserData'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import ModalsActions from '../../actions/ModalsActions'
+import useAuth from '../../hooks/useAuth'
 
 const PreferencesModal = (props) => {
-  const [service, setService] = useState(props.service)
+  const {userInfo, setUserInfo, logout} = useContext(ApplicationWrapperContext)
+
+  const {user, metadata} = userInfo
+  const serviceInfo = UserStore.getDefaultConnectedService()
+
+  const [service, setService] = useState(serviceInfo)
   const [credentials, setCredentials] = useState(null)
   const [driveActive, setDriveActive] = useState(
     service && (!service.disabled_at || !service.expired_at),
@@ -27,9 +36,11 @@ const PreferencesModal = (props) => {
   const [credentialsCopied, setCredentialsCopied] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [modifyUser, setModifyUser] = useState(false)
-  const [firstName, setFirstName] = useState(props.user.first_name)
-  const [lastName, setLastName] = useState(props.user.last_name)
+  const [firstName, setFirstName] = useState(user.first_name)
+  const [lastName, setLastName] = useState(user.last_name)
+
   const inputName = useRef()
+
   useEffect(() => {
     getUserApiKey()
       .then((response) => {
@@ -41,7 +52,7 @@ const PreferencesModal = (props) => {
   }, [])
 
   const openResetPassword = () => {
-    APP.openResetPassword() // Assuming APP.openResetPassword() is defined
+    ModalsActions.openResetPassword()
   }
 
   const checkboxChange = (selected) => {
@@ -57,8 +68,9 @@ const PreferencesModal = (props) => {
 
       let interval = setInterval(() => {
         if (newWindow.closed) {
-          APP.USER.loadUserData().then(() => {
-            const updatedService = APP.USER.getDefaultConnectedService()
+          getUserData().then((data) => {
+            UserActions.updateUser(data)
+            const updatedService = UserStore.getDefaultConnectedService()
             if (updatedService) {
               setService(updatedService)
               setDriveActive(true)
@@ -72,10 +84,15 @@ const PreferencesModal = (props) => {
     } else {
       setDriveActive(false)
 
-      if (APP.USER.STORE.connected_services.length) {
+      if (userInfo.connected_services.length) {
         disableGDrive().then((data) => {
-          APP.USER.upsertConnectedService(data.connected_service)
-          setService(APP.USER.getDefaultConnectedService())
+          const connectedServices = UserStore.updateConnectedService(
+            data.connected_service,
+          )
+          const defaultService = connectedServices.find((item) => {
+            return item.is_default
+          })
+          setService(defaultService)
         })
       }
     }
@@ -85,14 +102,8 @@ const PreferencesModal = (props) => {
     return connectedServicesGDrive(service.id)
   }
 
-  const logoutUser = () => {
-    logoutUserApi().then(() => {
-      if ($('body').hasClass('manage')) {
-        location.href = config.hostpath + config.basepath
-      } else {
-        window.location.reload()
-      }
-    })
+  const logoutFn = () => {
+    logout()
   }
 
   const generateKey = () => {
@@ -127,13 +138,14 @@ const PreferencesModal = (props) => {
   }
 
   const modifyUserDetails = () => {
-    if (firstName && lastName) {
-      modifyUserInfo(firstName, lastName).then(() => {
-        console.log('saved')
-      })
-      setModifyUser(false)
-      TeamsActions.updateUserName({firstName, lastName})
-    }
+    modifyUserInfo(firstName, lastName).then(() => {
+      console.log('saved')
+    })
+    setModifyUser(false)
+    setUserInfo((prevState) => ({
+      ...prevState,
+      user: {...prevState.user, first_name: firstName, last_name: lastName},
+    }))
   }
 
   const getApiKeyHtml = () => {
@@ -152,7 +164,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => deleteKey()}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Delete
                 </Button>
@@ -161,7 +173,7 @@ const PreferencesModal = (props) => {
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={(e) => undoDelete(e)}
                   className={'btn-cancel'}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Cancel
                 </Button>
@@ -210,7 +222,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={(e) => copyToClipboard(e)}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     <i className="icon-copy icon" />
                     {credentialsCopied ? 'Copied' : 'Copy'}
@@ -219,7 +231,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     Delete
                   </Button>
@@ -230,7 +242,7 @@ const PreferencesModal = (props) => {
                     type={BUTTON_TYPE.PRIMARY}
                     size={BUTTON_SIZE.MEDIUM}
                     onClick={() => confirmDeleteHandler()}
-                    tabIndex={0}
+                    tabIndex="0"
                   >
                     Delete
                   </Button>
@@ -293,7 +305,7 @@ const PreferencesModal = (props) => {
                   type={BUTTON_TYPE.PRIMARY}
                   size={BUTTON_SIZE.MEDIUM}
                   onClick={() => generateKey()}
-                  tabIndex={0}
+                  tabIndex="0"
                 >
                   Generate
                 </Button>
@@ -315,12 +327,12 @@ const PreferencesModal = (props) => {
   }
 
   let services_label = 'Allow Matecat to access your files on Google Drive'
-  if (service && (!service.disabled_at || !service.expired_at)) {
+  if (service && !service.disabled_at && !service.expired_at) {
     services_label = `Connected to Google Drive (${service.email})`
   }
 
   let resetPasswordHtml = ''
-  if (props.user.has_password) {
+  if (user.has_password) {
     resetPasswordHtml = (
       <a className="reset-password pull-left" onClick={openResetPassword}>
         Reset Password
@@ -331,10 +343,13 @@ const PreferencesModal = (props) => {
   let avatar = (
     <div className="avatar-user pull-left">{config.userShortName}</div>
   )
-  if (props.metadata.gplus_picture) {
+  if (metadata && metadata[`${metadata.oauth_provider}_picture`]) {
     avatar = (
       <div className="avatar-user pull-left">
-        <img src={props.metadata.gplus_picture} style={{width: '48px'}} />
+        <img
+          src={metadata[`${metadata.oauth_provider}_picture`]}
+          style={{width: '48px'}}
+        />
       </div>
     )
   }
@@ -393,10 +408,10 @@ const PreferencesModal = (props) => {
                 <Button
                   type={BUTTON_TYPE.WARNING}
                   size={BUTTON_SIZE.ICON_STANDARD}
-                  tabIndex={0}
+                  tabIndex="0"
                   onClick={() => {
-                    setFirstName(props.user.first_name)
-                    setLastName(props.user.last_name)
+                    setFirstName(user.first_name)
+                    setLastName(user.last_name)
                     setModifyUser(false)
                   }}
                 >
@@ -419,15 +434,15 @@ const PreferencesModal = (props) => {
               </div>
             </div>
           )}
-          <span className="grey-txt">{props.user.email}</span>
+          <span className="grey-txt">{user.email}</span>
           <br />
         </div>
         <br />
         <div className="user-link">
-          <div id="logoutlink" className="pull-right" onClick={logoutUser}>
+          {resetPasswordHtml}
+          <div id="logoutlink" className="pull-right" onClick={logoutFn}>
             Logout
           </div>
-          {resetPasswordHtml}
         </div>
       </div>
       <div className="user-info-attributes">

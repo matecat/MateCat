@@ -13,10 +13,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $is_default               = false;
     public int     $uid                      = 0;
     public int     $id_team                  = 0;
-    public bool    $speech2text              = false;
-    public bool    $lexica                   = true;
     public bool    $tag_projection           = true;
-    public ?string $cross_language_matches   = null;
     public ?string $segmentation_rule        = null;
     public ?string $mt                       = null;
     public ?string $tm                       = null;
@@ -26,9 +23,13 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public int     $xliff_config_template_id = 0;
     public bool    $pretranslate_100         = false;
     public bool    $pretranslate_101         = false;
+    public bool    $tm_prioritization        = false;
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
+    public ?string $subject                  = null;
+    public ?string $source_language          = null;
+    public ?string $target_language          = null;
 
     /**
      * @param string   $json
@@ -45,33 +46,22 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->name                     = $json->name;
         $this->is_default               = ( isset( $json->is_default ) ) ? $json->is_default : false;
         $this->id_team                  = $json->id_team;
-        $this->speech2text              = $json->speech2text;
-        $this->lexica                   = $json->lexica;
-        $this->tag_projection           = $json->tag_projection;
-        $this->cross_language_matches   = json_encode( $json->cross_language_matches );
-        $this->segmentation_rule        = json_encode( $json->segmentation_rule );
+        $this->segmentation_rule        = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
+        $this->tm_prioritization        = $json->tm_prioritization;
         $this->get_public_matches       = $json->get_public_matches;
         $this->mt                       = json_encode( $json->mt );
-        $this->tm                       = json_encode( $json->tm );
+        $this->tm                       = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
         $this->payable_rate_template_id = $json->payable_rate_template_id;
         $this->qa_model_template_id     = $json->qa_model_template_id;
         $this->filters_template_id      = $json->filters_template_id;
         $this->xliff_config_template_id = $json->xliff_config_template_id;
+        $this->subject                  = $json->subject;
+        $this->source_language          = $json->source_language;
+        $this->target_language          = (!empty($json->target_language)) ? serialize($json->target_language) : null;
 
         return $this;
-    }
-
-    /**
-     * @return ?object
-     */
-    public function getCrossLanguageMatches(): ?object {
-        if ( !empty( $this->cross_language_matches ) ) {
-            return json_decode( $this->cross_language_matches );
-        }
-
-        return new stdClass();
     }
 
     /**
@@ -107,6 +97,15 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         return [];
     }
 
+    public function getTargetLanguage(): array {
+
+        if(empty($this->target_language)){
+            return [];
+        }
+
+        return unserialize($this->target_language);
+    }
+
     /**
      * @inheritDoc
      */
@@ -117,10 +116,6 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'is_default'               => $this->is_default,
                 'uid'                      => $this->uid,
                 'id_team'                  => $this->id_team,
-                'speech2text'              => $this->speech2text,
-                'lexica'                   => $this->lexica,
-                'tag_projection'           => $this->tag_projection,
-                'cross_language_matches'   => $this->getCrossLanguageMatches(),
                 'segmentation_rule'        => $this->getSegmentationRule(),
                 'mt'                       => $this->getMt(),
                 'tm'                       => $this->getTm(),
@@ -131,6 +126,10 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'get_public_matches'       => $this->get_public_matches,
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
+                'tm_prioritization'        => $this->tm_prioritization,
+                'subject'                  => $this->subject,
+                'source_language'          => $this->source_language,
+                'target_language'          => $this->getTargetLanguage(),
                 'created_at'               => date_create( $this->created_at )->format( DATE_RFC822 ),
                 'modified_at'              => date_create( $this->modified_at )->format( DATE_RFC822 ),
         ];

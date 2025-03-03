@@ -41,7 +41,7 @@ class analyzeController extends viewController {
     public $project;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -57,8 +57,8 @@ class analyzeController extends viewController {
 
     public function __construct() {
 
-        parent::sessionStart();
-        parent::__construct( false );
+        parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
 
         $filterArgs = [
                 'pid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
@@ -77,12 +77,18 @@ class analyzeController extends viewController {
 
         $this->project = Projects_ProjectDao::findById( $this->pid, 60 * 60 );
 
+        if ( empty( $this->project ) ) {
+            $this->project_not_found = true;
+            parent::makeTemplate( $this->analyze_html );
+            return;
+        }
+
         if ( !empty( $this->jid ) ) {
 
             // we are looking for a chunk
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $pass );
 
-            if ( $this->chunk->status_owner === Constants_JobStatus::STATUS_DELETED ) {
+            if ( $this->chunk->isDeleted() ) {
                 $this->project_not_found = true;
             }
 
@@ -96,7 +102,7 @@ class analyzeController extends viewController {
             $chunks = ( new Chunks_ChunkDao )->getByProjectID( $this->project->id );
 
             $notDeleted = array_filter( $chunks, function ( $element ) {
-                return $element->status_owner != Constants_JobStatus::STATUS_DELETED;
+                return !$element->isDeleted();
             } );
 
             $this->project_not_found = $this->project->password != $pass || empty( $notDeleted );
@@ -186,8 +192,7 @@ class analyzeController extends viewController {
         $this->template->split_enabled           = true;
         $this->template->enable_outsource        = INIT::$ENABLE_OUTSOURCE;
 
-        $this->template->authURL       = ( !$this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-', INIT::$OAUTH_REDIRECT_URL ) : "";
-        $this->template->gdriveAuthURL = ( $this->isLoggedIn() ) ? $this->setGoogleAuthUrl( 'google-drive-', INIT::$HTTPHOST . "/gdrive/oauth/response" ) : "";
+        $this->intOauthClients();
 
     }
 

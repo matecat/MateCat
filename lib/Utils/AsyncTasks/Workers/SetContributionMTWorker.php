@@ -27,7 +27,7 @@ class SetContributionMTWorker extends SetContributionWorker {
      */
     protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        if ( empty( $this->_engine ) || $jobStruct->id_mt_engine != $this->_engine->getEngineRow()->id ) {
+        if ( empty( $this->_engine ) || $jobStruct->id_mt_engine != $this->_engine->getEngineRecord()->id ) {
             try {
                 $this->_engine = Engine::getInstance( $jobStruct->id_mt_engine ); //Load MT Adaptive Engine
             } catch ( Exception $e ) {
@@ -51,7 +51,7 @@ class SetContributionMTWorker extends SetContributionWorker {
         $config[ 'translation' ] = $contributionStruct->translation;
         $config[ 'session' ]     = $contributionStruct->getSessionId();
         $config[ 'uid' ]         = $contributionStruct->uid;
-        $config[ 'set_mt' ]      = ( $jobStruct->id_mt_engine != 1 ) ? false : true;
+        $config[ 'set_mt' ]      = $jobStruct->id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->set( $config );
@@ -70,11 +70,13 @@ class SetContributionMTWorker extends SetContributionWorker {
      */
     protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 0 ) {
 
-        $config[ 'segment' ]     = $contributionStruct->segment;
-        $config[ 'translation' ] = $contributionStruct->translation;
-        $config[ 'tuid' ]        = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
-        $config[ 'session' ]     = $contributionStruct->getSessionId();
-        $config[ 'set_mt' ]      = ( $id_mt_engine != 1 ) ? false : true;
+        $config[ 'segment' ]        = $contributionStruct->segment;
+        $config[ 'translation' ]    = $contributionStruct->translation;
+        $config[ 'tuid' ]           = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+        $config[ 'session' ]        = $contributionStruct->getSessionId();
+        $config[ 'set_mt' ]         = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
+        $config[ 'context_before' ] = $contributionStruct->context_before;
+        $config[ 'context_after' ]  = $contributionStruct->context_after;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );

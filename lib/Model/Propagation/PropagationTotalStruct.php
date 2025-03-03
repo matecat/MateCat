@@ -1,54 +1,47 @@
 <?php
 
-class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
 
     /**
      * @var array
      */
-    private $totals;
+    protected array $totals = [];
 
     /**
      * @var array
      */
-    private $propagated_ids;
+    protected array $propagated_ids = [];
 
     /**
      * @var array
      */
-    private $propagated_ids_to_update_version;
+    protected array $propagated_ids_to_update_version = [];
 
     /**
      * @var array
      */
-    private $segments_for_propagation;
-
-    public function __construct() {
-        $this->totals                           = [];
-        $this->propagated_ids                   = [];
-        $this->propagated_ids_to_update_version = [];
-        $this->segments_for_propagation         = [
-                'propagated'     => [
-                        'ice'     => [],
-                        'not_ice' => [],
-                ],
-                'not_propagated' => [
-                        'ice'     => [],
-                        'not_ice' => [],
-                ],
-        ];
-    }
+    protected array $segments_for_propagation = [
+            'propagated'     => [
+                    'ice'     => [],
+                    'not_ice' => [],
+            ],
+            'not_propagated' => [
+                    'ice'     => [],
+                    'not_ice' => [],
+            ],
+    ];
 
     /**
      * @return array
      */
-    public function getTotals() {
+    public function getTotals(): array {
         return $this->totals;
     }
 
     /**
      * @param array $params
      */
-    public function setTotals( $params ) {
+    public function setTotals( array $params ) {
         $this->totals[ 'total' ]    = $params[ 'total' ];
         $this->totals[ 'countSeg' ] = $params[ 'countSeg' ];
         $this->totals[ 'status' ]   = $params[ 'status' ];
@@ -57,14 +50,14 @@ class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoObjectStr
     /**
      * @return array
      */
-    public function getPropagatedIds() {
+    public function getPropagatedIds(): array {
         return $this->propagated_ids;
     }
 
     /**
-     * @param int $id_segment
+     * @param string $id_segment
      */
-    public function addPropagatedId( $id_segment ) {
+    public function addPropagatedId( string $id_segment ) {
         if ( false === in_array( $id_segment, $this->propagated_ids ) ) {
             $this->propagated_ids[]                               = $id_segment;
             $this->segments_for_propagation[ 'propagated_ids' ][] = $id_segment;
@@ -74,23 +67,23 @@ class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoObjectStr
     /**
      * @return array
      */
-    public function getPropagatedIdsToUpdateVersion() {
+    public function getPropagatedIdsToUpdateVersion(): array {
         return $this->propagated_ids_to_update_version;
     }
 
     /**
-     * @param int $id_segment
+     * @param string $id_segment
      */
-    public function addPropagatedIdToUpdateVersion( $id_segment ) {
+    public function addPropagatedIdToUpdateVersion( string $id_segment ) {
         if ( false === in_array( $id_segment, $this->propagated_ids_to_update_version ) ) {
-            $this->propagated_ids_to_update_version[] = $id_segment;
+            $this->propagated_ids_to_update_version[ $id_segment ] = $id_segment;
         }
     }
 
     /**
      * @return array
      */
-    public function getSegmentsForPropagation() {
+    public function getSegmentsForPropagation(): array {
         return $this->segments_for_propagation;
     }
 
@@ -127,6 +120,32 @@ class Propagation_PropagationTotalStruct extends DataAccess_AbstractDaoObjectStr
         $this->segments_for_propagation[ 'not_propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'not_propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
     }
+
+    public function jsonSerialize(): array {
+        return [
+                "totals"                           => $this->totals,
+                "propagated_ids"                   => $this->propagated_ids,
+                "propagated_ids_to_update_version" => $this->propagated_ids_to_update_version,
+                "segments_for_propagation"         => $this->segments_for_propagation,
+        ];
+    }
+
+    public function getAllToPropagate(): array {
+        $aggregator = [];
+
+        if ( !empty( $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ] ) ) {
+            foreach ( $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ] as $segment ) {
+                $aggregator[] = $segment;
+            }
+        }
+
+        if ( !empty( $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ] ) ) {
+            foreach ( $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ] as $segment ) {
+                $aggregator[] = $segment;
+            }
+        }
+
+        return $aggregator;
+    }
+
 }
-
-

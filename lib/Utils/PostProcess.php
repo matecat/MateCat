@@ -7,12 +7,12 @@ class PostProcess extends QA {
 
     /**
      * Perform all integrity check and comparisons on source and target string
-     * 
+     *
      */
     public function realignMTSpaces() {
 
         try {
-            list( $srcNodeList, $trgNodeList ) = $this->_prepareDOMStructures();
+            [ $srcNodeList, $trgNodeList ] = $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
@@ -24,7 +24,7 @@ class PostProcess extends QA {
             return; //fail
         }
 
-        list ( $source_seg, $target_seg ) = $this->_realignTMSpaces();
+        [ $source_seg, $target_seg ] = $this->_realignTMSpaces();
 
         //- re-import in the dom target after regular expression
         //- perform check again ( recursive over the entire class )

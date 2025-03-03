@@ -1,4 +1,5 @@
 <?php
+
 namespace AsyncTasks\Workers;
 
 use Jobs_JobDao;
@@ -45,7 +46,7 @@ class JobsWorker extends AbstractWorker {
      *
      * @throws EndQueueException
      */
-    protected function _checkForReQueueEnd( QueueElement $queueElement ){
+    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
 
         /**
          *
@@ -64,13 +65,13 @@ class JobsWorker extends AbstractWorker {
 
     }
 
-    protected function _recountAvgPee( Jobs_JobStruct $jobStruct ){
+    protected function _recountAvgPee( Jobs_JobStruct $jobStruct ) {
 
         $jDao = new Jobs_JobDao();
 
         $segments = $jDao->getAllModifiedSegmentsForPee( $jobStruct );
 
-        $Pee_weighted = 0;
+        $Pee_weighted       = 0;
         $total_time_to_edit = 0;
         foreach( $segments as $segment ){
             $segment->target_language_code = $jobStruct->target; //Add language to tell to TMS_MATCH if this is a CJK
@@ -79,9 +80,9 @@ class JobsWorker extends AbstractWorker {
         }
 
         $jobStruct->avg_post_editing_effort = $Pee_weighted;
-        $jobStruct->total_time_to_edit = $total_time_to_edit;
+        $jobStruct->total_time_to_edit      = $total_time_to_edit;
 
-        $this->_doLog( "***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: ". $Pee_weighted . " ***** ");
+        $this->_doLog( "***** Job Split " . $jobStruct->id . "-" . $jobStruct->password . " AvgPee: " . $Pee_weighted . " ***** " );
 
         $jDao->updateJobWeightedPeeAndTTE( $jobStruct );
 

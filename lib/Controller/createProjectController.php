@@ -1,8 +1,9 @@
 <?php
 
-use ConnectedServices\GDrive as GDrive;
+use ConnectedServices\Google\GDrive\Session;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
+use Langs\Languages;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
@@ -14,6 +15,7 @@ use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
+use Xliff\XliffConfigTemplateDao;
 
 class createProjectController extends ajaxController {
 
@@ -38,6 +40,11 @@ class createProjectController extends ajaxController {
     private $filters_extraction_parameters;
     private $xliff_parameters;
 
+    private $dictation;
+    private $show_whitespace;
+    private $character_counter;
+    private $ai_assistant;
+
     /**
      * @var QAModelTemplateStruct
      */
@@ -60,10 +67,14 @@ class createProjectController extends ajaxController {
 
     public $postInput;
 
+    private $tm_prioritization;
+
+    /**
+     * @throws Exception
+     */
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = [
@@ -78,6 +89,7 @@ class createProjectController extends ajaxController {
                 'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
                 'pretranslate_101'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'tm_prioritization'  => [ 'filter' => FILTER_VALIDATE_INT ],
                 'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
                 'mmt_glossaries' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
@@ -86,15 +98,20 @@ class createProjectController extends ajaxController {
                 'deepl_formality'               => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
                 'project_completion'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
                 'get_public_matches'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'ai_assistant'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
                 'dialect_strict'                => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'filters_extraction_parameters' => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'xliff_parameters'              => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'xliff_parameters_template_id'  => [ 'filter' => FILTER_VALIDATE_INT ],
 
                 'qa_model_template_id'     => [ 'filter' => FILTER_VALIDATE_INT ],
                 'payable_rate_template_id' => [ 'filter' => FILTER_VALIDATE_INT ],
         ];
 
-        $this->readLoginInfo( false );
+        $this->identifyUser();
         $this->setupUserFeatures();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs );
@@ -102,6 +119,9 @@ class createProjectController extends ajaxController {
         $this->postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //first we check the presence of a list from tm management panel
+
+        $this->__validateTMKeysArray($_POST[ 'private_keys_list' ]);
+
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
 
@@ -158,6 +178,12 @@ class createProjectController extends ajaxController {
         $this->only_private            = ( is_null( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
         $this->due_date                = ( empty( $this->postInput[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $this->postInput[ 'due_date' ] ) );
 
+        $this->dictation         = $this->postInput[ 'dictation' ] ?? null;
+        $this->show_whitespace   = $this->postInput[ 'show_whitespace' ] ?? null;
+        $this->character_counter = $this->postInput[ 'character_counter' ] ?? null;
+        $this->ai_assistant      = $this->postInput[ 'ai_assistant' ] ?? null;
+        $this->tm_prioritization = $this->postInput[ 'tm_prioritization' ] ?? null;
+
         $this->__setMetadataFromPostInput();
 
         if ( $this->disable_tms_engine_flag ) {
@@ -181,8 +207,8 @@ class createProjectController extends ajaxController {
         }
 
 
-        $this->__validateSourceLang( Langs_Languages::getInstance() );
-        $this->__validateTargetLangs( Langs_Languages::getInstance() );
+        $this->__validateSourceLang( Languages::getInstance() );
+        $this->__validateTargetLangs( Languages::getInstance() );
         $this->__validateUserMTEngine();
         $this->__validateMMTGlossaries();
         $this->__validateDeepLGlossaryParams();
@@ -223,13 +249,16 @@ class createProjectController extends ajaxController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function doAction() {
         //check for errors. If there are, stop execution and return errors.
         if ( count( @$this->result[ 'errors' ] ) ) {
             return false;
         }
 
-        $arFiles = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
+        $arFiles = array_filter( explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) ) );
 
         $default_project_name = $arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
@@ -266,7 +295,7 @@ class createProjectController extends ajaxController {
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_session' ];
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
         $newArFiles = [];
         $fs         = FilesStorageFactory::create();
 
@@ -311,7 +340,7 @@ class createProjectController extends ajaxController {
 
         $projectStructure[ 'project_name' ]                 = $this->project_name;
         $projectStructure[ 'private_tm_key' ]               = $this->private_tm_key;
-        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_session' ];
+        $projectStructure[ 'uploadToken' ]                  = $_COOKIE[ 'upload_token' ];
         $projectStructure[ 'array_files' ]                  = $arFiles; //list of file name
         $projectStructure[ 'array_files_meta' ]             = $arMeta; //list of file metadata
         $projectStructure[ 'source_language' ]              = $this->source_lang;
@@ -328,6 +357,12 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'target_language_mt_engine_id' ] = $this->postInput[ 'target_language_mt_engine_id' ];
         $projectStructure[ 'user_ip' ]                      = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                    = INIT::$HTTPHOST;
+
+        $projectStructure[ 'dictation' ]         = $this->dictation;
+        $projectStructure[ 'show_whitespace' ]   = $this->show_whitespace;
+        $projectStructure[ 'character_counter' ] = $this->character_counter;
+        $projectStructure[ 'ai_assistant' ]      = $this->ai_assistant;
+        $projectStructure[ 'tm_prioritization' ] = $this->tm_prioritization ?? null;
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -392,7 +427,7 @@ class createProjectController extends ajaxController {
         }
 
         try {
-            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][] = [
                     "code"    => -235, // Error during moving file from upload session folder to queue path
@@ -417,7 +452,7 @@ class createProjectController extends ajaxController {
     /**
      * @param $filename
      *
-     * @return ArrayObject
+     * @return array
      * @throws \API\Commons\Exceptions\AuthenticationError
      * @throws \Exceptions\NotFoundException
      * @throws \Exceptions\ValidationError
@@ -488,7 +523,26 @@ class createProjectController extends ajaxController {
         $_SESSION[ 'last_created_pid' ] = $pid;
     }
 
-    private function __validateTargetLangs( Langs_Languages $lang_handler ) {
+    /**
+     * @param $tm_keys
+     * @throws \Exception
+     */
+    private function __validateTMKeysArray($tm_keys)
+    {
+        try {
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $tm_keys;
+
+            $validator = new JSONValidator( $schema );
+            $validator->validate( $validatorObject );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = [ "code" => -12, "message" => $e->getMessage() ];
+        }
+    }
+
+    private function __validateTargetLangs( Languages $lang_handler ) {
         $targets = explode( ',', $this->target_lang );
         $targets = array_map( 'trim', $targets );
         $targets = array_unique( $targets );
@@ -508,7 +562,7 @@ class createProjectController extends ajaxController {
         $this->target_lang = implode( ',', $targets );
     }
 
-    private function __validateSourceLang( Langs_Languages $lang_handler ) {
+    private function __validateSourceLang( Languages $lang_handler ) {
         try {
             $lang_handler->validateLanguage( $this->source_lang );
         } catch ( Exception $e ) {
@@ -519,7 +573,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session();
+            $gdriveSession = new Session();
             $gdriveSession->clearFileListFromSession();
         }
     }
@@ -736,9 +790,16 @@ class createProjectController extends ajaxController {
      * @throws Exception
      */
     private function __validateXliffParameters() {
+
         if ( !empty( $this->postInput[ 'xliff_parameters' ] ) ) {
 
             $json   = html_entity_decode( $this->postInput[ 'xliff_parameters' ] );
+
+            // first check if `xliff_parameters` is a valid JSON
+            if ( !Utils::isJson( $json ) ) {
+                throw new Exception( "xliff_parameters is not a valid JSON" );
+            }
+
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
@@ -746,8 +807,20 @@ class createProjectController extends ajaxController {
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
-            $this->xliff_parameters = $validatorObject->decoded;
+            $this->xliff_parameters = json_decode( $json, true ); // decode again because we need an associative array and not stdClass
+
+        } elseif ( !empty( $this->postInput[ 'xliff_parameters_template_id' ] ) ) {
+
+            $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $this->postInput[ 'xliff_parameters_template_id' ], $this->getUser()->uid );
+
+            if ( $xliffConfigTemplate === null ) {
+                throw new Exception( "xliff_parameters_template_id not valid" );
+            }
+
+            $this->xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+
         }
+
     }
 
     /**

@@ -2,7 +2,7 @@ import {render, screen, act, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import JobContainer from './JobContainer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
@@ -21,7 +21,6 @@ const formatDate = (context, fn) => {
 }
 $.format.date = formatDate($.format, $.format.date)
 
-require('../../../../common')
 window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {
@@ -850,7 +849,7 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, props} = fakeProperties
-  const project = Immutable.fromJS(data)
+  const project = fromJS(data)
   const jobs = project.get('jobs')
   const job = jobs.first()
 

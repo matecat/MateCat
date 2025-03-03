@@ -3,7 +3,7 @@
 
  */
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {forOwn} from 'lodash'
 
 class SegmentWarnings extends React.Component {
@@ -17,9 +17,7 @@ class SegmentWarnings extends React.Component {
   componentWillUnmount() {}
 
   shouldComponentUpdate(nextProps) {
-    return !Immutable.fromJS(this.props.warnings).equals(
-      Immutable.fromJS(nextProps.warnings),
-    )
+    return !fromJS(this.props.warnings).equals(fromJS(nextProps.warnings))
   }
 
   render() {
@@ -37,7 +35,7 @@ class SegmentWarnings extends React.Component {
     }
     if (this.props.warnings) {
       if (this.props.warnings.ERROR) {
-        _.forOwn(this.props.warnings.ERROR.Categories, (value, key) => {
+        forOwn(this.props.warnings.ERROR.Categories, (value, key) => {
           value.map((el) => {
             fnMap(el, 'ERROR')
           })

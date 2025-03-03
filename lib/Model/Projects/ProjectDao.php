@@ -7,8 +7,8 @@ use Teams\TeamStruct;
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_sql_project_data = "
             SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject, j.status_owner,
@@ -232,8 +232,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param int $ttl
      *
      * @return Projects_ProjectStruct
+     * @throws ReflectionException
      */
-    public static function findByJobId( $id_job, $ttl = 0 ) {
+    public static function findByJobId( int $id_job, int $ttl = 0 ): ?Projects_ProjectStruct {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $sql     = "SELECT projects.* FROM projects " .
@@ -242,7 +243,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 " LIMIT 1 ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ] ?? null;
     }
 
     /**
@@ -258,7 +259,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_customer' => $id_customer ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Projects_ProjectStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, Projects_ProjectStruct::class );
 
         return $stmt->fetchAll();
     }
@@ -267,15 +268,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct|Projects_ProjectStruct
+     * @return ?Projects_ProjectStruct
+     * @throws ReflectionException
      */
-    public static function findById( $id, $ttl = 0 ) {
+    public static function findById( $id, int $ttl = 0 ): ?Projects_ProjectStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
 
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        /** @var ?Projects_ProjectStruct $res */
+        $res = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ] ?? null;
+        return $res;
     }
 
     /**
@@ -357,7 +361,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * Returns uncompleted chunks by project ID. Requires 'is_review' to be passed
      * as a param to filter the query.
      *
-     * @return Chunks_ChunkStruct[]
+     * @return Jobs_JobStruct[]
      *
      * @throws Exception
      */
@@ -392,7 +396,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 'id_project' => $id_project
         ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
 
         return $stmt->fetchAll();
 
@@ -477,23 +481,27 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param             $pid
+     * @param int         $pid
      * @param string|null $project_password
-     * @param string|null $jid
+     * @param int|null    $jid
      * @param string|null $jpassword
      *
      * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      */
-    public function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
+    public function getProjectData( int $pid, ?string $project_password = null, ?int $jid = null, ?string $jpassword = null ): array {
 
         [ $query, $values ] = $this->_getProjectDataSQLAndValues( $pid, $project_password, $jid, $jpassword );
 
         $stmt = $this->_getStatementForQuery( $query );
 
-        return $this->_fetchObject( $stmt,
+        /** @var ShapelessConcreteStruct[] $res */
+        $res = $this->_fetchObject( $stmt,
                 new ShapelessConcreteStruct(),
                 $values
         );
+
+        return $res;
 
     }
 

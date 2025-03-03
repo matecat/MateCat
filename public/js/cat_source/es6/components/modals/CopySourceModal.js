@@ -1,6 +1,12 @@
 import React from 'react'
 import Cookies from 'js-cookie'
 import ModalsActions from '../../actions/ModalsActions'
+import {
+  Button,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 export const COPY_SOURCE_COOKIE = 'source_copied_to_target'
 class CopySourceModal extends React.Component {
   constructor(props) {
@@ -45,12 +51,21 @@ class CopySourceModal extends React.Component {
 
         <div className="buttons-popup-container">
           <label>Copy source to target for:</label>
-          <a className="btn-cancel" onClick={this.copyAllSources.bind(this)}>
+          <Button
+            mode={BUTTON_MODE.OUTLINE}
+            size={BUTTON_SIZE.BIG}
+            onClick={this.copyAllSources.bind(this)}
+          >
             ALL new segments
-          </a>
-          <a className="btn-ok" onClick={this.copySegmentOnly.bind(this)}>
+          </Button>
+          <Button
+            type={BUTTON_TYPE.PRIMARY}
+            size={BUTTON_SIZE.BIG}
+            className="btn-ok"
+            onClick={this.copySegmentOnly.bind(this)}
+          >
             This segment only
-          </a>
+          </Button>
           <div className="notes-action"></div>
         </div>
         <div className="boxed">

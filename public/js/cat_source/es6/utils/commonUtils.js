@@ -491,8 +491,14 @@ const CommonUtils = {
     file && file.metadata && file.metadata.instructions,
 
   isAllowedLinkRedirect: () => false,
-  dispatchTrackingError: (message) => {
-    const event = new CustomEvent('track-error', {detail: message})
+  dispatchTrackingError: (message, attachment) => {
+    const event = new CustomEvent('track-error', {
+      detail: {message, attachment},
+    })
+    document.dispatchEvent(event)
+  },
+  dispatchCustomEvent: (eventName, data = {}) => {
+    const event = new CustomEvent(eventName, {detail: data})
     document.dispatchEvent(event)
   },
   dispatchTrackingEvents: (name, message) => {
@@ -503,9 +509,12 @@ const CommonUtils = {
     const event = new CustomEvent('dataLayer-event', {detail: data})
     document.dispatchEvent(event)
   },
-  dispatchCustomEvent: (name, data) => {
-    const event = new CustomEvent(name, {detail: data})
-    document.dispatchEvent(event)
+  lookupFlashServiceParam: (name) => {
+    if (config.flash_messages && config.flash_messages.service) {
+      return config.flash_messages.service.filter((service) => {
+        return service.key == name
+      })
+    }
   },
 }
 
@@ -651,4 +660,14 @@ export function switchArrayIndex(arr, targetIndex, newIndex) {
 
     return [...acc, cur]
   }, [])
+}
+
+export const executeOnce = () => {
+  let wasAlreadyExecuted = false
+
+  return (callback) => {
+    if (wasAlreadyExecuted) return
+    callback()
+    wasAlreadyExecuted = true
+  }
 }

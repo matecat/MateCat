@@ -132,14 +132,14 @@ abstract class downloadController extends controller {
             $this->unlockToken();
 
             if ( empty( $this->project ) ) {
-                $this->project = \Projects_ProjectDao::findByJobId( $this->id_job );
+                $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             }
 
             if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
+            $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
 

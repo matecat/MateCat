@@ -18,8 +18,9 @@ $klein->with( '/api/app/user', function () {
     route( '/password/change', 'POST', [ 'API\App\Authentication\UserController', 'changePasswordAsLoggedUser' ] );
 
     route( '/login', 'POST', [ 'API\App\Authentication\LoginController', 'login' ] );
-    route( '/logout', 'POST', [ 'API\App\Authentication\LoginController', 'logout' ] );
+    route( '/logout', 'POST', [ 'API\App\Authentication\LoginController', 'directLogout' ] );
     route( '/login/token', 'GET', [ 'API\App\Authentication\LoginController', 'token' ] );
+    route( '/login/socket', 'GET', [ 'API\App\Authentication\LoginController', 'socketToken' ] );
 
     route( '/metadata', 'POST', [ 'API\App\UserMetadataController', 'update' ] );
 
@@ -73,6 +74,7 @@ route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
     route( '/[:id_job]/[:password]', 'GET', [ '\API\App\TmKeyManagementController', 'getByJob' ] );
+    route( '/engines/info/[:key]', 'GET', [ '\API\App\TmKeyManagementController', 'getByUserAndKey' ] );
 } );
 
 // Glossary

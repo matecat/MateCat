@@ -7,7 +7,6 @@ use Constants_Teams;
 use Exceptions\ValidationError;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use RedisHandler;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;
@@ -45,7 +44,7 @@ class ProjectModel {
     }
 
     public function setUser( $user ) {
-        $this->user = $user ;
+        $this->user = $user;
     }
 
     /**
@@ -55,7 +54,7 @@ class ProjectModel {
      * @throws \ReflectionException
      */
     public function update() {
-        $this->changedFields = array();
+        $this->changedFields = [];
 
         $newStruct = new Projects_ProjectStruct( $this->project_struct->toArray() );
 
@@ -68,7 +67,7 @@ class ProjectModel {
                 isset( $this->willChange[ 'id_team' ] )
         ) {
             $this->checkIdAssignee( $this->willChange[ 'id_team' ] );
-        } elseif( isset( $this->willChange[ 'id_assignee' ] ) ){
+        } elseif ( isset( $this->willChange[ 'id_assignee' ] ) ) {
             $this->checkIdAssignee( $this->project_struct->id_team );
         }
 
@@ -81,13 +80,13 @@ class ProjectModel {
             $newStruct->$field = $value;
         }
 
-        $result = Projects_ProjectDao::updateStruct( $newStruct, array(
-            'fields' => array_keys( $this->willChange )
-        ) );
+        $result = Projects_ProjectDao::updateStruct( $newStruct, [
+                'fields' => array_keys( $this->willChange )
+        ] );
 
         if ( $result ) {
-            $this->changedFields = $this->willChange ;
-            $this->willChange = array();
+            $this->changedFields = $this->willChange;
+            $this->willChange    = [];
 
             $this->_sendNotificationEmails();
         }
@@ -103,12 +102,12 @@ class ProjectModel {
 
     protected function _sendNotificationEmails() {
         if (
-            $this->changedFields['id_assignee'] &&
-            !is_null($this->changedFields['id_assignee']) &&
-            $this->user->uid != $this->changedFields['id_assignee']
+                $this->changedFields[ 'id_assignee' ] &&
+                !is_null( $this->changedFields[ 'id_assignee' ] ) &&
+                $this->user->uid != $this->changedFields[ 'id_assignee' ]
         ) {
-            $assignee = ( new Users_UserDao )->getByUid($this->changedFields['id_assignee']) ;
-            $email = new \Email\ProjectAssignedEmail($this->user, $this->project_struct, $assignee );
+            $assignee = ( new Users_UserDao )->getByUid( $this->changedFields[ 'id_assignee' ] );
+            $email    = new \Email\ProjectAssignedEmail( $this->user, $this->project_struct, $assignee );
             $email->send();
         }
     }
@@ -127,11 +126,11 @@ class ProjectModel {
      *
      * @throws ValidationError
      */
-    private function checkAssigneeChangeInPersonalTeam( $id_team ){
+    private function checkAssigneeChangeInPersonalTeam( $id_team ) {
 
         $teamDao = new TeamDao();
-        $team = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $id_team );
-        if( $team->type == Constants_Teams::PERSONAL ){
+        $team    = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $id_team );
+        if ( $team->type == Constants_Teams::PERSONAL ) {
             throw new ValidationError( 'Can\'t change the Assignee of a personal project.' );
         }
 
@@ -142,7 +141,7 @@ class ProjectModel {
      *
      * @throws ValidationError
      */
-    private function checkIdAssignee(  $id_team ) {
+    private function checkIdAssignee( $id_team ) {
 
         $membershipDao = new MembershipDao();
         $members       = $membershipDao->setCacheTTL( 60 )->getMemberListByTeamId( $id_team );
@@ -164,14 +163,14 @@ class ProjectModel {
     /**
      * @throws AuthorizationError
      */
-    private function checkIdTeam(){
+    private function checkIdTeam() {
 
         $memberShip = new MembershipDao();
 
         //choose this method ( and use array_filter ) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL( 60 )->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
 
-        $found = array_filter( $memberList, function( $values ) {
+        $found = array_filter( $memberList, function ( $values ) {
             return $values->uid == $this->user->uid;
         } );
 
@@ -185,21 +184,21 @@ class ProjectModel {
         $team = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getPersonalByUid( $this->user->uid );
 
         // check if the destination team is personal, in such case set the assignee to the user UID
-        if( $team->id == $this->willChange[ 'id_team' ] && $team->type == Constants_Teams::PERSONAL ){
+        if ( $team->id == $this->willChange[ 'id_team' ] && $team->type == Constants_Teams::PERSONAL ) {
             $this->willChange[ 'id_assignee' ] = $this->user->uid;
-            $this->cacheTeamsToClean[] = $this->willChange[ 'id_team' ];
-            $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+            $this->cacheTeamsToClean[]         = $this->willChange[ 'id_team' ];
+            $this->cacheTeamsToClean[]         = $this->project_struct->id_team;
         }
 
         // if the project has an assignee and the destination team is not personal,
         // we have to check if the assignee_id exists in the other team. If not, reset the assignee
-        elseif( $this->project_struct->id_assignee ){
+        elseif ( $this->project_struct->id_assignee ) {
 
-            $found = array_filter( $memberList, function( $values ) {
+            $found = array_filter( $memberList, function ( $values ) {
                 return $this->project_struct->id_assignee == $values->uid;
             } );
 
-            if( empty( $found )){
+            if ( empty( $found ) ) {
                 $this->willChange[ 'id_assignee' ] = null; //unset the assignee
             } else {
 
@@ -215,11 +214,11 @@ class ProjectModel {
 
     }
 
-    private function cleanAssigneeCaches(){
+    private function cleanAssigneeCaches() {
 
-        $teamDao = new TeamDao();
+        $teamDao                 = new TeamDao();
         $this->cacheTeamsToClean = array_unique( $this->cacheTeamsToClean );
-        foreach( $this->cacheTeamsToClean as $team_id ){
+        foreach ( $this->cacheTeamsToClean as $team_id ) {
             $teamInCacheToClean = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $team_id );
             $teamDao->destroyCacheAssignee( $teamInCacheToClean );
         }

@@ -53,7 +53,7 @@ class setTranslationController extends ajaxController {
     protected $split_statuses;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -189,7 +189,7 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if ( strtolower( $this->chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+            if ( $this->chunk->isArchived() ) {
                 $this->result[ 'errors' ][] = [ "code" => -3, "message" => "job archived" ];
             }
 
@@ -299,7 +299,7 @@ class setTranslationController extends ajaxController {
      */
     public function doAction() {
         $this->checkData();
-        $this->readLoginInfo();
+        $this->identifyUser();
         $this->initVersionHandler();
         $this->_getContexts();
 
@@ -372,25 +372,21 @@ class setTranslationController extends ajaxController {
             $new_translation->suggestion = $old_suggestion->translation;
 
             // update suggestion match
-            if ( $old_suggestion->match == "MT" ) {
+            if ( $old_suggestion->match == Constants_Engines::MT ) {
                 // case 1. is MT
                 $new_translation->suggestion_match  = 85;
-                $new_translation->suggestion_source = 'MT';
+                $new_translation->suggestion_source = Constants_Engines::MT;
             } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                 // case 2. no match
                 $new_translation->suggestion_source = 'NO_MATCH';
             } else {
                 // case 3. otherwise is TM
                 $new_translation->suggestion_match  = $old_suggestion->match;
-                $new_translation->suggestion_source = 'TM';
+                $new_translation->suggestion_source = Constants_Engines::TM;
             }
         }
 
-        // time_to_edit should be increased only if the translation was changed
-        $new_translation->time_to_edit = 0;
-        if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ) ) {
-            $new_translation->time_to_edit = $this->time_to_edit;
-        }
+        $new_translation->time_to_edit = $this->time_to_edit;
 
         /**
          * Update Time to Edit and
@@ -476,9 +472,8 @@ class setTranslationController extends ajaxController {
                     $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $this->chunk,
-                            $this->id_segment,
+                            (int)$this->id_segment,
                             $this->project,
-                            $this->VersionsHandler
                     );
                 }
 
@@ -575,7 +570,7 @@ class setTranslationController extends ajaxController {
             $this->featureSet->run( 'setTranslationCommitted', [
                     'translation'      => $new_translation,
                     'old_translation'  => $old_translation,
-                    'propagated_ids'   => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
+                    'propagated_ids'   => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ?? null,
                     'chunk'            => $this->chunk,
                     'segment'          => $this->segment,
                     'user'             => $this->user,
@@ -590,7 +585,7 @@ class setTranslationController extends ajaxController {
             $this->result = $this->featureSet->filter( 'filterSetTranslationResult', $this->result, [
                     'translation'     => $new_translation,
                     'old_translation' => $old_translation,
-                    'propagated_ids'  => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
+                    'propagated_ids'  => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ?? null,
                     'chunk'           => $this->chunk,
                     'segment'         => $this->segment
             ] );
@@ -782,11 +777,9 @@ class setTranslationController extends ajaxController {
     private function updateJobPEE( array $old_translation, array $new_translation ) {
 
         //update total time to edit
-        $tte = $old_translation[ 'time_to_edit' ];
+        $jobTotalTTEForTranslation = $this->chunk[ 'total_time_to_edit' ];
         if ( !self::isRevision() ) {
-            if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
-                $tte += $new_translation[ 'time_to_edit' ];
-            }
+            $jobTotalTTEForTranslation += $new_translation[ 'time_to_edit' ];
         }
 
         $segmentRawWordCount  = $this->segment->raw_word_count;
@@ -821,7 +814,7 @@ class setTranslationController extends ajaxController {
 
             Jobs_JobDao::updateFields(
 
-                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
@@ -832,14 +825,14 @@ class setTranslationController extends ajaxController {
             $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
             Jobs_JobDao::updateFields(
-                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                    [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
-        } else {
+        } elseif ( $jobTotalTTEForTranslation != 0 ) {
             Jobs_JobDao::updateFields(
-                    [ 'total_time_to_edit' => $tte ],
+                    [ 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
@@ -896,16 +889,16 @@ class setTranslationController extends ajaxController {
         /**
          * Set the new contribution in queue
          */
-        $contributionStruct               = new ContributionSetStruct();
-        $contributionStruct->fromRevision = self::isRevision();
-        $contributionStruct->id_file      = ( $filesParts !== null ) ? $filesParts->id_file : null;
-        $contributionStruct->id_job       = $this->id_job;
-        $contributionStruct->job_password = $this->password;
-        $contributionStruct->id_segment   = $this->id_segment;
-        $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
-        $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;;
+        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_file              = ( $filesParts !== null ) ? $filesParts->id_file : null;
+        $contributionStruct->id_job               = $this->id_job;
+        $contributionStruct->job_password         = $this->password;
+        $contributionStruct->id_segment           = $this->id_segment;
+        $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] );
+        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->segment[ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
@@ -942,7 +935,6 @@ class setTranslationController extends ajaxController {
         Set::contribution( $contributionStruct );
 
         if ( $contributionStruct->id_mt > 1 ) {
-            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->project );
             Set::contributionMT( $contributionStruct );
         }
 

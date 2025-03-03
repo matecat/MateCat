@@ -11,18 +11,13 @@ namespace ConnectedServices;
 
 use API\App\Json\ConnectedService;
 use API\Commons\AbstractStatefulKleinController;
-use Bootstrap;
+use API\Commons\Authentication\AuthenticationHelper;
+use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;
-use Users_UserStruct;
 
 class ConnectedServicesController extends AbstractStatefulKleinController {
-
-    /**
-     * @var Users_UserStruct
-     */
-    protected $user;
 
     /**
      * @var ConnectedServiceStruct
@@ -60,12 +55,10 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
 
         ConnectedServiceDao::updateStruct( $this->service, [ 'fields'=> [ 'disabled_at' ] ] );
 
+        $this->refreshClientSessionIfNotApi();
+
         $formatter = new ConnectedService( [] );
         $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->service ) ] );
-    }
-
-    protected function afterConstruct() {
-        Bootstrap::sessionClose();
     }
 
     /**
@@ -74,7 +67,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     private function __handleGDrive() {
         $verifier = new GDriveTokenVerifyModel( $this->service );
 
-        $client = GoogleClientFactory::getGoogleClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->response->code( 200 );

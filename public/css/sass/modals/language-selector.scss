@@ -1,22 +1,22 @@
 /* Language Selector Modal */
+@use "../commons/colors";
 
 #matecat-modal-languages {
-  $light-blue: $translatedBlue;
-  $medium-blue: $linkBlue;
-  $dark-blue: $darkBlue;
+  $light-blue: colors.$translatedBlue;
+  $medium-blue: colors.$linkBlue;
+  $dark-blue: colors.$darkBlue;
 
   $placeholder-gray: #cdd4de;
-  $btn-shadow-gray: $grey1;
-  $btn-hover-blue: $translatedBlueHover;
+  $btn-shadow-gray: colors.$grey1;
+  $btn-hover-blue: colors.$translatedBlueHover;
 
-  $light-gray: $grey3;
-  $medium-gray: $grey2;
-  $dark-gray: $grey1;
+  $medium-gray: colors.$grey2;
+  $dark-gray: colors.$grey1;
 
   /* Modal */
   .matecat-modal {
     button:focus {
-      border: 1px solid $translatedBlue;
+      border: 1px solid colors.$translatedBlue;
     }
   }
 
@@ -61,7 +61,7 @@
       }
 
       .label {
-        color: $grey6;
+        color: colors.$grey6;
         margin: 0px 8px 0 0;
       }
 
@@ -71,13 +71,13 @@
         gap: 5px;
 
         .list-badge {
-          background-color: $grey1;
+          background-color: colors.$grey1;
           border-radius: 12px;
           padding: 2px 10px;
           cursor: pointer;
 
           &:hover {
-            background-color: $darkBlueHover;
+            background-color: colors.$darkBlueHover;
           }
 
           .language-name {
@@ -228,7 +228,7 @@
       /* Badge */
       .badge {
         padding: 0.35rem 0.58rem;
-        background: $translatedBlue;
+        background: colors.$translatedBlue;
         border-radius: 25px;
         font-size: 0.9rem;
         color: #fff;
@@ -296,7 +296,7 @@
 
         &:hover:not(.selected),
         &.hover:not(.selected) {
-          background: $light-gray;
+          background: colors.$grey3;
           color: $medium-blue;
           // padding-left: 26px;
 
@@ -307,8 +307,8 @@
 
         .language-dropdown-item-container {
           .code-badge-selected {
-            background-color: $white;
-            color: $darkBlue;
+            background-color: colors.$white;
+            color: colors.$darkBlue;
           }
         }
       }
@@ -360,7 +360,7 @@
         border: 1px solid $light-blue;
       }
       &:hover {
-        background-color: $grey3;
+        background-color: colors.$grey3;
       }
     }
   }

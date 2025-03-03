@@ -1,4 +1,4 @@
-@import 'commons/colors';
+@use 'commons/colors';
 /*
  ******
  ******
@@ -12,23 +12,6 @@
   box-shadow: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
 }
 
-/*section.editor .mbc-comment-balloon-inner {
-  margin-top: -25px;
-}*/
-
-/* Give breathing space to the last comment ballon in page */
-//.mbc-comment-balloon-outer:last-of-type {
-//  margin-bottom: 100px;
-//}
-
-/*
- ******
- Post new comment
- ******
- */
-.mbc-reply-input {
-  background: #ffffff;
-}
 
 /*
  ******
@@ -53,7 +36,7 @@
  ******
  */
 .mbc-thread-wrap {
-  padding: 0 10px 10px 10px;
+  padding: 10px;
   border-top: 1px solid #f2f4f7;
 }
 
@@ -86,7 +69,18 @@
 }
 
 .mbc-comments-wrap .mbc-show-comment:not(:last-of-type) {
-  border-bottom: 1px solid #dadada;
+  background-color: colors.$grey5;
+  border-radius: 4px;
+  padding: 8px;
+  > .bc-show-comment-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+.mbc-comments-wrap .mbc-thread-wrap-resolved .mbc-show-comment:not(:last-of-type) {
+  background-color: rgba(colors.$greenDefaultTransparent, 0.2);
+  border-radius: 4px;
 }
 
 /*
@@ -96,7 +90,7 @@
  */
 .mbc-comment-info-wrap {
   clear: both;
-  margin: 4px 0;
+  margin-top: -6px;
 }
 
 .mbc-comment-info {
@@ -108,15 +102,6 @@
 }
 
 /*
- Email past comment details
- */
-.mbc-comment-email-label {
-  color: #7f7f7f;
-  font-weight: normal;
-  width: 90%; /* set width below 100% and allow truncation */
-}
-
-/*
  Message past comment details
  */
 .mbc-comment-body {
@@ -124,41 +109,6 @@
   font-size: 14px;
   margin: 12px 0 16px;
   word-wrap: break-word;
-}
-
-/*
- ******
- New incoming message notification
- ******
- */
-
-.mbc-new-message-notification {
-  background-color: #fff9cc;
-  color: #6d6e71;
-  font-size: 14px;
-  left: 0;
-  line-height: 2.2;
-  position: absolute;
-  text-align: center;
-  top: -31px;
-  width: 100%;
-}
-
-/* New message link  */
-a.mbc-new-message-link:link,
-a.mbc-new-message-link:visited {
-  color: #6d6e71;
-  text-decoration: underline;
-}
-
-a.mbc-new-message-link:hover {
-  text-decoration: none;
-}
-
-.mbc-new-message-icon {
-  font-size: 14px;
-  font-weight: bold;
-  padding: 0 6px 0 0;
 }
 
 /*
@@ -221,49 +171,28 @@ a.mbc-new-message-link:hover {
 }
 
 .mbc-comment-input__suggestions__list {
-  background-color: $white;
-  border: 1px solid $grey8;
+  background-color: colors.$white;
+  border: 1px solid colors.$grey8;
 }
 
 .mbc-comment-input__suggestions__item {
   padding: 5px 15px;
-  border-bottom: 1px solid $grey9;
+  border-bottom: 1px solid colors.$grey9;
 }
 
 .mbc-comment-input__suggestions__item--focused {
-  background-color: rgba($grey9, 0.6);
-  color: $translatedBlue;
+  background-color: rgba(colors.$grey9, 0.6);
+  color: colors.$translatedBlue;
 }
 
 .tagging-item {
-  color: $translatedBlue;
+  color: colors.$translatedBlue;
 }
 
 .tagging-item-textarea {
-  background-color: rgba($translatedBlue, 0.3);
+  background-color: rgba(colors.$translatedBlue, 0.3);
   border-radius: 10px;
   padding: 2px 0;
-}
-
-.mbc-comment-textinput {
-  background: #fff;
-  border: 1px solid #999;
-  border-radius: 2px;
-  -webkit-box-shadow: inset 0 1px 2px #ddd;
-  box-shadow: inset 0 1px 2px #ddd;
-  font-size: 14px;
-  height: auto;
-  margin: 0 0 2px;
-  outline: 0;
-  overflow: initial;
-  padding: 2px 5px;
-  text-overflow: initial;
-  white-space: initial;
-}
-
-.mbc-comment-textinput:hover {
-  box-shadow: 0px 0px 0px 1px #ccc;
-  cursor: text;
 }
 
 /*
@@ -292,6 +221,9 @@ a.mbc-new-message-link:hover {
   font-weight: bold;
   margin-bottom: 4px;
   padding: 5px 5px 2px 0;
+  span {
+    color: colors.$grey7;
+  }
 }
 /*
  Anonymous label
@@ -300,11 +232,6 @@ a.mbc-new-message-link:hover {
 .mbc-comment-anonymous-label {
   padding: 2px 5px 2px 0;
 }
-
-//.mbc-comment-anonymous-label:hover {
-//  box-shadow: 0px 0px 0px 1px #ccc;
-//  cursor: text;
-//}
 
 /*
  ******
@@ -320,112 +247,9 @@ a.mbc-new-message-link:hover {
 }
 
 .mbc-comment-resolved-label {
-  color: $approvedGreen; /* per-green line 2350 style.css */
+  color: colors.$approvedGreen; /* per-green line 2350 style.css */
   font-size: 12px;
   font-weight: bold;
-}
-
-/*
- ******
- ******
- Buttons
- ******
- ******
- */
-
-/*
- ******
- Common button
- ******
- */
-a:link.mbc-comment-btn,
-a:visited.mbc-comment-btn,
-a.ui.button {
-  &.mbc-comment-btn {
-    border-radius: 2px;
-    cursor: pointer;
-    display: inline-block;
-    font-size: 14px;
-    font-weight: bold;
-    margin: 10px 0 0;
-    text-decoration: none;
-    text-transform: uppercase;
-    border: 1px solid #848689;
-    padding: 8px 10px;
-  }
-}
-/*
- ******
- Button default
- ******
- */
-a:link.mbc-comment-default-btn,
-a:visited.mbc-comment-default-btn {
-  background: #dcdedf;
-  border: 1px solid #999;
-  color: #333;
-}
-
-a:hover.mbc-comment-default-btn {
-  border: 1px solid #666;
-}
-
-a:active.mbc-comment-default-btn {
-  border: 1px solid #000; /* .btn:active line 643 style.css */
-}
-
-/*
- ******
- Comment button in comment balloon
- Now follows translated button common.css line 1188
- ******
- */
-a.mbc-comment-send-btn:link,
-a.mbc-comment-send-btn:visited {
-  background: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from($translatedBlue),
-    to(#119ec4)
-  );
-  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-  background: linear-gradient(top, $translatedBlue, #119ec4);
-  border: 1px solid #848689;
-  color: #fff;
-}
-
-a.mbc-comment-send-btn:hover {
-  background: #12b4df;
-  border: 1px solid #000;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-  box-shadow: 0 1px 2px #ccc;
-}
-
-a.mbc-comment-send-btn:active {
-  -moz-box-shadow: inset 0 0 1px 1px #888;
-  -webkit-box-shadow: inset 0 0 1px 1px #888;
-  box-shadow: inset 0 0 1px 1px #888;
-}
-
-/*
- ******
- Resolve button in comment balloon
- ******
- */
-a.mbc-comment-resolve-btn,
-a.mbc-comment-resolve-btn:visited {
-  background: #dcdedf;
-  border: 1px solid #999;
-  color: #333;
-}
-
-a.mbc-comment-resolve-btn:hover,
-a.mbc-comment-resolve-btn:active {
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 a.ui.button.mbc-comment-delete-btn {
@@ -454,16 +278,6 @@ a.mbc-comment-link-btn:active {
 
 /*
  ******
- Login invitation link in comment balloon
- ******
- */
-a.mbc-login-link:link,
-a.mbc-login-link:visited {
-  padding: 0 4px 10px 0;
-}
-
-/*
- ******
  View link in history balloon
  ******
  */
@@ -485,47 +299,6 @@ a.mbc-view-link:visited {
   color: #9a9a9a;
   line-height: 1.8;
   margin-bottom: 6px;
-}
-
-/*
- ******
- ******
- Close icon duplicate
- ******
- ******
- */
-
-/* style.css line 1612 */
-a.mbc-close-icon:link,
-a.mbc-close-icon:visited {
-  background: #fff;
-  border-radius: 20px;
-  color: #aeaeae;
-  display: block;
-  font-size: 15px;
-  height: 14px;
-  padding: 0;
-  position: absolute;
-  right: 8px;
-  text-decoration: none;
-  top: 0;
-  vertical-align: middle;
-  width: 14px;
-}
-
-a.mbc-close-icon:hover {
-  background: red;
-  color: #fff;
-  text-align: center;
-}
-
-.mbc-close-icon:before {
-  content: '\ea0d';
-  display: block;
-  margin-left: -1px;
-  margin-top: 0px;
-  text-align: center;
-  vertical-align: middle;
 }
 
 /*
@@ -597,8 +370,8 @@ a.mbc-close-icon:hover {
  Invitation element unique properties
  */
 .mbc-comment-highlight-invite {
-  background: $darkBlue;
-  color: $grey3;
+  background: colors.$darkBlue;
+  color: colors.$grey3;
   position: absolute;
 }
 
@@ -611,46 +384,6 @@ a.mbc-close-icon:hover {
   top: 5px;
 }
 
-/*
- Highlight element in header unique properties
- */
-.mbc-comment-highlight-history {
-  color: #6d6e71;
-  position: absolute;
-  right: 7px;
-  top: 10px;
-}
-
-.mbc-comment-highlight-history:hover {
-  color: #6d6e71;
-}
-
-/*
- Highlight element in history balloon unique properties
- */
-.mbc-comment-highlight-balloon-history {
-  color: #6d6e71;
-  float: right;
-}
-
-/*
- ******
- ******
- Article state follwing comment balloon activation
- ******
- ******
- */
-
-/*
- ******
- Commenting opened. Article width reduced and room made for comment ballon
- ******
- */
-article section {
-  //-webkit-backface-visibility: hidden;
-  //-webkit-transition: width .2s ease;
-  //transition: width .2s ease;
-}
 
 /*
  ******
@@ -693,7 +426,6 @@ article .mbc-comment-balloon-outer {
  */
 
 #mbc-history {
-  /* #filterSwitch line 71 style.css */
   cursor: pointer;
   font-size: 23px;
   height: 27px;
@@ -712,7 +444,6 @@ article .mbc-comment-balloon-outer {
 }
 
 #mbc-history:hover {
-  /* #filterSwitch:hover line 86 style.css */
   color: #ccc;
 }
 
@@ -735,7 +466,7 @@ article .mbc-comment-balloon-outer {
     display: block;
   }
   .mbc-badge-resolved {
-    background-color: $greenDefaultTransparent;
+    background-color: colors.$greenDefaultTransparent;
   }
 }
 
@@ -762,14 +493,6 @@ article .mbc-comment-balloon-outer {
   margin-bottom: 10px;
 }
 
-.mbc-comment-segment-number-label {
-  display: block;
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  text-transform: uppercase;
-}
-
 .mbc-history-balloon {
   background-color: rgba(247, 247, 247, 1); /* #ffffff */
   padding: 0;
@@ -794,22 +517,6 @@ article .mbc-comment-balloon-outer {
 }
 
 /*
- ******
- ******
- Helpers
- ******
- ******
- */
-
-.pull-left {
-  float: left;
-}
-
-.pull-right {
-  float: right;
-}
-
-/*
   Truncate text in label
  */
 .mbc-truncate {
@@ -826,15 +533,6 @@ article .mbc-comment-balloon-outer {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-}
-
-.divider {
-  background-color: #dadada;
-  display: block; /* for use on default inline elements like span */
-  height: 1px;
-  margin: 0;
-  overflow: hidden;
-  width: 100%;
 }
 
 /*
@@ -955,18 +653,6 @@ Close icon ballon - Right panel
 
 /*
  ******
- Display and visibility helpers
- ******
- */
-.mbc-hide {
-  display: none !important;
-}
-
-.mbc-visible {
-  display: block !important;
-}
-/*
- ******
  Pure css solution to hide and unhide the button
  ******
  */
@@ -984,4 +670,25 @@ section:hover .mbc-comment-icon-button,
 .segment-side-buttons:hover .mbc-comment-icon-button,
 .mbc-comment-icon-button:hover {
   visibility: visible;
+}
+
+.mbc-comment-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  .input-checkbox > span {
+    color: colors.$grey7;
+    font-size: 14px;
+  }
+
+}
+.mbc-thread-wrap-bottom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 20px;
+  button {
+    color: colors.$black !important;
+  }
 }

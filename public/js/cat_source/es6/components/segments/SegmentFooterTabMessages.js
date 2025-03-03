@@ -1,5 +1,5 @@
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {isUndefined} from 'lodash'
 import TEXT_UTILS from '../../utils/textUtils'
 
@@ -151,9 +151,7 @@ class SegmentFooterTabMessages extends React.Component {
     return (
       isUndefined(nextProps.notes) ||
       isUndefined(this.props.note) ||
-      !Immutable.fromJS(this.props.notes).equals(
-        Immutable.fromJS(nextProps.notes),
-      ) ||
+      !fromJS(this.props.notes).equals(fromJS(nextProps.notes)) ||
       this.props.loading !== nextProps.loading ||
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class

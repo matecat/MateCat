@@ -10,9 +10,9 @@
 namespace Contribution;
 
 
-use Chunks_ChunkStruct;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 
 class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
@@ -24,15 +24,18 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $jobStruct;
 
-    public $dataRefMap;
+    public $dataRefMap = [];
 
     public $projectStruct;
 
     public $contexts = [
-            'context_before' => null,
-            'segment'        => null,
-            'context_after'  => null
+        'context_before' => null,
+        'segment'        => null,
+        'context_after'  => null
     ];
+
+    public ?array $context_list_before = null;
+    public ?array $context_list_after  = null;
 
     /**
      * @var string
@@ -69,13 +72,17 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
      */
     public $fromTarget = false;
 
-
     public $crossLangTargets = [] ;
 
+    public $dialect_strict = null;
+
+    public $tm_prioritization = null;
+
+    public $penalty_key = [];
 
     # Private members
     /**
-     * @var \Jobs_JobStruct|\Chunks_ChunkStruct
+     * @var \Jobs_JobStruct|\Jobs_JobStruct
      */
     private $__jobStruct = null;
 
@@ -100,11 +107,11 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     private $__mt_engine = null;
 
     /**
-     * @return Chunks_ChunkStruct|\Jobs_JobStruct
+     * @return Jobs_JobStruct|\Jobs_JobStruct
      */
     public function getJobStruct(){
         if( $this->__jobStruct == null ){
-            $this->__jobStruct = new Chunks_ChunkStruct( (array)$this->jobStruct );
+            $this->__jobStruct = new Jobs_JobStruct( (array)$this->jobStruct );
         }
         return $this->__jobStruct;
     }

@@ -9,6 +9,7 @@ import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
 import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
+import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 
 class AnalyzeChunksResume extends React.Component {
@@ -131,17 +132,17 @@ class AnalyzeChunksResume extends React.Component {
     const key = 'first_translate_click' + config.id_project
     if (!sessionStorage.getItem(key)) {
       //Track Translate click
-      const event = {
-        event: 'open_job',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
-        idProject: parseInt(config.id_project),
+      const userInfo = UserStore.getUser()
+      if (userInfo) {
+        const event = {
+          event: 'open_job',
+          userStatus: 'loggedUser',
+          userId: userInfo.user.uid,
+          idProject: parseInt(config.id_project),
+        }
+        CommonUtils.dispatchAnalyticsEvents(event)
+        sessionStorage.setItem(key, 'true')
       }
-      CommonUtils.dispatchAnalyticsEvents(event)
-      sessionStorage.setItem(key, 'true')
     }
     window.open(chunk.urls.t, '_blank')
   }

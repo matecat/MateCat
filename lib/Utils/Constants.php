@@ -30,21 +30,19 @@ class Constants {
     /**
      * @throws Exception
      */
-    public static function validateSegmentationRules( $segmentation_rule ) {
+    public static function validateSegmentationRules( ?string $segmentation_rule = '' ): ?string {
 
-        $segmentation_rule = ( !empty( $segmentation_rule ) ) ? $segmentation_rule : '';
+        //normalize segmentation rule to what it's used internally
+        if ( $segmentation_rule == 'standard' || $segmentation_rule == '' ) {
+            return null;
+        }
 
         if ( !in_array( $segmentation_rule, Constants::$allowed_seg_rules ) ) {
             throw new Exception( "Segmentation rule not allowed: " . $segmentation_rule, -4 );
         }
 
-        //normalize segmentation rule to what it's used internally
-        if ( $segmentation_rule == 'standard' || $segmentation_rule == '' ) {
-            $segmentation_rule = null;
-        }
-
         return $segmentation_rule;
 
     }
-    
+
 }

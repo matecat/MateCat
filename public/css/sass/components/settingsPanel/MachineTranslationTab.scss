@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -10,9 +11,6 @@
 
   li.dropdown__option {
     height: 36px;
-  }
-  .not-logged-user {
-    padding: 100px;
   }
 
   .confirm-button {
@@ -55,6 +53,11 @@
       text-align: left;
       padding: 15px 15px 0 0;
       .provider-data {
+        //&.provider-data-lara {
+        //  .provider-field:last-child {
+        //    margin-top: -12px
+        //  }
+        //}
         display: flex;
         flex-direction: column;
         .button {
@@ -100,11 +103,11 @@
           }
         }
         .field-error {
-          color: $redDefault;
+          color: colors.$redDefault;
           font-size: 12px;
         }
         .mt-error {
-          color: $redDefault;
+          color: colors.$redDefault;
         }
       }
     }
@@ -112,7 +115,7 @@
       width: 50%;
       text-align: left;
       padding: 15px;
-      background: $grey5;
+      background: colors.$grey5;
       display: flex;
       flex-direction: column;
       .button {
@@ -127,6 +130,12 @@
         line-height: 26px;
       }
     }
+  }
+
+  .provider-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 }
 .machine-translation-tab-table-title {
@@ -156,11 +165,11 @@
   }
 
   .settings-panel-row-content {
-    background-color: $white;
+    background-color: colors.$white;
   }
 
   .settings-panel-row-active {
-    background-color: $transparentBlue;
+    background-color: colors.$transparentBlue;
   }
   .settings-panel-table-rowHeading-column:nth-child(3),
   .settings-panel-table-rowHeading-column:nth-child(4) {
@@ -183,8 +192,6 @@
 
     .select__dropdown-wrapper {
       min-width: 280px;
-      border: solid 1px #96c8da;
-      border-top: unset;
       z-index: 1;
       margin-top: 1px;
     }
@@ -200,6 +207,21 @@
 
   .add-mt-provider .select-with-label__wrapper {
     margin-right: 30px;
+  }
+
+  .provider-license-label-with-icon {
+    display: flex;
+    gap: 5px;
+  }
+
+  .provider-data-lara {
+    .button {
+      margin-top: 62px !important;
+    }
+
+    .provider-field {
+      gap: 15px !important;
+    }
   }
 }
 .machine-translation-tab {
@@ -252,7 +274,7 @@
 .mt-glossary {
   display: flex;
   flex-direction: column;
-  background-color: $white;
+  background-color: colors.$white;
 
   .expand-button {
     height: 32px;
@@ -343,7 +365,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -356,7 +378,7 @@
   }
 
   &.error {
-    border: solid 1px $redDefault;
+    border: solid 1px colors.$redDefault;
   }
 }
 
@@ -382,7 +404,7 @@
 
   .grey-button {
     &.error {
-      border: solid 1px $redDefault;
+      border: solid 1px colors.$redDefault;
     }
   }
 
@@ -428,7 +450,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: $grey5;
+    background-color: colors.$grey5;
   }
 
   &:disabled {
@@ -444,7 +466,7 @@
 
 .spinner {
   position: absolute;
-  background: url(../../img/loading.gif) 48% top no-repeat !important;
+  background: url(/public/img/loading.gif) 48% top no-repeat !important;
   background-size: 26px 26px !important;
   width: 26px;
   height: 26px;

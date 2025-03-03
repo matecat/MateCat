@@ -50,7 +50,7 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "Wrong parameter :email ", 400 );
         }
 
-        if($this->jStruct->wasDeleted()){
+        if($this->jStruct->isDeleted()){
             throw new NotFoundException('No job found.');
         }
 
@@ -91,7 +91,7 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
-        if($this->jStruct->wasDeleted()){
+        if($this->jStruct->isDeleted()){
             throw new NotFoundException('No job found.');
         }
 

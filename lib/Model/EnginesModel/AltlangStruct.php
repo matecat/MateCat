@@ -24,7 +24,7 @@ class EnginesModel_AltlangStruct extends EnginesModel_EngineStruct {
      * @var string
      */
     public $base_url = "https://api2.prompsit.com";
-        
+
     /**
      * @var string
      */

@@ -2,17 +2,19 @@
 
 namespace Features\TranslationEvents\Model;
 
-use Chunks_ChunkStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Database;
+use Error;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryWithCategoryStruct;
+use RuntimeException;
 use Segments_SegmentDao;
 use Segments_SegmentStruct;
+use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationStruct;
-use Users_UserDao;
 use Users_UserStruct;
 
 class TranslationEvent {
@@ -50,9 +52,9 @@ class TranslationEvent {
     protected bool $_isPropagationSource = true;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    private Chunks_ChunkStruct $chunk;
+    private Jobs_JobStruct $chunk;
 
     /**
      * @var bool
@@ -79,6 +81,13 @@ class TranslationEvent {
      */
     private array $issues_to_delete = [];
 
+    /**
+     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param Translations_SegmentTranslationStruct $translation
+     * @param Users_UserStruct|null                 $user
+     * @param int                                   $source_page_code
+     *
+     */
     public function __construct( Translations_SegmentTranslationStruct $old_translation,
                                  Translations_SegmentTranslationStruct $translation,
                                  ?Users_UserStruct                     $user,
@@ -89,7 +98,12 @@ class TranslationEvent {
         $this->wanted_translation = $translation;
         $this->user               = $user;
         $this->source_page        = $source_page_code;
-        $this->chunk              = $this->wanted_translation->getChunk();
+
+        try {
+            $this->chunk = $this->wanted_translation->getChunk();
+        } catch ( Error $e ) {
+            throw new RuntimeException( "*** Job not found or it is deleted. JobId '{$this->wanted_translation->id_job}'" );
+        }
 
         $this->getLatestEventForSegment();
     }
@@ -159,9 +173,9 @@ class TranslationEvent {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
-    public function getChunk(): ?Chunks_ChunkStruct {
+    public function getChunk(): ?Jobs_JobStruct {
         return $this->chunk;
     }
 

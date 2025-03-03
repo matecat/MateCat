@@ -9,8 +9,8 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
@@ -26,12 +26,12 @@ class ChunkReviewModel implements IChunkReviewModel {
     protected $penalty_points;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -97,9 +97,9 @@ class ChunkReviewModel implements IChunkReviewModel {
     public function getScore() {
         if ( $this->chunk_review->reviewed_words_count == 0 ) {
             return 0;
-        } else {
-            return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000;
         }
+
+        return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000;
     }
 
     public function getPenaltyPoints() {
@@ -179,6 +179,7 @@ class ChunkReviewModel implements IChunkReviewModel {
                 ]
         );
 
+        // External call by Plugins
         $project->getFeaturesSet()->run(
                 'chunkReviewUpdated', $this->chunk_review, $update_result, $this, $project
         );

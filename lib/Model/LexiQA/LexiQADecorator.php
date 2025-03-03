@@ -10,36 +10,37 @@
 namespace LexiQA;
 
 
+use Exception;
+use FeatureSet;
 use INIT;
 use PHPTAL;
 use ProjectOptionsSanitizer;
+use Projects\ChunkOptionsModel;
 
 class LexiQADecorator {
 
-    protected $template;
-
-    protected $model;
+    protected PHPTAL $template;
 
     /**
      * This var means that the job has this functionality enabled
      *
      * @var bool
      */
-    protected $lexiqa_enabled = true;
+    protected bool $lexiqa_enabled = true;
 
     /**
      * Url of lexiQa
      *
-     * @var null
+     * @var string|null
      */
-    protected $lexiqa_server;
+    protected ?string $lexiqa_server;
 
     protected function __construct( PHPTAL $template ) {
         $this->template      = $template;
         $this->lexiqa_server = INIT::$LXQ_SERVER;
     }
 
-    public static function getInstance( PHPTAL $template ){
+    public static function getInstance( PHPTAL $template ): LexiQADecorator {
         return new static( $template );
     }
 
@@ -47,28 +48,30 @@ class LexiQADecorator {
      * Decorate the controllers with the lexiqa template vars
      *
      */
-    public function decorateViewLexiQA(){
+    public function decorateViewLexiQA() {
 
-        if( INIT::$LXQ_LICENSE ){
+        if ( INIT::$LXQ_LICENSE ) {
             //LEXIQA license key
-            $this->template->lxq_license = INIT::$LXQ_LICENSE;
-            $this->template->lxq_partnerid = INIT::$LXQ_PARTNERID;
+            $this->template->lxq_license      = INIT::$LXQ_LICENSE;
+            $this->template->lxq_partnerid    = INIT::$LXQ_PARTNERID;
             $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 
-        $this->template->lxq_enabled  = $this->lexiqa_enabled;
         $this->template->lexiqaServer = $this->lexiqa_server;
 
     }
 
     /**
      * Called to check if the JOb has this feature enabled from creation project
-     * @param \ChunkOptionsModel $model
+     *
+     * @param ChunkOptionsModel $model
      *
      * @return $this
+     * @throws Exception
      */
-    public function checkJobHasLexiQAEnabled( \ChunkOptionsModel $model ){
+    public function checkJobHasLexiQAEnabled( ChunkOptionsModel $model ): LexiQADecorator {
         $this->lexiqa_enabled = $model->isEnabled( 'lexiqa' );
+
         return $this;
     }
 
@@ -76,14 +79,15 @@ class LexiQADecorator {
      * Check if the feature is enabled in the matecat installation according to the
      * given preloaded featureSet. In fact, some Features exclude LexiQA.
      *
-     * @param \Users_UserStruct $userStruct
+     * @param FeatureSet $featureSet
      *
      * @return $this
      */
-    public function featureEnabled( \FeatureSet $featureSet ) {
+    public function featureEnabled( FeatureSet $featureSet ): LexiQADecorator {
 
-        if ( !INIT::$LXQ_LICENSE ){
+        if ( !INIT::$LXQ_LICENSE ) {
             $this->lexiqa_enabled = false;
+
             return $this;
         }
         $this->lexiqa_enabled = true;

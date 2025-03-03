@@ -76,7 +76,7 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_ASSOC );
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
 }

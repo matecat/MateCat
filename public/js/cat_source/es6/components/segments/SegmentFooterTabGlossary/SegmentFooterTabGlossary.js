@@ -233,10 +233,6 @@ export const SegmentFooterTabGlossary = ({
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
     CatToolStore.addListener(
-      CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-      refreshGlossary,
-    )
-    CatToolStore.addListener(
       CatToolConstants.HAVE_KEYS_GLOSSARY,
       onReceiveHaveKeysGlossary,
     )
@@ -260,10 +256,6 @@ export const SegmentFooterTabGlossary = ({
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-      CatToolStore.removeListener(
-        CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-        refreshGlossary,
-      )
       CatToolStore.removeListener(
         CatToolConstants.HAVE_KEYS_GLOSSARY,
         onReceiveHaveKeysGlossary,
@@ -384,8 +376,8 @@ export const SegmentFooterTabGlossary = ({
         keys.length > 1
           ? SegmentUtils.getSelectedKeysGlossary(keys)
           : keys.length === 1
-          ? [keys[0]]
-          : [],
+            ? [keys[0]]
+            : [],
     }))
   }, [keys])
 
@@ -518,7 +510,7 @@ export const SegmentFooterTabGlossary = ({
         tabIndex="0"
       >
         {!clientConnected ? (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />

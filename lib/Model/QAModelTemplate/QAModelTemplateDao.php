@@ -12,6 +12,7 @@ use INIT;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
@@ -99,7 +100,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
 
             $deleted = $stmt->rowCount();
 
-            if( !$deleted ){
+            if ( !$deleted ) {
                 return 0;
             }
 
@@ -141,12 +142,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                     'id_template' => $id
             ] );
 
-            $stmt = $conn->prepare( "UPDATE project_templates SET qa_model_template_id = :zero WHERE uid = :uid and qa_model_template_id = :id " );
-            $stmt->execute( [
-                    'zero' => 0,
-                    'id'   => $id,
-                    'uid'  => $uid,
-            ] );
+            ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'qa_model_template_id' );
 
             $conn->commit();
 
@@ -179,6 +175,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
             $severities = [];
             unset( $category[ 'dqf_id' ] );
             $category[ 'id' ] = ( $cindex + 1 );
+            $category[ 'sort' ] = ( $cindex + 1 );
 
             foreach ( $defaultTemplateModel[ 'model' ][ 'severities' ] as $sindex => $severity ) {
 
@@ -189,6 +186,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
                 $severity[ 'id_category' ] = ( $cindex + 1 );
                 $severity[ 'code' ]        = strtoupper( substr( $severity[ 'label' ], 0, 3 ) );
                 $severity[ 'penalty' ]     = floatval( $severity[ 'penalty' ] );
+                $severity[ 'sort' ]        = ( $sindex + 1 );
                 $severities[]              = $severity;
             }
 
@@ -222,7 +220,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
         return [
                 'id'         => 0,
                 'uid'        => (int)$uid,
-                'label'      => 'Default',
+                'label'      => 'Matecat original settings',
                 'version'    => 1,
                 'categories' => $categories,
                 'passfail'   => $passFail,
@@ -257,7 +255,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
 
         $result = $pager->getPagination( $totals, $paginationParameters );
 
-        $models   = [];
+        $models = [];
         foreach ( $result[ 'items' ] as $model ) {
             $models[] = self::get( [
                     'id'  => $model[ 'id' ],

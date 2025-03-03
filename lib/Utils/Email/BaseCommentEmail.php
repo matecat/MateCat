@@ -6,47 +6,96 @@
  * Time: 15:07
  */
 
-namespace  Email;
+namespace Email;
+
+use Comments_CommentStruct;
+use Users_UserStruct;
 
 class BaseCommentEmail extends AbstractEmail {
 
+    /**
+     * @var Users_UserStruct
+     */
     protected $user;
-    protected $comment ;
-    protected $url ;
+
+    /**
+     * @var Comments_CommentStruct
+     */
+    protected Comments_CommentStruct $comment;
+
+    /**
+     * @var string
+     */
+    protected $url;
+
     protected $project;
 
-    public function __construct( $user, $comment, $url, $project, $job ) {
+    protected $job;
 
-        $this->project = $project ;
-        $this->user = $user ;
-        $this->comment = $comment ;
-        $this->url = $url ;
-        $this->job = $job;
-        $this->_setLayout('skeleton.html');
-        $this->_setTemplate('Comment/action_on_a_comment.html');
+    /**
+     * BaseCommentEmail constructor.
+     * @param Users_UserStruct $user
+     * @param Comments_CommentStruct $comment
+     * @param $url
+     * @param $project
+     * @param $job
+     */
+    public function __construct( Users_UserStruct $user, Comments_CommentStruct $comment, $url, $project, $job ) {
+
+        $this->project = $project;
+        $this->user    = $user;
+        $this->comment = $comment;
+        $this->url     = $url;
+        $this->job     = $job;
+        $this->_setLayout( 'skeleton.html' );
+        $this->_setTemplate( 'Comment/action_on_a_comment.html' );
     }
 
     public function send() {
 
-        $recipient  = array( $this->user->email, $this->user->first_name );
+        $recipient = [ $this->user->email, $this->user->first_name ];
 
-        $this->doSend( $recipient, $this->title ,
+        $this->doSend( $recipient, $this->title,
                 $this->_buildHTMLMessage(),
                 $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
     }
 
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         $content = \Comments_CommentDao::placeholdContent( $this->comment->message );
 
         return [
-                'user'    => $this->user->toArray(),
-                'project' => $this->project,
-                'job'     => $this->job,
-                'comment' => $this->comment->toArray(),
-                'url'     => $this->url . ",comment",
-                'content' => $content
+                'user'      => $this->user->toArray(),
+                'project'   => $this->project,
+                'job'       => $this->job,
+                'commenter' => $this->getCommentFullName(),
+                'url'       => $this->url . ",comment",
+                'content'   => $content
         ];
     }
 
+    /**
+     * @return string
+     */
+    private function getCommentFullName()
+    {
+        if($this->comment->is_anonymous == true){
+
+            $revision_number = (int)$this->comment->revision_number;
+
+            switch ($revision_number){
+                default:
+                case 0:
+                    return "the translator";
+
+                case 1:
+                    return "the revisor";
+
+                case 2:
+                    return "the 2nd pass revisor";
+            }
+        }
+
+        return $this->comment->full_name;
+    }
 }

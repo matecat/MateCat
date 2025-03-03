@@ -3,20 +3,15 @@
 namespace API\V2;
 
 use API\Commons\AbstractStatefulKleinController;
-use AuthCookie;
-use Bootstrap;
 use CookieManager;
-use Database;
 use Exception;
 use Files_FileDao;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Jobs_JobDao;
 use Jobs_JobStruct;
-use Log;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use Users_UserDao;
-use Users_UserStruct;
 use ZipContentObject;
 
 abstract class AbstractDownloadController extends AbstractStatefulKleinController
@@ -39,72 +34,6 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      * @var Jobs_JobStruct
      */
     protected $job;
-
-    /**
-     * @throws Exception
-     */
-    protected function sessionStart() {
-        Bootstrap::sessionStart();
-    }
-
-    /**
-     * Explicitly disable sessions for ajax call
-     *
-     * Sessions enabled on INIT Class
-     *
-     */
-    protected function disableSessions() {
-        Bootstrap::sessionClose();
-    }
-
-    protected function setUserCredentials() {
-
-        $this->user        = new Users_UserStruct();
-        $this->user->uid   = ( !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->user->email = ( !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
-
-        try {
-
-            $userDao            = new Users_UserDao( Database::obtain() );
-            $loggedUser         = $userDao->setCacheTTL( 3600 )->read( $this->user )[ 0 ]; // one hour cache
-            $this->userIsLogged = (
-                !empty( $loggedUser->uid ) &&
-                !empty( $loggedUser->email ) &&
-                !empty( $loggedUser->first_name ) &&
-                !empty( $loggedUser->last_name )
-            );
-
-        } catch ( Exception $e ) {
-            Log::doJsonLog( 'User not logged.' );
-        }
-
-        $this->user = ( $this->userIsLogged ? $loggedUser : $this->user );
-    }
-
-    public function readLoginInfo( $close = true ) {
-        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
-        self::sessionStart();
-        $this->_setUserFromAuthCookie();
-        $this->setUserCredentials();
-
-        if ( $close ) {
-            self::disableSessions();
-        }
-    }
-
-    /**
-     *  Try to get user name from cookie if it is not present and put it in session.
-     *
-     */
-    protected function _setUserFromAuthCookie() {
-        if ( empty( $_SESSION[ 'cid' ] ) ) {
-            $username_from_cookie = AuthCookie::getCredentials();
-            if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie[ 'username' ];
-                $_SESSION[ 'uid' ] = $username_from_cookie[ 'uid' ];
-            }
-        }
-    }
 
     /**
      * @param int $ttl
@@ -223,14 +152,14 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $this->unlockToken();
 
             if ( empty( $this->project ) ) {
-                $this->project = \Projects_ProjectDao::findByJobId( $this->id_job );
+                $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             }
 
             if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
+            $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             if ( !$isGDriveProject || $forceXliff === true ) {
                 $buffer = ob_get_contents();

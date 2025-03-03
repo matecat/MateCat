@@ -4,6 +4,7 @@
  * and open the template in the editor.
  */
 
+use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments\ContextGroupDao;
 
@@ -24,7 +25,7 @@ class getSegmentsController extends ajaxController {
     private $create_date = "";
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $job;
 
@@ -74,7 +75,7 @@ class getSegmentsController extends ajaxController {
 
         $featureSet->loadForProject( $this->project );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
         $this->parseIDSegment();
 
@@ -124,7 +125,7 @@ class getSegmentsController extends ajaxController {
                 $seg[ 'edit_distance' ] = 0;
             }
 
-            $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( $seg[ 'time_to_edit' ] );
+            $seg[ 'parsed_time_to_edit' ] = CatUtils::parse_time_to_edit( min( $seg[ 'time_to_edit' ], PHP_INT_MAX ) );
 
             ( $seg[ 'source_chunk_lengths' ] === null ? $seg[ 'source_chunk_lengths' ] = '[]' : null );
             ( $seg[ 'target_chunk_lengths' ] === null ? $seg[ 'target_chunk_lengths' ] = '{"len":[0],"statuses":["DRAFT"]}' : null );

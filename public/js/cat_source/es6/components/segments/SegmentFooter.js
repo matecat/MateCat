@@ -532,7 +532,7 @@ function SegmentFooter() {
             <span className="number">
               {countResult ? ' (' + countResult + ')' : ''}
             </span>
-          ) : clientConnected ? (
+          ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
             <i className="icon-warning2 icon" />

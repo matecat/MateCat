@@ -28,42 +28,31 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDele
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
+import {Lara} from './MtEngines/Lara'
+
+let engineIdFromFromQueryString = new URLSearchParams(
+  window.location.search,
+).get('engineId')
 
 export const MachineTranslationTab = () => {
   const {
     mtEngines,
     setMtEngines,
-    openLoginModal,
     modifyingCurrentTemplate,
     currentProjectTemplate,
     projectTemplates,
   } = useContext(SettingsPanelContext)
-
-  const activeMTEngine = currentProjectTemplate.mt?.id
-  const setActiveMTEngine = ({id} = {}) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      mt:
-        typeof id === 'number'
-          ? {
-              id,
-            }
-          : {},
-    }))
-
-  const [addMTVisible, setAddMTVisible] = useState(false)
-  const [activeAddEngine, setActiveAddEngine] = useState()
-  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
-    useState(false)
-  const [error, setError] = useState()
-  const [MTRows, setMTRows] = useState([])
-  const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const enginesList = [
     {
       name: 'ModernMT',
       id: 'mmt',
       component: ModernMt,
+    },
+    {
+      name: 'Lara',
+      id: 'Lara',
+      component: Lara,
     },
     {name: 'AltLang', id: 'altlang', component: AltLang},
     {name: 'Apertium', id: 'apertium', component: Apertium},
@@ -82,6 +71,35 @@ export const MachineTranslationTab = () => {
     {name: 'SmartMATE', id: 'smartmate', component: SmartMate},
     {name: 'Yandex.Translate', id: 'yandextranslate', component: Yandex},
   ]
+
+  const activeMTEngine = currentProjectTemplate.mt?.id
+  const setActiveMTEngine = ({id} = {}) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      mt:
+        typeof id === 'number'
+          ? {
+              id,
+            }
+          : {},
+    }))
+
+  const [addMTVisible, setAddMTVisible] = useState(
+    typeof engineIdFromFromQueryString === 'string',
+  )
+  const [activeAddEngine, setActiveAddEngine] = useState(() => {
+    const initialState =
+      typeof engineIdFromFromQueryString === 'string' &&
+      enginesList.find((mt) => mt.id === engineIdFromFromQueryString)
+
+    engineIdFromFromQueryString = false
+    return initialState
+  })
+  const [isAddMTEngineRequestInProgress, setIsAddMTEngineRequestInProgress] =
+    useState(false)
+  const [error, setError] = useState()
+  const [MTRows, setMTRows] = useState([])
+  const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const COLUMNS_TABLE = config.is_cattool
     ? [{name: 'Engine Name'}, {name: 'Description'}]
@@ -327,7 +345,7 @@ export const MachineTranslationTab = () => {
       <div data-testid="active-mt">
         <div className="machine-translation-tab-table-title">
           <h2>Active MT</h2>
-          {!config.is_cattool && config.isLoggedIn && !addMTVisible && (
+          {!config.is_cattool && !addMTVisible && (
             <button
               className="ui primary button settings-panel-button-icon"
               onClick={() => setAddMTVisible(true)}
@@ -364,23 +382,10 @@ export const MachineTranslationTab = () => {
           }
         />
       </div>
-      {config.isLoggedIn ? (
-        !config.is_cattool && (
-          <div className="inactive-mt" data-testid="inactive-mt">
-            <h2>Inactive MT</h2>
-            <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
-          </div>
-        )
-      ) : (
-        <div className="not-logged-user">
-          <button
-            className="ui primary button"
-            onClick={openLoginModal}
-            title="Login to see your custom MT engines"
-            data-testid="login-button"
-          >
-            Login to see your custom MT engines
-          </button>
+      {!config.is_cattool && (
+        <div className="inactive-mt" data-testid="inactive-mt">
+          <h2>Inactive MT</h2>
+          <SettingsPanelTable columns={COLUMNS_TABLE} rows={MTRows} />
         </div>
       )}
     </div>

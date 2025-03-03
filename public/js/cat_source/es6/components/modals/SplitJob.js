@@ -24,6 +24,7 @@ const SplitJobModal = ({job, project, callback}) => {
     job.get('stats').get('equivalent').get('total') === 0,
   )
   const [splitData, setSplitData] = useState()
+  const [jobSplttable, setJobSplittable] = useState(true)
 
   const splitSelectRef = useRef(null)
   const tooltipRef = useRef()
@@ -82,7 +83,14 @@ const SplitJobModal = ({job, project, callback}) => {
         setSplitData(data)
       })
       .catch((errors) => {
-        if (errors !== 'undefined' && errors.length) {
+        if (errors !== 'undefined' && errors.length && errors[0].code === -7) {
+          setJobSplittable(false)
+          setErrorMsg('This job cannot be split.')
+          setShowError(true)
+          setShowLoader(false)
+          setShowStartLoader(false)
+          setSplitChecked(false)
+        } else if (errors !== 'undefined' && errors.length) {
           setErrorMsg(errors[0].message)
           setShowError(true)
           setShowLoader(false)
@@ -200,7 +208,9 @@ const SplitJobModal = ({job, project, callback}) => {
   }
 
   const getJobParts = () => {
-    if (!wordsArray) {
+    if (!jobSplttable) {
+      return <div className="ui segment" style={{height: '126px'}}></div>
+    } else if (!wordsArray) {
       return (
         <div className="ui segment" style={{height: '126px'}}>
           <div className="ui active inverted dimmer">
@@ -294,6 +304,7 @@ const SplitJobModal = ({job, project, callback}) => {
                 className="splitselect left"
                 ref={splitSelectRef}
                 onChange={changeSplitNumber}
+                disabled={!jobSplttable}
               >
                 {Array.from({length: 49}, (_, i) => (
                   <option key={i + 2} value={i + 2}>
@@ -356,6 +367,7 @@ const SplitJobModal = ({job, project, callback}) => {
               type={BUTTON_TYPE.PRIMARY}
               size={BUTTON_SIZE.MEDIUM}
               onClick={checkSplitJob}
+              disabled={!jobSplttable}
             >
               Check split
             </Button>

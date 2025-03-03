@@ -20,9 +20,9 @@ class CacheSetConnectionTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao    = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_cacheSetConnection" );
+        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_cacheSetConnection" );
         $this->method->setAccessible( true );
         $this->cache_conn = $this->reflector->getProperty( "cache_con" );
         $this->cache_conn->setAccessible( true );
@@ -43,9 +43,9 @@ class CacheSetConnectionTest extends AbstractTest {
      */
     public function test_set_connection_after_creation_of_engine() {
 
-        $this->cache_conn->setValue( $this->jobDao, null );
-        $this->method->invoke( $this->jobDao );
-        $this->assertTrue( $this->cache_conn->getValue( $this->jobDao ) instanceof Predis\Client );
+        $this->cache_conn->setValue( $this->databaseInstance, null );
+        $this->method->invoke( $this->databaseInstance );
+        $this->assertTrue( $this->cache_conn->getValue( $this->databaseInstance ) instanceof Predis\Client );
     }
 
     /**
@@ -55,10 +55,10 @@ class CacheSetConnectionTest extends AbstractTest {
      */
     public function test_set_connection_with_wrong_global_constant() {
 
-        $this->cache_conn->setValue( $this->jobDao, null );
+        $this->cache_conn->setValue( $this->databaseInstance, null );
         $this->initial_redis_configuration = INIT::$REDIS_SERVERS;
         INIT::$REDIS_SERVERS               = "tcp://fake_localhost_and_fake_port:7777";
         $this->expectException( ConnectionException::class );
-        $this->method->invoke( $this->jobDao );
+        $this->method->invoke( $this->databaseInstance );
     }
 }

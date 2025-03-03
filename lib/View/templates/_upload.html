@@ -1,16 +1,4 @@
 <!DOCTYPE HTML>
-<!--
-/*
- * jQuery File Upload Plugin Demo 6.9.1
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschant
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
- */
--->
 <html lang="en">
 <head>
     <!-- Force latest IE rendering engine or ChromeFrame if installed -->
@@ -71,7 +59,7 @@
       };
       /*]]>*/
     </script>
-    <script type="text/javascript" src="${basepath}public/build/lib_upload.min.js?build=${build_number}"></script>
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" src="${basepath}public/build/lib_upload.min.js?build=${build_number}"></script>
 
 </head>
 
@@ -596,8 +584,6 @@
 </script>
 
 <div class="notifications-wrapper"></div>
-
-<div id="uploadCallback"></div>
 
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>

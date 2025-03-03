@@ -5,8 +5,7 @@ namespace QAModelTemplate;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 
-class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable
-{
+class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable {
     public $id;
     public $id_category;
     public $severity_code;
@@ -17,14 +16,14 @@ class QAModelTemplateSeverityStruct extends DataAccess_AbstractDaoSilentStruct i
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
-    {
+    public function jsonSerialize() {
         return [
-            'id' => (int)$this->id,
-            'id_category' => (int)$this->id_category,
-            'code' => $this->severity_code,
-            'label' => $this->severity_label,
-            'penalty' => floatval($this->penalty),
+                'id'          => (int)$this->id,
+                'id_category' => (int)$this->id_category,
+                'code'        => $this->severity_code,
+                'label'       => $this->severity_label,
+                'penalty'     => floatval( $this->penalty ),
+                'sort'        => $this->sort ? (int)$this->sort : null,
         ];
     }
 }

@@ -65,16 +65,6 @@ let SegmentFilterUtils = {
           SegmentFilterUtils.tryToFocusLastSegment()
         }
       })
-
-      $(document).on('click', 'header .filter', function (e) {
-        e.preventDefault()
-        if (!SegmentFilterUtils.open) {
-          SegmentFilterUtils.openFilter()
-        } else {
-          SegmentFilterUtils.closeFilter()
-          SegmentFilterUtils.open = false
-        }
-      })
     }
   },
 
@@ -90,7 +80,7 @@ let SegmentFilterUtils = {
    * @returns {*}
    */
   filtering: function () {
-    return SegmentFilterUtils.filteringSegments
+    return SegmentFilterUtils.filteringSegments && SegmentFilterUtils.open
   },
 
   /**
@@ -144,56 +134,63 @@ let SegmentFilterUtils = {
     SegmentFilterUtils.filteringSegments = true
     filter.revision = config.isReview
     var password = config.isReview ? config.review_password : config.password
-    getFilteredSegments(
-      config.id_job,
-      password,
-      filter,
-      filter.revision_number,
-    ).then((data) => {
-      CommonUtils.clearStorage('SegmentFilter')
+    getFilteredSegments(config.id_job, password, filter, filter.revision_number)
+      .then((data) => {
+        CommonUtils.clearStorage('SegmentFilter')
 
-      SegmentActions.removeAllMutedSegments()
+        SegmentActions.removeAllMutedSegments()
 
-      $(document).trigger('segment-filter:filter-data:load', {data: data})
+        $(document).trigger('segment-filter:filter-data:load', {data: data})
 
-      var reactState = Object.assign(
-        {
-          filteredCount: data.count,
-          filtering: true,
-          segmentsArray: data.segment_ids,
-        },
-        extendendLocalStorageValues,
-      )
-
-      SegmentFilterUtils.setStoredState({
-        serverData: data,
-        reactState: reactState,
-      })
-
-      CatToolActions.setSegmentFilter(data)
-
-      SegmentActions.setMutedSegments(data['segment_ids'])
-
-      var segmentToOpen
-      var lastSegmentId = SegmentFilterUtils.getStoredState().lastSegmentId
-      if (!lastSegmentId) {
-        segmentToOpen = data['segment_ids'][0]
-        SegmentActions.scrollToSegment(segmentToOpen)
-        SegmentActions.openSegment(segmentToOpen)
-      } else if (
-        lastSegmentId &&
-        !SegmentFilterUtils.segmentIsInSample(
-          lastSegmentId,
-          data['segment_ids'],
+        var reactState = Object.assign(
+          {
+            filteredCount: data.count,
+            filtering: true,
+            segmentsArray: data.segment_ids,
+          },
+          extendendLocalStorageValues,
         )
-      ) {
-        SegmentFilterUtils.callbackForSegmentNotInSample(lastSegmentId)
-      } else {
-        segmentToOpen = lastSegmentId
-        SegmentActions.openSegment(segmentToOpen)
-        SegmentActions.scrollToSegment(segmentToOpen)
-      }
-    })
+
+        SegmentFilterUtils.setStoredState({
+          serverData: data,
+          reactState: reactState,
+          open: true,
+        })
+
+        CatToolActions.setSegmentFilter(data)
+
+        SegmentActions.setMutedSegments(data['segment_ids'])
+
+        var segmentToOpen
+        var lastSegmentId = SegmentFilterUtils.getStoredState().lastSegmentId
+        if (!lastSegmentId) {
+          segmentToOpen = data['segment_ids'][0]
+          SegmentActions.scrollToSegment(segmentToOpen)
+          SegmentActions.openSegment(segmentToOpen)
+        } else if (
+          lastSegmentId &&
+          !SegmentFilterUtils.segmentIsInSample(
+            lastSegmentId,
+            data['segment_ids'],
+          )
+        ) {
+          SegmentFilterUtils.callbackForSegmentNotInSample(lastSegmentId)
+        } else {
+          segmentToOpen = lastSegmentId
+          SegmentActions.openSegment(segmentToOpen)
+          SegmentActions.scrollToSegment(segmentToOpen)
+        }
+      })
+      .catch(() => {
+        CatToolActions.setSegmentFilterError()
+        CatToolActions.addNotification({
+          title: 'Segments filters error',
+          type: 'error',
+          text: 'We got an error, please contact support',
+          position: 'br',
+          timer: 5000,
+        })
+      })
   },
 
   /**
@@ -205,7 +202,10 @@ let SegmentFilterUtils = {
   openFilter: () => {
     CatToolActions.openSegmentFilter()
     SegmentFilterUtils.open = true
-    var localStorageData = SegmentFilterUtils.getStoredState()
+    SegmentFilterUtils.setStoredState({
+      open: true,
+    })
+    const localStorageData = SegmentFilterUtils.getStoredState()
     if (localStorageData.serverData) {
       SegmentActions.setMutedSegments(
         SegmentFilterUtils.getStoredState().serverData.segment_ids,
@@ -231,6 +231,9 @@ let SegmentFilterUtils = {
   closeFilter: function () {
     CatToolActions.closeSubHeader()
     SegmentFilterUtils.open = false
+    SegmentFilterUtils.setStoredState({
+      open: false,
+    })
     SegmentActions.removeAllMutedSegments()
     setTimeout(function () {
       SegmentActions.scrollToSegment(UI.currentSegmentId)

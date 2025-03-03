@@ -13,14 +13,14 @@ use API\Commons\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;
-use Chunks_ChunkStruct;
 use Database;
 use Exception;
+use Jobs_JobStruct;
 
 class CompletionEventController extends KleinController {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -37,7 +37,7 @@ class CompletionEventController extends KleinController {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

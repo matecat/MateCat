@@ -8,7 +8,7 @@ use Model\Analysis\XTRFStatus;
  * User: gremorian
  * Date: 11/05/15
  * Time: 20.37
- * 
+ *
  */
 
 class downloadAnalysisReportController extends downloadController {
@@ -32,8 +32,18 @@ class downloadAnalysisReportController extends downloadController {
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-        $this->id_project    = $__postInput[ 'id_project' ];
-        $this->password      = $__postInput[ 'password' ];
+        $this->id_project = $__postInput[ 'id_project' ];
+        $this->password   = $__postInput[ 'password' ];
+
+        if(empty($this->id_project)){
+            throw new InvalidArgumentException("Id project not provided");
+        }
+
+        $this->project = Projects_ProjectDao::findById($this->id_project);
+
+        if($this->project === null){
+            throw new InvalidArgumentException("Wrong Id project provided");
+        }
 
         $this->featureSet = new FeatureSet();
 
@@ -72,7 +82,7 @@ class downloadAnalysisReportController extends downloadController {
         /**
          * Retrieve user information
          */
-        $this->readLoginInfo();
+        $this->identifyUser();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $_project_data[ 0 ][ 'jid' ];

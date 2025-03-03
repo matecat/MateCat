@@ -33,8 +33,6 @@ let SearchUtils = {
    * @returns {boolean}
    */
   execFind: function (params) {
-    $('section.currSearchSegment').removeClass('currSearchSegment')
-
     let nbspRegexp = new RegExp(tagSignatures.nbsp.placeholder, 'g')
     let spaceRegexp = tagSignatures.space
       ? new RegExp(tagSignatures.space.placeholder, 'g')
@@ -77,7 +75,7 @@ let SearchUtils = {
     }
     this.searchParams['match-case'] = params.matchCase
     this.searchParams['exact-match'] = params.exactMatch
-    this.searchParams['strict_mode'] = !params.entireJob
+    this.searchParams['inCurrentChunkOnly'] = !params.entireJob
 
     if (
       isUndefined(this.searchParams.source) &&
@@ -118,7 +116,7 @@ let SearchUtils = {
         status: this.searchParams.status,
         matchcase: this.searchParams['match-case'],
         exactmatch: this.searchParams['exact-match'],
-        strictMode: this.searchParams['strict_mode'],
+        inCurrentChunkOnly: this.searchParams['inCurrentChunkOnly'],
         revisionNumber: params.revisionNumber,
         replace,
       }).then((data) => {

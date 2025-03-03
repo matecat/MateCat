@@ -12,11 +12,10 @@ namespace DataAccess;
 use Exception;
 use INIT;
 use Log;
-use PDO;
-use PDOStatement;
 use Predis\Client;
 use RedisHandler;
 use ReflectionException;
+use Throwable;
 
 trait DaoCacheTrait {
 
@@ -69,8 +68,16 @@ trait DaoCacheTrait {
 
         $value = null;
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $key   = md5( $query );
-            $value = unserialize( self::$cache_con->get( $key ) );
+            $key = md5( $query );
+            try {
+                $value = unserialize( self::$cache_con->get( $key ) );
+            } catch ( Throwable $e ) {
+                Log::doJsonLog( [
+                        "type"  => "Wrong cache type found, maybe a Typed property ERROR",
+                        "key"   => $key,
+                        "error" => $e->getMessage(),
+                ], "query_cache.log" );
+            }
             $this->_logCache( "GET", $key, $value, $query );
         }
 

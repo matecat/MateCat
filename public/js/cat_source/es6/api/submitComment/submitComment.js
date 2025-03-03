@@ -22,6 +22,7 @@ export const submitComment = async ({
   idJob = config.id_job,
   password = config.password,
   revisionNumber = config.revisionNumber,
+  isAnonymous = false,
 }) => {
   const dataParams = {
     action: 'comment',
@@ -33,6 +34,7 @@ export const submitComment = async ({
     password,
     source_page: sourcePage,
     message,
+    is_anonymous: isAnonymous,
   }
   const formData = new FormData()
 

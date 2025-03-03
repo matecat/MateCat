@@ -6,7 +6,7 @@
  * Time: 14:50
  */
 
-namespace TmKeyManagement ;
+namespace TmKeyManagement;
 
 use Database;
 use Exception;
@@ -20,15 +20,15 @@ use Users_UserStruct;
 
 class UserKeysModel {
 
-    protected $_user_keys = [ 'totals' => [], 'job_keys' => [] ] ;
+    protected $_user_keys = [ 'totals' => [], 'job_keys' => [] ];
 
-    protected $user ;
+    protected $user;
 
-    protected $userRole ;
+    protected $userRole;
 
-    public function __construct( Users_UserStruct $user, $role ) {
-        $this->user = $user ;
-        $this->userRole = $role ;
+    public function __construct( Users_UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+        $this->user     = $user;
+        $this->userRole = $role;
     }
 
     public function getKeys( $jobKeys, $ttl = 0 ) {
@@ -41,7 +41,7 @@ class UserKeysModel {
             $keyList = $_keyDao->read( $dh, false, $ttl );
 
         } catch ( Exception $e ) {
-            $keyList = array();
+            $keyList = [];
             Log::doJsonLog( $e->getMessage() );
         }
 
@@ -80,7 +80,7 @@ class UserKeysModel {
          */
         foreach ( $job_keyList as $jobKey ) {
 
-            $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+            $jobKey                  = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
             $jobKey->complete_format = true;
 
             if ( !is_null( $this->user->uid ) && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
@@ -147,7 +147,7 @@ class UserKeysModel {
         //clean unordered keys
         $this->_user_keys[ 'totals' ] = array_values( $this->_user_keys[ 'totals' ] );
 
-        return $this->_user_keys ;
+        return $this->_user_keys;
     }
 
 

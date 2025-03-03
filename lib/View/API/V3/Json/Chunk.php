@@ -11,18 +11,17 @@ namespace API\V3\Json;
 use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
 use API\V2\Json\ProjectUrls;
-use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
-use Langs_LanguageDomains;
-use Langs_Languages;
+use Jobs_JobStruct;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use RedisHandler;
 use Utils;
 use WordCount\WordCountStruct;
 
@@ -32,13 +31,13 @@ class Chunk extends \API\V2\Json\Chunk {
     protected $chunk;
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      *
      * @return array
      * @throws \Exception
      * @throws \Exceptions\NotFoundException
      */
-    public function renderOne( Chunks_ChunkStruct $chunk ) {
+    public function renderOne( Jobs_JobStruct $chunk ) {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
@@ -51,7 +50,7 @@ class Chunk extends \API\V2\Json\Chunk {
     }
 
     /**
-     * @param                         $chunk Chunks_ChunkStruct
+     * @param                         $chunk Jobs_JobStruct
      *
      * @param Projects_ProjectStruct  $project
      * @param FeatureSet              $featureSet
@@ -59,7 +58,7 @@ class Chunk extends \API\V2\Json\Chunk {
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $this->chunk   = $chunk;
         $outsourceInfo = $chunk->getOutsource();
@@ -74,9 +73,9 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $jobStats = WordCountStruct::loadFromJob( $chunk );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
         $warningsCount = $chunk->getWarningsCount();

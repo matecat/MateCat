@@ -6,7 +6,9 @@
  * @param {string} source_lang
  * @param {string} target_lang
  * @param {string} segmentation_rule
+ * @param filters_extraction_parameters_template_id
  * @param {AbortController} signal
+ * @param restartedConversion
  * @returns {Promise<object>}
  */
 export const convertFileRequest = async ({
@@ -15,7 +17,9 @@ export const convertFileRequest = async ({
   source_lang,
   target_lang,
   segmentation_rule,
+  filters_extraction_parameters_template_id,
   signal,
+  restarted_conversion,
 }) => {
   const dataParams = {
     action,
@@ -23,6 +27,8 @@ export const convertFileRequest = async ({
     source_lang,
     target_lang,
     segmentation_rule,
+    filters_extraction_parameters_template_id,
+    restarted_conversion,
   }
   const formData = new FormData()
 

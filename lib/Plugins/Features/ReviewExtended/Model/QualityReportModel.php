@@ -10,11 +10,11 @@ namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;
@@ -24,7 +24,7 @@ use Users_UserDao;
 class QualityReportModel {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -53,9 +53,9 @@ class QualityReportModel {
     private $version;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      */
-    public function __construct( Chunks_ChunkStruct $chunk ) {
+    public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -152,8 +152,8 @@ class QualityReportModel {
                         'avg_edit_distance' => $this->avg_edit_distance
                 ],
                 'job'     => [
-                        'source' => $this->chunk->getJob()->source,
-                        'target' => $this->chunk->getJob()->target,
+                        'source' => $this->chunk->source,
+                        'target' => $this->chunk->target,
                 ],
                 'project' => [
                         'metadata'   => $this->getProject()->getMetadataAsKeyValue(),
@@ -189,7 +189,7 @@ class QualityReportModel {
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
                     'revision_number' => $revisionNumber,
                     'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                    'is_pass'         => !!$chunk_review->is_pass,
+                    'is_pass'         => ($chunk_review->is_pass !== null ? !!$chunk_review->is_pass : null),
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()
             ];

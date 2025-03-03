@@ -1,11 +1,17 @@
-// rewrite semantic CSS
+@use "colors";
 
+// rewrite semantic CSS
+html, body {
+  height: 100%;
+}
 body.manage {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: $grey5;
+  background-color: colors.$grey5;
   overflow-y: hidden;
   overflow-x: auto;
+  font-size: 14px;
+  line-height: 1.4285em;
 }
 
 div#manage-container {
@@ -46,14 +52,17 @@ div#manage-container {
   .menu {
     .item.submenu {
       width: 180px;
+      i.icon-refresh.icon {
+        margin-right: 9px !important;
+      }
     }
     .item.submenu a {
-      padding-left: 6px;
-      color: $black;
+      color: colors.$black;
     }
 
     .item.submenu .dropdown.icon {
       top: 2px;
+      margin-left: 8px;
     }
   }
 }
@@ -75,7 +84,7 @@ div#manage-container {
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 
@@ -87,18 +96,18 @@ div#manage-container {
     }
     .ui.ribbon.label {
       z-index: 2;
-      left: -28px;
-      max-width: 535px;
+      left: -33px;
+      max-width: 540px;
       min-width: 0px;
-      line-height: 17px;
-      background-color: $grey2;
-      color: $black;
+      line-height: 16px;
+      background-color: colors.$grey2;
+      color: colors.$black;
       height: 30px;
       border-radius: 0 2px 2px 0;
       display: inline-block;
     }
     .project-header {
-      background-color: $grey4;
+      background-color: colors.$grey4;
       padding-bottom: 10px !important;
       //border-bottom: 1px solid #ccc;
       margin-bottom: -25px;
@@ -137,11 +146,14 @@ div#manage-container {
         }
       }
       .project-activity-icon {
-        padding: 2px 12px 0px !important;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: end;
         font-family: Calibri, Arial, Helvetica, sans-serif;
         position: relative;
-        top: 4px;
-
+        top: 6px;
+        padding: 2px 12px 0px !important;
         .ui.dropdown {
           text-align: center;
           border-radius: 30px;
@@ -158,7 +170,7 @@ div#manage-container {
           }
           &.project-personal-assignee {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             border: 1px solid #bdbdbd;
             cursor: default;
@@ -175,7 +187,7 @@ div#manage-container {
           }
           &.project-team {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             height: 30px;
             .text {
@@ -186,7 +198,7 @@ div#manage-container {
               text-overflow: ellipsis;
               border-radius: 15px;
               padding: 5px 15px;
-              color: $black;
+              color: colors.$black;
               transition: 0.3s ease;
             }
             .menu {
@@ -208,16 +220,15 @@ div#manage-container {
                 cursor: pointer;
 
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
             &:hover .text {
-              background-color: $grey5 !important;
+              background-color: colors.$grey5 !important;
             }
           }
           &.project-assignee {
-            margin-right: 8px;
             background-color: #ffffff !important;
             vertical-align: top;
             /*height: 30px !important;*/
@@ -254,15 +265,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
               .scrolling {
@@ -305,10 +316,10 @@ div#manage-container {
               transition: 0.3s ease;
             }
             &:hover {
-              border: 1px solid $translatedBlue;
-              color: $translatedBlue;
+              border: 1px solid colors.$translatedBlue;
+              color: colors.$translatedBlue;
               .icon-user22 {
-                color: $translatedBlue;
+                color: colors.$translatedBlue;
               }
             }
             .not-assigned {
@@ -324,15 +335,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
@@ -370,7 +381,7 @@ div#manage-container {
     }
 
     .project-body {
-      background-color: $grey4;
+      background-color: colors.$grey4;
 
       .jobs {
         margin-top: 0px;
@@ -401,10 +412,6 @@ div#manage-container {
               transition: 0.3s ease;
               background-color: #ffffff;
               padding: 8px 15px;
-
-              .outsource.modal .popup {
-                box-shadow: none;
-              }
               .job-id {
                 float: left;
                 min-width: 70px;
@@ -664,7 +671,9 @@ div#manage-container {
                 box-shadow: none !important;
                 color: #7eaf3e !important;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:active {
@@ -690,7 +699,7 @@ div#manage-container {
                   display: flex;
                   align-items: center;
                   background: #fff;
-                  color: $black;
+                  color: colors.$black;
                   font-weight: normal;
                   padding: 5px 8px;
                   border: none; // border: 1px solid #979797;
@@ -703,7 +712,7 @@ div#manage-container {
                     font-size: 14px;
                   }
                   &.open-outsource-disabled span {
-                    color: $grey;
+                    color: colors.$grey;
                   }
                   span {
                     color: #000;
@@ -724,7 +733,9 @@ div#manage-container {
                 border-radius: 2px;
                 float: right;
                 &:hover {
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
+                  box-shadow:
+                    0 0 0 #e0e0e0,
+                    0 0 2px rgba(0, 0, 0, 0.12),
                     0 2px 4px rgba(0, 0, 0, 0.24) !important;
                 }
                 &:focus {
@@ -747,6 +758,8 @@ div#manage-container {
                   }
                   .item {
                     padding: 10px 15px !important;
+                    text-decoration: none;
+                    min-height: unset;
                   }
                   &:hover {
                     background-color: #ececec;
@@ -793,13 +806,13 @@ div#manage-container {
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
-      background-color: $grey4;
+      background-color: colors.$grey4;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
         a {
           text-decoration: underline;
-          color: $grey1;
+          color: colors.$grey1;
           font-size: 13px;
           &:hover {
             text-decoration: none;
@@ -809,7 +822,7 @@ div#manage-container {
       .project-due-date {
         margin-top: -10px;
         margin-left: -15px;
-        color: $grey1;
+        color: colors.$grey1;
         font-size: 13px;
       }
     }
@@ -865,73 +878,6 @@ div#manage-container {
   }
 }
 
-.normal-foo {
-  background-color: $grey4;
-  min-width: 992px;
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  .footer-body {
-    display: grid;
-    position: relative;
-    grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
-    align-items: center;
-    padding: 16px 64px;
-    height: 77px;
-    .info {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 40px auto;
-      grid-column-gap: 8px;
-      .logo {
-        background-position: center;
-        background-size: cover;
-      }
-      .description {
-        color: $grey1;
-        font-weight: 100;
-        font-size: 12px;
-        text-align: left;
-        line-height: 14px;
-        .link {
-          color: #00aee4;
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  .side-info {
-    padding: 0 16px;
-    position: absolute;
-    display: grid;
-    align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body {
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item {
-        a {
-          margin: 0;
-          padding: 0;
-          color: $grey1;
-          display: block;
-          text-decoration: underline;
-          text-align: left;
-        }
-      }
-    }
-  }
-}
-
 .modal[data-type='view'] {
   display: none;
 }
@@ -944,7 +890,7 @@ div#manage-container {
 
 @media only screen and (min-width: 1200px) {
   .ui.container {
-    width: 1140px;
+    width: 1140px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -953,7 +899,7 @@ div#manage-container {
 
 @media only screen and (min-width: 1380px) {
   .ui.container {
-    width: 1280px;
+    width: 1280px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -962,7 +908,7 @@ div#manage-container {
 
 @media only screen and (max-width: 1199px) and (min-width: 992px) {
   .ui.container {
-    width: 991px;
+    width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -977,7 +923,7 @@ div#manage-container {
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
   .ui.container {
-    min-width: 991px;
+    min-width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1033,4 +979,39 @@ div#manage-container {
 
 .ui.dropdown .scrolling.menu {
   border-top: none;
+}
+
+.project-team-dropdown,
+.user-project-dropdown {
+  line-height: 1;
+  border-radius: 15px !important;
+  box-shadow:
+    0 0 0 #e0e0e0,
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.24) !important;
+}
+
+.project-menu-dropdown {
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  background-color: rgba(colors.$grey8, 0.5) !important;
+
+  &:hover {
+    background-color: rgba(colors.$grey8, 1) !important;
+  }
+}
+
+.project-activity-icon button.project-team-dropdown {
+  height: 30px;
+  font-size: 14px;
+  color: #000;
+  padding: 5px 15px;
+  background-color: #fff;
+}
+
+.user-project-dropdown-container button.user-project-dropdown {
+  height: 30px !important;
+  color: #000 !important;
+  font-size: 14px;
 }

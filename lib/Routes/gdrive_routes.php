@@ -20,8 +20,8 @@ route(
         [ 'ConnectedServices\GDrive\GDriveController', 'listImportedFiles' ]
 );
 route(
-        '/gdrive/change/[:sourceLanguage]', 'GET',
-        [ 'ConnectedServices\GDrive\GDriveController', 'changeSourceLanguage' ]
+        '/gdrive/change', 'GET',
+        [ 'ConnectedServices\GDrive\GDriveController', 'changeConversionParameters' ]
 );
 route(
         '/gdrive/delete/[:fileId]', 'GET',

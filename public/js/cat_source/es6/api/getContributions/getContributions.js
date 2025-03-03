@@ -1,3 +1,4 @@
+import {NUM_CONTRIBUTION_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Get contributions
@@ -21,21 +22,22 @@ export const getContributions = async ({
   password = config.password,
   idClient = config.id_client,
   currentPassword = config.currentPassword,
+  contextListBefore,
+  contextListAfter,
 }) => {
   const contextBefore = UI.getContextBefore(idSegment)
   const idBefore = UI.getIdBefore(idSegment)
   const contextAfter = UI.getContextAfter(idSegment)
   const idAfter = UI.getIdAfter(idSegment)
-  const txt = target
 
   const obj = {
     action: 'getContribution',
     password: password,
     is_concordance: 0,
     id_segment: idSegment,
-    text: txt,
+    text: target,
     id_job: idJob,
-    num_results: UI.numContributionMatchesResults,
+    num_results: NUM_CONTRIBUTION_RESULTS,
     context_before: contextBefore ? contextBefore : '',
     id_before: idBefore ? idBefore : '',
     context_after: contextAfter,
@@ -43,6 +45,8 @@ export const getContributions = async ({
     id_client: idClient,
     cross_language: crossLanguages,
     current_password: currentPassword,
+    context_list_before: JSON.stringify(contextListBefore),
+    context_list_after: JSON.stringify(contextListAfter),
   }
   const dataParams = Object.fromEntries(
     Object.entries(obj).filter(([_, v]) => v != null),

@@ -9,10 +9,10 @@
 namespace Features\ProjectCompletion\Model ;
 
 use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ProjectCompletion\CompletionEventStruct;
 use FeatureSet;
+use Jobs_JobStruct;
 use Projects_ProjectDao;
 
 
@@ -23,14 +23,14 @@ class EventModel {
      */
     protected $eventStruct ;
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
 
 
-    public function __construct( Chunks_ChunkStruct $chunk, CompletionEventStruct $eventStruct ) {
+    public function __construct( Jobs_JobStruct $chunk, CompletionEventStruct $eventStruct ) {
         $this->eventStruct = $eventStruct ;
         $this->chunk = $chunk ;
     }

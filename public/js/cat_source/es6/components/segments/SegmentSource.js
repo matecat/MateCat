@@ -1,5 +1,5 @@
 import React, {createRef} from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {remove, cloneDeep, size, isUndefined} from 'lodash'
 import {CompositeDecorator, Editor, EditorState, Modifier} from 'draft-js'
 
@@ -271,8 +271,8 @@ class SegmentSource extends React.Component {
         missingGlossaryItems &&
         missingGlossaryItems.length > 0 &&
         (isUndefined(prevMissingGlossaryItems) ||
-          !Immutable.fromJS(prevMissingGlossaryItems).equals(
-            Immutable.fromJS(missingGlossaryItems),
+          !fromJS(prevMissingGlossaryItems).equals(
+            fromJS(missingGlossaryItems),
           ))
       ) {
         this.addQaCheckGlossaryDecorator()
@@ -292,7 +292,7 @@ class SegmentSource extends React.Component {
         glossary &&
         size(glossary) > 0 &&
         (isUndefined(prevGlossary) ||
-          !Immutable.fromJS(prevGlossary).equals(Immutable.fromJS(glossary)) ||
+          !fromJS(prevGlossary).equals(fromJS(glossary)) ||
           !prevActiveDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR])
       ) {
         activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = true
@@ -315,9 +315,7 @@ class SegmentSource extends React.Component {
       const lexiqaChanged =
         prevLexiqaSource &&
         currentLexiqaSource &&
-        !Immutable.fromJS(prevLexiqa.source).equals(
-          Immutable.fromJS(lexiqa.source),
-        )
+        !fromJS(prevLexiqa.source).equals(fromJS(lexiqa.source))
 
       if (
         currentLexiqaSource &&
@@ -347,8 +345,8 @@ class SegmentSource extends React.Component {
         (!prevProps || // was not mounted
           !prevProps.segment.inSearch || //Before was not active
           (prevProps.segment.inSearch &&
-            !Immutable.fromJS(prevProps.segment.searchParams).equals(
-              Immutable.fromJS(searchParams),
+            !fromJS(prevProps.segment.searchParams).equals(
+              fromJS(searchParams),
             )) || //Before was active but some params change
           (prevProps.segment.inSearch &&
             prevProps.segment.currentInSearch !== currentInSearch) || //Before was the current
@@ -552,7 +550,8 @@ class SegmentSource extends React.Component {
     if (this.delayAiAssistant) clearTimeout(this.delayAiAssistant)
 
     const isOpenAiEnabled =
-      Boolean(config.isOpenAiEnabled) && SegmentUtils.isAiAssistantAuto()
+      Boolean(config.isOpenAiEnabled) &&
+      this.context.userInfo?.metadata.ai_assistant === 1
 
     if (isOpenAiEnabled) {
       this.delayAiAssistant = setTimeout(() => {
@@ -632,7 +631,7 @@ class SegmentSource extends React.Component {
     const optionsToolbar = this.state.isShowingOptionsToolbar && (
       <ul className="optionsToolbar">
         {Boolean(config.isOpenAiEnabled) &&
-          !SegmentUtils.isAiAssistantAuto() && (
+          this.context.userInfo?.metadata.ai_assistant === 0 && (
             <li
               title={
                 isEnabledAiAssistantButton

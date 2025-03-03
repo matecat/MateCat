@@ -164,15 +164,6 @@ class SegmentPlaceholderLite extends React.Component {
                       </a>
                       <a
                         href="#"
-                        className="tagModeToggle "
-                        title="Display full/short tags"
-                      >
-                        <span className="icon-chevron-left"> </span>
-                        <span className="icon-tag-expand"> </span>
-                        <span className="icon-chevron-right"> </span>
-                      </a>
-                      <a
-                        href="#"
                         className="autofillTag"
                         title="Copy missing tags from source to target"
                       >
@@ -198,7 +189,7 @@ class SegmentPlaceholderLite extends React.Component {
                         {' '}
                         Translated{' '}
                       </a>
-                      <p>CTRL ENTER</p>
+                      <p>CTRL+ENTER</p>
                     </li>
                   </ul>
                 </div>
@@ -209,9 +200,6 @@ class SegmentPlaceholderLite extends React.Component {
                 {' '}
               </a>
             </div>
-          </div>
-          <div className="timetoedit" data-raw-time-to-edit="0">
-            {' '}
           </div>
           <div className="edit-distance">Edit Distance:</div>
         </div>

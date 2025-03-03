@@ -6,9 +6,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const WebpackConcatPlugin = require('webpack-concat-files-plugin')
 const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const buildPath = './public/build/'
 const lxqDownload = './public/buildResources/'
@@ -99,12 +102,13 @@ const matecatConfig = async ({env}, {mode}) => {
   files.forEach((file) => {
     const data = fs.readFileSync(file)
     const config = eval(data.toString('utf8'))
-    pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
+    pluginConfig = {...pluginConfig, ...config}
   })
   if (pluginConfig.sentryWebpackPlugin) {
-    pluginConfig.sentryWebpackPlugin.release = JSON.stringify(
-      config.BUILD_NUMBER,
-    )
+    pluginConfig.sentryWebpackPlugin.release = {
+      name: JSON.stringify(config.BUILD_NUMBER),
+    }
+    console.log('Sentry release', pluginConfig.sentryWebpackPlugin.release)
   }
   return {
     target: 'web',
@@ -126,6 +130,38 @@ const matecatConfig = async ({env}, {mode}) => {
     optimization: {
       moduleIds: 'deterministic',
       runtimeChunk: 'single',
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000, // Minimum size in bytes for a chunk to be generated
+        maxSize: 244000, // Maximum size in bytes for a chunk before it is split
+        maxInitialRequests: Infinity,
+        automaticNameDelimiter: '-',
+        cacheGroups: {
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
+      },
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          parallel: true,
+          terserOptions: {
+            compress: {
+              drop_console: true,
+            },
+            output: {
+              comments: false,
+            },
+          },
+        }),
+      ],
+    },
+    cache: {
+      type: 'filesystem',
+      cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),
     },
     module: {
       rules: [
@@ -137,12 +173,21 @@ const matecatConfig = async ({env}, {mode}) => {
             path.resolve(__dirname, 'plugins'),
           ],
           exclude: '/node_modules/',
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
+          use: [
+            {
+              loader: 'thread-loader',
+              options: {
+                workers: 2,
+              },
             },
-          },
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env'],
+                cacheDirectory: true,
+              },
+            },
+          ],
         },
         {
           test: /\.css$/i,
@@ -163,7 +208,7 @@ const matecatConfig = async ({env}, {mode}) => {
         {
           test: /\.s[ac]ss$/i,
           include: [
-            path.resolve(__dirname, 'public/css/sass'),
+            path.resolve(__dirname, 'public/css/sass/'),
             path.resolve(__dirname, 'plugins'),
           ],
           use: [
@@ -197,75 +242,110 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     entry: {
       'qa-report': [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
-          'public/js/cat_source/es6/components/quality_report/QualityReport.js',
+          'public/js/cat_source/es6/pages/QualityReport.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/quality-report.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/QualityReportPage.scss',
+        ),
       ],
       upload: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/gdrive.upload.js'),
         path.resolve(__dirname, 'public/js/gdrive.picker.js'),
-        path.resolve(__dirname, 'public/js/new-project.js'),
-        path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
       ],
       ...entryPoints,
       cattool: [
         path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.init.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.segment.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.headerTooltips.js'),
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
-      ],
-      dashboard: [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
         path.resolve(
           __dirname,
-          'public/js/cat_source/es6/components/projects/Dashboard.js',
+          'public/css/sass/components/pages/CattoolPage.scss',
         ),
-        path.resolve(__dirname, 'public/css/sass/manage_main.scss'),
+      ],
+      dashboard: [
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/DashboardPage.scss',
+        ),
       ],
       analyze: [
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/AnalyzePage.js',
         ),
-        path.resolve(__dirname, 'public/css/sass/analyze_main.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/AnalyzePage.scss',
+        ),
+      ],
+      signin: [
+        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/SignInPage.scss',
+        ),
       ],
       xliffToTarget: [
         path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/common.js'),
-        path.resolve(__dirname, 'public/js/user_store.js'),
-        path.resolve(__dirname, 'public/js/xliffToTarget.js'),
-        path.resolve(__dirname, 'public/css/sass/upload-main.scss'),
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/XliffToTarget.js',
+        ),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
+      ],
+      activityLog: [
+        path.resolve(
+          __dirname,
+          'public/js/cat_source/es6/pages/ActivityLog.js',
+        ),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/ActivityLogPage.scss',
+        ),
       ],
       commonCss: [
-        path.resolve(__dirname, 'public/css/sass/main.scss'),
-        path.resolve(__dirname, 'public/css/sass/legacy-misc.scss'),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/CattoolPage.scss',
+        ),
       ],
-      errorPage: [path.resolve(__dirname, 'public/css/sass/upload-main.scss')],
+      apiDoc: [
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/CattoolPage.scss',
+        ),
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/ApiDocPage.scss',
+        ),
+      ],
+      errorPage: [
+        path.resolve(
+          __dirname,
+          'public/css/sass/components/pages/NewProjectPage.scss',
+        ),
+      ],
     },
     plugins: [
+      // new BundleAnalyzerPlugin({analyzerMode: 'static'}),
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      !isDev &&
-        pluginConfig.sentryWebpackPlugin &&
-        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
       new WebpackConcatPlugin({
         bundles: [
           {
@@ -357,6 +437,13 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/signin.html'),
+        template: path.resolve(__dirname, './lib/View/templates/_signin.html'),
+        chunks: ['signin', 'allPagesPlugins'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/jobAnalysis.html'),
         template: path.resolve(
           __dirname,
@@ -379,7 +466,7 @@ const matecatConfig = async ({env}, {mode}) => {
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/APIDoc.php'),
         template: path.resolve(__dirname, './lib/View/templates/_APIDoc.php'),
-        chunks: ['commonCss'],
+        chunks: ['apiDoc'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
@@ -389,45 +476,57 @@ const matecatConfig = async ({env}, {mode}) => {
           __dirname,
           './lib/View/templates/_activity_log.html',
         ),
-        chunks: ['cattool'],
+        chunks: ['activityLog', 'allPagesPlugins'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/activity_log_not_found.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/activity_log_not_found.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_activity_log_not_found.html',
+          __dirname,
+          './lib/View/templates/_activity_log_not_found.html',
         ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/oauth_response_handler.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/oauth_response_handler.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_oauth_response_handler.html',
+          __dirname,
+          './lib/View/templates/_oauth_response_handler.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectFailurePage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectFailurePage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectFailurePage.html',
+          __dirname,
+          './lib/View/templates/_redirectFailurePage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
-        filename: path.resolve(__dirname, './lib/View/redirectSuccessPage.html'),
+        filename: path.resolve(
+          __dirname,
+          './lib/View/redirectSuccessPage.html',
+        ),
         template: path.resolve(
-            __dirname,
-            './lib/View/templates/_redirectSuccessPage.html',
+          __dirname,
+          './lib/View/templates/_redirectSuccessPage.html',
         ),
         chunks: [],
         publicPath: '/public/build/',
@@ -475,7 +574,10 @@ const matecatConfig = async ({env}, {mode}) => {
       }),
       new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/badConfiguration.html'),
-        template: path.resolve(__dirname, './lib/View/templates/_badConfiguration.html'),
+        template: path.resolve(
+          __dirname,
+          './lib/View/templates/_badConfiguration.html',
+        ),
         chunks: ['commonCss'],
         publicPath: '/public/build/',
         xhtml: true,
@@ -546,6 +648,9 @@ const matecatConfig = async ({env}, {mode}) => {
         publicPath: '/public/build/',
         xhtml: true,
       }),
+      !isDev &&
+        pluginConfig.sentryWebpackPlugin &&
+        sentryWebpackPlugin(pluginConfig.sentryWebpackPlugin),
     ],
     devtool: isDev ? 'inline-source-map' : 'source-map',
   }

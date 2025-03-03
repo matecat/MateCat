@@ -22,7 +22,7 @@ export const ConfirmDeleteResourceProjectTemplates = ({
           </ul>
         )}
 
-        {typeof footerContent === 'string'
+        {typeof footerContent !== 'undefined'
           ? footerContent
           : 'If you confirm, it will be removed from the template(s).'}
       </div>
@@ -40,5 +40,5 @@ ConfirmDeleteResourceProjectTemplates.propTypes = {
   projectTemplatesInvolved: PropTypes.array.isRequired,
   content: PropTypes.string.isRequired,
   successCallback: PropTypes.func.isRequired,
-  footerContent: PropTypes.string,
+  footerContent: PropTypes.node,
 }

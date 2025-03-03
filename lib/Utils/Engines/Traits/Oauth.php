@@ -16,12 +16,12 @@ use Exception;
 
 trait Oauth {
 
-    protected function getAuthParameters(){
-        return array(
+    protected function getAuthParameters() {
+        return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
                 CURLOPT_TIMEOUT    => 120
-        );
+        ];
     }
 
     /**
@@ -30,24 +30,23 @@ trait Oauth {
      * @return mixed
      * @throws Exception
      */
-    protected function _authenticate(){
+    protected function _authenticate() {
 
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
 
-        $url = $this->oauth_url;
+        $url      = $this->oauth_url;
         $curl_opt = $this->getAuthParameters();
 
         $rawValue = $this->_call( $url, $curl_opt );
 
-        if ( $this->isJson( $rawValue ) ){
+        if ( $this->isJson( $rawValue ) ) {
             $objResponse = json_decode( $rawValue, true );
-        }
-        else {
+        } else {
             $objResponse = $rawValue;
         }
 
-        if ( isset( $objResponse['error'] ) ) {
+        if ( isset( $objResponse[ 'error' ] ) ) {
 
             //format as a normal Translate Response and send to decoder to output the data
             //$rawValue = $this->_formatAuthenticateError( $objResponse );
@@ -58,20 +57,19 @@ trait Oauth {
             $this->_setTokenEndLife( -86400 );
 
         } else {
-            if(is_array($objResponse)){
-                $this->token = $objResponse['access_token'];
-                $this->_setTokenEndLife( @$objResponse['expires_in'] );
-            }
-            else{
+            if ( is_array( $objResponse ) ) {
+                $this->token = $objResponse[ 'access_token' ];
+                $this->_setTokenEndLife( @$objResponse[ 'expires_in' ] );
+            } else {
                 $this->token = $objResponse;
                 $this->_setTokenEndLife( 60 * 10 ); // microsoft token expire in 10 minutes
             }
 
         }
 
-        $record = clone( $this->engineRecord );
+        $record = clone( $this->getEngineRecord() );
 
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
 
         /**
          * Use a generic Engine and not Engine_MicrosoftHubStruct
@@ -85,14 +83,14 @@ trait Oauth {
         $debugParam = $engineDAO->destroyCache( $engineStruct );
         $engineDAO->updateByStruct( $record );
 
-        if( is_null( $this->token ) ){
-            throw new Exception( $objResponse['error_description'] );
+        if ( is_null( $this->token ) ) {
+            throw new Exception( $objResponse[ 'error_description' ] );
         }
 
     }
 
     private function isJson( $string ) {
-        if(is_array($string)){
+        if ( is_array( $string ) ) {
             return false;
         }
         json_decode( $string );
@@ -102,20 +100,20 @@ trait Oauth {
 
     public function get( $_config ) {
 
-        $cycle = @(int)func_get_arg(1);
+        $cycle = @(int)func_get_arg( 1 );
 
-        if( $cycle == 10 ){
+        if ( $cycle == 10 ) {
             return $this->_formatRecursionError();
         }
 
         try {
 
             //Check for time to live and refresh cache and token info
-            if( $this->token_endlife <= time() ){
+            if ( $this->token_endlife <= time() ) {
                 $this->_authenticate();
             }
 
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
             return $this->result;
         }
 
@@ -124,7 +122,7 @@ trait Oauth {
 
         $this->call( "translate_relative_url", $parameters );
 
-        if( $this->_checkAuthFailure() ){
+        if ( $this->_checkAuthFailure() ) {
 
             //if i'm good enough this should not happen because i have the time to live
             try {
@@ -132,7 +130,7 @@ trait Oauth {
                 //Check for time to live and refresh cache and token info
                 $this->_authenticate();
 
-            } catch( Exception $e ){
+            } catch ( Exception $e ) {
                 return $this->result;
             }
 

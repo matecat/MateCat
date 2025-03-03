@@ -1,0 +1,48 @@
+@use '../../common-main';
+@use '../../commons/icons';
+@use '../../commons/buttons';
+@use '../../commons/aria-label-tooltip';
+@use "../../common";
+@use '../../style';
+@use '../../commons/progress-mc-bar';
+@use '../../mbc-style';
+@use '../../lexiqa';
+@use '../segment/SegmentFooterTabMessages';
+@use '../MarkAsCompleteButton';
+@use '../header/segmentsFilter';
+@use '../ReviewExtendedPanel';
+//components
+@use '../segment/segment';
+@use '../segment/segmentFooter';
+@use '../segment/segmentFooterTabGlossary';
+@use '../segment/issuesContainer';
+@use '../segment/tagsMenu';
+@use '../segment/Tag';
+@use '../segment/TooltipInfo';
+@use '../segment/Glossary';
+@use '../segment/Editor';
+@use '../bulk-approve-bar/bulk_approve_bar';
+@use '../header/search';
+@use '../header/qaComponent';
+@use '../header/header';
+@use '../SegmentsContainer';
+@use '../header/FilesMenu';
+@use '../segment/segmentFooterTabAiAssistant';
+@use '../CattolFooter';
+@use '../signin/OnBoarding';
+
+@use '../../cattool';
+
+@use '../../speech2text';
+
+@use '../../commons/tooltip';
+
+@use '../SettingsPanel';
+
+
+
+
+
+
+
+

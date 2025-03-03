@@ -4,11 +4,11 @@ namespace API\V2;
 
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
-use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -165,7 +165,7 @@ class ChangePasswordController extends ChunkController
             }
 
             // invalidate ChunkReviewDao cache for the job
-            if($jStruct instanceof Chunks_ChunkStruct){
+            if($jStruct instanceof Jobs_JobStruct){
                 $chunkReviewDao = new ChunkReviewDao();
                 $chunkReviewDao->destroyCacheForFindChunkReviews($jStruct );
             }

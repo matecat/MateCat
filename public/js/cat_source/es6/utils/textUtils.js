@@ -128,7 +128,7 @@ const TEXT_UTILS = {
     return {tags, text}
   },
   restoreTempTags(tags, text) {
-    text = text.replace(/#_([a-zA-Z]*?)_#/gi, (match, id) => {
+    text = text.replace(/#_([a-zA-Z]+?)_#/gi, (match, id) => {
       try {
         const tag = tags.find((item) => {
           return item.id === id
@@ -247,14 +247,18 @@ const TEXT_UTILS = {
   },
   htmlEncode: function (value) {
     if (value) {
-      return $('<div />').text(value).html()
+      var txt = document.createElement('textarea')
+      txt.textContent = value
+      return txt.innerHTML
     } else {
       return ''
     }
   },
   htmlDecode: function (value) {
     if (value) {
-      return $('<div />').html(value).text()
+      var txt = document.createElement('textarea')
+      txt.innerHTML = value
+      return txt.value
     } else {
       return ''
     }
@@ -313,14 +317,17 @@ const TEXT_UTILS = {
   },
   replaceUrl: function (textToReplace) {
     let regExpUrl =
-      /(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/gim
-    return textToReplace.replace(regExpUrl, function (match) {
-      let href =
-        match[match.length - 1] === '.'
-          ? match.substring(0, match.length - 1)
-          : match
-      return '<a href="' + href + '" target="_blank">' + match + '</a>'
-    })
+      /(http|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\wàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ.,@?^=%&:/~+#'-]*[\wàèìòùÀÈÌÒÙáéíóúýÁÉÍÓÚÝâêîôûÂÊÎÔÛãñõÃÑÕäëïöüÿÄËÏÖÜŸçÇßØøÅåÆæœ@?^=%&/~+#'-])/gim
+    return TEXT_UTILS.htmlDecode(textToReplace).replace(
+      regExpUrl,
+      function (match) {
+        let href =
+          match[match.length - 1] === '.'
+            ? match.substring(0, match.length - 1)
+            : match
+        return '<a href="' + href + '" target="_blank">' + match + '</a>'
+      },
+    )
   },
   isContentTextEllipsis: ({offsetWidth, scrollWidth} = {}) =>
     offsetWidth < scrollWidth,

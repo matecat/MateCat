@@ -83,6 +83,13 @@ class SetContributionWorker extends AbstractWorker {
 
         $this->_loadEngine( $jobStruct );
 
+        /**
+         * @see Engines_AbstractEngine::$_isAdaptiveMT
+         */
+        if( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ){
+            return;
+        }
+
         $config             = $this->_engine->getConfigStruct();
         $config[ 'source' ] = $jobStruct->source;
         $config[ 'target' ] = $jobStruct->target;
@@ -113,7 +120,7 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRow()->id ) {
+        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 

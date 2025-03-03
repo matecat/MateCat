@@ -9,25 +9,21 @@
 namespace ConnectedServices\GDrive;
 
 use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\GDriveUserAuthorizationModel;
 use Exception;
 use Exceptions\ValidationError;
 use INIT;
-use Users_UserStruct;
+use ReflectionException;
 
 class OAuthController extends AbstractStatefulKleinController {
-
-    /**
-     * @var Users_UserStruct
-     */
-    protected $user;
 
     /**
      * @throws ValidationError
      */
     public function response() {
 
-        if( empty( $this->request->param( 'state' ) ) || $_SESSION[ 'google-drive-' . INIT::$XSRF_TOKEN ] !== $this->request->param( 'state' ) ){
+        if( empty( $this->request->param( 'state' ) ) || $_SESSION[ 'googledrive-' . INIT::$XSRF_TOKEN ] !== $this->request->param( 'state' ) ){
             $this->response->code( 401 );
             return;
         }
@@ -61,10 +57,12 @@ EOF;
 
     /**
      * @throws ValidationError
+     * @throws ReflectionException
      */
     private function __handleCode( $code ) {
         $model = new GDriveUserAuthorizationModel( $this->user );
         $model->updateOrCreateRecordByCode( $code );
+        $this->refreshClientSessionIfNotApi();
     }
 
     /**

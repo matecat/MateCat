@@ -7,7 +7,7 @@ interface Search_ReplaceEventIndexDAOInterface {
      *
      * @return int
      */
-    public function getActualIndex( $idJob);
+    public function getActualIndex( $idJob );
 
     /**
      * @param $idJob
@@ -15,7 +15,7 @@ interface Search_ReplaceEventIndexDAOInterface {
      *
      * @return mixed
      */
-    public function save($idJob, $version);
+    public function save( $idJob, $version );
 
     /**
      * @param $ttl

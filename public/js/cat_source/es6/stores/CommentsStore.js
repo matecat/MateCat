@@ -103,10 +103,9 @@ let CommentsStore = assign({}, EventEmitter.prototype, {
         total = 0
 
       $(this.getCommentsBySegment(s)).each(function (i, x) {
-        if (Number(x.message_type) === CommentsStore.db.types.comment) {
-          if (null == x.thread_id) active++
-          total++
-        }
+        if (x.message_type === CommentsStore.db.types.resolve) active = 0
+        if (x.message_type !== CommentsStore.db.types.resolve) active++
+        total++
       })
       return {active: active, total: total}
     },

@@ -9,6 +9,7 @@
 namespace API\V2;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
+use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use Jobs_JobStruct;
 use ProjectManager;
@@ -46,13 +47,14 @@ class JobMergeController extends KleinController {
 
         $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
 
-        if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id || $this->job->wasDeleted() ) {
+        if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id || $this->job->isDeleted() ) {
             throw new \Exceptions\NotFoundException();
         }
     }
 
     protected function afterConstruct() {
-        $this->validator = new \API\Commons\Validators\ProjectPasswordValidator( $this );
+        $this->validator = new ProjectPasswordValidator( $this );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
@@ -65,7 +67,7 @@ class JobMergeController extends KleinController {
 
         $jid   = $this->job->id;
         $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( $jid ) {
-            return $jobStruct->id == $jid and !$jobStruct->wasDeleted(); // exclude deleted jobs
+            return $jobStruct->id == $jid and !$jobStruct->isDeleted(); // exclude deleted jobs
         } );
 
         if ( empty( $jobToMerge ) ) {
