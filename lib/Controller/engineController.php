@@ -1,5 +1,6 @@
 <?php
 
+use Engines\MMT\MMTServiceApiException;
 use EnginesModel\DeepLStruct;
 use EnginesModel\LaraStruct;
 use Lara\LaraException;
@@ -356,6 +357,25 @@ class engineController extends ajaxController {
                 $this->destroyUserEnginesCache();
 
                 return;
+            }
+
+            // Check MMT License
+            $mmtLicense = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()['MMT-License'];
+
+            if(!empty($mmtLicense)){
+                $mmtClient = Engines\MMT\MMTServiceApi::newInstance()
+                    ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                    ->setLicense( $mmtLicense );
+
+                try {
+                    $mmtClient->me();
+                } catch (MMTServiceApiException $e){
+                    $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => "MMT license not valid" ];
+                    $engineDAO->delete( $newCreatedDbRowStruct );
+                    $this->destroyUserEnginesCache();
+
+                    return;
+                }
             }
 
             $UserMetadataDao = new MetadataDao();
