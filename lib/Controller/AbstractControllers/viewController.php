@@ -29,6 +29,7 @@ abstract class viewController extends controller {
      * Class constructor
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct() {
 
@@ -42,11 +43,9 @@ abstract class viewController extends controller {
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
 
-        //SESSION ENABLED
+        // SESSION ENABLED
         $this->identifyUser();
-
         $this->featureSet = new FeatureSet();
-
     }
 
     /**
@@ -103,7 +102,6 @@ abstract class viewController extends controller {
         if ( isset( $ignore ) ) {
             throw $ignore;
         }
-
     }
 
     /**
