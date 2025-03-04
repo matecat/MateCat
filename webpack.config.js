@@ -150,7 +150,7 @@ const matecatConfig = async ({env}, {mode}) => {
           parallel: true,
           terserOptions: {
             compress: {
-              drop_console: true,
+              drop_console: !isDev,
             },
             output: {
               comments: false,
