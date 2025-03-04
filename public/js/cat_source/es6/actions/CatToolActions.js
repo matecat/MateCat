@@ -309,7 +309,7 @@ let CatToolActions = {
     if (!sessionStorage.getItem(key)) {
       const props = {
         text: config.ownerIsMe
-          ? "You've hit the <strong>monthly limit of 10k characters</strong> availablewith Lara's free plan.</br>" +
+          ? "You've hit the <strong>monthly limit of 10k characters</strong> available with Lara's free plan.</br>" +
             'Lara will stop translating until the limit is reset at the end of the billing cycle.<br><br>' +
             'To enjoy unlimited access to the best machine tranlsation, upgrade your plan.'
           : "The <strong>10k-character monthly limit</strong> for Lara's free plan has been reached.<br> " +
