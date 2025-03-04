@@ -7,6 +7,7 @@ use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use Exception;
 use Jobs\MetadataDao;
+use Utils;
 
 class JobMetadataController extends KleinController {
 
@@ -75,26 +76,36 @@ class JobMetadataController extends KleinController {
                 throw new Exception( 'Bad request', 400 );
             }
 
+            $return = [];
             $json = json_decode($json, true);
 
-            if(!isset($json['key'])){
-                throw new Exception( 'Missing `key` property', 400 );
+            if(!Utils::arrayIsList($json)){
+                throw new Exception( 'JSON is not a list of metadata', 400 );
             }
 
-            if(empty($json['key'])){
-                throw new Exception( 'Empty `key` property', 400 );
+            foreach ($json as $item){
+                if(!isset($item['key'])){
+                    throw new Exception( 'Missing `key` property', 400 );
+                }
+
+                if(empty($item['key'])){
+                    throw new Exception( 'Empty `key` property', 400 );
+                }
+
+                if(!isset($item['value'])){
+                    throw new Exception( 'Missing `value` property', 400 );
+                }
+
+                if(empty($item['value'])){
+                    throw new Exception( 'Empty `value` property', 400 );
+                }
+
+                $struct = $dao->set($params['id_job'], $params['password'], $item['key'], $item['value']);
+                $return[] = $struct;
             }
 
-            if(!isset($json['value'])){
-                throw new Exception( 'Missing `value` property', 400 );
-            }
+            $this->response->json($return);
 
-            if(empty($json['value'])){
-                throw new Exception( 'Empty `value` property', 400 );
-            }
-
-            $struct = $dao->set($params['id_job'], $params['password'], $json['key'], $json['value']);
-            $this->response->json($struct);
         } catch (Exception $exception){
             $this->response->status()->setCode( $exception->getCode() >= 400 ? $exception->getCode() : 500 );
             $this->response->json( [
