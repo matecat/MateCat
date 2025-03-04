@@ -17,6 +17,7 @@ import {clearNotCompletedUploads} from './cat_source/es6/api/clearNotCompletedUp
 import CreateProjectStore from './cat_source/es6/stores/CreateProjectStore'
 import CreateProjectActions from './cat_source/es6/actions/CreateProjectActions'
 import CommonUtils from './cat_source/es6/utils/commonUtils'
+import {fileUploadDelete} from './cat_source/es6/api/fileUploadDelete'
 
 window.UI = null
 
@@ -258,7 +259,15 @@ window.UI = {
         UI.checkFailedConversionsNumber()
       })
       .bind('fileuploaddestroyed', function (e, data) {
-        var deletedFileName = data.url.match(/file=[^&]*/g)
+        var deletedFileName = data.type
+        const filtersTemplate = CreateProjectStore.getFiltersTemplate()
+        const source = CreateProjectStore.getSourceLang()
+        fileUploadDelete({
+          file: deletedFileName,
+          filtersTemplate: filtersTemplate.id,
+          source,
+          segmentationRule: UI.segmentationRule,
+        })
         if (deletedFileName) {
           deletedFileName = decodeURIComponent(
             deletedFileName[0].replace('file=', ''),
