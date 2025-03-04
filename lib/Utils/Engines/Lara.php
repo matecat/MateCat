@@ -2,11 +2,13 @@
 
 namespace Utils\Engines;
 
+use AMQHandler;
 use Constants_Engines;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
 use Engines_MMT;
+use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_Matches;
 use EnginesModel_MMTStruct;
 use Exception;
@@ -24,6 +26,7 @@ use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
+use Stomp\Transport\Message;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -163,7 +166,7 @@ class Lara extends Engines_AbstractEngine {
      *
      * @param $_config
      *
-     * @return array|\Engines_Results_AbstractResponse
+     * @return array|Engines_Results_AbstractResponse
      * @throws ReflectionException
      * @throws Exception
      */
@@ -243,7 +246,27 @@ class Lara extends Engines_AbstractEngine {
 
         } catch ( LaraException $t ) {
             if ( $t->getCode() == 429 ) {
-                Log::doJsonLog( "Quota finished." );
+
+                Log::doJsonLog( "Lara quota exceeded. You have exceeded your 'api_translation_chars' quota" );
+
+                $engine_type = explode( "\\", self::class );
+                $engine_type = array_pop( $engine_type );
+                $message     = json_encode( [
+                        '_type' => 'quota_exceeded',
+                        'data'  => [
+                                'id_job'  => $_config[ 'job_id' ],
+                                'payload' => [
+                                        'engine'  => $engine_type,
+                                        'code'    => $t->getCode(),
+                                        'message' => "Lara quota exceeded. " . $t->getMessage()
+                                ]
+                        ]
+                ] );
+
+                $queueHandler = AMQHandler::getNewInstanceForDaemons();
+                $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
+                return [];
             } elseif ( $t->getCode() == 401 || $t->getCode() == 403 ) {
                 Log::doJsonLog( [ "Missing or invalid authentication header.", $t->getMessage(), $t->getCode() ] );
                 throw new LaraException( "Lara credentials not valid, please verify their validity and try again", $t->getCode(), $t );
@@ -267,7 +290,6 @@ class Lara extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function set( $_config ) {
-        // TODO: Implement set() method.
     }
 
     /**
@@ -278,6 +300,12 @@ class Lara extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+
+        if( empty( $_keys ) ) {
+            Log::doJsonLog( [ "LARA: update skipped. No keys provided." ] );
+            return true;
+        }
+
         try {
 
             $time_start = microtime( true );
@@ -308,14 +336,8 @@ class Lara extends Engines_AbstractEngine {
                     'sentence_after'  => $_config[ 'context_after' ],
             ] );
 
-        } catch ( LaraApiException $e ) {
-            // Lara license expired/changed (401) or account deleted (403)
-            Log::doJsonLog( $e->getMessage() );
-
-            // DO NOT REQUEUE FOR LARA FAILURE ONLY
-
         } catch ( Exception $e ) {
-            // for any other exception (HTTP connection or timeout) requeue
+            // for any exception (HTTP connection or timeout) requeue
             return false;
         }
 
@@ -460,7 +482,6 @@ class Lara extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function delete( $_config ) {
-        // TODO: Implement delete() method.
     }
 
     /**

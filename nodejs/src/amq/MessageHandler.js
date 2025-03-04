@@ -23,6 +23,7 @@ const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 const LOGOUT = 'logout';
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
+const ENGINE_QUOTA_EXCEEDED = 'quota_exceeded';
 const MESSAGE_NAME = 'message';
 const GLOBAL_MESSAGES = 'global_messages';
 
@@ -48,6 +49,9 @@ module.exports.MessageHandler = class {
       case LOGOUT:
         logger.info('Forced logout: ' + LOGOUT + ' message received for user ' + message.data.uid + '...');
         room = message.data.uid.toString();
+        break;
+      case ENGINE_QUOTA_EXCEEDED:
+        room = message.data.id_job.toString();
         break;
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();

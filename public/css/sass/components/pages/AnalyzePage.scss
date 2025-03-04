@@ -1,25 +1,25 @@
-@import "../../common-main";
-@import '../../commons/filter-teams';
-@import '../../commons/icons';
-@import '../../commons/shadows';
-@import '../../commons/project';
-@import '../../commons/divider';
-@import '../../commons/progress-mc-bar';
-@import '../../commons/buttons';
-@import '../signin/OnBoarding';
+@use "../../common-main";
+@use '../../commons/filter-teams';
+@use '../../commons/icons';
+@use '../../commons/shadows';
+@use '../../commons/project';
+@use '../../commons/divider';
+@use '../../commons/progress-mc-bar';
+@use '../../commons/buttons';
+@use '../signin/OnBoarding';
 
-@import '../../modals/split_modal';
+@use '../../modals/split_modal';
 
-@import '../../commons/sub-header';
-@import '../../commons/team-member';
+@use '../../commons/sub-header';
+@use '../../commons/team-member';
 
-@import '../../commons/analyze';
-@import '../../commons/outsource';
-@import '../../commons/date-picker-translator';
-@import '../common/CookieConsent';
-@import '../common/Tooltip';
-@import '../common/Button';
-@import '../common/LabelWithTooltip';
-@import '../common/Switch';
-@import '../common/Accordion';
-@import '../Analyze/JobAnalyze';
+@use '../../commons/analyze';
+@use '../../commons/outsource';
+@use '../../commons/date-picker-translator';
+@use '../common/CookieConsent';
+@use '../common/Tooltip';
+@use '../common/Button';
+@use '../common/LabelWithTooltip';
+@use '../common/Switch';
+@use '../common/Accordion';
+@use '../Analyze/JobAnalyze';

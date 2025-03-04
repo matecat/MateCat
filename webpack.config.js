@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const WebpackConcatPlugin = require('webpack-concat-files-plugin')
 const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
@@ -101,7 +102,7 @@ const matecatConfig = async ({env}, {mode}) => {
   files.forEach((file) => {
     const data = fs.readFileSync(file)
     const config = eval(data.toString('utf8'))
-    pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
+    pluginConfig = {...pluginConfig, ...config}
   })
   if (pluginConfig.sentryWebpackPlugin) {
     pluginConfig.sentryWebpackPlugin.release = {
@@ -131,7 +132,36 @@ const matecatConfig = async ({env}, {mode}) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
+        minSize: 20000, // Minimum size in bytes for a chunk to be generated
+        maxSize: 244000, // Maximum size in bytes for a chunk before it is split
+        maxInitialRequests: Infinity,
+        automaticNameDelimiter: '-',
+        cacheGroups: {
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
       },
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          parallel: true,
+          terserOptions: {
+            compress: {
+              drop_console: true,
+            },
+            output: {
+              comments: false,
+            },
+          },
+        }),
+      ],
+    },
+    cache: {
+      type: 'filesystem',
+      cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),
     },
     module: {
       rules: [
@@ -143,12 +173,21 @@ const matecatConfig = async ({env}, {mode}) => {
             path.resolve(__dirname, 'plugins'),
           ],
           exclude: '/node_modules/',
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
+          use: [
+            {
+              loader: 'thread-loader',
+              options: {
+                workers: 2,
+              },
             },
-          },
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env'],
+                cacheDirectory: true,
+              },
+            },
+          ],
         },
         {
           test: /\.css$/i,

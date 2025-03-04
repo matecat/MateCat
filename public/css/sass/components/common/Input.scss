@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .input-component {
   display: flex;
@@ -24,8 +24,8 @@
   input {
     width: 100%;
     height: 40px;
-    color: $grey6;
-    border: 1px solid $grey4;
+    color: colors.$grey6;
+    border: 1px solid colors.$grey4;
     padding: 12px;
     box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.0784313725) inset;
     font-size: 16px;
@@ -40,7 +40,7 @@
       border: none !important;
     }
     &::placeholder {
-      color: $grey7;
+      color: colors.$grey7;
       opacity: 1;
     }
     &:hover {
@@ -49,7 +49,7 @@
     &:focus,
     &:active {
       outline: none;
-      box-shadow: inset 0 0 0 2px $black;
+      box-shadow: inset 0 0 0 2px colors.$black;
     }
     &.isCompressed {
       padding: 10px;
@@ -65,16 +65,16 @@
     &.hasError,
     &.hasError:hover,
     &.hasError:focus {
-      box-shadow: inset 0 0 0 2px $redDefault !important;
+      box-shadow: inset 0 0 0 2px colors.$redDefault !important;
     }
     &:disabled {
-      background-color: $grey9;
+      background-color: colors.$grey9;
       box-shadow: none;
-      color: $grey8;
+      color: colors.$grey8;
       cursor: not-allowed;
 
       &::placeholder {
-        color: $grey8;
+        color: colors.$grey8;
       }
     }
   }
@@ -89,7 +89,7 @@
     position: absolute;
     top: 12px;
     left: 12px;
-    color: $grey8;
+    color: colors.$grey8;
     cursor: pointer;
     pointer-events: none;
   }
@@ -98,7 +98,7 @@
     left: 10px;
   }
   input:disabled + svg {
-    color: $grey8 !important;
+    color: colors.$grey8 !important;
   }
 }
 
@@ -120,7 +120,7 @@
 
 .input-component-errorMessage {
   font-size: 12px;
-  color: $redDefault;
+  color: colors.$redDefault;
   text-align: left;
   padding-left: 2px;
 }

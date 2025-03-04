@@ -1,4 +1,4 @@
-@import "../../commons/colors";
+@use "../../commons/colors";
 .user-disconnect-box{
   position: fixed;
   top: 0;
@@ -18,7 +18,7 @@
     margin: 0;
     border-radius: 8px;
     width: 100%;
-    background-color: $white;
+    background-color: colors.$white;
     max-width: 500px;
     padding: 30px;
     > div {

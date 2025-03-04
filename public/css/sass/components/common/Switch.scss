@@ -1,3 +1,5 @@
+@use "../../commons/colors";
+
 .switch-container-outer {
   display: flex;
   gap: 10px;
@@ -6,10 +8,10 @@
   .switch-container-active,
   .switch-container-inactive {
     font-size: 18px;
-    color: $grey6;
+    color: colors.$grey6;
   }
   .switch-container-active {
-    color: $linkBlue;
+    color: colors.$linkBlue;
   }
 }
 .switch-container {
@@ -33,7 +35,7 @@
     right: 0;
     bottom: 0;
     border-radius: 12px;
-    background-color: $grey7;
+    background-color: colors.$grey7;
     transition: background-color 0.2s ease-out;
 
     &::before {
@@ -44,13 +46,13 @@
       bottom: 3px;
       left: 4px;
       border-radius: 50%;
-      background-color: $white;
+      background-color: colors.$white;
       transition: transform 0.2s ease-out;
     }
   }
 
   input:checked + span {
-    background-color: $linkBlue;
+    background-color: colors.$linkBlue;
   }
 
   input:checked + span::before {

@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .signin-overlay {
   position: fixed;
@@ -34,7 +34,7 @@
 
 .onboarding-wrapper {
   border-radius: 16px;
-  background-color: $white;
+  background-color: colors.$white;
 
   fieldset {
     padding: 0;

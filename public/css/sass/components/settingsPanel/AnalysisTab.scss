@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .analysis-tab {
   display: flex;
@@ -11,7 +11,7 @@
   .analysis-value-not-saved,
   .analysis-value-not-saved span,
   .analysis-value-not-saved input {
-    color: $translatedBlue;
+    color: colors.$translatedBlue;
   }
 
   &.settings-panel-contentwrapper-tab-background {
@@ -22,7 +22,7 @@
   span {
     display: block;
     text-align: left;
-    color: $grey6;
+    color: colors.$grey6;
   }
   .analysis-tab-head {
     span {
@@ -34,7 +34,7 @@
   input.input-percentage {
     height: 40px;
     width: 76px;
-    border: 1px solid $grey4;
+    border: 1px solid colors.$grey4;
     padding: 8px 12px 8px 12px;
     box-shadow: 2px 2px 4px 0px #00000014 inset;
     font-size: 16px;
@@ -54,17 +54,17 @@
   }
   .analysis-tab-tableContainer {
     table {
-      border: 1px solid $grey3;
+      border: 1px solid colors.$grey3;
       border-spacing: 0;
       border-collapse: separate;
       border-radius: 4px;
       overflow: hidden;
       th:not(:last-child),
       td:not(:last-child) {
-        border-right: 1px solid $grey3;
+        border-right: 1px solid colors.$grey3;
       }
       thead > tr > th {
-        border-bottom: 1px solid $grey3;
+        border-bottom: 1px solid colors.$grey3;
       }
       th {
         height: 64px;
@@ -76,7 +76,7 @@
       th,
       td {
         width: 94px;
-        background-color: $white;
+        background-color: colors.$white;
       }
     }
     input.input-percentage {
@@ -85,8 +85,8 @@
     }
   }
   .analysis-tab-exceptionsContainer {
-    background: $white;
-    border: 1px solid $grey3;
+    background: colors.$white;
+    border: 1px solid colors.$grey3;
     padding: 24px;
     border-radius: 4px;
     display: flex;

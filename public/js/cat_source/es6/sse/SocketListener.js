@@ -199,6 +199,9 @@ const SocketListener = ({isAuthenticated, userId}) => {
         CatToolActions.addNotification(notification)
       }
     },
+    quota_exceeded: () => {
+      CatToolActions.showLaraQuotaExceeded()
+    },
     logout: (data) => {
       console.log('Handling logout:', data)
       // Add your event handling logic here
@@ -219,7 +222,7 @@ const SocketListener = ({isAuthenticated, userId}) => {
 
   const {connectionState, connectionError} = useSocketLayer(
     getSource(),
-    {userId: userId, uuidV4: uuidV4(), jobId: config.id_job},
+    {userId: userId?.toString(), uuidV4: uuidV4(), jobId: config.id_job},
     isAuthenticated,
     eventHandlers,
   )

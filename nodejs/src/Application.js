@@ -57,7 +57,12 @@ module.exports.Application = class {
         socket.handshake.headers['x-uuid']
       ) {
         auth = socket.handshake.headers;
-      } else if (socket.handshake.auth) {
+      } else if (
+        socket.handshake.auth &&
+        socket.handshake.auth['x-token'] &&
+        socket.handshake.auth['x-userid'] &&
+        socket.handshake.auth['x-uuid']
+      ) {
         auth = socket.handshake.auth;
       } else {
         next(new Error('Authentication not provided'));
@@ -78,10 +83,10 @@ module.exports.Application = class {
             logger.error(['Authentication error invalid user id', auth['x-userid'], decoded.context.uid]);
             return next(new Error('Authentication error invalid user id'));
           }
-          socket.user_id = auth['x-userid'];
-          socket.uuid = auth['x-uuid'];
+          socket.user_id = auth['x-userid'].toString();
+          socket.uuid = auth['x-uuid'].toString();
           if (auth['x-jobid']) {
-            socket.jobId = auth['x-jobid'];
+            socket.jobId = auth['x-jobid'].toString();
           }
           next();
         }
@@ -110,6 +115,8 @@ module.exports.Application = class {
       if (socket.jobId) {
         socket.join(socket.jobId);
       }
+
+      logger.debug("JOINED USER:", {'user_id': socket.user_id, 'uuid': socket.uuid, 'jobId': socket.jobId});
 
       this.logger.debug({
         message: 'Client connected ' + socket.id,
