@@ -24,7 +24,6 @@ const LOGOUT = 'logout';
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
 const ENGINE_QUOTA_EXCEEDED = 'quota_exceeded';
-
 const MESSAGE_NAME = 'message';
 const GLOBAL_MESSAGES = 'global_messages';
 
