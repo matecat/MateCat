@@ -144,7 +144,7 @@ const matecatConfig = async ({env}, {mode}) => {
           },
         },
       },
-      minimize: true,
+      minimize: !isDev,
       minimizer: [
         new TerserPlugin({
           parallel: true,

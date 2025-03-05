@@ -12,17 +12,15 @@
  * @returns {Promise<object>}
  */
 export const convertFileRequest = async ({
-  action,
   file_name,
   source_lang,
   target_lang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
-  signal,
   restarted_conversion,
 }) => {
   const dataParams = {
-    action,
+    action: 'convertFile',
     file_name,
     source_lang,
     target_lang,
@@ -39,7 +37,6 @@ export const convertFileRequest = async ({
   const response = await fetch(`action/convertFile/`, {
     method: 'POST',
     credentials: 'include',
-    signal: signal,
     body: formData,
   })
 

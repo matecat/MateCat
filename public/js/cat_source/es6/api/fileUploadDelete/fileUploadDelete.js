@@ -12,7 +12,7 @@ export const fileUploadDelete = async ({
   filtersTemplate,
 }) => {
   const response = await fetch(
-    `/fileupload/?file=${file}&segmentationRule=${segmentationRule}&source=${source}&filtersTemplate=${filtersTemplate}`,
+    `/fileupload/?file=${file}&segmentationRule=${segmentationRule}&source=${source}&filtersTemplate=${filtersTemplateId}`,
     {
       method: 'delete',
       credentials: 'include',
