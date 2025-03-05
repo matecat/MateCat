@@ -1,6 +1,9 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use Filters\DTO\IDto;
+use Filters\FiltersConfigTemplateDao;
+use Filters\FiltersConfigTemplateStruct;
 use MimeTypes\MimeTypes;
 
 define( "DIRSEP", "//" );
@@ -466,6 +469,7 @@ class UploadHandler {
          *
          * ----> basename is NOT UTF8 compliant
          */
+
         $file_name = null;
         if ( isset( $_REQUEST[ 'file' ] ) ) {
             $raw_file  = explode( DIRECTORY_SEPARATOR, $_REQUEST[ 'file' ] );
@@ -482,7 +486,7 @@ class UploadHandler {
             return false;
         }
 
-        $file_info = AbstractFilesStorage::pathinfo_fix( $file_name );
+        $file_info        = AbstractFilesStorage::pathinfo_fix( $file_name );
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
@@ -549,59 +553,61 @@ class UploadHandler {
      * Avoid race conditions by javascript multiple calls
      *
      * @param $file_path
+     * @throws Exception
      */
     private function deleteSha( $file_path ) {
 
-        $sha1 = sha1_file( $file_path );
-        if ( !$sha1 ) {
-            return;
+        $path_parts = pathinfo($file_path);
+        $files = new DirectoryIterator($path_parts['dirname']);
+
+        foreach ($files as $file) {
+            if(!$file->isDot()){
+                $hash_file_path = $file->getPath()."/".$file->getFilename();
+
+                // can be present more than one file with the same sha
+                // so in the sha1 file there could be more than one row
+                // $file_sha = glob( $hash_name_for_disk . "*" ); //delete sha1 also
+                $fp = fopen( $hash_file_path, "r+" );
+
+                // no file found
+                if ( !$fp ) {
+                    return;
+                }
+
+                $i = 0;
+                while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
+                    $i++;
+                    if ( $i == 40 ) {
+                        return;
+                    } //exit the loop after 2 seconds, can not acquire the lock
+                    usleep( 50000 );
+                    continue;
+                }
+
+                $file_content       = fread( $fp, filesize( $hash_file_path ) );
+                $file_content_array = explode( "\n", $file_content );
+
+                //remove the last line ( is an empty string )
+                array_pop( $file_content_array );
+
+                $fileName = AbstractFilesStorage::basename_fix( $file_path );
+
+                $key = array_search( $fileName, $file_content_array );
+
+                if ( !is_int( $key ) ) {
+                    fseek( $fp, 0 ); //rewind
+                    ftruncate( $fp, 0 ); //truncate to zero bytes length
+                    fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
+                    fflush( $fp );
+                    flock( $fp, LOCK_UN );    // release the lock
+                    fclose( $fp );
+                } else {
+                    flock( $fp, LOCK_UN );    // release the lock
+                    fclose( $fp );
+                    @unlink( @$hash_file_path );
+                }
+            }
         }
-
-        //can be present more than one file with the same sha
-        //so in the sha1 file there could be more than one row
-        $file_sha = glob( $file_path . "*" ); //delete sha1 also
-
-        $fp = fopen( $file_sha[ 0 ], "r+" );
-
-        // no file found
-        if ( !$fp ) {
-            return;
-        }
-
-        $i = 0;
-        while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
-            $i++;
-            if ( $i == 40 ) {
-                return;
-            } //exit the loop after 2 seconds, can not acquire the lock
-            usleep( 50000 );
-            continue;
-        }
-
-        $file_content       = fread( $fp, filesize( $file_sha[ 0 ] ) );
-        $file_content_array = explode( "\n", $file_content );
-
-        //remove the last line ( is an empty string )
-        array_pop( $file_content_array );
-
-        $fileName = AbstractFilesStorage::basename_fix( $file_path );
-
-        $key = array_search( $fileName, $file_content_array );
-        unset( $file_content_array[ $key ] );
-
-        if ( !empty( $file_content_array ) ) {
-            fseek( $fp, 0 ); //rewind
-            ftruncate( $fp, 0 ); //truncate to zero bytes length
-            fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
-            fflush( $fp );
-            flock( $fp, LOCK_UN );    // release the lock
-            fclose( $fp );
-        } else {
-            flock( $fp, LOCK_UN );    // release the lock
-            fclose( $fp );
-            @unlink( @$file_sha[ 0 ] );
-        }
-
     }
 
     protected function _isRightMime( $fileUp ) {
@@ -633,5 +639,4 @@ class UploadHandler {
 
         return false;
     }
-
 }

@@ -612,9 +612,24 @@
         _deleteHandler: function ( e ) {
             e.preventDefault();
             var button = $( this );
+
+            /**
+             * Encode a URL
+             *
+             * @param url
+             * @return {*}
+             */
+            const urlEncode = (url) => {
+                return url
+                    .replaceAll("+", "%2B")
+                    .replaceAll(/\s/g, "%20")
+                    .replaceAll(/and/ig, "%26")
+                ;
+            };
+
             e.data.fileupload._trigger( 'destroy', e, {
                 context: button.closest( '.template-download' ),
-                url: button.attr( 'data-url' ),
+                url: urlEncode(button.attr( 'data-url' )),
                 type: button.attr( 'data-type' ) || 'DELETE',
                 dataType: e.data.fileupload.options.dataType
             } );
