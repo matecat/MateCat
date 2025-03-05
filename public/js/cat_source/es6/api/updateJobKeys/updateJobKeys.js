@@ -17,9 +17,6 @@ export const updateJobKeys = async ({
   currentPassword = config.currentPassword,
   getPublicMatches,
   dataTm,
-  tmPrioritization,
-  characterCounterCountTags,
-  characterCounterMode,
 }) => {
   const paramsData = Object.entries({
     action: 'updateJobKeys',
@@ -28,9 +25,6 @@ export const updateJobKeys = async ({
     get_public_matches: getPublicMatches,
     data: dataTm,
     current_password: currentPassword,
-    tm_prioritization: tmPrioritization,
-    character_counter_count_tags: characterCounterCountTags,
-    character_counter_mode: characterCounterMode,
   })
     .filter(([, value]) => typeof value !== 'undefined')
     .reduce((acc, [key, value]) => ({...acc, [key]: value}), {})

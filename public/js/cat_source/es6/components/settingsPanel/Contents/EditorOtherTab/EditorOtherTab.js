@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {updateJobKeys} from '../../../../api/updateJobKeys'
 import CatToolActions from '../../../../actions/CatToolActions'
-import {getTmDataStructureToSendServer} from '../TranslationMemoryGlossaryTab/TranslationMemoryGlossaryTab'
+import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
 
 export const EditorOtherTab = () => {
   const {currentProjectTemplate, tmKeys} = useContext(SettingsPanelContext)
@@ -19,12 +18,11 @@ export const EditorOtherTab = () => {
         previousCurrentProjectTemplate.current.characterCounterMode !==
           currentProjectTemplate?.characterCounterMode)
     ) {
-      updateJobKeys({
-        dataTm: getTmDataStructureToSendServer({tmKeys}),
+      updateJobMetadata({
         characterCounterCountTags:
           currentProjectTemplate.characterCounterCountTags,
         characterCounterMode: currentProjectTemplate.characterCounterMode,
-      }).then(() => CatToolActions.onTMKeysChangeStatus())
+      })
     }
 
     previousCurrentProjectTemplate.current = {
