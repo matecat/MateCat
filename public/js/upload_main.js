@@ -459,40 +459,7 @@ window.UI = {
         }
       })
     })
-
-    // Initialize the theme switcher:
-    $('#theme-switcher').change(function () {
-      var theme = $('#theme')
-      theme.prop(
-        'href',
-        theme
-          .prop('href')
-          .replace(/[\w\-]+\/jquery-ui.css/, $(this).val() + '/jquery-ui.css'),
-      )
-    })
   },
-}
-
-var userLangName = function (t, userLangCode) {
-  return $('#' + t + "-lang  option[value='" + userLangCode + "']").text()
-}
-
-var progressBar = function (filerow, start, filesize) {
-  var ob = $('.ui-progressbar-value', filerow)
-  if (ob.hasClass('completed')) return
-
-  ob.css('width', start + '%')
-  if (start > 90) {
-    return
-  }
-
-  if (!UI.conversionBlocked) {
-    setTimeout(function () {
-      progressBar(filerow, start + 1, filesize)
-    }, 200)
-  } else {
-    UI.conversionBlocked = false
-  }
 }
 
 var convertFile = function (
