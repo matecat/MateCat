@@ -83,7 +83,7 @@
     "msw": "^2.1.3",
     "prettier": "^3.0.0",
     "sass": "^1.66.0",
-    "sass-loader": "16.0.4",
+    "sass-loader": "16.0.5",
     "style-loader": "4.0.0",
     "undici": "^5.28.2",
     "webpack": "5.97.1",
@@ -95,5 +95,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.68"
+  "version": "3.0.77"
 }

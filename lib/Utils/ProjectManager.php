@@ -1380,6 +1380,7 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
+            $this->features->run( 'validateJobCreation', $newJob, $projectStructure );
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
@@ -1449,8 +1450,6 @@ class ProjectManager {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
-
-            $this->features->run( 'processJobsCreated', $newJob, $projectStructure );
 
         }
 

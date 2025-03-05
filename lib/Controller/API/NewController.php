@@ -75,7 +75,7 @@ class NewController extends ajaxController {
 
     private $metadata = [];
 
-    const MAX_NUM_KEYS = 6;
+    const MAX_NUM_KEYS = 10;
 
     private static $allowed_seg_rules = [
             'standard',
