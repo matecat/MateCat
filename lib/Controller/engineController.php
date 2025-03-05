@@ -370,7 +370,7 @@ class engineController extends ajaxController {
                 try {
                     $mmtClient->me();
                 } catch (MMTServiceApiException $e){
-                    $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => "MMT license not valid" ];
+                    $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => "ModernMT license not valid, please verify its validity and try again" ];
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
