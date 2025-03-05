@@ -469,6 +469,7 @@ class UploadHandler {
          *
          * ----> basename is NOT UTF8 compliant
          */
+
         $file_name = null;
         if ( isset( $_REQUEST[ 'file' ] ) ) {
             $raw_file  = explode( DIRECTORY_SEPARATOR, $_REQUEST[ 'file' ] );
