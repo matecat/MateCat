@@ -36,12 +36,10 @@ window.UI = {
   getPrintableFileSize: function (filesizeInBytes) {
     filesizeInBytes = filesizeInBytes / 1024
     var ext = ' KB'
-
     if (filesizeInBytes > 1024) {
       filesizeInBytes = filesizeInBytes / 1024
       ext = ' MB'
     }
-
     return Math.round(filesizeInBytes * 100, 2) / 100 + ext
   },
   conversionsAreToRestart: function () {

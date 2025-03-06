@@ -1,0 +1,61 @@
+@use '../commons/colors';
+.upload-files-container {
+  border: 1px dashed #ccc;
+  min-height: 200px;
+  border-radius: 4px;
+  padding: 24px;
+  background-color: colors.$white;
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  cursor: pointer;
+  &.isDragging {
+    background-color: colors.$grey7;
+  }
+  .upload-files-start {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    p {
+      font-size: 35px;
+      line-height: 50px;
+      font-weight: bold;
+      margin: 2px 0 0 0;
+    }
+    span {
+      font-size: 24px;
+      color: colors.$grey1
+    }
+  }
+  .upload-files-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    .file-item {
+      display: grid;
+      grid-template-columns: 2fr 1fr 24px;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px dashed #ccc;
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .file-item-name {
+        font-size: 16px;
+      }
+      .file-icon {
+        height: 30px;
+        width: 30px;
+        display: block;
+        background-size: 25px !important;
+        margin-bottom: 4px;
+      }
+      .file-item-error {
+        color: colors.$redDefault;
+      }
+    }
+  }
+}

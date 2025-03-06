@@ -9,7 +9,7 @@ export const fileUploadDelete = async ({
   file,
   segmentationRule,
   source,
-  filtersTemplate,
+  filtersTemplateId,
 }) => {
   const response = await fetch(
     `/fileupload/?file=${file}&segmentationRule=${segmentationRule}&source=${source}&filtersTemplate=${filtersTemplateId}`,
