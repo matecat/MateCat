@@ -20,17 +20,17 @@ export const updateJobMetadata = async ({
 }) => {
   const paramsData = Object.entries({
     tm_prioritization:
-      typeof tmPrioritization === 'boolean'
-        ? tmPrioritization === true
-          ? '1'
-          : '0'
-        : undefined,
+      tmPrioritization === true
+        ? '1'
+        : tmPrioritization === false
+          ? '0'
+          : undefined,
     character_counter_count_tags:
-      typeof characterCounterCountTags === 'boolean'
-        ? characterCounterCountTags === true
-          ? '1'
-          : '0'
-        : undefined,
+      characterCounterCountTags === true
+        ? '1'
+        : characterCounterCountTags === false
+          ? '0'
+          : undefined,
     character_counter_mode: characterCounterMode,
   })
     .filter(([, value]) => typeof value !== 'undefined')
@@ -40,6 +40,9 @@ export const updateJobMetadata = async ({
     `${getMatecatApiDomain()}api/app/jobs/${idJob}/${password}/metadata`,
     {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(paramsData),
       credentials: 'include',
     },

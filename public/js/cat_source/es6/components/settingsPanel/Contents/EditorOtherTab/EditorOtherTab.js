@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useRef} from 'react'
 import {CharacterCounterRules} from '../OtherTab/CharacterCounterRules'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import CatToolActions from '../../../../actions/CatToolActions'
 import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
 
 export const EditorOtherTab = () => {
