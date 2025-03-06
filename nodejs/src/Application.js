@@ -202,7 +202,7 @@ module.exports.Application = class {
       });
     });
 
-    pubClient.disconnect();
+    pubClient.quit();
     pubClient = null;
 
   };
