@@ -56,6 +56,8 @@ AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
 AWS_CACHING = true
 AWS_SSL_VERIFY = true
 
+MMT_DEFAULT_LICENSE = "xxxxxxxxxxxxxx"
+
 OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
 OPEN_AI_MODEL = "gpt-3.5-turbo"
 OPEN_AI_TIMEOUT = 30
