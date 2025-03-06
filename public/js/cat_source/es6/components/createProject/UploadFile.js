@@ -2,11 +2,13 @@ import React, {useState} from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
 import CreateProjectActions from '../../actions/CreateProjectActions'
-import {Button, BUTTON_SIZE} from '../common/Button/Button'
+import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary'
 import {fileUploadDelete} from '../../api/fileUploadDelete'
 import FileUploadIconBig from '../../../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
+import IconAdd from '../icons/IconAdd'
+import IconClose from '../icons/IconClose'
 
 function UploadFile({
   uplodedFilesNames,
@@ -19,16 +21,25 @@ function UploadFile({
   const [isDragging, setIsDragging] = useState(false)
   const dragCounter = React.useRef(0)
   const handleFiles = (selectedFiles) => {
-    const fileList = Array.from(selectedFiles).map((file) => ({
-      file,
-      name: file.name,
-      uploadProgress: 0,
-      uploaded: false,
-      converted: false,
-      error: null,
-      zipFolder: false,
-      size: 0,
-    }))
+    const fileList = Array.from(selectedFiles).map((file) => {
+      let name = file.name
+      // Check if file with the same name already exists
+      const filesSameName = files.filter((f) => f.originalName === name)
+      if (filesSameName.length > 0) {
+        name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
+      }
+      return {
+        file,
+        originalName: file.name,
+        name: name,
+        uploadProgress: 0,
+        uploaded: false,
+        converted: false,
+        error: null,
+        zipFolder: false,
+        size: 0,
+      }
+    })
     setFiles((prevFiles) => prevFiles.concat(fileList))
     fileList.forEach(({file, name}) => {
       const onProgress = (progress) => {
@@ -126,6 +137,7 @@ function UploadFile({
 
   const handleChange = (e) => {
     handleFiles(e.target.files)
+    e.target.value = ''
   }
 
   const handleDragOver = (e) => {
@@ -159,7 +171,7 @@ function UploadFile({
 
   return (
     <div
-      className={`upload-files-container ${isDragging ? 'dragging' : ''}`}
+      className={`upload-files-container ${isDragging ? 'dragging' : ''} ${files.length > 0 ? 'add-files' : ''}`}
       onDrop={handleDrop}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -170,15 +182,15 @@ function UploadFile({
           : null
       }
     >
+      <input
+        type="file"
+        multiple
+        style={{display: 'none'}}
+        id="fileInput"
+        onChange={handleChange}
+      />
       {files.length === 0 ? (
         <div className={`upload-files-start`}>
-          <input
-            type="file"
-            multiple
-            style={{display: 'none'}}
-            id="fileInput"
-            onChange={handleChange}
-          />
           <FileUploadIconBig />
           {!isDragging ? (
             <>
@@ -190,32 +202,52 @@ function UploadFile({
           )}
         </div>
       ) : (
-        <div className="upload-files-list">
-          {files.map((f, idx) => (
-            <div key={idx} className="file-item">
-              <div className="file-item-name">
-                <span
-                  className={`file-icon ${CommonUtils.getIconClass(
-                    f.name.split('.')[f.name.split('.').length - 1],
-                  )}`}
-                />
-                {f.name}
+        <>
+          <div className="upload-files-list">
+            {files.map((f, idx) => (
+              <div key={idx} className="file-item">
+                <div className="file-item-name">
+                  <span
+                    className={`file-icon ${CommonUtils.getIconClass(
+                      f.name.split('.')[f.name.split('.').length - 1],
+                    )}`}
+                  />
+                  {f.name}
+                </div>
+                {f.error && <div className="file-item-error">{f.error}</div>}
+                {f.uploaded && !f.error && getPrintableFileSize(f.size)}
+                {!f.uploaded &&
+                  !f.error &&
+                  f.progress &&
+                  f.progress + ' Progress'}
+                <Button
+                  size={BUTTON_SIZE.ICON_SMALL}
+                  onClick={() => deleteFile(f.name)}
+                >
+                  <DeleteIcon />
+                </Button>
               </div>
-              {f.error && <div className="file-item-error">{f.error}</div>}
-              {f.uploaded && !f.error && getPrintableFileSize(f.size)}
-              {!f.uploaded &&
-                !f.error &&
-                f.progress &&
-                f.progress + ' Progress'}
-              <Button
-                size={BUTTON_SIZE.ICON_SMALL}
-                onClick={() => deleteFile(f.name)}
-              >
-                <DeleteIcon />
-              </Button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+          <div className="upload-files-buttons">
+            <span>
+              <strong>Drag and drop</strong> your file here or
+            </span>
+            <Button
+              type={BUTTON_TYPE.PRIMARY}
+              onClick={() => document.getElementById('fileInput').click()}
+            >
+              <IconAdd />
+              Add files...
+            </Button>
+            <Button
+              type={BUTTON_TYPE.WARNING}
+              onClick={() => files.forEach((f) => deleteFile(f.name))}
+            >
+              <IconClose /> Clear all
+            </Button>
+          </div>
+        </>
       )}
     </div>
     /*<div>

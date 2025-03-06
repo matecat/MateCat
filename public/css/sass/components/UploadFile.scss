@@ -8,8 +8,12 @@
   margin-top: 18px;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   cursor: pointer;
+  &.add-files {
+    flex-direction: column;
+    align-items: flex-start;
+  }
   &.isDragging {
     background-color: colors.$grey7;
   }
@@ -45,10 +49,11 @@
       }
       .file-item-name {
         font-size: 16px;
+        max-width: 80%;
       }
       .file-icon {
         height: 30px;
-        width: 30px;
+        min-width: 30px;
         display: block;
         background-size: 25px !important;
         margin-bottom: 4px;
@@ -57,5 +62,13 @@
         color: colors.$redDefault;
       }
     }
+  }
+  .upload-files-buttons {
+    display: flex;
+    margin-top: auto;
+    margin-bottom: -6px;
+    align-items: center;
+    gap: 8px;
+    padding-top: 16px;
   }
 }
