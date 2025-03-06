@@ -253,6 +253,16 @@ class Lara extends Engines_AbstractEngine {
             try {
                 $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
                 $score = $qualityEstimation['score'];
+
+                Log::doJsonLog( [
+                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                    'source'                 => $_config[ 'source' ],
+                    'target'                 => $_config[ 'target' ],
+                    'segment'                => $_config[ 'segment' ],
+                    'translation'            => $translation,
+                    'score'                  => $score,
+                ] );
+
             } catch (\Exception $exception){
                 $score = 0;
             }
