@@ -93,6 +93,8 @@ const NewProject = () => {
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
 
+  const uplodedFilesNames = useRef([])
+
   const {
     projectTemplates,
     currentProjectTemplate,
@@ -426,7 +428,8 @@ const NewProject = () => {
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      file_name: getFilenameFromUploadedFiles(),
+      // file_name: getFilenameFromUploadedFiles(),
+      file_name: uplodedFilesNames.current.join('@@SEP@@'),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
@@ -460,7 +463,6 @@ const NewProject = () => {
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
     })
-
     if (!projectSent) {
       setErrors()
       setWarnings()
@@ -544,7 +546,7 @@ const NewProject = () => {
 
     retrieveSupportedLanguages()
 
-    UI.addEvents()
+    // UI.addEvents()
 
     const hideAllErrors = () => {
       setErrors()
@@ -918,7 +920,15 @@ const NewProject = () => {
         )}
         {typeof isUserLogged === 'boolean' ? (
           isUserLogged ? (
-            <UploadFile />
+            <UploadFile
+              uplodedFilesNames={uplodedFilesNames.current}
+              segmentationRule={currentProjectTemplate?.segmentationRule.id}
+              xliffConfigTemplateId={
+                currentProjectTemplate?.XliffConfigTemplateId
+              }
+              sourceLang={sourceLang.id}
+              targetLangs={targetLangs}
+            />
           ) : (
             <div className="upload-box-not-logged">
               <h2>

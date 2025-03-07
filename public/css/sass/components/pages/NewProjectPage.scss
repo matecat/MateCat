@@ -16,6 +16,7 @@
 
 @use '../SettingsPanel';
 @use "../../commons/colors";
+@use "../UploadFile";
 
 .new_project__page {
   overflow-y: auto;
