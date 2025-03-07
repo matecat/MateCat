@@ -182,9 +182,7 @@ module.exports.Application = class {
   dispatchGlobalMessages = (uuid) => {
     const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
     const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
-
-    const pubClient = new Redis(this.options.redis);
-    const socketIOServer = this._socketIOServer;
+    let pubClient = new Redis(this.options.redis);
 
     pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids)=> {
 
@@ -203,5 +201,9 @@ module.exports.Application = class {
         });
       });
     });
+
+    pubClient.quit();
+    pubClient = null;
+
   };
 };
