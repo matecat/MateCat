@@ -111,6 +111,27 @@ class MMTServiceApi {
         return $this->send( 'GET', "$this->baseUrl/users/me" );
     }
 
+    /**
+     * Get the Quality Estimation of a translation
+     *
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function qualityEstimation($source, $target, $sentence, $translation)
+    {
+        return $this->send( 'GET', "$this->baseUrl/translate/qe", [
+            "source" => $source,
+            "target" => $target,
+            "sentence" => $sentence,
+            "translation" => $translation,
+        ]);
+    }
+
+
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
     /**

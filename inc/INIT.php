@@ -108,6 +108,8 @@ class INIT {
     public static $MAX_NUM_FILES                = 100;
     public static $MAX_SOURCE_WORDS             = 250000;
 
+    public static $MMT_DEFAULT_LICENSE;
+
     /**
      * OPENAI configuration
      */
