@@ -39,9 +39,6 @@ abstract class KleinController implements IController {
     protected          $service;
     protected          $app;
 
-    protected ?string $api_key;
-    protected ?string $api_secret;
-
     /**
      * @var Base[]
      */
@@ -112,8 +109,7 @@ abstract class KleinController implements IController {
         $this->params     = $this->request->paramsPost()->getIterator()->getArrayCopy();
         $this->params     = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
         $this->featureSet = new FeatureSet();
-        $this->getAuthKeys();
-        $this->identifyUser( $this->useSession, $this->api_key, $this->api_secret );
+        $this->identifyUser( $this->useSession );
         $this->afterConstruct();
     }
 
@@ -154,21 +150,6 @@ abstract class KleinController implements IController {
 
     public function getRequest() {
         return $this->request;
-    }
-
-    /**
-     * @return void
-     */
-    protected function getAuthKeys() {
-        $headers = $this->request->headers();
-
-        $this->api_key    = $headers[ 'x-matecat-key' ];
-        $this->api_secret = $headers[ 'x-matecat-secret' ];
-
-        if ( false !== strpos( $this->api_key, '-' ) ) {
-            [ $this->api_key, $this->api_secret ] = explode( '-', $this->api_key );
-        }
-
     }
 
     public function getPutParams() {

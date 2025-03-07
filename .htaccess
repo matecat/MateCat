@@ -5,6 +5,7 @@ RewriteEngine On
 RewriteCond "%{HTTP_HOST}"   "!^www\.matecat\.com" [NC]
 RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 #RewriteRule ^offline\.html$ /lib/View/offline.html [L]
 #RewriteCond %{REQUEST_URI} !/offline.html [NC]
