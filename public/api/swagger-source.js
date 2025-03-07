@@ -704,6 +704,40 @@ var spec = {
         },
       },
     },
+    '/api/v3/jobs/{id_job}/{password}/delete': {
+      post: {
+        tags: ['Job'],
+        summary: 'Delete API',
+        description: 'API to delete a Job',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'ChangeStatus',
+            schema: {
+              $ref: '#/definitions/ChangeStatus',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v3/jobs/{id_job}/{password}/active': {
       post: {
         tags: ['Job'],
@@ -1391,6 +1425,55 @@ var spec = {
         },
       },
     },
+    '/api/v3/qr/download': {
+      post: {
+        tags: ['Quality Report'],
+        summary: 'Download the quality report',
+        description: 'Download the quality report',
+        parameters: [
+          {
+            name: 'idJob',
+            in: 'formData',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'format',
+            in: 'formData',
+            description: 'The QR format (csv or json)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'segmentsPerFile',
+            in: 'formData',
+            description: 'The number of segments per file (max 100)',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        produces: [
+            'text/csv',
+            'application/json',
+        ],
+        responses: {
+          200: {
+            description: "ok",
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
     '/api/v3/jobs/{id_job}/{password}/quality-report': {
       get: {
         tags: ['Job', 'Quality Report'],
@@ -1814,6 +1897,47 @@ var spec = {
             description: 'Translation issues',
             schema: {
               $ref: '#/definitions/TranslationIssues',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/{source_page}/issue-report/segments': {
+      get: {
+        tags: ['Job', 'Segment issues'],
+        summary: 'Segment issues',
+        description: 'Segment issues',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'source_page',
+            in: 'path',
+            description: 'The source page (possible values: 2 for R1, 3 for R2)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Segment issues report',
+            schema: {
+              $ref: '#/definitions/SegmentIssueReport',
             },
           },
           default: {
@@ -2332,6 +2456,77 @@ var spec = {
         },
       },
     },
+    '/api/v3/jobs/{id_job}/{password}/files': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Job files',
+        description: 'Get job files information',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get job files information',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/QualityReportFile',
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/metadata': {
+      get: {
+        tags: ['Job'],
+        summary: 'Job metadata',
+        description: 'Get all job metadata',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get all job metadata',
+            schema: {
+              $ref: '#/definitions/JobMetadata',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v3/TMX/{id_job}/{password}': {
       get: {
         tags: ['Job'],
@@ -2530,6 +2725,28 @@ var spec = {
             description: 'Keys List',
             schema: {
               $ref: '#/definitions/KeysList',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/tm-keys/list': {
+      get: {
+        tags: ['TM keys'],
+        summary: 'Retrieve private TM keys list.',
+        description: 'Retrieve private TM keys list.',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'Keys List',
+            schema: {
+              type: "array",
+              items: {
+                $ref: '#/definitions/KeysListComplete',
+              }
             },
           },
           default: {
@@ -3722,38 +3939,7 @@ var spec = {
           nullable: true
         },
         file: {
-          type: "object",
-          properties: {
-            id: {
-              type: 'integer',
-              format: 'int32',
-            },
-            first_segment: {
-              type: 'integer',
-              format: 'int32',
-            },
-            last_segment: {
-              type: 'integer',
-              format: 'int32',
-            },
-            file_name: {
-              type: "string",
-            },
-            raw_words: {
-              type: 'integer',
-            },
-            weighted_words: {
-              type: 'integer',
-            },
-            standard_words: {
-              type: 'integer',
-            },
-            metadata: {
-              type: "array",
-              items: {},
-              nullable: true
-            },
-          }
+          $ref: '#/definitions/QualityReportFile',
         },
         ice_locked: {
           type: "integer",
@@ -3882,6 +4068,65 @@ var spec = {
         }
       }
     },
+    QualityReportFile: {
+      type: "object",
+      properties: {
+        id: {
+          type: 'integer',
+          format: 'int32',
+        },
+        first_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        last_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        file_name: {
+          type: "string",
+        },
+        raw_words: {
+          type: 'integer',
+        },
+        weighted_words: {
+          type: 'integer',
+        },
+        standard_words: {
+          type: 'integer',
+        },
+        metadata: {
+          type: "array",
+        },
+      }
+    },
+    SegmentIssueReport: {
+      type: "object",
+      properties: {
+        modified_segments_count: {
+          type: 'integer',
+        },
+        issue_count: {
+          type: 'integer',
+        },
+        modified_segments: {
+          type: 'array',
+          items: {
+            $ref: {
+              type: "object",
+              properties: {
+                id_segment: {
+                  type: "integer"
+                },
+                issue_count: {
+                  type: "integer"
+                },
+              }
+            }
+          }
+        },
+      }
+    },
     TranslationVersions: {
       type: 'array',
       items: {
@@ -3931,6 +4176,34 @@ var spec = {
           type: 'integer',
         },
       },
+    },
+    JobMetadata: {
+      type: 'object',
+      properties: {
+        project: {
+          type: 'object',
+        },
+        job: {
+          type: 'object',
+        },
+        files: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer'
+              },
+              filename: {
+                type: 'string',
+              },
+              data: {
+                type: 'object',
+              },
+            }
+          },
+        },
+      }
     },
     UploadGlossaryStatusObject: {
       type: 'object',
@@ -4196,6 +4469,35 @@ var spec = {
           items: {
             $ref: '#/definitions/Key',
           },
+        },
+      },
+    },
+    KeysListComplete: {
+      type: 'object',
+      properties: {
+        tm: {
+          type: 'boolean'
+        },
+        glos: {
+          type: 'boolean'
+        },
+        owner: {
+          type: 'boolean'
+        },
+        name: {
+          type: 'string',
+          example: "Key name"
+        },
+        key: {
+          type: 'string',
+          example: "xxxyyyzzz"
+        },
+        penalty: {
+          type: 'number',
+          example: 0.93
+        },
+        is_shared: {
+          type: 'boolean'
         },
       },
     },
