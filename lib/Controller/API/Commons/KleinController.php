@@ -162,7 +162,7 @@ abstract class KleinController implements IController {
     protected function getAuthKeys() {
         $headers = $this->request->headers();
 
-        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Basic ', $headers[ 'Authorization' ] )[ 1 ] ?? null );
+        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Bearer ', $headers[ 'Authorization' ] )[ 1 ] ?? null );
         $this->api_secret = $headers[ 'x-matecat-secret' ] ?? null;
 
         if ( false !== strpos( $this->api_key, '-' ) ) {
