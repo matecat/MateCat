@@ -25,10 +25,19 @@ trait AuthenticationTrait {
     protected ?Users_UserStruct     $user       = null;
 
     /**
+     * @var ?string
+     */
+    protected ?string $api_key = null;
+    /**
+     * @var ?string
+     */
+    protected ?string $api_secret = null;
+
+    /**
      * @throws ReflectionException
      * @throws Exception
      */
-    protected function identifyUser( ?bool $useSession = true, ?string $api_key = null, ?string $api_secret = null ) {
+    protected function identifyUser( ?bool $useSession = true ) {
 
         $_session = [];
         if ( $useSession ) {
@@ -37,10 +46,27 @@ trait AuthenticationTrait {
             $_session =& $_SESSION;
         }
 
-        $auth               = AuthenticationHelper::getInstance( $_session, $api_key, $api_secret );
+        $this->setAuthKeysIfExists();
+
+        $auth               = AuthenticationHelper::getInstance( $_session, $this->api_key, $this->api_secret );
         $this->user         = $auth->getUser();
         $this->userIsLogged = $auth->isLogged();
         $this->api_record   = $auth->getApiRecord();
+
+    }
+
+    /**
+     * @return void
+     */
+    protected function setAuthKeysIfExists(): void {
+        $headers = getallheaders();
+
+        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Bearer ', $headers[ 'Authorization' ] )[ 1 ] ?? null );
+        $this->api_secret = $headers[ 'x-matecat-secret' ] ?? null;
+
+        if ( false !== strpos( $this->api_key, '-' ) ) {
+            [ $this->api_key, $this->api_secret ] = explode( '-', $this->api_key );
+        }
 
     }
 
