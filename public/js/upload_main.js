@@ -131,8 +131,8 @@ window.UI = {
     return checkAnalyzability()
   },
 
-  createKeyByTMX: function (extension, filename) {
-    CreateProjectActions.createKeyFromTMXFile({extension, filename})
+  createKeyByTMX: function (filename) {
+    CreateProjectActions.createKeyFromTMXFile({filename})
   },
 
   checkFailedConversionsNumber: function () {
@@ -256,17 +256,6 @@ window.UI = {
         UI.checkFailedConversionsNumber()
       })
       .bind('fileuploaddestroyed', function (e, data) {
-        var deletedFileName = data.url.match(/file=[^&]*/g)
-        if (deletedFileName) {
-          deletedFileName = decodeURIComponent(
-            deletedFileName[0].replace('file=', ''),
-          )
-
-          if (typeof UI.skipLangDetectArr[deletedFileName] !== 'undefined') {
-            delete UI.skipLangDetectArr[deletedFileName]
-          }
-        }
-
         if ($('.wrapper-upload .error-message.no-more').length) {
           if ($('.upload-table tr').length < config.maxNumberFiles) {
             CreateProjectActions.hideErrors()
@@ -382,9 +371,6 @@ window.UI = {
         $('.name', fileSpecs.filerow).text(fileSpecs.fname)
 
         if (typeof data.data != 'undefined' && !fileSpecs.error) {
-          //Global
-          UI.skipLangDetectArr[fileSpecs.fname] = 'detect'
-
           if (config.conversionEnabled) {
             if (!fileSpecs.filerow.hasClass('converting')) {
               //console.log( filerow );
@@ -609,7 +595,7 @@ var convertFile = function (
 
             /* c'è almeno un file tmx e non ho già generato la chiave => genera la chiave */
             if (thisIsATMXFile && !thereIsAKeyInTmPanel) {
-              UI.createKeyByTMX(extension, file['name'])
+              UI.createKeyByTMX(file['name'])
             }
 
             $(filerow).after(rowClone)
@@ -645,11 +631,8 @@ var convertFile = function (
            * Check for TMX file type, we must trigger the creation of a new TM key
            */
           var extension = fname.split('.')[fname.split('.').length - 1]
-          if (
-            (extension == 'tmx' || extension == 'g') &&
-            config.conversionEnabled
-          ) {
-            UI.createKeyByTMX(extension, fname)
+          if (extension == 'tmx' && config.conversionEnabled) {
+            UI.createKeyByTMX(fname)
           }
         }
       } else if (data.code <= 0 && errors.length > 0) {
@@ -818,11 +801,6 @@ var setFileReadiness = function () {
   })
 }
 
-var unsupported = function () {
-  var jj = $('<div/>').html(config.unsupportedFileTypes).text()
-  return $.parseJSON(jj)
-}
-
 var getIconClass = function (ext) {
   switch (ext) {
     case 'doc':
@@ -899,7 +877,6 @@ window.onbeforeunload = function (e) {
 }
 
 document.addEventListener('DOMContentLoaded', function (event) {
-  config.unsupported = unsupported()
   checkInit()
   UI.init()
 })

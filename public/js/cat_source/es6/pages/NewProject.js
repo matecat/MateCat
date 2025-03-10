@@ -593,7 +593,7 @@ const NewProject = () => {
   }, [getMTEngines, getTmKeys, isUserLogged])
 
   useEffect(() => {
-    const createKeyFromTMXFile = ({extension, filename}) => {
+    const createKeyFromTMXFile = ({filename}) => {
       const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
 
       if (haveNoActiveKeys) {
@@ -617,18 +617,7 @@ const NewProject = () => {
         })
       }
 
-      const glossaryMessage = (
-        <span>
-          A new resource has been generated for the glossary you uploaded. You
-          can manage your resources in the{' '}
-          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-            Settings panel
-          </a>
-          .
-        </span>
-      )
-
-      const tmMessage = haveNoActiveKeys ? (
+      const message = haveNoActiveKeys ? (
         <span>
           A new resource has been generated for the TMX you uploaded. You can
           manage your resources in the{' '}
@@ -645,7 +634,6 @@ const NewProject = () => {
         </span>
       )
 
-      const message = extension === 'g' ? glossaryMessage : tmMessage
       setWarnings(message)
     }
     CreateProjectStore.addListener(

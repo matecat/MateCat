@@ -242,8 +242,10 @@ const CommonUtils = {
         return 'extsgm'
       case 'properties':
         return 'extpro'
+      case 'zip':
+        return 'extzip'
       default:
-        return 'extxif'
+        return 'exttxt'
     }
   },
 

@@ -86,26 +86,11 @@ export const handleCreationStatus = (id_project, password) => {
 }
 
 const postProjectCreation = (d) => {
-  if (typeof d.lang_detect !== 'undefined') {
-    UI.skipLangDetectArr = d.lang_detect
-  }
-
-  if (UI.skipLangDetectArr != null) {
-    $.each(UI.skipLangDetectArr, function (file, status) {
-      if (status == 'ok') UI.skipLangDetectArr[file] = 'skip'
-      else UI.skipLangDetectArr[file] = 'detect'
-    })
-  }
-
   if (typeof d.errors != 'undefined' && d.errors.length) {
     CreateProjectActions.hideErrors()
 
     $.each(d.errors, function () {
       switch (this.code) {
-        //no useful memories found in TMX
-        case -16:
-          UI.addTMXLangFailure()
-          break
         case -14:
           UI.addInlineMessage('.tmx', this.message)
           break

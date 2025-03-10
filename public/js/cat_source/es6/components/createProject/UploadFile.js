@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
 import CreateProjectActions from '../../actions/CreateProjectActions'
@@ -20,6 +20,10 @@ function UploadFile({
   const [files, setFiles] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const dragCounter = React.useRef(0)
+
+  useEffect(() => {
+    restartConversions()
+  }, [sourceLang, xliffConfigTemplateId, segmentationRule])
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
       let name = file.name
@@ -38,6 +42,7 @@ function UploadFile({
         error: null,
         zipFolder: false,
         size: 0,
+        ext: file.name.split('.')[file.name.split('.').length - 1],
       }
     })
     setFiles((prevFiles) => prevFiles.concat(fileList))
@@ -52,14 +57,15 @@ function UploadFile({
 
       const onSuccess = (files) => {
         const fileResponse = JSON.parse(files)[0]
-        if (fileResponse.error) {
+        const fileError = getFileErrorMessage(fileResponse)
+        if (fileResponse.error || fileError) {
           setFiles((prevFiles) =>
             prevFiles.map((f) =>
               f.file === file
                 ? {
                     ...f,
                     uploaded: false,
-                    error: fileResponse.error,
+                    error: fileError ? fileError : fileResponse.error,
                   }
                 : f,
             ),
@@ -84,7 +90,22 @@ function UploadFile({
             segmentation_rule: segmentationRule,
             filters_extraction_parameters_template_id: xliffConfigTemplateId,
             restarted_conversion: false,
-          }).then(({data}) => {
+          }).then(({data, errors}) => {
+            console.log('errors', errors)
+            if (errors?.length > 0) {
+              setFiles((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.file === file
+                    ? {
+                        ...f,
+                        uploaded: false,
+                        error: errors[0].message,
+                      }
+                    : f,
+                ),
+              )
+              return
+            }
             uplodedFilesNames.push(name)
             if (data.data.zipFiles) {
               const zipFiles = JSON.parse(data.data.zipFiles)
@@ -114,6 +135,35 @@ function UploadFile({
       }
 
       fileUpload(file, onProgress, onSuccess, onError)
+    })
+  }
+
+  const getFileErrorMessage = (file) => {
+    const {ext, size} = file
+    if (ext === 'tmx' && size > config.maxTMXFileSize) {
+      return (
+        'Error during upload. The uploaded TMX file exceed the file size limit of ' +
+        config.maxTMXSizePrint
+      )
+    } else if (ext !== 'tmx' && size > config.maxFileSize) {
+      return (
+        'Error during upload. The uploaded file exceed the file size limit of ' +
+        config.maxFileSizePrint
+      )
+    }
+  }
+
+  const restartConversions = () => {
+    files.forEach((f) => {
+      if (f.uploaded && !f.error) {
+        convertFileRequest({
+          file_name: f.name,
+          source_lang: sourceLang,
+          target_lang: targetLangs.map((lang) => lang.id).join(),
+          segmentation_rule: segmentationRule,
+          filters_extraction_parameters_template_id: xliffConfigTemplateId,
+        })
+      }
     })
   }
 
