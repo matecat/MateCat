@@ -814,6 +814,43 @@ class Utils {
         $strippedHtml = strip_tags( $html );
         $strippedHtml = ltrim( $strippedHtml );
 
+
+        return $strippedHtml;
+    }
+
+    /**
+     * @param $string
+     * @return mixed
+     */
+    public static function duplicateNewLines($string)
+    {
+        $newLinePlaceholder = "###PHP_EOL###";
+        $doubleNewLinePlaceholder = "###DOUBLE_PHP_EOL###";
+
+        $string = str_replace(PHP_EOL, $newLinePlaceholder, $string);
+        $string = preg_replace('/\s+/', ' ', $string);
+        $string = str_replace([
+            $newLinePlaceholder.$newLinePlaceholder,
+            $newLinePlaceholder . " " .$newLinePlaceholder ,
+        ], $doubleNewLinePlaceholder, $string);
+        $string = str_replace($newLinePlaceholder, PHP_EOL . PHP_EOL, $string);
+        $string = str_replace($doubleNewLinePlaceholder, PHP_EOL . PHP_EOL, $string);
+
+        return $string;
+    }
+
+    /**
+     * @param $email
+     *
+     * @throws Exception
+     */
+    public static function validateEmailAddress( $email ) {
+        $clean_email = filter_var( $email, FILTER_SANITIZE_EMAIL );
+
+        if ( $email !== $clean_email or !filter_var( $email, FILTER_VALIDATE_EMAIL ) ) {
+            throw new Exception( $email . " is not a valid email address" );
+        }
+
         return rtrim( $strippedHtml );
     }
 
