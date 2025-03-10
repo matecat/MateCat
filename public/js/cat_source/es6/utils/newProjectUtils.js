@@ -1,16 +1,10 @@
 import Cookies from 'js-cookie'
 import CreateProjectActions from '../actions/CreateProjectActions'
-import {clearNotCompletedUploads as clearNotCompletedUploadsApi} from '../api/clearNotCompletedUploads'
 import {projectCreationStatus} from '../api/projectCreationStatus'
 import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import CommonUtils from './commonUtils'
 import UserStore from '../stores/UserStore'
-
-// called inside upload_main.js file
-window.clearNotCompletedUploads = function () {
-  clearNotCompletedUploadsApi()
-}
 
 export const restartConversions = () => {
   if (document.getElementsByClassName('template-download').length) {
@@ -113,10 +107,6 @@ const postProjectCreation = (d) => {
       CreateProjectActions.showError(this.message)
     })
   } else {
-    //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
-    //--> we don't want to delete the files on the upload directory
-    window.clearNotCompletedUploads = function () {}
-    //this should not be.
     //A project now are never EMPTY, it is not created anymore
     if (d.status == 'EMPTY') {
       console.log('EMPTY')

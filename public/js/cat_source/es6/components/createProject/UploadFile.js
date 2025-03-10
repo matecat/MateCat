@@ -300,49 +300,6 @@ function UploadFile({
         </>
       )}
     </div>
-    /*<div>
-      <div
-        style={{
-          border: '2px dashed #ccc',
-          padding: '20px',
-          textAlign: 'center',
-          cursor: 'pointer',
-        }}
-        onDrop={handleDrop}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
-        onClick={() => document.getElementById('fileInput').click()}
-      >
-        {isDragging
-          ? 'Drop it here'
-          : 'Drop your files to translate them with Matecat or click here to browse'}
-      </div>
-
-      <input
-        type="file"
-        multiple
-        style={{display: 'none'}}
-        id="fileInput"
-        onChange={handleChange}
-      />
-
-      <ul>
-        {files.map((f, idx) => (
-          <li key={idx}>
-            {f.name} - {f.uploadProgress.toFixed(2)}%
-            {f.uploaded && ' (Completato) - size:' + f.size}
-            {f.error && ` (Errore: ${f.error})`}
-            <Button
-              size={BUTTON_SIZE.ICON_SMALL}
-              onClick={() => deleteFile(f.name)}
-            >
-              <DeleteIcon />
-            </Button>
-          </li>
-        ))}
-      </ul>
-    </div>*/
   )
 }
 
