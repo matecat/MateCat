@@ -1,4 +1,4 @@
-@import 'commons/colors';
+@use 'commons/colors';
 html,
 body {
   height: 100%;
@@ -16,8 +16,8 @@ body {
   -moz-transition: all 100ms ease-in;
   font-size: 14px;
   line-height: 1.4285em;
-  background: $white;
-  color: $black;
+  background: colors.$white;
+  color: colors.$black;
   &.no-min-width {
     min-width: auto;
   }
@@ -144,7 +144,7 @@ ul {
 
 .btn-grey,
 .btn-grey {
-  color: $grey2;
+  color: colors.$grey2;
   background: white;
 }
 
@@ -562,7 +562,7 @@ section mark.searchMarker.currSearchItem {
   /* Google Sheet */
 
   .fileinput-button {
-    background: $translatedBlue;
+    background: colors.$translatedBlue;
   }
 }
 
@@ -629,11 +629,7 @@ a.unarchive-project:after,
 .mbc-warnings:before,
   /* mbc chat */
 .text .alternatives:before,
-.autofillTag:before,
 header .filter:before,
-.editToolbar .uppercase:after,
-.editToolbar .lowercase:after,
-.editToolbar .capitalize:after,
 .export-button-label:before,
 .canceladd-export:before {
   font-family: 'icomoon';
@@ -651,25 +647,6 @@ header .filter:before,
 
 header .filter:before {
   content: '\f0b0';
-}
-
-.editToolbar .uppercase:after {
-  content: '\ea6c';
-  font-size: 20px;
-  display: block;
-}
-
-.editToolbar .lowercase:after {
-  content: '\ea6b';
-  font-size: 20px;
-  display: block;
-}
-
-.editToolbar .capitalize:after {
-  content: '\ea5f';
-  font-size: 16px;
-  padding: 3px 2px 1px 2px;
-  display: block;
 }
 
 .fileupload-buttonbar .fileinput-button:before,
@@ -1160,7 +1137,7 @@ a.unarchive-project:after {
 #menu-site li a.bigblue {
   font-size: 17px !important;
   border: none !important;
-  color: $darkBlue !important;
+  color: colors.$darkBlue !important;
   border-radius: 18px;
   background-color: #fff;
   padding: 4px 18px;
@@ -1170,7 +1147,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a.bigred:hover {
-  color: $darkBlueHover !important;
+  color: colors.$darkBlueHover !important;
 }
 
 #menu-site li a:hover {
@@ -1203,10 +1180,10 @@ body svg {
     > span {
       display: block;
       text-align: center;
-      background-color: $grey7;
+      background-color: colors.$grey7;
       border-radius: 4px;
       padding: 2px 4px;
-      color: $white;
+      color: colors.$white;
       font-size: 14px;
       white-space: nowrap;
     }

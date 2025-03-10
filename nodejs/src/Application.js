@@ -7,7 +7,7 @@ const io = require("socket.io");
 const {setupWorker} = require("@socket.io/sticky");
 const {createAdapter} = require("@socket.io/redis-adapter");
 const {Reader} = require('./amq/AMQconnector');
-const {MessageHandler, MESSAGE_NAME} = require('./amq/MessageHandler');
+const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
 const Redis = require("ioredis");
@@ -57,7 +57,12 @@ module.exports.Application = class {
         socket.handshake.headers['x-uuid']
       ) {
         auth = socket.handshake.headers;
-      } else if (socket.handshake.auth) {
+      } else if (
+        socket.handshake.auth &&
+        socket.handshake.auth['x-token'] &&
+        socket.handshake.auth['x-userid'] &&
+        socket.handshake.auth['x-uuid']
+      ) {
         auth = socket.handshake.auth;
       } else {
         next(new Error('Authentication not provided'));
@@ -78,10 +83,10 @@ module.exports.Application = class {
             logger.error(['Authentication error invalid user id', auth['x-userid'], decoded.context.uid]);
             return next(new Error('Authentication error invalid user id'));
           }
-          socket.user_id = auth['x-userid'];
-          socket.uuid = auth['x-uuid'];
+          socket.user_id = auth['x-userid'].toString();
+          socket.uuid = auth['x-uuid'].toString();
           if (auth['x-jobid']) {
-            socket.jobId = auth['x-jobid'];
+            socket.jobId = auth['x-jobid'].toString();
           }
           next();
         }
@@ -111,6 +116,8 @@ module.exports.Application = class {
         socket.join(socket.jobId);
       }
 
+      logger.debug("JOINED USER:", {'user_id': socket.user_id, 'uuid': socket.uuid, 'jobId': socket.jobId});
+
       this.logger.debug({
         message: 'Client connected ' + socket.id,
         remote_ip: socket.getClientAddress(),
@@ -136,6 +143,7 @@ module.exports.Application = class {
         }
       });
 
+      this.dispatchGlobalMessages(socket.uuid);
     });
 
     return this;
@@ -168,5 +176,34 @@ module.exports.Application = class {
     this._socketIOServer.to(room).emit(type, message);
   };
 
+  /**
+   * Dispatch global messages
+   */
+  dispatchGlobalMessages = (uuid) => {
+    const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
+    const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
+    let pubClient = new Redis(this.options.redis);
 
-}
+    pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids)=> {
+
+      ids.length > 0 && ids.map((id) => {
+        pubClient.get( GLOBAL_MESSAGES_ELEMENT_KEY + id,  (err, element) => {
+          if ( element !== null ) {
+            this.sendRoomNotifications( uuid, MESSAGE_NAME, {
+              data: {
+                _type: GLOBAL_MESSAGES,
+                message: JSON.parse( element )
+              }
+            });
+          } else {
+            pubClient.srem( GLOBAL_MESSAGES_LIST_KEY + id );
+          }
+        });
+      });
+    });
+
+    pubClient.quit();
+    pubClient = null;
+
+  };
+};

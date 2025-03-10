@@ -1,5 +1,6 @@
 <?php
 
+use Engines\MMT\MMTServiceApiException;
 use EnginesModel\DeepLStruct;
 use EnginesModel\LaraStruct;
 use Lara\LaraException;
@@ -115,8 +116,7 @@ class engineController extends ajaxController {
      */
     private function add() {
 
-        $newEngineStruct = null;
-        $validEngine     = true;
+        $validEngine = true;
 
         switch ( strtolower( $this->provider ) ) {
 
@@ -291,9 +291,11 @@ class engineController extends ajaxController {
 
         if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
 
+            $engine_type = explode( "\\", $newEngineStruct->class_load );
+            $engine_type = array_pop( $engine_type );
             $this->result[ 'errors' ][] = $this->featureSet->filter(
                     'engineCreationFailed',
-                    [ 'code' => -9, 'message' => "Creation failed. Generic error" ],
+                    [ 'code' => 403, 'message' => "Creation failed. Only one $engine_type engine is allowed." ],
                     $newEngineStruct->class_load
             );
 
@@ -311,7 +313,7 @@ class engineController extends ajaxController {
             $mt_result = $newTestCreatedMT->get( $config );
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
+                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => $mt_result[ 'error' ] ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
@@ -325,11 +327,12 @@ class engineController extends ajaxController {
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
+            $config[ 'key' ]     = $this->engineData[ 'secret' ] ?? null;
 
             $mt_result = $newTestCreatedMT->get( $config );
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = $mt_result[ 'error' ];
+                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => $mt_result[ 'error' ] ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
@@ -340,16 +343,39 @@ class engineController extends ajaxController {
             /**
              * @var $newTestCreatedMT Lara
              */
-            $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $config              = $newTestCreatedMT->getConfigStruct();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "it-IT";
 
             try {
-                $newTestCreatedMT->getAvailableLanguages();
+                $newTestCreatedMT->get( $config );
             } catch ( LaraException $e ) {
-                $this->result[ 'errors' ][] = $e->getMessage();
+                $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => $e->getMessage() ];
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
                 return;
+            }
+
+            // Check MMT License
+            $mmtLicense = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()['MMT-License'];
+
+            if(!empty($mmtLicense)){
+                $mmtClient = Engines\MMT\MMTServiceApi::newInstance()
+                    ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                    ->setLicense( $mmtLicense );
+
+                try {
+                    $mmtClient->me();
+                } catch (MMTServiceApiException $e){
+                    $this->result[ 'errors' ][] = [ "code" => $e->getCode(), "message" => "ModernMT license not valid, please verify its validity and try again" ];
+                    $engineDAO->delete( $newCreatedDbRowStruct );
+                    $this->destroyUserEnginesCache();
+
+                    return;
+                }
             }
 
             $UserMetadataDao = new MetadataDao();
@@ -406,7 +432,7 @@ class engineController extends ajaxController {
 
         $engine = Engine::createTempInstance( $result );
 
-        if ( $engine->isAdaptive() ) {
+        if ( $engine->isAdaptiveMT() ) {
             //retrieve OWNER Engine License
             ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
         }

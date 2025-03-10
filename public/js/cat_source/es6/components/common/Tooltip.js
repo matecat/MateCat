@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
 
@@ -18,28 +18,68 @@ const Tooltip = ({
   mode = TOOLTIP_MODE.AUTO,
   delay = 300,
   className = '',
+  stylePointerElement,
   style,
   children,
   content,
+  isInteractiveContent,
 }) => {
-  const TooltipTimeout = useRef()
-
   const [isVisible, setVisibility] = useState(false)
   const [coords, setCoordinate] = useState()
   const Portal = usePortal(document.body)
+
+  const tooltipTimeout = useRef()
+  const refContainer = useRef()
+  const isCursorInsideTooltipContainer = useRef()
+
+  useEffect(() => {
+    if (!isInteractiveContent) return
+
+    const onMouseMoveHandler = ({clientX, clientY}) => {
+      if (refContainer.current) {
+        const rect = refContainer.current.getBoundingClientRect()
+        if (
+          clientX >= rect.left &&
+          clientX <= rect.right &&
+          clientY >= rect.top &&
+          clientY <= rect.bottom
+        ) {
+          isCursorInsideTooltipContainer.current = true
+        } else {
+          if (isCursorInsideTooltipContainer.current) {
+            isCursorInsideTooltipContainer.current = false
+            clearTimeout(tooltipTimeout.current)
+            setVisibility(false)
+          }
+        }
+      }
+    }
+
+    if (isVisible) document.addEventListener('mousemove', onMouseMoveHandler)
+
+    return () => document.removeEventListener('mousemove', onMouseMoveHandler)
+  }, [isInteractiveContent, isVisible])
 
   // FUNCTIONS
   const showToolTip = () => {
     if (content && content !== '') {
       setCoordinate(getCoords())
-      TooltipTimeout.current = setTimeout(() => {
+      clearTimeout(tooltipTimeout.current)
+      tooltipTimeout.current = setTimeout(() => {
         setVisibility(true)
       }, delay)
     }
   }
   const hideToolTip = () => {
+    isCursorInsideTooltipContainer.current = false
+    clearTimeout(tooltipTimeout.current)
     setVisibility(false)
-    clearInterval(TooltipTimeout.current)
+  }
+  const hideTooltipWithTimeout = () => {
+    clearTimeout(tooltipTimeout.current)
+    tooltipTimeout.current = setTimeout(() => {
+      if (!isCursorInsideTooltipContainer.current) setVisibility(false)
+    }, delay)
   }
 
   // RENDER
@@ -65,16 +105,26 @@ const Tooltip = ({
   }
 
   return mode === TOOLTIP_MODE.STATIC || !children ? (
-    <div className={`tooltip-container ${position} ${className}`} style={style}>
+    <div
+      className={`tooltip-container ${position} ${className} ${isInteractiveContent ? 'tooltip-container-interactive' : ''}`}
+      style={style}
+    >
       {content}
     </div>
   ) : children ? (
-    <div onPointerEnter={showToolTip} onPointerLeave={hideToolTip}>
+    <div
+      onPointerEnter={showToolTip}
+      onPointerLeave={
+        isInteractiveContent ? hideTooltipWithTimeout : hideToolTip
+      }
+      style={stylePointerElement}
+    >
       {children}
       {isVisible && (
         <Portal id="portal-root">
           <div
-            className={`tooltip-container ${position} ${className}`}
+            ref={refContainer}
+            className={`tooltip-container ${position} ${className} ${isInteractiveContent ? 'tooltip-container-interactive' : ''}`}
             style={{...style, ...coords}}
           >
             {content}

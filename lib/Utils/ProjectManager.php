@@ -591,12 +591,9 @@ class ProjectManager {
          */
         if ( $this->projectStructure[ 'result' ][ 'errors' ]->count() ) {
             $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
+
             return false;
         }
-
-        $this->__createProjectRecord();
-        $this->saveFeaturesInMetadata();
-        $this->saveMetadata();
 
         //sort files in order to process TMX first
         $sortedFiles      = [];
@@ -893,15 +890,19 @@ class ProjectManager {
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
             if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
+                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
-            $featureSet->run( "beforeInsertSegments", $this->projectStructure,
-                    [
+            // check for project Creation, before wasting disk space
+            $this->features->run( "beforeProjectCreation", $this->projectStructure, [
                             'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
+                            'files_raw_wc'           => $this->files_word_count
                     ]
             );
+
+            $this->__createProjectRecord();
+            $this->saveFeaturesInMetadata();
+            $this->saveMetadata();
 
             foreach ( $totalFilesStructure as $fid => $empty ) {
                 $this->_storeSegments( $fid );
@@ -1367,6 +1368,7 @@ class ProjectManager {
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
             $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
+            $newJob->last_update       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
             $newJob->owner             = $projectStructure[ 'owner' ];
             $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
@@ -1376,12 +1378,7 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
-            $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
-                            'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
-                    ]
-            );
-
+            $this->features->run( 'validateJobCreation', $newJob, $projectStructure );
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
@@ -1394,7 +1391,7 @@ class ProjectManager {
 
             // tm_prioritization
             if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', ($projectStructure[ 'tm_prioritization' ] == true ? "1" : "0") );
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
             }
 
             // dialect_strict
@@ -1441,6 +1438,7 @@ class ProjectManager {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
+
         }
 
         if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
@@ -1453,8 +1451,6 @@ class ProjectManager {
 
         //Clean Translation array
         $this->projectStructure[ 'translations' ]->exchangeArray( [] );
-
-        $this->features->run( 'processJobsCreated', $projectStructure );
 
     }
 
@@ -2317,7 +2313,6 @@ class ProjectManager {
 
                 // get metadata
                 $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
-
                 $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
                 $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );

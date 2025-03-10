@@ -559,8 +559,20 @@ class CatUtils {
      *
      * @return string
      */
-    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string {
-        return trim( strip_tags( html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string
+    {
+        $entityDecoded = html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+        // parse and extract CDATA
+        preg_match_all('/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches);
+
+        if(isset($cdataMatches[1]) and !empty($cdataMatches[1])){
+            foreach($cdataMatches[1] as $k => $m){
+                $entityDecoded = str_replace($cdataMatches[0][$k], $m, $entityDecoded);
+            }
+        }
+
+        return trim( strip_tags( $entityDecoded ) );
     }
 
     /**
@@ -610,11 +622,11 @@ class CatUtils {
 
         $is_pass = $values->is_pass;
 
-        if($is_pass == true){
+        if ( $is_pass == true ) {
             return 'excellent';
         }
 
-        if($is_pass == false){
+        if ( $is_pass == false ) {
             return 'fail';
         }
 
@@ -687,9 +699,9 @@ class CatUtils {
      * @param $jid
      * @param $password
      *
-     * @return bool|null
+     * @return bool
      */
-    public static function getIsRevisionFromIdJobAndPassword( $jid, $password ): ?bool {
+    public static function isRevisionFromIdJobAndPassword( $jid, $password ): bool {
 
         $jobValidator = new IsJobRevisionValidator();
 
@@ -704,7 +716,7 @@ class CatUtils {
         } catch ( Exception $ignore ) {
         }
 
-        return null;
+        return false;
     }
 
     /**
@@ -876,13 +888,15 @@ class CatUtils {
      * user's first_name and last_name
      *
      * @param $string
+     *
      * @return string
      */
-    public static function stripMaliciousContentFromAName($string)
-    {
-        $string = mb_substr( preg_replace( '/(?:https?|s?ftp)?\P{L}+/u', '', $string ), 0, 50 );
+    public static function stripMaliciousContentFromAName( $string ): string {
+        $string = preg_replace( '/\P{L}+/u', ' ', $string ); //replace all not letters (Unicode is valid) with a space
+        $string = preg_replace( '/ {2,}/u', ' ', $string ); // replace all double spaces with a single space
+        $string = mb_substr( $string, 0, 50 ); // max allowed characters are 50
 
-        return trim($string);
+        return trim( $string );
     }
 }
 

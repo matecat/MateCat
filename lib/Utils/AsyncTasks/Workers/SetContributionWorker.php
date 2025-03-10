@@ -84,9 +84,9 @@ class SetContributionWorker extends AbstractWorker {
         $this->_loadEngine( $jobStruct );
 
         /**
-         * @see Engines_AbstractEngine::$_isAdaptive
+         * @see Engines_AbstractEngine::$_isAdaptiveMT
          */
-        if( !$this->_engine->isAdaptive() ){
+        if ( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ) {
             return;
         }
 
@@ -120,7 +120,7 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRow()->id ) {
+        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
@@ -182,6 +182,7 @@ class SetContributionWorker extends AbstractWorker {
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
+        $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
 
         $this->_doLog( "Executing Update on " . get_class( $this->_engine ) );
         $res = $this->_engine->update( $config );

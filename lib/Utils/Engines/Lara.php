@@ -2,11 +2,14 @@
 
 namespace Utils\Engines;
 
+use AMQHandler;
 use Constants_Engines;
 use Engine;
+use Engines\MMT\MMTServiceApi;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
 use Engines_MMT;
+use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_Matches;
 use EnginesModel_MMTStruct;
 use Exception;
@@ -24,9 +27,11 @@ use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
+use Stomp\Transport\Message;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
+use TmKeyManagement_TmKeyStruct;
 use Users_UserDao;
 use Users_UserStruct;
 
@@ -41,17 +46,22 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptive
+     * @see Engines_AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
-    protected bool $_isAdaptive = true;
+    protected bool $_isAdaptiveMT = true;
 
     private ?Translator $clientLoaded = null;
 
     /**
      * @var Engines_MMT
      */
-    private Engines_EngineInterface $mmtUserFallback;
+    private Engines_EngineInterface $mmt_GET_Fallback;
+
+    /**
+     * @var ?Engines_MMT
+     */
+    private ?Engines_EngineInterface $mmt_SET_PrivateLicense = null;
 
     /**
      * @throws Exception
@@ -59,8 +69,8 @@ class Lara extends Engines_AbstractEngine {
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
 
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         $this->_skipAnalysis = true;
@@ -79,7 +89,7 @@ class Lara extends Engines_AbstractEngine {
             return $this->clientLoaded;
         }
 
-        $extraParams = $this->engineRecord->getExtraParamsAsArray();
+        $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new LaraCredentials( $extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ] );
 
         $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
@@ -89,8 +99,18 @@ class Lara extends Engines_AbstractEngine {
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
+        $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
 
-        $this->mmtUserFallback = Engine::createTempInstance( $mmtStruct );
+        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
+            $mmtStruct                    = EnginesModel_MMTStruct::getStruct();
+            $mmtStruct->type              = Constants_Engines::MT;
+            $mmtStruct->extra_parameters  = [
+                    'MMT-License'      => $extraParams[ 'MMT-License' ],
+                    'MMT-pretranslate' => true,
+                    'MMT-preimport'    => false,
+            ];
+            $this->mmt_SET_PrivateLicense = Engine::createTempInstance( $mmtStruct );
+        }
 
         $this->clientLoaded = new Translator( $credentials );
 
@@ -122,6 +142,16 @@ class Lara extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $value  = $client->getLanguages();
+
+        if ( !empty( $value ) ) {
+            $value = array_map( function ( $v ) {
+                $code = explode( '-', $v );
+
+                return $code[ 0 ];
+            }, $value );
+            $value = array_unique( $value );
+        }
+
         $cache->setex( "lara_languages", 86400, serialize( $value ) );
 
         return $value;
@@ -134,13 +164,16 @@ class Lara extends Engines_AbstractEngine {
 
     /**
      * @inheritDoc
-     * @throws LaraException
+     *
+     * @param $_config
+     *
+     * @return array|Engines_Results_AbstractResponse
      * @throws ReflectionException
      * @throws Exception
      */
     public function get( $_config ) {
 
-        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ], 'r' );
+        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
              * @var $tm_key TmKeyManagement_MemoryKeyStruct
@@ -160,32 +193,30 @@ class Lara extends Engines_AbstractEngine {
             $_config[ 'priority' ]      = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
-
-            return $this->mmtUserFallback->get( $_config );
+            return $this->mmt_GET_Fallback->get( $_config );
         } else {
             $_config[ 'priority' ] = 'normal';
         }
 
         $_lara_keys = $this->_reMapKeyList( $_config[ 'keys' ] );
 
-        $languagesList = $this->getAvailableLanguages();
+        try {
 
-        if ( in_array( $_config[ 'source' ], $languagesList ) && in_array( $_config[ 'target' ], $languagesList ) ) {
             // call lara
             $translateOptions = new TranslateOptions();
             $translateOptions->setAdaptTo( $_lara_keys );
-            $translateOptions->setPriority( $_config[ 'priority' ] );
-            $translateOptions->setMultiline( true );
+            $translateOptions->setMultiline( false );
+            $translateOptions->setContentType( 'application/xliff+xml' );
 
             $request_translation = [];
 
-            foreach ( $_config[ 'context_list_before' ] as $c ) {
+            foreach ( $_config[ 'context_list_before' ] ?? [] as $c ) {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
             $request_translation[] = new TextBlock( $_config[ 'segment' ] );
 
-            foreach ( $_config[ 'context_list_after' ] as $c ) {
+            foreach ( $_config[ 'context_list_after' ] ?? [] as $c ) {
                 $request_translation[] = new TextBlock( $c, false );
             }
 
@@ -201,8 +232,8 @@ class Lara extends Engines_AbstractEngine {
                     'adapt_to'     => $_lara_keys,
                     'source'       => $_config[ 'source' ],
                     'target'       => $_config[ 'target' ],
-                    'priority'     => $_config[ 'priority' ],
-                    'multiline'    => true,
+                    'content_type' => 'application/xliff+xml',
+                    'multiline'    => false,
             ] );
 
             $translation = "";
@@ -214,26 +245,79 @@ class Lara extends Engines_AbstractEngine {
                 }
             }
 
-        } else {
+            // Get score from MMT Quality Estimation
+            $mmtClient = MMTServiceApi::newInstance()
+                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
+
+            try {
+                $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
+                $score = $qualityEstimation['score'];
+
+                Log::doJsonLog( [
+                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                    'source'                 => $_config[ 'source' ],
+                    'target'                 => $_config[ 'target' ],
+                    'segment'                => $_config[ 'segment' ],
+                    'translation'            => $translation,
+                    'score'                  => $score,
+                ] );
+
+            } catch (\Exception $exception){
+                $score = 0;
+            }
+
+        } catch ( LaraException $t ) {
+            if ( $t->getCode() == 429 ) {
+
+                Log::doJsonLog( "Lara quota exceeded. You have exceeded your 'api_translation_chars' quota" );
+
+                $engine_type = explode( "\\", self::class );
+                $engine_type = array_pop( $engine_type );
+                $message     = json_encode( [
+                        '_type' => 'quota_exceeded',
+                        'data'  => [
+                                'id_job'  => $_config[ 'job_id' ],
+                                'payload' => [
+                                        'engine'  => $engine_type,
+                                        'code'    => $t->getCode(),
+                                        'message' => "Lara quota exceeded. " . $t->getMessage()
+                                ]
+                        ]
+                ] );
+
+                $queueHandler = AMQHandler::getNewInstanceForDaemons();
+                $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+
+                return [];
+            } elseif ( $t->getCode() == 401 || $t->getCode() == 403 ) {
+                Log::doJsonLog( [ "Missing or invalid authentication header.", $t->getMessage(), $t->getCode() ] );
+                throw new LaraException( "Lara credentials not valid, please verify their validity and try again", $t->getCode(), $t );
+            }
+
             // mmt fallback
-            return $this->mmtUserFallback->get( $_config );
+            return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches(
-                $_config[ 'segment' ],
-                $translation,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
+            $_config[ 'segment' ],
+            $translation,
+            100 - $this->getPenalty() . "%",
+            "MT-" . $this->getName(),
+            date( "Y-m-d" )
+        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
 
+        if($score){
+            $matchAsArray[ 'score' ] = $score;
+        }
+
+        return $matchAsArray;
     }
 
     /**
      * @inheritDoc
      */
     public function set( $_config ) {
-        // TODO: Implement set() method.
     }
 
     /**
@@ -244,6 +328,12 @@ class Lara extends Engines_AbstractEngine {
 
         $client = $this->_getClient();
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+
+        if( empty( $_keys ) ) {
+            Log::doJsonLog( [ "LARA: update skipped. No keys provided." ] );
+            return true;
+        }
+
         try {
 
             $time_start = microtime( true );
@@ -274,21 +364,69 @@ class Lara extends Engines_AbstractEngine {
                     'sentence_after'  => $_config[ 'context_after' ],
             ] );
 
-        } catch ( LaraApiException $e ) {
-            // Lara license expired/changed (401) or account deleted (403)
-            Log::doJsonLog( $e->getMessage() );
-
-            // DO NOT REQUEUE FOR LARA FAILURE ONLY
-
         } catch ( Exception $e ) {
-            // for any other exception (HTTP connection or timeout) requeue
+            // for any exception (HTTP connection or timeout) requeue
             return false;
         }
 
         // let MMT to have the last word on requeue
-        return $this->mmtUserFallback->update( $_config );
+        return !empty( $this->mmt_SET_PrivateLicense ) ? $this->mmt_SET_PrivateLicense->update( $_config ) : true;
 
     }
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     *
+     * @return array|null
+     * @throws LaraException
+     * @throws Exception
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        $clientMemories = $this->_getClient()->memories;
+        $memory         = $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) );
+        if ( $memory ) {
+            return $memory->jsonSerialize();
+        }
+
+        return null;
+    }
+
+    /**
+     * @throws LaraException
+     * @throws Exception
+     */
+    public function deleteMemory( array $memoryKey ): array {
+        $clientMemories = $this->_getClient()->memories;
+        try {
+
+            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+                $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+                $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
+
+                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
+                if ( !empty( $memoryMMT ) ) {
+                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
+                }
+            }
+
+            return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
+        } catch ( LaraApiException $e ) {
+            if ( $e->getCode() == 404 ) {
+                return [];
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * In 'Lara', there is no need to check the ownership of the memory because if a memory exists within an account, it definitely ALSO belongs to me and can be safely deleted (unlinked from my account).
+     * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
+     * @throws LaraException
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+        return $this->memoryExists( $memoryKey );
+    }
+
 
     /**
      * @throws LaraException
@@ -296,18 +434,9 @@ class Lara extends Engines_AbstractEngine {
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
-        $clientMemories     = $this->_getClient()->memories;
-        $associatedMemories = $clientMemories->getAll();
-        $memoryFound        = false;
+        $clientMemories = $this->_getClient()->memories;
 
-        foreach ( $associatedMemories as $memory ) {
-            if ( 'ext_my_' . trim( $memoryKey ) === $memory->getExternalId() ) {
-                $memoryFound = true;
-                break;
-            }
-        }
-
-        if ( !$memoryFound ) {
+        if ( !$clientMemories->get( 'ext_my_' . trim( $memoryKey ) ) ) {
             return null;
         }
 
@@ -332,6 +461,10 @@ class Lara extends Engines_AbstractEngine {
 
         $fp_out = null;
 
+        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
+            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
+        }
+
     }
 
     /**
@@ -350,16 +483,18 @@ class Lara extends Engines_AbstractEngine {
 
             foreach ( $project->getJobs() as $job ) {
 
-                $keyIds     = [];
-                $jobKeyList = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+                $keyIds          = [];
+                $jobKeyListRead  = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+                $jobKeyListWrite = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'w', 'tm', $user->uid );
+                $jobKeyList      = array_merge( $jobKeyListRead, $jobKeyListWrite );
 
                 foreach ( $jobKeyList as $memKey ) {
                     $keyIds[] = $memKey->key;
                 }
 
-                $keyIds = $this->_reMapKeyList( $keyIds );
+                $keyIds = $this->_reMapKeyList( array_values( array_unique( $keyIds ) ) );
                 $client = $this->_getClient();
-                $res = $client->memories->connect( $keyIds );
+                $res    = $client->memories->connect( $keyIds );
                 Log::doJsonLog( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
 
             }
@@ -375,7 +510,6 @@ class Lara extends Engines_AbstractEngine {
      * @inheritDoc
      */
     public function delete( $_config ) {
-        // TODO: Implement delete() method.
     }
 
     /**

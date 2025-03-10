@@ -50,37 +50,6 @@ export const ApplicationWrapper = ({children}) => {
 
   const [forceReload, setForceReload] = useState(false)
 
-  const checkGlobalMassages = useCallback(() => {
-    if (config.global_message) {
-      const messages = JSON.parse(config.global_message)
-      messages.forEach((elem) => {
-        if (
-          !isUserLogged ||
-          (typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
-            new Date(elem.expire) > new Date())
-        ) {
-          const notification = {
-            title: 'Notice',
-            text: elem.msg,
-            type: elem.level ? elem.level : 'warning',
-            autoDismiss: false,
-            position: 'bl',
-            allowHtml: true,
-            closeCallback: function () {
-              const expireDate = new Date(elem.expire)
-              Cookies.set('msg-' + elem.token, '', {
-                expires: expireDate,
-                secure: true,
-              })
-            },
-          }
-          CatToolActions.addNotification(notification)
-          return false
-        }
-      })
-    }
-  }, [isUserLogged])
-
   const checkForPopupToOpen = useRef()
   checkForPopupToOpen.current = () => {
     const openFromFlash = CommonUtils.lookupFlashServiceParam('popup')
@@ -115,10 +84,6 @@ export const ApplicationWrapper = ({children}) => {
         break
     }
   }
-
-  useEffect(() => {
-    if (typeof isUserLogged === 'boolean') checkGlobalMassages()
-  }, [isUserLogged, checkGlobalMassages])
 
   useEffect(() => {
     const forceReloadFn = () => {

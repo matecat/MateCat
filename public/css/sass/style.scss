@@ -1,3 +1,4 @@
+@use "commons/colors";
 body {
   transition: padding-top 200ms ease-out;
   -webkit-transition: padding-top 200ms ease-out;
@@ -239,7 +240,7 @@ section.opened .warnings {
 }
 
 .alternatives a {
-  color: $black !important;
+  color: colors.$black !important;
 }
 
 .mismatch .warnings {
@@ -328,15 +329,15 @@ section.opened .warnings {
     padding: 6px 12px;
     border-radius: 2px;
     font-size: 16px;
-    background: $translatedBlue;
-    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-    background: linear-gradient(top, $translatedBlue, #119ec4);
+    background: colors.$translatedBlue;
+    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
+    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
     user-select: none;
     cursor: pointer;
     min-width: 95px;
     margin-left: 15px;
     &:hover {
-      background-color: $translatedBlueHover;
+      background-color: colors.$translatedBlueHover;
     }
     svg {
       display: block;
@@ -370,14 +371,14 @@ section.opened .warnings {
 }
 
 .approved-bar {
-  background-color: $approvedGreen;
+  background-color: colors.$approvedGreen;
 }
 .approved-bar-2nd-pass {
-  background-color: $approved2Green;
+  background-color: colors.$approved2Green;
 }
 
 .draft-bar {
-  background-color: $grey4;
+  background-color: colors.$grey4;
 }
 
 .rejected-bar {
@@ -385,7 +386,7 @@ section.opened .warnings {
 }
 
 .translated-bar {
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
 }
 
 .rejected-background {
@@ -393,7 +394,7 @@ section.opened .warnings {
 }
 
 .approved-backgruond {
-  background-color: $approvedGreen;
+  background-color: colors.$approvedGreen;
 }
 
 .rejected-foreground {
@@ -401,7 +402,7 @@ section.opened .warnings {
 }
 
 .approved-foreground {
-  color: $approvedGreen;
+  color: colors.$approvedGreen;
 }
 
 .meter > a {
@@ -504,7 +505,7 @@ section.opened .warnings {
 .sid .txt {
   padding: 0px 3px;
   margin: 2px 0px 0 0px;
-  background: $grey5;
+  background: colors.$grey5;
   display: contents;
 }
 
@@ -569,7 +570,7 @@ p.split-shortcut {
 }
 
 section:hover .sid {
-  color: $grey1;
+  color: colors.$grey1;
 }
 
 .editor .sid {
@@ -644,9 +645,9 @@ strong:first-child {
   padding: 8px 18px;
   border-radius: 2px;
   font-size: 18px;
-  background: $translatedBlue;
-  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-  background: linear-gradient(top, $translatedBlue, #119ec4);
+  background: colors.$translatedBlue;
+  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
+  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
   text-transform: uppercase;
   user-select: none;
 }
@@ -664,7 +665,7 @@ strong:first-child {
 }
 
 .approved {
-  background: $approvedGreen;
+  background: colors.$approvedGreen;
 }
 
 article .translated,
@@ -737,7 +738,7 @@ article .approved:active {
 .translated:hover,
 .next-untranslated:hover,
 .guesstags:hover {
-  background-color: $translatedBlueHover;
+  background-color: colors.$translatedBlueHover;
   //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
@@ -760,7 +761,7 @@ article .approved:active {
 .next-unapproved {
   width: 50px !important;
   height: 27px !important;
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   font-weight: bold;
   text-decoration: none;
   padding: 5px 2px 3px 2px;
@@ -772,7 +773,7 @@ article .approved:active {
 
 .approved,
 .next-unapproved {
-  background: $approvedGreen;
+  background: colors.$approvedGreen;
   color: #fff !important;
 }
 
@@ -926,9 +927,9 @@ section .body > .text {
 }
 
 body #file section:not(.editor) {
-  background: $grey3;
+  background: colors.$grey3;
   cursor: pointer;
-  border: 1px solid $grey2 !important;
+  border: 1px solid colors.$grey2;
   .body {
     height: 100%;
   }
@@ -1003,6 +1004,14 @@ ul.suggestion-item.graysmall:last-child {
 
 section.loaded .submenu {
   display: block;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  overflow: hidden;
+
+  &:has(.active) {
+    border-bottom-left-radius: unset;
+    border-bottom-right-radius: unset;
+  }
 }
 
 .loaded {
@@ -1013,16 +1022,16 @@ section.loaded .submenu {
   float: left;
   position: relative;
   width: auto !important;
-  background: $grey4;
+  background: colors.$grey4;
   z-index: 1;
-  border-bottom: 1px solid $grey3;
+  border-bottom: 1px solid colors.$grey3;
   cursor: pointer;
   user-select: none;
 }
 
 .submenu li.active {
   border-bottom: 1px solid white;
-  background-color: $white;
+  background-color: colors.$white;
 }
 
 .submenu a {
@@ -1030,12 +1039,12 @@ section.loaded .submenu {
   -moz-transition: all 100ms ease-in;
   padding: 5px 20px;
   display: block;
-  color: $grey1;
+  color: colors.$grey1;
   font-size: 16px;
   float: left;
   text-decoration: none;
-  border-right: 2px solid $grey3;
-  border-top: 2px solid $grey3;
+  border-right: 2px solid colors.$grey3;
+  border-top: 2px solid colors.$grey3;
 }
 
 .submenu .notification:hover {
@@ -1044,7 +1053,7 @@ section.loaded .submenu {
 
 .submenu a:hover {
   background: #f5f5f5;
-  color: $grey1;
+  color: colors.$grey1;
   -moz-box-shadow: none;
   //position: relative;
   -webkit-box-shadow: none;
@@ -1080,7 +1089,7 @@ section.loaded .submenu {
   .icon-close {
     display: block;
     height: 15px;
-    color: $grey1;
+    color: colors.$grey1;
   }
 }
 
@@ -1122,7 +1131,7 @@ section.loaded .submenu {
   color: #fff;
   padding: 3px 10px 7px 4px;
   font-size: 12px;
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   box-shadow: 0px 2px 4px 0px #868686;
   z-index: 2;
 }
@@ -1307,7 +1316,7 @@ section.editor .loader_on {
 section .header .context {
   display: none;
   float: left;
-  color: $grey1;
+  color: colors.$grey1;
   text-decoration: none;
   margin: 3px 0 0 10px;
 }
@@ -1322,8 +1331,8 @@ section .header .context:hover {
 
 .qa {
   background: #ffcc00;
-  -moz-box-shadow: 0 1px 3px $grey2;
-  -webkit-box-shadow: 0 1px 3px $grey2;
+  -moz-box-shadow: 0 1px 3px colors.$grey2;
+  -webkit-box-shadow: 0 1px 3px colors.$grey2;
   padding: 0 2px;
 }
 
@@ -1334,8 +1343,8 @@ section .text .warning {
   border: 1px solid #333;
   -moz-border-radius: 2px;
   border-radius: 2px;
-  -moz-box-shadow: 0 1px 3px $grey2;
-  -webkit-box-shadow: 0 1px 3px $grey2;
+  -moz-box-shadow: 0 1px 3px colors.$grey2;
+  -webkit-box-shadow: 0 1px 3px colors.$grey2;
   display: block;
   position: absolute;
   bottom: -30px;
@@ -1350,10 +1359,8 @@ section.status-new.opened .editarea {
 section.editor {
   z-index: 2;
   position: relative;
-  //height: 100%;
   width: 89%;
   margin-left: 4.5%;
-  //height: 100%;
 }
 
 section.editor .sid {
@@ -1390,6 +1397,12 @@ section.opened {
     float: left;
     margin-top: 16px;
     width: 40%;
+    button {
+      padding: 0;
+    }
+    .revise-lock-editArea-active {
+      background-color: colors.$grey4;
+    }
   }
 }
 
@@ -1479,8 +1492,8 @@ body.archived section .status-container a.status:hover {
   outline: none;
   color: #000;
   border: 1px solid #dedede;
-  box-shadow: inset 0 1px 2px $grey2;
-  -webkit-box-shadow: inset 0 1px 2px $grey2;
+  box-shadow: inset 0 1px 2px colors.$grey2;
+  -webkit-box-shadow: inset 0 1px 2px colors.$grey2;
   /*font-variant-ligatures: none;*/
   cursor: text;
 }
@@ -1622,7 +1635,7 @@ body.rtl-target .editor .editarea span {
   margin-left: 30px;
   width: 60%;
   padding: 3px 0;
-  border-top: 1px dotted $grey2;
+  border-top: 1px dotted colors.$grey2;
   font-style: italic;
   overflow: hidden;
 }
@@ -1655,7 +1668,7 @@ body.rtl-target .editor .editarea span {
 
 .trash {
   transition: all 0.1s linear;
-  color: $grey1;
+  color: colors.$grey1;
   text-decoration: none;
   -o-transition: all 0.1s linear;
   -webkit-transition: all 0.1s linear;
@@ -1685,7 +1698,7 @@ body.rtl-target .editor .editarea span {
   display: none;
   position: absolute;
   bottom: 0px;
-  color: $grey1;
+  color: colors.$grey1;
   width: 100%;
   float: left;
   margin: 0;
@@ -1713,6 +1726,7 @@ body.rtl-target .editor .editarea span {
   right: 0;
   margin-top: 10px;
   margin-right: 15px;
+  margin-bottom: 10px;
 }
 
 .graysmall-details li {
@@ -1725,7 +1739,7 @@ body.rtl-target .editor .editarea span {
 }
 
 .graysmall:hover {
-  background: $grey5;
+  background: colors.$grey5;
   cursor: default;
   .tag {
     opacity: 1;
@@ -1798,7 +1812,7 @@ body.rtl-target .editor .editarea span {
   position: absolute;
   right: 0;
   height: 100%;
-  background: $grey2;
+  background: colors.$grey2;
   top: 0;
   border-bottom: 0;
   z-index: 0;
@@ -1825,20 +1839,20 @@ body.archived section .status-container a.status:hover {
 }
 
 section.status-translated .status {
-  background-color: $translatedBlue !important;
+  background-color: colors.$translatedBlue !important;
 }
 
 section.status-approved .status {
-  background-color: $approvedGreen !important;
+  background-color: colors.$approvedGreen !important;
 }
 
 section.status-approved2 .status {
-  background-color: $approved2Green !important;
+  background-color: colors.$approved2Green !important;
 }
 
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status {
-  background-color: $rebuttedRed !important;
+  background-color: colors.$rebuttedRed !important;
 }
 
 .message-offline-icons {
@@ -1870,7 +1884,7 @@ body[data-offline-mode='light-off'] .msg span,
 }
 
 section.editor.status-rejected .status {
-  background-color: $rebuttedRed !important;
+  background-color: colors.$rebuttedRed !important;
 }
 
 section.modified .status {
@@ -1904,42 +1918,42 @@ section.opened.editor .status {
 }
 
 .per-orange {
-  background: $rebuttedRed !important;
+  background: colors.$rebuttedRed !important;
   color: #fff !important;
 }
 
 .per-blue {
-  background: $translatedBlue !important;
+  background: colors.$translatedBlue !important;
   color: #fff !important;
 }
 
 .per-green {
-  background: $approvedGreen !important;
+  background: colors.$approvedGreen !important;
   color: #fff !important;
 }
 
 .per-yellow {
-  background: $orangeDefault !important;
+  background: colors.$orangeDefault !important;
   color: #333 !important;
 }
 
 .per-red {
-  background: $redDefault !important;
+  background: colors.$redDefault !important;
   color: #fff !important;
 }
 
 .per-gray {
-  background: $grey3 !important;
+  background: colors.$grey3 !important;
   color: #333 !important;
 }
 
 .per-red-outline {
   margin-left: 5px !important;
   background-color: transparent !important;
-  color: $redDefault !important;
-  box-shadow: inset 0px 0px 0px 1px $redDefault;
-  -moz-box-shadow: inset 0px 0px 0px 1px $redDefault;
-  -webkit-box-shadow: inset 0px 0px 0px 1px $redDefault;
+  color: colors.$redDefault !important;
+  box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
+  -moz-box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
+  -webkit-box-shadow: inset 0px 0px 0px 1px colors.$redDefault;
 }
 
 .graysmall-details .per-yellow,
@@ -2179,59 +2193,15 @@ del.diff {
   background: #ffcfcf;
 }
 
-section .toolbar .autofillTag {
-  float: left;
-  font-size: 60%;
-  text-decoration: none;
-  display: none;
-}
-
-section .toolbar span {
-  font-size: 120%;
-  padding-top: 5px;
-  margin-left: 1px;
-}
-
-.autofillTag {
-  display: block;
-  float: left;
-  cursor: pointer;
-  color: #444 !important;
-}
-
-.autofillTag:before {
-  content: '\e23a';
-  font-size: 19px;
-  display: block;
-}
-
-section .toolbar .autofillTag {
-  float: left;
-  font-size: 60%;
-  text-decoration: none;
-  display: block;
-}
-
 .editToolbar {
-  /*float: left;*/
   position: relative;
-  display: block;
+  display: flex;
+  gap: 8px;
   visibility: hidden;
-  margin-top: -6px;
-  padding-top: 4px;
-  color: $grey1;
 }
 
 .editToolbar.visible {
   visibility: visible;
-}
-
-.editToolbar li {
-  float: left;
-  width: 16px;
-  height: 16px;
-  margin-right: 10px;
-  cursor: pointer;
 }
 
 .split {
@@ -2267,22 +2237,7 @@ section .toolbar .autofillTag {
 }
 
 .editor.split-action .actions .split {
-  background: $translatedBlue;
-}
-
-.autofillTag {
-  padding: 4px 2px 0px 2px;
-  border: 1px solid #fff;
-  color: $grey1 !important;
-}
-
-.autofillTag {
-  padding-top: 0;
-}
-
-.autofillTag:hover,
-.autofillTag.active {
-  color: #333 !important;
+  background: colors.$translatedBlue;
 }
 
 section .toolbar {
@@ -2291,15 +2246,8 @@ section .toolbar {
 }
 
 section.editor .toolbar {
-  display: block;
-}
-
-.autofillTag span {
-  float: left;
-}
-
-.autofillTag {
-  margin-right: 10px;
+  display: flex;
+  gap: 8px;
 }
 
 @keyframes fadein {
@@ -2428,23 +2376,6 @@ section.editor .toolbar {
   to {
     opacity: 0;
   }
-}
-
-.noConnectionMsg {
-  position: absolute;
-  left: 43%;
-  bottom: 50%;
-  z-index: 10001;
-  background: #434c56;
-  border: 1px solid #1a232e;
-  color: #dde4ea;
-  border-left: 0px;
-  border-bottom: 0px;
-  padding: 14px;
-  padding-bottom: 30px;
-  border-radius: 0px 3px 0px 0px;
-  -webkit-border-radius: 0px 3px 0px 0px;
-  z-index: 999999999999999;
 }
 
 /* retina display query */
@@ -2599,14 +2530,14 @@ section .footer .tab.open {
   display: block;
   z-index: 0;
   position: relative;
-  border-top: 1px solid $grey3;
+  border-top: 1px solid colors.$grey3;
   top: -1px;
   min-height: 40px;
-  background-color: $white;
+  background-color: colors.$white;
 }
 
 section .segment-side-buttons {
-  color: $grey1;
+  color: colors.$grey1;
 }
 
 .grey-button {
@@ -2643,7 +2574,6 @@ section .segment-side-buttons {
   margin-right: 0;
   z-index: 0;
   position: relative;
-  margin-top: -2px;
 }
 
 .buttons li {
@@ -2657,14 +2587,6 @@ section .segment-side-buttons {
 /* Header/Footer Restyling */
 
 $icon-scale: 30px;
-$matecat-blue: #002b5c;
-$light-gray: #f2f5f7;
-$medium-gray: #acb3bd;
-$gray-2: #bbbbbb;
-
-$light-blue: #0055b8;
-$white: #fff;
-
 /* XLIFF to Target page */
 
 .xliff-to-target-page {
@@ -2769,7 +2691,7 @@ header {
         top: -8px;
         padding: 0px 8px;
         right: -12px;
-        background: $orangeDefault;
+        background: colors.$orangeDefault;
         color: #fff;
         font-size: 10px;
         text-align: center;
@@ -2804,8 +2726,8 @@ header {
             color: #000000;
             text-decoration: none;
             &:not(.disabled):hover {
-              background-color: $light-gray;
-              color: $light-blue;
+              background-color: colors.$grey3;
+              color: colors.$translatedBlue;
             }
             &.selected {
               background-color: transparent !important;
@@ -3042,10 +2964,10 @@ header {
     cursor: pointer;
     border-radius: 3px;
     border: 1px solid #c6c6c6;
-    color: $grey1;
+    color: colors.$grey1;
 
     &:hover:not(.disabled) {
-      color: $black;
+      color: colors.$black;
     }
 
     &.disabled {

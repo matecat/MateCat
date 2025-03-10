@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react'
-import {getSocketAuthToken} from "../api/loginUser/";
+import {getSocketAuthToken} from '../api/loginUser/'
 
-const {io} = require("socket.io-client");
+const {io} = require('socket.io-client')
 
 // Object to represent connection states
 export const ConnectionStates = {
@@ -11,7 +11,12 @@ export const ConnectionStates = {
   ERROR: 'ERROR',
 }
 
-const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandlers = {}) => {
+const useSocketLayer = (
+  connectionParams,
+  options,
+  isAuthenticated,
+  eventHandlers = {},
+) => {
   // State variables to manage connection status, error, event source, and received event data
   const [connectionState, setConnectionState] = useState(
     ConnectionStates.CONNECTING,
@@ -28,19 +33,19 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
   }
 
   const connect = () => {
-    getSocketAuthToken().then(response => {
-      connectUnderlyingSocket(
-        {
-          "x-token": response.token,
-          "x-uuid": options.uuidV4,
-          "x-userid": options.userId,
-          "x-jobid": options.jobId
-        }
-      )
-    }).catch(error => {
-      console.log("Token error", error)
-      reconnect();
-    });
+    getSocketAuthToken()
+      .then((response) => {
+        connectUnderlyingSocket({
+          'x-token': response.token,
+          'x-uuid': options.uuidV4,
+          'x-userid': options.userId,
+          'x-jobid': options.jobId,
+        })
+      })
+      .catch((error) => {
+        console.log('Token error', error)
+        reconnect()
+      })
   }
 
   const reconnect = () => {
@@ -54,41 +59,35 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
         connect() // Reconnect
       }, 2000)
     }
-
   }
 
   const connectUnderlyingSocket = (extraHeaders) => {
-
-    const socket = io(connectionParams.source,
-      {
-        path: connectionParams.path,
-        reconnection: false, // manually handle reconnections
-        extraHeaders: extraHeaders,
-        transports: ['websocket', 'polling'],
-        auth: extraHeaders
-      }
-    );
+    const socket = io(connectionParams.source, {
+      path: connectionParams.path,
+      reconnection: false, // manually handle reconnections
+      extraHeaders: extraHeaders,
+      transports: ['websocket', 'polling'],
+      auth: extraHeaders,
+    })
 
     setEventSource(socket) // Set the EventSource instance
     socket.on('connect', () => {
-        setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
-        setConnectionError(null) // Reset the error on successful connection
-        if (retryingInterval.current) {
-          clearTimeout(retryingInterval.current) // Clear the timeout if it was active
-          retryingInterval.current = null
-          eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
-        }
+      setConnectionState(ConnectionStates.OPEN) // Update state to OPEN when connection is established
+      setConnectionError(null) // Reset the error on successful connection
+      if (retryingInterval.current) {
+        clearTimeout(retryingInterval.current) // Clear the timeout if it was active
+        retryingInterval.current = null
+        eventHandlers['reconnected'] ? eventHandlers['reconnected']() : null
       }
-    );
+    })
 
     // CLIENT CODE: The server has forcefully disconnected the socket with socket.disconnect(),
     // the client will not try to reconnect and, you need to manually call socket.connect().
     socket.on('disconnect', function () {
-      reconnect();
-    });
+      reconnect()
+    })
 
     socket.on('connect_error', (error) => {
-
       /*
        * connect_error
        * This event is fired when:
@@ -105,8 +104,8 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
       setConnectionState(ConnectionStates.CLOSED) // Update state to CLOSED on error
       setConnectionError(error) // Store the error
       console.error('Socket connection error:', error)
-      reconnect();
-    });
+      reconnect()
+    })
 
     // Add listener for the message event
     socket.on('message', (event) => {
@@ -126,7 +125,6 @@ const useSocketLayer = (connectionParams, options, isAuthenticated, eventHandler
         }
         dispatchEventNotification(eventIdentifier, parsedData)
         // Log the raised event (optional)
-        console.log(`Event raised: ${eventIdentifier}`, parsedData)
       } catch (error) {
         console.error('Error parsing message:', error) // Handle parsing errors
       }

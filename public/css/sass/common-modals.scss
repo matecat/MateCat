@@ -1,6 +1,7 @@
-@import 'modals/instructionsModal';
-@import 'modals/tmShareModal';
-@import 'modals/PreferenceModal';
+@use 'modals/instructionsModal';
+@use 'modals/tmShareModal';
+@use 'modals/PreferenceModal';
+@use "commons/colors";
 
 h1,
 h2,
@@ -33,11 +34,11 @@ a {
   text-decoration: underline;
   float: left;
   cursor: pointer;
-  color: $linkBlue;
+  color: colors.$linkBlue;
 
   &:hover {
     text-decoration: none;
-    color: $linkBlueHover;
+    color: colors.$linkBlueHover;
   }
 }
 
@@ -68,7 +69,7 @@ a {
 .forgot-password {
   cursor: pointer;
   text-decoration: underline;
-  color: $linkBlue;
+  color: colors.$linkBlue;
 }
 
 .dqf-modal input[type='text'],
@@ -97,7 +98,7 @@ a {
 .dqf-modal input[disabled] {
   color: #999;
   cursor: not-allowed;
-  background: $grey2;
+  background: colors.$grey2;
 }
 
 .user-info-form input {
@@ -131,9 +132,9 @@ a {
   padding: 20px 0;
 }
 
-
 .forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
+  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
+    136px;
   background-size: 23%;
   /*width: 385px;*/
   padding: 25px 96px;
@@ -242,7 +243,7 @@ a {
     min-height: 50px;
     height: 100%;
     /*color: #000;*/
-    background-color: $grey5;
+    background-color: colors.$grey5;
     border-radius: 0 0 4px 4px;
     margin: 0 auto;
     overflow: hidden;
@@ -429,10 +430,8 @@ a {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   &:hover {
-    color: $darkBlueTransparent;
+    color: colors.$darkBlueTransparent;
   }
-
-
 }
 
 .x-popup:before,
@@ -510,7 +509,7 @@ a {
             width: 40px !important;
             max-width: 40px;
             height: 40px;
-            background-color: $grey2;
+            background-color: colors.$grey2;
             border-radius: 50%;
             vertical-align: middle;
             text-align: center;
@@ -529,13 +528,13 @@ a {
           .content.email-user-invited {
             font-weight: 100;
             font-size: 14px;
-            color: $grey1;
+            color: colors.$grey1;
           }
 
           .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
-            color: $grey1;
+            color: colors.$grey1;
             white-space: nowrap;
           }
 
@@ -798,7 +797,7 @@ a {
 
       > svg {
         margin-right: 8px;
-        color: $grey6;
+        color: colors.$grey6;
       }
 
       > input {
@@ -808,7 +807,7 @@ a {
         border: none;
 
         &::placeholder {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
 
@@ -822,7 +821,7 @@ a {
         margin-right: 2px;
 
         > svg {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
 
@@ -1226,5 +1225,12 @@ a {
     list-style: disc;
     padding: 10px 20px;
     font-weight: bold;
+  }
+
+  .tm-row-delete-remove-from-content {
+    > :nth-child(2) {
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
   }
 }

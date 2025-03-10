@@ -75,7 +75,7 @@ class NewController extends ajaxController {
 
     private $metadata = [];
 
-    const MAX_NUM_KEYS = 6;
+    const MAX_NUM_KEYS = 10;
 
     private static $allowed_seg_rules = [
             'standard',
@@ -168,7 +168,7 @@ class NewController extends ajaxController {
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        if ( !$this->__validateAuthHeader() ) {
+        if ( !$this->isLoggedIn() ) {
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Authentication failed';
             $this->setUnauthorizedHeader();
@@ -378,7 +378,7 @@ class NewController extends ajaxController {
                 throw new Exception( "Invalid MT Engine.", -2 );
             } else {
                 $testEngine = Engine::getInstance( $this->postInput[ 'mt_engine' ] );
-                if ( $testEngine->getEngineRow()->uid != $this->getUser()->uid ) {
+                if ( $testEngine->getEngineRecord()->uid != $this->getUser()->uid ) {
                     throw new Exception( "Invalid MT Engine.", -21 );
                 }
             }
@@ -868,47 +868,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
         }
-    }
-
-    /**
-     * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    private function __validateAuthHeader(): bool {
-
-        $api_key    = $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null;
-        $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
-
-        if ( empty( $api_key ) ) {
-            return false;
-        }
-
-        if ( false !== strpos( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null, '-' ) ) {
-            [ $api_key, $api_secret ] = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
-        }
-
-        if ( $api_key && $api_secret ) {
-            $key = ApiKeys_ApiKeyDao::findByKey( $api_key );
-
-            if ( !$key || !$key->validSecret( $api_secret ) ) {
-                return false;
-            }
-
-            Log::doJsonLog( $key );
-            $this->user = $key->getUser();
-
-            $this->userIsLogged = (
-                    !empty( $this->user->uid ) &&
-                    !empty( $this->user->email ) &&
-                    !empty( $this->user->first_name ) &&
-                    !empty( $this->user->last_name )
-            );
-
-        }
-
-        return true;
     }
 
     /**

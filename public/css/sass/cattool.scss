@@ -1,12 +1,12 @@
-@import 'commons/mixins';
-@import 'commons/_colors';
+@use 'commons/mixins';
+@use 'commons/_colors';
 body.cattool {
   //display: flex;
   height: 100vh;
   //flex-direction: column;
   overflow-y: hidden !important;
   padding: unset;
-  background-color: $grey5;
+  background-color: colors.$grey5;
 
   .page-content {
     display: flex;
@@ -48,7 +48,7 @@ body.cattool {
   .pointer-first-segment {
     height: 36px;
     width: 36px;
-    background: $darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
+    background: colors.$darkBlue url('/public/img/icons/arrow-up.svg') no-repeat center
       center;
     background-size: 24px;
     border-radius: 50%;
@@ -59,7 +59,7 @@ body.cattool {
     bottom: 8px;
     cursor: pointer;
     &:hover {
-      background-color: $darkBlueHover;
+      background-color: colors.$darkBlueHover;
     }
   }
 }
@@ -78,26 +78,6 @@ body.cattool {
   width: 7%;
   top: 0;
   height: 100%;
-}
-
-.toolbar a {
-  height: 20px;
-  zoom: 0.8;
-  min-width: 20px;
-  cursor: pointer;
-  border-radius: 3px;
-  padding: 2px;
-  border: 1px solid #c6c6c6;
-  /*@include box-shadow(0 1px 1px rgba(0,0,0,.1));
-  @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);*/
-
-  &:hover {
-    color: #000000;
-  }
-
-  &:active {
-    background-color: #fff;
-  }
 }
 
 //ICE MATCH

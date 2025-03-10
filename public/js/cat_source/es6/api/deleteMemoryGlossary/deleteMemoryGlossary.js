@@ -10,7 +10,7 @@ export const deleteMemoryGlossary = async ({engineId, memoryId}) => {
     formData.append(key, params[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/delete-memory/${memoryId}`,
+    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/memory/delete/${memoryId}`,
     {
       method: 'GET',
       credentials: 'include',

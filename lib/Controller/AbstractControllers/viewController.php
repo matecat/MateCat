@@ -29,6 +29,7 @@ abstract class viewController extends controller {
      * Class constructor
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct() {
 
@@ -42,11 +43,9 @@ abstract class viewController extends controller {
             die(); // do not complete klein response, set 404 header in render404 instead of 200
         }
 
-        //SESSION ENABLED
+        // SESSION ENABLED
         $this->identifyUser();
-
         $this->featureSet = new FeatureSet();
-
     }
 
     /**
@@ -103,7 +102,6 @@ abstract class viewController extends controller {
         if ( isset( $ignore ) ) {
             throw $ignore;
         }
-
     }
 
     /**
@@ -165,16 +163,16 @@ abstract class viewController extends controller {
     /**
      * @return bool
      */
-    public static function isRevision() {
+    public static function isRevision(): bool {
 
         $controller = static::getInstance();
 
         if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
             $jid        = $controller->jid;
             $password   = $controller->received_password;
-            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
 
-            if ( null === $isRevision ) {
+            if ( !$isRevision ) {
                 $isRevision = CatUtils::getIsRevisionFromRequestUri();
             }
 

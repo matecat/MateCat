@@ -1,13 +1,13 @@
-@import '../commons/variables';
+@use '../commons/variables';
 /******* Notifications ************/
 
 .notifications-position {
   font-family: inherit;
   position: fixed;
-  width: $notifications-width;
+  width: variables.$notifications-width;
   padding: 0 10px 10px 10px;
   z-index: 99999999;
-  @include box-sizing(border-box);
+  @include variables.box-sizing(border-box);
   height: auto;
 }
 .notifications-position-bl {
@@ -23,7 +23,7 @@
   bottom: 30px;
   margin: 0 auto;
   left: 50%;
-  margin-left: calc(-1 * ($notifications-width / 2));
+  margin-left: calc(-1 * (variables.$notifications-width / 2));
 }
 .notifications-position-br {
   @extend .notifications-position;
@@ -45,7 +45,7 @@
   bottom: auto;
   margin: 0 auto;
   left: 50%;
-  margin-left: calc(-1 * ($notifications-width / 2));
+  margin-left: calc(-1 * (variables.$notifications-width / 2));
 }
 .notifications-position-tr {
   @extend .notifications-position;
@@ -59,15 +59,15 @@
   width: 100%;
   text-align: left;
   background-color: #fff;
-  @include border-radius(2px);
+  @include variables.border-radius(2px);
   font-size: 16px;
   margin: 10px 0 0;
   padding: 15px;
   box-shadow: 0 1px 10px #666;
   display: block;
-  @include box-sizing(border-box);
+  @include variables.box-sizing(border-box);
   opacity: 0;
-  @include transition(0.3s ease-in-out);
+  @include variables.transition(0.3s ease-in-out);
   .notification-message {
     word-wrap: break-word;
   }
@@ -75,22 +75,22 @@
 
 .notification-type-success {
   @extend .notification-type;
-  border-top: 3px solid $notification-success;
+  border-top: 3px solid variables.$notification-success;
 }
 
 .notification-type-error {
   @extend .notification-type;
-  border-top: 3px solid $notification-error;
+  border-top: 3px solid variables.$notification-error;
 }
 
 .notification-type-warning {
   @extend .notification-type;
-  border-top: 3px solid $notification-warning;
+  border-top: 3px solid variables.$notification-warning;
 }
 
 .notification-type-info {
   @extend .notification-type;
-  border-top: 3px solid $notification-info;
+  border-top: 3px solid variables.$notification-info;
 }
 .notification-message {
   .warning-call-to {
@@ -136,24 +136,24 @@
 
 .notification-title-success {
   @extend .notification-title;
-  color: $notification-success;
+  color: variables.$notification-success;
 }
 .notification-title-error {
   @extend .notification-title;
-  color: $notification-error;
+  color: variables.$notification-error;
 }
 .notification-title-warning {
   @extend .notification-title;
-  color: $notification-warning;
+  color: variables.$notification-warning;
 }
 .notification-title-info {
   @extend .notification-title;
-  color: $notification-info;
+  color: variables.$notification-info;
 }
 
 .notification-message{
   a {
-    color:  $notification-info;
+    color:  variables.$notification-info;
   }
   a.bold {
     font-weight: bold;

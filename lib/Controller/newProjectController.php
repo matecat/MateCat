@@ -59,7 +59,7 @@ class newProjectController extends viewController {
 
         $engine            = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery       = new EnginesModel_EngineStruct();
-        $engineQuery->type = 'MT';
+        $engineQuery->type = Constants_Engines::MT;
 
         $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
 
@@ -268,8 +268,6 @@ class newProjectController extends viewController {
         //Enable tag projection at instance level
         $this->template->show_tag_projection    = true;
         $this->template->tag_projection_default = true;
-
-        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
 
         $this->intOauthClients();
 

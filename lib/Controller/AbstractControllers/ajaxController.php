@@ -64,16 +64,16 @@ abstract class ajaxController extends controller {
 
         $this->featureSet = new FeatureSet();
 
-        $filterArgs = array(
-                'current_password' => array(
+        $filterArgs = [
+                'current_password' => [
                         'filter' => FILTER_SANITIZE_STRING,
-                        'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-        );
+                        'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+        ];
 
-        $__postInput   = (object)filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        if( isset( $__postInput->current_password) ){
+        if ( isset( $__postInput->current_password ) ) {
             $this->received_password = $__postInput->current_password;
         }
     }
@@ -85,7 +85,7 @@ abstract class ajaxController extends controller {
     public function finalize() {
         $toJson = json_encode( $this->result );
 
-        if (!ob_get_status())  {
+        if ( !ob_get_status() ) {
             ob_start();
         }
 
@@ -102,12 +102,12 @@ abstract class ajaxController extends controller {
 
         $controller = static::getInstance();
 
-        if (isset($controller->id_job) and isset($controller->received_password)){
+        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
             $jid        = $controller->id_job;
             $password   = $controller->received_password;
-            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
 
-            if ( null === $isRevision ) {
+            if ( !$isRevision ) {
                 $isRevision = CatUtils::getIsRevisionFromReferer();
             }
 

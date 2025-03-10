@@ -450,7 +450,6 @@ const SegmentActions = {
         } else {
           SegmentActions.setSegmentAsTagged(sid)
           SegmentActions.autoFillTagsInTarget(sid)
-          OfflineUtils.startOfflineMode()
         }
       })
       .finally(function () {
@@ -900,7 +899,7 @@ const SegmentActions = {
           DraftMatecatUtils.removeTagsFromText(text),
         ),
       }).catch(() => {
-        OfflineUtils.failedConnection(sid, 'getGlossaryForSegment')
+        OfflineUtils.failedConnection()
       })
       return
     }
@@ -949,7 +948,7 @@ const SegmentActions = {
             DraftMatecatUtils.removeTagsFromText(request.text),
           ),
         }).catch(() => {
-          OfflineUtils.failedConnection(request.sid, 'getGlossaryForSegment')
+          OfflineUtils.failedConnection()
         })
       }
     }
@@ -969,7 +968,7 @@ const SegmentActions = {
       sourceLanguage,
       targetLanguage,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'glossary')
+      OfflineUtils.failedConnection()
       SegmentStore.isSearchingGlossaryInTarget = false
     })
   },
@@ -995,7 +994,7 @@ const SegmentActions = {
     deleteGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'deleteGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -1036,7 +1035,7 @@ const SegmentActions = {
             message: errors[0].message,
           })
         } else {
-          OfflineUtils.failedConnection(0, 'addGlossaryItem')
+          OfflineUtils.failedConnection()
         }
       })
   },
@@ -1068,7 +1067,7 @@ const SegmentActions = {
     updateGlossaryItem(data)
       .then(() => {})
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'updateGlossaryItem')
+        OfflineUtils.failedConnection()
       })
   },
 
@@ -1662,7 +1661,7 @@ const SegmentActions = {
         })
       })
       .catch(() => {
-        OfflineUtils.failedConnection(0, 'getWarning')
+        OfflineUtils.failedConnection()
       })
     // get tm keys
     new Promise((resolve) => {
@@ -1784,7 +1783,7 @@ const SegmentActions = {
         }
       })
       .catch(() => {
-        OfflineUtils.failedConnection(requestData, 'setCurrentSegment')
+        OfflineUtils.failedConnection()
       })
   },
   refreshTagMap: function () {

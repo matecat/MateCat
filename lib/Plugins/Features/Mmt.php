@@ -167,11 +167,18 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $jobsMetadataDao = new \Jobs\MetadataDao();
+            $contextRs  = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
             $mt_context = @array_pop( $contextRs );
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
+            }
+
+            // mt evaluation => ice_mt
+            $mt_evaluation = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 )->value ?? null;
+            if ( $mt_evaluation ) {
+                $config[ 'include_score' ] = true;
             }
 
             $config[ 'job_id' ]     = $jobStruct->id;
@@ -364,35 +371,6 @@ class Mmt extends BaseFeature {
 
         return $isValid;
 
-    }
-
-    /**
-     * @param $key
-     * @param $uid
-     *
-     * @throws Exception
-     */
-    public function postUserKeyDelete( $key, $uid ) {
-
-        /*
-         * Comment for now, we have to decide if user can delete key imported in ModernMT directly from matecat, moreover it should have a choice.
-         * Maybe He wants to retain the key and the associated memories in its license.
-         */
-
-//        $engineToBeDeleted         = EnginesModel_EngineStruct::getStruct();
-//        $engineToBeDeleted->uid    = $uid;
-//        $engineToBeDeleted->active = true;
-//
-//        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-//        $result    = $engineDAO->read( $engineToBeDeleted );
-//
-//        if(empty($result)){
-//            return;
-//        }
-//
-//        $mmt = new Engines_MMT($result[0]);
-//
-//        $mmt->deleteMemory("x_mm-".$key);
     }
 
     /**
