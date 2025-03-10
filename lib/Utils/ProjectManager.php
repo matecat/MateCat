@@ -2308,41 +2308,44 @@ class ProjectManager {
 
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
-            // get metadata
-            $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+            // avoid blank filenames
+            if(!empty($originalFileName)){
 
-            $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
-            $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
+                // get metadata
+                $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+                $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
-            if ( $this->gdriveSession ) {
-                $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
-                if ( $gdriveFileId ) {
-                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
-                    $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
+                if ( $this->gdriveSession ) {
+                    $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
+                    if ( $gdriveFileId ) {
+                        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                        $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
+                    }
                 }
-            }
 
-            $moved = $fs->moveFromCacheToFileDir(
+                $moved = $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,
                     $originalFileName
-            );
+                );
 
-            // check if the files were moved
-            if ( true !== $moved ) {
-                throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
-            }
+                // check if the files were moved
+                if ( true !== $moved ) {
+                    throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
+                }
 
-            $this->projectStructure[ 'file_id_list' ]->append( $fid );
+                $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-            $fileStructures[ $fid ] = [
-                    'fid'               => $fid,
+                $fileStructures[ $fid ] = [
+                    'fid' => $fid,
                     'original_filename' => $originalFileName,
                     'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type'         => $mimeType
-            ];
+                    'mime_type' => $mimeType
+                ];
+            }
         }
 
         return $fileStructures;

@@ -5,6 +5,7 @@ namespace Utils\Engines;
 use AMQHandler;
 use Constants_Engines;
 use Engine;
+use Engines\MMT\MMTServiceApi;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
 use Engines_MMT;
@@ -244,6 +245,28 @@ class Lara extends Engines_AbstractEngine {
                 }
             }
 
+            // Get score from MMT Quality Estimation
+            $mmtClient = MMTServiceApi::newInstance()
+                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
+
+            try {
+                $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
+                $score = $qualityEstimation['score'];
+
+                Log::doJsonLog( [
+                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                    'source'                 => $_config[ 'source' ],
+                    'target'                 => $_config[ 'target' ],
+                    'segment'                => $_config[ 'segment' ],
+                    'translation'            => $translation,
+                    'score'                  => $score,
+                ] );
+
+            } catch (\Exception $exception){
+                $score = 0;
+            }
+
         } catch ( LaraException $t ) {
             if ( $t->getCode() == 429 ) {
 
@@ -276,14 +299,19 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches(
-                $_config[ 'segment' ],
-                $translation,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
+            $_config[ 'segment' ],
+            $translation,
+            100 - $this->getPenalty() . "%",
+            "MT-" . $this->getName(),
+            date( "Y-m-d" )
+        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
 
+        if($score){
+            $matchAsArray[ 'score' ] = $score;
+        }
+
+        return $matchAsArray;
     }
 
     /**
