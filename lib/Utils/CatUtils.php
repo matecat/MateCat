@@ -559,8 +559,20 @@ class CatUtils {
      *
      * @return string
      */
-    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string {
-        return trim( strip_tags( html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ) );
+    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string
+    {
+        $entityDecoded = html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+        // parse and extract CDATA
+        preg_match_all('/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches);
+
+        if(isset($cdataMatches[1]) and !empty($cdataMatches[1])){
+            foreach($cdataMatches[1] as $k => $m){
+                $entityDecoded = str_replace($cdataMatches[0][$k], $m, $entityDecoded);
+            }
+        }
+
+        return trim( strip_tags( $entityDecoded ) );
     }
 
     /**
