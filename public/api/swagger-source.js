@@ -1425,6 +1425,60 @@ var spec = {
         },
       },
     },
+    '/api/v3/feedback': {
+      post: {
+        tags: ['Job'],
+        summary: 'Create a revision feedback',
+        description: 'Create a revision feedback',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'formData',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'revision_number',
+            in: 'formData',
+            description: 'The revision number (1 or 2)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'feedback',
+            in: 'formData',
+            description: 'The feedback',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: "ok",
+            schema: {
+              type: "object",
+              properties: {
+                status: {
+                  type: "string",
+                  example: "ok"
+                }
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
     '/api/v3/qr/download': {
       post: {
         tags: ['Quality Report'],
