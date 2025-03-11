@@ -820,13 +820,17 @@ class Utils {
      *
      * Example:
      *
-     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(https://matecat.com)
+     * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(<a href="https://matecat.com">https://matecat.com</a>)
      *
      * @param string $html
      *
      * @return string
      */
     public static function stripTagsPreservingHrefs( string $html ): string {
+
+        // support for markdown
+        $html = preg_replace('/\[([^\]]+)\]\(([^\)]+)\)/', '<a href="\2">\1</a>', $html);
+
         $htmlDom               = new DOMDocument( '1.0', 'UTF-8' );
         $htmlDom->formatOutput = false;
 
@@ -838,17 +842,18 @@ class Utils {
         foreach ( $links as $link ) {
             $linkLabel       = $link->nodeValue;
             $linkHref        = $link->getAttribute( 'href' );
-            $link->nodeValue = $linkLabel . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
+            $linkHref        = str_replace( "\\\"", "", $linkHref );
+            $link->nodeValue = $linkLabel . "(<a href='".$linkHref."'>" . $linkHref . "</a>)";
         }
 
         $html = $htmlDom->saveHtml( $htmlDom->documentElement );
         $html = utf8_decode( $html );
 
         $strippedHtml = strip_tags( $html );
+        $strippedHtml = htmlspecialchars_decode($strippedHtml);
         $strippedHtml = ltrim( $strippedHtml );
 
-
-        return $strippedHtml;
+        return rtrim( $strippedHtml );
     }
 
     /**

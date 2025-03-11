@@ -22,7 +22,7 @@ class StripTagsPreservingHrefsTest extends AbstractTest {
     public function testCanStripTagsFromHtml() {
         $html      = '<p>This is a simple test. <span>This is nested <a href="http://test.com">link</a></span></p>';
         $stripTags = Utils::stripTagsPreservingHrefs( $html );
-        $expected  = 'This is a simple test. This is nested link(http://test.com)';
+        $expected  = "This is a simple test. This is nested link(<a href='http://test.com'>http://test.com</a>)";
 
         $this->assertEquals( $expected, $stripTags );
     }
@@ -30,7 +30,15 @@ class StripTagsPreservingHrefsTest extends AbstractTest {
     public function testCanStripTagsFromJson() {
         $json      = '{"AdditionalInfo":"{}","MobileUsages":"[]","ReferenceLinks":"[]","Component":"[]","DynamicValueExample":"<span>Example</span>","KeyName":"<a href=\"https://text.com\" target=\"_blank\">Test</a><br>","Repo":"<a href =\"https://test2.com\" target=\"_blank\">test2</a>"}';
         $stripTags = Utils::stripTagsPreservingHrefs( $json );
-        $expected  = '{"AdditionalInfo":"{}","MobileUsages":"[]","ReferenceLinks":"[]","Component":"[]","DynamicValueExample":"Example","KeyName":"Test(https://text.com)","Repo":"test2(https://test2.com)"}';
+        $expected  = '{"AdditionalInfo":"{}","MobileUsages":"[]","ReferenceLinks":"[]","Component":"[]","DynamicValueExample":"Example","KeyName":"Test(<a href=\'https://text.com\'>https://text.com</a>)","Repo":"test2(<a href=\'https://test2.com\'>https://test2.com</a>)"}';
+
+        $this->assertEquals( $expected, $stripTags );
+    }
+
+    public function testCanStripTagsFromMarkdown() {
+        $html      = 'This is a simple test. This is nested [link](http://test.com)';
+        $stripTags = Utils::stripTagsPreservingHrefs( $html );
+        $expected  = "This is a simple test. This is nested link(<a href='http://test.com'>http://test.com</a>)";
 
         $this->assertEquals( $expected, $stripTags );
     }
