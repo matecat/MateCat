@@ -10,7 +10,10 @@ import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import {removeTagsFromText} from './utils/DraftMatecatUtils/tagUtils'
+import {
+  removeTagsFromText,
+  textHasTags,
+} from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import RemoveTagsIcon from '../../../../../img/icons/RemoveTagsIcon'
 import AddTagsIcon from '../../../../../img/icons/AddTagsIcon'
@@ -189,7 +192,7 @@ class SegmentTarget extends React.Component {
           </div>
         )
       }
-      if (segment.sourceTagMap?.length > 0) {
+      if (textHasTags(translation)) {
         removeTagsButton = (
           <Button
             className="removeAllTags"

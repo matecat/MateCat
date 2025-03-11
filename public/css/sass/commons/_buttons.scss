@@ -1,3 +1,4 @@
+@use "../commons/colors";
 /*SIZE*/
 .ui.buttons .button,
 .ui.buttons .or,
@@ -19,11 +20,11 @@
       linear,
       left top,
       left bottom,
-      from($translatedBlue),
+      from(colors.$translatedBlue),
       to(#119ec4)
     );
-    background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-    background: linear-gradient(top, $translatedBlue, #119ec4);
+    background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
+    background: linear-gradient(top, colors.$translatedBlue, #119ec4);
     color: #fff;
     border: 1px solid #848689;
     text-decoration: none;
@@ -130,7 +131,7 @@
   border: 1px solid #797979;
   position: relative;
   padding: 9px 12px 8px !important;
-  background: $approvedGreen !important;
+  background: colors.$approvedGreen !important;
   &.revise-button-2 {
     background: #bc6ac9 !important;
   }

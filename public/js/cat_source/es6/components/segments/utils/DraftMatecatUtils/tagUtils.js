@@ -289,6 +289,21 @@ export const removeTagsFromText = (segmentString) => {
 }
 
 /**
+ * Checks if the given segment string contains XLIFF tags.
+ *
+ * @param {string} segmentString - The segment string to check for XLIFF tags.
+ * @returns {boolean|string} - Returns `true` if XLIFF tags are found, `false` if not,
+ *                             or the original segment string if it is empty.
+ */
+export const textHasTags = (segmentString) => {
+  const regExp = getXliffRegExpression()
+  if (segmentString) {
+    return regExp.test(segmentString)
+  }
+  return segmentString
+}
+
+/**
  *
  * @param escapedHTML
  * @returns {string}

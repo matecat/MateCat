@@ -28,7 +28,7 @@ class SegmentHeader extends React.PureComponent {
   changePercentuage(sid, perc, className, createdBy) {
     if (this.props.sid == sid) {
       this.setState({
-        percentage: perc,
+        percentage: perc === 'ICE_MT' ? 'TQMT' : perc,
         classname: className,
         createdBy: createdBy,
         visible: true,

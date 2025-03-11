@@ -1,3 +1,5 @@
+@use '../../commons/colors';
+@use '../../commons/variables';
 .segment-selected-inBulk:not(.opened) {
   .body > .text {
     background-color: #edf4fd !important;
@@ -22,7 +24,7 @@
     display: none;
   }
   &:not(.editor):not(.muted):hover {
-    background: $grey4;
+    background: colors.$grey4;
     color: #000;
   }
   &.segment-selected {
@@ -55,9 +57,9 @@ section {
   .header {
     height: 24px;
     width: 100%;
-    color: $grey1;
+    color: colors.$grey1;
     font-size: 12px;
-    background: $grey4 !important;
+    background: colors.$grey4 !important;
     margin-bottom: 0px;
     .percentuage {
       position: relative;
@@ -87,7 +89,7 @@ section {
       text-transform: uppercase;
       color: #fff;
       font-size: 12px;
-      background: $grey2;
+      background: colors.$grey2;
       padding: 4px 8px;
       position: relative;
       z-index: 12;
@@ -155,22 +157,22 @@ section {
         &.error-alert {
           background: #fdeae2;
           .icon-column {
-            background-color: $redDefaultTransparent;
-            color: $redDefault;
+            background-color: colors.$redDefaultTransparent;
+            color: colors.$redDefault;
           }
         }
         &.warning-alert {
           background: #fff4e3;
           .icon-column {
-            background-color: $orangeDefaultTransparent;
-            color: $orangeDefault;
+            background-color: colors.$orangeDefaultTransparent;
+            color: colors.$orangeDefault;
           }
         }
         &.info-alert {
-          background: $grey3;
+          background: colors.$grey3;
           .icon-column {
-            background-color: $grey2;
-            color: $grey1;
+            background-color: colors.$grey2;
+            color: colors.$grey1;
           }
         }
         .icon {
@@ -273,15 +275,15 @@ section {
 
   &.segment-counter-limit-warning {
     .segment-counter-current {
-      color: $notification-warning;
+      color: variables.$notification-warning;
       margin-right: 2px;
     }
   }
 
   &.segment-counter-limit-error {
     .segment-counter-current {
-      color: $notification-error;
-      background-color: rgba($notification-error, 0.2);
+      color: variables.$notification-error;
+      background-color: rgba(variables.$notification-error, 0.2);
       border-radius: 4px;
       padding: 2px;
     }

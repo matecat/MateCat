@@ -1,5 +1,6 @@
+@use "../commons/colors";
 #markAsCompleteButton.isMarkableAsComplete {
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   color: #fff !important;
   width: auto !important;
   border-radius: 2px 0 0 2px;
@@ -12,8 +13,8 @@ input#markAsCompleteButton[disabled] {
 }
 
 #markAsCompleteButton {
-  width: $icon-scale !important;
-  height: $icon-scale;
+  width: 30px !important;
+  height: 30px;
   text-align: right;
   background: transparent;
   border: none;

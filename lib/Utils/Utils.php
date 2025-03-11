@@ -201,39 +201,6 @@ class Utils {
         return str_replace( $a, $b, $var );
     }
 
-    /**
-     * @throws Exception
-     */
-    public static function getGlobalMessage(): array {
-
-        // pull messages from redis
-        $redis      = ( new RedisHandler() )->getConnection();
-        $ids        = $redis->smembers( 'global_message_list_ids' );
-        $retStrings = [];
-
-        foreach ( $ids as $id ) {
-            $element = $redis->get( 'global_message_list_element_' . $id );
-
-            if ( $element !== null ) {
-                $element = unserialize( $element );
-
-                $resObject = [
-                        'title'  => $element[ 'title' ],
-                        'msg'    => $element[ 'message' ],
-                        'level'  => $element[ 'level' ],
-                        'token'  => md5( $element[ 'message' ] ),
-                        'expire' => ( new DateTime( $element[ 'expire' ] ) )->format( DateTimeInterface::W3C )
-                ];
-
-                $retStrings[] = $resObject;
-            } else {
-                $redis->srem( 'global_message_list_ids', $id );
-            }
-        }
-
-        return [ 'messages' => json_encode( $retStrings ) ];
-    }
-
     public static function encryptPass( $clear_pass, $salt ): string {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
 

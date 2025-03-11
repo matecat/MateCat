@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .searchbox {
   position: relative;
   float: left;
@@ -267,13 +268,13 @@ button#exec-replace {
                   background: #e8e8e8;
                 }
                 &.translated-color {
-                  background: $translatedBlue;
+                  background: colors.$translatedBlue;
                 }
                 &.approved-color {
-                  background: $approvedGreen;
+                  background: colors.$approvedGreen;
                 }
                 &.approved-2ndpass-color {
-                  background: $approved2Green;
+                  background: colors.$approved2Green;
                 }
                 &.rejected-color {
                   background: #dc2e34;
