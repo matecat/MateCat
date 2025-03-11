@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 .other-options-box {
   float: left;
   width: 100%;
@@ -219,6 +219,6 @@
 
   > p {
     font-weight: normal;
-    color: $grey6;
+    color: colors.$grey6;
   }
 }
