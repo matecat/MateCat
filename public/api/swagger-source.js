@@ -2768,6 +2768,49 @@ var spec = {
         },
       },
     },
+    '/api/v3/create-key': {
+      post: {
+        tags: ['TM keys'],
+        summary: 'Create a TM key.',
+        description: 'Create a TM key.',
+        consumes: ["application/json"],
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              type: "object",
+              properties: {
+                key: {
+                  type: "string",
+                  example: "1234_xxxx"
+                },
+                name: {
+                  type: "string",
+                  example: "My new key"
+                }
+              }
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The new key created',
+            schema: {
+              type: "object",
+              properties: {
+                key: {
+                  type: "string",
+                  example: "1234_xxxx"
+                }
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
+    },
     '/api/v3/keys/list': {
       get: {
         tags: ['TM keys'],
@@ -3031,6 +3074,51 @@ var spec = {
           },
         },
       },
+    },
+    '/api/v3/word-count/raw': {
+      post: {
+        tags: ['Word count'],
+        summary: 'Create new Project on Matecat in detached mode',
+        description: '',
+        parameters: [
+          {
+            name: 'text',
+            in: 'formData',
+            description: 'The text string',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'language',
+            in: 'formData',
+            description:
+                'The language (optional).',
+            required: false,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The word and character count of a text string.',
+            schema: {
+              type: "object",
+              properties: {
+                word_count: {
+                  type: "integer",
+                  example: 123
+                },
+                character_count: {
+                  type: "integer",
+                  example: 123
+                },
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      }
     },
   },
   definitions: {
