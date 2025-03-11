@@ -877,6 +877,6 @@ var getIconClass = function (ext) {
 // }
 
 document.addEventListener('DOMContentLoaded', function (event) {
-  checkInit()
+  // checkInit()
   UI.init()
 })

@@ -42,7 +42,7 @@
       align-items: center;
       padding: 8px;
       border-bottom: 1px dashed #ccc;
-      > div {
+      .file-item-name, .file-item-error {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -60,6 +60,17 @@
       }
       .file-item-error {
         color: colors.$redDefault;
+      }
+    }
+    .upload-progress {
+      width: 60%;
+    }
+    .importing-progress {
+      .progress {
+        background-color: colors.$approvedGreen;
+      }
+      .progress-wrapper {
+        background-color: rgba(colors.$approvedGreen, 0.24);
       }
     }
   }

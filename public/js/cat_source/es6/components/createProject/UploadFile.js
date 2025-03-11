@@ -11,6 +11,12 @@ import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
 import {initFileUpload} from '../../api/initFileUpload'
 import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
+import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
+
+const EXTENSIONS = {
+  tmx: 'tmx',
+  zip: 'zip',
+}
 
 function UploadFile({
   uplodedFilesNames,
@@ -40,6 +46,13 @@ function UploadFile({
       window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [])
+
+  useEffect(() => {
+    const hasIncompleteFiles =
+      files.some((f) => !f.uploaded || !f.converted || f.error) ||
+      !files.some((f) => f.ext !== EXTENSIONS.tmx)
+    CreateProjectActions.enableAnalyzeButton(!hasIncompleteFiles)
+  }, [files])
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
       let name = file.name
@@ -53,6 +66,7 @@ function UploadFile({
         originalName: file.name,
         name: name,
         uploadProgress: 0,
+        convertProgress: 0,
         uploaded: false,
         converted: false,
         error: null,
@@ -62,7 +76,7 @@ function UploadFile({
       }
     })
     setFiles((prevFiles) => prevFiles.concat(fileList))
-    fileList.forEach(({file, name}) => {
+    fileList.forEach(({file, name, ext}) => {
       const onProgress = (progress) => {
         setFiles((prevFiles) =>
           prevFiles.map((f) =>
@@ -99,6 +113,7 @@ function UploadFile({
                 : f,
             ),
           )
+          const interval = startConvertFakeProgress(file)
           convertFileRequest({
             file_name: name,
             source_lang: sourceLang,
@@ -108,6 +123,7 @@ function UploadFile({
             restarted_conversion: false,
           })
             .then(({data, errors, code}) => {
+              clearInterval(interval)
               if (code <= 0 && errors?.length > 0) {
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
@@ -130,6 +146,8 @@ function UploadFile({
                     prevFiles.concat({
                       name: zipFile.name,
                       uploadProgress: 100,
+                      convertedProgress: 100,
+                      converted: true,
                       uploaded: true,
                       error: null,
                       zipFolder: true,
@@ -138,6 +156,20 @@ function UploadFile({
                   )
                   uplodedFilesNames.push(zipFile.name)
                 })
+              }
+              setFiles((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.file === file
+                    ? {
+                        ...f,
+                        convertedProgress: 100,
+                        converted: true,
+                      }
+                    : f,
+                ),
+              )
+              if (ext === EXTENSIONS.tmx) {
+                CreateProjectActions.createKeyFromTMXFile({filename: file.name})
               }
               CreateProjectActions.enableAnalyzeButton(true)
             })
@@ -169,12 +201,12 @@ function UploadFile({
 
   const getFileErrorMessage = (file) => {
     const {ext, size} = file
-    if (ext === 'tmx' && size > config.maxTMXFileSize) {
+    if (ext === EXTENSIONS.tmx && size > config.maxTMXFileSize) {
       return (
         'Error during upload. The uploaded TMX file exceed the file size limit of ' +
         config.maxTMXSizePrint
       )
-    } else if (ext !== 'tmx' && size > config.maxFileSize) {
+    } else if (ext !== EXTENSIONS.tmx && size > config.maxFileSize) {
       return (
         'Error during upload. The uploaded file exceed the file size limit of ' +
         config.maxFileSizePrint
@@ -205,6 +237,7 @@ function UploadFile({
       segmentationRule,
       filtersTemplateId: xliffConfigTemplateId,
     })
+    CreateProjectActions.hideErrors()
   }
 
   const handleDrop = (e) => {
@@ -246,6 +279,31 @@ function UploadFile({
       ext = ' MB'
     }
     return Math.round(filesizeInBytes * 100, 2) / 100 + ext
+  }
+
+  const startConvertFakeProgress = (file) => {
+    let step = 0.5
+    let currentProgress = 0
+    return setInterval(() => {
+      currentProgress += step
+      const progress =
+        Math.round((Math.atan(currentProgress) / (Math.PI / 2)) * 100 * 1000) /
+        1000
+
+      setFiles((prevFiles) =>
+        prevFiles.map((f) =>
+          f.file === file
+            ? {
+                ...f,
+                convertProgress: progress,
+              }
+            : f,
+        ),
+      )
+      if (progress >= 70) {
+        step = 0.1
+      }
+    }, 100)
   }
 
   return (
@@ -294,14 +352,41 @@ function UploadFile({
                   {f.name}
                 </div>
                 {f.error && <div className="file-item-error">{f.error}</div>}
-                {f.uploaded && !f.error && getPrintableFileSize(f.size)}
-                {!f.uploaded &&
+                {f.uploaded &&
+                  f.converted &&
                   !f.error &&
-                  f.progress &&
-                  f.progress + ' Progress'}
+                  f.size &&
+                  getPrintableFileSize(f.size)}
+                {!f.uploaded && !f.error && f.uploadProgress > 0 && (
+                  <div className={'upload-progress'}>
+                    <ProgressBar
+                      total={100}
+                      progress={f.uploadProgress}
+                      size={PROGRESS_BAR_SIZE.BIG}
+                      showProgress={true}
+                      label={'Uploading'}
+                    />
+                  </div>
+                )}
+                {f.uploaded &&
+                  !f.converted &&
+                  !f.error &&
+                  f.convertProgress > 0 && (
+                    <div className={'upload-progress'}>
+                      <ProgressBar
+                        total={100}
+                        progress={f.convertProgress}
+                        size={PROGRESS_BAR_SIZE.BIG}
+                        label={'Importing'}
+                        className={'importing-progress'}
+                      />
+                    </div>
+                  )}
                 <Button
                   size={BUTTON_SIZE.ICON_SMALL}
                   onClick={() => deleteFile(f.name)}
+                  style={{marginLeft: 'auto'}}
+                  tooltip={'Remove file'}
                 >
                   <DeleteIcon />
                 </Button>
