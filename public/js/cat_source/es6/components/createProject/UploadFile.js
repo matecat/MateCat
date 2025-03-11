@@ -9,6 +9,8 @@ import FileUploadIconBig from '../../../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
 import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
+import {initFileUpload} from '../../api/initFileUpload'
+import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 
 function UploadFile({
   uplodedFilesNames,
@@ -24,6 +26,20 @@ function UploadFile({
   useEffect(() => {
     restartConversions()
   }, [sourceLang, xliffConfigTemplateId, segmentationRule])
+
+  useEffect(() => {
+    initFileUpload()
+    const onBeforeUnload = () => {
+      clearNotCompletedUploads()
+      return true
+    }
+
+    window.addEventListener('beforeunload', onBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload)
+    }
+  }, [])
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
       let name = file.name
@@ -90,41 +106,54 @@ function UploadFile({
             segmentation_rule: segmentationRule,
             filters_extraction_parameters_template_id: xliffConfigTemplateId,
             restarted_conversion: false,
-          }).then(({data, errors}) => {
-            console.log('errors', errors)
-            if (errors?.length > 0) {
+          })
+            .then(({data, errors, code}) => {
+              if (code <= 0 && errors?.length > 0) {
+                setFiles((prevFiles) =>
+                  prevFiles.map((f) =>
+                    f.file === file
+                      ? {
+                          ...f,
+                          uploaded: false,
+                          error: errors[0].message,
+                        }
+                      : f,
+                  ),
+                )
+                return
+              }
+              uplodedFilesNames.push(name)
+              if (data.data.zipFiles) {
+                const zipFiles = JSON.parse(data.data.zipFiles)
+                zipFiles.forEach((zipFile) => {
+                  setFiles((prevFiles) =>
+                    prevFiles.concat({
+                      name: zipFile.name,
+                      uploadProgress: 100,
+                      uploaded: true,
+                      error: null,
+                      zipFolder: true,
+                      size: zipFile.size,
+                    }),
+                  )
+                  uplodedFilesNames.push(zipFile.name)
+                })
+              }
+              CreateProjectActions.enableAnalyzeButton(true)
+            })
+            .catch(() => {
               setFiles((prevFiles) =>
                 prevFiles.map((f) =>
                   f.file === file
                     ? {
                         ...f,
                         uploaded: false,
-                        error: errors[0].message,
+                        error: 'Server error, try again.',
                       }
                     : f,
                 ),
               )
-              return
-            }
-            uplodedFilesNames.push(name)
-            if (data.data.zipFiles) {
-              const zipFiles = JSON.parse(data.data.zipFiles)
-              zipFiles.forEach((zipFile) => {
-                setFiles((prevFiles) =>
-                  prevFiles.concat({
-                    name: zipFile.name,
-                    uploadProgress: 100,
-                    uploaded: true,
-                    error: null,
-                    zipFolder: true,
-                    size: zipFile.size,
-                  }),
-                )
-                uplodedFilesNames.push(zipFile.name)
-              })
-            }
-            CreateProjectActions.enableAnalyzeButton(true)
-          })
+            })
         }
       }
 
@@ -296,6 +325,16 @@ function UploadFile({
             >
               <IconClose /> Clear all
             </Button>
+            {files.filter((f) => f.error).length > 0 && (
+              <Button
+                type={BUTTON_TYPE.WARNING}
+                onClick={() =>
+                  files.forEach((f) => f.error && deleteFile(f.name))
+                }
+              >
+                <IconClose /> Clear all failed
+              </Button>
+            )}
           </div>
         </>
       )}

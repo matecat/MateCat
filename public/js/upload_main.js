@@ -869,12 +869,12 @@ var getIconClass = function (ext) {
   }
 }
 
-window.onbeforeunload = function (e) {
-  //return works for Chrome and Safari
-  //function in new-project.js this function does an ajax call to clean uploaded files when an user
-  // refresh a page without click the analyze method
-  clearNotCompletedUploads()
-}
+// window.onbeforeunload = function (e) {
+//   //return works for Chrome and Safari
+//   //function in new-project.js this function does an ajax call to clean uploaded files when an user
+//   // refresh a page without click the analyze method
+//   clearNotCompletedUploads()
+// }
 
 document.addEventListener('DOMContentLoaded', function (event) {
   checkInit()
