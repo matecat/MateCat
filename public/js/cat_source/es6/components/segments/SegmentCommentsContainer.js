@@ -259,7 +259,9 @@ class SegmentCommentsContainer extends React.Component {
                       {' '}
                       {comment.source_page === 1
                         ? '(translator)'
-                        : comment.source_page === 2 ? '(revisor)' : '(2nd pass revisor)' }
+                        : comment.source_page === 2
+                          ? '(revisor)'
+                          : '(2nd pass revisor)'}
                     </span>
                   </div>
                 )}
@@ -341,7 +343,9 @@ class SegmentCommentsContainer extends React.Component {
                 ' ' +
                 this.context.userInfo.user.last_name
               : config.isReview
-                ? config.revisionNumber === 2 ? '2nd pass revisor' : 'Revisor'
+                ? config.revisionNumber === 2
+                  ? '2nd pass revisor'
+                  : 'Revisor'
                 : 'Translator'}
           </span>
           <MentionsInput

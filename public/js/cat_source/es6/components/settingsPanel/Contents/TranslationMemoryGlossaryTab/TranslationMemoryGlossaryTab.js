@@ -17,6 +17,7 @@ import {updateJobKeys} from '../../../../api/updateJobKeys'
 import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
 import {METADATA_KEY} from '../../../../constants/Constants'
+import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
@@ -197,7 +198,6 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-        tmPrioritization,
       }).then(() => {
         CatToolActions.onTMKeysChangeStatus()
         SegmentActions.getContributions(
@@ -358,7 +358,6 @@ export const TranslationMemoryGlossaryTab = () => {
         updateJobKeys({
           getPublicMatches,
           dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-          tmPrioritization,
         }).then(() => {
           CatToolActions.onTMKeysChangeStatus()
           SegmentActions.getContributions(
@@ -366,6 +365,12 @@ export const TranslationMemoryGlossaryTab = () => {
             userInfo.metadata[METADATA_KEY],
             true,
           )
+        })
+      }
+
+      if (tmPrioritization !== current.tmPrioritization) {
+        updateJobMetadata({
+          tmPrioritization,
         })
       }
     }

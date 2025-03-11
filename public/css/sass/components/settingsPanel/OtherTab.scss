@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 .other-options-box {
   float: left;
   width: 100%;
@@ -8,7 +8,7 @@
     border-bottom: 0;
   }
 
-  h2 {
+  > h2 {
     font-size: 30px;
     text-align: left;
     margin-bottom: 15px;
@@ -17,6 +17,7 @@
 
   .options-box h3 {
     font-size: 19px;
+    margin-bottom: 0;
   }
 
   .options-box .option-description {
@@ -187,4 +188,37 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.characters-counter-box {
+  display: flex;
+  flex-direction: column;
+  padding: 30px 0;
+
+  > :last-child {
+    padding-bottom: 0;
+  }
+}
+
+.option-characters-counter-rule-dropdown {
+  .dropdown__option span {
+    white-space: unset;
+    overflow: unset;
+    text-overflow: unset;
+  }
+
+  .custom-dropdown {
+    padding-top: 0;
+  }
+}
+
+.option-characters-counter-rule-select-option-content {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+
+  > p {
+    font-weight: normal;
+    color: colors.$grey6;
+  }
 }
