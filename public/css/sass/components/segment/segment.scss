@@ -1,5 +1,5 @@
-@use "../../commons/colors";
-@use "../../commons/variables";
+@use '../../commons/colors';
+@use '../../commons/variables';
 .segment-selected-inBulk:not(.opened) {
   .body > .text {
     background-color: #edf4fd !important;

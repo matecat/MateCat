@@ -24,6 +24,7 @@ import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
 import SegmentUtils from '../../utils/segmentUtils'
+import CatToolStore from '../../stores/CatToolStore'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -407,6 +408,8 @@ class SegmentTarget extends React.Component {
       SegmentUtils.getRelativeTransUnitCharactersCounter({
         sid: this.props.segment.sid,
         charactersCounter: value,
+        shouldCountTagsAsChars:
+          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
       })
 
     this.setState({

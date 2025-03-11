@@ -267,7 +267,11 @@ const SegmentUtils = {
       config.job_completion_current_phase === 'revise'
     return projectCompletionCheck || segment.readonly === 'true'
   },
-  getRelativeTransUnitCharactersCounter: ({sid, charactersCounter = 0}) => {
+  getRelativeTransUnitCharactersCounter: ({
+    sid,
+    charactersCounter = 0,
+    shouldCountTagsAsChars = false,
+  }) => {
     const segments = SegmentStore.getAllSegments()
     const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
 
@@ -280,10 +284,16 @@ const SegmentUtils = {
     const unitCharacters = segmentsGroupInternalId
       .filter((segment) => segment.sid !== sid)
       .reduce((acc, cur) => {
-        const cleanTagsTranslation =
-          DraftMatecatUtils.decodePlaceholdersToPlainText(
-            DraftMatecatUtils.removeTagsFromText(cur.translation),
-          )
+        const cleanTagsTranslation = shouldCountTagsAsChars
+          ? DraftMatecatUtils.excludeSomeTagsTransformToText(cur.translation, [
+              'g',
+              'bx',
+              'ex',
+              'x',
+            ])
+          : DraftMatecatUtils.decodePlaceholdersToPlainText(
+              DraftMatecatUtils.removeTagsFromText(cur.translation),
+            )
         return (
           acc + DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation)
         )
