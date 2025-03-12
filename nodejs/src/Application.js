@@ -20,6 +20,8 @@ module.exports.Application = class {
     this.logger = logger;
     this.options = options;
 
+    this.pubGlobalMessageClient = new Redis(this.options.redis);
+
     // setup redis adapter
     logger.info(['Connecting redis for adapter started', this.options.redis])
     const pubClient = new Redis(this.options.redis);
@@ -182,28 +184,25 @@ module.exports.Application = class {
   dispatchGlobalMessages = (uuid) => {
     const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
     const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
-    let pubClient = new Redis(this.options.redis);
 
-    pubClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids)=> {
+    this.pubGlobalMessageClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids) => {
 
       ids.length > 0 && ids.map((id) => {
-        pubClient.get( GLOBAL_MESSAGES_ELEMENT_KEY + id,  (err, element) => {
-          if ( element !== null ) {
-            this.sendRoomNotifications( uuid, MESSAGE_NAME, {
+        this.pubGlobalMessageClient.get(GLOBAL_MESSAGES_ELEMENT_KEY + id, (err, element) => {
+          if (element !== null) {
+            this.sendRoomNotifications(uuid, MESSAGE_NAME, {
               data: {
                 _type: GLOBAL_MESSAGES,
-                message: JSON.parse( element )
+                message: JSON.parse(element)
               }
             });
+            this.logger.debug("Dispatched global message to user: " + uuid);
           } else {
-            pubClient.srem( GLOBAL_MESSAGES_LIST_KEY + id );
+            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY + id);
           }
         });
       });
     });
-
-    pubClient.quit();
-    pubClient = null;
 
   };
 };
