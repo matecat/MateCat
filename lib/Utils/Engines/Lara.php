@@ -246,25 +246,27 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            $mmtClient = MMTServiceApi::newInstance()
-                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
-                ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
+            if($_config['mt_evaluation'] and $_config['mt_evaluation'] == 1){
+                $mmtClient = MMTServiceApi::newInstance()
+                    ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                    ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
 
-            try {
-                $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
-                $score = $qualityEstimation['score'];
+                try {
+                    $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
+                    $score = $qualityEstimation['score'];
 
-                Log::doJsonLog( [
-                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                    'source'                 => $_config[ 'source' ],
-                    'target'                 => $_config[ 'target' ],
-                    'segment'                => $_config[ 'segment' ],
-                    'translation'            => $translation,
-                    'score'                  => $score,
-                ] );
+                    Log::doJsonLog( [
+                        'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                        'source'                 => $_config[ 'source' ],
+                        'target'                 => $_config[ 'target' ],
+                        'segment'                => $_config[ 'segment' ],
+                        'translation'            => $translation,
+                        'score'                  => $score,
+                    ] );
 
-            } catch (\Exception $exception){
-                $score = 0;
+                } catch (\Exception $exception){
+                    $score = 0;
+                }
             }
 
         } catch ( LaraException $t ) {
@@ -307,7 +309,7 @@ class Lara extends Engines_AbstractEngine {
             date( "Y-m-d" )
         ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
 
-        if($score){
+        if(isset($score)){
             $matchAsArray[ 'score' ] = $score;
         }
 

@@ -525,9 +525,14 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
+        $mt_evaluation  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'mt_evaluation', 10 * 60 );
 
         if ( $dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
+        }
+
+        if ( $mt_evaluation !== null ) {
+            $_config[ 'mt_evaluation' ] = $mt_evaluation->value == 1;
         }
 
         // penalty_key
