@@ -41,16 +41,23 @@ class SegmentFooterTabMessages extends React.Component {
             return
           }
           let note = item.note
-          let html = (
-            <div className="note" key={'note-' + index}>
-              <span className="note-label">Note: </span>
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: this.getNoteContentStructure(note),
-                }}
-              />
-            </div>
-          )
+          const noteStructure = this.getNoteContentStructure(note)
+          let html =
+            typeof noteStructure === 'string' ? (
+              <div className="note" key={'note-' + index}>
+                <span className="note-label">Note: </span>
+                <span
+                  dangerouslySetInnerHTML={{
+                    __html: noteStructure,
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="note" key={'note-' + index}>
+                <span className="note-label">Note: </span>
+                <span>{noteStructure}</span>
+              </div>
+            )
           notesHtml.push(html)
         } else if (
           item.json &&
