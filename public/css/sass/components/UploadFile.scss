@@ -10,6 +10,7 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  position: relative;
   &.add-files {
     flex-direction: column;
     align-items: flex-start;
@@ -76,6 +77,17 @@
         background-color: rgba(colors.$approvedGreen, 0.24);
       }
     }
+  }
+
+  .fileupload-loading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url(/public/img/loading.gif) center no-repeat;
+    backdrop-filter: blur(2px);
+    background-size: 40px;
+    left: 0;
+    z-index: 1;
   }
   .upload-files-buttons {
     display: flex;

@@ -84,15 +84,8 @@ var gdrive = new GDrive()
   }
 
   function openGoogleDrivePickerIntent() {
-    const userInfo = UserStore.getUser()
     if (!gdriveInitComplete()) {
       console.log('gdriveInitComplete not complete')
-      return
-    }
-
-    // TODO: is this enough to know if the user is logged in?
-    if (!userInfo) {
-      ModalsActions.openLoginModal()
       return
     }
 
@@ -114,10 +107,10 @@ var gdrive = new GDrive()
       })
   }
 
-  $(document).on('click', '.load-gdrive', function (e) {
-    e.preventDefault()
-    openGoogleDrivePickerIntent()
-  })
+  // $(document).on('click', '.load-gdrive', function (e) {
+  //   e.preventDefault()
+  //   openGoogleDrivePickerIntent()
+  // })
 })(jQuery, gdrive)
 
 window.onGDriveApiInit = function () {

@@ -130,14 +130,14 @@ button.ui-button::-moz-focus-inner {
   display: none;
 }
 
-.fileupload-loading {
+/*.fileupload-loading {
   position: absolute;
   left: 50%;
   width: 128px;
   height: 128px;
   background: url(/public/img/loading.gif) center no-repeat;
   display: none;
-}
+}*/
 
 .fileupload-processing .fileupload-loading {
   display: block;

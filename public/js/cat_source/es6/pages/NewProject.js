@@ -13,7 +13,7 @@ import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import More from '../../../../img/icons/More'
-import UploadFile from '../components/createProject/UploadFile'
+import UploadFileLocal from '../components/createProject/UploadFileLocal'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -55,6 +55,7 @@ import {
   ONBOARDING_PAGE,
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
+import {UploadFile} from '../components/createProject/UploadFile'
 
 const SELECT_HEIGHT = 324
 
@@ -87,8 +88,9 @@ const NewProject = () => {
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
+  const [openGdrive, setOpenGdrive] = useState(false)
 
-  const uplodedFilesNames = useRef([])
+  const uploadedFilesNames = useRef([])
 
   const {
     projectTemplates,
@@ -422,7 +424,7 @@ const NewProject = () => {
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      file_name: uplodedFilesNames.current.join('@@SEP@@'),
+      file_name: uploadedFilesNames.current.join('@@SEP@@'),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
@@ -888,13 +890,14 @@ const NewProject = () => {
         {typeof isUserLogged === 'boolean' ? (
           isUserLogged ? (
             <UploadFile
-              uplodedFilesNames={uplodedFilesNames.current}
+              uploadedFilesNames={uploadedFilesNames.current}
               segmentationRule={currentProjectTemplate?.segmentationRule.id}
               xliffConfigTemplateId={
                 currentProjectTemplate?.XliffConfigTemplateId
               }
               sourceLang={sourceLang.id}
               targetLangs={targetLangs}
+              openGdrive={openGdrive}
             />
           ) : (
             <div className="upload-box-not-logged">
@@ -930,7 +933,11 @@ const NewProject = () => {
             {googleDriveEnabled && (
               <span className="gdrive-addlink-container">
                 and{' '}
-                <a className="load-gdrive load-gdrive-disabled" href="#">
+                <a
+                  className="load-gdrive"
+                  onClick={() => setOpenGdrive(true)}
+                  href="#"
+                >
                   Google Drive files
                 </a>
                 <span className="gdrive-icon"></span>
