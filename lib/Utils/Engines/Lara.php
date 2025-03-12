@@ -246,7 +246,7 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            if($_config['mt_evaluation'] and $_config['mt_evaluation'] == 1){
+            if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] and $_config['mt_evaluation'] == 1){
                 $mmtClient = MMTServiceApi::newInstance()
                     ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
                     ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
