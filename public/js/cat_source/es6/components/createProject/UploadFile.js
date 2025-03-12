@@ -69,163 +69,176 @@ function UploadFile({
       )
     }
   }, [files])
-  const handleFiles = (selectedFiles) => {
-    const fileList = Array.from(selectedFiles).map((file) => {
-      let name = file.name
-      // Check if file with the same name already exists
-      const filesSameName = files.filter((f) => f.originalName === name)
-      if (filesSameName.length > 0) {
-        name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
-      }
-      const ext = file.name.split('.').pop()
-      CommonUtils.dispatchCustomEvent('uploaded-file', {extension: ext})
-      return {
-        file,
-        originalName: file.name,
-        name: name,
-        uploadProgress: 0,
-        convertProgress: 0,
-        uploaded: false,
-        converted: false,
-        error: null,
-        zipFolder: false,
-        size: 0,
-        ext: ext,
-      }
-    })
-    //Check if the total number of files exceeds the limit
-    const totalFiles = files.length + fileList.length
-    if (totalFiles > config.maxNumberFiles) {
-      const excessFiles = totalFiles - config.maxNumberFiles
-      fileList.slice(-excessFiles).forEach((f) => {
-        f.error = 'File limit exceeded'
+  const handleFiles = useCallback(
+    (selectedFiles) => {
+      const fileList = Array.from(selectedFiles).map((file) => {
+        let name = file.name
+        // Check if file with the same name already exists
+        const filesSameName = files.filter((f) => f.originalName === name)
+        if (filesSameName.length > 0) {
+          name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
+        }
+        const ext = file.name.split('.').pop()
+        CommonUtils.dispatchCustomEvent('uploaded-file', {extension: ext})
+        return {
+          file,
+          originalName: file.name,
+          name: name,
+          uploadProgress: 0,
+          convertProgress: 0,
+          uploaded: false,
+          converted: false,
+          error: null,
+          zipFolder: false,
+          size: 0,
+          ext: ext,
+        }
       })
-    }
-    setFiles((prevFiles) => prevFiles.concat(fileList))
-    fileList.forEach(({file, name, ext}) => {
-      if (file.error) return
-      const onProgress = (progress) => {
-        setFiles((prevFiles) =>
-          prevFiles.map((f) =>
-            f.name === name ? {...f, uploadProgress: progress} : f,
-          ),
-        )
+      //Check if the total number of files exceeds the limit
+      const totalFiles = files.length + fileList.length
+      if (totalFiles > config.maxNumberFiles) {
+        const excessFiles = totalFiles - config.maxNumberFiles
+        fileList.slice(-excessFiles).forEach((f) => {
+          f.error = 'File limit exceeded'
+        })
       }
+      setFiles((prevFiles) => prevFiles.concat(fileList))
+      fileList.forEach(({file, name, ext}) => {
+        if (file.error) return
+        const onProgress = (progress) => {
+          setFiles((prevFiles) =>
+            prevFiles.map((f) =>
+              f.name === name ? {...f, uploadProgress: progress} : f,
+            ),
+          )
+        }
 
-      const onSuccess = (files) => {
-        const fileResponse = JSON.parse(files)[0]
-        const fileError = getFileErrorMessage(fileResponse)
-        if (fileResponse.error || fileError) {
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.file === file
-                ? {
-                    ...f,
-                    uploaded: false,
-                    error: fileError ? fileError : fileResponse.error,
-                  }
-                : f,
-            ),
-          )
-        } else {
-          setFiles((prevFiles) =>
-            prevFiles.map((f) =>
-              f.file === file
-                ? {
-                    ...f,
-                    uploaded: true,
-                    size: fileResponse.size,
-                    type: fileResponse.type,
-                  }
-                : f,
-            ),
-          )
-          const interval = startConvertFakeProgress(file)
-          convertFileRequest({
-            file_name: name,
-            source_lang: sourceLang,
-            target_lang: targetLangs.map((lang) => lang.id).join(),
-            segmentation_rule: segmentationRule,
-            filters_extraction_parameters_template_id: xliffConfigTemplateId,
-            restarted_conversion: false,
-          })
-            .then(({data, errors, code}) => {
-              clearInterval(interval)
-              if (code <= 0 && errors?.length > 0) {
+        const onSuccess = (files) => {
+          const fileResponse = JSON.parse(files)[0]
+          const fileError = getFileErrorMessage(fileResponse)
+          if (fileResponse.error || fileError) {
+            setFiles((prevFiles) =>
+              prevFiles.map((f) =>
+                f.file === file
+                  ? {
+                      ...f,
+                      uploaded: false,
+                      error: fileError ? fileError : fileResponse.error,
+                    }
+                  : f,
+              ),
+            )
+          } else {
+            setFiles((prevFiles) =>
+              prevFiles.map((f) =>
+                f.file === file
+                  ? {
+                      ...f,
+                      uploaded: true,
+                      size: fileResponse.size,
+                      type: fileResponse.type,
+                    }
+                  : f,
+              ),
+            )
+            const interval = startConvertFakeProgress(file)
+            convertFileRequest({
+              file_name: name,
+              source_lang: sourceLang,
+              target_lang: targetLangs.map((lang) => lang.id).join(),
+              segmentation_rule: segmentationRule,
+              filters_extraction_parameters_template_id: xliffConfigTemplateId,
+              restarted_conversion: false,
+            })
+              .then(({data, errors, warnings}) => {
+                clearInterval(interval)
+                if (errors?.length > 0 && errors[0].code <= -14) {
+                  setFiles((prevFiles) =>
+                    prevFiles.map((f) =>
+                      f.file === file
+                        ? {
+                            ...f,
+                            uploaded: false,
+                            error: errors[0].message,
+                          }
+                        : f,
+                    ),
+                  )
+                  return
+                }
+                uplodedFilesNames.push(name)
+                if (data.data.zipFiles) {
+                  const zipFiles = JSON.parse(data.data.zipFiles)
+                  zipFiles.forEach((zipFile) => {
+                    setFiles((prevFiles) =>
+                      prevFiles.concat({
+                        name: zipFile.name,
+                        uploadProgress: 100,
+                        convertedProgress: 100,
+                        converted: true,
+                        uploaded: true,
+                        error: null,
+                        zipFolder: true,
+                        size: zipFile.size,
+                      }),
+                    )
+                    uplodedFilesNames.push(zipFile.name)
+                  })
+                }
+                setFiles((prevFiles) =>
+                  prevFiles.map((f) =>
+                    f.file === file
+                      ? {
+                          ...f,
+                          convertedProgress: 100,
+                          converted: true,
+                          warning: warnings ? warnings[0].message : null,
+                        }
+                      : f,
+                  ),
+                )
+                if (ext === EXTENSIONS.tmx) {
+                  CreateProjectActions.createKeyFromTMXFile({
+                    filename: file.name,
+                  })
+                }
+                CreateProjectActions.enableAnalyzeButton(true)
+              })
+              .catch((e) => {
+                console.log(e)
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
                     f.file === file
                       ? {
                           ...f,
                           uploaded: false,
-                          error: errors[0].message,
+                          error: 'Server error, try again.',
                         }
                       : f,
                   ),
                 )
-                return
-              }
-              uplodedFilesNames.push(name)
-              if (data.data.zipFiles) {
-                const zipFiles = JSON.parse(data.data.zipFiles)
-                zipFiles.forEach((zipFile) => {
-                  setFiles((prevFiles) =>
-                    prevFiles.concat({
-                      name: zipFile.name,
-                      uploadProgress: 100,
-                      convertedProgress: 100,
-                      converted: true,
-                      uploaded: true,
-                      error: null,
-                      zipFolder: true,
-                      size: zipFile.size,
-                    }),
-                  )
-                  uplodedFilesNames.push(zipFile.name)
-                })
-              }
-              setFiles((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.file === file
-                    ? {
-                        ...f,
-                        convertedProgress: 100,
-                        converted: true,
-                      }
-                    : f,
-                ),
-              )
-              if (ext === EXTENSIONS.tmx) {
-                CreateProjectActions.createKeyFromTMXFile({filename: file.name})
-              }
-              CreateProjectActions.enableAnalyzeButton(true)
-            })
-            .catch((e) => {
-              console.log(e)
-              setFiles((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.file === file
-                    ? {
-                        ...f,
-                        uploaded: false,
-                        error: 'Server error, try again.',
-                      }
-                    : f,
-                ),
-              )
-            })
+              })
+          }
         }
-      }
 
-      const onError = (error) => {
-        setFiles((prevFiles) =>
-          prevFiles.map((f) => (f.file === file ? {...f, error} : f)),
-        )
-      }
+        const onError = (error) => {
+          setFiles((prevFiles) =>
+            prevFiles.map((f) => (f.file === file ? {...f, error} : f)),
+          )
+        }
 
-      fileUpload(file, onProgress, onSuccess, onError)
-    })
-  }
+        fileUpload(file, onProgress, onSuccess, onError)
+      })
+    },
+    [
+      files,
+      sourceLang,
+      targetLangs,
+      xliffConfigTemplateId,
+      segmentationRule,
+      uplodedFilesNames,
+    ],
+  )
 
   const getFileErrorMessage = (file) => {
     const {ext, size} = file
@@ -384,6 +397,9 @@ function UploadFile({
                   {f.name}
                 </div>
                 {f.error && <div className="file-item-error">{f.error}</div>}
+                {f.warning && (
+                  <div className="file-item-warning">{f.warning}</div>
+                )}
                 {f.uploaded &&
                   f.converted &&
                   !f.error &&

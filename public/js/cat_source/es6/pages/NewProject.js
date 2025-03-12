@@ -39,12 +39,7 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {
-  checkGDriveEvents,
-  getFilenameFromUploadedFiles,
-  handleCreationStatus,
-  restartConversions,
-} from '../utils/newProjectUtils'
+import {checkGDriveEvents, handleCreationStatus} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
@@ -427,7 +422,6 @@ const NewProject = () => {
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      // file_name: getFilenameFromUploadedFiles(),
       file_name: uplodedFilesNames.current.join('@@SEP@@'),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
@@ -655,23 +649,8 @@ const NewProject = () => {
         targetLangs,
         selectedTeam,
       })
-      if (prevSourceLang.current.id !== sourceLang.id) {
-        prevSourceLang.current = sourceLang
-        restartConversions()
-      }
     }
   }, [sourceLang, targetLangs, selectedTeam])
-
-  useEffect(() => {
-    //TODO: used in main.js, remove
-    if (currentProjectTemplate) {
-      const {segmentationRule} = currentProjectTemplate
-      if (UI.segmentationRule !== segmentationRule.id) {
-        UI.segmentationRule = segmentationRule.id
-        restartConversions()
-      }
-    }
-  }, [currentProjectTemplate?.segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {

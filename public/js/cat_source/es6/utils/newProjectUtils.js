@@ -6,16 +6,6 @@ import AlertModal from '../components/modals/AlertModal'
 import CommonUtils from './commonUtils'
 import UserStore from '../stores/UserStore'
 
-export const restartConversions = () => {
-  if (document.getElementsByClassName('template-download').length) {
-    if (UI.conversionsAreToRestart()) {
-      UI.restartConversions()
-    }
-  } else if (document.getElementsByClassName('template-gdrive').length) {
-    APP.restartGDriveConversions()
-  }
-}
-
 export const checkGDriveEvents = () => {
   const cookieFilesGdrive = 'gdrive_files_to_be_listed'
   const cookieGdriveResponse = 'gdrive_files_outcome'
@@ -37,34 +27,6 @@ export const checkGDriveEvents = () => {
     })
   }
 }
-
-export const getFilenameFromUploadedFiles = () => {
-  const excludeFailed = (element) =>
-    !Array.from(element.classList).some((value) => value === 'failed')
-  const getFilename = (element) =>
-    element.getElementsByClassName('name')[0].innerText
-
-  const tableElements = Array.from(
-    document
-      .getElementsByClassName('upload-table')[0]
-      .getElementsByClassName('template-download'),
-  )
-  const tableElementsGDrive = Array.from(
-    document
-      .getElementsByClassName('gdrive-upload-table')[0]
-      .getElementsByClassName('template-gdrive'),
-  )
-
-  const filesList = [
-    ...tableElements.filter(excludeFailed).map(getFilename),
-    ...tableElementsGDrive.filter(excludeFailed).map(getFilename),
-  ]
-
-  return filesList.length > 1
-    ? filesList.reduce((acc, cur) => `${acc}@@SEP@@${cur}`, '')
-    : filesList
-}
-
 export const handleCreationStatus = (id_project, password) => {
   projectCreationStatus(id_project, password)
     .then(({data, status}) => {
@@ -79,38 +41,13 @@ export const handleCreationStatus = (id_project, password) => {
     })
 }
 
-const postProjectCreation = (d) => {
-  if (typeof d.errors != 'undefined' && d.errors.length) {
+const postProjectCreation = (data) => {
+  if (typeof data.errors != 'undefined' && data.errors.length) {
     CreateProjectActions.hideErrors()
-
-    $.each(d.errors, function () {
-      switch (this.code) {
-        case -14:
-          UI.addInlineMessage('.tmx', this.message)
-          break
-        //no text to translate found.
-        case -1:
-          var fileName = this.message
-            .replace('No text to translate in the file ', '')
-            .replace(/.$/g, '')
-
-          console.log(fileName)
-          UI.addInlineMessage(
-            fileName,
-            'Is this a scanned file or image?<br/>Try converting to DOCX using an OCR software ' +
-              '(ABBYY FineReader or Nuance PDF Converter)',
-          )
-          break
-      }
-
-      //normal error management
-      CreateProjectActions.showError(this.message)
-    })
+    CreateProjectActions.showError(data.errors[0].message)
   } else {
     //A project now are never EMPTY, it is not created anymore
-    if (d.status == 'EMPTY') {
-      console.log('EMPTY')
-      $('body').removeClass('creating')
+    if (data.status === 'EMPTY') {
       ModalsActions.showModalComponent(
         AlertModal,
         {
@@ -126,10 +63,10 @@ const postProjectCreation = (d) => {
         event: 'analyze_click',
         userStatus: 'loggedUser',
         userId: userInfo.user.uid,
-        idProject: d.id_project,
+        idProject: data.id_project,
       }
       CommonUtils.dispatchAnalyticsEvents(data)
-      location.href = d.analyze_url
+      location.href = data.analyze_url
     }
   }
 }

@@ -144,7 +144,7 @@ class UploadHandler {
         if ( $this->options[ 'min_file_size' ] &&
             $file_size < $this->options[ 'min_file_size' ]
         ) {
-            $file->error = 'minFileSize';
+            $file->error = 'Error: File is empty';
 
             return false;
         }

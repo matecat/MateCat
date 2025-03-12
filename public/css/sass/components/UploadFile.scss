@@ -61,6 +61,9 @@
       .file-item-error {
         color: colors.$redDefault;
       }
+      .file-item-warning {
+        color: colors.$orangeDefault;
+      }
     }
     .upload-progress {
       width: 60%;
