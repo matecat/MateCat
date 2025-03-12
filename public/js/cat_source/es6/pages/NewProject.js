@@ -102,7 +102,6 @@ const NewProject = () => {
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
   } = useProjectTemplates(tmKeys)
-
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -594,9 +593,10 @@ const NewProject = () => {
 
   useEffect(() => {
     const createKeyFromTMXFile = ({filename}) => {
-      const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
+      const activeTm = currentProjectTemplate.tm
+      const haveNoActiveKeys = activeTm.length === 0
 
-      if (haveNoActiveKeys) {
+      if (activeTm.length) {
         tmCreateRandUser().then((response) => {
           const {key} = response.data
           setTmKeys((prevState) => [
@@ -629,8 +629,8 @@ const NewProject = () => {
         </span>
       ) : (
         <span>
-          The TMX file(s) you have uploaded have been imported into the active
-          private key(s)
+          The TMX file(s) you have uploaded have been imported into the key
+          named <i>{activeTm[0].name}</i>.
         </span>
       )
 

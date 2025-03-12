@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
 import CreateProjectActions from '../../actions/CreateProjectActions'
@@ -17,6 +17,15 @@ const EXTENSIONS = {
   tmx: 'tmx',
   zip: 'zip',
 }
+
+const maxFileSize = Math.log(config.maxFileSize) / Math.log(1024)
+const maxFileSizePrint =
+  parseInt(Math.pow(1024, maxFileSize - Math.floor(maxFileSize)) + 0.5) + ' MB'
+
+const maxTMXFileSize = Math.log(config.maxTMXFileSize) / Math.log(1024)
+const maxTMXSizePrint =
+  parseInt(Math.pow(1024, maxTMXFileSize - Math.floor(maxTMXFileSize)) + 0.5) +
+  ' MB'
 
 function UploadFile({
   uplodedFilesNames,
@@ -52,6 +61,13 @@ function UploadFile({
       files.some((f) => !f.uploaded || !f.converted || f.error) ||
       !files.some((f) => f.ext !== EXTENSIONS.tmx)
     CreateProjectActions.enableAnalyzeButton(!hasIncompleteFiles)
+    if (files.length >= config.maxNumberFiles) {
+      CreateProjectActions.showError(
+        'No more files can be loaded (the limit of ' +
+          config.maxNumberFiles +
+          ' has been exceeded).',
+      )
+    }
   }, [files])
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
@@ -61,6 +77,8 @@ function UploadFile({
       if (filesSameName.length > 0) {
         name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
       }
+      const ext = file.name.split('.').pop()
+      CommonUtils.dispatchCustomEvent('uploaded-file', {extension: ext})
       return {
         file,
         originalName: file.name,
@@ -72,11 +90,20 @@ function UploadFile({
         error: null,
         zipFolder: false,
         size: 0,
-        ext: file.name.split('.')[file.name.split('.').length - 1],
+        ext: ext,
       }
     })
+    //Check if the total number of files exceeds the limit
+    const totalFiles = files.length + fileList.length
+    if (totalFiles > config.maxNumberFiles) {
+      const excessFiles = totalFiles - config.maxNumberFiles
+      fileList.slice(-excessFiles).forEach((f) => {
+        f.error = 'File limit exceeded'
+      })
+    }
     setFiles((prevFiles) => prevFiles.concat(fileList))
     fileList.forEach(({file, name, ext}) => {
+      if (file.error) return
       const onProgress = (progress) => {
         setFiles((prevFiles) =>
           prevFiles.map((f) =>
@@ -173,7 +200,8 @@ function UploadFile({
               }
               CreateProjectActions.enableAnalyzeButton(true)
             })
-            .catch(() => {
+            .catch((e) => {
+              console.log(e)
               setFiles((prevFiles) =>
                 prevFiles.map((f) =>
                   f.file === file
@@ -204,12 +232,12 @@ function UploadFile({
     if (ext === EXTENSIONS.tmx && size > config.maxTMXFileSize) {
       return (
         'Error during upload. The uploaded TMX file exceed the file size limit of ' +
-        config.maxTMXSizePrint
+        maxTMXSizePrint
       )
     } else if (ext !== EXTENSIONS.tmx && size > config.maxFileSize) {
       return (
         'Error during upload. The uploaded file exceed the file size limit of ' +
-        config.maxFileSizePrint
+        maxFileSizePrint
       )
     }
   }
@@ -240,12 +268,31 @@ function UploadFile({
     CreateProjectActions.hideErrors()
   }
 
-  const handleDrop = (e) => {
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault()
+      handleFiles(e.dataTransfer.files)
+      setIsDragging(false)
+      dragCounter.current = 0
+    },
+    [handleFiles],
+  )
+
+  const handleDragEnter = useCallback((e) => {
     e.preventDefault()
-    handleFiles(e.dataTransfer.files)
-    setIsDragging(false)
-    dragCounter.current = 0
-  }
+    dragCounter.current += 1
+    if (dragCounter.current === 1) {
+      setIsDragging(true)
+    }
+  }, [])
+
+  const handleDragLeave = useCallback((e) => {
+    e.preventDefault()
+    dragCounter.current -= 1
+    if (dragCounter.current === 0) {
+      setIsDragging(false)
+    }
+  }, [])
 
   const handleChange = (e) => {
     handleFiles(e.target.files)
@@ -254,21 +301,6 @@ function UploadFile({
 
   const handleDragOver = (e) => {
     e.preventDefault()
-  }
-  const handleDragEnter = (e) => {
-    e.preventDefault()
-    dragCounter.current += 1
-    if (dragCounter.current === 1) {
-      setIsDragging(true)
-    }
-  }
-
-  const handleDragLeave = (e) => {
-    e.preventDefault()
-    dragCounter.current -= 1
-    if (dragCounter.current === 0) {
-      setIsDragging(false)
-    }
   }
 
   const getPrintableFileSize = (filesizeInBytes) => {
@@ -400,6 +432,7 @@ function UploadFile({
             <Button
               type={BUTTON_TYPE.PRIMARY}
               onClick={() => document.getElementById('fileInput').click()}
+              disabled={files.length >= config.maxNumberFiles}
             >
               <IconAdd />
               Add files...
