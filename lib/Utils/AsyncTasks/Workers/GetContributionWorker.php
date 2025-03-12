@@ -539,6 +539,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
+                $config[ 'mt_evaluation' ]       = $contributionStruct->mt_evaluation;
 
                 $mt_result = $mt_engine->get( $config );
             }
