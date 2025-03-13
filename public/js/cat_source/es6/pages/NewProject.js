@@ -88,8 +88,7 @@ const NewProject = () => {
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
   const [openGDrive, setOpenGDrive] = useState(false)
-
-  const uploadedFilesNames = useRef([])
+  const [uploadedFilesNames, setUploadedFilesNames] = useState([])
 
   const {
     projectTemplates,
@@ -758,6 +757,8 @@ const NewProject = () => {
         openGDrive,
         setOpenGDrive,
         currentProjectTemplate,
+        uploadedFilesNames,
+        setUploadedFilesNames,
       }}
     >
       <HeaderPortal>
@@ -889,7 +890,7 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-        <UploadFile uploadedFilesNames={uploadedFilesNames.current} />
+        <UploadFile />
       </div>
       <div className="wrapper-bottom">
         {conversionEnabled && (
@@ -909,19 +910,21 @@ const NewProject = () => {
               {formatsNumber} file formats{' '}
             </a>
             <span style={{float: 'right'}}>.</span>
-            {googleDriveEnabled && uploadedFilesNames.current.length === 0 && (
-              <span className="gdrive-addlink-container">
-                and{' '}
-                <a
-                  className="load-gdrive"
-                  onClick={() => setOpenGDrive(true)}
-                  href="#"
-                >
-                  Google Drive files
-                </a>
-                <span className="gdrive-icon"></span>
-              </span>
-            )}
+            {googleDriveEnabled &&
+              currentProjectTemplate &&
+              uploadedFilesNames.length === 0 && (
+                <span className="gdrive-addlink-container">
+                  and{' '}
+                  <a
+                    className="load-gdrive"
+                    onClick={() => setOpenGDrive(true)}
+                    href="#"
+                  >
+                    Google Drive files
+                  </a>
+                  <span className="gdrive-icon"></span>
+                </span>
+              )}
           </p>
         )}
         <div className="uploadbtn-box">

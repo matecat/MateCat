@@ -29,17 +29,22 @@ const maxTMXSizePrint =
   parseInt(Math.pow(1024, maxTMXFileSize - Math.floor(maxTMXFileSize)) + 0.5) +
   ' MB'
 
-function UploadFileLocal({uploadedFilesNames}) {
+function UploadFileLocal() {
   const [files, setFiles] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const dragCounter = React.useRef(0)
-  const {sourceLang, targetLangs, currentProjectTemplate} =
-    useContext(CreateProjectContext)
+  const {
+    sourceLang,
+    targetLangs,
+    currentProjectTemplate,
+    setUploadedFilesNames,
+  } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
-  const xliffConfigTemplateId = currentProjectTemplate?.XliffConfigTemplateId
+  const extractionParameterTemplateId =
+    currentProjectTemplate?.filters_template_id
   useEffect(() => {
     restartConversions()
-  }, [sourceLang, xliffConfigTemplateId, segmentationRule])
+  }, [sourceLang, extractionParameterTemplateId, segmentationRule])
 
   useEffect(() => {
     initFileUpload()
@@ -68,176 +73,167 @@ function UploadFileLocal({uploadedFilesNames}) {
       )
     }
   }, [files])
-  const handleFiles = useCallback(
-    (selectedFiles) => {
-      const fileList = Array.from(selectedFiles).map((file) => {
-        let name = file.name
-        // Check if file with the same name already exists
-        const filesSameName = files.filter((f) => f.originalName === name)
-        if (filesSameName.length > 0) {
-          name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
-        }
-        const ext = file.name.split('.').pop()
-        CommonUtils.dispatchCustomEvent('uploaded-file', {extension: ext})
-        return {
-          file,
-          originalName: file.name,
-          name: name,
-          uploadProgress: 0,
-          convertProgress: 0,
-          uploaded: false,
-          converted: false,
-          error: null,
-          zipFolder: false,
-          size: 0,
-          ext: ext,
-        }
-      })
-      //Check if the total number of files exceeds the limit
-      const totalFiles = files.length + fileList.length
-      if (totalFiles > config.maxNumberFiles) {
-        const excessFiles = totalFiles - config.maxNumberFiles
-        fileList.slice(-excessFiles).forEach((f) => {
-          f.error = 'File limit exceeded'
-        })
+  const handleFiles = (selectedFiles) => {
+    const fileList = Array.from(selectedFiles).map((file) => {
+      let name = file.name
+      // Check if file with the same name already exists
+      const filesSameName = files.filter((f) => f.originalName === name)
+      if (filesSameName.length > 0) {
+        name = `${file.name.split('.')[0]}_(${filesSameName.length}).${file.name.split('.')[1]}`
       }
-      setFiles((prevFiles) => prevFiles.concat(fileList))
-      fileList.forEach(({file, name, ext}) => {
-        if (file.error) return
-        const onProgress = (progress) => {
+      const ext = file.name.split('.').pop()
+      CommonUtils.dispatchCustomEvent('uploaded-file', {extension: ext})
+      return {
+        file,
+        originalName: file.name,
+        name: name,
+        uploadProgress: 0,
+        convertProgress: 0,
+        uploaded: false,
+        converted: false,
+        error: null,
+        zipFolder: false,
+        size: 0,
+        ext: ext,
+      }
+    })
+    //Check if the total number of files exceeds the limit
+    const totalFiles = files.length + fileList.length
+    if (totalFiles > config.maxNumberFiles) {
+      const excessFiles = totalFiles - config.maxNumberFiles
+      fileList.slice(-excessFiles).forEach((f) => {
+        f.error = 'File limit exceeded'
+      })
+    }
+    setFiles((prevFiles) => prevFiles.concat(fileList))
+    fileList.forEach(({file, name, ext}) => {
+      if (file.error) return
+      const onProgress = (progress) => {
+        setFiles((prevFiles) =>
+          prevFiles.map((f) =>
+            f.name === name ? {...f, uploadProgress: progress} : f,
+          ),
+        )
+      }
+
+      const onSuccess = (files) => {
+        const fileResponse = JSON.parse(files)[0]
+        const fileError = getFileErrorMessage(fileResponse)
+        if (fileResponse.error || fileError) {
           setFiles((prevFiles) =>
             prevFiles.map((f) =>
-              f.name === name ? {...f, uploadProgress: progress} : f,
+              f.file === file
+                ? {
+                    ...f,
+                    uploaded: false,
+                    error: fileError ? fileError : fileResponse.error,
+                  }
+                : f,
             ),
           )
-        }
-
-        const onSuccess = (files) => {
-          const fileResponse = JSON.parse(files)[0]
-          const fileError = getFileErrorMessage(fileResponse)
-          if (fileResponse.error || fileError) {
-            setFiles((prevFiles) =>
-              prevFiles.map((f) =>
-                f.file === file
-                  ? {
-                      ...f,
-                      uploaded: false,
-                      error: fileError ? fileError : fileResponse.error,
-                    }
-                  : f,
-              ),
-            )
-          } else {
-            setFiles((prevFiles) =>
-              prevFiles.map((f) =>
-                f.file === file
-                  ? {
-                      ...f,
-                      uploaded: true,
-                      size: fileResponse.size,
-                      type: fileResponse.type,
-                    }
-                  : f,
-              ),
-            )
-            const interval = startConvertFakeProgress(file)
-            convertFileRequest({
-              file_name: name,
-              source_lang: sourceLang.code,
-              target_lang: targetLangs.map((lang) => lang.id).join(),
-              segmentation_rule: segmentationRule,
-              filters_extraction_parameters_template_id: xliffConfigTemplateId,
-              restarted_conversion: false,
-            })
-              .then(({data, errors, warnings}) => {
-                clearInterval(interval)
-                if (errors?.length > 0 && errors[0].code <= -14) {
-                  setFiles((prevFiles) =>
-                    prevFiles.map((f) =>
-                      f.file === file
-                        ? {
-                            ...f,
-                            uploaded: false,
-                            error: errors[0].message,
-                          }
-                        : f,
-                    ),
-                  )
-                  return
-                }
-                uploadedFilesNames.push(name)
-                if (data.data.zipFiles) {
-                  const zipFiles = JSON.parse(data.data.zipFiles)
-                  zipFiles.forEach((zipFile) => {
-                    setFiles((prevFiles) =>
-                      prevFiles.concat({
-                        name: zipFile.name,
-                        uploadProgress: 100,
-                        convertedProgress: 100,
-                        converted: true,
-                        uploaded: true,
-                        error: null,
-                        zipFolder: true,
-                        size: zipFile.size,
-                      }),
-                    )
-                    uploadedFilesNames.push(zipFile.name)
-                  })
-                }
-                setFiles((prevFiles) =>
-                  prevFiles.map((f) =>
-                    f.file === file
-                      ? {
-                          ...f,
-                          convertedProgress: 100,
-                          converted: true,
-                          warning: warnings ? warnings[0].message : null,
-                        }
-                      : f,
-                  ),
-                )
-                if (ext === EXTENSIONS.tmx) {
-                  CreateProjectActions.createKeyFromTMXFile({
-                    filename: file.name,
-                  })
-                }
-                CreateProjectActions.enableAnalyzeButton(true)
-              })
-              .catch((e) => {
-                console.log(e)
+        } else {
+          setFiles((prevFiles) =>
+            prevFiles.map((f) =>
+              f.file === file
+                ? {
+                    ...f,
+                    uploaded: true,
+                    size: fileResponse.size,
+                    type: fileResponse.type,
+                  }
+                : f,
+            ),
+          )
+          const interval = startConvertFakeProgress(file)
+          convertFileRequest({
+            file_name: name,
+            source_lang: sourceLang.code,
+            target_lang: targetLangs.map((lang) => lang.id).join(),
+            segmentation_rule: segmentationRule,
+            filters_extraction_parameters_template_id:
+              extractionParameterTemplateId,
+            restarted_conversion: false,
+          })
+            .then(({data, errors, warnings}) => {
+              clearInterval(interval)
+              if (errors?.length > 0 && errors[0].code <= -14) {
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
                     f.file === file
                       ? {
                           ...f,
                           uploaded: false,
-                          error: 'Server error, try again.',
+                          error: errors[0].message,
                         }
                       : f,
                   ),
                 )
-              })
-          }
+                return
+              }
+              setUploadedFilesNames((prev) => prev.concat([name]))
+              if (data.data.zipFiles) {
+                const zipFiles = JSON.parse(data.data.zipFiles)
+                zipFiles.forEach((zipFile) => {
+                  setFiles((prevFiles) =>
+                    prevFiles.concat({
+                      name: zipFile.name,
+                      uploadProgress: 100,
+                      convertedProgress: 100,
+                      converted: true,
+                      uploaded: true,
+                      error: null,
+                      zipFolder: true,
+                      size: zipFile.size,
+                    }),
+                  )
+                  setUploadedFilesNames((prev) => prev.concat([zipFile.name]))
+                })
+              }
+              setFiles((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.file === file
+                    ? {
+                        ...f,
+                        convertedProgress: 100,
+                        converted: true,
+                        warning: warnings ? warnings[0].message : null,
+                      }
+                    : f,
+                ),
+              )
+              if (ext === EXTENSIONS.tmx) {
+                CreateProjectActions.createKeyFromTMXFile({
+                  filename: file.name,
+                })
+              }
+              CreateProjectActions.enableAnalyzeButton(true)
+            })
+            .catch((e) => {
+              console.log(e)
+              setFiles((prevFiles) =>
+                prevFiles.map((f) =>
+                  f.file === file
+                    ? {
+                        ...f,
+                        uploaded: false,
+                        error: 'Server error, try again.',
+                      }
+                    : f,
+                ),
+              )
+            })
         }
+      }
 
-        const onError = (error) => {
-          setFiles((prevFiles) =>
-            prevFiles.map((f) => (f.file === file ? {...f, error} : f)),
-          )
-        }
+      const onError = (error) => {
+        setFiles((prevFiles) =>
+          prevFiles.map((f) => (f.file === file ? {...f, error} : f)),
+        )
+      }
 
-        fileUpload(file, onProgress, onSuccess, onError)
-      })
-    },
-    [
-      files,
-      sourceLang,
-      targetLangs,
-      xliffConfigTemplateId,
-      segmentationRule,
-      uploadedFilesNames,
-    ],
-  )
+      fileUpload(file, onProgress, onSuccess, onError)
+    })
+  }
 
   const getFileErrorMessage = (file) => {
     const {ext, size} = file
@@ -255,6 +251,7 @@ function UploadFileLocal({uploadedFilesNames}) {
   }
 
   const restartConversions = () => {
+    CreateProjectActions.enableAnalyzeButton(false)
     files.forEach((f) => {
       if (f.uploaded && !f.error) {
         convertFileRequest({
@@ -262,7 +259,10 @@ function UploadFileLocal({uploadedFilesNames}) {
           source_lang: sourceLang,
           target_lang: targetLangs.map((lang) => lang.id).join(),
           segmentation_rule: segmentationRule,
-          filters_extraction_parameters_template_id: xliffConfigTemplateId,
+          filters_extraction_parameters_template_id:
+            extractionParameterTemplateId,
+        }).then(() => {
+          CreateProjectActions.enableAnalyzeButton(true)
         })
       }
     })
@@ -270,12 +270,12 @@ function UploadFileLocal({uploadedFilesNames}) {
 
   const deleteFile = (fileName) => {
     setFiles((prevFiles) => prevFiles.filter((f) => f.name !== fileName))
-    uploadedFilesNames = uploadedFilesNames.filter((f) => f !== fileName)
+    setUploadedFilesNames((prev) => prev.filter((f) => f !== fileName))
     fileUploadDelete({
       file: fileName,
       source: sourceLang,
       segmentationRule,
-      filtersTemplateId: xliffConfigTemplateId,
+      filtersTemplateId: extractionParameterTemplateId,
     })
     CreateProjectActions.hideErrors()
   }

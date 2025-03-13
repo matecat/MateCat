@@ -13,16 +13,25 @@ import {deleteGDriveUploadedFile} from '../../api/deleteGdriveUploadedFile'
 import IconClose from '../icons/IconClose'
 import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
+import CreateProjectStore from '../../stores/CreateProjectStore'
+import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
 
-export const UploadGdrive = ({uploadedFilesNames}) => {
+export const UploadGdrive = () => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState([])
-  const {openGDrive, sourceLang, targetLangs, currentProjectTemplate} =
-    useContext(CreateProjectContext)
+  const {
+    openGDrive,
+    sourceLang,
+    targetLangs,
+    currentProjectTemplate,
+    setUploadedFilesNames,
+    setOpenGDrive,
+  } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
-  const xliffConfigTemplateId = currentProjectTemplate?.XliffConfigTemplateId
+  const extractionParameterTemplateId =
+    currentProjectTemplate?.filters_template_id
   const openGDrivePrev = usePrevious(openGDrive)
 
   useEffect(() => {
@@ -43,11 +52,18 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
           ' has been exceeded).',
       )
     }
+    if (files.length === 0) {
+      setOpenGDrive(false)
+    }
   }, [files])
 
-  const gdriveInitComplete = useCallback(() => {
+  useEffect(() => {
+    restartGDriveConversions()
+  }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+
+  const gdriveInitComplete = () => {
     return pickerApiLoaded && authApiLoaded
-  }, [pickerApiLoaded, authApiLoaded])
+  }
 
   const tryToRefreshToken = (service) => {
     return getUserConnectedService(service.id)
@@ -100,6 +116,10 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
   }
 
   const pickerCallback = (data) => {
+    if (data[google.picker.Response.ACTION] == google.picker.Action.CANCEL) {
+      files.length === 0 && setOpenGDrive(false)
+      return
+    }
     if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
       let exportIds = []
       data[google.picker.Response.DOCUMENTS].forEach((doc) => {
@@ -117,7 +137,8 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
         sourceLang: sourceLang.code,
         targetLang: targetLangs.map((lang) => lang.id).join(),
         segmentation_rule: segmentationRule,
-        filters_extraction_parameters_template_id: xliffConfigTemplateId,
+        filters_extraction_parameters_template_id:
+          extractionParameterTemplateId,
       }).then((response) => {
         CreateProjectActions.hideErrors()
         if (response.success) {
@@ -164,7 +185,7 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
 
   const deleteGDriveFile = (file) => {
     deleteGDriveUploadedFile(file.id).then((response) => {
-      uploadedFilesNames = uploadedFilesNames.filter((f) => f !== file.name)
+      setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
       if (response.success) {
         tryListGDriveFiles()
       }
@@ -177,7 +198,7 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
         let filesList = []
         if (listFiles && listFiles.files) {
           listFiles.files.forEach((file) => {
-            uploadedFilesNames.push(file.fileName)
+            setUploadedFilesNames((prev) => prev.concat([file.fileName]))
             filesList.push({
               name: file.fileName,
               ext: file.fileExtension,
@@ -197,6 +218,25 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
       })
   }
 
+  const restartGDriveConversions = () => {
+    if (files.length > 0) {
+      setLoading(true)
+      CreateProjectActions.enableAnalyzeButton(false)
+      changeGDriveSourceLang({
+        sourceLang: sourceLang.code,
+        segmentation_rule: segmentationRule,
+        filters_extraction_parameters_template_id:
+          extractionParameterTemplateId,
+      }).then((response) => {
+        setLoading(false)
+        if (response.success) {
+          CreateProjectActions.enableAnalyzeButton(true)
+          console.log('Source language changed.')
+        }
+      })
+    }
+  }
+
   const showPreferencesWithMessage = () => {
     ModalsActions.openPreferencesModal({showGDriveMessage: true})
   }
@@ -206,7 +246,13 @@ export const UploadGdrive = ({uploadedFilesNames}) => {
       <div
         className={`upload-files-container ${files.length > 0 ? 'add-files' : ''}`}
       >
-        {loading && <div className="fileupload-loading" />}
+        {loading && (
+          <div className="modal-gdrive">
+            <div className="ui active inverted dimmer">
+              <div className="ui massive text loader">Uploading Files</div>
+            </div>
+          </div>
+        )}
         {files.length > 0 && (
           <>
             <div className="upload-files-list">
