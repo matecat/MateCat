@@ -13,7 +13,6 @@ import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import More from '../../../../img/icons/More'
-import UploadFileLocal from '../components/createProject/UploadFileLocal'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -88,7 +87,7 @@ const NewProject = () => {
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
-  const [openGdrive, setOpenGdrive] = useState(false)
+  const [openGDrive, setOpenGDrive] = useState(false)
 
   const uploadedFilesNames = useRef([])
 
@@ -756,6 +755,9 @@ const NewProject = () => {
         setSelectedTeam,
         subject,
         setSubject,
+        openGDrive,
+        setOpenGDrive,
+        currentProjectTemplate,
       }}
     >
       <HeaderPortal>
@@ -887,30 +889,7 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-        {typeof isUserLogged === 'boolean' ? (
-          isUserLogged ? (
-            <UploadFile
-              uploadedFilesNames={uploadedFilesNames.current}
-              segmentationRule={currentProjectTemplate?.segmentationRule.id}
-              xliffConfigTemplateId={
-                currentProjectTemplate?.XliffConfigTemplateId
-              }
-              sourceLang={sourceLang.id}
-              targetLangs={targetLangs}
-              openGdrive={openGdrive}
-            />
-          ) : (
-            <div className="upload-box-not-logged">
-              <h2>
-                <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create
-                a project.
-              </h2>
-              <span>Start translating now!</span>
-            </div>
-          )
-        ) : (
-          <div className="upload-waiting-logged"></div>
-        )}
+        <UploadFile uploadedFilesNames={uploadedFilesNames.current} />
       </div>
       <div className="wrapper-bottom">
         {conversionEnabled && (
@@ -930,12 +909,12 @@ const NewProject = () => {
               {formatsNumber} file formats{' '}
             </a>
             <span style={{float: 'right'}}>.</span>
-            {googleDriveEnabled && (
+            {googleDriveEnabled && uploadedFilesNames.current.length === 0 && (
               <span className="gdrive-addlink-container">
                 and{' '}
                 <a
                   className="load-gdrive"
-                  onClick={() => setOpenGdrive(true)}
+                  onClick={() => setOpenGDrive(true)}
                   href="#"
                 >
                   Google Drive files

@@ -59,13 +59,13 @@ const postProjectCreation = (data) => {
     } else {
       const userInfo = UserStore.getUser()
 
-      const data = {
+      const dataEvent = {
         event: 'analyze_click',
         userStatus: 'loggedUser',
         userId: userInfo.user.uid,
         idProject: data.id_project,
       }
-      CommonUtils.dispatchAnalyticsEvents(data)
+      CommonUtils.dispatchAnalyticsEvents(dataEvent)
       location.href = data.analyze_url
     }
   }

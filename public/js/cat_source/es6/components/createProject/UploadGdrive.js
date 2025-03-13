@@ -1,31 +1,29 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useContext, useEffect, useState} from 'react'
 import UserStore from '../../stores/UserStore'
 import ModalsActions from '../../actions/ModalsActions'
 import {getUserConnectedService} from '../../api/getUserConnectedService'
-import CreateProjectStore from '../../stores/CreateProjectStore'
 import {openGDriveFiles} from '../../api/openGDriveFiles'
 import CreateProjectActions from '../../actions/CreateProjectActions'
 import {getGoogleDriveUploadedFiles} from '../../api/getGoogleDriveUploadedFiles'
 import CommonUtils from '../../utils/commonUtils'
-import {getPrintableFileSize} from './UploadFile'
+import {FILES_TYPE, getPrintableFileSize} from './UploadFile'
 import {Button, BUTTON_SIZE, BUTTON_TYPE} from '../common/Button/Button'
 import {DeleteIcon} from '../segments/SegmentFooterTabGlossary'
 import {deleteGDriveUploadedFile} from '../../api/deleteGdriveUploadedFile'
 import IconClose from '../icons/IconClose'
+import {usePrevious} from '../../hooks/usePrevious'
+import {CreateProjectContext} from './CreateProjectContext'
 
-export const UploadGdrive = ({
-  openGdrive,
-  uploadedFilesNames,
-  sourceLang,
-  targetLangs,
-  xliffConfigTemplateId,
-  segmentationRule,
-  setUploadFilesType,
-}) => {
+export const UploadGdrive = ({uploadedFilesNames}) => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState([])
+  const {openGDrive, sourceLang, targetLangs, currentProjectTemplate} =
+    useContext(CreateProjectContext)
+  const segmentationRule = currentProjectTemplate?.segmentationRule.id
+  const xliffConfigTemplateId = currentProjectTemplate?.XliffConfigTemplateId
+  const openGDrivePrev = usePrevious(openGDrive)
 
   useEffect(() => {
     gapi.load('auth', {callback: setAuthApiLoaded(true)})
@@ -33,18 +31,29 @@ export const UploadGdrive = ({
   }, [])
 
   useEffect(() => {
-    openGdrive && openGdrivePicker()
-  }, [openGdrive])
+    openGDrive && !openGDrivePrev && openGDrivePicker()
+  }, [openGDrive, openGDrivePrev])
 
-  const gdriveInitComplete = () => {
+  useEffect(() => {
+    CreateProjectActions.enableAnalyzeButton(files.length > 0)
+    if (files.length >= config.maxNumberFiles) {
+      CreateProjectActions.showError(
+        'No more files can be loaded (the limit of ' +
+          config.maxNumberFiles +
+          ' has been exceeded).',
+      )
+    }
+  }, [files])
+
+  const gdriveInitComplete = useCallback(() => {
     return pickerApiLoaded && authApiLoaded
-  }
+  }, [pickerApiLoaded, authApiLoaded])
 
   const tryToRefreshToken = (service) => {
     return getUserConnectedService(service.id)
   }
 
-  const openGdrivePicker = () => {
+  const openGDrivePicker = () => {
     if (!gdriveInitComplete()) {
       console.log('gdriveInitComplete not complete')
       return
@@ -105,7 +114,7 @@ export const UploadGdrive = ({
       setLoading(true)
       openGDriveFiles({
         encodedJson: encodeURIComponent(JSON.stringify(jsonDoc)),
-        sourceLang: sourceLang,
+        sourceLang: sourceLang.code,
         targetLang: targetLangs.map((lang) => lang.id).join(),
         segmentation_rule: segmentationRule,
         filters_extraction_parameters_template_id: xliffConfigTemplateId,
@@ -163,21 +172,29 @@ export const UploadGdrive = ({
   }
 
   const tryListGDriveFiles = () => {
-    getGoogleDriveUploadedFiles().then((listFiles) => {
-      let filesList = []
-      if (listFiles && listFiles.files) {
-        listFiles.files.forEach((file) => {
-          uploadedFilesNames.push(file.fileName)
-          filesList.push({
-            name: file.fileName,
-            ext: file.fileExtension,
-            size: file.fileSize,
-            id: file.fileId,
+    getGoogleDriveUploadedFiles()
+      .then((listFiles) => {
+        let filesList = []
+        if (listFiles && listFiles.files) {
+          listFiles.files.forEach((file) => {
+            uploadedFilesNames.push(file.fileName)
+            filesList.push({
+              name: file.fileName,
+              ext: file.fileExtension,
+              size: file.fileSize,
+              id: file.fileId,
+            })
           })
-        })
-      }
-      setFiles(filesList)
-    })
+          CreateProjectActions.enableAnalyzeButton(true)
+        }
+        setFiles(filesList)
+      })
+      .catch((error) => {
+        if (error.code === 400) {
+          const message = <span>{error.msg}</span>
+          CreateProjectActions.showError(message)
+        }
+      })
   }
 
   const showPreferencesWithMessage = () => {
@@ -185,53 +202,56 @@ export const UploadGdrive = ({
   }
 
   return (
-    <div
-      className={`upload-files-container ${files.length > 0 ? 'add-files' : ''}`}
-    >
-      {loading && <div className="fileupload-loading" />}
-      {files.length > 0 && (
-        <>
-          <div className="upload-files-list">
-            {files.map((f, idx) => (
-              <div key={idx} className="file-item">
-                <div className="file-item-name">
-                  <span
-                    className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
-                  />
-                  {f.name}
+    openGDrive && (
+      <div
+        className={`upload-files-container ${files.length > 0 ? 'add-files' : ''}`}
+      >
+        {loading && <div className="fileupload-loading" />}
+        {files.length > 0 && (
+          <>
+            <div className="upload-files-list">
+              {files.map((f, idx) => (
+                <div key={idx} className="file-item">
+                  <div className="file-item-name">
+                    <span
+                      className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
+                    />
+                    {f.name}
+                  </div>
+                  <div>{getPrintableFileSize(f.size)}</div>
+                  <Button
+                    size={BUTTON_SIZE.ICON_SMALL}
+                    style={{marginLeft: 'auto'}}
+                    tooltip={'Remove file'}
+                    onClick={() => deleteGDriveFile(f)}
+                  >
+                    <DeleteIcon />
+                  </Button>
                 </div>
-                <div>{getPrintableFileSize(f.size)}</div>
-                <Button
-                  size={BUTTON_SIZE.ICON_SMALL}
-                  style={{marginLeft: 'auto'}}
-                  tooltip={'Remove file'}
-                  onClick={() => deleteGDriveFile(f)}
-                >
-                  <DeleteIcon />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <div className="upload-files-buttons">
-            <Button
-              type={BUTTON_TYPE.PRIMARY}
-              onClick={() => openGdrivePicker()}
-            >
-              <img
-                src="/public/img/logo-drive-16.png"
-                alt="Google drive logo"
-              />
-              Add from Google Drive
-            </Button>
-            <Button
-              type={BUTTON_TYPE.WARNING}
-              onClick={() => files.forEach((f) => deleteGDriveFile(f))}
-            >
-              <IconClose /> Clear all
-            </Button>
-          </div>
-        </>
-      )}
-    </div>
+              ))}
+            </div>
+            <div className="upload-files-buttons">
+              <Button
+                type={BUTTON_TYPE.PRIMARY}
+                onClick={() => openGDrivePicker()}
+                disabled={files.length >= config.maxNumberFiles}
+              >
+                <img
+                  src="/public/img/logo-drive-16.png"
+                  alt="Google drive logo"
+                />
+                Add from Google Drive
+              </Button>
+              <Button
+                type={BUTTON_TYPE.WARNING}
+                onClick={() => files.forEach((f) => deleteGDriveFile(f))}
+              >
+                <IconClose /> Clear all
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    )
   )
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback} from 'react'
+import React, {useEffect, useState, useCallback, useContext} from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
 import CreateProjectActions from '../../actions/CreateProjectActions'
@@ -13,6 +13,7 @@ import {initFileUpload} from '../../api/initFileUpload'
 import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {FILES_TYPE, getPrintableFileSize} from './UploadFile'
+import {CreateProjectContext} from './CreateProjectContext'
 
 const EXTENSIONS = {
   tmx: 'tmx',
@@ -28,18 +29,14 @@ const maxTMXSizePrint =
   parseInt(Math.pow(1024, maxTMXFileSize - Math.floor(maxTMXFileSize)) + 0.5) +
   ' MB'
 
-function UploadFileLocal({
-  uploadedFilesNames,
-  sourceLang,
-  targetLangs,
-  xliffConfigTemplateId,
-  segmentationRule,
-  setUploadFilesType,
-}) {
+function UploadFileLocal({uploadedFilesNames}) {
   const [files, setFiles] = useState([])
   const [isDragging, setIsDragging] = useState(false)
   const dragCounter = React.useRef(0)
-
+  const {sourceLang, targetLangs, currentProjectTemplate} =
+    useContext(CreateProjectContext)
+  const segmentationRule = currentProjectTemplate?.segmentationRule.id
+  const xliffConfigTemplateId = currentProjectTemplate?.XliffConfigTemplateId
   useEffect(() => {
     restartConversions()
   }, [sourceLang, xliffConfigTemplateId, segmentationRule])
@@ -69,9 +66,6 @@ function UploadFileLocal({
           config.maxNumberFiles +
           ' has been exceeded).',
       )
-    }
-    if (files.length > 0) {
-      setUploadFilesType(FILES_TYPE.LOCAL)
     }
   }, [files])
   const handleFiles = useCallback(
@@ -149,7 +143,7 @@ function UploadFileLocal({
             const interval = startConvertFakeProgress(file)
             convertFileRequest({
               file_name: name,
-              source_lang: sourceLang,
+              source_lang: sourceLang.code,
               target_lang: targetLangs.map((lang) => lang.id).join(),
               segmentation_rule: segmentationRule,
               filters_extraction_parameters_template_id: xliffConfigTemplateId,

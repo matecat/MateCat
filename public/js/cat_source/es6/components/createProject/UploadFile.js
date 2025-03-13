@@ -1,11 +1,9 @@
-import React, {useState} from 'react'
+import React, {useContext} from 'react'
 import UploadFileLocal from './UploadFileLocal'
 import {UploadGdrive} from './UploadGdrive'
-
-export const FILES_TYPE = {
-  GDRIVE: 'gdrive',
-  LOCAL: 'local',
-}
+import ModalsActions from '../../actions/ModalsActions'
+import {CreateProjectContext} from './CreateProjectContext'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
 
 export const getPrintableFileSize = (filesizeInBytes) => {
   filesizeInBytes = filesizeInBytes / 1024
@@ -17,11 +15,25 @@ export const getPrintableFileSize = (filesizeInBytes) => {
   return Math.round(filesizeInBytes * 100, 2) / 100 + ext
 }
 export const UploadFile = ({...props}) => {
-  const [uploadFilesType, setUploadFilesType] = useState(FILES_TYPE.LOCAL)
-  return (
-    <>
-      <UploadFileLocal setUploadFilesType={setUploadFilesType} {...props} />
-      <UploadGdrive setUploadFilesType={setUploadFilesType} {...props} />
-    </>
+  const {openGDrive} = useContext(CreateProjectContext)
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+  return typeof isUserLogged === 'boolean' ? (
+    isUserLogged ? (
+      <>
+        {!openGDrive && <UploadFileLocal {...props} />}
+
+        <UploadGdrive {...props} />
+      </>
+    ) : (
+      <div className="upload-box-not-logged">
+        <h2>
+          <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
+          project.
+        </h2>
+        <span>Start translating now!</span>
+      </div>
+    )
+  ) : (
+    <div className="upload-waiting-logged"></div>
   )
 }
