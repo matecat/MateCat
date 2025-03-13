@@ -213,16 +213,18 @@ let ManageActions = {
       })
   },
 
-  changeProjectName: function (team, project, newName) {
-    changeProjectName(team.get('id'), project.get('id'), newName).then(
-      (response) => {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.CHANGE_PROJECT_NAME,
-          project: project,
-          newProject: response.project,
-        })
-      },
-    )
+  changeProjectName: function (project, newName) {
+    changeProjectName({
+      idProject: project.get('id'),
+      passwordProject: project.get('password'),
+      newName,
+    }).then((response) => {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.CHANGE_PROJECT_NAME,
+        project: project,
+        newName: response.name,
+      })
+    })
   },
 
   changeProjectTeam: function (teamId, project) {
