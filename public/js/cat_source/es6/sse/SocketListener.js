@@ -201,32 +201,6 @@ const SocketListener = ({isAuthenticated, userId}) => {
     quota_exceeded: () => {
       CatToolActions.showLaraQuotaExceeded()
     },
-    global_messages: (data) => {
-      const message = data.message
-      if (
-        message &&
-        (!isUserLogged ||
-          (typeof Cookies.get('msg-' + message.token) == 'undefined' &&
-            new Date(message.expire) > new Date()))
-      ) {
-        const notification = {
-          title: message.title ? message.title : 'Notice',
-          text: message.message,
-          type: message.level ? message.level : 'warning',
-          autoDismiss: false,
-          position: 'bl',
-          allowHtml: true,
-          closeCallback: function () {
-            const expireDate = new Date(message.expire)
-            Cookies.set('msg-' + message.token, '', {
-              expires: expireDate,
-              secure: true,
-            })
-          },
-        }
-        CatToolActions.addNotification(notification)
-      }
-    },
     logout: (data) => {
       console.log('Handling logout:', data)
       // Add your event handling logic here
