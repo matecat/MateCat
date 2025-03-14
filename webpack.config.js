@@ -342,7 +342,7 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      new WebpackConcatPlugin({
+      /*new WebpackConcatPlugin({
         bundles: [
           {
             src: [
@@ -358,14 +358,13 @@ const matecatConfig = async ({env}, {mode}) => {
             },
           },
         ],
-      }),
+      }),*/
       new WebpackConcatPlugin({
         bundles: [
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
               './public/js/lib/jquery-ui-1.14.0.min.js',
-              './public/js/lib/jquery-dateFormat.min.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/libs.js',

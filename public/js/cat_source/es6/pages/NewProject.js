@@ -422,7 +422,7 @@ const NewProject = () => {
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      file_name: uploadedFilesNames.current.join('@@SEP@@'),
+      file_name: uploadedFilesNames.join('@@SEP@@'),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),

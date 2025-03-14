@@ -1176,3 +1176,43 @@ select:focus {
   }
 
 }
+
+.error-message,
+.warning-message {
+  background: #d65757;
+  color: #fff;
+  padding: 10px 0 10px 16px;
+  margin: 10px 0;
+  float: left;
+  font-weight: bold;
+  width: 100%;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border: 1px solid #c45f5f;
+  .icon {
+    float: left;
+    font-size: 25px;
+  }
+  p {
+    line-height: 25px;
+    font-size: 16px;
+    float: left;
+    margin-left: 12px;
+  }
+}
+
+.error-message {
+  a {
+    color: #fff;
+  }
+}
+
+.warning-message {
+  background: rgba(255, 250, 139, 0.38) !important;
+  border-color: #6d6e71;
+  color: #000;
+}
+
+.warning-message span {
+  /*margin-left: 15px;*/
+}
