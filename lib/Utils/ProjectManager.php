@@ -1188,6 +1188,8 @@ class ProjectManager {
 
                 if ( 'tmx' == $ext ) {
 
+                    \Log::doJsonLog("PIPPO ----> " . $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ]);
+
                     $file = new TMSFile(
                             "$this->uploadDir/$fileName",
                             $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ],
