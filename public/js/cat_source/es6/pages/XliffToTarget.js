@@ -24,8 +24,16 @@ export const XliffToTarget = () => {
           user={isUserLogged ? userInfo.user : undefined}
         />
       </HeaderPortal>
-      <div className="wrapper-xliff-to-target">
-        {typeof isUserLogged !== 'undefined' && <UploadXliff />}
+      <div className="xliff-to-target-wrapper">
+        <div className="wrapper-claim">
+          <div className="wrapper-claim-content">
+            <h1>XLIFF to Target File Conversion Tool</h1>
+          </div>
+        </div>
+
+        <div className="wrapper-upload">
+          {typeof isUserLogged !== 'undefined' && <UploadXliff />}
+        </div>
       </div>
       <Footer />
       <SocketListener

@@ -7,6 +7,7 @@
   background-color: colors.$white;
   margin-top: 18px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -64,6 +65,13 @@
       .file-item-warning {
         color: colors.$orangeDefault;
       }
+      .file-item-success {
+        color: colors.$greenDefault;
+      }
+      .file-item-info {
+        display:flex;
+        gap: 16px;
+      }
     }
     .upload-progress {
       width: 60%;
@@ -84,5 +92,6 @@
     align-items: center;
     gap: 8px;
     padding-top: 16px;
+    align-self: flex-start;
   }
 }

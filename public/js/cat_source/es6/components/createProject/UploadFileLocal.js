@@ -12,7 +12,7 @@ import IconClose from '../icons/IconClose'
 import {initFileUpload} from '../../api/initFileUpload'
 import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
-import {FILES_TYPE, getPrintableFileSize} from './UploadFile'
+import {getPrintableFileSize} from './UploadFile'
 import {CreateProjectContext} from './CreateProjectContext'
 
 const EXTENSIONS = {

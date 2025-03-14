@@ -639,7 +639,7 @@ h2 {
 .uploadbtn-box:hover p {
   display: block;
 }
-
+/*#############################################*/
 /*upload table*/
 .upload-table,
 .gdrive-upload-table {
@@ -812,6 +812,8 @@ h2 {
   float: left;
 }
 
+/*###################################*/
+
 a {
   text-decoration: underline;
 }
@@ -857,14 +859,6 @@ body {
 .upload-input:hover {
   border-color: rgba(34, 36, 38, 0.35);
   box-shadow: none;
-}
-
-.ui-progressbar-value {
-  display: none !important;
-}
-
-table .ui-progressbar-value {
-  display: block !important;
 }
 
 a {
@@ -1568,4 +1562,24 @@ select:focus {
     background-size: 24px !important;
     height: 100%;
   }
+}
+
+/* XLIFF TO TARGET */
+// wrapper container page xliff to target
+.xliff_to_target__page {
+  .wrapper-upload {
+    padding-top: 24px;
+  }
+  .upload-files-container {
+    margin-top: 0;
+    &.add-files {
+      align-items: center;
+      gap: 40px;
+    }
+  }
+  footer {
+    position: absolute;
+    bottom: 0;
+  }
+
 }
