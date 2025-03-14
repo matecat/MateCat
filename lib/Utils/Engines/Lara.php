@@ -250,8 +250,7 @@ class Lara extends Engines_AbstractEngine {
             if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1){
 
                 try {
-                    $qualityEstimation = $this->mmt_GET_Fallback->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
-                    $score = $qualityEstimation['score'];
+                    $score = $this->mmt_GET_Fallback->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
 
                     Log::doJsonLog( [
                         'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
@@ -302,14 +301,20 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches(
+        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
             $_config[ 'segment' ],
             $translation,
             100 - $this->getPenalty() . "%",
             "MT-" . $this->getName(),
             date( "Y-m-d" ),
             $score ?? null
-        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
+        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+
+        if(isset($score)){
+            $matchAsArray[ 'score' ] = $score;
+        }
+
+        return $matchAsArray;
     }
 
     /**

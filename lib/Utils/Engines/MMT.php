@@ -660,10 +660,10 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @param $target
      * @param $sentence
      * @param $translation
-     * @return int|null
+     * @return float|null
      * @throws MMTServiceApiException
      */
-    public function getQualityEstimation($source, $target, $sentence, $translation): ?int
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
     {
         $client = $this->_getClient();
         $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation);
