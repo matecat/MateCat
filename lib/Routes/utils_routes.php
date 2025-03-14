@@ -70,6 +70,7 @@ route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', [ 'API\App\QualityFrameworkController', 'job' ] );
 
 route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 'changePassword' ] );
+route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
