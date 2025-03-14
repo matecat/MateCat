@@ -442,36 +442,66 @@ const CommonUtils = {
   },
 
   getGMTDate: function (date, timeZoneFrom) {
+    // Replace hyphens with slashes, if necessary.
     if (typeof date === 'string' && date.indexOf('-') > -1) {
       date = date.replace(/-/g, '/')
     }
+
+    // Get the timezone to show from cookies or default to the system's timezone offset.
     var timezoneToShow = Cookies.get('matecat_timezone')
-    if (timezoneToShow == '') {
+    if (!timezoneToShow) {
       timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
     }
+
+    // Create a Date object from the date parameter.
     var dd = new Date(date)
-    timeZoneFrom = timeZoneFrom
-      ? timeZoneFrom
-      : -1 * (new Date().getTimezoneOffset() / 60) //TODO UTC0 ? Why the browser gmt
+    timeZoneFrom =
+      timeZoneFrom !== undefined
+        ? timeZoneFrom
+        : -1 * (new Date().getTimezoneOffset() / 60)
+
+    // Adjust the date for the timezone difference.
     dd.setMinutes(dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60)
+
+    // Get the GMT timezone string.
     var timeZone = this.getGMTZoneString()
+
+    // Format the Date object using toLocaleString.
     return {
-      day: $.format.date(dd, 'd'),
-      month: $.format.date(dd, 'MMMM'),
-      time:
-        $.format.date(dd, 'hh') +
-        ':' +
-        $.format.date(dd, 'mm') +
-        ' ' +
-        $.format.date(dd, 'a'),
-      time2: $.format.date(dd, 'HH') + ':' + $.format.date(dd, 'mm'),
-      year: $.format.date(dd, 'yyyy'),
+      day: dd.getDate().toString(),
+      month: dd.toLocaleString('default', {month: 'long'}),
+      time: dd.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      time2: dd.toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      year: dd.getFullYear().toString(),
       gmt: timeZone,
       monthIndex: dd.getMonth(),
     }
   },
+
+  formatDate: function (oldDate) {
+    const date = new Date(oldDate)
+
+    // Extract the components
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1 // Months are zero-indexed
+    const day = date.getDate()
+
+    const options12Hour = {hour: '2-digit', minute: '2-digit', hour12: true}
+    const time = date.toLocaleTimeString('en-US', options12Hour)
+
+    // Construct the formatted date string
+    return `${year}-${month}-${day} ${time}`
+  },
+
   getGMTZoneString: function () {
-    // var timezoneToShow = "";
     var timezoneToShow = Cookies.get('matecat_timezone')
     if (timezoneToShow == '') {
       timezoneToShow = -1 * (new Date().getTimezoneOffset() / 60)
