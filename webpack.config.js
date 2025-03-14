@@ -342,7 +342,7 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      new WebpackConcatPlugin({
+      /*new WebpackConcatPlugin({
         bundles: [
           {
             src: [
@@ -358,7 +358,7 @@ const matecatConfig = async ({env}, {mode}) => {
             },
           },
         ],
-      }),
+      }),*/
       new WebpackConcatPlugin({
         bundles: [
           {

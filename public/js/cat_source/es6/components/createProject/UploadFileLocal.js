@@ -268,15 +268,23 @@ function UploadFileLocal() {
     })
   }
 
-  const deleteFile = (fileName) => {
-    setFiles((prevFiles) => prevFiles.filter((f) => f.name !== fileName))
-    setUploadedFilesNames((prev) => prev.filter((f) => f !== fileName))
+  const deleteFile = (file) => {
+    setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name))
+    setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
     fileUploadDelete({
-      file: fileName,
+      file: file.name,
       source: sourceLang,
       segmentationRule,
       filtersTemplateId: extractionParameterTemplateId,
     })
+    if (file.ext === EXTENSIONS.zip) {
+      setFiles((prevFiles) =>
+        prevFiles.filter((f) => !(f.zipFolder && f.name.startsWith(file.name))),
+      )
+      setUploadedFilesNames((prev) =>
+        prev.filter((f) => !(f.zipFolder && f.name.startsWith(file.name))),
+      )
+    }
     CreateProjectActions.hideErrors()
   }
 
@@ -419,7 +427,7 @@ function UploadFileLocal() {
                   )}
                 <Button
                   size={BUTTON_SIZE.ICON_SMALL}
-                  onClick={() => deleteFile(f.name)}
+                  onClick={() => deleteFile(f)}
                   style={{marginLeft: 'auto'}}
                   tooltip={'Remove file'}
                 >
@@ -442,16 +450,14 @@ function UploadFileLocal() {
             </Button>
             <Button
               type={BUTTON_TYPE.WARNING}
-              onClick={() => files.forEach((f) => deleteFile(f.name))}
+              onClick={() => files.forEach((f) => deleteFile(f))}
             >
               <IconClose /> Clear all
             </Button>
             {files.filter((f) => f.error).length > 0 && (
               <Button
                 type={BUTTON_TYPE.WARNING}
-                onClick={() =>
-                  files.forEach((f) => f.error && deleteFile(f.name))
-                }
+                onClick={() => files.forEach((f) => f.error && deleteFile(f))}
               >
                 <IconClose /> Clear all failed
               </Button>
