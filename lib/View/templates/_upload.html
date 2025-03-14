@@ -589,20 +589,8 @@
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-
   var developerKey = '${developerKey}';
   var clientId = '${clientId}';
-
-
-  // window.onGDriveApiLoad = function () {
-  //   setTimeout(()=> {
-  //     if (window.onGDriveApiInit) {
-  //       window.onGDriveApiInit()
-  //     } else {
-  //       window.onGDriveApiLoad
-  //     }
-  //   }, 500)
-  // }
 
 </script>
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
