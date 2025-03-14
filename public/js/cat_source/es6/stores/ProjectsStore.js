@@ -105,16 +105,12 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     )
   },
 
-  changeProjectName: function (project, newProject) {
-    let projectOld = this.projects.find(function (prj) {
+  changeProjectName: function (project, newName) {
+    const currentProject = this.projects.find(function (prj) {
       return prj.get('id') == project.get('id')
     })
-    let indexProject = this.projects.indexOf(projectOld)
-    this.projects = this.projects.setIn([indexProject, 'name'], newProject.name)
-    this.projects = this.projects.setIn(
-      [indexProject, 'project_slug'],
-      newProject.project_slug,
-    )
+    const indexProject = this.projects.indexOf(currentProject)
+    this.projects = this.projects.setIn([indexProject, 'name'], newName)
   },
 
   changeProjectAssignee: function (project, user) {
@@ -281,7 +277,7 @@ AppDispatcher.register(function (action) {
       ProjectsStore.emitChange(action.actionType)
       break
     case ManageConstants.CHANGE_PROJECT_NAME:
-      ProjectsStore.changeProjectName(action.project, action.newProject)
+      ProjectsStore.changeProjectName(action.project, action.newName)
       ProjectsStore.emitChange(
         ManageConstants.UPDATE_PROJECTS,
         ProjectsStore.projects,

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
 
@@ -16,40 +16,47 @@ import {
   DROPDOWN_MENU_ALIGN,
   DropdownMenu,
 } from '../common/DropdownMenu/DropdownMenu'
-import {BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import {
+  Button,
+  BUTTON_HTML_TYPE,
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+} from '../common/Button/Button'
 import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
 import {UserProjectDropdown} from './UserProjectDropdown'
+import {Controller, useForm} from 'react-hook-form'
+import {Input} from '../common/Input/Input'
+import IconEdit from '../icons/IconEdit'
+import Checkmark from '../../../../../img/icons/Checkmark'
+import IconClose from '../icons/IconClose'
 
-class ProjectContainer extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      showAllJobs: true,
-      visibleJobs: [],
-      showAllJobsBoxes: true,
-      lastAction: null,
-      jobsActions: null,
-      projectName: this.props.project.get('name'),
-      idTeamSelected: this.props.project.get('id_team'),
-    }
-    this.getActivityLogUrl = this.getActivityLogUrl.bind(this)
-    this.changeUser = this.changeUser.bind(this)
-    this.hideProject = this.hideProject.bind(this)
-    this.projectTeam = this.props.teams.find(
-      (team) => team.get('id') === this.props.project.get('id_team'),
-    )
-    this.lastActivityController
-  }
+const ProjectContainer = ({
+  project,
+  teams,
+  team,
+  selectedUser,
+  changeStatusFn,
+  downloadTranslationFn,
+}) => {
+  const [lastAction, setLastAction] = useState()
+  const [jobsActions, setJobsActions] = useState()
+  const [idTeamSelected, setIdTeamSelected] = useState(project.get('id_team'))
+  const [shouldShowEditNameIcon, setShouldShowEditNameIcon] = useState(false)
+  const [isEditingName, setIsEditingName] = useState(false)
 
-  hideProject(project) {
-    if (this.props.project.get('id') === project.get('id')) {
-      $(this.project).transition('fly right')
-    }
-  }
+  const {handleSubmit, control, reset} = useForm()
 
-  hideProjectAfterChangeAssignee = (project, user) => {
-    if (this.props.project.get('id') === project.get('id')) {
-      const {selectedUser, team} = this.props
+  const projectRef = useRef()
+  const projectTeam = useRef()
+  projectTeam.current = teams.find(
+    (team) => team.get('id') === project.get('id_team'),
+  )
+  const lastActivityController = useRef()
+
+  const hideProjectAfterChangeAssignee = useRef()
+  hideProjectAfterChangeAssignee.current = (projectCompare, user) => {
+    if (project.get('id') === projectCompare.get('id')) {
       const uid = user ? user.get('uid') : -1
       if (
         (uid !== selectedUser &&
@@ -57,19 +64,21 @@ class ProjectContainer extends React.Component {
         (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
       ) {
         setTimeout(() => {
-          $(this.project).transition('fly right')
+          $(projectRef.current).transition('fly right')
         }, 500)
         setTimeout(() => {
-          ManageActions.removeProject(this.props.project)
+          ManageActions.removeProject(project)
         }, 1000)
-        let name = user?.toJS
+
+        const name = user?.toJS
           ? user.get('first_name') + ' ' + user.get('last_name')
           : 'Not assigned'
-        let notification = {
+
+        const notification = {
           title: 'Assignee changed',
           text:
             'The project ' +
-            this.props.project.get('name') +
+            project.get('name') +
             ' has been assigned to ' +
             name,
           type: 'success',
@@ -82,26 +91,26 @@ class ProjectContainer extends React.Component {
     }
   }
 
-  thereIsChunkOutsourced(idJob) {
-    let outsourceChunk = this.props.project.get('jobs').find(function (item) {
+  const thereIsChunkOutsourced = (idJob) => {
+    const outsourceChunk = project.get('jobs').find(function (item) {
       return !!item.get('outsource') && item.get('id') === idJob
     })
     return !isUndefined(outsourceChunk)
   }
 
-  removeProject() {
-    ManageActions.updateStatusProject(this.props.project, 'cancel')
+  const removeProject = () => {
+    ManageActions.updateStatusProject(project, 'cancel')
   }
 
-  archiveProject() {
-    ManageActions.updateStatusProject(this.props.project, 'archive')
+  const archiveProject = () => {
+    ManageActions.updateStatusProject(project, 'archive')
   }
 
-  activateProject() {
-    ManageActions.updateStatusProject(this.props.project, 'active')
+  const activateProject = () => {
+    ManageActions.updateStatusProject(project, 'active')
   }
 
-  deleteProject() {
+  const deleteProject = () => {
     const props = {
       text:
         'You are about to delete this project permanently. This action cannot be undone.' +
@@ -119,13 +128,13 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  changeUser(value) {
+  const changeUser = (value) => {
     let user
     const idUser = parseInt(value)
-    let team = this.projectTeam
+    const team = projectTeam.current
     if (idUser !== -1) {
-      let newUser = team.get('members').find(function (member) {
-        let user = member.get('user')
+      const newUser = team.get('members').find(function (member) {
+        const user = member.get('user')
         if (user.get('uid') === idUser) {
           return true
         }
@@ -136,27 +145,25 @@ class ProjectContainer extends React.Component {
       user = newUser.get('user')
     }
     if (
-      (!this.props.project.get('id_assignee') && idUser !== -1) ||
-      (this.props.project.get('id_assignee') &&
-        idUser != this.props.project.get('id_assignee'))
+      (!project.get('id_assignee') && idUser !== -1) ||
+      (project.get('id_assignee') && idUser != project.get('id_assignee'))
     ) {
-      ManageActions.changeProjectAssignee(team, this.props.project, user)
+      ManageActions.changeProjectAssignee(team, project, user)
     }
   }
 
-  changeTeam(value) {
-    if (this.props.project.get('id_team') !== parseInt(value)) {
-      ManageActions.changeProjectTeam(value, this.props.project)
-      this.projectTeam = this.props.teams.find(
+  const changeTeam = (value) => {
+    if (project.get('id_team') !== parseInt(value)) {
+      ManageActions.changeProjectTeam(value, project)
+      projectTeam.current = teams.find(
         (team) => parseInt(team.get('id')) === parseInt(value),
       )
-      this.forceUpdate()
     }
   }
 
-  getDropdownProjectMenu(activityLogUrl) {
-    const isArchived = this.props.project.get('is_archived')
-    const isCancelled = this.props.project.get('is_cancelled')
+  const getDropdownProjectMenu = (activityLogUrl) => {
+    const isArchived = project.get('is_archived')
+    const isCancelled = project.get('is_cancelled')
 
     const items = [
       {
@@ -177,7 +184,7 @@ class ProjectContainer extends React.Component {
                   Archive project
                 </>
               ),
-              onClick: () => this.archiveProject(),
+              onClick: archiveProject,
             },
             {
               label: (
@@ -186,7 +193,7 @@ class ProjectContainer extends React.Component {
                   Cancel project
                 </>
               ),
-              onClick: () => this.removeProject(),
+              onClick: removeProject,
             },
           ]
         : []),
@@ -199,7 +206,7 @@ class ProjectContainer extends React.Component {
                   Unarchive project
                 </>
               ),
-              onClick: () => this.activateProject(),
+              onClick: activateProject,
             },
             {
               label: (
@@ -208,7 +215,7 @@ class ProjectContainer extends React.Component {
                   Cancel project
                 </>
               ),
-              onClick: () => this.removeProject(),
+              onClick: removeProject,
             },
           ]
         : []),
@@ -221,7 +228,7 @@ class ProjectContainer extends React.Component {
                   Resume Project
                 </>
               ),
-              onClick: () => this.activateProject(),
+              onClick: activateProject,
             },
             {
               label: (
@@ -230,7 +237,7 @@ class ProjectContainer extends React.Component {
                   Delete project permanently
                 </>
               ),
-              onClick: () => this.deleteProject(),
+              onClick: deleteProject,
             },
           ]
         : []),
@@ -249,109 +256,48 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  getLastAction() {
-    let self = this
-    this.lastActivityController = new AbortController()
+  const getLastAction = useRef()
+  getLastAction.current = () => {
+    lastActivityController.current = new AbortController()
     getLastProjectActivityLogAction(
       {
-        id: this.props.project.get('id'),
-        password: this.props.project.get('password'),
+        id: project.get('id'),
+        password: project.get('password'),
       },
-      this.lastActivityController,
+      lastActivityController.current,
     ).then((data) => {
-      let lastAction = data.activity[0] ? data.activity[0] : null
-      self.setState({
-        lastAction: lastAction,
-        jobsActions: data.activity,
-      })
+      const lastAction = data.activity[0] ? data.activity[0] : null
+      setLastAction(lastAction)
+      setJobsActions(data.activity)
     })
   }
 
-  getLastJobAction(idJob) {
+  const getLastJobAction = (idJob) => {
     //Last Activity Log Action
     let lastAction
-    if (this.state.jobsActions && this.state.jobsActions.length > 0) {
-      lastAction = this.state.jobsActions.find(function (job) {
+    if (jobsActions && jobsActions.length > 0) {
+      lastAction = jobsActions.find(function (job) {
         return job.id_job == idJob
       })
     }
     return lastAction
   }
 
-  getActivityLogUrl() {
-    return (
-      '/activityLog/' +
-      this.props.project.get('id') +
-      '/' +
-      this.props.project.get('password')
-    )
+  const getActivityLogUrl = () => {
+    return '/activityLog/' + project.get('id') + '/' + project.get('password')
   }
 
-  getAnalyzeUrl() {
-    return (
-      '/analyze/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      this.props.project.get('id') +
-      '-' +
-      this.props.project.get('password')
-    )
-  }
-
-  getJobSplitUrl(job) {
-    return (
-      '/analyze/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      this.props.project.get('id') +
-      '-' +
-      this.props.project.get('password') +
-      '?open=split&jobid=' +
-      job.get('id')
-    )
-  }
-
-  getJobMergeUrl(job) {
-    return (
-      '/analyze/' +
-      this.props.project.get('project_slug') +
-      '/' +
-      this.props.project.get('id') +
-      '-' +
-      this.props.project.get('password') +
-      '?open=merge&jobid=' +
-      job.get('id')
-    )
-  }
-
-  getJobSplitOrMergeButton(isChunk, mergeUrl) {
-    if (isChunk) {
-      return (
-        <a
-          className="merge ui basic button"
-          target="_blank"
-          href={mergeUrl}
-          rel="noreferrer"
-        >
-          <i className="icon-compress icon" /> Merge
-        </a>
-      )
-    } else {
-      return ''
-    }
-  }
-
-  getLastActionDate() {
-    let date = new Date(this.state.lastAction.event_date)
+  const getLastActionDate = () => {
+    let date = new Date(lastAction.event_date)
     return date.toDateString()
   }
 
-  getJobsList(targetsLangs, jobsList, jobsLength) {
-    let self = this
+  const getJobsList = (jobsLength) => {
+    const jobsList = []
     let chunks = [],
       index
-    let tempIdsArray = []
-    let orderedJobs = this.props.project.get('jobs')
+    const tempIdsArray = []
+    let orderedJobs = project.get('jobs')
     orderedJobs.map(function (job, i) {
       let next_job_id = orderedJobs.get(i + 1)
         ? orderedJobs.get(i + 1).get('id')
@@ -373,62 +319,57 @@ class ProjectContainer extends React.Component {
         index = 0
       }
 
-      //Create the Jobs boxes and, if visibles, the jobs body
-      if (
-        self.state.showAllJobs ||
-        self.state.visibleJobs.indexOf(job.get('id')) > -1 ||
-        jobsLength === 1
-      ) {
-        let lastAction = self.getLastJobAction(job.get('id'))
-        let isChunkOutsourced = self.thereIsChunkOutsourced(job.get('id'))
-        let item = (
-          <JobContainer
-            key={job.get('id') + '-' + i}
-            job={job}
-            index={index}
-            project={self.props.project}
-            jobsLenght={jobsLength}
-            changeStatusFn={self.props.changeStatusFn}
-            downloadTranslationFn={self.props.downloadTranslationFn}
-            isChunk={isChunk}
-            lastAction={lastAction}
-            isChunkOutsourced={isChunkOutsourced}
-            activityLogUrl={self.getActivityLogUrl()}
-          />
-        )
-        chunks.push(item)
-        if (job.get('id') !== next_job_id) {
-          let jobList = (
-            <div
-              className="job ui grid"
-              key={i - 1 + '-' + job.get('id')}
-              data-testid={job.get('id')}
-            >
-              <div className="job-body sixteen wide column">
-                <div className="ui grid chunks">{chunks}</div>
-              </div>
+      const lastAction = getLastJobAction(job.get('id'))
+      const isChunkOutsourced = thereIsChunkOutsourced(job.get('id'))
+      let item = (
+        <JobContainer
+          key={job.get('id') + '-' + i}
+          job={job}
+          index={index}
+          project={project}
+          jobsLenght={jobsLength}
+          changeStatusFn={changeStatusFn}
+          downloadTranslationFn={downloadTranslationFn}
+          isChunk={isChunk}
+          lastAction={lastAction}
+          isChunkOutsourced={isChunkOutsourced}
+          activityLogUrl={getActivityLogUrl()}
+        />
+      )
+      chunks.push(item)
+      if (job.get('id') !== next_job_id) {
+        let jobList = (
+          <div
+            className="job ui grid"
+            key={i - 1 + '-' + job.get('id')}
+            data-testid={job.get('id')}
+          >
+            <div className="job-body sixteen wide column">
+              <div className="ui grid chunks">{chunks}</div>
             </div>
-          )
-          jobsList.push(jobList)
-          chunks = []
-        }
+          </div>
+        )
+        jobsList.push(jobList)
+        chunks = []
       }
     })
+
+    return jobsList
   }
 
-  openAddMember() {
-    ManageActions.openAddTeamMemberModal(this.projectTeam.toJS())
+  const openAddMember = () => {
+    ManageActions.openAddTeamMemberModal(projectTeam.current.toJS())
   }
 
-  createUserDropDown = (users) => {
+  const createUserDropDown = (users) => {
     return (
       <UserProjectDropdown
         {...{
           users: users.toJS(),
-          project: this.props.project.toJS(),
-          openAddMember: this.openAddMember.bind(this),
-          changeUser: this.changeUser.bind(this),
-          idAssignee: this.props.project.get('id_assignee'),
+          project: project.toJS(),
+          openAddMember: openAddMember,
+          changeUser: changeUser,
+          idAssignee: project.get('id_assignee'),
         }}
       />
     )
@@ -438,39 +379,34 @@ class ProjectContainer extends React.Component {
    * To add informations from the plugins
    * @returns {string}
    */
-  moreProjectInfo() {
+  const moreProjectInfo = () => {
     return ''
   }
 
-  getDropDownUsers() {
+  const getDropDownUsers = () => {
     let result = ''
-    var self = this
-    if (this.props.team.get('type') == 'personal') {
-      if (this.props.teams) {
-        if (self.projectTeam && self.projectTeam.get('members')) {
-          result = this.createUserDropDown(self.projectTeam.get('members'))
+    if (team.get('type') == 'personal') {
+      if (teams) {
+        if (projectTeam.current && projectTeam.current.get('members')) {
+          result = createUserDropDown(projectTeam.current.get('members'))
         } else {
           UserActions.getAllTeams()
         }
       }
-    } else if (this.props.team.get('members')) {
-      result = this.createUserDropDown(this.props.team.get('members'))
+    } else if (team.get('members')) {
+      result = createUserDropDown(team.get('members'))
     }
     return result
   }
 
-  getDropDownTeams = () => {
-    const teams = this.props.teams?.toJS() ?? []
-    const {idTeamSelected} = this.state
-
-    const items = teams.map((team) => ({
+  const getDropDownTeams = () => {
+    const teamsCollections = teams?.toJS() ?? []
+    const items = teamsCollections.map((team) => ({
       label: team.name,
       selected: team.id === idTeamSelected,
       onClick: () => {
-        this.changeTeam(team.id)
-        this.setState({
-          idTeamSelected: team.id,
-        })
+        changeTeam(team.id)
+        setIdTeamSelected(team.id)
       },
     }))
 
@@ -481,7 +417,8 @@ class ProjectContainer extends React.Component {
         toggleButtonProps={{
           mode: BUTTON_MODE.BASIC,
           size: BUTTON_SIZE.SMALL,
-          children: teams.find(({id}) => id === idTeamSelected)?.name,
+          children: teamsCollections.find(({id}) => id === idTeamSelected)
+            ?.name,
           testId: 'teams-dropdown',
         }}
         items={items}
@@ -489,13 +426,12 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  getDueDate() {
-    if (this.props.project.get('due_date')) {
+  const getDueDate = () => {
+    if (project.get('due_date')) {
       return (
         <div className="eight wide left aligned column pad-top-0 pad-bottom-0">
           <div className="project-due-date">
-            {'Due Date: ' +
-              moment(this.props.project.get('due_date')).format('LLLL')}
+            {'Due Date: ' + moment(project.get('due_date')).format('LLLL')}
           </div>
         </div>
       )
@@ -505,169 +441,223 @@ class ProjectContainer extends React.Component {
     )
   }
 
-  componentDidMount() {
-    this.getLastAction()
+  useEffect(() => {
+    getLastAction.current()
 
-    ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject)
+    const hideProject = (projectCompare) => {
+      if (project.get('id') === projectCompare.get('id')) {
+        $(projectRef.current).transition('fly right')
+      }
+    }
+
+    ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, hideProject)
     ProjectsStore.addListener(
       ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-      this.hideProjectAfterChangeAssignee,
+      hideProjectAfterChangeAssignee.current,
     )
-  }
 
-  componentWillUnmount() {
-    ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject)
-    ProjectsStore.removeListener(
-      ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-      this.hideProjectAfterChangeAssignee,
-    )
-    this.lastActivityController.abort?.()
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      !nextProps.project.equals(this.props.project) ||
-      nextState.lastAction !== this.state.lastAction ||
-      !nextProps.team.equals(this.props.team) ||
-      !nextProps.teams.equals(this.props.teams) ||
-      nextState.idTeamSelected !== this.state.idTeamSelected
-    )
-  }
-
-  render() {
-    let activityLogUrl = this.getActivityLogUrl()
-    const dropdownProjectMenu = this.getDropdownProjectMenu(activityLogUrl)
-    let jobsLength = this.props.project.get('jobs').size
-
-    let targetsLangs = [],
-      jobsList = []
-    //The list of jobs
-    this.getJobsList(targetsLangs, jobsList, jobsLength)
-
-    let dueDateHtml = this.getDueDate()
-
-    //Last Activity Log Action
-    let lastAction
-    if (this.state.lastAction) {
-      let date = this.getLastActionDate()
-      lastAction = (
-        <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
-          <div className="activity-log">
-            <a
-              href={activityLogUrl}
-              target="_blank"
-              className="right activity-log"
-              title="Activity log"
-              rel="noreferrer"
-              data-testid="last-action-activity"
-            >
-              <i>
-                {' '}
-                <span>
-                  Last action: {this.state.lastAction.action + ' on ' + date}
-                </span>
-                <span> by {this.state.lastAction.first_name}</span>
-              </i>
-            </a>
-          </div>
-        </div>
+    return () => {
+      ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, hideProject)
+      ProjectsStore.removeListener(
+        ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+        hideProjectAfterChangeAssignee.current,
       )
-    } else {
-      lastAction = (
-        <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
-          <div className="activity-log">
-            <a
-              href={activityLogUrl}
-              target="_blank"
-              className="right activity-log"
-              title="Activity log"
-              rel="noreferrer"
-            >
-              <i>
-                {' '}
-                <span>
-                  Created on:{' '}
-                  {this.props.project
-                    .get('jobs')
-                    .first()
-                    .get('formatted_create_date')}
-                </span>
-              </i>
-            </a>
-          </div>
-        </div>
-      )
+      lastActivityController.current.abort?.()
     }
+  }, [project])
 
-    // Project State (Archived or Cancelled)
-    let state = ''
-    if (this.props.project.get('is_archived')) {
-      state = <div className="status-filter">(archived)</div>
-    } else if (this.props.project.get('is_cancelled')) {
-      state = <div className="status-filter">(cancelled)</div>
-    }
+  const handleFormSubmit = (formData) => {
+    const {name} = formData
+    ManageActions.changeProjectName(project, name)
+    setIsEditingName(false)
+  }
 
-    // Users dropdown
-    const dropDownUsers = this.getDropDownUsers()
-    const dropDownTeams = this.getDropDownTeams()
+  const changeNameFormId = `project-change-name-${project.get('id')}`
 
-    return (
-      <div
-        className="project ui column grid shadow-1"
-        id={'project-' + this.props.project.get('id')}
-        ref={(project) => (this.project = project)}
-      >
-        <div className="sixteen wide column">
-          <div className="project-header ui grid">
-            <div className="nine wide column">
-              <div className="ui stackable grid">
-                <div className="sixteen wide column project-title">
-                  <div className="ui ribbon label">
-                    <div className="project-id" title="Project id">
-                      {'(' + this.props.project.get('id') + ')'}
-                    </div>
+  const changeNameForm = (
+    <form
+      id={changeNameFormId}
+      className="project-container-form-edit-name"
+      onSubmit={handleSubmit(handleFormSubmit)}
+      onReset={() => {
+        reset()
+        setIsEditingName(false)
+      }}
+    >
+      <fieldset>
+        <Controller
+          control={control}
+          defaultValue={project.get('name')}
+          name="name"
+          render={({field: {name, onChange, value}, fieldState: {error}}) => (
+            <Input
+              autoFocus
+              placeholder="Name"
+              {...{name, value, onChange, error}}
+            />
+          )}
+        />
+      </fieldset>
+    </form>
+  )
+
+  const activityLogUrl = getActivityLogUrl()
+  const dropdownProjectMenu = getDropdownProjectMenu(activityLogUrl)
+  const jobsLength = project.get('jobs').size
+
+  //The list of jobs
+  const jobsList = getJobsList(jobsLength)
+
+  // Users dropdown
+  const dropDownUsers = getDropDownUsers()
+  const dropDownTeams = getDropDownTeams()
+
+  const state = project.get('is_archived') ? (
+    <div className="status-filter">(archived)</div>
+  ) : project.get('is_cancelled') ? (
+    <div className="status-filter">(cancelled)</div>
+  ) : (
+    ''
+  )
+
+  return (
+    <div
+      className="project ui column grid shadow-1"
+      id={'project-' + project.get('id')}
+      ref={projectRef}
+    >
+      <div className="sixteen wide column">
+        <div className="project-header ui grid">
+          <div className="nine wide column">
+            <div className="ui stackable grid">
+              <div
+                className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
+                onMouseLeave={() => setShouldShowEditNameIcon(false)}
+              >
+                <div className="ui ribbon label">
+                  <div className="project-id" title="Project id">
+                    {'(' + project.get('id') + ')'}
+                  </div>
+                  {isEditingName ? (
+                    changeNameForm
+                  ) : (
                     <div
                       className="project-name"
                       title="Project name"
                       data-testid="project-name"
+                      onMouseOver={() => setShouldShowEditNameIcon(true)}
                     >
-                      {this.state.projectName}
+                      {project.get('name')}
                     </div>
-                  </div>
-                  {(state !== '' || this.props.project.get('is_cancelled')) && (
-                    <div className="project-header-more">{state}</div>
                   )}
-                  {this.moreProjectInfo()}
                 </div>
-              </div>
-            </div>
+                {shouldShowEditNameIcon && !isEditingName && (
+                  <Button
+                    className="project-container-button-edit-name"
+                    mode={BUTTON_MODE.GHOST}
+                    size={BUTTON_SIZE.ICON_SMALL}
+                    onClick={() => setIsEditingName(true)}
+                  >
+                    <IconEdit />
+                  </Button>
+                )}
+                {isEditingName && (
+                  <>
+                    <Button
+                      type={BUTTON_TYPE.PRIMARY}
+                      size={BUTTON_SIZE.SMALL}
+                      htmlType={BUTTON_HTML_TYPE.SUBMIT}
+                      form={changeNameFormId}
+                    >
+                      <Checkmark size={14} />
+                      Confirm
+                    </Button>
 
-            <div className="seven wide right floated column pad-top-8">
-              <div className="ui mobile reversed stackable grid right aligned">
-                <div className="sixteen wide right floated column">
-                  <div className="project-activity-icon">
-                    {dropDownTeams}
-                    {dropDownUsers}
-                    {dropdownProjectMenu}
-                  </div>
-                </div>
+                    <Button
+                      type={BUTTON_TYPE.WARNING}
+                      size={BUTTON_SIZE.SMALL}
+                      htmlType={BUTTON_HTML_TYPE.RESET}
+                      form={changeNameFormId}
+                    >
+                      <IconClose size={11} />
+                    </Button>
+                  </>
+                )}
+                {(state !== '' || project.get('is_cancelled')) && (
+                  <div className="project-header-more">{state}</div>
+                )}
+                {moreProjectInfo()}
               </div>
             </div>
           </div>
-          <div className="project-body ui grid">
-            <div className="jobs sixteen wide column pad-bottom-0">
-              {jobsList}
-            </div>
-          </div>
 
-          <div className="project-footer ui grid">
-            {dueDateHtml}
-            {lastAction}
+          <div className="seven wide right floated column pad-top-8">
+            <div className="ui mobile reversed stackable grid right aligned">
+              <div className="sixteen wide right floated column">
+                <div className="project-activity-icon">
+                  {dropDownTeams}
+                  {dropDownUsers}
+                  {dropdownProjectMenu}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+        <div className="project-body ui grid">
+          <div className="jobs sixteen wide column pad-bottom-0">
+            {jobsList}
+          </div>
+        </div>
+
+        <div className="project-footer ui grid">
+          {getDueDate()}
+          {lastAction ? (
+            <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
+              <div className="activity-log">
+                <a
+                  href={activityLogUrl}
+                  target="_blank"
+                  className="right activity-log"
+                  title="Activity log"
+                  rel="noreferrer"
+                  data-testid="last-action-activity"
+                >
+                  <i>
+                    {' '}
+                    <span>
+                      Last action:{' '}
+                      {lastAction.action + ' on ' + getLastActionDate()}
+                    </span>
+                    <span> by {lastAction.first_name}</span>
+                  </i>
+                </a>
+              </div>
+            </div>
+          ) : (
+            <div className="eight wide right aligned column pad-top-0 pad-bottom-0">
+              <div className="activity-log">
+                <a
+                  href={activityLogUrl}
+                  target="_blank"
+                  className="right activity-log"
+                  title="Activity log"
+                  rel="noreferrer"
+                >
+                  <i>
+                    {' '}
+                    <span>
+                      Created on:{' '}
+                      {project.get('jobs').first().get('formatted_create_date')}
+                    </span>
+                  </i>
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    )
-  }
+    </div>
+  )
 }
 
 export default ProjectContainer

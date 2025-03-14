@@ -94,6 +94,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         return $res;
     }
 
+    /**
+     * @param Projects_ProjectStruct $project
+     * @param $name
+     * @return Projects_ProjectStruct
+     */
+    public function changeName( Projects_ProjectStruct $project, $name ) {
+        $res = $this->updateField( $project, 'name', $name );
+        $this->destroyCacheById( $project->id );
+
+        return $res;
+    }
+
     public function deleteFailedProject( $idProject ) {
 
         if ( empty( $idProject ) ) {
