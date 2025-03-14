@@ -39,7 +39,7 @@ import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/Templa
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
 import {checkGDriveEvents, handleCreationStatus} from '../utils/newProjectUtils'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'

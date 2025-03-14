@@ -252,7 +252,6 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
       ],
       upload: [
-        path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(
           __dirname,

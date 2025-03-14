@@ -5,7 +5,7 @@
 import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 class SegmentHeader extends React.PureComponent {
   static contextType = ApplicationWrapperContext

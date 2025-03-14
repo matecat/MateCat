@@ -7,7 +7,7 @@ import SegmentsDetails from '../components/quality_report/SegmentsDetailsContain
 import JobSummary from '../components/quality_report/JobSummary'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'

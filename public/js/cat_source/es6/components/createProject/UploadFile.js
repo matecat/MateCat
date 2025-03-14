@@ -3,7 +3,7 @@ import UploadFileLocal from './UploadFileLocal'
 import {UploadGdrive} from './UploadGdrive'
 import ModalsActions from '../../actions/ModalsActions'
 import {CreateProjectContext} from './CreateProjectContext'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const getPrintableFileSize = (filesizeInBytes) => {
   filesizeInBytes = filesizeInBytes / 1024
