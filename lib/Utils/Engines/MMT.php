@@ -655,5 +655,19 @@ class Engines_MMT extends Engines_AbstractEngine {
         return null;
     }
 
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return int|null
+     * @throws MMTServiceApiException
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?int
+    {
+        $client = $this->_getClient();
+        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation);
 
+        return $qualityEstimation['score'];
+    }
 }

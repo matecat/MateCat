@@ -531,10 +531,6 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
         }
 
-        if ( $mt_evaluation !== null ) {
-            $_config[ 'mt_evaluation' ] = $mt_evaluation->value == 1;
-        }
-
         // penalty_key
         $penalty_key = [];
         $tm_keys     = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
@@ -605,11 +601,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // Do nothing, skip frame
         }
 
-
-        // mt evaluation => ice_mt
-        $mt_evaluation = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'mt_evaluation', 10 * 60 )->value ?? null;
-
-        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_evaluation );
+        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement );
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
             usort( $matches, "self::_compareScore" );
@@ -639,7 +631,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement, bool $mt_evaluation = null ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
 
         $mt_result = false;
 
@@ -655,6 +647,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // set for lara engine in case, this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
+
+            $mt_evaluation = $config['mt_evaluation'] ?? null;
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );

@@ -100,4 +100,12 @@ interface Engines_EngineInterface {
      */
     public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
 
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return int|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation) : ?int;
 }

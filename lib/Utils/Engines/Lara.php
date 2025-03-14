@@ -6,6 +6,7 @@ use AMQHandler;
 use Constants_Engines;
 use Engine;
 use Engines\MMT\MMTServiceApi;
+use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
 use Engines_MMT;
@@ -246,13 +247,10 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] and $_config['mt_evaluation'] == 1){
-                $mmtClient = MMTServiceApi::newInstance()
-                    ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
-                    ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
+            if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1){
 
                 try {
-                    $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
+                    $qualityEstimation = $this->mmt_GET_Fallback->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
                     $score = $qualityEstimation['score'];
 
                     Log::doJsonLog( [
@@ -264,8 +262,11 @@ class Lara extends Engines_AbstractEngine {
                         'score'                  => $score,
                     ] );
 
-                } catch (\Exception $exception){
-                    $score = 0;
+                } catch (MMTServiceApiException $exception){
+                    Log::doJsonLog( [
+                        'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
+                        'error'                        => $exception->getMessage(),
+                    ] );
                 }
             }
 
@@ -301,19 +302,14 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
+        return ( new Engines_Results_MyMemory_Matches(
             $_config[ 'segment' ],
             $translation,
             100 - $this->getPenalty() . "%",
             "MT-" . $this->getName(),
-            date( "Y-m-d" )
+            date( "Y-m-d" ),
+            $score ?? null
         ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
-
-        if(isset($score)){
-            $matchAsArray[ 'score' ] = $score;
-        }
-
-        return $matchAsArray;
     }
 
     /**
