@@ -7,7 +7,7 @@ import {http, HttpResponse} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 import userEvent from '@testing-library/user-event'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import userMock from '../../../../../mocks/userMock'
 
 // create modal div

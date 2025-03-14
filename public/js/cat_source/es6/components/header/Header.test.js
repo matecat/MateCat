@@ -6,7 +6,7 @@ import {createRoot} from 'react-dom/client'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 import Header from './Header'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import userMock from '../../../../../mocks/userMock'
 
 // create modal div

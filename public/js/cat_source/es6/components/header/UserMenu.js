@@ -1,5 +1,5 @@
 import React, {useContext} from 'react'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {
   POPOVER_ALIGN,
   POPOVER_VERTICAL_ALIGN,
