@@ -376,4 +376,15 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return null;
     }
 
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return float|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
+    {
+        return null;
+    }
 }

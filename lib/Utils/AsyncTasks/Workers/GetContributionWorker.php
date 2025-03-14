@@ -421,13 +421,20 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
+        if ( $contributionStruct->mt_evaluation !== null ) {
+            $_config[ 'mt_evaluation' ] = $contributionStruct->mt_evaluation;
+        }
+
         if ( $contributionStruct->dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
         }
 
         if ( $contributionStruct->tm_prioritization !== null ) {
-
             $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
+        }
+
+        if ( $contributionStruct->mt_evaluation !== null ) {
+            $_config[ 'mt_evaluation' ] = $contributionStruct->mt_evaluation;
         }
 
         if ( !empty( $contributionStruct->penalty_key ) ) {
@@ -536,6 +543,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
+                $config[ 'mt_evaluation' ]       = $contributionStruct->mt_evaluation;
 
                 $mt_result = $mt_engine->get( $config );
             }
