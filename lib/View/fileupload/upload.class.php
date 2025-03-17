@@ -144,7 +144,7 @@ class UploadHandler {
         if ( $this->options[ 'min_file_size' ] &&
             $file_size < $this->options[ 'min_file_size' ]
         ) {
-            $file->error = 'minFileSize';
+            $file->error = 'Error: File is empty';
 
             return false;
         }
@@ -487,17 +487,20 @@ class UploadHandler {
         }
 
         $file_info        = AbstractFilesStorage::pathinfo_fix( $file_name );
+        $source           = $_REQUEST['source'];
+        $segmentationRule = $_REQUEST['segmentationRule'];
+        $filtersTemplate  = $_REQUEST['filtersTemplate'];
 
         //if it's a zip file, delete it and all its contained files.
         if ( $file_info[ 'extension' ] == 'zip' ) {
-            $success = $this->zipFileDelete( $file_name );
+            $success = $this->zipFileDelete( $file_name, $source, $segmentationRule, $filtersTemplate );
         } //if it's a file in a zipped folder, delete it.
         elseif ( preg_match( '#^[^\.]*\.zip/#', $_REQUEST[ 'file' ] ) ) {
             $file_name = ZipArchiveExtended::getInternalFileName( $_REQUEST[ 'file' ] );
 
-            $success = $this->zipInternalFileDelete( $file_name );
+            $success = $this->zipInternalFileDelete( $file_name, $source, $segmentationRule, $filtersTemplate );
         } else {
-            $success = $this->normalFileDelete( $file_name );
+            $success = $this->normalFileDelete( $file_name, $source, $segmentationRule, $filtersTemplate );
         }
 
         header( 'Content-type: application/json' );
@@ -505,18 +508,18 @@ class UploadHandler {
 
     }
 
-    private function normalFileDelete( $file_name ) {
+    private function normalFileDelete( $file_name, $source, $segmentationRule = null, $filtersTemplate = 0 ) {
 
         $file_path = $this->options[ 'upload_dir' ] . $file_name;
 
-        $this->deleteSha( $file_path );
+        $this->deleteSha( $file_path, $source, $segmentationRule, $filtersTemplate );
 
         $success[ $file_name ] = is_file( $file_path ) && $file_name[ 0 ] !== '.' && unlink( $file_path );
 
         return $success;
     }
 
-    private function zipFileDelete( $file_name ) {
+    private function zipFileDelete( $file_name, $source, $segmentationRule = null, $filtersTemplate = 0 ) {
         $file_path = $this->options[ 'upload_dir' ] . $file_name;
 
         $out_file_name = ZipArchiveExtended::getFileName( $file_name );
@@ -529,7 +532,7 @@ class UploadHandler {
 
             while ( $k < count( $containedFiles ) ) {
                 $internalFileName = str_replace( $this->options[ 'upload_dir' ], "", $containedFiles[ $k ] );
-                $success          = array_merge( $success, $this->zipInternalFileDelete( $internalFileName ) );
+                $success          = array_merge( $success, $this->zipInternalFileDelete( $internalFileName, $source, $segmentationRule, $filtersTemplate ) );
                 $k++;
             }
 
@@ -538,9 +541,9 @@ class UploadHandler {
         return $success;
     }
 
-    private function zipInternalFileDelete( $file_name ) {
+    private function zipInternalFileDelete( $file_name, $source, $segmentationRule = null, $filtersTemplate = 0 ) {
         $file_path = $this->options[ 'upload_dir' ] . $file_name;
-        $this->deleteSha( $file_path );
+        $this->deleteSha( $file_path, $source, $segmentationRule, $filtersTemplate );
 
         $out_file_name = ZipArchiveExtended::getFileName( $file_name );
 
@@ -555,7 +558,7 @@ class UploadHandler {
      * @param $file_path
      * @throws Exception
      */
-    private function deleteSha( $file_path ) {
+    private function deleteSha( $file_path, $source, $segmentationRule = null, $filtersTemplateId = 0 ) {
 
         $path_parts = pathinfo($file_path);
         $files = new DirectoryIterator($path_parts['dirname']);

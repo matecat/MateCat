@@ -3,7 +3,7 @@ import {act, render, screen, waitFor} from '@testing-library/react'
 import {http, HttpResponse} from 'msw'
 
 import {mswServer} from '../../../../mocks/mswServer'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import userMock from '../../../../mocks/userMock'
 import React from 'react'
 import {QualityReport} from './QualityReport'

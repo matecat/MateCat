@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
 import CatToolActions from '../../../../actions/CatToolActions'
