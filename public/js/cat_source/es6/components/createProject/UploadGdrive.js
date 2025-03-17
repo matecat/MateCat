@@ -177,6 +177,9 @@ export const UploadGdrive = () => {
               ', Error message: ' +
               message,
           )
+          if (files.length === 0) {
+            setOpenGDrive(false)
+          }
         }
         setLoading(false)
       })
@@ -184,12 +187,17 @@ export const UploadGdrive = () => {
   }
 
   const deleteGDriveFile = (file) => {
-    deleteGDriveUploadedFile(file.id).then((response) => {
-      setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
-      if (response.success) {
-        tryListGDriveFiles()
-      }
-    })
+    deleteGDriveUploadedFile(file.id)
+      .then((response) => {
+        setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
+        if (response.success) {
+          tryListGDriveFiles()
+        }
+      })
+      .catch((error) => {
+        setFiles([])
+      })
+    CreateProjectActions.hideErrors()
   }
 
   const tryListGDriveFiles = () => {

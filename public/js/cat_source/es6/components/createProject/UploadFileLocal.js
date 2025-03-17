@@ -282,7 +282,7 @@ function UploadFileLocal() {
         prevFiles.filter((f) => !(f.zipFolder && f.name.startsWith(file.name))),
       )
       setUploadedFilesNames((prev) =>
-        prev.filter((f) => !(f.zipFolder && f.name.startsWith(file.name))),
+        prev.filter((f) => !f.startsWith(file.name)),
       )
     }
     CreateProjectActions.hideErrors()
