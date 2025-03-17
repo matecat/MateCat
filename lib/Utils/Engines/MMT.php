@@ -3,7 +3,9 @@
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
+use Features\Mmt;
 use Jobs\MetadataDao;
+use TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.
@@ -143,7 +145,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'include_score' ] ?? null
             );
 
-            $matchAsArray = ( new Engines_Results_MyMemory_Matches(
+            return ( new Engines_Results_MyMemory_Matches(
                     $_config[ 'segment' ],
                     $translation[ 'translation' ],
                     100 - $this->getPenalty() . "%",
@@ -151,12 +153,6 @@ class Engines_MMT extends Engines_AbstractEngine {
                     date( "Y-m-d" ),
                     $translation[ 'score' ] ?? null
             ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
-
-            if ( isset( $translation[ 'score' ] ) ) {
-                $matchAsArray[ 'score' ] = $translation[ 'score' ];
-            }
-
-            return $matchAsArray;
 
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );
@@ -669,5 +665,32 @@ class Engines_MMT extends Engines_AbstractEngine {
         $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation);
 
         return $qualityEstimation['score'];
+    }
+
+    /**
+     * @param $config
+     * @param QueueElement $queueElement
+     * @param $mt_evaluation
+     * @return mixed
+     */
+    public function analysisBeforeMTGetContribution( $config, QueueElement $queueElement, $mt_evaluation )
+    {
+        $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $queueElement->params->id_job, 'mt_context' );
+        $mt_context = @array_pop( $contextRs );
+
+        if ( !empty( $mt_context ) ) {
+            $config[ 'mt_context' ] = $mt_context->value;
+        }
+
+        if ( $mt_evaluation ) {
+            $config[ 'include_score' ] = true;
+        }
+
+        $config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
+        $config[ 'priority' ]   = 'background';
+        $config[ 'keys' ]       = $config[ 'id_user' ] ?? [];
+
+        return $config;
+
     }
 }

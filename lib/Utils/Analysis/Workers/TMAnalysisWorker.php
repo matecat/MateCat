@@ -18,6 +18,7 @@ use Constants_TranslationStatus;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
+use Engines_MMT;
 use Engines_MyMemory;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_TMS;
@@ -525,7 +526,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
-        $mt_evaluation  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'mt_evaluation', 10 * 60 );
 
         if ( $dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $dialect_strict->value == 1;
@@ -652,6 +652,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
             //if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
+
+            if($mtEngine instanceof Engines_MMT){
+                $mtEngine->analysisBeforeMTGetContribution($config, $queueElement, $mt_evaluation);
+            }
 
             $mt_result = $mtEngine->get( $config );
 
