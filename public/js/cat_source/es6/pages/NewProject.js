@@ -55,6 +55,7 @@ import {
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
 import {UploadFile} from '../components/createProject/UploadFile'
+import {flushSync} from 'react-dom'
 
 const SELECT_HEIGHT = 324
 
@@ -586,28 +587,36 @@ const NewProject = () => {
   }, [getMTEngines, getTmKeys, isUserLogged])
 
   useEffect(() => {
+    if (!Array.isArray(currentProjectTemplate?.tm)) return
+
     const createKeyFromTMXFile = ({filename}) => {
       const activeTm = currentProjectTemplate.tm
       const haveNoActiveKeys = activeTm.length === 0
 
-      if (activeTm.length) {
+      if (haveNoActiveKeys) {
         tmCreateRandUser().then((response) => {
           const {key} = response.data
-          setTmKeys((prevState) => [
-            ...(prevState ?? []),
-            {
-              r: true,
-              w: true,
-              tm: true,
-              glos: true,
-              owner: true,
-              name: filename,
-              key,
-              is_shared: false,
-              id: key,
-              isActive: true,
-            },
-          ])
+          const tmItem = {
+            r: true,
+            w: true,
+            tm: true,
+            glos: true,
+            owner: true,
+            name: filename,
+            key,
+            is_shared: false,
+            id: key,
+            isActive: true,
+          }
+
+          flushSync(() =>
+            setTmKeys((prevState) => [...(prevState ?? []), tmItem]),
+          )
+
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            tm: [...prevTemplate.tm, tmItem],
+          }))
         })
       }
 
@@ -640,7 +649,7 @@ const NewProject = () => {
         createKeyFromTMXFile,
       )
     }
-  }, [tmKeys])
+  }, [currentProjectTemplate?.tm, modifyingCurrentTemplate])
 
   useEffect(() => {
     if (sourceLang && targetLangs) {
