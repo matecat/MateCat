@@ -104,6 +104,19 @@ class SegmentFooterTabConcordance extends React.Component {
     }
   }
 
+  async copyText(e) {
+    const internalClipboard = document.getSelection()
+    if (internalClipboard) {
+      e.preventDefault()
+      // Get plain text form internalClipboard fragment
+      const plainText = internalClipboard
+        .toString()
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
+      return await navigator.clipboard.writeText(plainText)
+    }
+  }
+
   componentDidMount() {
     SegmentStore.addListener(
       SegmentConstants.FIND_CONCORDANCE,
@@ -195,6 +208,8 @@ class SegmentFooterTabConcordance extends React.Component {
           this.props.tab_class
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
+        onCopy={this.copyText}
+        onCut={this.copyText}
       >
         {' '}
         {!clientConnected ? (
