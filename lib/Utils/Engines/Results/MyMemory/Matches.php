@@ -37,6 +37,8 @@ class Engines_Results_MyMemory_Matches {
 
     public $penalty;
 
+    public $score;
+
     public function __construct() {
 
         //NEEDED TO UNIFORM DATA as array( $matches )
@@ -114,7 +116,8 @@ class Engines_Results_MyMemory_Matches {
             $match[ 'created-by' ]       = $this->_args[ 3 ];
             $match[ 'create-date' ]      = $this->_args[ 4 ];
             $match[ 'last-update-date' ] = $this->_args[ 4 ];
-            $match[ 'prop' ]             = ( isset( $this->_args[ 5 ] ) ? $this->_args[ 5 ] : [] );
+            $match[ 'score' ]            = $this->_args[ 5 ];
+            $match[ 'prop' ]             = ( isset( $this->_args[ 6 ] ) ? $this->_args[ 6 ] : [] );
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
@@ -139,6 +142,7 @@ class Engines_Results_MyMemory_Matches {
         $this->target           = array_key_exists( 'target', $match ) ? $match[ 'target' ] : $target;
         $this->source           = array_key_exists( 'source', $match ) ? $match[ 'source' ] : $source;
         $this->penalty          = array_key_exists( 'penalty', $match ) ? $match[ 'penalty' ] : $source;
+        $this->score            = array_key_exists( 'score', $match ) ? $match[ 'score' ] : '';
 
         $this->prop = $match[ 'prop' ];
 

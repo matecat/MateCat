@@ -190,7 +190,7 @@ class Lara extends Engines_AbstractEngine {
         $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             // for MMT
-            $_config[ 'include_score' ] = true;
+            $_config[ 'include_score' ] = isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1;
             $_config[ 'priority' ]      = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
@@ -301,7 +301,7 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
+        return ( new Engines_Results_MyMemory_Matches(
             $_config[ 'segment' ],
             $translation,
             100 - $this->getPenalty() . "%",
@@ -309,12 +309,6 @@ class Lara extends Engines_AbstractEngine {
             date( "Y-m-d" ),
             $score ?? null
         ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
-
-        if(isset($score)){
-            $matchAsArray[ 'score' ] = $score;
-        }
-
-        return $matchAsArray;
     }
 
     /**
