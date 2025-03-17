@@ -8,20 +8,38 @@ const OPTIONS = [
   {
     id: CHARS_SIZE_COUNTER_TYPES.GOOGLE_ADS,
     name: 'Ads',
-    description:
-      'Lorem ipsum dolor sit amet consectetur. Arcu aliquet vel donec at fermentum nulla neque.',
+    description: (
+      <>
+        Ideal for translating ads.
+        <br />
+        Counts characters like the most popular ads platforms: UTF-16 byte size
+        for Armenian, Chinese, Georgian, Japanese, Korean, Sinhala, and emojis;
+        all other characters count as one.
+      </>
+    ),
   },
   {
     id: CHARS_SIZE_COUNTER_TYPES.EXCLUDE_CJK,
-    name: 'Airbnb',
-    description:
-      'Lorem ipsum dolor sit amet consectetur. Arcu aliquet vel donec at fermentum nulla neque.',
+    name: 'Screen-fit',
+    description: (
+      <>
+        Ideal for content where on-screen text size matters.
+        <br />
+        Counts characters using UTF-16 byte size for Chinese, Japanese and
+        Korean; all other characters count as one
+      </>
+    ),
   },
   {
     id: CHARS_SIZE_COUNTER_TYPES.ALL_ONE,
-    name: 'Always one',
-    description:
-      'Lorem ipsum dolor sit amet consectetur. Arcu aliquet vel donec at fermentum nulla neque.',
+    name: 'Content length',
+    description: (
+      <>
+        Ideal for content where total text length matters.
+        <br />
+        Counts all characters as one.
+      </>
+    ),
   },
 ]
 
@@ -55,7 +73,7 @@ export const CharacterCounterRules = () => {
       <div className="options-box">
         <div className="option-description">
           <h3>Character counter rule</h3>
-          <p>Select how the character counter should count tags:</p>
+          <p>Select how characters should be counted in your project.</p>
         </div>
         <div className="options-box-value">
           <Select
@@ -82,8 +100,8 @@ export const CharacterCounterRules = () => {
 
       <div className="options-box">
         <div className="option-description">
-          <h3>Count tags as characters</h3>
-          <p>Lorem ipsum.</p>
+          <h3>Count characters in tags</h3>
+          <p>Choose whether to count characters within tags.</p>
         </div>
         <div className="options-box-value">
           <Switch
