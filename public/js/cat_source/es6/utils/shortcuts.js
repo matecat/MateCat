@@ -222,6 +222,22 @@ export const Shortcuts = {
           mac: 'option+t',
         },
       },
+      addTags: {
+        label: 'Add missing tags to the target',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+q',
+          mac: 'ctrl+q',
+        },
+      },
+      removeTags: {
+        label: 'Remove tags from the target',
+        equivalent: '',
+        keystrokes: {
+          standard: 'ctrl+shift+q',
+          mac: 'ctrl+shift+q',
+        },
+      },
       navigateTabs: {
         label: 'Navigate segment tabs',
         equivalent: '',
