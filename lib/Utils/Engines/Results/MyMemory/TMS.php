@@ -8,7 +8,6 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
 
     public function __construct( $result ) {
 
-
         $this->responseData    = isset( $result[ 'responseData' ] ) ? $result[ 'responseData' ] : '';
         $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
         $this->responseStatus  = isset( $result[ 'responseStatus' ] ) ? $result[ 'responseStatus' ] : '';
@@ -20,7 +19,36 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
             if ( is_array( $matches ) and !empty( $matches ) ) {
 
                 foreach ( $matches as $match ) {
-                    $currMatch       = new Engines_Results_MyMemory_Matches( $match );
+
+                    if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
+                        $match[ 'last-update-date' ] = "0000-00-00";
+                    }
+
+                    if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
+                        $match[ 'last-update-date' ] = date( "Y-m-d", strtotime( $match[ 'last-update-date' ] ) );
+                    }
+
+                    $match['create-date'] =  isset($match['create-date']) ? date( "Y-m-d", strtotime( $match[ 'create-date' ] ) ) : $match[ 'last-update-date' ];
+
+                    if ( empty( $match[ 'created-by' ] ) ) {
+                        $match[ 'created-by' ] = "Anonymous";
+                    }
+
+                    $match[ 'match' ] = $match[ 'match' ] * 100;
+                    $match[ 'match' ] = $match[ 'match' ] . "%";
+
+                    $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
+
+                    $currMatch = new Engines_Results_MyMemory_Matches(
+                        $match['segment'],
+                        $match['translation'],
+                        $match['match'],
+                        $match['created-by'],
+                        $match['create-date'],
+                        null,
+                        $match['prop'],
+                    );
+
                     $this->matches[] = $currMatch;
                 }
             }

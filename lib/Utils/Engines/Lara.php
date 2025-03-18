@@ -248,25 +248,7 @@ class Lara extends Engines_AbstractEngine {
 
             // Get score from MMT Quality Estimation
             if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1){
-
-                try {
-                    $score = $this->mmt_GET_Fallback->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
-
-                    Log::doJsonLog( [
-                        'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                        'source'                 => $_config[ 'source' ],
-                        'target'                 => $_config[ 'target' ],
-                        'segment'                => $_config[ 'segment' ],
-                        'translation'            => $translation,
-                        'score'                  => $score,
-                    ] );
-
-                } catch (MMTServiceApiException $exception){
-                    Log::doJsonLog( [
-                        'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
-                        'error'                        => $exception->getMessage(),
-                    ] );
-                }
+                $score = $this->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
             }
 
         } catch ( LaraException $t ) {
@@ -309,6 +291,37 @@ class Lara extends Engines_AbstractEngine {
             date( "Y-m-d" ),
             $score ?? null
         ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+    }
+
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return float|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
+    {
+        try {
+            $score = $this->mmt_GET_Fallback->getQualityEstimation($source, $target, $sentence, $translation);
+
+            Log::doJsonLog( [
+                'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                'source'                 => $source,
+                'target'                 => $target,
+                'segment'                => $sentence,
+                'translation'            => $translation,
+                'score'                  => $score,
+            ] );
+
+            return $score;
+
+        } catch (MMTServiceApiException $exception){
+            Log::doJsonLog( [
+                'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
+                'error'                        => $exception->getMessage(),
+            ] );
+        }
     }
 
     /**

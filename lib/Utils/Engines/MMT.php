@@ -129,6 +129,10 @@ class Engines_MMT extends Engines_AbstractEngine {
             $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
         }
 
+        if($_config[ 'job_id' ] and $_config[ 'analysis_before_mt_get_contribution' ]){
+            $_config = $this->analysisBeforeMTGetContribution($_config, $_config[ 'job_id' ], $_config['mt_evaluation'] ?? null);
+        }
+
         try {
             $translation = $client->translate(
                     $_config[ 'source' ],
@@ -669,13 +673,13 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      * @param $config
-     * @param QueueElement $queueElement
+     * @param $id_job
      * @param $mt_evaluation
      * @return mixed
      */
-    public function analysisBeforeMTGetContribution( $config, QueueElement $queueElement, $mt_evaluation )
+    private function analysisBeforeMTGetContribution( $config, $id_job, $mt_evaluation )
     {
-        $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $queueElement->params->id_job, 'mt_context' );
+        $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
         $mt_context = @array_pop( $contextRs );
 
         if ( !empty( $mt_context ) ) {
