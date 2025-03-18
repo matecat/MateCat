@@ -256,7 +256,7 @@ function UploadFileLocal() {
       if (f.uploaded && !f.error) {
         convertFileRequest({
           file_name: f.name,
-          source_lang: sourceLang,
+          source_lang: sourceLang.code,
           target_lang: targetLangs.map((lang) => lang.id).join(),
           segmentation_rule: segmentationRule,
           filters_extraction_parameters_template_id:
