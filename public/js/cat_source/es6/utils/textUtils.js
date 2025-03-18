@@ -352,7 +352,7 @@ const TEXT_UTILS = {
           const difference = matchArr[0].length - matchArr[2].length ?? 0
           start = matchArr.index + difference
           end = start + matchArr[2].length
-          callback(start, end)
+          TEXT_UTILS.handleTagInside(start, end, contentBlock, callback)
         } catch (e) {
           return false
         }
@@ -374,7 +374,8 @@ const TEXT_UTILS = {
           const isNextBreakWord =
             regexWordDelimiter.test(text[end]) || !text[end]
 
-          if (isPreviousBreakWord && isNextBreakWord) callback(start, end)
+          if (isPreviousBreakWord && isNextBreakWord)
+            TEXT_UTILS.handleTagInside(start, end, contentBlock, callback)
         } catch (e) {
           return false
         }
@@ -388,7 +389,7 @@ const TEXT_UTILS = {
         try {
           start = matchArr.index
           end = start + matchArr[0].length
-          callback(start, end)
+          TEXT_UTILS.handleTagInside(start, end, contentBlock, callback)
         } catch (e) {
           return false
         }
@@ -611,6 +612,28 @@ const TEXT_UTILS = {
   removeHiddenCharacters: (value) => value.replace(/\u2060/g, ''),
   stripUnderscore: (value) =>
     value.replace(/_[^_]/g, (match) => match[1].toUpperCase()),
+  hasEntity: (charPosition, contentBlock) =>
+    contentBlock.getEntityAt(charPosition),
+  handleTagInside: (start, end, contentBlock, callback) => {
+    let cursor = start
+    while (cursor < end) {
+      // start
+      while (TEXT_UTILS.hasEntity(cursor, contentBlock) && cursor < end) {
+        cursor++
+      }
+      let tempStart = cursor
+      // end
+      while (!TEXT_UTILS.hasEntity(cursor, contentBlock) && cursor < end) {
+        cursor++
+      }
+      // no entity between, end loop
+      if (cursor === tempStart) {
+        cursor = end
+      }
+      let tempEnd = cursor
+      callback(tempStart, tempEnd)
+    }
+  },
 }
 
 export default TEXT_UTILS
