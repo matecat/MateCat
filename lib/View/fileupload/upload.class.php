@@ -18,23 +18,23 @@ class UploadHandler {
     function __construct() {
 
         $this->options = [
-                'script_url'              => $this->getFullUrl() . '/',
-                'upload_token'            => $_COOKIE[ 'upload_token' ],
-                'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_token' ] ),
-                'upload_url'              => $this->getFullUrl() . '/files/',
-                'param_name'              => 'files',
+            'script_url'              => $this->getFullUrl() . '/',
+            'upload_token'            => $_COOKIE[ 'upload_token' ],
+            'upload_dir'              => Utils::uploadDirFromSessionCookie( $_COOKIE[ 'upload_token' ] ),
+            'upload_url'              => $this->getFullUrl() . '/files/',
+            'param_name'              => 'files',
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
-                'delete_type'             => 'DELETE',
+            'delete_type'             => 'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-                'max_tmx_file_size'       => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
-                'max_file_size'           => INIT::$MAX_UPLOAD_FILE_SIZE,
-                'min_file_size'           => 1,
+            'max_tmx_file_size'       => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
+            'max_file_size'           => INIT::$MAX_UPLOAD_FILE_SIZE,
+            'min_file_size'           => 1,
             // The maximum number of files for the upload directory:
-                'max_number_of_files'     => INIT::$MAX_NUM_FILES,
+            'max_number_of_files'     => INIT::$MAX_NUM_FILES,
             // Set the following option to false to enable resumable uploads:
-                'discard_aborted_uploads' => true,
+            'discard_aborted_uploads' => true,
         ];
     }
 
@@ -42,17 +42,17 @@ class UploadHandler {
         $https = INIT::$PROTOCOL === 'https';
 
         return
-                ( $https ? 'https://' : 'http://' ) .
-                ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
-                ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : ( $_SERVER[ 'SERVER_NAME' ] .
-                        ( $https && $_SERVER[ 'SERVER_PORT' ] === 443 ||
-                        $_SERVER[ 'SERVER_PORT' ] === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ] ) ) ) .
-                rtrim( $_SERVER[ 'REQUEST_URI' ], '/' );
+            ( $https ? 'https://' : 'http://' ) .
+            ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
+            ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : ( $_SERVER[ 'SERVER_NAME' ] .
+                ( $https && $_SERVER[ 'SERVER_PORT' ] === 443 ||
+                $_SERVER[ 'SERVER_PORT' ] === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ] ) ) ) .
+            rtrim( $_SERVER[ 'REQUEST_URI' ], '/' );
     }
 
     protected function set_file_delete_url( $file ) {
         $file->delete_url  = $this->options[ 'script_url' ]
-                . '?file=' . rawurlencode( $file->name );
+            . '?file=' . rawurlencode( $file->name );
         $file->delete_type = $this->options[ 'delete_type' ];
         if ( $file->delete_type !== 'DELETE' ) {
             $file->delete_url .= '&_method=DELETE';
@@ -77,7 +77,7 @@ class UploadHandler {
 
     protected function get_file_objects() {
         return array_values( array_filter( array_map(
-                [ $this, 'get_file_object' ], scandir( $this->options[ 'upload_dir' ] )
+            [ $this, 'get_file_object' ], scandir( $this->options[ 'upload_dir' ] )
         ) ) );
     }
 
@@ -144,7 +144,7 @@ class UploadHandler {
         if ( $this->options[ 'min_file_size' ] &&
             $file_size < $this->options[ 'min_file_size' ]
         ) {
-            $file->error = 'Error: File is empty';
+            $file->error = 'minFileSize';
 
             return false;
         }
@@ -196,7 +196,7 @@ class UploadHandler {
 
     protected function upcount_name( $name ) {
         return preg_replace_callback(
-                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ $this, 'upcount_name_callback' ], $name, 1
+            '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', [ $this, 'upcount_name_callback' ], $name, 1
         );
     }
 
@@ -252,13 +252,13 @@ class UploadHandler {
         if ( $this->validate( $uploaded_file, $file, $error, $index ) ) {
             $file_path   = $this->options[ 'upload_dir' ] . $file->name;
             $append_file = !$this->options[ 'discard_aborted_uploads' ] &&
-                    is_file( $file_path ) && $file->size > filesize( $file_path );
+                is_file( $file_path ) && $file->size > filesize( $file_path );
             clearstatcache();
             if ( $uploaded_file && is_uploaded_file( $uploaded_file ) ) {
                 // multipart/formdata uploads (POST method uploads)
                 if ( $append_file ) {
                     $res = file_put_contents(
-                            $file_path, fopen( $uploaded_file, 'r' ), FILE_APPEND
+                        $file_path, fopen( $uploaded_file, 'r' ), FILE_APPEND
                     );
                     Log::doJsonLog( $res );
                 } else {
@@ -268,7 +268,7 @@ class UploadHandler {
             } else {
                 // Non-multipart uploads (PUT method support)
                 $res = file_put_contents(
-                        $file_path, fopen( 'php://input', 'r' ), $append_file ? FILE_APPEND : 0
+                    $file_path, fopen( 'php://input', 'r' ), $append_file ? FILE_APPEND : 0
                 );
                 Log::doJsonLog( $res );
             }
@@ -350,7 +350,7 @@ class UploadHandler {
 
     public function get() {
         $file_name = isset( $_REQUEST[ 'file' ] ) ?
-                basename( stripslashes( $_REQUEST[ 'file' ] ) ) : null;
+            basename( stripslashes( $_REQUEST[ 'file' ] ) ) : null;
         if ( $file_name ) {
             $info = $this->get_file_object( $file_name );
         } else {
@@ -380,23 +380,23 @@ class UploadHandler {
             // $_FILES is a multi-dimensional array:
             foreach ( $upload[ 'tmp_name' ] as $index => $value ) {
                 $info[] = $this->handle_file_upload(
-                        $upload[ 'tmp_name' ][ $index ],
-                        $upload[ 'name' ][ $index ],
-                        $upload[ 'size' ][ $index ],
-                        $upload[ 'type' ][ $index ],
-                        $upload[ 'error' ][ $index ],
-                        $index
+                    $upload[ 'tmp_name' ][ $index ],
+                    $upload[ 'name' ][ $index ],
+                    $upload[ 'size' ][ $index ],
+                    $upload[ 'type' ][ $index ],
+                    $upload[ 'error' ][ $index ],
+                    $index
                 );
             }
         } elseif ( $upload || isset( $_SERVER[ 'HTTP_X_FILE_NAME' ] ) ) {
             // param_name is a single object identifier like "file",
             // $_FILES is a one-dimensional array:
             $info[] = $this->handle_file_upload(
-                    isset( $upload[ 'tmp_name' ] ) ? $upload[ 'tmp_name' ] : null,
-                    isset( $upload[ 'name' ] ) ? $upload[ 'name' ] : null,
-                    isset( $upload[ 'size' ] ) ? $upload[ 'size' ] : null,
-                    isset( $upload[ 'type' ] ) ? $upload[ 'type' ] : null,
-                    isset( $upload[ 'error' ] ) ? $upload[ 'error' ] : null
+                isset( $upload[ 'tmp_name' ] ) ? $upload[ 'tmp_name' ] : null,
+                isset( $upload[ 'name' ] ) ? $upload[ 'name' ] : null,
+                isset( $upload[ 'size' ] ) ? $upload[ 'size' ] : null,
+                isset( $upload[ 'type' ] ) ? $upload[ 'type' ] : null,
+                isset( $upload[ 'error' ] ) ? $upload[ 'error' ] : null
             );
         }
 
@@ -422,17 +422,17 @@ class UploadHandler {
             $file->size  = null;
             $file->type  = trim( $matches[ 2 ] );
             $file->error = "The file is too large. " .
-                    "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
-                    "\"The server configuration does not conform with Matecat configuration. " .
-                    "Check for max header post size value in the virtualhost configuration or php.ini.\"";
+                "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
+                "\"The server configuration does not conform with Matecat configuration. " .
+                "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
             $info = [ $file ];
 
         } elseif ( $_SERVER[ 'CONTENT_LENGTH' ] >= $uploadParams->getUploadMaxFilesize() ) {
             $info[ 0 ]->error = "The file is too large.  " .
-                    "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
-                    "\"The server configuration does not conform with Matecat configuration. " .
-                    "Check for max file upload value in the virtualhost configuration or php.ini.\"";
+                "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
+                "\"The server configuration does not conform with Matecat configuration. " .
+                "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
         //check for server misconfiguration
 
@@ -469,7 +469,6 @@ class UploadHandler {
          *
          * ----> basename is NOT UTF8 compliant
          */
-
         $file_name = null;
         if ( isset( $_REQUEST[ 'file' ] ) ) {
             $raw_file  = explode( DIRECTORY_SEPARATOR, $_REQUEST[ 'file' ] );
@@ -556,61 +555,88 @@ class UploadHandler {
      * Avoid race conditions by javascript multiple calls
      *
      * @param $file_path
+     * @param $source
+     * @param null $segmentationRule
+     * @param int $filtersTemplateId
      * @throws Exception
      */
     private function deleteSha( $file_path, $source, $segmentationRule = null, $filtersTemplateId = 0 ) {
 
-        $path_parts = pathinfo($file_path);
-        $files = new DirectoryIterator($path_parts['dirname']);
+        $extraction_parameters = null;
 
-        foreach ($files as $file) {
-            if(!$file->isDot()){
-                $hash_file_path = $file->getPath()."/".$file->getFilename();
+        if($filtersTemplateId > 0){
+            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
 
-                // can be present more than one file with the same sha
-                // so in the sha1 file there could be more than one row
-                // $file_sha = glob( $hash_name_for_disk . "*" ); //delete sha1 also
-                $fp = fopen( $hash_file_path, "r+" );
-
-                // no file found
-                if ( !$fp ) {
-                    return;
-                }
-
-                $i = 0;
-                while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
-                    $i++;
-                    if ( $i == 40 ) {
-                        return;
-                    } //exit the loop after 2 seconds, can not acquire the lock
-                    usleep( 50000 );
-                    continue;
-                }
-
-                $file_content       = fread( $fp, filesize( $hash_file_path ) );
-                $file_content_array = explode( "\n", $file_content );
-
-                //remove the last line ( is an empty string )
-                array_pop( $file_content_array );
-
-                $fileName = AbstractFilesStorage::basename_fix( $file_path );
-
-                $key = array_search( $fileName, $file_content_array );
-
-                if ( !is_int( $key ) ) {
-                    fseek( $fp, 0 ); //rewind
-                    ftruncate( $fp, 0 ); //truncate to zero bytes length
-                    fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
-                    fflush( $fp );
-                    flock( $fp, LOCK_UN );    // release the lock
-                    fclose( $fp );
-                } else {
-                    flock( $fp, LOCK_UN );    // release the lock
-                    fclose( $fp );
-                    @unlink( @$hash_file_path );
-                }
+            if($filtersTemplateStruct !== null){
+                $extraction_parameters = $this->getRightExtractionParameter($file_path, $filtersTemplateStruct);
             }
         }
+
+        $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
+
+        $hash_name_for_disk =
+            sha1_file( $file_path )
+            . "_" .
+            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+            . "|" .
+            $source;
+
+        if ( !$hash_name_for_disk ) {
+            return;
+        }
+
+        $path_parts = pathinfo($file_path);
+        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+
+        if(!file_exists($hash_file_path)){
+            return;
+        }
+
+        //can be present more than one file with the same sha
+        //so in the sha1 file there could be more than one row
+        //  $file_sha = glob( $hash_name_for_disk . "*" ); //delete sha1 also
+
+        $fp = fopen( $hash_file_path, "r+" );
+
+        // no file found
+        if ( !$fp ) {
+            return;
+        }
+
+        $i = 0;
+        while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
+            $i++;
+            if ( $i == 40 ) {
+                return;
+            } //exit the loop after 2 seconds, can not acquire the lock
+            usleep( 50000 );
+            continue;
+        }
+
+        $file_content       = fread( $fp, filesize( $hash_file_path ) );
+        $file_content_array = explode( "\n", $file_content );
+
+        //remove the last line ( is an empty string )
+        array_pop( $file_content_array );
+
+        $fileName = AbstractFilesStorage::basename_fix( $file_path );
+
+        $key = array_search( $fileName, $file_content_array );
+        unset( $file_content_array[ $key ] );
+
+        if ( !empty( $file_content_array ) ) {
+            fseek( $fp, 0 ); //rewind
+            ftruncate( $fp, 0 ); //truncate to zero bytes length
+            fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+        } else {
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+            @unlink( @$hash_file_path );
+        }
+
     }
 
     protected function _isRightMime( $fileUp ) {
@@ -641,5 +667,65 @@ class UploadHandler {
         }
 
         return false;
+    }
+
+    /**
+     * @param string $filePath
+     * @param FiltersConfigTemplateStruct $filters_extraction_parameters
+     * @return IDto|null
+     */
+    private function getRightExtractionParameter( string $filePath, FiltersConfigTemplateStruct $filters_extraction_parameters ): ?IDto {
+
+        $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $params = null;
+
+        if ( $filters_extraction_parameters !== null ) {
+
+            // send extraction params based on the file extension
+            switch ( $extension ) {
+                case "json":
+                    if ( isset( $filters_extraction_parameters->json ) ) {
+                        $params = $filters_extraction_parameters->json;
+                    }
+                    break;
+                case "xml":
+                    if ( isset( $filters_extraction_parameters->xml ) ) {
+                        $params = $filters_extraction_parameters->xml;
+                    }
+                    break;
+                case "yml":
+                case "yaml":
+                    if ( isset( $filters_extraction_parameters->yaml ) ) {
+                        $params = $filters_extraction_parameters->yaml;
+                    }
+                    break;
+                case "doc":
+                case "docx":
+                    if ( isset( $filters_extraction_parameters->ms_word ) ) {
+                        $params = $filters_extraction_parameters->ms_word;
+                    }
+                    break;
+                case "xls":
+                case "xlsx":
+                    if ( isset( $filters_extraction_parameters->ms_excel ) ) {
+                        $params = $filters_extraction_parameters->ms_excel;
+                    }
+                    break;
+                case "ppt":
+                case "pptx":
+                    if ( isset( $filters_extraction_parameters->ms_powerpoint ) ) {
+                        $params = $filters_extraction_parameters->ms_powerpoint;
+                    }
+                    break;
+                case "dita":
+                case "ditamap":
+                    if ( isset( $filters_extraction_parameters->dita ) ) {
+                        $params = $filters_extraction_parameters->dita;
+                    }
+                    break;
+            }
+        }
+
+        return $params;
     }
 }
