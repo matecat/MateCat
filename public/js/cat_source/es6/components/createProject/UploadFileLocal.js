@@ -273,7 +273,7 @@ function UploadFileLocal() {
     setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
     fileUploadDelete({
       file: file.name,
-      source: sourceLang,
+      source: sourceLang.code,
       segmentationRule,
       filtersTemplateId: extractionParameterTemplateId,
     })
