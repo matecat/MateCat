@@ -40,10 +40,16 @@ import {
   ONBOARDING_PAGE,
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
-import {charsSizeCounter} from '../utils/charsSizeCounterUtil'
+import {
+  CHARS_SIZE_COUNTER_TYPES,
+  charsSizeCounter,
+} from '../utils/charsSizeCounterUtil'
+import {CatToolInterface} from './CatToolInterface'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
+
+const cattoolInterface = new CatToolInterface()
 
 function CatTool() {
   useHotkeys(
@@ -401,12 +407,21 @@ function CatTool() {
 
   useEffect(() => {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
+      const isValidPresetCharacterMode = Object.values(
+        CHARS_SIZE_COUNTER_TYPES,
+      ).some((value) => value === cattoolInterface.getCharacterCounterMode())
+
       modifyingCurrentTemplate((prevTemplate) => ({
         ...prevTemplate,
         tmPrioritization: jobMetadata?.job?.tm_prioritization === 1,
         characterCounterCountTags:
           jobMetadata?.job?.character_counter_count_tags === 1,
-        characterCounterMode: jobMetadata?.job?.character_counter_mode,
+        characterCounterMode:
+          typeof jobMetadata?.job?.character_counter_mode === 'string'
+            ? jobMetadata?.job?.character_counter_mode
+            : isValidPresetCharacterMode
+              ? cattoolInterface.getCharacterCounterMode()
+              : undefined,
       }))
     }
   }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
