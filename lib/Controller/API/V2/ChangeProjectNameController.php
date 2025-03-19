@@ -48,6 +48,8 @@ class ChangeProjectNameController extends ChunkController
             exit();
         }
 
+        $name = trim($name);
+
         if ( empty($name) ) {
             $code = 400;
             $this->response->status()->setCode( $code );
