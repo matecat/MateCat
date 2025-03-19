@@ -48,7 +48,11 @@ class ChangeProjectNameController extends ChunkController
             exit();
         }
 
+        $name = Utils::sanitizeName($name);
+
         if ( empty($name) ) {
+            $code = 400;
+            $this->response->status()->setCode( $code );
             $this->response->json( [
                 'error' => 'Missing required parameters [`name`]'
             ] );
