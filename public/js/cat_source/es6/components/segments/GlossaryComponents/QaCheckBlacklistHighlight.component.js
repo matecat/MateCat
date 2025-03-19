@@ -10,7 +10,7 @@ class QaCheckBlacklistHighlight extends Component {
   }
   getTermDetails = () => {
     const {contentState, blackListedTerms, start, end, children} = this.props
-    if (tagSignatures.space.regex) {
+    if (tagSignatures.space) {
       const fakeContentBlock = {
         getText: () => contentState.getPlainText(),
         getEntityAt: () => false,

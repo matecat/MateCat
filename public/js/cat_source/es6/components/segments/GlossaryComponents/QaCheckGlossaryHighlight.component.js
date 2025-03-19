@@ -11,7 +11,7 @@ class QaCheckGlossaryHighlight extends Component {
   }
   getTermDetails = () => {
     const {contentState, missingTerms, start, end, children} = this.props
-    if (tagSignatures.space.regex) {
+    if (tagSignatures.space) {
       const fakeContentBlock = {
         getText: () => contentState.getPlainText(),
         getEntityAt: () => false,

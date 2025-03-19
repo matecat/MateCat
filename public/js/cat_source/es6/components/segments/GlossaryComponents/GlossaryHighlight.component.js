@@ -11,7 +11,7 @@ class GlossaryHighlight extends Component {
   }
   getTermDetails = () => {
     const {contentState, glossary, start, end, children} = this.props
-    if (tagSignatures.space.regex) {
+    if (tagSignatures.space) {
       const fakeContentBlock = {
         getText: () => contentState.getPlainText(),
         getEntityAt: () => false,
