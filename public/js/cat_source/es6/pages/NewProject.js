@@ -929,7 +929,7 @@ const NewProject = () => {
                     onClick={() => setOpenGDrive(true)}
                     href="#"
                   >
-                    Google Drive files
+                    Google Drive files <span className="gdrive-icon"></span>
                   </a>
                   <span className="gdrive-icon"></span>
                 </span>

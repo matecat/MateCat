@@ -13,7 +13,6 @@ import {deleteGDriveUploadedFile} from '../../api/deleteGdriveUploadedFile'
 import IconClose from '../icons/IconClose'
 import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
-import CreateProjectStore from '../../stores/CreateProjectStore'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
 
 export const UploadGdrive = () => {
