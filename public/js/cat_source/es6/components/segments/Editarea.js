@@ -502,6 +502,7 @@ class Editarea extends React.Component {
 
   refreshTagMap = () => {
     this.setNewTranslation(this.props.segment.sid, this.props.translation)
+    setTimeout(() => this.checkDecorators(), 100)
   }
 
   componentWillUnmount() {
