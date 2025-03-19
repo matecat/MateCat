@@ -6,6 +6,8 @@ import {
 } from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates from './useTemplates'
 import {cloneDeep, mergeWith} from 'lodash'
+import {ComponentExtendInterface} from '../utils/ComponentExtendInterface'
+import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
 
@@ -71,6 +73,12 @@ export const SCHEMA_KEYS = {
   characterCounterMode: 'character_counter_mode',
 }
 
+export class UseProjectTemplateInterface extends ComponentExtendInterface {
+  getCharacterCounterMode() {}
+}
+
+const useProjectTemplateInterface = new UseProjectTemplateInterface()
+
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
   const {
     templates: projectTemplates,
@@ -95,10 +103,24 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
+            const shouldUsePresetCharacterMode = Object.values(
+              CHARS_SIZE_COUNTER_TYPES,
+            ).some(
+              (value) =>
+                value === useProjectTemplateInterface.getCharacterCounterMode(),
+            )
+
+            const templateDefaultNormalized = {
+              ...templateDefault,
+              ...(shouldUsePresetCharacterMode && {
+                character_counter_mode:
+                  useProjectTemplateInterface.getCharacterCounterMode(),
+              }),
+            }
             // check if users templates have some properties value to undefined or null and assign them default value
             const templatesNormalized = items.map((template) =>
               mergeWith(
-                cloneDeep(templateDefault),
+                cloneDeep(templateDefaultNormalized),
                 cloneDeep(template),
                 (objValue, srcValue) =>
                   typeof srcValue === 'undefined' || srcValue === null
@@ -113,7 +135,7 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
             setProjectTemplates(
               [
                 {
-                  ...templateDefault,
+                  ...templateDefaultNormalized,
                   ...(shouldStandardToBeDefault && {is_default: true}),
                 },
                 ...templatesNormalized,
