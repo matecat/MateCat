@@ -24,6 +24,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
     public bool    $pretranslate_100         = false;
     public bool    $pretranslate_101         = false;
     public bool    $tm_prioritization        = false;
+    public bool    $dialect_strict           = false;
     public bool    $get_public_matches       = true;
     public string  $created_at;
     public ?string $modified_at              = null;
@@ -50,6 +51,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $this->pretranslate_100         = $json->pretranslate_100;
         $this->pretranslate_101         = $json->pretranslate_101;
         $this->tm_prioritization        = $json->tm_prioritization;
+        $this->dialect_strict           = $json->dialect_strict;
         $this->get_public_matches       = $json->get_public_matches;
         $this->mt                       = json_encode( $json->mt );
         $this->tm                       = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
@@ -127,6 +129,7 @@ class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
                 'pretranslate_100'         => $this->pretranslate_100,
                 'pretranslate_101'         => $this->pretranslate_101,
                 'tm_prioritization'        => $this->tm_prioritization,
+                'dialect_strict'           => $this->dialect_strict,
                 'subject'                  => $this->subject,
                 'source_language'          => $this->source_language,
                 'target_language'          => $this->getTargetLanguage(),

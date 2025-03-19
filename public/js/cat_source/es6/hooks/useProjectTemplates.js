@@ -35,6 +35,8 @@ const STANDARD_TEMPLATE = {
   source_language: null,
   subject: null,
   target_language: [],
+  tm_prioritization: false,
+  dialect_strict: false,
 }
 
 const CATTOOL_TEMPLATE = {
@@ -64,6 +66,7 @@ export const SCHEMA_KEYS = {
   subject: 'subject',
   targetLanguage: 'target_language',
   tmPrioritization: 'tm_prioritization',
+  dialectStrict: 'dialect_strict',
 }
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {

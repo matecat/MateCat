@@ -420,6 +420,7 @@ const NewProject = () => {
       payableRateTemplateId,
       XliffConfigTemplateId,
       tmPrioritization,
+      dialectStrict,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -459,6 +460,17 @@ const NewProject = () => {
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
+      ...(dialectStrict && {
+        dialect_strict: JSON.stringify(
+          targetLangs.reduce(
+            (acc, {id}) => ({
+              ...acc,
+              [id]: true,
+            }),
+            {},
+          ),
+        ),
+      }),
     })
 
     if (!projectSent) {
