@@ -23,6 +23,8 @@ import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
 import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
+import {Shortcuts} from '../../utils/shortcuts'
+import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -192,16 +194,26 @@ class SegmentTarget extends React.Component {
       }
       if (textHasTags(translation)) {
         removeTagsButton = (
-          <Button
-            className="removeAllTags"
-            size={BUTTON_SIZE.ICON_SMALL}
-            mode={BUTTON_MODE.OUTLINE}
-            alt="Remove all tags"
-            title="Remove all tags"
-            onClick={this.removeTagsFromText.bind(this)}
-          >
-            <RemoveTagsIcon />
-          </Button>
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.removeTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.removeTagsFromText.bind(this)}
+            />
+            <Button
+              className="removeAllTags"
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Remove all tags"
+              title="Remove all tags"
+              onClick={this.removeTagsFromText.bind(this)}
+            >
+              <RemoveTagsIcon />
+            </Button>
+          </>
         )
       }
       if (
@@ -210,15 +222,25 @@ class SegmentTarget extends React.Component {
         this.editArea
       ) {
         tagCopyButton = (
-          <Button
-            size={BUTTON_SIZE.ICON_SMALL}
-            mode={BUTTON_MODE.OUTLINE}
-            alt="Copy missing tags from source to target"
-            title="Copy missing tags from source to target"
-            onClick={this.editArea.addMissingSourceTagsToTarget}
-          >
-            <AddTagsIcon />
-          </Button>
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.addTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.editArea.addMissingSourceTagsToTarget}
+            />
+            <Button
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Copy missing tags from source to target"
+              title="Copy missing tags from source to target"
+              onClick={this.editArea.addMissingSourceTagsToTarget}
+            >
+              <AddTagsIcon />
+            </Button>
+          </>
         )
       }
 
