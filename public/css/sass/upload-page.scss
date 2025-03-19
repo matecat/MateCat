@@ -8,155 +8,6 @@ body {
   min-height: 100%;
 }
 
-/*!
- * jQuery UI Button 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Button#theming
- */
-.ui-button {
-  display: inline-block;
-  position: relative;
-  padding: 0;
-  margin-right: 0.1em;
-  text-decoration: none !important;
-  cursor: pointer;
-  text-align: center;
-  zoom: 1;
-  overflow: visible;
-}
-
-table .btn {
-  padding: 0px 20px;
-}
-
-/* workarounds */
-button.ui-button::-moz-focus-inner {
-  border: 0;
-  padding: 0;
-}
-
-/*!
- * jQuery UI Progressbar 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Progressbar#theming
- */
-.ui-progressbar {
-  height: 2em;
-  text-align: left;
-  overflow: hidden;
-}
-
-.ui-progressbar .ui-progressbar-value {
-  height: 100%;
-}
-
-/* files operations */
-
-.operation {
-  color: #666 !important;
-  font-size: 12px !important;
-}
-
-.converting .ui-progressbar-value {
-  background: url(/public/img/progressbar-green.gif) !important;
-}
-
-.fileinput-button input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  /*width: 100%;*/
-  height: 100%;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  cursor: pointer;
-}
-
-.fileinput-link input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  /*cursor: pointer;*/
-}
-
-.fileupload-buttonbar .fileinput-link:before {
-  display: none;
-}
-
-.fileupload-buttonbar .ui-button,
-.fileupload-buttonbar .toggle {
-  margin-bottom: 5px;
-}
-
-.files .progress {
-  background: #fff;
-}
-
-.files .progress,
-.fileupload-buttonbar .progress {
-  height: 15px;
-  border-radius: 10px;
-}
-
-.files .ui-progressbar-value,
-.fileupload-buttonbar .ui-progressbar-value {
-  background: url(/public/img/progressbar.gif);
-}
-
-.fileupload-buttonbar .fade,
-.files .fade {
-  display: none;
-}
-
-/*.fileupload-loading {
-  position: absolute;
-  left: 50%;
-  width: 128px;
-  height: 128px;
-  background: url(/public/img/loading.gif) center no-repeat;
-  display: none;
-}*/
-
-.fileupload-processing .fileupload-loading {
-  display: block;
-}
-
-.name {
-  width: 50% !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 16px;
-}
-
-.cancel-btn {
-  background: colors.$rebuttedRed;
-}
-
-.cancel-btn:hover {
-  background: colors.$rebuttedRedHover;
-}
 
 .translate-box a.tooltip {
   text-align: center;
@@ -179,47 +30,6 @@ button.ui-button::-moz-focus-inner {
 .translate-box a.tooltip:hover span {
   top: -70px;
 }
-
-.cancel-btn,
-#clear-all-files,
-#clear-all-gdrive,
-#delete-failed-conversions {
-  background: colors.$rebuttedRed;
-}
-
-.cancel-btn:hover,
-#clear-all-files:hover,
-#clear-all-gdrive:hover,
-#delete-failed-conversions:hover {
-  background: colors.$rebuttedRedHover;
-}
-
-/* Fix for IE 6: */
-* html .fileinput-button {
-  margin-right: -2px;
-}
-
-* html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
-/* Fix for IE 7: */
-* + html .fileinput-button {
-  margin-right: 1px;
-}
-
-* + html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* + html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
 @media only screen and (max-width: 1320px) {
   .translate-box.tmx-select,
   .translate-box.source,
@@ -303,14 +113,6 @@ button.ui-button::-moz-focus-inner {
     width: 60px;
   }
 }
-
-/* Fix for Webkit (Safari, Chrome) */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .fileinput-button {
-    margin-top: 2px;
-  }
-}
-
 .translate-box {
   float: left;
   margin: 20px 0 0 0;
@@ -690,18 +492,6 @@ a {
   }
 }
 
-.translate-box .fileinput-button {
-  margin-top: 8px;
-  text-align: center;
-  padding: 4px 0px;
-}
-
-@-moz-document url-prefix() {
-  .translate-box .fileinput-button {
-    margin-top: 7px;
-  }
-}
-
 .btn {
   height: 44px;
   display: block;
@@ -917,25 +707,6 @@ ul.test li {
   cursor: pointer;
 }
 
-span.load-gdrive {
-  display: inline-block;
-  vertical-align: top;
-  width: 200px;
-  font-family: calibri, Arial, Helvetica, sans-serif;
-  font-size: 1.1em;
-  margin: 0;
-  padding: 0.6rem 0.25rem 0.4rem 2.2rem;
-  border: 0.1rem solid #b7b9bc;
-  background: url(/public/img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-span.load-gdrive:hover,
-.continue-gdrive span.load-gdrive:hover {
-  background-color: #efefef;
-}
-
 .modal-gdrive {
   position: fixed;
   top: 0;
@@ -944,48 +715,6 @@ span.load-gdrive:hover,
   height: 100%;
   z-index: 9999999999999;
   background: rgba(255, 255, 255, 0.5);
-}
-
-.fileupload-buttonbar span.min {
-  font-size: 24px;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 42px;
-  margin: 0 1.5rem;
-}
-
-span.fileinput-button {
-  display: inline-block;
-  vertical-align: top;
-  margin: 0;
-}
-
-div.continue-gdrive {
-  margin: 0 0 10px 10px !important;
-  display: block;
-}
-
-.continue-gdrive span.load-gdrive {
-  width: auto;
-  padding: 0.5rem 0.7rem 0rem 2.3rem;
-  background: url(/public/img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
-  margin-right: 10px;
-  background-size: 20px;
-  height: 36px;
-}
-
-.continue-gdrive span.clear-gdrive {
-  float: none;
-  margin: 0 !important;
-}
-
-#upload-files-list {
-  display: block;
-  padding: 24px;
-}
-
-#gdrive-files-list {
-  display: none;
 }
 
 header .nav-bar .dropdown.select-org span.text {
@@ -1211,8 +940,4 @@ select:focus {
   background: rgba(255, 250, 139, 0.38) !important;
   border-color: #6d6e71;
   color: #000;
-}
-
-.warning-message span {
-  /*margin-left: 15px;*/
 }
