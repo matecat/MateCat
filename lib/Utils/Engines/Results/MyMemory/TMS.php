@@ -30,10 +30,6 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
 
                     $match['create-date'] =  isset($match['create-date']) ? date( "Y-m-d", strtotime( $match[ 'create-date' ] ) ) : $match[ 'last-update-date' ];
 
-                    if ( empty( $match[ 'created-by' ] ) ) {
-                        $match[ 'created-by' ] = "Anonymous";
-                    }
-
                     $match[ 'match' ] = $match[ 'match' ] * 100;
                     $match[ 'match' ] = $match[ 'match' ] . "%";
 
@@ -43,7 +39,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
                         $match['segment'],
                         $match['translation'],
                         $match['match'],
-                        $match['created-by'],
+                        $match['created-by'] ?? "Anonymous",
                         $match['create-date'],
                         null,
                         $match['prop'],

@@ -182,7 +182,6 @@ class Lara extends Engines_AbstractEngine {
             return $tm_key->key;
         }, $tm_keys );
 
-
         // init lara client and mmt fallback
         $client = $this->_getClient();
 

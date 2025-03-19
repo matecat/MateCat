@@ -647,6 +647,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // set for lara engine in case, this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
+            $config[ 'mt_evaluation' ]   = $queueElement->params->mt_evaluation;
 
             $mt_evaluation = $config['mt_evaluation'] ?? null;
 
