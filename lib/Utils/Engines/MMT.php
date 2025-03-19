@@ -129,9 +129,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
         }
 
-        if($_config[ 'job_id' ] and $_config[ 'analysis_before_mt_get_contribution' ]){
-            $_config = $this->analysisBeforeMTGetContribution($_config, $_config[ 'job_id' ], $_config['mt_evaluation'] ?? null);
-        }
+        $_config = $this->configureAnalysisContribution($_config);
 
         try {
             $translation = $client->translate(
@@ -673,28 +671,30 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      * @param $config
-     * @param $id_job
-     * @param $mt_evaluation
      * @return mixed
      */
-    private function analysisBeforeMTGetContribution( $config, $id_job, $mt_evaluation )
+    private function configureAnalysisContribution($config)
     {
-        $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
-        $mt_context = @array_pop( $contextRs );
+        $id_job        = $_config[ 'job_id' ] ?? null;
+        $mt_evaluation = $_config['mt_evaluation'] ?? null;
 
-        if ( !empty( $mt_context ) ) {
-            $config[ 'mt_context' ] = $mt_context->value;
+        if($id_job and $this->_isAnalysis){
+            $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
+            $mt_context = @array_pop( $contextRs );
+
+            if ( !empty( $mt_context ) ) {
+                $config[ 'mt_context' ] = $mt_context->value;
+            }
+
+            if ( $mt_evaluation ) {
+                $config[ 'include_score' ] = true;
+            }
+
+            $config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
+            $config[ 'priority' ]   = 'background';
+            $config[ 'keys' ]       = $config[ 'id_user' ] ?? [];
         }
-
-        if ( $mt_evaluation ) {
-            $config[ 'include_score' ] = true;
-        }
-
-        $config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
-        $config[ 'priority' ]   = 'background';
-        $config[ 'keys' ]       = $config[ 'id_user' ] ?? [];
 
         return $config;
-
     }
 }
