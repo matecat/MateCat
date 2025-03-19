@@ -647,15 +647,15 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // set for lara engine in case, this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
+            $config[ 'mt_evaluation' ]   = $queueElement->params->mt_evaluation;
 
             $mt_evaluation = $config['mt_evaluation'] ?? null;
 
-            //if a callback is not set only the first argument is returned, get the config params from the callback
+            // if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
 
-            if($mtEngine instanceof Engines_MMT){
-                $mtEngine->analysisBeforeMTGetContribution($config, $queueElement, $mt_evaluation);
-            }
+            // for MMT engine
+            $config['analysis_before_mt_get_contribution'] = true;
 
             $mt_result = $mtEngine->get( $config );
 

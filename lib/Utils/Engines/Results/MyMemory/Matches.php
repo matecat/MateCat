@@ -30,7 +30,6 @@ class Engines_Results_MyMemory_Matches {
      * @var FeatureSet
      */
     protected $featureSet;
-    protected $_args;
 
     public $source;
     public $target;
@@ -39,23 +38,33 @@ class Engines_Results_MyMemory_Matches {
 
     public $score;
 
-    public function __construct() {
-
-        //NEEDED TO UNIFORM DATA as array( $matches )
-        $args = func_get_args();
-
-        if ( empty( $args ) ) {
-            throw new Exception( "No args defined for " . __CLASS__ . " constructor" );
-        }
-
-        if ( count( $args ) > 1 and is_array( $args[ 0 ] ) ) {
-            throw new Exception( "Invalid arg 1 " . __CLASS__ . " constructor" );
-        }
-
-        // $args[ 0 ]
-
-        $this->_args = $args;
-
+    /**
+     * Engines_Results_MyMemory_Matches constructor.
+     * @param $raw_segment
+     * @param $raw_translation
+     * @param $match
+     * @param $createdBy
+     * @param $createDate
+     * @param $score
+     * @param $prop
+     */
+    public function __construct(
+        $raw_segment,
+        $raw_translation,
+        $match,
+        $createdBy = null,
+        $createDate = null,
+        $score = null,
+        $prop = []
+    ) {
+        $this->raw_segment = $raw_segment;
+        $this->raw_translation = $raw_translation;
+        $this->match = $match;
+        $this->created_by = $createdBy ?? "Anonymous";
+        $this->create_date = $createDate ?? "0000-00-00 00:00:00";
+        $this->last_update_date = $createDate ?? "0000-00-00 00:00:00";
+        $this->score = $score;
+        $this->prop = $prop ?? [];
     }
 
     public function featureSet( FeatureSet $featureSet = null ) {
@@ -81,43 +90,30 @@ class Engines_Results_MyMemory_Matches {
             $this->target = $target;
         }
 
-        if ( count( $this->_args ) == 1 and is_array( $this->_args[ 0 ] ) ) {
+        $match[ 'segment' ]          = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
+        $match[ 'raw_segment' ]      = $this->raw_segment;
+        $match[ 'translation' ]      = $this->getLayer( $this->raw_translation, $layerNum, $dataRefMap );
+        $match[ 'raw_translation' ]  = $this->raw_translation;
+        $match[ 'match' ]            = $this->match;
 
-            $match = $this->_args[ 0 ];
+        if(!empty($this->created_by)){
+            $match[ 'created-by' ] = $this->created_by;
+        }
 
-            if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
-                $match[ 'last-update-date' ] = "0000-00-00";
-            }
-            if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
-                $match[ 'last-update-date' ] = date( "Y-m-d", strtotime( $match[ 'last-update-date' ] ) );
-            }
+        if(!empty($this->create_date)){
+            $match[ 'create-date' ] = $this->create_date;
+        }
 
-            if ( empty( $match[ 'created-by' ] ) ) {
-                $match[ 'created-by' ] = "Anonymous";
-            }
+        if(!empty($this->last_update_date)){
+            $match[ 'last-update-date' ] = $this->last_update_date;
+        }
 
-            $match[ 'match' ] = $match[ 'match' ] * 100;
-            $match[ 'match' ] = $match[ 'match' ] . "%";
+        if(!empty($this->score)){
+            $match[ 'score' ] = $this->score;
+        }
 
-            ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
-
-            /* MyMemory Match */
-            $match[ 'raw_segment' ]     = $match[ 'segment' ];
-            $match[ 'segment' ]         = $this->getLayer( $match[ 'segment' ], $layerNum, $dataRefMap );
-            $match[ 'raw_translation' ] = $match[ 'translation' ];
-            $match[ 'translation' ]     = $this->getLayer( $match[ 'translation' ], $layerNum, $dataRefMap );
-
-        } elseif ( count( $this->_args ) >= 5 and !is_array( $this->_args[ 0 ] ) ) {
-            $match[ 'segment' ]          = $this->getLayer( $this->_args[ 0 ], $layerNum, $dataRefMap );
-            $match[ 'raw_segment' ]      = $this->_args[ 0 ];
-            $match[ 'translation' ]      = $this->getLayer( $this->_args[ 1 ], $layerNum, $dataRefMap );
-            $match[ 'raw_translation' ]  = $this->_args[ 1 ];
-            $match[ 'match' ]            = $this->_args[ 2 ];
-            $match[ 'created-by' ]       = $this->_args[ 3 ];
-            $match[ 'create-date' ]      = $this->_args[ 4 ];
-            $match[ 'last-update-date' ] = $this->_args[ 4 ];
-            $match[ 'score' ]            = $this->_args[ 5 ];
-            $match[ 'prop' ]             = ( isset( $this->_args[ 6 ] ) ? $this->_args[ 6 ] : [] );
+        if(!empty($this->prop)){
+            $match[ 'prop' ] = $this->prop;
         }
 
         $this->id               = array_key_exists( 'id', $match ) ? $match[ 'id' ] : '0';
