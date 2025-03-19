@@ -14,6 +14,7 @@ import IconClose from '../icons/IconClose'
 import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
+import DriveIcon from '../../../../../img/icons/DriveIcon'
 
 export const UploadGdrive = () => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
@@ -289,10 +290,7 @@ export const UploadGdrive = () => {
                 onClick={() => openGDrivePicker()}
                 disabled={files.length >= config.maxNumberFiles}
               >
-                <img
-                  src="/public/img/logo-drive-16.png"
-                  alt="Google drive logo"
-                />
+                <DriveIcon />
                 Add from Google Drive
               </Button>
               <Button

@@ -22,6 +22,13 @@
   overflow-y: auto;
   height: 100%;
   padding-bottom: 60px;
+  .load-gdrive {
+    float: right;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 3px;
+  }
 }
 
 .translation-row {

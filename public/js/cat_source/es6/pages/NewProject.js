@@ -56,6 +56,7 @@ import {
 } from '../components/header/OnboardingTooltips'
 import {UploadFile} from '../components/createProject/UploadFile'
 import {flushSync} from 'react-dom'
+import DriveIcon from '../../../../img/icons/DriveIcon'
 
 const SELECT_HEIGHT = 324
 
@@ -929,9 +930,9 @@ const NewProject = () => {
                     onClick={() => setOpenGDrive(true)}
                     href="#"
                   >
-                    Google Drive files <span className="gdrive-icon"></span>
+                    Google Drive files{'  '}
+                    <DriveIcon size={16} />
                   </a>
-                  <span className="gdrive-icon"></span>
                 </span>
               )}
           </p>
