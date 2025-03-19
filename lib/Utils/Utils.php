@@ -172,6 +172,11 @@ class Utils {
         // transliterate string
         $string = Transliterator::transliterate( $string );
 
+        // avoid empty strings
+        if(empty($string)){
+            $string = "-";
+        }
+
         //delete and replace rest of special chars
         $find = [ '/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/' ];
         $repl = [ '', '-', '' ];
