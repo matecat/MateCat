@@ -869,4 +869,24 @@ class Utils {
         return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
     }
 
+    /**
+     * @param $nameString
+     * @return bool|string
+     */
+    public static function sanitizeName( $nameString ) {
+
+        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
+        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
+        $nameString = str_replace( '_.', ".", $nameString );
+
+        // project name validation
+        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
+
+        if ( !preg_match( $pattern, $nameString ) ) {
+            return false;
+        }
+
+        return $nameString;
+
+    }
 }

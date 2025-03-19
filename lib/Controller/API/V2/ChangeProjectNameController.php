@@ -48,7 +48,7 @@ class ChangeProjectNameController extends ChunkController
             exit();
         }
 
-        $name = trim($name);
+        $name = Utils::sanitizeName($name);
 
         if ( empty($name) ) {
             $code = 400;
