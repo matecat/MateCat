@@ -654,9 +654,6 @@ class TMAnalysisWorker extends AbstractWorker {
             // if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
 
-            // for MMT engine
-            $config['analysis_before_mt_get_contribution'] = true;
-
             $mt_result = $mtEngine->get( $config );
 
             // handle Engines_Results_MyMemory_TMS instead of having directly Engines_Results_MyMemory_Matches

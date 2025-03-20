@@ -19,36 +19,67 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
             if ( is_array( $matches ) and !empty( $matches ) ) {
 
                 foreach ( $matches as $match ) {
-
-                    if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
-                        $match[ 'last-update-date' ] = "0000-00-00";
-                    }
-
-                    if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
-                        $match[ 'last-update-date' ] = date( "Y-m-d", strtotime( $match[ 'last-update-date' ] ) );
-                    }
-
-                    $match['create-date'] =  isset($match['create-date']) ? date( "Y-m-d", strtotime( $match[ 'create-date' ] ) ) : $match[ 'last-update-date' ];
-
-                    $match[ 'match' ] = $match[ 'match' ] * 100;
-                    $match[ 'match' ] = $match[ 'match' ] . "%";
-
-                    $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
-
-                    $currMatch = new Engines_Results_MyMemory_Matches(
-                        $match['segment'],
-                        $match['translation'],
-                        $match['match'],
-                        $match['created-by'] ?? "Anonymous",
-                        $match['create-date'],
-                        null,
-                        $match['prop'],
-                    );
-
-                    $this->matches[] = $currMatch;
+                    $this->matches[] = $this->buildMyMemoryMatch($match);
                 }
             }
         }
+    }
+
+    /**
+     * @param $match
+     * @return Engines_Results_MyMemory_Matches
+     */
+    private function buildMyMemoryMatch($match)
+    {
+        if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
+            $match[ 'last-update-date' ] = "0000-00-00";
+        }
+
+        if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
+            $match[ 'last-update-date' ] = date( "Y-m-d", strtotime( $match[ 'last-update-date' ] ) );
+        }
+
+        $match['create-date'] =  (isset($match['create-date']) and $match['create-date'] !== "0000-00-00 00:00:00") ? date( "Y-m-d H:i:s", strtotime( $match[ 'create-date' ] ) ) : $match[ 'last-update-date' ];
+
+        $match[ 'match' ] = $match[ 'match' ] * 100;
+        $match[ 'match' ] = $match[ 'match' ] . "%";
+
+        $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
+
+        $currMatch = new Engines_Results_MyMemory_Matches(
+            $match['segment'],
+            $match['translation'],
+            $match['match'],
+            $match['created-by'] ?? "Anonymous",
+            $match['create-date'],
+            null,
+            $match['prop'],
+        );
+
+        $props = [
+            "id" => 'id',
+            "segment" =>  'segment',
+            "translation" => 'translation',
+            "quality" => 'quality',
+            "reference" => 'reference',
+            "usage-count" => 'usage_count',
+            "subject" => 'subject',
+            "created-by" => 'created_by',
+            "last-updated-by" => 'last_updated_by',
+            "create-date" => 'create_date',
+            "last-update-date" => 'last_update_date',
+            "tm_properties" => 'tm_properties',
+            "match" => 'match',
+            "key" =>  'memory_key',
+        ];
+
+        // hydrate other $currMatch props
+        foreach ($props as $key => $prop){
+            if(!empty($match[$key])){
+                $currMatch->$prop = $match[$key];
+            }
+        }
+        return $currMatch;
     }
 
     /**
