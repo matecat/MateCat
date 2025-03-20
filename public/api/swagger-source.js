@@ -3075,6 +3075,191 @@ var spec = {
         },
       },
     },
+    '/api/v3/qa_model_template': {
+      get: {
+        tags: ['Quality models'],
+        summary:
+            'Shows the list of quality models available for the currents user',
+        description:
+            'Shows the list of quality models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/QualityModelSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Quality models'],
+        summary: 'Creates a new quality model',
+        description: 'Creates a new quality model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/{id}': {
+      get: {
+        tags: ['Quality models'],
+        summary: 'Shows a particular quality model',
+        description: 'Shows a particular quality model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Quality models'],
+        summary: 'Deletes a particular quality model',
+        description: 'Deletes a particular quality model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Quality models'],
+        summary: 'Updates a particular quality model',
+        description: 'Updates a particular quality model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/validate': {
+      post: {
+        tags: ['Quality models'],
+        summary: 'Validates a quality model before creation',
+        description: 'Validates a quality model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/schema': {
+      get: {
+        tags: ['Quality models'],
+        summary: 'Shows the quality model creation schema',
+        description: 'Shows the quality model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v3/word-count/raw': {
       post: {
         tags: ['Word count'],
@@ -3122,10 +3307,152 @@ var spec = {
     },
   },
   definitions: {
+    QualityModelSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        label: {
+          type: 'string',
+        },
+        version: {
+          type: 'integer',
+          readOnly: true,
+          description: "The model version. It's incremented on every model update.",
+          example: 1,
+        },
+        categories: {
+          type: 'array',
+          maxItems: 50,
+          items: {
+            $ref: '#/definitions/QAModelCategory',
+          }
+        },
+        passfail: {
+          type: 'object',
+          $ref: '#/definitions/PassFail',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        modifiedAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        deletedAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+      },
+      required: ["version", "label", "categories", "passfail"]
+    },
+    QAModelCategory: {
+      type: "object",
+      properties: {
+        id_parent: {
+          type: "integer"
+        },
+        label: {
+          type: "string",
+          maxLength: 255
+        },
+        code: {
+          type: "string",
+          maxLength: 3
+        },
+        severities: {
+          type: "array",
+          maxItems: 50,
+          items: {
+            "$ref": "#/definitions/QAModelSeverity"
+          }
+        },
+        sort: {
+          type: "integer",
+          nullable: true
+        }
+      },
+      required: ["code", "label", "severities"]
+    },
+    QAModelSeverity: {
+      type: "object",
+      properties: {
+        label: {
+          type: "string"
+        },
+        code: {
+          type: "string",
+          maxLength: 3
+        },
+        penalty: {
+          type: "number",
+          format: "currency",
+          examples: [
+            "0",
+            "0.00",
+            "0.05",
+            "19.95"
+          ]
+        },
+        sort: {
+          type: "integer",
+          nullable: true
+        }
+      },
+      required: ["code", "label", "penalty"]
+    },
+    PassFail: {
+      type: "object",
+      properties: {
+        type: {
+          type: "string",
+          enum: [
+            "points_per_thousand"
+          ]
+        },
+        thresholds: {
+          type: "array",
+          maxItems: 2,
+          items: {
+            "$ref": "#/definitions/PassFailThreshold"
+          }
+        }
+      },
+      required: ["type", "thresholds"]
+    },
+    PassFailThreshold: {
+      type: "object",
+      properties: {
+        label: {
+          type: "string",
+          enum: [
+            "R1", "R2"
+          ]
+        },
+        value: {
+          "type": "integer"
+        }
+      },
+      required: ["label", "value"]
+    },
     PayableRateSchema: {
       type: 'object',
       properties: {
         id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
           type: 'integer',
           readOnly: true,
         },
@@ -3145,7 +3472,6 @@ var spec = {
         },
       },
     },
-
     PayableRateBreakdowns: {
       type: 'object',
       properties: {
