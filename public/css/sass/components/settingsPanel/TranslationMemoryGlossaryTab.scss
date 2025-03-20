@@ -81,6 +81,7 @@
     .row-content-default-memory {
       grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
       padding: 0 10px !important;
+      background-color: transparent;
 
       > :last-child {
         grid-column: 6;
@@ -124,7 +125,7 @@
   .settings-panel-table {
     .settings-panel-row-content:not(.row-content-create-resource):not(
         .row-content-default-memory
-      )
+      ):not(.row-content-tm-from-file)
       > :last-child {
       grid-column: 7;
     }

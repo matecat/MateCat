@@ -304,7 +304,8 @@ export const TranslationMemoryGlossaryTab = () => {
           id,
           key,
           name,
-          isDraggable: isActive && !isSpecialRow && isOwnerOfKey(key),
+          isDraggable:
+            isActive && !isSpecialRow && isOwnerOfKey(key) && !row.isTmFromFile,
           isActive,
           isLocked,
           isExpanded,
@@ -314,7 +315,9 @@ export const TranslationMemoryGlossaryTab = () => {
               : id === SPECIAL_ROWS_ID.addSharedResource ||
                   id === SPECIAL_ROWS_ID.newResource
                 ? 'settings-panel-row-active row-content-create-resource'
-                : '',
+                : row.isTmFromFile
+                  ? 'row-content-tm-from-file'
+                  : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (

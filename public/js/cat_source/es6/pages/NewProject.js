@@ -590,16 +590,21 @@ const NewProject = () => {
   useEffect(() => {
     if (!Array.isArray(currentProjectTemplate?.tm)) return
 
-    const createKeyFromTMXFile = ({filename}) => {
-      const activeTm = currentProjectTemplate.tm
-      const haveNoActiveKeys = activeTm.length === 0
+    let isTmCreationInProgress = false
 
-      if (haveNoActiveKeys) {
+    const createKeyFromTMXFile = ({filename}) => {
+      const alreadyImportedTmFromFile = tmKeys
+        .filter(({key}) =>
+          currentProjectTemplate.tm.some((tmCompare) => tmCompare.key === key),
+        )
+        .some(({isTmFromFile}) => isTmFromFile)
+
+      if (!alreadyImportedTmFromFile && !isTmCreationInProgress) {
         tmCreateRandUser().then((response) => {
           const {key} = response.data
           const tmItem = {
             r: true,
-            w: true,
+            w: false,
             tm: true,
             glos: true,
             owner: true,
@@ -608,37 +613,43 @@ const NewProject = () => {
             is_shared: false,
             id: key,
             isActive: true,
+            isLocked: true,
+            isTmFromFile: true,
           }
 
           flushSync(() =>
             setTmKeys((prevState) => [...(prevState ?? []), tmItem]),
           )
 
+          //eslint-disable-next-line
+          const {id, isActive, isLocked, isTmFromFile, ...tmTemplateItem} =
+            tmItem
+
           modifyingCurrentTemplate((prevTemplate) => ({
             ...prevTemplate,
-            tm: [...prevTemplate.tm, tmItem],
+            tm: [tmTemplateItem, ...prevTemplate.tm],
           }))
+
+          isTmCreationInProgress = false
         })
+
+        const message = (
+          <span>
+            The TMX file(s) you have uploaded will be imported into the newly
+            created key <i>{filename}</i>. If you wish to import them into an
+            existing key, please use the 'Import TMX' button in the
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              {' '}
+              Settings panel
+            </a>
+            .
+          </span>
+        )
+
+        setWarnings(message)
+
+        isTmCreationInProgress = true
       }
-
-      const message = haveNoActiveKeys ? (
-        <span>
-          A new resource has been generated for the TMX you uploaded. You can
-          manage your resources in the{' '}
-          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-            {' '}
-            Settings panel
-          </a>
-          .
-        </span>
-      ) : (
-        <span>
-          The TMX file(s) you have uploaded have been imported into the key
-          named <i>{activeTm[0].name}</i>.
-        </span>
-      )
-
-      setWarnings(message)
     }
     CreateProjectStore.addListener(
       NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
@@ -650,7 +661,7 @@ const NewProject = () => {
         createKeyFromTMXFile,
       )
     }
-  }, [currentProjectTemplate?.tm, modifyingCurrentTemplate])
+  }, [currentProjectTemplate?.tm, tmKeys, modifyingCurrentTemplate])
 
   useEffect(() => {
     if (sourceLang && targetLangs) {

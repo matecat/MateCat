@@ -38,6 +38,9 @@ function UploadFileLocal() {
     targetLangs,
     currentProjectTemplate,
     setUploadedFilesNames,
+    tmKeys,
+    setTmKeys,
+    modifyingCurrentTemplate,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
@@ -286,6 +289,68 @@ function UploadFileLocal() {
       )
     }
     CreateProjectActions.hideErrors()
+
+    // check if it removes tm key created from file
+    if (file.ext === EXTENSIONS.tmx) {
+      if (files.filter(({ext}) => ext === file.ext).length > 1) {
+        const tmFromFileName = tmKeys.find(
+          ({isTmFromFile}) => isTmFromFile,
+        ).name
+        if (tmFromFileName === file.name) {
+          const filteredFilesTmx = files
+            .filter(({name}) => name !== file.name)
+            .filter(({ext}) => ext === file.ext)
+
+          const newTmFromFileName = filteredFilesTmx[0].name
+          setTmKeys((prevState) =>
+            prevState.map((tm) =>
+              tm.isTmFromFile ? {...tm, name: newTmFromFileName} : tm,
+            ),
+          )
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            tm: prevTemplate.tm.map((tm) =>
+              tm.isTmFromFile ? {...tm, name: newTmFromFileName} : tm,
+            ),
+          }))
+        }
+      } else {
+        setTmKeys((prevState) =>
+          prevState.filter(({isTmFromFile}) => !isTmFromFile),
+        )
+        modifyingCurrentTemplate((prevTemplate) => ({
+          ...prevTemplate,
+          tm: prevTemplate.tm.filter(({isTmFromFile}) => !isTmFromFile),
+        }))
+      }
+    }
+  }
+
+  const deleteAllFiles = () => {
+    files.forEach((file) => {
+      fileUploadDelete({
+        file: file.name,
+        source: sourceLang.code,
+        segmentationRule,
+        filtersTemplateId: extractionParameterTemplateId,
+      })
+    })
+
+    CreateProjectActions.hideErrors()
+
+    // check if it removes tm key created from file
+    if (files.some(({ext}) => ext === EXTENSIONS.tmx)) {
+      setTmKeys((prevState) =>
+        prevState.filter(({isTmFromFile}) => !isTmFromFile),
+      )
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        tm: prevTemplate.tm.filter(({isTmFromFile}) => !isTmFromFile),
+      }))
+    }
+
+    setFiles([])
+    setUploadedFilesNames([])
   }
 
   const handleDrop = useCallback(
@@ -448,10 +513,7 @@ function UploadFileLocal() {
               <IconAdd />
               Add files...
             </Button>
-            <Button
-              type={BUTTON_TYPE.WARNING}
-              onClick={() => files.forEach((f) => deleteFile(f))}
-            >
+            <Button type={BUTTON_TYPE.WARNING} onClick={deleteAllFiles}>
               <IconClose /> Clear all
             </Button>
             {files.filter((f) => f.error).length > 0 && (
