@@ -912,12 +912,12 @@ select:focus {
   color: #fff;
   padding: 10px 0 10px 16px;
   margin: 10px 0;
-  float: left;
   font-weight: bold;
   width: 100%;
   -moz-border-radius: 2px;
   border-radius: 2px;
   border: 1px solid #c45f5f;
+  display: flex;
   .icon {
     float: left;
     font-size: 25px;
@@ -929,7 +929,6 @@ select:focus {
     margin-left: 12px;
   }
 }
-
 .error-message {
   a {
     color: #fff;
