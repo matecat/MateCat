@@ -529,14 +529,16 @@ const ProjectContainer = ({
       id={'project-' + project.get('id')}
       ref={projectRef}
     >
-      <div className="sixteen wide column">
+      <div
+        className="sixteen wide column"
+        onMouseOver={() => setShouldShowEditNameIcon(true)}
+        onMouseLeave={() => setShouldShowEditNameIcon(false)}
+      >
         <div className="project-header ui grid">
           <div className="nine wide column">
             <div className="ui stackable grid">
               <div
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
-                onMouseOver={() => setShouldShowEditNameIcon(true)}
-                onMouseLeave={() => setShouldShowEditNameIcon(false)}
               >
                 <div className="ui ribbon label">
                   <div className="project-id" title="Project id">
