@@ -1,0 +1,120 @@
+<?php
+
+namespace API\V2;
+
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
+use CatUtils;
+use Database;
+use Exception;
+use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobDao;
+use Jobs_JobStruct;
+use LQA\ChunkReviewDao;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Teams\MembershipDao;
+use Users_UserStruct;
+use Utils;
+
+class ChangeProjectNameController extends ChunkController
+{
+    /**
+     * @var ProjectPasswordValidator
+     */
+    private $validator;
+
+    protected function afterConstruct()
+    {
+        $this->validator = new ProjectPasswordValidator( $this );
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+    public function changeName()
+    {
+        $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT );
+        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+
+        if(
+            empty($id) or
+            empty($password)
+        ){
+            $code = 400;
+            $this->response->status()->setCode( $code );
+            $this->response->json( [
+                'error' => 'Missing required parameters [`id `, `password`]'
+            ] );
+            exit();
+        }
+
+        $name = Utils::sanitizeName($name);
+
+        if ( empty($name) ) {
+            $code = 400;
+            $this->response->status()->setCode( $code );
+            $this->response->json( [
+                'error' => 'Missing required parameters [`name`]'
+            ] );
+            exit();
+        }
+
+        try {
+            $this->changeProjectName($id, $password, $name);
+
+            $this->response->status()->setCode(200);
+            $this->response->json( [
+                'id'   => $id,
+                'name' => $name,
+            ] );
+            exit();
+
+        } catch (Exception $exception){
+            $this->response->status()->setCode(500);
+            $this->response->json( [
+                'error' => $exception->getMessage()
+            ] );
+            exit();
+        }
+    }
+
+    /**
+     * @param $id
+     * @param $password
+     * @param $name
+     * @throws Exception
+     */
+    private function changeProjectName($id, $password, $name)
+    {
+        $pStruct = Projects_ProjectDao::findByIdAndPassword( $id, $password );
+
+        if($pStruct === null){
+            throw new Exception('Project not found');
+        }
+
+        $this->checkUserPermissions($pStruct, $this->getUser());
+
+        $pDao = new Projects_ProjectDao();
+        $pDao->changeName( $pStruct, $name );
+        $pDao->destroyCacheById( $id );
+        $pDao->destroyCacheForProjectData($pStruct->id, $pStruct->password);
+    }
+
+    /**
+     * Check if the logged user has the permissions to change the password
+     *
+     * @param Projects_ProjectStruct $project
+     * @param Users_UserStruct $user
+     * @throws Exception
+     */
+    private function checkUserPermissions(Projects_ProjectStruct $project, Users_UserStruct $user)
+    {
+        // check if user is belongs to the project team
+        $team  = $project->getTeam();
+        $check = (new MembershipDao())->findTeamByIdAndUser($team->id, $user);
+
+        if($check === null){
+            throw new Exception('The logged user does not belong to the right team', 403);
+        }
+    }
+}
