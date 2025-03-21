@@ -2890,6 +2890,192 @@ var spec = {
         },
       },
     },
+
+    '/api/v3/project-template': {
+      get: {
+        tags: ['Project templates'],
+        summary:
+            'Shows the list of project template models available for the currents user',
+        description:
+            'Shows the list of project template models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/ProjectTemplateSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Project templates'],
+        summary: 'Creates a new project template model',
+        description: 'Creates a new project template model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/{id}': {
+      get: {
+        tags: ['Project templates'],
+        summary: 'Shows a particular project template model',
+        description: 'Shows a particular project template model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Project templates'],
+        summary: 'Deletes a particular project template model',
+        description: 'Deletes a particular project template model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Project templates'],
+        summary: 'Updates a particular project template model',
+        description: 'Updates a particular project template model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/validate': {
+      post: {
+        tags: ['Project templates'],
+        summary: 'Validates a project template before creation',
+        description: 'Validates a project template before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/schema': {
+      get: {
+        tags: ['Project templates'],
+        summary: 'Shows the project template model creation schema',
+        description: 'Shows the project template model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v3/payable_rate': {
       get: {
         tags: ['Billing models'],
@@ -3260,6 +3446,380 @@ var spec = {
         },
       },
     },
+    '/api/v3/filters-config-template': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary:
+            'Shows the list of filters analysis configuration models available for the currents user',
+        description:
+            'Shows the list of filters analysis configuration models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/FiltersConfigSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Creates a new filters analysis configuration model',
+        description: 'Creates a new filters analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/{id}': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Shows a particular filters analysis configuration model',
+        description: 'Shows a particular filters analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Deletes a particular filters analysis configuration model',
+        description: 'Deletes a particular filters analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Updates a particular filters analysis configuration model',
+        description: 'Updates a particular filters analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/validate': {
+      post: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Validates a filters analysis configuration model before creation',
+        description: 'Validates a filters analysis configuration model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/schema': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Shows the filters analysis configuration model creation schema',
+        description: 'Shows the filters analysis configuration model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary:
+            'Shows the list of xliff analysis configuration models available for the currents user',
+        description:
+            'Shows the list of xliff analysis configuration models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/XliffConfigSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Creates a new xliff analysis configuration model',
+        description: 'Creates a new xliff analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/{id}': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Shows a particular xliff analysis configuration model',
+        description: 'Shows a particular xliff analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Deletes a particular xliff analysis configuration model',
+        description: 'Deletes a particular xliff analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Updates a particular xliff analysis configuration model',
+        description: 'Updates a particular xliff analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/validate': {
+      post: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Validates a xliff analysis configuration model before creation',
+        description: 'Validates a xliff analysis configuration model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/schema': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Shows the xliff analysis configuration model creation schema',
+        description: 'Shows the xliff analysis configuration model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+
+
+
+
     '/api/v3/word-count/raw': {
       post: {
         tags: ['Word count'],
@@ -3307,6 +3867,521 @@ var spec = {
     },
   },
   definitions: {
+    FiltersConfigSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: "string"
+        },
+        json: {
+          type: "object",
+          properties: {
+            extract_arrays: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            escape_forward_slashes: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            translate_keys: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            do_not_translate_keys: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            context_keys: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            character_limit: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          dependencies: {
+            translate_keys: {
+              not: {
+                required: [
+                  "do_not_translate_keys"
+                ]
+              }
+            },
+            do_not_translate_keys: {
+              not: {
+                required: [
+                  "translate_keys"
+                ]
+              }
+            }
+          },
+          additionalProperties: false
+        },
+        xml: {
+          type: "object",
+          properties: {
+            preserve_whitespace: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            translate_attributes: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            translate_elements: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            do_not_translate_elements: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          dependencies: {
+            translate_elements: {
+              not: {
+                required: [
+                  "do_not_translate_elements"
+                ]
+              }
+            },
+            do_not_translate_elements: {
+              not: {
+                required: [
+                  "translate_elements"
+                ]
+              }
+            }
+          },
+          additionalProperties: false
+        },
+        yaml: {
+          type: "object",
+          properties: {
+            translate_keys: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            do_not_translate_keys: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          dependencies: {
+            translate_keys: {
+              not: {
+                required: [
+                  "do_not_translate_keys"
+                ]
+              }
+            },
+            do_not_translate_keys: {
+              not: {
+                required: [
+                  "translate_keys"
+                ]
+              }
+            }
+          },
+          additionalProperties: false
+        },
+        ms_word: {
+          type: "object",
+          properties: {
+            extract_doc_properties: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_comments: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_headers_footers: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_hidden_text: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            accept_revisions: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            exclude_styles: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            },
+            exclude_highlight_colors: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          additionalProperties: false
+        },
+        ms_excel: {
+          type: "object",
+          properties: {
+            extract_doc_properties: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_hidden_cells: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_diagrams: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_drawings: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_sheet_names: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            exclude_columns: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              default: []
+            }
+          },
+          additionalProperties: false
+        },
+        ms_powerpoint: {
+          type: "object",
+          properties: {
+            extract_doc_properties: {
+              type: "boolean",
+              nullable: true,
+              default: false
+            },
+            extract_hidden_slides: {
+              type: "boolean",
+              nullable: true
+            },
+            extract_notes: {
+              type: "boolean",
+              nullable: true,
+              default: true
+            },
+            translate_slides: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          dependencies: {
+            extract_hidden_slides: {
+              not: {
+                required: [
+                  "translate_slides"
+                ]
+              }
+            },
+            translate_slides: {
+              not: {
+                required: [
+                  "extract_hidden_slides"
+                ]
+              }
+            }
+          },
+          additionalProperties: false
+        },
+        dita: {
+          type: "object",
+          properties: {
+            do_not_translate_elements: {
+              type: "array",
+              items: {
+                $ref: {
+                  type: "string"
+                }
+              },
+              nullable: true
+            }
+          },
+          required: ["do_not_translate_elements"],
+          additionalProperties: false
+        }
+      }
+    },
+    XliffConfigSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: "string"
+        },
+        rules: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            xliff12: {
+              $ref: "#/definitions/XliffRule"
+            },
+            xliff20: {
+              $ref: "#/definitions/XliffRule"
+            }
+          }
+        }
+      },
+      required: [
+        "rules",
+        "name"
+      ]
+    },
+    XliffRule: {
+      type: 'object',
+      properties: {
+        states: {
+          type: "array",
+          example: ["translated"],
+          items: {
+            $ref: {
+              type: "string"
+            }
+          }
+        },
+        analysis: {
+          type: "string",
+          example: "new"
+        },
+        editor: {
+          type: "string",
+          example: "translated"
+        },
+        matchCategory: {
+          type: "string"
+        }
+      }
+    },
+    ProjectTemplateSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: "string"
+        },
+        is_default: {
+          type: "boolean"
+        },
+        id_team: {
+          type: "integer"
+        },
+        tm_prioritization: {
+          type: "boolean"
+        },
+        pretranslate_100: {
+          type: "boolean"
+        },
+        pretranslate_101: {
+          type: "boolean"
+        },
+        get_public_matches: {
+          type: "boolean"
+        },
+        subject: {
+          type:  "string"
+        },
+        source_language: {
+          type:  "string"
+        },
+        target_language: {
+          type: "array",
+          items: {
+            type: "string",
+            example: "it-IT"
+          }
+        },
+        segmentation_rule: {
+          type: "object",
+          nullable: true
+        },
+        tm: {
+          type: "array",
+          items: {
+            type: "object",
+            $ref: "#/definitions/ProjectTemplateSchemaTM"
+          }
+        },
+        mt: {
+          type: "object",
+          $ref: "#/definitions/ProjectTemplateSchemaMT"
+        },
+        payable_rate_template_id: {
+          type: "integer",
+          nullable: true
+        },
+        qa_model_template_id: {
+          type: "integer",
+          nullable: true
+        },
+        xliff_config_template_id: {
+          type: "integer",
+          nullable: true
+        },
+        filters_template_id: {
+          type: "integer",
+          nullable: true
+        }
+      },
+      required: [
+        "name",
+        "id_team",
+        "pretranslate_100",
+        "get_public_matches"
+      ],
+    },
+    ProjectTemplateSchemaTM: {
+      type: "object",
+      properties: {
+        glos: {
+          type: "boolean"
+        },
+        is_shared: {
+          type: "boolean"
+        },
+        key: {
+          type: "string"
+        },
+        name: {
+          type: "string"
+        },
+        owner: {
+          type: "boolean"
+        },
+        tm: {
+          type: "boolean"
+        },
+        r: {
+          type: "boolean"
+        },
+        w: {
+          type: "boolean"
+        },
+        penalty: {
+          type: "integer",
+          nullable: true,
+          maximum: 100,
+          minimum: 0
+        }
+      }
+    },
+    ProjectTemplateSchemaMT: {
+      type: "object",
+      properties: {
+        id: {
+          type: "integer"
+        },
+        extra: {
+          type: "object"
+        }
+      }
+    },
     QualityModelSchema: {
       type: 'object',
       properties: {
@@ -3440,7 +4515,7 @@ var spec = {
           ]
         },
         value: {
-          "type": "integer"
+          type: "integer"
         }
       },
       required: ["label", "value"]
