@@ -489,6 +489,9 @@ const ProjectContainer = ({
           control={control}
           defaultValue={project.get('name')}
           name="name"
+          rules={{
+            required: true,
+          }}
           render={({field: {name, onChange, value}, fieldState: {error}}) => (
             <Input
               autoFocus
@@ -532,6 +535,7 @@ const ProjectContainer = ({
             <div className="ui stackable grid">
               <div
                 className={`sixteen wide column project-title ${isEditingName ? 'project-title-editing-name-mode' : ``}`}
+                onMouseOver={() => setShouldShowEditNameIcon(true)}
                 onMouseLeave={() => setShouldShowEditNameIcon(false)}
               >
                 <div className="ui ribbon label">
@@ -545,7 +549,6 @@ const ProjectContainer = ({
                       className="project-name"
                       title="Project name"
                       data-testid="project-name"
-                      onMouseOver={() => setShouldShowEditNameIcon(true)}
                     >
                       {project.get('name')}
                     </div>
