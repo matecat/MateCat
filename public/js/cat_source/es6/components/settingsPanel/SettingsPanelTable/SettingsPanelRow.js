@@ -108,7 +108,7 @@ export const SettingsPanelRow = forwardRef(
           )}
           <div
             className={`settings-panel-row-content ${
-              row.isActive && !row.isLocked ? ' settings-panel-row-active' : ''
+              row.isActive ? ' settings-panel-row-active' : ''
             } ${className}`}
           >
             {node}

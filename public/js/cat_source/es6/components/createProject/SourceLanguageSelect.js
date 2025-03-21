@@ -2,7 +2,7 @@ import React, {useContext} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../common/Select'
 import {CreateProjectContext} from './CreateProjectContext'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const SourceLanguageSelect = ({
   isRenderedInsideTab = false,

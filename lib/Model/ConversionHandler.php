@@ -321,7 +321,7 @@ class ConversionHandler {
                 return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
             }
 
-            return 'File conversion issue, please contact us at <a href="mailto:support@matecat.com">support@matecat.com</a>';
+            return 'File conversion issue, please contact us at support@matecat.com';
         }
 
         return $message;

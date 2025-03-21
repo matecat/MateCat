@@ -1,6 +1,6 @@
 import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {BUTTON_TYPE, Button} from '../common/Button/Button'
 import IconDown from '../icons/IconDown'
 import ManageActions from '../../actions/ManageActions'

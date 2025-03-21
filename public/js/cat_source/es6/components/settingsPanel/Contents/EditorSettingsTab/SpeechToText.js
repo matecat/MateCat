@@ -4,7 +4,7 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import Speech2TextFeature from '../../../../utils/speech2text'
 
 import AlertModal from '../../../modals/AlertModal'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const METADATA_KEY = 'dictation'
 
