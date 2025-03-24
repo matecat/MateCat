@@ -676,7 +676,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     private function configureAnalysisContribution($config)
     {
         $id_job        = $_config[ 'job_id' ] ?? null;
-        $mt_evaluation = $_config['mt_evaluation'] ?? null;
+        $mt_evaluation = $_config[ 'mt_evaluation' ] ?? null;
 
         if($id_job and $this->_isAnalysis){
             $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
@@ -684,6 +684,10 @@ class Engines_MMT extends Engines_AbstractEngine {
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
+            }
+
+            if ( empty( $mt_evaluation ) ) {
+                $mt_evaluation  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_evaluation' );
             }
 
             if ( $mt_evaluation ) {
