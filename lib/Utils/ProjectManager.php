@@ -274,7 +274,7 @@ class ProjectManager {
      * @throws Exception
      */
     protected function _sanitizeProjectName() {
-        $newName = self::_sanitizeName( $this->projectStructure[ 'project_name' ] );
+        $newName = Utils::sanitizeName( $this->projectStructure[ 'project_name' ] );
 
         if ( !$newName ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -2811,23 +2811,6 @@ class ProjectManager {
 
         // Definitely DISABLED
         return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
-
-    }
-
-    protected static function _sanitizeName( $nameString ) {
-
-        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
-        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
-        $nameString = str_replace( '_.', ".", $nameString );
-
-        // project name validation
-        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
-
-        if ( !preg_match( $pattern, $nameString ) ) {
-            return false;
-        }
-
-        return $nameString;
 
     }
 
