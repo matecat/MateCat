@@ -168,7 +168,7 @@ class ManageUtils {
 
         if ( $search_in_pname ) {
             $conditions[]           = " p.name LIKE :project_name ";
-            $data[ 'project_name' ] = "%$search_in_pname%";
+            $data[ 'project_name' ] = "%".Utils::sanitizeName($search_in_pname)."%";
         }
 
         if ( $search_source ) {
