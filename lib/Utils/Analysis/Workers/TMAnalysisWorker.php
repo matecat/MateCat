@@ -523,6 +523,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
         $_config[ 'priority_key' ]      = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'job_id' ]            = $queueElement->params->id_job ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -650,6 +651,10 @@ class TMAnalysisWorker extends AbstractWorker {
             $config[ 'mt_evaluation' ]   = $queueElement->params->mt_evaluation;
 
             $mt_evaluation = $config['mt_evaluation'] ?? null;
+
+            if(!isset($config['job_id'])){
+                $config['job_id'] = $queueElement->params->id_job;
+            }
 
             // if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
