@@ -430,7 +430,7 @@ export const TranslationMemoryGlossaryTab = () => {
               />
               Activate variant-strict matching.{' '}
               <a
-                href="https://guides.matecat.com/activ"
+                href="https://guides.matecat.com/activ#:~:text=In%20order%20to%20maximize%20TM%20leverage%2C%20Matecat%2C%20by%20default%2C%20returns%20TM%20matches%20for%20all%20the%20variants%20of%20your%20project%27s%20languages.%20Matches%20from%20language%20variants%20other%20than%20those%20specified%20for%20the%20project%20incur%20a%201%25%20penalty%20to%20prevent%20them%20from%20being%20used%20for%20pre%2Dtranslation"
                 rel="noreferrer"
                 target="_blank"
               >
