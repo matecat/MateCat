@@ -83,7 +83,7 @@ class ProjectsContainer extends React.Component {
   }
 
   createNewProject() {
-    window.open('/', '_blank')
+    window.open(`/?idTeam=${this.state.team.get('id')}`, '_blank')
   }
 
   getButtonsNoProjects() {
