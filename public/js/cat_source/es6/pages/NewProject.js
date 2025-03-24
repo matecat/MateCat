@@ -13,7 +13,6 @@ import ModalsActions from '../actions/ModalsActions'
 import AlertModal from '../components/modals/AlertModal'
 import {getTmKeysUser} from '../api/getTmKeysUser'
 import More from '../../../../img/icons/More'
-import UploadFile from '../components/createProject/UploadFile'
 import SupportedFilesModal from '../components/modals/SupportedFilesModal'
 import Footer from '../components/footer/Footer'
 import {createProject as createProjectApi} from '../api/createProject'
@@ -39,13 +38,8 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {
-  checkGDriveEvents,
-  getFilenameFromUploadedFiles,
-  handleCreationStatus,
-  restartConversions,
-} from '../utils/newProjectUtils'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {checkGDriveEvents, handleCreationStatus} from '../utils/newProjectUtils'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
 import UserActions from '../actions/UserActions'
@@ -60,6 +54,9 @@ import {
   ONBOARDING_PAGE,
   OnboardingTooltips,
 } from '../components/header/OnboardingTooltips'
+import {UploadFile} from '../components/createProject/UploadFile'
+import {flushSync} from 'react-dom'
+import DriveIcon from '../../../../img/icons/DriveIcon'
 
 const SELECT_HEIGHT = 324
 
@@ -92,6 +89,8 @@ const NewProject = () => {
   const [isFormReadyToSubmit, setIsFormReadyToSubmit] = useState(false)
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
+  const [openGDrive, setOpenGDrive] = useState(false)
+  const [uploadedFilesNames, setUploadedFilesNames] = useState([])
 
   const {
     projectTemplates,
@@ -100,7 +99,6 @@ const NewProject = () => {
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
   } = useProjectTemplates(tmKeys)
-
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -427,7 +425,7 @@ const NewProject = () => {
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
       action: 'createProject',
-      file_name: getFilenameFromUploadedFiles(),
+      file_name: uploadedFilesNames.join('@@SEP@@'),
       project_name: projectNameRef.current.value,
       source_lang: sourceLang.id,
       target_lang: targetLangs.map((lang) => lang.id).join(),
@@ -472,7 +470,6 @@ const NewProject = () => {
         ),
       }),
     })
-
     if (!projectSent) {
       setErrors()
       setWarnings()
@@ -556,7 +553,7 @@ const NewProject = () => {
 
     retrieveSupportedLanguages()
 
-    UI.addEvents()
+    // UI.addEvents()
 
     const hideAllErrors = () => {
       setErrors()
@@ -603,60 +600,68 @@ const NewProject = () => {
   }, [getMTEngines, getTmKeys, isUserLogged])
 
   useEffect(() => {
-    const createKeyFromTMXFile = ({extension, filename}) => {
-      const haveNoActiveKeys = tmKeys.every(({isActive}) => !isActive)
+    if (!Array.isArray(currentProjectTemplate?.tm)) return
 
-      if (haveNoActiveKeys) {
+    let isTmCreationInProgress = false
+
+    const createKeyFromTMXFile = ({filename}) => {
+      const alreadyImportedTmFromFile = tmKeys
+        .filter(({key}) =>
+          currentProjectTemplate.tm.some((tmCompare) => tmCompare.key === key),
+        )
+        .some(({isTmFromFile}) => isTmFromFile)
+
+      if (!alreadyImportedTmFromFile && !isTmCreationInProgress) {
         tmCreateRandUser().then((response) => {
           const {key} = response.data
-          setTmKeys((prevState) => [
-            ...(prevState ?? []),
-            {
-              r: true,
-              w: true,
-              tm: true,
-              glos: true,
-              owner: true,
-              name: filename,
-              key,
-              is_shared: false,
-              id: key,
-              isActive: true,
-            },
-          ])
+          const tmItem = {
+            r: true,
+            w: false,
+            tm: true,
+            glos: true,
+            owner: true,
+            name: filename,
+            key,
+            is_shared: false,
+            id: key,
+            isActive: true,
+            isLocked: true,
+            isTmFromFile: true,
+          }
+
+          flushSync(() =>
+            setTmKeys((prevState) => [...(prevState ?? []), tmItem]),
+          )
+
+          //eslint-disable-next-line
+          const {id, isActive, isLocked, isTmFromFile, ...tmTemplateItem} =
+            tmItem
+
+          modifyingCurrentTemplate((prevTemplate) => ({
+            ...prevTemplate,
+            tm: [tmTemplateItem, ...prevTemplate.tm],
+          }))
+
+          isTmCreationInProgress = false
         })
+
+        const message = (
+          <span>
+            The TMX file(s) you have uploaded will be imported into the newly
+            created key <i>{filename}</i>. If you wish to import them into an
+            existing key, please use the 'Import TMX' button in the
+            <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
+              {' '}
+              Settings panel
+            </a>
+            .
+          </span>
+        )
+
+        setWarnings(message)
+
+        isTmCreationInProgress = true
       }
-
-      const glossaryMessage = (
-        <span>
-          A new resource has been generated for the glossary you uploaded. You
-          can manage your resources in the{' '}
-          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-            Settings panel
-          </a>
-          .
-        </span>
-      )
-
-      const tmMessage = haveNoActiveKeys ? (
-        <span>
-          A new resource has been generated for the TMX you uploaded. You can
-          manage your resources in the{' '}
-          <a href="#" onClick={() => setOpenSettings({isOpen: true})}>
-            {' '}
-            Settings panel
-          </a>
-          .
-        </span>
-      ) : (
-        <span>
-          The TMX file(s) you have uploaded have been imported into the active
-          private key(s)
-        </span>
-      )
-
-      const message = extension === 'g' ? glossaryMessage : tmMessage
-      setWarnings(message)
     }
     CreateProjectStore.addListener(
       NewProjectConstants.CREATE_KEY_FROM_TMX_FILE,
@@ -668,7 +673,7 @@ const NewProject = () => {
         createKeyFromTMXFile,
       )
     }
-  }, [tmKeys])
+  }, [currentProjectTemplate?.tm, tmKeys, modifyingCurrentTemplate])
 
   useEffect(() => {
     if (sourceLang && targetLangs) {
@@ -677,23 +682,8 @@ const NewProject = () => {
         targetLangs,
         selectedTeam,
       })
-      if (prevSourceLang.current.id !== sourceLang.id) {
-        prevSourceLang.current = sourceLang
-        restartConversions()
-      }
     }
   }, [sourceLang, targetLangs, selectedTeam])
-
-  useEffect(() => {
-    //TODO: used in main.js, remove
-    if (currentProjectTemplate) {
-      const {segmentationRule} = currentProjectTemplate
-      if (UI.segmentationRule !== segmentationRule.id) {
-        UI.segmentationRule = segmentationRule.id
-        restartConversions()
-      }
-    }
-  }, [currentProjectTemplate?.segmentationRule])
 
   useEffect(() => {
     if (!isDeviceCompatible) {
@@ -797,6 +787,11 @@ const NewProject = () => {
         setSelectedTeam,
         subject,
         setSubject,
+        openGDrive,
+        setOpenGDrive,
+        currentProjectTemplate,
+        uploadedFilesNames,
+        setUploadedFilesNames,
       }}
     >
       <HeaderPortal>
@@ -928,21 +923,7 @@ const NewProject = () => {
             <p>{errors}</p>
           </div>
         )}
-        {typeof isUserLogged === 'boolean' ? (
-          isUserLogged ? (
-            <UploadFile />
-          ) : (
-            <div className="upload-box-not-logged">
-              <h2>
-                <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create
-                a project.
-              </h2>
-              <span>Start translating now!</span>
-            </div>
-          )
-        ) : (
-          <div className="upload-waiting-logged"></div>
-        )}
+        <UploadFile />
       </div>
       <div className="wrapper-bottom">
         {conversionEnabled && (
@@ -962,15 +943,21 @@ const NewProject = () => {
               {formatsNumber} file formats{' '}
             </a>
             <span style={{float: 'right'}}>.</span>
-            {googleDriveEnabled && (
-              <span className="gdrive-addlink-container">
-                and{' '}
-                <a className="load-gdrive load-gdrive-disabled" href="#">
-                  Google Drive files
-                </a>
-                <span className="gdrive-icon"></span>
-              </span>
-            )}
+            {googleDriveEnabled &&
+              currentProjectTemplate &&
+              uploadedFilesNames.length === 0 && (
+                <span className="gdrive-addlink-container">
+                  and{' '}
+                  <a
+                    className="load-gdrive"
+                    onClick={() => setOpenGDrive(true)}
+                    href="#"
+                  >
+                    Google Drive files{'  '}
+                    <DriveIcon size={16} />
+                  </a>
+                </span>
+              )}
           </p>
         )}
         <div className="uploadbtn-box">

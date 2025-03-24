@@ -11,7 +11,7 @@ import IconEdit from '../icons/IconEdit'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import Close from '../../../../../img/icons/Close'
 import {EMAIL_PATTERN} from '../../constants/Constants'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import UserConstants from '../../constants/UserConstants'
 import UserStore from '../../stores/UserStore'
 import {

@@ -2587,15 +2587,6 @@ section .segment-side-buttons {
 /* Header/Footer Restyling */
 
 $icon-scale: 30px;
-/* XLIFF to Target page */
-
-.xliff-to-target-page {
-  header {
-    .wrapper {
-      grid-template-columns: 208px 1fr max-content !important;
-    }
-  }
-}
 
 /* Default */
 

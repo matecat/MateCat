@@ -26,7 +26,6 @@ import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
 import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
 import {debounce, isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
-import {restartConversions} from '../../utils/newProjectUtils'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -185,9 +184,6 @@ export const SettingsPanel = ({
     XLIFF_SETTINGS_SCHEMA_KEYS,
   )
 
-  const debounceRestartConversions =
-    restartConversions && debounce(restartConversions, 500)
-
   // Sync filters template with conversion file
   useSyncTemplateWithConvertFile({
     ...fileImportFiltersParamsTemplates,
@@ -199,7 +195,6 @@ export const SettingsPanel = ({
         CreateProjectStore.updateProject({
           filtersTemplate,
         })
-        if (debounceRestartConversions) debounceRestartConversions()
       }
     },
   })

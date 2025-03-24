@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
 import CatToolActions from '../../../../actions/CatToolActions'
@@ -310,7 +310,8 @@ export const TranslationMemoryGlossaryTab = () => {
           id,
           key,
           name,
-          isDraggable: isActive && !isSpecialRow && isOwnerOfKey(key),
+          isDraggable:
+            isActive && !isSpecialRow && isOwnerOfKey(key) && !row.isTmFromFile,
           isActive,
           isLocked,
           isExpanded,
@@ -320,7 +321,9 @@ export const TranslationMemoryGlossaryTab = () => {
               : id === SPECIAL_ROWS_ID.addSharedResource ||
                   id === SPECIAL_ROWS_ID.newResource
                 ? 'settings-panel-row-active row-content-create-resource'
-                : '',
+                : row.isTmFromFile
+                  ? 'row-content-tm-from-file'
+                  : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (

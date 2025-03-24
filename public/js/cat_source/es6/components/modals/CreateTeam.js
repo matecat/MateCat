@@ -4,7 +4,7 @@ import CommonUtils from '../../utils/commonUtils'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const CreateTeam = () => {
   const {userInfo} = useContext(ApplicationWrapperContext)

@@ -1,40 +1,12 @@
-import React, {
-  createContext,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {createContext, useEffect, useRef, useState} from 'react'
 import useAuth from '../../../hooks/useAuth'
-import Cookies from 'js-cookie'
-import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
 import CommonUtils from '../../../utils/commonUtils'
 import {FORCE_ACTIONS, ForcedActionModal} from './ForcedActionModal'
 import ModalsActions from '../../../actions/ModalsActions'
 import UserConstants from '../../../constants/UserConstants'
-import ApplicationStore from '../../../stores/ApplicationStore'
 import UserStore from '../../../stores/UserStore'
-
-// Custom event handler class: allows namespaced events
-class EventHandlerClass {
-  constructor() {
-    this.functionMap = {}
-  }
-
-  addEventListener(event, func) {
-    this.functionMap[event] = func
-    document.addEventListener(event.split('.')[0], this.functionMap[event])
-  }
-
-  removeEventListener(event) {
-    document.removeEventListener(event.split('.')[0], this.functionMap[event])
-    delete this.functionMap[event]
-  }
-}
-window.eventHandler = new EventHandlerClass()
-
-export const ApplicationWrapperContext = createContext({})
+import {ApplicationWrapperContext} from './ApplicationWrapperContext'
 
 export const ApplicationWrapper = ({children}) => {
   const {
