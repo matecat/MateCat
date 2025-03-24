@@ -270,11 +270,12 @@ LXQ.init = function () {
   /*
    * Add lexiQA event handlers for warnings events
    */
-  $(document).on('getWarning:local:success', function (e, data) {
+  document.addEventListener('getWarning:local:success', (event) => {
+    const data = event.detail
     LXQ.doLexiQA(data.segment, false, function () {})
   })
   /* Invoked when page loads */
-  $(document).on('getWarning:global:success', function () {
+  document.addEventListener('getWarning:global:success', function () {
     if (globalReceived) {
       return
     }
@@ -285,12 +286,14 @@ LXQ.init = function () {
   })
 
   /* invoked when segment is completed (translated clicked)*/
-  $(document).on('setTranslation:success', function (e, data) {
+  document.addEventListener('setTranslation:success', (event) => {
+    const data = event.detail
     LXQ.doLexiQA(data.segment, true, null)
   })
 
   /* invoked when more segments are loaded...*/
-  $(window).on('segmentsAdded', function (e, data) {
+  document.addEventListener('segmentsAdded', (event) => {
+    const data = event.detail
     globalReceived = false
     console.log('[LEXIQA] got segmentsAdded ')
     each(data.resp, function (file) {
