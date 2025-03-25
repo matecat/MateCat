@@ -320,6 +320,24 @@ class engineController extends ajaxController {
                 return;
             }
 
+        } elseif( $newEngineStruct instanceof EnginesModel_IntentoStruct ){
+
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $newTestCreatedMT->get( $config );
+
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => "Intento license not valid, please verify its validity and try again" ];
+                $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
+
+                return;
+            }
+
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
 
             $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
