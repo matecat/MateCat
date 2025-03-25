@@ -16,7 +16,7 @@ export const OtherTab = () => {
         <Subject />
       </div>
       <div className="settings-panel-contentwrapper-tab-subcategories">
-        <h2>Character counter</h2>
+        <h2>Character counter settings</h2>
         <CharacterCounterRules />
       </div>
     </div>
