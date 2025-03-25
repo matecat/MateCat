@@ -12,11 +12,24 @@ class Engines_Intento extends Engines_AbstractEngine {
             'target'  => null
     ];
 
+    private $apiKey;
+    private $provider = [];
+    private $providerKey;
+    private $providerCategory;
+
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
+
         if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
+
+        $extra = $engineRecord->getExtraParamsAsArray();
+
+        $this->apiKey = $extra['apikey'] ?? null;
+        $this->provider = $extra['provider'] ?? [];
+        $this->providerKey = $extra['providerkey'] ?? null;
+        $this->providerCategory = $extra['providercategory'] ?? null;
     }
 
     /**
@@ -48,11 +61,11 @@ class Engines_Intento extends Engines_AbstractEngine {
                 if ( isset( $result->response ) and isset( $result->done ) and $result->done == true ) {
                     $text    = $result->response[ 0 ]->results[ 0 ];
                     $decoded = [
-                            'data' => [
-                                    'translations' => [
-                                            [ 'translatedText' => $text ]
-                                    ]
+                        'data' => [
+                            'translations' => [
+                                [ 'translatedText' => $text ]
                             ]
+                        ]
                     ];
 
                 } elseif ( isset( $result->done ) and $result->done == false ) {
@@ -62,10 +75,10 @@ class Engines_Intento extends Engines_AbstractEngine {
                     return $this->_curl_async( $cnf, $parameters, $function );
                 } elseif ( isset( $result->error ) and $result->error != null ) {
                     $decoded = [
-                            'error' => [
-                                    'code'    => '-2',
-                                    'message' => $result->error->reason
-                            ]
+                        'error' => [
+                            'code'    => '-2',
+                            'message' => $result->error->reason
+                        ]
                     ];
                 } else {
                     $cnf = [ 'async' => true, 'id' => $id ];
@@ -130,23 +143,27 @@ class Engines_Intento extends Engines_AbstractEngine {
         $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
-        if ( $this->apikey != null and $this->apikey != '' ) {
-            $_headers = [ 'apikey: ' . $this->apikey, 'Content-Type: application/json' ];
+        if ( !empty($this->apiKey) ) {
+            $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
         $provider                          = $this->provider;
-        if ( $provider != null and $provider != '' ) {
+        $providerKey                       = $this->providerKey;
+        $providerCategory                  = $this->providerCategory;
+
+        if ( !empty($provider) ) {
             $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider;
-            if ( $this->providerkey != null and $this->providerkey != '' ) {
-                $providerkey                                    = json_decode( $this->providerkey );
-                $parameters[ 'service' ][ 'auth' ][ $provider ] = [ $providerkey ];
+            $parameters[ 'service' ][ 'provider' ] = $provider['id'];
+
+            if ( !empty($providerKey) ) {
+                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [ json_decode( $providerKey ) ];
             }
-            if ( $this->providercategory != null and $this->providercategory != '' ) {
-                $parameters[ 'context' ][ 'category' ] = $this->providercategory;
+
+            if ( !empty($providerCategory) ) {
+                $parameters[ 'context' ][ 'category' ] = $providerCategory;
             }
         }
 
@@ -162,14 +179,17 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters, true );
 
+        \Log::doJsonLog("PIPPO ----> " . json_encode($this->result) );
+
         return $this->result;
 
     }
 
     protected function _curl_async( $config, $parameters = null, $function = null ) {
         $id = $config[ 'id' ];
-        if ( $this->apikey != null and $this->apikey != '' ) {
-            $_headers = [ 'apikey: ' . $this->apikey, 'Content-Type: application/json' ];
+
+        if ( !empty($this->apiKey) ) {
+            $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
         $this->_setIntentoUserAgent(); //Set Intento User Agent
