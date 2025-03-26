@@ -331,7 +331,13 @@ class engineController extends ajaxController {
             $mt_result = $newTestCreatedMT->get( $config );
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => "Intento license not valid, please verify its validity and try again" ];
+
+                if($mt_result[ 'error' ][ 'code' ] === -403){
+                    $this->result[ 'errors' ][] = [ 'code' => 403, 'message' =>  "The Intento license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using Intento as MT engine."];
+                } else {
+                    $this->result[ 'errors' ][] = [ 'code' => 404, 'message' => "Intento license not valid, please verify its validity and try again" ];
+                }
+
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
