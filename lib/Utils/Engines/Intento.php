@@ -179,8 +179,6 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters, true );
 
-        \Log::doJsonLog("PIPPO ----> " . json_encode($this->result) );
-
         return $this->result;
 
     }
