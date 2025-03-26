@@ -397,6 +397,57 @@ var spec = {
         },
       },
     },
+    '/api/v2/projects/{id_project}/{password}/change-name': {
+      post: {
+        tags: ['Project'],
+        summary: 'Change the name of a project',
+        description: 'Change the name of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'name',
+            in: 'formData',
+            description: 'The new project name.',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The id and the new project name',
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  example: 123
+                },
+                name: {
+                  type: 'string',
+                  example: "the_new_project_name"
+                },
+              }
+            }
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
     '/api/v2/change-password': {
       post: {
         tags: ['Project', 'Job'],
