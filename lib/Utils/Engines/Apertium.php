@@ -71,16 +71,13 @@ class Engines_Apertium extends Engines_AbstractEngine {
 
         $mt_match_res = new Engines_Results_MyMemory_Matches([
             'raw_segment' => $original[ "text" ],
-            'translation' => $mt_result->translatedText,
+            'raw_translation' => $mt_result->translatedText,
             'match' => 100 - $this->getPenalty() . "%",
             'created-by' => "MT-" . $this->getName(),
             'create-date' => date( "Y-m-d" ),
         ]);
 
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $mt_match_res->getMatches();
     }
 
     public function get( $_config ) {

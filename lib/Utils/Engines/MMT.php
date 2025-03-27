@@ -151,7 +151,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                 'source' => $_config[ 'source' ],
                 'target' => $_config[ 'target' ],
                 'raw_segment' => $_config[ 'segment' ],
-                'translation' => $translation[ 'translation' ],
+                'raw_translation' => $translation[ 'translation' ],
                 'match' => 100 - $this->getPenalty() . "%",
                 'created-by' => "MT-" . $this->getName(),
                 'create-date' => date( "Y-m-d" ),

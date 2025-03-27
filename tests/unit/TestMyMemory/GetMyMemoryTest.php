@@ -272,6 +272,8 @@ TAB;
 
         $result->matches = $result->get_matches_as_array();
 
+
+
         /**
          * 1st match
          */

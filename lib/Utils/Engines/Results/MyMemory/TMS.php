@@ -47,22 +47,21 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
         $match[ 'prop' ] = isset( $match[ 'prop' ]) ? json_decode( $match[ 'prop' ]) : [];
 
         return new Engines_Results_MyMemory_Matches([
-            'id' => $match['id'],
-            'raw_segment' => $match['segment'],
-            'segment' => $match['segment'],
-            'translation' => $match['translation'],
+            'id' => $match['id'] ?? '0',
+            'raw_segment' => $match['segment'] ?? '',
+            'raw_translation' => $match['translation'] ?? '',
             'match' => $match['match'],
             'created-by' => $match['created-by'] ?? "Anonymous",
-            'create-date' => $match['create-date'],
-            'prop' => $match['prop'],
-            'quality' => $match['quality'],
-            'usage-count' => $match['usage_count'],
-            'subject' => $match['subject'],
-            'reference' => $match['reference'],
-            'last-updated-by' => $match['last_updated_by'],
-            'last-update-date' => $match['last_update_date'],
+            'create-date' => $match['create-date'] ?? '0000-00-00',
+            'prop' => $match['prop'] ?? [],
+            'quality' => $match['quality'] ?? 0,
+            'usage-count' => $match['usage-count'] ?? 0,
+            'subject' => $match['subject'] ?? '',
+            'reference' => $match['reference'] ?? '',
+            'last-updated-by' => $match['last-updated-by'] ?? '',
+            'last-update-date' => $match['last-update-date'] ?? '0000-00-00',
             'tm_properties' => $match['tm_properties'],
-            'key' => $match['memory_key'],
+            'key' => $match['key'] ?? '',
         ]);
     }
 

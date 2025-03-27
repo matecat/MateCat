@@ -76,7 +76,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
 
         $mt_match_res = new Engines_Results_MyMemory_Matches([
             'raw_segment' => $all_args[ 1 ][ "text" ],
-            'translation' => $mt_result->translatedText,
+            'raw_translation' => $mt_result->translatedText,
             'match' => 100 - $this->getPenalty() . "%",
             'created-by' => "MT-" . $this->getName(),
             'create-date' => date( "Y-m-d" ),

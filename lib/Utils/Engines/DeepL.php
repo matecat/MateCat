@@ -40,7 +40,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
             'source' => $source,
             'target' => $target,
             'raw_segment' => $segment,
-            'translation' => $translation,
+            'raw_translation' => $translation,
             'match' => "85%",
             'created-by' => "MT-" . $this->getName(),
             'create-date' => date( "Y-m-d" ),
