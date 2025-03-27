@@ -18,7 +18,7 @@ class Engines_Results_MyMemory_Matches {
     public $last_updated_by;
     public $create_date;
     public $last_update_date;
-    public $match;
+    public $data;
 
     public $prop = [];
     public $memory_key;
@@ -38,39 +38,36 @@ class Engines_Results_MyMemory_Matches {
 
     public $score;
 
+    public $match;
+
     /**
      * Engines_Results_MyMemory_Matches constructor.
-     * @param $raw_segment
-     * @param $raw_translation
-     * @param $match
-     * @param $createdBy
-     * @param $createDate
-     * @param $score
-     * @param $prop
+     * @param array $data
      */
-    public function __construct(
-        $raw_segment,
-        $raw_translation,
-        $match,
-        $createdBy = null,
-        $createDate = null,
-        $score = null,
-        $prop = []
-    ) {
-        $this->id = 0;
-        $this->raw_segment = $raw_segment;
-        $this->raw_translation = $raw_translation;
-        $this->match = $match;
-        $this->created_by = $createdBy ?? "Anonymous";
-        $this->create_date = $createDate ?? "0000-00-00 00:00:00";
-        $this->last_update_date = $createDate ?? "0000-00-00 00:00:00";
-        $this->score = $score;
-        $this->prop = $prop ?? [];
-        $this->tm_properties = [];
-        $this->ICE = false;
-        $this->match = 0;
-        $this->quality = 0;
-        $this->usage_count = 0;
+    public function __construct($data = []) {
+        $this->id               = array_key_exists( 'id', $data ) ? $data[ 'id' ] : '0';
+        $this->create_date      = array_key_exists( 'create-date', $data ) ? $data[ 'create-date' ] : '0000-00-00';
+        $this->segment          = array_key_exists( 'segment', $data ) ? $data[ 'segment' ] : '';
+        $this->raw_segment      = array_key_exists( 'raw_segment', $data ) ? $data[ 'raw_segment' ] : '';
+        $this->translation      = array_key_exists( 'translation', $data ) ? $data[ 'translation' ] : '';
+        $this->source_note      = array_key_exists( 'source_note', $data ) ? $data[ 'source_note' ] : '';
+        $this->target_note      = array_key_exists( 'target_note', $data ) ? $data[ 'target_note' ] : '';
+        $this->raw_translation  = array_key_exists( 'raw_translation', $data ) ? $data[ 'raw_translation' ] : '';
+        $this->quality          = array_key_exists( 'quality', $data ) ? $data[ 'quality' ] : 0;
+        $this->reference        = array_key_exists( 'reference', $data ) ? $data[ 'reference' ] : '';
+        $this->usage_count      = array_key_exists( 'usage-count', $data ) ? $data[ 'usage-count' ] : 0;
+        $this->subject          = array_key_exists( 'subject', $data ) ? $data[ 'subject' ] : '';
+        $this->created_by       = array_key_exists( 'created-by', $data ) ? $data[ 'created-by' ] : '';
+        $this->last_updated_by  = array_key_exists( 'last-updated-by', $data ) ? $data[ 'last-updated-by' ] : '';
+        $this->last_update_date = array_key_exists( 'last-update-date', $data ) ? $data[ 'last-update-date' ] : '0000-00-00';
+        $this->match            = array_key_exists( 'match', $data ) ? $data[ 'match' ] : 0;
+        $this->memory_key       = array_key_exists( 'key', $data ) ? $data[ 'key' ] : '';
+        $this->ICE              = array_key_exists( 'ICE', $data ) ? (bool)$data[ 'ICE' ] : false;
+        $this->tm_properties    = array_key_exists( 'tm_properties', $data ) ? json_decode( $data[ 'tm_properties' ], true ) : [];
+        $this->target           = array_key_exists( 'target', $data ) ? $data[ 'target' ] : null;
+        $this->source           = array_key_exists( 'source', $data ) ? $data[ 'source' ] : null;
+        $this->penalty          = array_key_exists( 'penalty', $data ) ? $data[ 'penalty' ] : null;
+        $this->prop             = array_key_exists( 'prop', $data ) ? $data[ 'prop' ] : [];
     }
 
     public function featureSet( FeatureSet $featureSet = null ) {

@@ -189,7 +189,7 @@ class Lara extends Engines_AbstractEngine {
         $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             // for MMT
-            $_config[ 'include_score' ] = isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1;
+            $_config[ 'include_score' ] = isset($_config['mt_evaluation']) && $_config['mt_evaluation'] == 1;
             $_config[ 'priority' ]      = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
@@ -282,14 +282,16 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches(
-            $_config[ 'segment' ],
-            $translation,
-            100 - $this->getPenalty() . "%",
-            "MT-" . $this->getName(),
-            date( "Y-m-d" ),
-            $score ?? null
-        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        return ( new Engines_Results_MyMemory_Matches([
+            'source' => $_config[ 'source' ],
+            'target' => $_config[ 'target' ],
+            'raw_segment' => $_config[ 'segment' ],
+            'translation' => $translation,
+            'match' => 100 - $this->getPenalty() . "%",
+            'created-by' => "MT-" . $this->getName(),
+            'create-date' => date( "Y-m-d" ),
+            'score' => $score ?? null
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
     }
 
     /**

@@ -147,14 +147,16 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'include_score' ] ?? null
             );
 
-            return ( new Engines_Results_MyMemory_Matches(
-                    $_config[ 'segment' ],
-                    $translation[ 'translation' ],
-                    100 - $this->getPenalty() . "%",
-                    "MT-" . $this->getName(),
-                    date( "Y-m-d" ),
-                    $translation[ 'score' ] ?? null
-            ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+            return ( new Engines_Results_MyMemory_Matches([
+                'source' => $_config[ 'source' ],
+                'target' => $_config[ 'target' ],
+                'raw_segment' => $_config[ 'segment' ],
+                'translation' => $translation[ 'translation' ],
+                'match' => 100 - $this->getPenalty() . "%",
+                'created-by' => "MT-" . $this->getName(),
+                'create-date' => date( "Y-m-d" ),
+                'score' => $translation[ 'score' ] ?? null
+            ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
 
         } catch ( Exception $e ) {
             return $this->GoogleTranslateFallback( $_config );

@@ -36,13 +36,15 @@ class Engines_DeepL extends Engines_AbstractEngine {
         $target      = $parameters[ 'target_lang' ];
         $segment     = $parameters[ 'text' ][ 0 ];
 
-        return ( new Engines_Results_MyMemory_Matches(
-                $segment,
-                $translation,
-                "85%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        ) )->getMatches( 1, [], $source, $target );
+        return ( new Engines_Results_MyMemory_Matches([
+            'source' => $source,
+            'target' => $target,
+            'raw_segment' => $segment,
+            'translation' => $translation,
+            'match' => "85%",
+            'created-by' => "MT-" . $this->getName(),
+            'create-date' => date( "Y-m-d" ),
+        ] ) )->getMatches( 1, [], $source, $target );
     }
 
     /**

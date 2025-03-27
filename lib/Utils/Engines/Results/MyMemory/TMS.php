@@ -46,40 +46,24 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
 
         $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
 
-        $currMatch = new Engines_Results_MyMemory_Matches(
-            $match['segment'],
-            $match['translation'],
-            $match['match'],
-            $match['created-by'] ?? "Anonymous",
-            $match['create-date'],
-            null,
-            $match['prop'],
-        );
-
-        $props = [
-            "id" => 'id',
-            "segment" =>  'segment',
-            "translation" => 'translation',
-            "quality" => 'quality',
-            "reference" => 'reference',
-            "usage-count" => 'usage_count',
-            "subject" => 'subject',
-            "created-by" => 'created_by',
-            "last-updated-by" => 'last_updated_by',
-            "create-date" => 'create_date',
-            "last-update-date" => 'last_update_date',
-            "tm_properties" => 'tm_properties',
-            "match" => 'match',
-            "key" =>  'memory_key',
-        ];
-
-        // hydrate other $currMatch props
-        foreach ($props as $key => $prop){
-            if(!empty($match[$key])){
-                $currMatch->$prop = $match[$key];
-            }
-        }
-        return $currMatch;
+        return new Engines_Results_MyMemory_Matches([
+            'id' => $match['id'],
+            'raw_segment' => $match['segment'],
+            'segment' => $match['segment'],
+            'translation' => $match['translation'],
+            'match' => $match['match'],
+            'created-by' => $match['created-by'] ?? "Anonymous",
+            'create-date' => $match['create-date'],
+            'prop' => $match['prop'],
+            'quality' => $match['quality'],
+            'usage-count' => $match['usage_count'],
+            'subject' => $match['subject'],
+            'reference' => $match['reference'],
+            'last-updated-by' => $match['last_updated_by'],
+            'last-update-date' => $match['last_update_date'],
+            'tm_properties' => $match['tm_properties'],
+            'key' => $match['memory_key'],
+        ]);
     }
 
     /**
