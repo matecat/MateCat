@@ -13,7 +13,6 @@ import useAuth from '../hooks/useAuth'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
-  const {isUserLogged} = useAuth()
   const eventHandlers = {
     disconnected: () => {
       CatToolActions.clientConnected(false)
@@ -177,11 +176,11 @@ const SocketListener = ({isAuthenticated, userId}) => {
       const message = data.message
       if (
         message &&
-        (!isUserLogged ||
-          (typeof Cookies.get('msg-' + message.token) == 'undefined' &&
-            new Date(message.expire) > new Date()))
+        typeof Cookies.get('msg-' + message.token) == 'undefined' &&
+        new Date(message.expire) > new Date()
       ) {
         const notification = {
+          uid: message.token,
           title: message.title ? message.title : 'Notice',
           text: message.message,
           type: message.level ? message.level : 'warning',

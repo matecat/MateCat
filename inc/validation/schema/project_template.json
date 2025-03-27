@@ -71,6 +71,9 @@
         "exclude_cjk",
         "all_one"
       ]
+    },
+    "dialect_strict": {
+      "type":  ["null", "boolean"]
     }
   },
   "required": [

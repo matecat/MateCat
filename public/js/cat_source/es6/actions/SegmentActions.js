@@ -1656,7 +1656,7 @@ const SegmentActions = {
         } else {
           SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
         }
-        $(document).trigger('getWarning:local:success', {
+        CommonUtils.dispatchCustomEvent('getWarning:local:success', {
           resp: data,
           segment: segment,
         })

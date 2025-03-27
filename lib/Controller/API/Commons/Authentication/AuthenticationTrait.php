@@ -59,9 +59,10 @@ trait AuthenticationTrait {
      * @return void
      */
     protected function setAuthKeysIfExists(): void {
-        $headers = getallheaders();
 
-        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Bearer ', $headers[ 'Authorization' ] )[ 1 ] ?? null );
+        $headers = array_change_key_case( getallheaders() );
+
+        $this->api_key    = $headers[ 'x-matecat-key' ] ?? base64_decode( explode( 'Bearer ', $headers[ 'authorization' ] )[ 1 ] ?? null );
         $this->api_secret = $headers[ 'x-matecat-secret' ] ?? null;
 
         if ( false !== strpos( $this->api_key, '-' ) ) {

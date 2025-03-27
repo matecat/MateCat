@@ -38,8 +38,10 @@ const STANDARD_TEMPLATE = {
   source_language: null,
   subject: null,
   target_language: [],
+  tm_prioritization: false,
   character_counter_count_tags: false,
   character_counter_mode: 'google_ads',
+  dialect_strict: false,
 }
 
 const CATTOOL_TEMPLATE = {
@@ -71,6 +73,7 @@ export const SCHEMA_KEYS = {
   tmPrioritization: 'tm_prioritization',
   characterCounterCountTags: 'character_counter_count_tags',
   characterCounterMode: 'character_counter_mode',
+  dialectStrict: 'dialect_strict',
 }
 
 export class UseProjectTemplateInterface extends ComponentExtendInterface {
