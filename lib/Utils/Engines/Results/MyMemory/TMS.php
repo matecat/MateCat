@@ -44,7 +44,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
         $match[ 'match' ] = $match[ 'match' ] * 100;
         $match[ 'match' ] = $match[ 'match' ] . "%";
 
-        $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
+        $match[ 'prop' ] = isset( $match[ 'prop' ]) ? json_decode( $match[ 'prop' ]) : [];
 
         return new Engines_Results_MyMemory_Matches([
             'id' => $match['id'],
