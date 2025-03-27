@@ -53,12 +53,14 @@ class Engines_Intento extends Engines_AbstractEngine {
      * @throws Exception
      */
     protected function _decode( $rawValue, $parameters = null, $function = null ) {
-        $all_args = func_get_args();
+
         if ( is_string( $rawValue ) ) {
             $result = json_decode( $rawValue, false );
+
             if ( $result and isset( $result->id ) ) {
                 $id = $result->id;
-                if ( isset( $result->response ) and isset( $result->done ) and $result->done == true ) {
+
+                if ( isset( $result->response ) and !empty($result->response) and isset( $result->done ) and $result->done == true ) {
                     $text    = $result->response[ 0 ]->results[ 0 ];
                     $decoded = [
                         'data' => [
@@ -73,11 +75,16 @@ class Engines_Intento extends Engines_AbstractEngine {
                     $cnf = [ 'async' => true, 'id' => $id ];
 
                     return $this->_curl_async( $cnf, $parameters, $function );
-                } elseif ( isset( $result->error ) and $result->error != null ) {
+                } elseif ( isset( $result->error ) and !empty($result->error) ) {
+
+                    $httpCode = $result->error->data[0]->response->body->error->code ?? 500;
+                    $message = $result->error->data[0]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
+
                     $decoded = [
                         'error' => [
-                            'code'    => '-2',
-                            'message' => $result->error->reason
+                            'code'    => -2,
+                            'message' => $message,
+                            'http_code' => $httpCode
                         ]
                     ];
                 } else {
@@ -159,7 +166,7 @@ class Engines_Intento extends Engines_AbstractEngine {
             $parameters[ 'service' ][ 'provider' ] = $provider['id'];
 
             if ( !empty($providerKey) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [ json_decode( $providerKey ) ];
+                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [json_decode( $providerKey, true )];
             }
 
             if ( !empty($providerCategory) ) {
