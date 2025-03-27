@@ -19,6 +19,7 @@ class SegmentHeader extends React.PureComponent {
       createdBy: '',
       visible: false,
       charactersCounter: {},
+      isGroupByTransUnit: false,
     }
     this.changePercentuage = this.changePercentuage.bind(this)
     this.hideHeader = this.hideHeader.bind(this)
@@ -58,6 +59,21 @@ class SegmentHeader extends React.PureComponent {
       SegmentConstants.CHARACTER_COUNTER,
       this.onCharacterCounter,
     )
+
+    const {sid} = this.props
+
+    const prevInternalId = SegmentStore.getPrevSegment(sid)?.internal_id
+
+    const internalId = SegmentStore.getSegmentByIdToJS(sid)?.internal_id
+
+    const nextInternalId = SegmentStore.getNextSegment({
+      current_sid: sid,
+    })?.internal_id
+
+    this.setState({
+      isGroupByTransUnit:
+        internalId === prevInternalId || internalId === nextInternalId,
+    })
   }
 
   componentWillUnmount() {
@@ -132,7 +148,8 @@ class SegmentHeader extends React.PureComponent {
         <span>Saving</span>
       </div>
     )
-    const {isActiveCharactersCounter, charactersCounter} = this.state
+    const {isActiveCharactersCounter, charactersCounter, isGroupByTransUnit} =
+      this.state
     const shouldDisplayCharactersCounter =
       charactersCounter?.sid === sid &&
       (isActiveCharactersCounter || charactersCounter.limit)
@@ -151,18 +168,28 @@ class SegmentHeader extends React.PureComponent {
                   : ''
             }`}
           >
-            <span>Character count: </span>
-            <span className="segment-counter-current">
-              {charactersCounter.counter}
-            </span>
-            {charactersCounter.limit > 0 && (
-              <>
-                /
-                <span className={'segment-counter-limit'}>
-                  {charactersCounter.limit}
-                </span>
-              </>
+            {isGroupByTransUnit && (
+              <div>
+                <span>Segment characters: </span>{' '}
+                <span>{charactersCounter.segmentCharacters}</span>
+              </div>
             )}
+            <div>
+              <span>
+                {isGroupByTransUnit ? 'Unit characters' : 'Characters'}:{' '}
+              </span>
+              <span className="segment-counter-current">
+                {charactersCounter.counter}
+              </span>
+              {charactersCounter.limit > 0 && (
+                <>
+                  /
+                  <span className={'segment-counter-limit'}>
+                    {charactersCounter.limit}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         )}
         {saving ? savingHtml : null}{' '}

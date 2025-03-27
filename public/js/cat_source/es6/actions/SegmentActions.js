@@ -1605,11 +1605,12 @@ const SegmentActions = {
       actionType: SegmentConstants.HIDE_AI_ASSISTANT,
     })
   },
-  characterCounter: ({sid, counter, limit}) => {
+  characterCounter: ({sid, counter, segmentCharacters, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
       counter,
+      segmentCharacters,
       limit,
     })
   },
@@ -1793,6 +1794,11 @@ const SegmentActions = {
     )
     AppDispatcher.dispatch({
       actionType: SegmentConstants.REFRESH_TAG_MAP,
+    })
+  },
+  changeCharactersCounterRules: function () {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
     })
   },
 }
