@@ -28,7 +28,7 @@ let TranslationMatches = {
         matchToUse.created_by,
       )
       UI.registerQACheck()
-      $(document).trigger('contribution:copied', {
+      CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })

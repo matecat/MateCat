@@ -1260,10 +1260,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         : filteredWithoutCurrent
     SegmentStore._aiSuggestions = [...update, {sid, suggestion}]
   },
-  setSegmentCharactersCounter: function (sid, counter) {
+  setSegmentCharactersCounter: function (sid, counter, segmentCharacters) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn([index, 'charactersCounter'], counter)
+    this._segments = this._segments.setIn(
+      [index, 'segmentCharacters'],
+      segmentCharacters,
+    )
   },
 })
 
@@ -1926,10 +1930,15 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHARACTER_COUNTER:
-      SegmentStore.setSegmentCharactersCounter(action.sid, action.counter)
+      SegmentStore.setSegmentCharactersCounter(
+        action.sid,
+        action.counter,
+        action.segmentCharacters,
+      )
       SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
         sid: action.sid,
         counter: action.counter,
+        segmentCharacters: action.segmentCharacters,
         limit: action.limit,
       })
       break
@@ -1992,6 +2001,9 @@ AppDispatcher.register(function (action) {
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
       )
+      break
+    case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
+      SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)

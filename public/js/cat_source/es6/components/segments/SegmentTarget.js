@@ -23,6 +23,8 @@ import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
 import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
+import SegmentUtils from '../../utils/segmentUtils'
+import CatToolStore from '../../stores/CatToolStore'
 import {Shortcuts} from '../../utils/shortcuts'
 import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 
@@ -34,6 +36,7 @@ class SegmentTarget extends React.Component {
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,
+      segmentCharacters: 0,
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
@@ -380,12 +383,14 @@ class SegmentTarget extends React.Component {
     // dispatch characterCounter action
     if (
       this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
-      this.state.charactersCounter !== prevState.charactersCounter
+      this.state.charactersCounter !== prevState.charactersCounter ||
+      this.state.segmentCharacters !== prevState.segmentCharacters
     ) {
       setTimeout(() => {
         SegmentActions.characterCounter({
           sid: this.props.segment.sid,
           counter: this.state.charactersCounter,
+          segmentCharacters: this.state.segmentCharacters,
           limit: this.state.charactersCounterLimit,
         })
       })
@@ -421,8 +426,17 @@ class SegmentTarget extends React.Component {
     )
   }
   updateCounter = (value) => {
+    const {segmentCharacters, unitCharacters} =
+      SegmentUtils.getRelativeTransUnitCharactersCounter({
+        sid: this.props.segment.sid,
+        charactersCounter: value,
+        shouldCountTagsAsChars:
+          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
+      })
+
     this.setState({
-      charactersCounter: value,
+      charactersCounter: unitCharacters,
+      segmentCharacters,
     })
   }
   toggleFormatMenu = (show) => {
