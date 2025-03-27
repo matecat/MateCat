@@ -2,6 +2,7 @@ import {cloneDeep} from 'lodash'
 import SearchHighlight from '../../SearchHighLight/SearchHighLight.component'
 import * as DraftMatecatConstants from './editorConstants'
 import SearchUtils from '../../../header/cattol/search/searchUtils'
+import TEXT_UTILS from '../../../../utils/textUtils'
 
 const activateSearch = (
   text,
@@ -66,33 +67,8 @@ const activateSearch = (
         }
       }
       //!isTag(start, tagRange) && callback(start, end)
-      handleTagInside(start, end, contentBlock, callback)
+      TEXT_UTILS.handleTagInside(start, end, contentBlock, callback)
       index++
-    }
-  }
-
-  const hasEntity = (charPosition, contentBlock) => {
-    return contentBlock.getEntityAt(charPosition)
-  }
-
-  const handleTagInside = (start, end, contentBlock, callback) => {
-    let cursor = start
-    while (cursor < end) {
-      // start
-      while (hasEntity(cursor, contentBlock) && cursor < end) {
-        cursor++
-      }
-      let tempStart = cursor
-      // end
-      while (!hasEntity(cursor, contentBlock) && cursor < end) {
-        cursor++
-      }
-      // no entity between, end loop
-      if (cursor === tempStart) {
-        cursor = end
-      }
-      let tempEnd = cursor
-      callback(tempStart, tempEnd)
     }
   }
 
