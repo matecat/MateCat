@@ -340,7 +340,7 @@ function CatTool() {
     } else {
       // more segments
       // TODO: da verificare se serve: $(window).trigger('segmentsAdded', {resp: data.files})
-      $(window).trigger('segmentsAdded', {resp: data.files})
+      CommonUtils.dispatchCustomEvent('segmentsAdded', {resp: data.files})
     }
     if (config.isReview) {
       SegmentActions.addPreloadedIssuesToSegment()
