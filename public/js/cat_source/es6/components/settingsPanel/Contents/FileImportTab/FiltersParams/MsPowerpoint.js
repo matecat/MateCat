@@ -1,9 +1,24 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {NumbersDashBadge} from './NumbersDashBadge'
+
+const convertTranslateSlidesToServer = (value) =>
+  value.reduce((acc, cur) => {
+    const [firstNum, secondNum] = cur.split('-')
+    const arrayLength =
+      typeof secondNum === 'string'
+        ? parseInt(secondNum) - parseInt(firstNum)
+        : 1
+    const result = new Array(arrayLength)
+      .fill('')
+      .map((item, index) => parseInt(firstNum) + index)
+      .filter((value) => acc.every((valueCompare) => valueCompare !== value))
+
+    return [...acc, ...result].sort((a, b) => a - b)
+  }, [])
 
 export const MsPowerpoint = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
@@ -140,7 +155,7 @@ export const MsPowerpoint = () => {
           name="translate_slides"
           disabled={formData?.extract_hidden_slides}
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <NumbersDashBadge
               name={name}
               value={value}
               onChange={onChange}

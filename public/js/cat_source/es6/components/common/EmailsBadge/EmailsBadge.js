@@ -39,7 +39,8 @@ export const EmailsBadge = ({
   name,
   onChange,
   value = [],
-  validatePattern = EMAIL_PATTERN,
+  validateUserTyping,
+  validateChip = EMAIL_PATTERN,
   separators = EMAIL_SEPARATORS,
   placeholder,
   disabled,
@@ -48,8 +49,8 @@ export const EmailsBadge = ({
   const areaRef = useRef()
   const inputRef = useRef()
   const highlightedEmailIndexRef = useRef(-1)
-  const validatePatternRef = useRef()
-  validatePatternRef.current = validatePattern
+  const validateChipRef = useRef()
+  validateChipRef.current = validateChip
 
   const [inputValue, setInputValue] = useState('')
   const [emails, setEmails] = useState(() => value)
@@ -92,10 +93,17 @@ export const EmailsBadge = ({
 
   const handleInputChange = (e) => {
     const newValue = e.target.value
-    if (newValue !== '') {
-      updateEmails(newValue)
-    } else {
-      setInputValue(newValue)
+
+    if (
+      (typeof validateUserTyping === 'function' &&
+        validateUserTyping(newValue)) ||
+      !validateUserTyping
+    ) {
+      if (newValue !== '') {
+        updateEmails(newValue)
+      } else {
+        setInputValue(newValue)
+      }
     }
   }
   const handlePaste = (e) => {
@@ -194,7 +202,10 @@ export const EmailsBadge = ({
 
   // RENDER
   const renderChip = (email, index) => {
-    const isValid = validatePatternRef.current.test(email)
+    const isValid =
+      typeof validateChipRef.current === 'object'
+        ? validateChipRef.current.test(email)
+        : validateChipRef.current(email)
     const isSelected = index === highlightedEmailIndex
     return (
       <div
@@ -262,7 +273,8 @@ EmailsBadge.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   value: PropTypes.arrayOf(PropTypes.string),
-  validatePattern: PropTypes.object,
+  validateUserTyping: PropTypes.func,
+  validateChip: PropTypes.oneOfType([PropTypes.object, PropTypes.func]),
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   error: PropTypes.object,
