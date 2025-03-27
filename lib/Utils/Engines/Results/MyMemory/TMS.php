@@ -32,7 +32,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     private function buildMyMemoryMatch($match)
     {
         if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
-            $match[ 'last-update-date' ] = "0000-00-00";
+            $match[ 'last-update-date' ] = "1970-01-01 00:00:00";
         }
 
         if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
@@ -52,14 +52,14 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
             'raw_translation' => $match['translation'] ?? '',
             'match' => $match['match'],
             'created-by' => $match['created-by'] ?? "Anonymous",
-            'create-date' => $match['create-date'] ?? '0000-00-00',
+            'create-date' => $match['create-date'] ?? '1970-01-01 00:00:00',
             'prop' => $match['prop'] ?? [],
             'quality' => $match['quality'] ?? 0,
             'usage-count' => $match['usage-count'] ?? 0,
             'subject' => $match['subject'] ?? '',
             'reference' => $match['reference'] ?? '',
             'last-updated-by' => $match['last-updated-by'] ?? '',
-            'last-update-date' => $match['last-update-date'] ?? '0000-00-00',
+            'last-update-date' => $match['last-update-date'] ?? '1970-01-01 00:00:00',
             'tm_properties' => $match['tm_properties'],
             'key' => $match['key'] ?? '',
         ]);

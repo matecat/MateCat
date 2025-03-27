@@ -46,7 +46,7 @@ class Engines_Results_MyMemory_Matches {
      */
     public function __construct($data = []) {
         $this->id               = array_key_exists( 'id', $data ) ? $data[ 'id' ] : '0';
-        $this->create_date      = array_key_exists( 'create-date', $data ) ? $data[ 'create-date' ] : '0000-00-00';
+        $this->create_date      = array_key_exists( 'create-date', $data ) ? $data[ 'create-date' ] : '1970-01-01 00:00:00';
         $this->segment          = array_key_exists( 'segment', $data ) ? $data[ 'segment' ] : '';
         $this->raw_segment      = array_key_exists( 'raw_segment', $data ) ? $data[ 'raw_segment' ] : '';
         $this->translation      = array_key_exists( 'translation', $data ) ? $data[ 'translation' ] : '';
@@ -59,7 +59,7 @@ class Engines_Results_MyMemory_Matches {
         $this->subject          = array_key_exists( 'subject', $data ) ? $data[ 'subject' ] : '';
         $this->created_by       = array_key_exists( 'created-by', $data ) ? $data[ 'created-by' ] : '';
         $this->last_updated_by  = array_key_exists( 'last-updated-by', $data ) ? $data[ 'last-updated-by' ] : '';
-        $this->last_update_date = array_key_exists( 'last-update-date', $data ) ? $data[ 'last-update-date' ] : '0000-00-00';
+        $this->last_update_date = array_key_exists( 'last-update-date', $data ) ? $data[ 'last-update-date' ] : '1970-01-01 00:00:00';
         $this->match            = array_key_exists( 'match', $data ) ? $data[ 'match' ] : 0;
         $this->memory_key       = array_key_exists( 'key', $data ) ? $data[ 'key' ] : '';
         $this->ICE              = array_key_exists( 'ICE', $data ) ? (bool)$data[ 'ICE' ] : false;
