@@ -10,7 +10,7 @@ const convertTranslateSlidesToServer = (value) =>
     const [firstNum, secondNum] = cur.split('-')
     const arrayLength =
       typeof secondNum === 'string'
-        ? parseInt(secondNum) - parseInt(firstNum)
+        ? parseInt(secondNum) - parseInt(firstNum) + 1
         : 1
     const result = new Array(arrayLength)
       .fill('')
@@ -19,6 +19,34 @@ const convertTranslateSlidesToServer = (value) =>
 
     return [...acc, ...result].sort((a, b) => a - b)
   }, [])
+
+const convertTranslateSlidesToView = (value) =>
+  value
+    .reduce((acc, cur) => {
+      const accCopy = [...acc]
+      const lastElement = accCopy.pop()
+
+      const isLastRangeCompleted =
+        typeof lastElement === 'string' && lastElement.indexOf('-') > -1
+      if (isLastRangeCompleted) {
+        return [...acc, [cur]]
+      } else {
+        if (!Array.isArray(lastElement)) return [...acc, [cur]]
+
+        const lastValue = lastElement[lastElement.length - 1]
+
+        if (cur - 1 === lastValue) {
+          return [...accCopy, [...lastElement, cur]]
+        } else {
+          return [
+            ...accCopy,
+            `${lastElement[0]}-${lastElement[lastElement.length - 1]}`,
+            [cur],
+          ]
+        }
+      }
+    }, [])
+    .map((value) => (Array.isArray(value) ? value[0].toString() : value))
 
 export const MsPowerpoint = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
