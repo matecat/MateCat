@@ -526,6 +526,10 @@ class Editarea extends React.Component {
     this.setNewTranslation(this.props.segment.sid, this.props.translation)
   }
 
+  refreshCharactersCounterRules = () => {
+    this.setNewTranslation(this.props.segment.sid, this.props.translation)
+  }
+
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.REPLACE_TRANSLATION,

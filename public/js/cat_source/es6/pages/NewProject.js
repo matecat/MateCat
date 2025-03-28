@@ -421,6 +421,8 @@ const NewProject = () => {
       payableRateTemplateId,
       XliffConfigTemplateId,
       tmPrioritization,
+      characterCounterCountTags,
+      characterCounterMode,
       dialectStrict,
       characterCounterCountTags,
       characterCounterMode,
@@ -463,6 +465,8 @@ const NewProject = () => {
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
+      character_counter_mode: characterCounterMode,
+      character_counter_count_tags: characterCounterCountTags,
       ...(dialectStrict && {
         dialect_strict: JSON.stringify(
           targetLangs.reduce(

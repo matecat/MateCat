@@ -433,14 +433,65 @@ var spec = {
               properties: {
                 id: {
                   type: 'integer',
-                  example: 123
+                  example: 123,
                 },
                 name: {
                   type: 'string',
-                  example: "the_new_project_name"
+                  example: 'the_new_project_name',
                 },
-              }
-            }
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v2/projects/{id_project}/{password}/change-name': {
+      post: {
+        tags: ['Project'],
+        summary: 'Change the name of a project',
+        description: 'Change the name of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'name',
+            in: 'formData',
+            description: 'The new project name.',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The id and the new project name',
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  example: 123,
+                },
+                name: {
+                  type: 'string',
+                  example: 'the_new_project_name',
+                },
+              },
+            },
           },
           default: {
             description: 'Unexpected error',
@@ -763,7 +814,7 @@ var spec = {
             name: 'id_project',
             in: 'path',
             description:
-                'The id of the parent project of the job you intend to generate the Revise 2 step for',
+              'The id of the parent project of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -771,7 +822,7 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-                'The password of parent project of the job you intend to generate the Revise 2 step for',
+              'The password of parent project of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -779,7 +830,7 @@ var spec = {
             name: 'id_job',
             in: 'formData',
             description:
-                'The id of the job you intend to generate the Revise 2 step for',
+              'The id of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
@@ -787,7 +838,7 @@ var spec = {
             name: 'password',
             in: 'formData',
             description:
-                'The password of the job you intend to generate the Revise 2 step for',
+              'The password of the job you intend to generate the Revise 2 step for',
             required: true,
             type: 'string',
           },
