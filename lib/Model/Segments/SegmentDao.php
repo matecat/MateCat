@@ -633,7 +633,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 files.filename,
                 s.id AS sid,
                 s.segment,
-                s.internal_id,
+                TO_BASE64(CONCAT(s.id_file_part, '_', s.internal_id)) as internal_id,
                 s.segment_hash,
                 IF ( st.status='NEW', NULL, st.translation ) AS translation,
                 IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
