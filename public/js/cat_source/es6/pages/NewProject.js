@@ -424,8 +424,6 @@ const NewProject = () => {
       characterCounterCountTags,
       characterCounterMode,
       dialectStrict,
-      characterCounterCountTags,
-      characterCounterMode,
     } = currentProjectTemplate
 
     // update store recently used target languages
