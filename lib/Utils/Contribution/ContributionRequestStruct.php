@@ -78,6 +78,8 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $tm_prioritization = null;
 
+    public $mt_evaluation = null;
+
     public $penalty_key = [];
 
     # Private members

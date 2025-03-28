@@ -110,18 +110,16 @@ class Engines_Intento extends Engines_AbstractEngine {
             return $mt_result;
         }
 
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $parameters[ 'context' ][ 'text' ],
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
+        $mt_match_res = new Engines_Results_MyMemory_Matches([
+            'raw_segment' => $parameters[ 'context' ][ 'text' ],
+            'raw_translation' => $mt_result->translatedText,
+            'match' => 100 - $this->getPenalty() . "%",
+            'created-by' => "MT-" . $this->getName(),
+            'create-date' => date( "Y-m-d" ),
+            'score' => $score ?? null
+        ]);
 
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $mt_match_res->getMatches();
     }
 
     public function get( $_config ) {
