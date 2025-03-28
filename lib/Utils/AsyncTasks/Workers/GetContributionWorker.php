@@ -433,10 +433,6 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
         }
 
-        if ( $contributionStruct->mt_evaluation !== null ) {
-            $_config[ 'mt_evaluation' ] = $contributionStruct->mt_evaluation;
-        }
-
         if ( !empty( $contributionStruct->penalty_key ) ) {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
         }

@@ -32,7 +32,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     private function buildMyMemoryMatch($match)
     {
         if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
-            $match[ 'last-update-date' ] = "0000-00-00";
+            $match[ 'last-update-date' ] = "1970-01-01 00:00:00";
         }
 
         if ( !empty( $match[ 'last-update-date' ] ) and $match[ 'last-update-date' ] != '0000-00-00' ) {
@@ -44,42 +44,25 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
         $match[ 'match' ] = $match[ 'match' ] * 100;
         $match[ 'match' ] = $match[ 'match' ] . "%";
 
-        $match[ 'prop' ] = ( isset( $match[ 'prop' ] ) ? $match[ 'prop' ] = json_decode( $match[ 'prop' ] ) : $match[ 'prop' ] = [] );
+        $match[ 'prop' ] = isset( $match[ 'prop' ]) ? json_decode( $match[ 'prop' ]) : [];
 
-        $currMatch = new Engines_Results_MyMemory_Matches(
-            $match['segment'],
-            $match['translation'],
-            $match['match'],
-            $match['created-by'] ?? "Anonymous",
-            $match['create-date'],
-            null,
-            $match['prop'],
-        );
-
-        $props = [
-            "id" => 'id',
-            "segment" =>  'segment',
-            "translation" => 'translation',
-            "quality" => 'quality',
-            "reference" => 'reference',
-            "usage-count" => 'usage_count',
-            "subject" => 'subject',
-            "created-by" => 'created_by',
-            "last-updated-by" => 'last_updated_by',
-            "create-date" => 'create_date',
-            "last-update-date" => 'last_update_date',
-            "tm_properties" => 'tm_properties',
-            "match" => 'match',
-            "key" =>  'memory_key',
-        ];
-
-        // hydrate other $currMatch props
-        foreach ($props as $key => $prop){
-            if(!empty($match[$key])){
-                $currMatch->$prop = $match[$key];
-            }
-        }
-        return $currMatch;
+        return new Engines_Results_MyMemory_Matches([
+            'id' => $match['id'] ?? '0',
+            'raw_segment' => $match['segment'] ?? '',
+            'raw_translation' => $match['translation'] ?? '',
+            'match' => $match['match'],
+            'created-by' => $match['created-by'] ?? "Anonymous",
+            'create-date' => $match['create-date'] ?? '1970-01-01 00:00:00',
+            'prop' => $match['prop'] ?? [],
+            'quality' => $match['quality'] ?? 0,
+            'usage-count' => $match['usage-count'] ?? 0,
+            'subject' => $match['subject'] ?? '',
+            'reference' => $match['reference'] ?? '',
+            'last-updated-by' => $match['last-updated-by'] ?? '',
+            'last-update-date' => $match['last-update-date'] ?? '1970-01-01 00:00:00',
+            'tm_properties' => $match['tm_properties'],
+            'key' => $match['key'] ?? '',
+        ]);
     }
 
     /**
