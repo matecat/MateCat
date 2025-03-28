@@ -478,8 +478,6 @@ const NewProject = () => {
           ),
         ),
       }),
-      character_counter_mode: characterCounterMode,
-      character_counter_count_tags: characterCounterCountTags,
     })
     if (!projectSent) {
       setErrors()
