@@ -1729,7 +1729,10 @@ class Editarea extends React.Component {
         segmentTargetTagMap,
         [],
       )
-      SegmentActions.getSegmentsQa(this.props.segment)
+      SegmentActions.getSegmentsQa({
+        ...this.props.segment,
+        translation: newTranslation,
+      })
     }, 100)
   }
 }
