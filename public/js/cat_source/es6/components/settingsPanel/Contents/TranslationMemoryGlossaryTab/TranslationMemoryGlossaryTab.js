@@ -401,10 +401,11 @@ export const TranslationMemoryGlossaryTab = () => {
     ])
 
   const inactiveKeys = keyRows.filter(
-    ({isActive, name}) =>
+    ({isActive, name, key}) =>
       !isActive &&
       (filterInactiveKeys
-        ? new RegExp(filterInactiveKeys, 'gi').test(name)
+        ? new RegExp(filterInactiveKeys, 'gi').test(name) ||
+          new RegExp(filterInactiveKeys, 'gi').test(key)
         : true),
   )
 
