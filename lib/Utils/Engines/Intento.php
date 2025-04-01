@@ -121,25 +121,7 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result            = $mt_result->get_as_array();
-            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
-
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches([
-            'raw_segment' => $parameters[ 'context' ][ 'text' ],
-            'raw_translation' => $mt_result->translatedText,
-            'match' => 100 - $this->getPenalty() . "%",
-            'created-by' => "MT-" . $this->getName(),
-            'create-date' => date( "Y-m-d" ),
-            'score' => $score ?? null
-        ]);
-
-        return $mt_match_res->getMatches();
+        return $this->_composeResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
     }
 
     public function get( $_config ) {
