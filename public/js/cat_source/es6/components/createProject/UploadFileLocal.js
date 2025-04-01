@@ -9,8 +9,6 @@ import FileUploadIconBig from '../../../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
 import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
-import {initFileUpload} from '../../api/initFileUpload'
-import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {getPrintableFileSize} from './UploadFile'
 import {CreateProjectContext} from './CreateProjectContext'
@@ -18,6 +16,10 @@ import {CreateProjectContext} from './CreateProjectContext'
 const EXTENSIONS = {
   tmx: 'tmx',
   zip: 'zip',
+}
+
+const UPLOAD_ERRORS = {
+  EMPTY_FILE: 'minFileSize',
 }
 
 const maxFileSize = Math.log(config.maxFileSize) / Math.log(1024)
@@ -48,20 +50,6 @@ function UploadFileLocal() {
   useEffect(() => {
     restartConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
-
-  useEffect(() => {
-    initFileUpload()
-    const onBeforeUnload = () => {
-      clearNotCompletedUploads()
-      return true
-    }
-
-    window.addEventListener('beforeunload', onBeforeUnload)
-
-    return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload)
-    }
-  }, [])
 
   useEffect(() => {
     const hasIncompleteFiles =
@@ -239,7 +227,7 @@ function UploadFileLocal() {
   }
 
   const getFileErrorMessage = (file) => {
-    const {ext, size} = file
+    const {ext, size, error} = file
     if (ext === EXTENSIONS.tmx && size > config.maxTMXFileSize) {
       return (
         'Error during upload. The uploaded TMX file exceed the file size limit of ' +
@@ -250,6 +238,8 @@ function UploadFileLocal() {
         'Error during upload. The uploaded file exceed the file size limit of ' +
         maxFileSizePrint
       )
+    } else if (error === UPLOAD_ERRORS.EMPTY_FILE) {
+      return 'Error: File is empty'
     }
   }
 

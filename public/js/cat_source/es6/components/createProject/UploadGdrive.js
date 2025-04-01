@@ -189,7 +189,7 @@ export const UploadGdrive = () => {
   const deleteGDriveFile = (file) => {
     deleteGDriveUploadedFile(file.id)
       .then((response) => {
-        setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
+        // setUploadedFilesNames((prev) => prev.filter((f) => f !== file.name))
         if (response.success) {
           tryListGDriveFiles()
         }
