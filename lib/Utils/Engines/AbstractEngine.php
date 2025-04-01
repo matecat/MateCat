@@ -259,8 +259,21 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $this->engineRecord->penalty;
     }
 
+    /**
+     * @return string
+     */
+    public function getStandardPenalty()
+    {
+        return 100 - $this->getPenalty() . "%";
+    }
+
     public function getName() {
         return $this->engineRecord->name;
+    }
+
+    public function getMTName()
+    {
+        return "MT-" . $this->getName();
     }
 
     public function isTMS(): bool {
@@ -376,4 +389,44 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return null;
     }
 
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return float|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
+    {
+        return null;
+    }
+
+    /**
+     * @param string $raw_segment
+     * @param $decoded
+     * @param int $layerNum
+     * @return array|Engines_Results_MT
+     * @throws Exception
+     */
+    protected function _composeResponseAsMatch( $raw_segment, $decoded, $layerNum = 1 ) {
+
+        $mt_result = new Engines_Results_MT( $decoded );
+
+        if ( $mt_result->error->code < 0 ) {
+            $mt_result            = $mt_result->get_as_array();
+            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
+
+            return $mt_result;
+        }
+
+        $mt_match_res = new Engines_Results_MyMemory_Matches([
+            'raw_segment' => $raw_segment,
+            'raw_translation' => $mt_result->translatedText,
+            'match' => $this->getStandardPenalty(),
+            'created-by' => $this->getMTName(),
+            'create-date' => date( "Y-m-d" )
+        ]);
+
+        return $mt_match_res->getMatches($layerNum);
+    }
 }
