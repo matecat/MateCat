@@ -1,9 +1,11 @@
-import React, {useContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import UploadFileLocal from './UploadFileLocal'
 import {UploadGdrive} from './UploadGdrive'
 import ModalsActions from '../../actions/ModalsActions'
 import {CreateProjectContext} from './CreateProjectContext'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {initFileUpload} from '../../api/initFileUpload'
+import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 
 export const getPrintableFileSize = (filesizeInBytes) => {
   filesizeInBytes = filesizeInBytes / 1024
@@ -17,6 +19,20 @@ export const getPrintableFileSize = (filesizeInBytes) => {
 export const UploadFile = ({...props}) => {
   const {openGDrive} = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
+
+  useEffect(() => {
+    initFileUpload()
+    const onBeforeUnload = () => {
+      clearNotCompletedUploads()
+      return true
+    }
+
+    window.addEventListener('beforeunload', onBeforeUnload)
+
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload)
+    }
+  }, [])
   return typeof isUserLogged === 'boolean' ? (
     isUserLogged ? (
       <>

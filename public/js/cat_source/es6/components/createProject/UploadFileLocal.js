@@ -9,8 +9,6 @@ import FileUploadIconBig from '../../../../../img/icons/FileUploadIconBig'
 import CommonUtils from '../../utils/commonUtils'
 import IconAdd from '../icons/IconAdd'
 import IconClose from '../icons/IconClose'
-import {initFileUpload} from '../../api/initFileUpload'
-import {clearNotCompletedUploads} from '../../api/clearNotCompletedUploads'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {getPrintableFileSize} from './UploadFile'
 import {CreateProjectContext} from './CreateProjectContext'
@@ -52,20 +50,6 @@ function UploadFileLocal() {
   useEffect(() => {
     restartConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
-
-  useEffect(() => {
-    initFileUpload()
-    const onBeforeUnload = () => {
-      clearNotCompletedUploads()
-      return true
-    }
-
-    window.addEventListener('beforeunload', onBeforeUnload)
-
-    return () => {
-      window.removeEventListener('beforeunload', onBeforeUnload)
-    }
-  }, [])
 
   useEffect(() => {
     const hasIncompleteFiles =
