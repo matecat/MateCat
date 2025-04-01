@@ -20,6 +20,10 @@ const EXTENSIONS = {
   zip: 'zip',
 }
 
+const UPLOAD_ERRORS = {
+  EMPTY_FILE: 'minFileSize',
+}
+
 const maxFileSize = Math.log(config.maxFileSize) / Math.log(1024)
 const maxFileSizePrint =
   parseInt(Math.pow(1024, maxFileSize - Math.floor(maxFileSize)) + 0.5) + ' MB'
@@ -239,7 +243,7 @@ function UploadFileLocal() {
   }
 
   const getFileErrorMessage = (file) => {
-    const {ext, size} = file
+    const {ext, size, error} = file
     if (ext === EXTENSIONS.tmx && size > config.maxTMXFileSize) {
       return (
         'Error during upload. The uploaded TMX file exceed the file size limit of ' +
@@ -250,6 +254,8 @@ function UploadFileLocal() {
         'Error during upload. The uploaded file exceed the file size limit of ' +
         maxFileSizePrint
       )
+    } else if (error === UPLOAD_ERRORS.EMPTY_FILE) {
+      return 'Error: File is empty'
     }
   }
 
