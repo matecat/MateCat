@@ -1061,6 +1061,10 @@ a {
                   content: 'T';
                 }
 
+                &.q:after {
+                  content: 'Q';
+                }
+
                 &.up:after {
                   content: 'Arrow up';
                 }

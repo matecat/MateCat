@@ -26,6 +26,7 @@ import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
 import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
 import {debounce, isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
+import {EditorOtherTab} from './Contents/EditorOtherTab'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -39,6 +40,7 @@ export const SETTINGS_PANEL_TABS = {
   qualityFramework: 'qf',
   fileImport: 'fileImport',
   editorSettings: 'editorSettings',
+  editorOther: 'editorOther',
 }
 
 export const TEMPLATE_PROPS_BY_TAB = {
@@ -64,6 +66,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.idTeam,
   ],
   [SETTINGS_PANEL_TABS.editorSettings]: [],
+  [SETTINGS_PANEL_TABS.editorOther]: [],
 }
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
@@ -108,7 +111,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
           {
             id: SETTINGS_PANEL_TABS.other,
             label: 'Other',
-            description: 'Adjust general settings for project creation.',
+            description: 'Adjust other project creation settings.',
             component: <OtherTab />,
           },
         ]
@@ -121,6 +124,12 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             description:
               'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
+          },
+          {
+            id: SETTINGS_PANEL_TABS.editorOther,
+            label: 'Other',
+            description: 'Adjust other project creation settings.',
+            component: <EditorOtherTab />,
           },
         ]
       : []),

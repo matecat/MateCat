@@ -63,6 +63,8 @@ const SELECT_HEIGHT = 324
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
 const tmKeyFromQueryString = urlParams.get('private_tm_key')
+const idTeamFromQueryString = urlParams.get('idTeam')
+
 let isTmKeyFromQueryStringAddedToTemplate = false
 
 const subjectsArray = config.subject_array.map((item) => {
@@ -164,6 +166,7 @@ const NewProject = () => {
   const projectNameRef = useRef()
   const prevSourceLang = useRef(sourceLang)
   const createProject = useRef()
+  const idTeamPreset = useRef(parseInt(idTeamFromQueryString))
 
   const checkMMTGlossariesWasCancelledIntoTemplates = useRef(
     (() => {
@@ -418,6 +421,9 @@ const NewProject = () => {
       payableRateTemplateId,
       XliffConfigTemplateId,
       tmPrioritization,
+      characterCounterCountTags,
+      characterCounterMode,
+      dialectStrict,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -457,6 +463,19 @@ const NewProject = () => {
       }),
       xliff_parameters_template_id: XliffConfigTemplateId,
       tm_prioritization: tmPrioritization ? 1 : 0,
+      character_counter_mode: characterCounterMode,
+      character_counter_count_tags: characterCounterCountTags,
+      ...(dialectStrict && {
+        dialect_strict: JSON.stringify(
+          targetLangs.reduce(
+            (acc, {id}) => ({
+              ...acc,
+              [id]: true,
+            }),
+            {},
+          ),
+        ),
+      }),
     })
     if (!projectSent) {
       setErrors()
@@ -742,6 +761,17 @@ const NewProject = () => {
       isTmKeyFromQueryStringAddedToTemplate = true
     }
   }, [currentProjectTemplate?.tm, tmKeys, modifyingCurrentTemplate])
+
+  useEffect(() => {
+    if (
+      typeof currentProjectTemplate?.idTeam === 'number' &&
+      typeof idTeamPreset.current === 'number' &&
+      !isNaN(idTeamPreset.current)
+    ) {
+      setSelectedTeam({id: idTeamPreset.current})
+      idTeamPreset.current = undefined
+    }
+  }, [currentProjectTemplate?.idTeam, setSelectedTeam])
 
   const isLoadingTemplates = !projectTemplates.length
 

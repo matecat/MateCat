@@ -1,7 +1,8 @@
-@use "colors";
+@use 'colors';
 
 // rewrite semantic CSS
-html, body {
+html,
+body {
   height: 100%;
 }
 body.manage {
@@ -92,7 +93,16 @@ div#manage-container {
     margin-bottom: 30px !important;
     //border: 1px solid $grey2;
     .project-title {
+      display: flex !important;
+      gap: 10px;
+      &[class*='sixteen wide'].column {
+        width: auto !important;
+      }
       padding-bottom: 0 !important;
+
+      > .label {
+        padding-top: 7px;
+      }
     }
     .ui.ribbon.label {
       z-index: 2;
@@ -105,6 +115,7 @@ div#manage-container {
       height: 30px;
       border-radius: 0 2px 2px 0;
       display: inline-block;
+      margin-right: -33px;
     }
     .project-header {
       background-color: colors.$grey4;
@@ -1014,4 +1025,39 @@ div#manage-container {
   height: 30px !important;
   color: #000 !important;
   font-size: 14px;
+}
+
+.project-container-button-edit-name {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.project-container-form-edit-name {
+  display: inline-block;
+
+  fieldset {
+    border: unset;
+    margin: 0;
+    padding: 0;
+  }
+
+  input[type='text'] {
+    height: 28px;
+    min-width: 250px;
+    max-width: 400px;
+
+    &:active,
+    &:focus {
+      box-shadow: unset;
+      border: 1px solid colors.$grey1;
+    }
+  }
+}
+
+.project-title-editing-name-mode {
+  > .label {
+    padding-top: 1px !important;
+    padding-right: 1px !important;
+  }
 }

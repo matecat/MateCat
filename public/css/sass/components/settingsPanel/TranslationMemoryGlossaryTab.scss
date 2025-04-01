@@ -28,15 +28,21 @@
   }
 }
 
-.translation-memory-glossary-tab-pre-translate {
+.translation-memory-glossary-checkbox-container {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
   border-radius: 4px;
   border: 1px dashed colors.$grey8;
   padding: 10px;
   margin-bottom: 20px;
   background: colors.$white;
+}
+
+.translation-memory-glossary-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .translation-memory-glossary-tab-table-title {
