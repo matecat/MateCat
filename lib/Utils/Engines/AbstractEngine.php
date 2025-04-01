@@ -414,9 +414,6 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
             'create-date' => date( "Y-m-d" )
         ]);
 
-        $source = null;
-        $target = null;
-
-        return $mt_match_res->getMatches($layerNum, [], $source, $target);
+        return $mt_match_res->getMatches($layerNum);
     }
 }
