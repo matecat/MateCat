@@ -589,7 +589,6 @@ const NewProject = () => {
       CommonUtils.getParameterByName('project_name')
     if (projectNameFromQuerystring)
       projectNameRef.current.value = projectNameFromQuerystring
-    checkGDriveEvents()
     return () => {
       CreateProjectStore.removeListener(
         NewProjectConstants.HIDE_ERROR_WARNING,
