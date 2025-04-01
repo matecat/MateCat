@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import CreateProjectActions from '../actions/CreateProjectActions'
 import {projectCreationStatus} from '../api/projectCreationStatus'
 import ModalsActions from '../actions/ModalsActions'
@@ -6,27 +5,6 @@ import AlertModal from '../components/modals/AlertModal'
 import CommonUtils from './commonUtils'
 import UserStore from '../stores/UserStore'
 
-export const checkGDriveEvents = () => {
-  const cookieFilesGdrive = 'gdrive_files_to_be_listed'
-  const cookieGdriveResponse = 'gdrive_files_outcome'
-  const cookie = Cookies.get(cookieGdriveResponse)
-  if (cookie) {
-    const gdriveResponse = JSON.parse(Cookies.get(cookieGdriveResponse))
-    if (gdriveResponse.success) {
-      APP.tryListGDriveFiles()
-    } else if (gdriveResponse.error_msg) {
-      CreateProjectActions.showError(gdriveResponse.error_msg)
-    }
-    Cookies.remove(cookieFilesGdrive, {
-      path: '',
-      domain: '.' + location.hostname,
-    })
-    Cookies.remove(cookieGdriveResponse, {
-      path: '',
-      domain: '.' + location.hostname,
-    })
-  }
-}
 export const handleCreationStatus = (id_project, password) => {
   projectCreationStatus(id_project, password)
     .then(({data, status}) => {
