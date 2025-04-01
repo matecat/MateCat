@@ -391,10 +391,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @param array $all_args
      * @param $decoded
+     * @param int $layerNum
      * @return array|Engines_Results_MT
      * @throws Exception
      */
-    protected function _composeResponseAsMatch( array $all_args, $decoded ) {
+    protected function _composeResponseAsMatch( array $all_args, $decoded, $layerNum = 1 ) {
 
         $mt_result = new Engines_Results_MT( $decoded );
 
@@ -413,6 +414,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
             'create-date' => date( "Y-m-d" )
         ]);
 
-        return $mt_match_res->getMatches();
+        $source = null;
+        $target = null;
+
+        return $mt_match_res->getMatches($layerNum, [], $source, $target);
     }
 }
