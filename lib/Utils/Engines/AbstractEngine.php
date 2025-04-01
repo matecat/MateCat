@@ -259,8 +259,21 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         return $this->engineRecord->penalty;
     }
 
+    /**
+     * @return string
+     */
+    public function getStandardPenalty()
+    {
+        return 100 - $this->getPenalty() . "%";
+    }
+
     public function getName() {
         return $this->engineRecord->name;
+    }
+
+    public function getMTName()
+    {
+        return "MT-" . $this->getName();
     }
 
     public function isTMS(): bool {
@@ -409,8 +422,8 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         $mt_match_res = new Engines_Results_MyMemory_Matches([
             'raw_segment' => $raw_segment,
             'raw_translation' => $mt_result->translatedText,
-            'match' => 100 - $this->getPenalty() . "%",
-            'created-by' => "MT-" . $this->getName(),
+            'match' => $this->getStandardPenalty(),
+            'created-by' => $this->getMTName(),
             'create-date' => date( "Y-m-d" )
         ]);
 

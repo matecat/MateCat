@@ -42,7 +42,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
             'raw_segment' => $segment,
             'raw_translation' => $translation,
             'match' => "85%",
-            'created-by' => "MT-" . $this->getName(),
+            'created-by' => $this->getMTName(),
             'create-date' => date( "Y-m-d" ),
         ] ) )->getMatches( 1, [], $source, $target );
     }
