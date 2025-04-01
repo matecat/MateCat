@@ -18,7 +18,7 @@
  */
 class Engines_MicrosoftHub extends Engines_AbstractEngine {
 
-    use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
+    use \Engines\Traits\Oauth;
 
     private $rawXmlErrStruct = <<<TAG
             <html>

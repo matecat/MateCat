@@ -387,4 +387,32 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     {
         return null;
     }
+
+    /**
+     * @param array $all_args
+     * @param $decoded
+     * @return array|Engines_Results_MT
+     * @throws Exception
+     */
+    protected function _composeResponseAsMatch( array $all_args, $decoded ) {
+
+        $mt_result = new Engines_Results_MT( $decoded );
+
+        if ( $mt_result->error->code < 0 ) {
+            $mt_result            = $mt_result->get_as_array();
+            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
+
+            return $mt_result;
+        }
+
+        $mt_match_res = new Engines_Results_MyMemory_Matches([
+            'raw_segment' => $all_args[ 1 ][ 'text' ],
+            'raw_translation' => $mt_result->translatedText,
+            'match' => 100 - $this->getPenalty() . "%",
+            'created-by' => "MT-" . $this->getName(),
+            'create-date' => date( "Y-m-d" )
+        ]);
+
+        return $mt_match_res->getMatches();
+    }
 }

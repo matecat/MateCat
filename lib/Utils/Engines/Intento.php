@@ -116,7 +116,6 @@ class Engines_Intento extends Engines_AbstractEngine {
             'match' => 100 - $this->getPenalty() . "%",
             'created-by' => "MT-" . $this->getName(),
             'create-date' => date( "Y-m-d" ),
-            'score' => $score ?? null
         ]);
 
         return $mt_match_res->getMatches();

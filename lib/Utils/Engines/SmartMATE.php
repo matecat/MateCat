@@ -10,7 +10,7 @@
  */
 class Engines_SmartMATE extends Engines_AbstractEngine {
 
-    use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
+    use \Engines\Traits\Oauth;
 
     protected $_auth_parameters = [
             'client_id'     => null,

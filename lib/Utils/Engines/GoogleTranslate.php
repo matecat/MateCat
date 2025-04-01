@@ -9,8 +9,6 @@
 
 class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
-    use \Engines\Traits\FormatResponse;
-
     protected $_config = [
             'q'      => null,
             'source' => null,
