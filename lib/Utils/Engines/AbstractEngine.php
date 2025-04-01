@@ -389,13 +389,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param array $all_args
+     * @param string $raw_segment
      * @param $decoded
      * @param int $layerNum
      * @return array|Engines_Results_MT
      * @throws Exception
      */
-    protected function _composeResponseAsMatch( array $all_args, $decoded, $layerNum = 1 ) {
+    protected function _composeResponseAsMatch( $raw_segment, $decoded, $layerNum = 1 ) {
 
         $mt_result = new Engines_Results_MT( $decoded );
 
@@ -407,7 +407,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         }
 
         $mt_match_res = new Engines_Results_MyMemory_Matches([
-            'raw_segment' => $all_args[ 1 ][ 'text' ],
+            'raw_segment' => $raw_segment,
             'raw_translation' => $mt_result->translatedText,
             'match' => 100 - $this->getPenalty() . "%",
             'created-by' => "MT-" . $this->getName(),

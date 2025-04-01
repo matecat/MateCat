@@ -101,9 +101,7 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        $all_args[ 1 ][ 'text' ] = $parameters[ 'context' ][ 'text' ];
-
-        return $this->_composeResponseAsMatch($all_args, $decoded);
+        return $this->_composeResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
     }
 
     public function get( $_config ) {

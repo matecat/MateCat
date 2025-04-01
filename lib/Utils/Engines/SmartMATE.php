@@ -73,7 +73,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeResponseAsMatch( $all_args, $decoded );
+        return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
@@ -125,7 +125,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     protected function _formatRecursionError() {
         return $this->_composeResponseAsMatch(
-                [],
+                '',
                 [
                         'error'          => [
                                 'code'     => -499,

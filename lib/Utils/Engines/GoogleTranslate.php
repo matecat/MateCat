@@ -25,9 +25,10 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
     /**
      * @param       $rawValue
      * @param array $parameters
-     * @param null  $function
+     * @param null $function
      *
      * @return array|Engines_Results_MT|mixed
+     * @throws Exception
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
@@ -37,7 +38,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
             if ( isset( $decoded[ "data" ] ) ) {
-                return $this->_composeResponseAsMatch( $all_args, $decoded );
+                return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
             } else {
                 $decoded = [
                         'error' => [
