@@ -61,6 +61,7 @@ class ChangeProjectNameController extends ChunkController
 
         try {
             $this->changeProjectName($id, $password, $name);
+            $this->featureSet->filter( 'filterCreateProjectFeatures', $id, $name );
 
             $this->response->status()->setCode(200);
             $this->response->json( [
