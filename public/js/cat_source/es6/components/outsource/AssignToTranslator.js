@@ -137,9 +137,9 @@ class AssignToTranslator extends React.Component {
     }
   }
   shareToTranslatorDateChangeNotification(email, oldDate, newDate) {
-    oldDate = $.format.date(oldDate, 'yyyy-MM-d hh:mm a')
+    oldDate = CommonUtils.formatDate(oldDate, 'yyyy-MM-d hh:mm a')
     oldDate = CommonUtils.getGMTDate(oldDate)
-    newDate = $.format.date(newDate, 'yyyy-MM-d hh:mm a')
+    newDate = CommonUtils.formatDate(newDate, 'yyyy-MM-d hh:mm a')
     newDate = CommonUtils.getGMTDate(newDate)
     return {
       title: 'Job delivery update',

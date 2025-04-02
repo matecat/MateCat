@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import usePortal from '../hooks/usePortal'
 import Header from '../components/header/Header'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import Footer from '../components/footer/Footer'
 import SocketListener from '../sse/SocketListener'
 import {mountPage} from './mountPage'

@@ -1,6 +1,6 @@
 import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const METADATA_KEY = 'character_counter'
 
