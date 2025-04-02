@@ -364,7 +364,6 @@ const matecatConfig = async ({env}, {mode}) => {
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/jquery-ui-1.14.0.min.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/libs.js',
