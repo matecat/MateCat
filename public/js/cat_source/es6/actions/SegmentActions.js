@@ -645,7 +645,7 @@ const SegmentActions = {
     SegmentStore.consecutiveCopySourceNum = []
 
     SegmentActions.removeAllSegments() //TODO
-    $('#outer').addClass('loading')
+    document.getElementById('outer').classList.add('loading')
 
     copyAllSourceToTarget()
       .then(() => {

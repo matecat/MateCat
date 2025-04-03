@@ -13,6 +13,7 @@ import ConfirmMessageModal from '../modals/ConfirmMessageModal'
 import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
+import {Popup} from 'semantic-ui-react'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -459,28 +460,30 @@ class JobContainer extends React.Component {
   getTMIcon() {
     if (this.props.job.get('private_tm_key').size) {
       let keys = this.props.job.get('private_tm_key')
-      let tooltipText = ''
-      keys.forEach(function (key) {
+      const tooltipText = keys.map((key) => {
         let descript = key.get('name') ? key.get('name') : 'Private resource'
-        let item =
-          '<div style="text-align: left"><span style="font-weight: bold">' +
-          descript +
-          '</span> (' +
-          key.get('key') +
-          ')</div>'
-        tooltipText = tooltipText + item
+        return (
+          <div style={{textAlign: 'left'}} key={key.get('key')}>
+            <span style={{fontWeight: 'bold'}}> {descript}</span> ({' '}
+            {key.get('key')})
+          </div>
+        )
       })
       return (
-        <a
-          className=" ui icon basic button tm-keys"
-          data-html={tooltipText}
-          data-variation="tiny"
-          ref={(tooltip) => (this.tmTooltip = tooltip)}
-          onClick={this.openTMPanel.bind(this)}
-          data-testid="tm-button"
-        >
-          <i className="icon-tm-matecat icon" />
-        </a>
+        <Popup
+          content={<>{tooltipText}</>}
+          size="tiny"
+          hoverable
+          trigger={
+            <a
+              className=" ui icon basic button tm-keys"
+              onClick={this.openTMPanel.bind(this)}
+              data-testid="tm-button"
+            >
+              <i className="icon-tm-matecat icon" />
+            </a>
+          }
+        />
       )
     } else {
       return ''
@@ -503,17 +506,20 @@ class JobContainer extends React.Component {
       var translatedUrl = this.getTranslateUrl() + '?action=openComments'
       icon = (
         <div className="comments-icon-container activity-icon-single">
-          <a
-            className=" ui icon basic button comments-tooltip"
-            data-html={tooltipText}
-            href={translatedUrl}
-            data-variation="tiny"
-            target="_blank"
-            ref={(tooltip) => (this.commentsTooltip = tooltip)}
-            rel="noreferrer"
-          >
-            <i className="icon-uniE96B icon" />
-          </a>
+          <Popup
+            content={tooltipText}
+            size="tiny"
+            trigger={
+              <a
+                className=" ui icon basic button comments-tooltip"
+                href={translatedUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="icon-uniE96B icon" />
+              </a>
+            }
+          />
         </div>
       )
     }
@@ -529,18 +535,21 @@ class JobContainer extends React.Component {
       var classQuality = quality === 'poor' ? 'yellow' : 'red'
       icon = (
         <div className="qreport-icon-container activity-icon-single">
-          <a
-            className="ui icon basic button qr-tooltip "
-            data-html={tooltipText}
-            href={url}
-            target="_blank"
-            data-position="top center"
-            data-variation="tiny"
-            ref={(tooltip) => (this.activityTooltip = tooltip)}
-            rel="noreferrer"
-          >
-            <i className={'icon-qr-matecat icon ' + classQuality} />
-          </a>
+          <Popup
+            content={tooltipText}
+            position="top center"
+            size="tiny"
+            trigger={
+              <a
+                className="ui icon basic button qr-tooltip "
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className={'icon-qr-matecat icon ' + classQuality} />
+              </a>
+            }
+          />
         </div>
       )
     }
@@ -555,18 +564,21 @@ class JobContainer extends React.Component {
       let tooltipText = 'Click to see issues'
       icon = (
         <div className="warnings-icon-container activity-icon-single">
-          <a
-            className="ui icon basic button warning-tooltip"
-            data-html={tooltipText}
-            href={url}
-            target="_blank"
-            data-position="top center"
-            data-variation="tiny"
-            ref={(tooltip) => (this.warningTooltip = tooltip)}
-            rel="noreferrer"
-          >
-            <i className="icon-notice icon red" />
-          </a>
+          <Popup
+            content={tooltipText}
+            position="top center"
+            size="tiny"
+            trigger={
+              <a
+                className="ui icon basic button warning-tooltip"
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="icon-notice icon red" />
+              </a>
+            }
+          />
         </div>
       )
     }
@@ -870,7 +882,6 @@ class JobContainer extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     var self = this
     $(this.iconsButton).dropdown()
-    this.initTooltips()
     if (this.updated) {
       this.container.classList.add('updated-job')
       setTimeout(function () {
@@ -893,7 +904,6 @@ class JobContainer extends React.Component {
     $(this.dropdown).dropdown({
       belowOrigin: true,
     })
-    this.initTooltips()
     $(this.iconsButton).dropdown()
     ProjectsStore.addListener(
       ManageConstants.ENABLE_DOWNLOAD_BUTTON,
@@ -903,19 +913,6 @@ class JobContainer extends React.Component {
       ManageConstants.DISABLE_DOWNLOAD_BUTTON,
       this.disableDownloadMenu.bind(this),
     )
-  }
-
-  initTooltips() {
-    $(this.rejectedTooltip).popup()
-    $(this.approvedTooltip).popup()
-    $(this.approved2ndPassTooltip).popup()
-    $(this.translatedTooltip).popup()
-    $(this.draftTooltip).popup()
-    $(this.activityTooltip).popup()
-    $(this.commentsTooltip).popup()
-    $(this.tmTooltip).popup({hoverable: true})
-    $(this.warningTooltip).popup()
-    $(this.languageTooltip).popup()
   }
 
   componentWillUnmount() {
@@ -961,26 +958,29 @@ class JobContainer extends React.Component {
               <div className="job-id" title="Job Id">
                 ID: {idJobLabel}
               </div>
-              <div
-                className="source-target languages-tooltip"
-                ref={(tooltip) => (this.languageTooltip = tooltip)}
-                data-html={
+              <Popup
+                size="tiny"
+                hoverable
+                content={
                   this.props.job.get('sourceTxt') +
                   ' > ' +
                   this.props.job.get('targetTxt')
                 }
-                data-variation="tiny"
-              >
-                <div className="source-box" data-testid="source-label">
-                  {this.props.job.get('sourceTxt')}
-                </div>
-                <div className="in-to">
-                  <i className="icon-chevron-right icon" />
-                </div>
-                <div className="target-box" data-testid="target-label">
-                  {this.props.job.get('targetTxt')}
-                </div>
-              </div>
+                trigger={
+                  <div className="source-target languages-tooltip">
+                    <div className="source-box" data-testid="source-label">
+                      {this.props.job.get('sourceTxt')}
+                    </div>
+                    <div className="in-to">
+                      <i className="icon-chevron-right icon" />
+                    </div>
+                    <div className="target-box" data-testid="target-label">
+                      {this.props.job.get('targetTxt')}
+                    </div>
+                  </div>
+                }
+              />
+
               <JobProgressBar stats={stats} />
               <div className="job-payable">
                 <a href={analysisUrl} target="_blank" rel="noreferrer">
