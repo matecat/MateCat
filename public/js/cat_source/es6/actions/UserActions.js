@@ -1,3 +1,4 @@
+import $ from 'jquery'
 import AppDispatcher from '../stores/AppDispatcher'
 import UserConstants from '../constants/UserConstants'
 import {getTeamMembers} from '../api/getTeamMembers'
