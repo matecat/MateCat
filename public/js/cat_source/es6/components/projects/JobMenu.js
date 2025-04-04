@@ -32,20 +32,6 @@ class JobMenu extends React.Component {
     }
   }
 
-  getReviseMenuLink() {
-    let reviseUrl = this.props.reviseUrl
-    return (
-      <div
-        className={'item'}
-        onClick={() => window.open(reviseUrl, '_blank')}
-        data-testid="revise-item"
-      >
-        <i className="icon-edit icon" />
-        Revise
-      </div>
-    )
-  }
-
   getSecondPassReviewMenuLink() {
     if (
       this.props.project.has('features') &&
@@ -108,10 +94,6 @@ class JobMenu extends React.Component {
     ).then(() => {
       this.openSecondPassUrl()
     })
-  }
-
-  componentDidMount() {
-    $(this.dropdown).dropdown()
   }
 
   render() {

@@ -1,5 +1,5 @@
 import React, {useRef} from 'react'
-
+import $ from 'jquery'
 import JobMenu from './JobMenu'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import CommonUtils from '../../utils/commonUtils'
@@ -14,6 +14,8 @@ import TranslatedIconSmall from '../../../../../img/icons/TranslatedIconSmall'
 import Tooltip from '../common/Tooltip'
 import JobProgressBar from '../common/JobProgressBar'
 import {Popup} from 'semantic-ui-react'
+import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
+import {BUTTON_SIZE} from '../common/Button/Button'
 
 class JobContainer extends React.Component {
   constructor(props) {
@@ -573,72 +575,89 @@ class JobContainer extends React.Component {
   }
 
   getWarningsMenuItem() {
-    var icon = ''
+    var icon = []
     var warnings = this.props.job.get('warnings_count')
     if (warnings > 0) {
       var url = this.getTranslateUrl() + '?action=warnings'
       let tooltipText = 'Click to see issues'
-      icon = (
-        <a
-          className="ui icon basic button "
-          href={url}
-          target="_blank"
-          data-position="top center"
-          rel="noreferrer"
-        >
-          <i className="icon-notice icon red" />
-          {tooltipText}
-        </a>
-      )
+      icon = [
+        {
+          label: (
+            <>
+              <i className="icon-notice icon red" />
+              {tooltipText}
+            </>
+          ),
+          onClick: () => {
+            window.open(url, '_blank')
+          },
+        },
+      ]
     }
     return icon
   }
 
   getCommentsMenuItem() {
-    let icon = ''
+    let icon = []
     let openThreads = this.props.job.get('open_threads_count')
     if (openThreads > 0) {
       var translatedUrl = this.getTranslateUrl() + '?action=openComments'
       if (this.props.job.get('open_threads_count') === 1) {
-        icon = (
-          <a
-            className=" ui icon basic button "
-            href={translatedUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <i className="icon-uniE96B icon" />
-            There is an open thread
-          </a>
-        )
+        icon = [
+          {
+            label: (
+              <>
+                <i className="icon-uniE96B icon" />
+                There is an open thread
+              </>
+            ),
+            onClick: () => {
+              window.open(translatedUrl, '_blank')
+            },
+          },
+        ]
       } else {
-        icon = (
-          <a
-            className=" ui icon basic button "
-            href={translatedUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <i className="icon-uniE96B icon" />
-            There are <span style={{fontWeight: 'bold'}}>
-              {openThreads}
-            </span>{' '}
-            open threads
-          </a>
-        )
+        icon = [
+          {
+            label: (
+              <>
+                <i className="icon-uniE96B icon" />
+                There are{' '}
+                <span style={{fontWeight: 'bold'}}>{openThreads}</span> open
+                threads
+              </>
+            ),
+            onClick: () => {
+              window.open(translatedUrl, '_blank')
+            },
+          },
+        ]
       }
     }
     return icon
   }
 
   getQRMenuItem() {
-    var icon = ''
+    var icon = []
     var quality = this.props.job.get('quality_summary').get('quality_overall')
     if (quality === 'poor' || quality === 'fail') {
       var url = this.getQAReport()
       let tooltipText = 'Overall quality: ' + quality.toUpperCase()
       var classQuality = quality === 'poor' ? 'yellow' : 'red'
-      icon = (
+      icon = [
+        {
+          label: (
+            <>
+              <i className={'icon-qr-matecat icon ' + classQuality} />
+              {tooltipText}
+            </>
+          ),
+          onClick: () => {
+            window.open(url, '_blank')
+          },
+        },
+      ]
+      /*icon = (
         <a
           className="ui icon basic button"
           href={url}
@@ -649,7 +668,7 @@ class JobContainer extends React.Component {
           <i className={'icon-qr-matecat icon ' + classQuality} />
           {tooltipText}
         </a>
-      )
+      )*/
     }
     return icon
   }
@@ -826,17 +845,23 @@ class JobContainer extends React.Component {
     const icons = this.getWarningsInfo()
     const iconsBody =
       icons.number > 1 ? (
-        <div
-          className="ui icon top right pointing dropdown group-activity-icon basic button"
-          ref={(button) => (this.iconsButton = button)}
-        >
-          <i className="icon-alarm icon" />
-          <div className="menu group-activity-icons transition hidden">
-            <div className="item">{this.getQRMenuItem()}</div>
-            <div className="item">{this.getWarningsMenuItem()}</div>
-            <div className="item">{this.getCommentsMenuItem()}</div>
-          </div>
-        </div>
+        <DropdownMenu
+          className="group-activity-icon"
+          toggleButtonProps={{
+            children: (
+              <div className="ui icon top right pointing dropdown group-activity-icon basic button">
+                <i className="icon-alarm icon" />
+              </div>
+            ),
+            testId: 'job-menu-button',
+            size: BUTTON_SIZE.ICON_STANDARD,
+          }}
+          items={[
+            ...this.getQRMenuItem(),
+            ...this.getWarningsMenuItem(),
+            ...this.getCommentsMenuItem(),
+          ]}
+        />
       ) : (
         icons.icon
       )
@@ -868,14 +893,10 @@ class JobContainer extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     var self = this
-    $(this.iconsButton).dropdown()
     if (this.updated) {
       this.container.classList.add('updated-job')
       setTimeout(function () {
         self.container.classList.remove('updated-job')
-        $(self.dropdown).dropdown({
-          belowOrigin: true,
-        })
       }, 500)
       self.updated = false
     }
@@ -888,10 +909,6 @@ class JobContainer extends React.Component {
   }
 
   componentDidMount() {
-    $(this.dropdown).dropdown({
-      belowOrigin: true,
-    })
-    $(this.iconsButton).dropdown()
     ProjectsStore.addListener(
       ManageConstants.ENABLE_DOWNLOAD_BUTTON,
       this.enableDownloadMenu.bind(this),

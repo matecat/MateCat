@@ -481,6 +481,13 @@ div#manage-container {
                 width: 30px;
                 height: 30px;
                 margin-left: 5px;
+                button.group-activity-icon {
+                  height: 30px;
+                  width: 30px;
+                  i {
+                    width: 30px;
+                  }
+                }
                 .comments {
                 }
                 .group-activity-icons {
