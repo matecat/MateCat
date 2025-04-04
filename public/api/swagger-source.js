@@ -3986,6 +3986,353 @@ var spec = {
       }
     },
 
+    '/api/v3/mmt/{engineId}/keys': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Get Modern MT keys',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'List the Modern MT keys.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/MMTKey',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/import-status/{uuid}': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Returns the status of an Import Job.',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns the JSON representation of an Import Job.',
+            schema: {
+              $ref: "#/definitions/MMTGlossary",
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/memory/create': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Create a new memory on Modern MT.',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              type: "object",
+              properties: {
+                name: {
+                  type: 'string'
+                },
+                description: {
+                  type: "string"
+                },
+                external_id: {
+                  type: "string"
+                },
+              }
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTKey',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/memory/update/{memoryId}': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Update Modern MT memory metadata',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'path',
+            description: 'The memory ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              type: "object",
+              properties: {
+                name: {
+                  type: 'string'
+                },
+                description: {
+                  type: "string"
+                }
+              }
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTMemory',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      },
+      delete: {
+        tags: ['Modern MT'],
+        summary: 'Delete a Modern MT memory',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'path',
+            description: 'The memory ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTMemory',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/glossary/create-memory-and-import': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Store Modern MT glossary content',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'csv',
+            in: 'formData',
+            description: 'The CSV file',
+            required: true,
+            type: 'file',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/glossary/import-status/{uuid}': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Get a Modern MT glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'uuid',
+            in: 'path',
+            description: 'The glossary uuid',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/glossary/import': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'formData',
+            description: 'The memory id',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'csv',
+            in: 'formData',
+            description: 'The CSV file',
+            required: true,
+            type: 'file',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/mmt/{engineId}/glossary/modify': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'body',
+            description: 'The memory id',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'tuid',
+            in: 'body',
+            description: 'The tuid of the glossary entry to be updated. forbidden if type is unidirectional, required if type is equivalent',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'terms',
+            in: 'body',
+            description: 'The glossary terms to be updated',
+            required: true,
+            type: 'string',
+            example: '[{"term": "test", "language": "en"}, {"term": "prova", "language": "it"}, {"term": "prueba", "language": "es"}]'
+          },
+          {
+            name: 'type',
+            in: 'body',
+            description: 'The string identifying the glossary type (either unidirectional or equivalent)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+
     '/api/v3/word-count/raw': {
       post: {
         tags: ['Word count'],
@@ -4033,6 +4380,52 @@ var spec = {
     },
   },
   definitions: {
+    MMTGlossary: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string'
+        },
+        memory: {
+          type: "integer"
+        },
+        size: {
+          type: "integer"
+        },
+        progress: {
+          type: "integer"
+        }
+      }
+    },
+    MMTKey: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer'
+        },
+        name: {
+          type: "string"
+        },
+        has_glossary: {
+          type: "boolean"
+        }
+      }
+    },
+    MMTMemory: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer'
+        },
+        creationDate: {
+          type: "string",
+          format: 'date-time',
+        },
+        name: {
+          type: "string"
+        }
+      }
+    },
     DeepLGlossary: {
       type: 'object',
       properties: {
