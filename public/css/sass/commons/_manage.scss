@@ -757,30 +757,11 @@ div#manage-container {
                 }
               }
               .job-menu {
-                i {
-                  vertical-align: inherit;
-                }
-                &.ui.button {
-                  background-color: transparent;
-                  border-radius: 2px;
-                  float: right;
-                  .divider {
-                    margin: 0;
-                  }
-                  .item {
-                    padding: 10px 15px !important;
-                    text-decoration: none;
-                    min-height: unset;
-                  }
-                  &:hover {
-                    background-color: #ececec;
-                  }
-                  &:active {
-                    background-color: #e2e2e2;
-                  }
-                  &:focus {
-                    background-color: #e2e2e2;
-                  }
+                float: right;
+                width: 28px !important;
+                height: 28px !important;
+                &:hover {
+                  background-color: rgba(colors.$grey8, 0.5) !important;
                 }
               }
 
