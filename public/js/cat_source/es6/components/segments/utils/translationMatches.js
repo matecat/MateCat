@@ -28,7 +28,7 @@ let TranslationMatches = {
         matchToUse.created_by,
       )
       UI.registerQACheck()
-      $(document).trigger('contribution:copied', {
+      CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })
@@ -62,7 +62,7 @@ let TranslationMatches = {
       matches &&
       matches.length > 0 &&
       isUndefined(matches[0].error) &&
-      (parseInt(match) > 70 || match === 'MT')
+      (parseInt(match) > 70 || match === 'MT' || match === 'ICE_MT')
     ) {
       var editareaLength = segmentObj.translation.length
       var translation = matches[0].translation
@@ -249,8 +249,11 @@ let TranslationMatches = {
       case match > 0 && match <= 99:
         percentageClass = 'per-orange'
         break
-      case match == 'MT':
+      case match === 'MT':
         percentageClass = 'per-yellow'
+        break
+      case match === 'ICE_MT':
+        percentageClass = 'per-green'
         break
       default:
         percentageClass = ''

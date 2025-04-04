@@ -1,4 +1,4 @@
-@import "commons/colors";
+@use "commons/colors";
 
 body {
   margin: 0;
@@ -151,11 +151,11 @@ button.ui-button::-moz-focus-inner {
 }
 
 .cancel-btn {
-  background: $rebuttedRed;
+  background: colors.$rebuttedRed;
 }
 
 .cancel-btn:hover {
-  background: $rebuttedRedHover;
+  background: colors.$rebuttedRedHover;
 }
 
 .translate-box a.tooltip {
@@ -184,14 +184,14 @@ button.ui-button::-moz-focus-inner {
 #clear-all-files,
 #clear-all-gdrive,
 #delete-failed-conversions {
-  background: $rebuttedRed;
+  background: colors.$rebuttedRed;
 }
 
 .cancel-btn:hover,
 #clear-all-files:hover,
 #clear-all-gdrive:hover,
 #delete-failed-conversions:hover {
-  background: $rebuttedRedHover;
+  background: colors.$rebuttedRedHover;
 }
 
 /* Fix for IE 6: */
@@ -326,7 +326,7 @@ button.ui-button::-moz-focus-inner {
 .translate-box {
   h2,
   .select-with-label__wrapper label {
-    color: $grey1;
+    color: colors.$grey1;
     font-size: 18px;
     font-weight: normal;
   }
@@ -393,7 +393,7 @@ button.ui-button::-moz-focus-inner {
       }
 
       .dropdown__option--is-no-results-found {
-        color: $grey7;
+        color: colors.$grey7;
       }
 
       .dropdown__option--is-no-results-found {
@@ -402,14 +402,14 @@ button.ui-button::-moz-focus-inner {
 
       .dropdown__option--is-active-option {
         background-color: unset;
-        color: $black;
+        color: colors.$black;
         font-weight: bold;
-        background-color: $grey5;
+        background-color: colors.$grey5;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: $grey4;
+        background-color: colors.$grey4;
       }
     }
 
@@ -422,7 +422,7 @@ button.ui-button::-moz-focus-inner {
 
       input:not([type='radio']),
       textarea {
-        border: 1px solid $grey2;
+        border: 1px solid colors.$grey2;
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
@@ -430,7 +430,7 @@ button.ui-button::-moz-focus-inner {
         line-height: 16px;
         &:focus,
         &:focus-visible {
-          border-color: $linkBlueTransparent;
+          border-color: colors.$linkBlueTransparent;
         }
       }
       .dropdown__search-bar {
@@ -460,7 +460,7 @@ button.ui-button::-moz-focus-inner {
         }
 
         &:hover {
-          background-color: $grey4;
+          background-color: colors.$grey4;
         }
       }
     }
@@ -528,7 +528,7 @@ button.ui-button::-moz-focus-inner {
   max-width: 1600px;
   position: relative;
   padding: 24px;
-  background: $grey5;
+  background: colors.$grey5;
   padding-top: 0px;
 }
 
@@ -553,7 +553,7 @@ button.ui-button::-moz-focus-inner {
   display: grid;
   align-items: center;
   justify-content: center;
-  color: $darkBlue;
+  color: colors.$darkBlue;
   min-width: 992px;
   /*margin: -3px 0 10px 0;*/
   height: 175px;
@@ -575,7 +575,7 @@ button.ui-button::-moz-focus-inner {
   margin: 0px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   .highlight {
-    color: $translatedBlue;
+    color: colors.$translatedBlue;
   }
 }
 
@@ -606,7 +606,7 @@ h2 {
   min-width: 200px;
   font-size: 26px !important;
   &.disabled {
-    background: $grey2 !important;
+    background: colors.$grey2 !important;
   }
   .uploadloader {
     background: url(/public/img/loader.gif) center center no-repeat;
@@ -728,7 +728,7 @@ h2 {
   width: 200px;
   cursor: pointer;
   padding: 12px 0px 4px 0;
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   color: #fff;
   font-weight: bold;
   margin-bottom: 30px !important;
@@ -747,7 +747,7 @@ h2 {
   padding: 0;
   width: max-content;
   text-decoration: underline !important;
-  color: $grey1 !important;
+  color: colors.$grey1 !important;
   label {
     font-size: 24px;
     &:hover {
@@ -758,7 +758,7 @@ h2 {
 }
 
 .fileinput-button:hover {
-  background-color: $translatedBlueHover;
+  background-color: colors.$translatedBlueHover;
   box-shadow:
     0 0 0 #e0e0e0,
     0 0 2px rgba(0, 0, 0, 0.12),
@@ -867,9 +867,9 @@ table .ui-progressbar-value {
 }
 
 a {
-  color: $linkBlue;
+  color: colors.$linkBlue;
   &:hover {
-    color: $linkBlueHover;
+    color: colors.$linkBlueHover;
   }
 }
 
@@ -882,7 +882,7 @@ a {
   float: left;
   font-weight: bold;
   font-size: 16px;
-  color: $grey1;
+  color: colors.$grey1;
   margin: 0px;
   .supported-file-formats {
     cursor: pointer;
@@ -1085,7 +1085,7 @@ tr.ready .size span {
 }
 
 .file_upload_error {
-  color: $redDefault;
+  color: colors.$redDefault;
 }
 
 .more {
@@ -1130,7 +1130,7 @@ tr.ready .size span {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   border: none;
-  background: $grey2;
+  background: colors.$grey2;
   box-shadow: none !important;
 }
 
@@ -1209,7 +1209,7 @@ tr.ready .size span {
 .popup .header input {
   float: right;
   margin: 1px 0px 0px 15px !important;
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   font-weight: bold;
   float: right;
   font-size: 14px;
@@ -1227,8 +1227,8 @@ tr.ready .size span {
     from(rgb(245, 245, 245)),
     to(rgb(211, 212, 213))
   );
-  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-  background: linear-gradient(top, $translatedBlue, #119ec4);
+  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
+  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
 }
 
 .translate-box h2 span.extra {
@@ -1455,7 +1455,7 @@ select:focus {
     flex-grow: 1;
     align-items: center;
     justify-content: space-between;
-    color: $black;
+    color: colors.$black;
 
     .select-item-default-label {
       display: block;
@@ -1473,7 +1473,7 @@ select:focus {
   .dropdown__option--is-active-option {
     .select-item-default {
       margin-right: 4px;
-      color: $white;
+      color: colors.$white;
     }
   }
 }
@@ -1482,7 +1482,7 @@ select:focus {
   .project-template-select {
     .dropdown__option--is-active-option {
       .select-item-default {
-        color: $black;
+        color: colors.$black;
       }
     }
   }
@@ -1490,7 +1490,7 @@ select:focus {
 
 .project-template-select-unsaved {
   .select {
-    color: $translatedBlue !important;
+    color: colors.$translatedBlue !important;
   }
 }
 
@@ -1515,7 +1515,7 @@ select:focus {
     flex-grow: 1;
     align-items: center;
     justify-content: space-between;
-    color: $black;
+    color: colors.$black;
 
     .select-item-default-label {
       display: block;
@@ -1533,7 +1533,7 @@ select:focus {
   .dropdown__option--is-active-option {
     .select-item-default {
       margin-right: 4px;
-      color: $white;
+      color: colors.$white;
     }
   }
 }
@@ -1542,7 +1542,7 @@ select:focus {
   .project-template-select {
     .dropdown__option--is-active-option {
       .select-item-default {
-        color: $black;
+        color: colors.$black;
       }
     }
   }
@@ -1550,7 +1550,7 @@ select:focus {
 
 .project-template-select-unsaved {
   .select {
-    color: $translatedBlue !important;
+    color: colors.$translatedBlue !important;
   }
 }
 

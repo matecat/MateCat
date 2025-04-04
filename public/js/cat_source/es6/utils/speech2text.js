@@ -13,17 +13,25 @@ const Speech2Text = {
   },
   disable: function () {
     Speech2Text.initialized = false
-    $(document).off('contribution:copied')
+    document.removeEventListener(
+      'contribution:copied',
+      Speech2Text.contributionCopied,
+    )
   },
   enable: function () {},
   init: function () {
     Speech2Text.initialized = true
     Speech2Text.loadRecognition()
-    $(document).on('contribution:copied', function (ev, data) {
-      if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
-        Speech2Text.finalTranscript = data.translation + ' '
-      }
-    })
+    document.addEventListener(
+      'contribution:copied',
+      Speech2Text.contributionCopied,
+    )
+  },
+  contributionCopied: function (event) {
+    const data = event.detail
+    if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
+      Speech2Text.finalTranscript = data.translation + ' '
+    }
   },
   recognition: null,
   recognizing: false,

@@ -5,6 +5,9 @@ import {
   getProjectTemplates,
 } from '../api/getProjectTemplates/getProjectTemplates'
 import useTemplates from './useTemplates'
+import {cloneDeep, mergeWith} from 'lodash'
+import {ComponentExtendInterface} from '../utils/ComponentExtendInterface'
+import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
 
 export const isStandardTemplate = ({id} = {}) => id === 0
 
@@ -35,6 +38,10 @@ const STANDARD_TEMPLATE = {
   source_language: null,
   subject: null,
   target_language: [],
+  tm_prioritization: false,
+  character_counter_count_tags: false,
+  character_counter_mode: 'google_ads',
+  dialect_strict: false,
 }
 
 const CATTOOL_TEMPLATE = {
@@ -64,7 +71,16 @@ export const SCHEMA_KEYS = {
   subject: 'subject',
   targetLanguage: 'target_language',
   tmPrioritization: 'tm_prioritization',
+  characterCounterCountTags: 'character_counter_count_tags',
+  characterCounterMode: 'character_counter_mode',
+  dialectStrict: 'dialect_strict',
 }
+
+export class UseProjectTemplateInterface extends ComponentExtendInterface {
+  getCharacterCounterMode() {}
+}
+
+const useProjectTemplateInterface = new UseProjectTemplateInterface()
 
 function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
   const {
@@ -90,16 +106,42 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           if (!cleanup) {
-            const shouldStandardToBeDefault = items.every(
+            const shouldUsePresetCharacterMode = Object.values(
+              CHARS_SIZE_COUNTER_TYPES,
+            ).some(
+              (value) =>
+                value === useProjectTemplateInterface.getCharacterCounterMode(),
+            )
+
+            const templateDefaultNormalized = {
+              ...templateDefault,
+              ...(shouldUsePresetCharacterMode && {
+                character_counter_mode:
+                  useProjectTemplateInterface.getCharacterCounterMode(),
+              }),
+            }
+            // check if users templates have some properties value to undefined or null and assign them default value
+            const templatesNormalized = items.map((template) =>
+              mergeWith(
+                cloneDeep(templateDefaultNormalized),
+                cloneDeep(template),
+                (objValue, srcValue) =>
+                  typeof srcValue === 'undefined' || srcValue === null
+                    ? objValue
+                    : srcValue,
+              ),
+            )
+
+            const shouldStandardToBeDefault = templatesNormalized.every(
               ({is_default}) => !is_default,
             )
             setProjectTemplates(
               [
                 {
-                  ...templateDefault,
+                  ...templateDefaultNormalized,
                   ...(shouldStandardToBeDefault && {is_default: true}),
                 },
-                ...items,
+                ...templatesNormalized,
               ].map((template) => ({
                 ...template,
                 tm: template.tm.map((item) => ({

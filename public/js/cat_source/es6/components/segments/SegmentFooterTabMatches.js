@@ -60,7 +60,7 @@ class SegmentFooterTabMatches extends React.Component {
       }
 
       item.percentClass = TranslationMatches.getPercentuageClass(this.match)
-      item.percentText = this.match
+      item.percentText = this.match === 'ICE_MT' ? 'TQMT' : this.match
       item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.
@@ -268,6 +268,19 @@ class SegmentFooterTabMatches extends React.Component {
     )
   }
 
+  async copyText(e) {
+    const internalClipboard = document.getSelection()
+    if (internalClipboard) {
+      e.preventDefault()
+      // Get plain text form internalClipboard fragment
+      const plainText = internalClipboard
+        .toString()
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
+      return await navigator.clipboard.writeText(plainText)
+    }
+  }
+
   allowHTML(string) {
     return {__html: string}
   }
@@ -412,6 +425,8 @@ class SegmentFooterTabMatches extends React.Component {
           this.props.tab_class
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
+        onCopy={this.copyText}
+        onCut={this.copyText}
       >
         {clientConnected ? (
           <>

@@ -27,7 +27,11 @@ class updateJobKeysController extends ajaxController {
 
     private $jobData = [];
 
-    protected $tm_prioritization = null;
+    private $tm_prioritization = null;
+
+    private $character_counter_count_tags;
+
+    private $character_counter_mode;
 
     public function __construct() {
 
@@ -39,6 +43,13 @@ class updateJobKeysController extends ajaxController {
         $filterArgs = [
                 'tm_prioritization'             => [
                         'filter' => FILTER_VALIDATE_BOOLEAN
+                ],
+                'character_counter_count_tags' => [
+                        'filter' => FILTER_VALIDATE_BOOLEAN
+                ],
+                'character_counter_mode'  => [
+                    'filter' => FILTER_SANITIZE_STRING,
+                    'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'job_id'             => [
                         'filter' => FILTER_SANITIZE_NUMBER_INT
@@ -62,13 +73,15 @@ class updateJobKeysController extends ajaxController {
         $_postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //assign variables
-        $this->id_job            = $_postInput[ 'job_id' ];
-        $this->received_password = $_postInput[ 'current_password' ];
-        $this->job_id            = $_postInput[ 'job_id' ];
-        $this->job_pass          = $_postInput[ 'job_pass' ];
-        $this->tm_prioritization = $_postInput[ 'tm_prioritization' ];
-        $this->tm_keys           = CatUtils::sanitizeJSON($_postInput[ 'data' ]); // this will be filtered inside the TmKeyManagement class
-        $this->only_private      = !$_postInput[ 'get_public_matches' ];
+        $this->id_job                       = $_postInput[ 'job_id' ];
+        $this->received_password            = $_postInput[ 'current_password' ];
+        $this->job_id                       = $_postInput[ 'job_id' ];
+        $this->job_pass                     = $_postInput[ 'job_pass' ];
+        $this->tm_prioritization            = $_postInput[ 'tm_prioritization' ];
+        $this->character_counter_count_tags = $_postInput[ 'character_counter_count_tags' ];
+        $this->character_counter_mode       = $_postInput[ 'character_counter_mode' ];
+        $this->tm_keys                      = CatUtils::sanitizeJSON($_postInput[ 'data' ]); // this will be filtered inside the TmKeyManagement class
+        $this->only_private                 = !$_postInput[ 'get_public_matches' ];
 
         //check for eventual errors on the input passed
         $this->result[ 'errors' ] = [];
@@ -227,11 +240,23 @@ class updateJobKeysController extends ajaxController {
             $jobDao->updateStruct( $this->jobData, [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
             $jobDao->destroyCache( $this->jobData );
 
+            $jobsMetadataDao = new Jobs\MetadataDao();
+
             // update tm_prioritization job metadata
             if($this->tm_prioritization !== null){
                 $tm_prioritization = $this->tm_prioritization == true ? "1" : "0";
-                $jobsMetadataDao = new Jobs\MetadataDao();
                 $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'tm_prioritization', $tm_prioritization );
+            }
+
+            // update character_counter_count_tags job metadata
+            if($this->character_counter_count_tags !== null){
+                $character_counter_count_tags = $this->character_counter_count_tags == true ? "1" : "0";
+                $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'character_counter_count_tags', $character_counter_count_tags );
+            }
+
+            // update character_counter_mode job metadata
+            if($this->character_counter_mode !== null){
+                $jobsMetadataDao->set( $this->id_job, $this->job_pass, 'character_counter_mode', $this->character_counter_mode );
             }
 
             $this->result[ 'data' ] = 'OK';

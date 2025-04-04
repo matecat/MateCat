@@ -1,12 +1,12 @@
-@import 'commons/variables';
-@import 'commons/colors';
-@import './vendor_mc/semantic/matecat_semantic';
+@use 'commons/variables';
+@use 'commons/colors';
+@use 'vendor_mc/semantic/matecat_semantic';
 
-@import "commons/typography";
-@import 'commons/matecat_fonts';
+@use "commons/typography";
+@use 'commons/matecat_fonts';
 
-@import 'popup';
-@import 'common-modals';
-@import 'components/NotificationBox';
-@import 'common-components';
-@import './commons/nav-bar';
+@use 'popup';
+@use 'common-modals';
+@use 'components/NotificationBox';
+@use 'common-components';
+@use 'commons/nav-bar';

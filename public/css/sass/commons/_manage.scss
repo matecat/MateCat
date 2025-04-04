@@ -1,13 +1,14 @@
-@import "colors";
+@use 'colors';
 
 // rewrite semantic CSS
-html, body {
+html,
+body {
   height: 100%;
 }
 body.manage {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: $grey5;
+  background-color: colors.$grey5;
   overflow-y: hidden;
   overflow-x: auto;
   font-size: 14px;
@@ -57,7 +58,7 @@ div#manage-container {
       }
     }
     .item.submenu a {
-      color: $black;
+      color: colors.$black;
     }
 
     .item.submenu .dropdown.icon {
@@ -84,7 +85,7 @@ div#manage-container {
   padding-bottom: 160px;
   .container {
     .ui.inverted.dimmer.more {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 
@@ -92,7 +93,16 @@ div#manage-container {
     margin-bottom: 30px !important;
     //border: 1px solid $grey2;
     .project-title {
+      display: flex !important;
+      gap: 10px;
+      &[class*='sixteen wide'].column {
+        width: auto !important;
+      }
       padding-bottom: 0 !important;
+
+      > .label {
+        padding-top: 7px;
+      }
     }
     .ui.ribbon.label {
       z-index: 2;
@@ -100,14 +110,15 @@ div#manage-container {
       max-width: 540px;
       min-width: 0px;
       line-height: 16px;
-      background-color: $grey2;
-      color: $black;
+      background-color: colors.$grey2;
+      color: colors.$black;
       height: 30px;
       border-radius: 0 2px 2px 0;
       display: inline-block;
+      margin-right: -33px;
     }
     .project-header {
-      background-color: $grey4;
+      background-color: colors.$grey4;
       padding-bottom: 10px !important;
       //border-bottom: 1px solid #ccc;
       margin-bottom: -25px;
@@ -170,7 +181,7 @@ div#manage-container {
           }
           &.project-personal-assignee {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             border: 1px solid #bdbdbd;
             cursor: default;
@@ -187,7 +198,7 @@ div#manage-container {
           }
           &.project-team {
             margin-right: 8px;
-            background-color: $white;
+            background-color: colors.$white;
             vertical-align: top;
             height: 30px;
             .text {
@@ -198,7 +209,7 @@ div#manage-container {
               text-overflow: ellipsis;
               border-radius: 15px;
               padding: 5px 15px;
-              color: $black;
+              color: colors.$black;
               transition: 0.3s ease;
             }
             .menu {
@@ -220,12 +231,12 @@ div#manage-container {
                 cursor: pointer;
 
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
             &:hover .text {
-              background-color: $grey5 !important;
+              background-color: colors.$grey5 !important;
             }
           }
           &.project-assignee {
@@ -265,15 +276,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
               .scrolling {
@@ -316,10 +327,10 @@ div#manage-container {
               transition: 0.3s ease;
             }
             &:hover {
-              border: 1px solid $translatedBlue;
-              color: $translatedBlue;
+              border: 1px solid colors.$translatedBlue;
+              color: colors.$translatedBlue;
               .icon-user22 {
-                color: $translatedBlue;
+                color: colors.$translatedBlue;
               }
             }
             .not-assigned {
@@ -335,15 +346,15 @@ div#manage-container {
                 padding: 15px;
                 cursor: pointer;
                 a {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 i {
                   float: right;
                   font-size: 18px;
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 &:hover {
-                  background-color: $grey3;
+                  background-color: colors.$grey3;
                 }
               }
             }
@@ -381,7 +392,7 @@ div#manage-container {
     }
 
     .project-body {
-      background-color: $grey4;
+      background-color: colors.$grey4;
 
       .jobs {
         margin-top: 0px;
@@ -699,7 +710,7 @@ div#manage-container {
                   display: flex;
                   align-items: center;
                   background: #fff;
-                  color: $black;
+                  color: colors.$black;
                   font-weight: normal;
                   padding: 5px 8px;
                   border: none; // border: 1px solid #979797;
@@ -712,7 +723,7 @@ div#manage-container {
                     font-size: 14px;
                   }
                   &.open-outsource-disabled span {
-                    color: $grey;
+                    color: colors.$grey;
                   }
                   span {
                     color: #000;
@@ -806,13 +817,13 @@ div#manage-container {
     .project-footer {
       padding: 0 30px 5px !important;
       text-align: right;
-      background-color: $grey4;
+      background-color: colors.$grey4;
       .activity-log {
         margin-top: -10px;
         margin-right: -15px;
         a {
           text-decoration: underline;
-          color: $grey1;
+          color: colors.$grey1;
           font-size: 13px;
           &:hover {
             text-decoration: none;
@@ -822,7 +833,7 @@ div#manage-container {
       .project-due-date {
         margin-top: -10px;
         margin-left: -15px;
-        color: $grey1;
+        color: colors.$grey1;
         font-size: 13px;
       }
     }
@@ -995,10 +1006,10 @@ div#manage-container {
   border-radius: 50% !important;
   width: 28px !important;
   height: 28px !important;
-  background-color: rgba($grey8, 0.5) !important;
+  background-color: rgba(colors.$grey8, 0.5) !important;
 
   &:hover {
-    background-color: rgba($grey8, 1) !important;
+    background-color: rgba(colors.$grey8, 1) !important;
   }
 }
 
@@ -1014,4 +1025,39 @@ div#manage-container {
   height: 30px !important;
   color: #000 !important;
   font-size: 14px;
+}
+
+.project-container-button-edit-name {
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+}
+
+.project-container-form-edit-name {
+  display: inline-block;
+
+  fieldset {
+    border: unset;
+    margin: 0;
+    padding: 0;
+  }
+
+  input[type='text'] {
+    height: 28px;
+    min-width: 250px;
+    max-width: 400px;
+
+    &:active,
+    &:focus {
+      box-shadow: unset;
+      border: 1px solid colors.$grey1;
+    }
+  }
+}
+
+.project-title-editing-name-mode {
+  > .label {
+    padding-top: 1px !important;
+    padding-right: 1px !important;
+  }
 }

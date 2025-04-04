@@ -86,7 +86,7 @@ class SetContributionWorker extends AbstractWorker {
         /**
          * @see Engines_AbstractEngine::$_isAdaptiveMT
          */
-        if( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ){
+        if ( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ) {
             return;
         }
 
@@ -182,6 +182,7 @@ class SetContributionWorker extends AbstractWorker {
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
+        $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
 
         $this->_doLog( "Executing Update on " . get_class( $this->_engine ) );
         $res = $this->_engine->update( $config );

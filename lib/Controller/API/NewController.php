@@ -75,7 +75,7 @@ class NewController extends ajaxController {
 
     private $metadata = [];
 
-    const MAX_NUM_KEYS = 6;
+    const MAX_NUM_KEYS = 10;
 
     private static $allowed_seg_rules = [
             'standard',
@@ -140,10 +140,14 @@ class NewController extends ajaxController {
 
     private $xliff_parameters;
 
+    // LEGACY PARAMS TO BE REMOVED
     private $dictation;
     private $show_whitespace;
     private $character_counter;
     private $ai_assistant;
+
+    private $character_counter_count_tags;
+    private $character_counter_mode;
 
     private function setBadRequestHeader() {
         $this->httpHeader = 'HTTP/1.0 400 Bad Request';
@@ -168,7 +172,7 @@ class NewController extends ajaxController {
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        if ( !$this->__validateAuthHeader() ) {
+        if ( !$this->isLoggedIn() ) {
             $this->api_output[ 'message' ] = 'Project Creation Failure';
             $this->api_output[ 'debug' ]   = 'Authentication failed';
             $this->setUnauthorizedHeader();
@@ -210,27 +214,29 @@ class NewController extends ajaxController {
                 'pretranslate_101'           => [
                         'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
                 ],
-                'id_team'                    => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model'                => [ 'filter' => FILTER_VALIDATE_INT ],
-                'id_qa_model_template'       => [ 'filter' => FILTER_VALIDATE_INT ],
-                'payable_rate_template_id'   => [ 'filter' => FILTER_VALIDATE_INT ],
-                'payable_rate_template_name' => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'dialect_strict'             => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'lexiqa'                     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'speech2text'                => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'tag_projection'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'project_completion'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'get_public_matches'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
-                'dictation'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'show_whitespace'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'character_counter'          => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'ai_assistant'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'instructions'               => [
+                'id_team'                      => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model'                  => [ 'filter' => FILTER_VALIDATE_INT ],
+                'id_qa_model_template'         => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_id'     => [ 'filter' => FILTER_VALIDATE_INT ],
+                'payable_rate_template_name'   => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'dialect_strict'               => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'lexiqa'                       => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'                  => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'               => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion'           => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'get_public_matches'           => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // disable public TM matches
+                'dictation'                    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'show_whitespace'              => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter'            => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter_count_tags' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'character_counter_mode'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+                'ai_assistant'                 => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'instructions'                 => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_REQUIRE_ARRAY,
                 ],
-                'project_info'               => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'mmt_glossaries'             => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'project_info'                 => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'mmt_glossaries'               => [ 'filter' => FILTER_SANITIZE_STRING ],
 
                 'deepl_formality'   => [ 'filter' => FILTER_SANITIZE_STRING ],
                 'deepl_id_glossary' => [ 'filter' => FILTER_SANITIZE_STRING ],
@@ -278,6 +284,7 @@ class NewController extends ajaxController {
 
         try {
             $this->__validateMetadataParam();
+            $this->__validateCharacterCounterMode();
             $this->__validateEngines();
             $this->__validateSubjects();
             $this->__validateSegmentationRules();
@@ -352,6 +359,23 @@ class NewController extends ajaxController {
         if ( !isset( $this->postInput[ 'target_language_mt_engine_id' ] ) ) { // this could be already set by MMT engine if enabled ( so check and do not override )
             foreach ( explode( ",", $this->postInput[ 'target_lang' ] ) as $_matecatTarget ) {
                 $this->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $this->postInput[ 'mt_engine' ];
+            }
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function __validateCharacterCounterMode() {
+        if ( isset( $this->postInput[ 'character_counter_mode' ] ) ) {
+            $allowed = [
+                "google_ads",
+                "exclude_cjk",
+                "all_one"
+            ];
+
+            if(!in_array($this->postInput[ 'character_counter_mode' ], $allowed)){
+                throw new Exception( "Invalid character counter mode.", -2 );
             }
         }
     }
@@ -680,10 +704,14 @@ class NewController extends ajaxController {
         $projectStructure[ 'pretranslate_100' ]  = (int)!!$this->postInput[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ]  = isset( $this->postInput[ 'pretranslate_101' ] ) ? (int)$this->postInput[ 'pretranslate_101' ] : 1;
 
-        $projectStructure[ 'dictation' ]         = $this->postInput[ 'dictation' ] ?? null;
-        $projectStructure[ 'show_whitespace' ]   = $this->postInput[ 'show_whitespace' ] ?? null;
-        $projectStructure[ 'character_counter' ] = $this->postInput[ 'character_counter' ] ?? null;
-        $projectStructure[ 'ai_assistant' ]      = $this->postInput[ 'ai_assistant' ] ?? null;
+        $projectStructure[ 'dictation' ]              = $this->postInput[ 'dictation' ] ?? null;
+        $projectStructure[ 'show_whitespace' ]        = $this->postInput[ 'show_whitespace' ] ?? null;
+        $projectStructure[ 'character_counter' ]      = $this->postInput[ 'character_counter' ] ?? null;
+        $projectStructure[ 'character_counter_mode' ] = $this->postInput[ 'character_counter_mode' ] ?? null;
+        $projectStructure[ 'ai_assistant' ]           = $this->postInput[ 'ai_assistant' ] ?? null;
+
+        $projectStructure[ 'character_counter_mode' ]       = $this->postInput['character_counter_mode'] ?? null;
+        $projectStructure[ 'character_counter_count_tags' ] = $this->postInput['character_counter_count_tags'] ?? null;
 
         //default get all public matches from TM
         $projectStructure[ 'only_private' ] = ( !isset( $this->postInput[ 'get_public_matches' ] ) ? false : !$this->postInput[ 'get_public_matches' ] );
@@ -868,47 +896,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = $e->getMessage();
             $this->result[ 'errors' ][]    = [ "code" => -4, "message" => $e->getMessage() ];
         }
-    }
-
-    /**
-     * Tries to find authentication credentials in header. Returns false if credentials are provided and invalid. True otherwise.
-     *
-     * @return bool
-     * @throws ReflectionException
-     */
-    private function __validateAuthHeader(): bool {
-
-        $api_key    = $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null;
-        $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
-
-        if ( empty( $api_key ) ) {
-            return false;
-        }
-
-        if ( false !== strpos( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ?? null, '-' ) ) {
-            [ $api_key, $api_secret ] = explode( '-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
-        }
-
-        if ( $api_key && $api_secret ) {
-            $key = ApiKeys_ApiKeyDao::findByKey( $api_key );
-
-            if ( !$key || !$key->validSecret( $api_secret ) ) {
-                return false;
-            }
-
-            Log::doJsonLog( $key );
-            $this->user = $key->getUser();
-
-            $this->userIsLogged = (
-                    !empty( $this->user->uid ) &&
-                    !empty( $this->user->email ) &&
-                    !empty( $this->user->first_name ) &&
-                    !empty( $this->user->last_name )
-            );
-
-        }
-
-        return true;
     }
 
     /**

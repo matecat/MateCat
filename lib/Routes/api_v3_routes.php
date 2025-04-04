@@ -145,6 +145,7 @@ $klein->with( '/api/v3/projects/[:id_project]/[:password]', function () {
     route( '/active', 'POST', [ 'API\V2\ProjectsController', 'active' ] );
     route( '/r2', 'POST', [ 'API\V2\ReviewsController', 'createReview' ] );
     route( '/analysis/status', 'GET', [ '\API\V3\StatusController', 'index' ] );
+    route( '/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
 } );
 
 $klein->with('/api/v3/activity', function () {

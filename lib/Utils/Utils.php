@@ -172,6 +172,11 @@ class Utils {
         // transliterate string
         $string = Transliterator::transliterate( $string );
 
+        // avoid empty strings
+        if(empty($string)){
+            $string = "-";
+        }
+
         //delete and replace rest of special chars
         $find = [ '/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/' ];
         $repl = [ '', '-', '' ];
@@ -199,39 +204,6 @@ class Utils {
         ];
 
         return str_replace( $a, $b, $var );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function getGlobalMessage(): array {
-
-        // pull messages from redis
-        $redis      = ( new RedisHandler() )->getConnection();
-        $ids        = $redis->smembers( 'global_message_list_ids' );
-        $retStrings = [];
-
-        foreach ( $ids as $id ) {
-            $element = $redis->get( 'global_message_list_element_' . $id );
-
-            if ( $element !== null ) {
-                $element = unserialize( $element );
-
-                $resObject = [
-                        'title'  => $element[ 'title' ],
-                        'msg'    => $element[ 'message' ],
-                        'level'  => $element[ 'level' ],
-                        'token'  => md5( $element[ 'message' ] ),
-                        'expire' => ( new DateTime( $element[ 'expire' ] ) )->format( DateTimeInterface::W3C )
-                ];
-
-                $retStrings[] = $resObject;
-            } else {
-                $redis->srem( 'global_message_list_ids', $id );
-            }
-        }
-
-        return [ 'messages' => json_encode( $retStrings ) ];
     }
 
     public static function encryptPass( $clear_pass, $salt ): string {
@@ -873,7 +845,19 @@ class Utils {
         }
 
         return array_keys( $aValid );
+    }
 
+    /**
+     * @param array $arr
+     * @return bool
+     */
+    public static function arrayIsList(array $arr)
+    {
+        if ($arr === []) {
+            return true;
+        }
+
+        return array_keys($arr) === range(0, count($arr) - 1);
     }
 
     /**
@@ -902,4 +886,24 @@ class Utils {
         return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
     }
 
+    /**
+     * @param $nameString
+     * @return bool|string
+     */
+    public static function sanitizeName( $nameString ) {
+
+        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
+        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
+        $nameString = str_replace( '_.', ".", $nameString );
+
+        // project name validation
+        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
+
+        if ( !preg_match( $pattern, $nameString ) ) {
+            return false;
+        }
+
+        return $nameString;
+
+    }
 }

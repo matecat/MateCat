@@ -7,7 +7,7 @@ const io = require("socket.io");
 const {setupWorker} = require("@socket.io/sticky");
 const {createAdapter} = require("@socket.io/redis-adapter");
 const {Reader} = require('./amq/AMQconnector');
-const {MessageHandler, MESSAGE_NAME} = require('./amq/MessageHandler');
+const {MessageHandler, MESSAGE_NAME, GLOBAL_MESSAGES} = require('./amq/MessageHandler');
 const {logger, getWebSocketClientAddress} = require('./utils');
 const {verify} = require('jsonwebtoken');
 const Redis = require("ioredis");
@@ -19,6 +19,8 @@ module.exports.Application = class {
     };
     this.logger = logger;
     this.options = options;
+
+    this.pubGlobalMessageClient = new Redis(this.options.redis);
 
     // setup redis adapter
     logger.info(['Connecting redis for adapter started', this.options.redis])
@@ -143,6 +145,7 @@ module.exports.Application = class {
         }
       });
 
+      this.dispatchGlobalMessages(socket.uuid);
     });
 
     return this;
@@ -175,5 +178,31 @@ module.exports.Application = class {
     this._socketIOServer.to(room).emit(type, message);
   };
 
+  /**
+   * Dispatch global messages
+   */
+  dispatchGlobalMessages = (uuid) => {
+    const GLOBAL_MESSAGES_LIST_KEY = 'global_message_list_ids';
+    const GLOBAL_MESSAGES_ELEMENT_KEY = 'global_message_list_element_';
 
-}
+    this.pubGlobalMessageClient.smembers(GLOBAL_MESSAGES_LIST_KEY, (err, ids) => {
+
+      ids.length > 0 && ids.map((id) => {
+        this.pubGlobalMessageClient.get(GLOBAL_MESSAGES_ELEMENT_KEY + id, (err, element) => {
+          if (element !== null) {
+            this.sendRoomNotifications(uuid, MESSAGE_NAME, {
+              data: {
+                _type: GLOBAL_MESSAGES,
+                message: JSON.parse(element)
+              }
+            });
+            this.logger.debug("Dispatched global message to user: " + uuid);
+          } else {
+            this.pubGlobalMessageClient.srem(GLOBAL_MESSAGES_LIST_KEY + id);
+          }
+        });
+      });
+    });
+
+  };
+};

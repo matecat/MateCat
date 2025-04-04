@@ -1627,16 +1627,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.2.5",
+            "version": "v2.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "3e9021b6e098c082749e46b101abb5d5d1bacbf5"
+                "reference": "cbc14c0a598540095e3deb2821c785ff4b13f19d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/3e9021b6e098c082749e46b101abb5d5d1bacbf5",
-                "reference": "3e9021b6e098c082749e46b101abb5d5d1bacbf5",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/cbc14c0a598540095e3deb2821c785ff4b13f19d",
+                "reference": "cbc14c0a598540095e3deb2821c785ff4b13f19d",
                 "shasum": ""
             },
             "require": {
@@ -1681,26 +1681,26 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.2.5"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.2.7"
             },
-            "time": "2024-09-11T15:07:14+00:00"
+            "time": "2025-01-21T14:31:21+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
-            "version": "v1.0.15",
+            "version": "v1.0.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/whole-text-finder.git",
-                "reference": "43a8b2c5a1d7dce6c379464dd85291a546378285"
+                "reference": "3e2d503333ff0cad9453d03c9e24a6c83f05476a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/43a8b2c5a1d7dce6c379464dd85291a546378285",
-                "reference": "43a8b2c5a1d7dce6c379464dd85291a546378285",
+                "url": "https://api.github.com/repos/matecat/whole-text-finder/zipball/3e2d503333ff0cad9453d03c9e24a6c83f05476a",
+                "reference": "3e2d503333ff0cad9453d03c9e24a6c83f05476a",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5"
+                "php": ">=7.4"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^2.15",
@@ -1734,9 +1734,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/whole-text-finder/issues",
-                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.15"
+                "source": "https://github.com/matecat/whole-text-finder/tree/v1.0.16"
             },
-            "time": "2022-01-05T10:01:30+00:00"
+            "time": "2025-02-14T11:12:39+00:00"
         },
         {
             "name": "matecat/xliff-parser",

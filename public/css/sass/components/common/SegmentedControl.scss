@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .segmented-control__wrapper > label {
   display: block;
@@ -11,7 +11,7 @@
   display: flex;
   user-select: none;
   border-radius: 4px;
-  background-color: $grey5;
+  background-color: colors.$grey5;
 }
 
 .segmented-control__label {
@@ -23,7 +23,7 @@
   margin: 0;
   font-size: 16px;
   line-height: 48px;
-  color: $grey1;
+  color: colors.$grey1;
   transition: color 0.3s cubic-bezier(0.77, 0, 0.175, 1);
   cursor: pointer;
 
@@ -36,7 +36,7 @@
   }
 
   &:hover {
-    color: $grey6;
+    color: colors.$grey6;
   }
 }
 
@@ -61,5 +61,5 @@
   display: block;
   height: 100%;
   border-radius: 4px;
-  background-color: $translatedBlue;
+  background-color: colors.$translatedBlue;
 }

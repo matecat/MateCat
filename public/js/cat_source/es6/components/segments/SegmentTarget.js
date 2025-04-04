@@ -10,7 +10,10 @@ import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import {removeTagsFromText} from './utils/DraftMatecatUtils/tagUtils'
+import {
+  removeTagsFromText,
+  textHasTags,
+} from './utils/DraftMatecatUtils/tagUtils'
 import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
 import RemoveTagsIcon from '../../../../../img/icons/RemoveTagsIcon'
 import AddTagsIcon from '../../../../../img/icons/AddTagsIcon'
@@ -20,6 +23,10 @@ import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
 import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
 import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
 import OfflineUtils from '../../utils/offlineUtils'
+import SegmentUtils from '../../utils/segmentUtils'
+import CatToolStore from '../../stores/CatToolStore'
+import {Shortcuts} from '../../utils/shortcuts'
+import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -29,6 +36,7 @@ class SegmentTarget extends React.Component {
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,
+      segmentCharacters: 0,
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
@@ -187,18 +195,28 @@ class SegmentTarget extends React.Component {
           </div>
         )
       }
-      if (segment.sourceTagMap?.length > 0) {
+      if (textHasTags(translation)) {
         removeTagsButton = (
-          <Button
-            className="removeAllTags"
-            size={BUTTON_SIZE.ICON_SMALL}
-            mode={BUTTON_MODE.OUTLINE}
-            alt="Remove all tags"
-            title="Remove all tags"
-            onClick={this.removeTagsFromText.bind(this)}
-          >
-            <RemoveTagsIcon />
-          </Button>
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.removeTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.removeTagsFromText.bind(this)}
+            />
+            <Button
+              className="removeAllTags"
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Remove all tags"
+              title="Remove all tags"
+              onClick={this.removeTagsFromText.bind(this)}
+            >
+              <RemoveTagsIcon />
+            </Button>
+          </>
         )
       }
       if (
@@ -207,15 +225,25 @@ class SegmentTarget extends React.Component {
         this.editArea
       ) {
         tagCopyButton = (
-          <Button
-            size={BUTTON_SIZE.ICON_SMALL}
-            mode={BUTTON_MODE.OUTLINE}
-            alt="Copy missing tags from source to target"
-            title="Copy missing tags from source to target"
-            onClick={this.editArea.addMissingSourceTagsToTarget}
-          >
-            <AddTagsIcon />
-          </Button>
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.addTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.editArea.addMissingSourceTagsToTarget}
+            />
+            <Button
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Copy missing tags from source to target"
+              title="Copy missing tags from source to target"
+              onClick={this.editArea.addMissingSourceTagsToTarget}
+            >
+              <AddTagsIcon />
+            </Button>
+          </>
         )
       }
 
@@ -355,12 +383,14 @@ class SegmentTarget extends React.Component {
     // dispatch characterCounter action
     if (
       this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
-      this.state.charactersCounter !== prevState.charactersCounter
+      this.state.charactersCounter !== prevState.charactersCounter ||
+      this.state.segmentCharacters !== prevState.segmentCharacters
     ) {
       setTimeout(() => {
         SegmentActions.characterCounter({
           sid: this.props.segment.sid,
           counter: this.state.charactersCounter,
+          segmentCharacters: this.state.segmentCharacters,
           limit: this.state.charactersCounterLimit,
         })
       })
@@ -372,6 +402,7 @@ class SegmentTarget extends React.Component {
     let translation = this.props.segment.translation
 
     if (
+      !translation ||
       translation.trim().length === 0 ||
       OfflineUtils.offlineCacheRemaining <= 0
     ) {
@@ -395,8 +426,17 @@ class SegmentTarget extends React.Component {
     )
   }
   updateCounter = (value) => {
+    const {segmentCharacters, unitCharacters} =
+      SegmentUtils.getRelativeTransUnitCharactersCounter({
+        sid: this.props.segment.sid,
+        charactersCounter: value,
+        shouldCountTagsAsChars:
+          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
+      })
+
     this.setState({
-      charactersCounter: value,
+      charactersCounter: unitCharacters,
+      segmentCharacters,
     })
   }
   toggleFormatMenu = (show) => {
