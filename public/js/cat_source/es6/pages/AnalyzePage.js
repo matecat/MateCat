@@ -9,7 +9,7 @@ import {getVolumeAnalysis} from '../api/getVolumeAnalysis'
 import {fromJS} from 'immutable'
 import {ANALYSIS_STATUS} from '../constants/Constants'
 import {mountPage} from './mountPage'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import SocketListener from '../sse/SocketListener'
 
 let pollingTime = 1000

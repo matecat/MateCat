@@ -7,7 +7,7 @@ import ProjectsContainer from './ProjectsContainer'
 import ManageActions from '../../actions/ManageActions'
 import {mswServer} from '../../../../../mocks/mswServer'
 import userMock from '../../../../../mocks/userMock'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 // create modal div
 const modalElement = document.createElement('div')

@@ -13,7 +13,7 @@ import {SegmentsFilterButton} from './SegmentsFilterButton'
 import {SettingsButton} from './SettingsButton'
 import {ActionMenu} from '../ActionMenu'
 import {UserMenu} from '../UserMenu'
-import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const Header = ({
   jid,
@@ -63,7 +63,7 @@ export const Header = ({
             <FilesMenu projectName={projectName} />
 
             {/*Icons header*/}
-            <div className="action-menu">
+            <div className="header-menu">
               {projectCompletionEnabled && (
                 <MarkAsCompleteButton
                   featureEnabled={projectCompletionEnabled}

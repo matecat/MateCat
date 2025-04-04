@@ -8,155 +8,6 @@ body {
   min-height: 100%;
 }
 
-/*!
- * jQuery UI Button 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Button#theming
- */
-.ui-button {
-  display: inline-block;
-  position: relative;
-  padding: 0;
-  margin-right: 0.1em;
-  text-decoration: none !important;
-  cursor: pointer;
-  text-align: center;
-  zoom: 1;
-  overflow: visible;
-}
-
-table .btn {
-  padding: 0px 20px;
-}
-
-/* workarounds */
-button.ui-button::-moz-focus-inner {
-  border: 0;
-  padding: 0;
-}
-
-/*!
- * jQuery UI Progressbar 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Progressbar#theming
- */
-.ui-progressbar {
-  height: 2em;
-  text-align: left;
-  overflow: hidden;
-}
-
-.ui-progressbar .ui-progressbar-value {
-  height: 100%;
-}
-
-/* files operations */
-
-.operation {
-  color: #666 !important;
-  font-size: 12px !important;
-}
-
-.converting .ui-progressbar-value {
-  background: url(/public/img/progressbar-green.gif) !important;
-}
-
-.fileinput-button input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  /*width: 100%;*/
-  height: 100%;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  cursor: pointer;
-}
-
-.fileinput-link input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  /*cursor: pointer;*/
-}
-
-.fileupload-buttonbar .fileinput-link:before {
-  display: none;
-}
-
-.fileupload-buttonbar .ui-button,
-.fileupload-buttonbar .toggle {
-  margin-bottom: 5px;
-}
-
-.files .progress {
-  background: #fff;
-}
-
-.files .progress,
-.fileupload-buttonbar .progress {
-  height: 15px;
-  border-radius: 10px;
-}
-
-.files .ui-progressbar-value,
-.fileupload-buttonbar .ui-progressbar-value {
-  background: url(/public/img/progressbar.gif);
-}
-
-.fileupload-buttonbar .fade,
-.files .fade {
-  display: none;
-}
-
-.fileupload-loading {
-  position: absolute;
-  left: 50%;
-  width: 128px;
-  height: 128px;
-  background: url(/public/img/loading.gif) center no-repeat;
-  display: none;
-}
-
-.fileupload-processing .fileupload-loading {
-  display: block;
-}
-
-.name {
-  width: 50% !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 16px;
-}
-
-.cancel-btn {
-  background: colors.$rebuttedRed;
-}
-
-.cancel-btn:hover {
-  background: colors.$rebuttedRedHover;
-}
 
 .translate-box a.tooltip {
   text-align: center;
@@ -179,47 +30,6 @@ button.ui-button::-moz-focus-inner {
 .translate-box a.tooltip:hover span {
   top: -70px;
 }
-
-.cancel-btn,
-#clear-all-files,
-#clear-all-gdrive,
-#delete-failed-conversions {
-  background: colors.$rebuttedRed;
-}
-
-.cancel-btn:hover,
-#clear-all-files:hover,
-#clear-all-gdrive:hover,
-#delete-failed-conversions:hover {
-  background: colors.$rebuttedRedHover;
-}
-
-/* Fix for IE 6: */
-* html .fileinput-button {
-  margin-right: -2px;
-}
-
-* html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
-/* Fix for IE 7: */
-* + html .fileinput-button {
-  margin-right: 1px;
-}
-
-* + html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* + html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
 @media only screen and (max-width: 1320px) {
   .translate-box.tmx-select,
   .translate-box.source,
@@ -303,14 +113,6 @@ button.ui-button::-moz-focus-inner {
     width: 60px;
   }
 }
-
-/* Fix for Webkit (Safari, Chrome) */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .fileinput-button {
-    margin-top: 2px;
-  }
-}
-
 .translate-box {
   float: left;
   margin: 20px 0 0 0;
@@ -530,6 +332,7 @@ button.ui-button::-moz-focus-inner {
   padding: 24px;
   background: colors.$grey5;
   padding-top: 0px;
+  border-radius: 4px;
 }
 
 .wrapper-upload h1 {
@@ -639,178 +442,6 @@ h2 {
   display: block;
 }
 
-/*upload table*/
-.upload-table,
-.gdrive-upload-table {
-  width: 100%;
-  margin: 0;
-  table-layout: fixed;
-}
-
-.upload-table td,
-.gdrive-upload-table td {
-  height: auto;
-  padding: 5px 10px;
-  text-align: left;
-  border-bottom: 1px dashed #ccc;
-}
-
-.upload-table tr,
-.gdrive-upload-table tr {
-  background: #fff;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
-  border-bottom: 1px dashed #ccc;
-}
-
-.btncontinue {
-  position: absolute;
-  bottom: 0;
-  display: none;
-  float: left;
-  padding: 0px 0 0 0 !important;
-  font-size: 14px !important;
-  margin: 0px 0 0 10px !important;
-}
-
-.uploaded .btncontinue {
-  display: block;
-}
-
-.btncontinue p {
-  float: left !important;
-  font-size: 14px !important;
-  margin: 0px 0 0 0 !important;
-  padding: 0;
-}
-
-.btncontinue .fileinput-button {
-  float: left;
-  margin: 7px 0 0 10px !important;
-  width: auto;
-  padding: 8px 10px 0px 10px !important;
-  height: 36px;
-}
-
-#add-files,
-#clear-all-files,
-#clear-all-gdrive {
-  padding: 8px 10px 0px 10px !important;
-  height: 36px;
-}
-
-.preview {
-  border-right: none !important;
-  width: 30px;
-  padding: 8px;
-}
-
-.preview img {
-  margin: 5px 0 0 10px;
-}
-
-.delete,
-.cancel {
-  border-right: none !important;
-}
-
-.delete .btn,
-.cancel .btn {
-  float: right;
-  font-weight: bold;
-}
-
-/*UI buttons*/
-.fileinput-button {
-  font-size: 1.1em;
-  overflow: hidden;
-  margin: 0 auto;
-  width: 200px;
-  cursor: pointer;
-  padding: 12px 0px 4px 0;
-  background: colors.$translatedBlue;
-  color: #fff;
-  font-weight: bold;
-  margin-bottom: 30px !important;
-}
-
-/* Ovverride file-input-button to style it as a link */
-.fileinput-link {
-  font-size: 16px;
-  overflow: hidden;
-  margin: 0 auto;
-  cursor: pointer;
-  font-weight: 100;
-  margin-bottom: 30px !important;
-  background: transparent;
-  border: none !important;
-  padding: 0;
-  width: max-content;
-  text-decoration: underline !important;
-  color: colors.$grey1 !important;
-  label {
-    font-size: 24px;
-    &:hover {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  }
-}
-
-.fileinput-button:hover {
-  background-color: colors.$translatedBlueHover;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.fileinput-button:active {
-  box-shadow: none !important;
-}
-
-.fileinput-button:focus {
-  box-shadow: none !important;
-}
-
-.fileinput-link:hover,
-.fileinput-link:focus,
-.fileinput-link:active {
-  background-color: transparent;
-  box-shadow: none !important;
-}
-
-.delete .ui-button-text,
-.cancel .ui-button-text,
-.delete span,
-.cancel span {
-  display: none;
-  color: #fff;
-  text-align: left;
-  margin: 0px 0 0 10px !important;
-}
-
-.delete .btn,
-.cancel .btn {
-  height: 35px !important;
-  font-size: 1.1em;
-  border: 0;
-  background: transparent;
-}
-.cancel button:hover,
-.delete button:hover {
-  background: #f26522;
-  color: #fff;
-  border: 1px solid #848689;
-}
-
-.cancel .ui-button-text span,
-.delete .ui-button-text span {
-  margin: -3px 0 0 15px !important;
-  display: block;
-  float: left;
-}
-
 a {
   text-decoration: underline;
 }
@@ -843,39 +474,11 @@ body {
   border-radius: 2px;
 }
 
-.upload-input {
-  padding: 3px 5px 3px 9px;
-  font-size: 16px !important;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  border: 1px solid rgba(34, 36, 38, 0.15);
-  height: 36px;
-  box-shadow: inset 0 1px 3px #ddd;
-}
-
-.upload-input:hover {
-  border-color: rgba(34, 36, 38, 0.35);
-  box-shadow: none;
-}
-
-.ui-progressbar-value {
-  display: none !important;
-}
-
-table .ui-progressbar-value {
-  display: block !important;
-}
-
 a {
   color: colors.$linkBlue;
   &:hover {
     color: colors.$linkBlueHover;
   }
-}
-
-.cl {
-  clear: both;
-  visibility: hidden;
 }
 
 .supported-files {
@@ -886,231 +489,6 @@ a {
   margin: 0px;
   .supported-file-formats {
     cursor: pointer;
-  }
-}
-
-/*upload table*/
-
-.dragging .file-drop {
-  display: block !important;
-}
-
-.uploaded.dragging .file-drop {
-  display: none !important;
-}
-
-.file-drop {
-  margin: 40px 0 50px 0 !important;
-}
-
-#fileupload {
-  margin: 0 !important; /* padding:0 !important */
-}
-
-.upload-files,
-.gdrive-upload-files {
-  position: relative;
-  border: 1px dashed #ccc;
-  margin: 18px 0 0;
-  min-height: 200px;
-  /*min-height: 270px;*/
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  background: #fff;
-  -webkit-transition: all 50ms ease-in;
-  -moz-transition: all 50ms ease-in;
-}
-
-.upload-files.uploaded,
-.gdrive-upload-files.uploaded {
-  padding-bottom: 50px !important;
-  min-height: 220px;
-}
-
-span.gdrive-icon {
-  background: url(/public/img/logo-drive-16.png);
-  background-size: 100%;
-  width: 16px;
-  height: 14px;
-  display: block;
-  float: right;
-  margin-top: 2px;
-  margin-left: 3px;
-}
-
-.dragging {
-  background: #e2e2e3 !important;
-  border: 1px dashed #000 !important;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-}
-
-.uploaded .upload-files,
-.uploaded .gdrive-upload-files {
-  height: auto !important;
-}
-
-.drag {
-  text-align: center;
-  overflow: hidden;
-}
-
-.drag p {
-  text-align: center;
-  margin: 2px 0 0 0;
-  font-size: 35px;
-  line-height: 50px;
-}
-
-.drag span.min {
-  font-size: 24px;
-}
-
-#overlay {
-  display: none;
-  z-index: 2;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.error-message,
-.warning-message {
-  background: #d65757;
-  color: #fff;
-  padding: 10px 0 10px 16px;
-  margin: 10px 0;
-  float: left;
-  font-weight: bold;
-  width: 100%;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  border: 1px solid #c45f5f;
-  .icon {
-    float: left;
-    font-size: 25px;
-  }
-  p {
-    line-height: 25px;
-    font-size: 16px;
-    float: left;
-    margin-left: 12px;
-  }
-}
-
-.error-message {
-  a {
-    color: #fff;
-  }
-}
-
-.warning-message {
-  background: rgba(255, 250, 139, 0.38) !important;
-  border-color: #6d6e71;
-  color: #000;
-}
-
-.warning-message span {
-  /*margin-left: 15px;*/
-}
-
-.file-drag {
-  transition: width 2s;
-  -moz-transition: width 2s; /* Firefox 4 */
-  -webkit-transition: width 2s; /* Safari and Chrome */
-  -o-transition: width 2s; /* Opera */
-}
-
-.file-drag {
-  overflow: hidden;
-  /*height:100px;*/
-  margin: 10px auto;
-  /*cursor: pointer;*/
-  position: relative;
-  transition: all 0.1s linear;
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  -o-transition: all 0.1s linear;
-  -ms-transition: all 0.1s linear;
-}
-
-/*.dragging .file-drag,*/
-.uploaded .file-drag,
-.uploaded .min {
-  display: none;
-}
-
-.file-drop,
-.uploaded .btn-success,
-.dragging .btn-success,
-.uploaded .fileinput-link,
-.dragging .fileinput-link,
-.uploaded .upload-icon,
-.dragging .upload-icon {
-  display: none !important;
-}
-
-.progress-extended {
-  display: none;
-}
-
-.dragging .file-drag,
-.uploaded .file-drop,
-.uploaded .fileupload-buttonbar {
-  height: 0;
-}
-
-.dragging .min {
-  display: none;
-}
-
-.name {
-  width: 230px;
-}
-
-.size {
-  width: 100px;
-  text-align: right !important;
-  padding-right: 20px;
-}
-
-.size span {
-  visibility: hidden;
-}
-
-tr.ready .size span {
-  visibility: visible;
-}
-
-.file_upload_error {
-  color: colors.$redDefault;
-}
-
-.more {
-  margin-bottom: 5px;
-  float: left;
-  text-decoration: none;
-}
-
-.more span {
-  text-decoration: underline;
-}
-
-.more:hover span {
-  text-decoration: none;
-}
-
-.translate-box .fileinput-button {
-  margin-top: 8px;
-  text-align: center;
-  padding: 4px 0px;
-}
-
-@-moz-document url-prefix() {
-  .translate-box .fileinput-button {
-    margin-top: 7px;
   }
 }
 
@@ -1329,25 +707,6 @@ ul.test li {
   cursor: pointer;
 }
 
-span.load-gdrive {
-  display: inline-block;
-  vertical-align: top;
-  width: 200px;
-  font-family: calibri, Arial, Helvetica, sans-serif;
-  font-size: 1.1em;
-  margin: 0;
-  padding: 0.6rem 0.25rem 0.4rem 2.2rem;
-  border: 0.1rem solid #b7b9bc;
-  background: url(/public/img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-span.load-gdrive:hover,
-.continue-gdrive span.load-gdrive:hover {
-  background-color: #efefef;
-}
-
 .modal-gdrive {
   position: fixed;
   top: 0;
@@ -1356,48 +715,6 @@ span.load-gdrive:hover,
   height: 100%;
   z-index: 9999999999999;
   background: rgba(255, 255, 255, 0.5);
-}
-
-.fileupload-buttonbar span.min {
-  font-size: 24px;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 42px;
-  margin: 0 1.5rem;
-}
-
-span.fileinput-button {
-  display: inline-block;
-  vertical-align: top;
-  margin: 0;
-}
-
-div.continue-gdrive {
-  margin: 0 0 10px 10px !important;
-  display: block;
-}
-
-.continue-gdrive span.load-gdrive {
-  width: auto;
-  padding: 0.5rem 0.7rem 0rem 2.3rem;
-  background: url(/public/img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
-  margin-right: 10px;
-  background-size: 20px;
-  height: 36px;
-}
-
-.continue-gdrive span.clear-gdrive {
-  float: none;
-  margin: 0 !important;
-}
-
-#upload-files-list {
-  display: block;
-  padding: 24px;
-}
-
-#gdrive-files-list {
-  display: none;
 }
 
 header .nav-bar .dropdown.select-org span.text {
@@ -1567,4 +884,59 @@ select:focus {
     background-size: 24px !important;
     height: 100%;
   }
+}
+
+/* XLIFF TO TARGET */
+// wrapper container page xliff to target
+.xliff_to_target__page {
+  .wrapper-upload {
+    padding-top: 24px;
+  }
+  .upload-files-container {
+    margin-top: 0;
+    &.add-files {
+      align-items: center;
+      gap: 40px;
+    }
+  }
+  footer {
+    position: absolute;
+    bottom: 0;
+  }
+
+}
+
+.error-message,
+.warning-message {
+  background: #d65757;
+  color: #fff;
+  padding: 10px 0 10px 16px;
+  margin: 10px 0;
+  font-weight: bold;
+  width: 100%;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border: 1px solid #c45f5f;
+  display: flex;
+  .icon {
+    float: left;
+    font-size: 25px;
+  }
+  p {
+    line-height: 25px;
+    font-size: 16px;
+    float: left;
+    margin-left: 12px;
+  }
+}
+.error-message {
+  a {
+    color: #fff;
+  }
+}
+
+.warning-message {
+  background: rgba(255, 250, 139, 0.38) !important;
+  border-color: #6d6e71;
+  color: #000;
 }

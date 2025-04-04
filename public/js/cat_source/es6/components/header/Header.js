@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import QualityReportStore from '../../stores/QualityReportStore'
 import QualityReportConstants from '../../constants/QualityReportConstants'
 import FilterProjects from './manage/FilterProjects'

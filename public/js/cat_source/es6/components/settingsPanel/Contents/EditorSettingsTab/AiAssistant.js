@@ -1,7 +1,7 @@
 import React, {useContext, useState} from 'react'
 import Switch from '../../../common/Switch'
 import CommonUtils from '../../../../utils/commonUtils'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import UserStore from '../../../../stores/UserStore'
 
 const METADATA_KEY = 'ai_assistant'

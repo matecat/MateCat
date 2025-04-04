@@ -5,7 +5,7 @@ import IconAdd from '../icons/IconAdd'
 import CommonUtils from '../../utils/commonUtils'
 import {INPUT_SIZE, Input} from '../common/Input/Input'
 import IconSearch from '../icons/IconSearch'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import IconClose from '../icons/IconClose'
 
 export const UserProjectDropdown = ({
