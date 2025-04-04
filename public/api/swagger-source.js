@@ -3817,8 +3817,174 @@ var spec = {
       },
     },
 
-
-
+    '/api/v3/deepl/{engineId}/glossaries': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get all DeepL engines',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/DeepLGlossary',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['DeepL'],
+        summary: 'Create new DeepL engine',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/deepl/{engineId}/glossaries/{id}': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get a specific DeepL glossary item',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      },
+      delete: {
+        tags: ['DeepL'],
+        summary: 'Delete a specific DeepL glossary item',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              type: "object",
+              properties: {
+                id: {
+                  type: 'integer',
+                  readOnly: true,
+                },
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
+    '/api/v3/deepl/{engineId}/glossaries/{id}/entries': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'List the entries of a single glossary in the format specified by the Accept header.',
+            schema: {
+              type: "string",
+              example: "Hello! Guten Tag!"
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
 
     '/api/v3/word-count/raw': {
       post: {
@@ -3867,6 +4033,34 @@ var spec = {
     },
   },
   definitions: {
+    DeepLGlossary: {
+      type: 'object',
+      properties: {
+        glossary_id: {
+          type: 'integer'
+        },
+        name: {
+          type: "string"
+        },
+        ready: {
+          type: "boolean"
+        },
+        source_lang: {
+          type: "string"
+        },
+        target_lang: {
+          type: "string"
+        },
+        creation_time: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        entry_count: {
+          type: 'integer'
+        },
+      }
+    },
     FiltersConfigSchema: {
       type: 'object',
       properties: {
@@ -5204,14 +5398,14 @@ var spec = {
       type: 'object',
       properties: {
         files: {
-          $ref: '#/definitions/Files',
+          $ref: '#/definitions/JobFiles',
         },
         jobs: {
           $ref: '#/definitions/UrlsJobs',
         },
       },
     },
-    Files: {
+    JobFiles: {
       type: 'array',
       items: {
         $ref: '#/definitions/JobFile',
