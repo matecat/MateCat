@@ -300,7 +300,6 @@ class JobContainer extends React.Component {
 
   disableDownloadMenu(idJob) {
     if (this.props.job.get('id') === idJob) {
-      $(this.downloadMenu).addClass('disabled')
       this.setState({
         showDownloadProgress: true,
       })
@@ -309,7 +308,6 @@ class JobContainer extends React.Component {
 
   enableDownloadMenu(idJob) {
     if (this.props.job.get('id') === idJob) {
-      $(this.downloadMenu).removeClass('disabled')
       this.setState({
         showDownloadProgress: false,
       })
@@ -337,52 +335,40 @@ class JobContainer extends React.Component {
     let jobTranslated = stats.raw.draft === 0 && stats.raw.new === 0
     let remoteService = this.props.project.get('remote_file_service')
     let label = (
-      <a
-        className="item"
-        onClick={() => {
-          const data = {
-            event: 'download_draft',
-          }
-          CommonUtils.dispatchAnalyticsEvents(data)
-          this.downloadTranslation()
-        }}
-        ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
-      >
+      <>
         <i className="icon-eye icon" /> Draft
-      </a>
+      </>
     )
+    let action = () => {
+      const data = {
+        event: 'download_draft',
+      }
+      CommonUtils.dispatchAnalyticsEvents(data)
+      this.downloadTranslation()
+    }
     if (jobTranslated && !remoteService) {
       label = (
-        <a
-          className="item"
-          onClick={this.downloadTranslation}
-          ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
-        >
+        <>
           <i className="icon-download icon" /> Download Translation
-        </a>
+        </>
       )
+      action = this.downloadTranslation
     } else if (jobTranslated && remoteService === 'gdrive') {
       label = (
-        <a
-          className="item"
-          onClick={this.downloadTranslation}
-          ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
-        >
+        <>
           <i className="icon-download icon" /> Open in Google Drive
-        </a>
+        </>
       )
+      action = this.downloadTranslation
     } else if (remoteService && remoteService === 'gdrive') {
       label = (
-        <a
-          className="item"
-          onClick={this.downloadTranslation}
-          ref={(downloadMenu) => (this.downloadMenu = downloadMenu)}
-        >
+        <>
           <i className="icon-eye icon" /> Preview in Google Drive
-        </a>
+        </>
       )
+      action = this.downloadTranslation
     }
-    return label
+    return {label, action}
   }
 
   getJobMenu() {
@@ -424,6 +410,7 @@ class JobContainer extends React.Component {
         activateJobFn={this.activateJob}
         cancelJobFn={this.cancelJob}
         deleteJobFn={this.deleteJob}
+        disableDownload={this.state.showDownloadProgress}
       />
     )
   }
@@ -1011,15 +998,8 @@ class JobContainer extends React.Component {
                   )}
                 </div>
               </div>
-              <div
-                className="ui icon top right pointing dropdown job-menu  button"
-                title="Job menu"
-                ref={(dropdown) => (this.dropdown = dropdown)}
-                data-testid="job-menu-button"
-              >
-                <i className="icon-more_vert icon" />
-                {jobMenu}
-              </div>
+
+              {jobMenu}
               <a
                 className="open-translate ui primary button open"
                 target="_blank"
