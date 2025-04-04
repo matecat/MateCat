@@ -734,6 +734,39 @@ header {
     }
   }
 }
+.qr-reviewType-dropdown, .filter-reviewType  {
+  .circular.label {
+    &.new-color {
+      box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+      background: #ffffff;
+    }
+
+    &.draft-color {
+      background: colors.$grey1;
+    }
+
+    &.translated-color {
+      background: colors.$translatedBlue;
+    }
+
+    &.approved-color {
+      background: colors.$approvedGreen;
+    }
+
+    &.rejected-color {
+      background: colors.$rebuttedRed;
+    }
+
+    &.revision-color {
+      background: colors.$approvedGreen;
+    }
+
+    &.second-revision-color,
+    &.approved-2ndpass-color {
+      background: colors.$approved2Green;
+    }
+  }
+}
 
 .qr-filter-list {
   display: flex;
@@ -742,6 +775,11 @@ header {
   .filter-dropdown {
     display: flex;
     align-items: center;
+    button {
+      height: auto;
+      width: auto;
+      line-height: unset;
+    }
     .dropdown {
       background: colors.$white !important;
     }
@@ -839,32 +877,6 @@ header {
       box-shadow: unset;
       border: none;
       pointer-events: none;
-    }
-
-    .circular.label {
-      &.new-color {
-        box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
-        background: #ffffff;
-      }
-      &.draft-color {
-        background: colors.$grey1;
-      }
-      &.translated-color {
-        background: colors.$translatedBlue;
-      }
-      &.approved-color {
-        background: colors.$approvedGreen;
-      }
-      &.rejected-color {
-        background: colors.$rebuttedRed;
-      }
-      &.revision-color {
-        background: colors.$approvedGreen;
-      }
-      &.second-revision-color,
-      &.approved-2ndpass-color {
-        background: colors.$approved2Green;
-      }
     }
 
     .filter-toggle {

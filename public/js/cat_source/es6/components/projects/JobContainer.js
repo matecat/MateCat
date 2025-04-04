@@ -853,7 +853,6 @@ class JobContainer extends React.Component {
                 <i className="icon-alarm icon" />
               </div>
             ),
-            testId: 'job-menu-button',
             size: BUTTON_SIZE.ICON_STANDARD,
           }}
           items={[
