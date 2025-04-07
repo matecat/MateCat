@@ -10,7 +10,7 @@ var spec = {
         </div>
       </div>
       `,
-    version: '2.0.0',
+    version: '3.0.0',
   },
   host: config.swagger_host,
   schemes: ['https'],
@@ -2590,6 +2590,98 @@ var spec = {
               items: {
                 $ref: '#/definitions/QualityReportFile',
               }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/file/{id_file}/instructions': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Job instructions',
+        description: 'Get job instructions',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get job instructions',
+            type: 'object',
+            properties: {
+              instructions: {
+                type: "string",
+                example: "Write some instructions for this file"
+              }
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Job', 'Files'],
+        summary: 'Job instructions',
+        description: 'Insert/update job instructions for a specific job file',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'instructions',
+            in: 'body',
+            description: 'The instructions for this file',
+            required: true,
+            type: 'string',
+            example: "Write some instructions for this file"
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Insert/update job instructions for a specific job file',
+            schema: {
+              type: 'boolean',
             },
           },
           default: {
