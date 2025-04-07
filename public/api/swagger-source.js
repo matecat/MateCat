@@ -2779,7 +2779,7 @@ var spec = {
             name: 'tm_key',
             in: 'formData',
             description: 'The tm key.',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
