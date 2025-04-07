@@ -63,6 +63,7 @@ class MatchesTest extends AbstractTest {
             'last-update-date' => '2024-12-30',
             'tm_properties' => '[{"type":"x-project_id","value":86},{"type":"x-project_id","value":654}]',
             'key' => 'FDSFDSFDS8FDSFDS8FSD',
+            'ICE' => 1,
         ]);
 
         $matches = $match->getMatches(2, [], 'en-US', 'fr-FR');
@@ -77,6 +78,7 @@ class MatchesTest extends AbstractTest {
         $this->assertEquals($matches['create_date'], '2024-12-30 15:56:32');
         $this->assertEquals($matches['quality'], 74);
         $this->assertEquals($matches['usage_count'], 2);
+        $this->assertTrue($matches['ICE']);
         $this->assertEquals($matches['memory_key'], 'FDSFDSFDS8FDSFDS8FSD');
         $this->assertEquals($matches['tm_properties'], [
             ["type" => "x-project_id", "value" => "86"],
