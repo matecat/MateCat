@@ -77,7 +77,7 @@ export const Lexiqa = ({sourceLang, targetLangs}) => {
   */}
       <div className="option-description">
         <h3>
-          QA by <img src="/public/img/lexiqa-new-2.png" />
+          QA by <img src="/public/img/lexiqa-logo-transparent.png" />
         </h3>
         <p>
           {!lexiqaLicense && (
