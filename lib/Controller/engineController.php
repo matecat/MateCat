@@ -320,6 +320,50 @@ class engineController extends ajaxController {
                 return;
             }
 
+        } elseif( $newEngineStruct instanceof EnginesModel_IntentoStruct ){
+
+            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
+            $config[ 'segment' ] = "Hello World";
+            $config[ 'source' ]  = "en-US";
+            $config[ 'target' ]  = "fr-FR";
+
+            $mt_result = $newTestCreatedMT->get( $config );
+
+            if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+
+                switch ($mt_result[ 'error' ][ 'code' ]){
+
+                    // wrong provider credentials
+                    case -2:
+                        $this->result[ 'errors' ][] = [
+                            'code'    => $mt_result[ 'error' ][ 'http_code' ] ?? 413,
+                            'message' =>  $mt_result[ 'error' ][ 'message' ]
+                        ];
+                        break;
+
+                    // not valid license
+                    case -403:
+                        $this->result[ 'errors' ][] = [
+                            'code' => 413,
+                            'message' =>  "The Intento license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using Intento as MT engine."
+                        ];
+                        break;
+
+                    default:
+                        $this->result[ 'errors' ][] = [
+                            'code' => 500,
+                            'message' => "Intento license not valid, please verify its validity and try again"
+                        ];
+                        break;
+                }
+
+                $engineDAO->delete( $newCreatedDbRowStruct );
+                $this->destroyUserEnginesCache();
+
+                return;
+            }
+
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
 
             $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );

@@ -8,7 +8,7 @@ import {mswServer} from '../../../../../../mocks/mswServer'
 import {HttpResponse, http} from 'msw'
 import projectTemplatesMock from '../../../../../../mocks/projectTemplateMock'
 import userMock from '../../../../../../mocks/userMock'
-import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 import tmKeysMock from '../../../../../../mocks/tmKeysMock'
 
 global.config = {

@@ -26,7 +26,7 @@ import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const ROW_MARGIN = 3
 const ROW_HEIGHT = 90

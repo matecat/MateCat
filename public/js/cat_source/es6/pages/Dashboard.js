@@ -20,7 +20,7 @@ import {getUserData} from '../api/getUserData'
 import {getTeamMembers} from '../api/getTeamMembers'
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import DownloadFileUtils from '../utils/downloadFileUtils'
 import SocketListener from '../sse/SocketListener'
 

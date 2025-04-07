@@ -3,6 +3,7 @@
 namespace API\V2;
 
 use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use CatUtils;
 use Database;
@@ -60,7 +61,12 @@ class ChangeProjectNameController extends ChunkController
         }
 
         try {
+            $this->validator->validate();
+            ( new ProjectAccessValidator( $this, $this->validator->getProject() ) )->validate();
+            $ownerEmail = $this->validator->getProject()->id_customer;
+
             $this->changeProjectName($id, $password, $name);
+            $this->featureSet->filter( 'filterProjectNameModified', $id, $name, $password, $ownerEmail );
 
             $this->response->status()->setCode(200);
             $this->response->json( [

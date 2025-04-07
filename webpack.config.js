@@ -144,7 +144,7 @@ const matecatConfig = async ({env}, {mode}) => {
           },
         },
       },
-      minimize: true,
+      minimize: !isDev,
       minimizer: [
         new TerserPlugin({
           parallel: true,
@@ -252,9 +252,6 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
       ],
       upload: [
-        path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/gdrive.upload.js'),
-        path.resolve(__dirname, 'public/js/gdrive.picker.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(
           __dirname,
@@ -296,7 +293,6 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
       ],
       xliffToTarget: [
-        path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/XliffToTarget.js',
@@ -346,22 +342,11 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      new WebpackConcatPlugin({
+      /*new WebpackConcatPlugin({
         bundles: [
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/jquery-ui-1.14.0.min.js',
-              './public/js/lib/fileupload/tmpl.min.js',
-              './public/js/lib/fileupload/load-image.min.js',
-              './public/js/lib/fileupload/canvas-to-blob.min.js',
-              './public/js/lib/fileupload/jquery.image-gallery.min.js',
-              './public/js/lib/fileupload/jquery.iframe-transport.js',
-              './public/js/lib/fileupload/jquery.fileupload.js',
-              './public/js/lib/fileupload/jquery.fileupload-fp.js',
-              './public/js/lib/fileupload/jquery.fileupload-ui.js',
-              './public/js/lib/fileupload/jquery.fileupload-jui.js',
-              './public/js/lib/fileupload/locale.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/lib_upload.min.js',
@@ -373,14 +358,12 @@ const matecatConfig = async ({env}, {mode}) => {
             },
           },
         ],
-      }),
+      }),*/
       new WebpackConcatPlugin({
         bundles: [
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/jquery-ui-1.14.0.min.js',
-              './public/js/lib/jquery-dateFormat.min.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/libs.js',
