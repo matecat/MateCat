@@ -495,6 +495,8 @@ class SegmentSource extends React.Component {
     flushSync(() => this.setState({editorState, tagRange}))
 
     this.updateSourceInStore()
+
+    setTimeout(() => this.checkDecorators(), 100)
   }
 
   allowHTML(string) {
