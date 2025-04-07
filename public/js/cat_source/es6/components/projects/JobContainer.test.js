@@ -7,20 +7,6 @@ import JobContainer from './JobContainer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
-require('../../../../lib/jquery-dateFormat.min.js')
-// high order function -> $.format.date (jquery plugin) - workaround
-const formatDate = (context, fn) => {
-  return function (...args) {
-    const params = args.map((argument) =>
-      typeof argument === 'string' && /hh/i.test(argument)
-        ? argument.toUpperCase()
-        : argument,
-    )
-    return fn.apply(context, params)
-  }
-}
-$.format.date = formatDate($.format, $.format.date)
-
 window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {

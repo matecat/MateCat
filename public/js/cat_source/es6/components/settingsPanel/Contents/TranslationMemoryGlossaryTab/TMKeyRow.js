@@ -412,7 +412,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           checked={isLookup}
           onChange={onChangeIsLookup}
           disabled={
-            (!isOwner && !isMMSharedKey) || (isMMSharedKey && !config.ownerIsMe)
+            (!isOwner && !isMMSharedKey) ||
+            (isMMSharedKey && !config.ownerIsMe) ||
+            row.isTmFromFile
           }
           type="checkbox"
           data-testid={`tmkey-lookup-${row.id}`}
@@ -440,7 +442,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           }`}
           value={name}
           onChange={onChangeName}
-          disabled={isMMSharedKey || !isOwner}
+          disabled={isMMSharedKey || !isOwner || row.isTmFromFile}
           onBlur={updateKeyName}
           data-testid={`tmkey-row-name-${row.id}`}
         ></input>
@@ -452,7 +454,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       {!isMMSharedKey && isOwner && row.isActive && (
         <div className="align-center tm-row-penalty">{renderPenalty}</div>
       )}
-      {!isMMSharedKey && isOwner ? (
+      {!isMMSharedKey && isOwner && !row.isTmFromFile ? (
         <div className="align-center">
           <MenuButton
             label="Import TMX"

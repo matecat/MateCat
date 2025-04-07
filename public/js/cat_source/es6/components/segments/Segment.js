@@ -25,7 +25,7 @@ import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
-import {ApplicationWrapperContext} from '../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext

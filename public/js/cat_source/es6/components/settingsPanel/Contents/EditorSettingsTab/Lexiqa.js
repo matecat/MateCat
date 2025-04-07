@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
 import LXQ from '../../../../utils/lxq.main'
 import ApplicationStore from '../../../../stores/ApplicationStore'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const checkLexiqaIsEnabled = ({
   sourceLang,
