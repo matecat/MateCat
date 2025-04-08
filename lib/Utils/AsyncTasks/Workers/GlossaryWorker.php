@@ -385,10 +385,7 @@ class GlossaryWorker extends AbstractWorker {
 
             $payload[ 'term' ][ 'metadata' ][ 'keys' ] = $keysAsArray;
 
-            // return term_id
-            if ( isset( $response->responseData[ 'id_glossary_term' ] ) and null !== $response->responseData[ 'id_glossary_term' ] ) {
-                $payload[ 'term' ][ 'term_id' ] = $response->responseData[ 'id_glossary_term' ];
-            }
+            $payload[ 'request_id' ] = $response->responseDetails;
 
             $message[ 'payload' ] = $payload;
         }
