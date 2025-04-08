@@ -178,7 +178,8 @@ export const SegmentFooterTabGlossary = ({
   useEffect(() => {
     const refreshCheckQa = () =>
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
-    const addGlossaryItem = () => {
+    const addGlossaryItem = (payload) => {
+      console.log(payload)
       setTimeout(() => {
         setIsLoading(false)
         setSearchTerm('')
