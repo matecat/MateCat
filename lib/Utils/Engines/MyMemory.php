@@ -367,6 +367,24 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * Check the entry status on myMemory
+     *
+     * @param string $uuid
+     * @return array
+     */
+    public function entryStatus( string $uuid )
+    {
+        $this->call( "entry_status_relative_url", [
+            'uuid' => $uuid
+        ], false );
+
+        /**
+         * @var Engines_Results_MyMemory_TmxResponse
+         */
+        return $this->result;
+    }
+
+    /**
      * Post a file to myMemory
      *
      * Remove the first line from csv (source and target)
