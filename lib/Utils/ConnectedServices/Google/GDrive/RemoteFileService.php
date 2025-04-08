@@ -156,8 +156,9 @@ class RemoteFileService {
      * @param $copyTitle
      *
      * @return Google_Service_Drive_DriveFile|null
+     * @throws Exception
      */
-    public function copyFile( $originFileId, $copyTitle ) {
+    public function copyFile( $originFileId, $copyTitle ): ?Google_Service_Drive_DriveFile {
         $copiedFile = new Google_Service_Drive_DriveFile();
         $copiedFile->setName( $copyTitle );
 
@@ -171,10 +172,9 @@ class RemoteFileService {
         try {
             return $this->gdriveService->files->copy( $originFileId, $copiedFile, $optParams );
         } catch ( Exception $e ) {
-            print "An error occurred: " . $e->getMessage();
+            throw new Exception( 'Copy File - GDrive Error: ' . json_decode( $e->getMessage() )->error->message, $e->getCode() );
         }
 
-        return null;
     }
 
     /**
