@@ -806,8 +806,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $id_segment
      * @param $suggestions
      */
-    public
-    static function updateSuggestionsArray( $id_segment, $suggestions ) {
+    public static function updateSuggestionsArray( $id_segment, $suggestions ) {
 
         if ( empty( $suggestions ) ) {
             return;
@@ -825,5 +824,10 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
         ];
 
         $stmt->execute( $params );
+    }
+
+    public static function getLastModifiedSegmentEvent(int $id_job, int $ttl = 0)
+    {
+
     }
 }

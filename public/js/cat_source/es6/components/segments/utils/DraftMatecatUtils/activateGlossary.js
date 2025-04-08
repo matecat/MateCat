@@ -1,6 +1,7 @@
 import GlossaryComponent from '../../GlossaryComponents/GlossaryHighlight.component'
 import TextUtils from '../../../../utils/textUtils.js'
 import * as DraftMatecatConstants from './editorConstants'
+import {tagSignatures} from './tagModel'
 
 export const activateGlossary = (glossary, sid) => {
   const generateGlossaryDecorator = ({regex, regexCallback}) => {
@@ -23,7 +24,14 @@ export const activateGlossary = (glossary, sid) => {
     let matches = []
     glossaryArray.forEach((item) => {
       if (!item.missingTerm) {
-        const arrayMatches = item.matching_words
+        const arrayMatches = item.matching_words.map((words) =>
+          tagSignatures.space
+            ? words.replace(
+                tagSignatures.space.regex,
+                '​' + tagSignatures.space.placeholder + '​',
+              )
+            : words,
+        )
         matches = [...matches, ...arrayMatches].sort((a, b) =>
           a.toLowerCase() < b.toLowerCase() ? 1 : -1,
         ) // Order words alphabetically descending to prioritize composite terms ex. ['Guest favorite', 'guest']

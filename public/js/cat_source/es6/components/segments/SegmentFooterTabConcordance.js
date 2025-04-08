@@ -193,7 +193,7 @@ class SegmentFooterTabConcordance extends React.Component {
     } else {
       html = (
         <ul className={'graysmall message prime'}>
-          <li>TM Search is not available when the TM feature is disabled</li>
+          <li>TM Search is not available when the TM feature is disabled </li>
         </ul>
       )
     }

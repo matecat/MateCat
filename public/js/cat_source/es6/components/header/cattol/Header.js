@@ -63,7 +63,7 @@ export const Header = ({
             <FilesMenu projectName={projectName} />
 
             {/*Icons header*/}
-            <div className="action-menu">
+            <div className="header-menu">
               {projectCompletionEnabled && (
                 <MarkAsCompleteButton
                   featureEnabled={projectCompletionEnabled}

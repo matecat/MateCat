@@ -1,6 +1,7 @@
 import React from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
+import {Popup} from 'semantic-ui-react'
 
 class SegmentQRIssue extends React.Component {
   generateHtmlCommentLines(issue) {
@@ -60,23 +61,6 @@ class SegmentQRIssue extends React.Component {
     }
     return array
   }
-  attachPopupEvent() {
-    if (this.comments) {
-      $(this.comments).popup({
-        popup: $(this.popup),
-        // on    : 'click',
-        hoverable: true,
-        position: 'bottom right',
-        lastResort: 'bottom right',
-      })
-    }
-  }
-  componentDidMount() {
-    this.attachPopupEvent()
-  }
-  componentDidUpdate() {
-    this.attachPopupEvent()
-  }
   render() {
     let index = this.props.index
     let issue = this.props.issue
@@ -92,31 +76,36 @@ class SegmentQRIssue extends React.Component {
           issue.get('comments').size > 0) ||
         issue.get('target_text') ? (
           <React.Fragment>
-            <div
-              className="qr-issue-comments"
-              style={{marginLeft: '10px'}}
-              ref={(comments) => (this.comments = comments)}
+            <Popup
+              hoverable
+              position="bottom right"
+              trigger={
+                <div
+                  className="qr-issue-comments"
+                  style={{marginLeft: '10px'}}
+                  ref={(comments) => (this.comments = comments)}
+                >
+                  <button
+                    className="ui icon basic tiny button issue-note re-active re-message"
+                    title="Comments"
+                  >
+                    <i className="icon-uniE96B icon" />
+                  </button>
+                </div>
+              }
             >
-              <button
-                className="ui icon basic tiny button issue-note re-active re-message"
-                title="Comments"
+              <div
+                style={{
+                  top: '0px',
+                  right: 'auto',
+                  left: '616.766px',
+                  bottom: 'auto',
+                  width: '368.594px',
+                }}
               >
-                <i className="icon-uniE96B icon" />
-              </button>
-            </div>
-            <div
-              className="ui fluid popup bottom left transition visible animating scale out qr-comment-list"
-              ref={(popup) => (this.popup = popup)}
-              style={{
-                top: '0px',
-                right: 'auto',
-                left: '616.766px',
-                bottom: 'auto',
-                width: '368.594px',
-              }}
-            >
-              {this.generateHtmlCommentLines(issue)}
-            </div>
+                {this.generateHtmlCommentLines(issue)}
+              </div>
+            </Popup>
           </React.Fragment>
         ) : null}
       </div>

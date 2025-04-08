@@ -2,7 +2,8 @@ import React, {useRef} from 'react'
 import {isUndefined, size} from 'lodash'
 import {each, map} from 'lodash/collection'
 import {pick} from 'lodash/object'
-
+import $ from 'jquery'
+import {Popup} from 'semantic-ui-react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
@@ -120,9 +121,6 @@ class AnalyzeChunksResume extends React.Component {
     e.stopPropagation()
     this.jobLinkRef[jid].select()
     this.jobLinkRef[jid].setSelectionRange(0, 99999)
-    setTimeout(() => {
-      $('.ui.icon.button.copy').popup('hide')
-    }, 3000)
     document.execCommand('copy')
   }
 
@@ -223,14 +221,20 @@ class AnalyzeChunksResume extends React.Component {
                       value={chunkAnalysis.urls.t}
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <button
-                      onClick={copyJobLinkToClipboard(jidChunk)}
-                      className={'ui icon button copy'}
-                      data-content="Copied to Clipboard!"
-                      data-position="top center"
-                    >
-                      <i className="icon-link icon" />
-                    </button>
+                    <Popup
+                      content="Copied to Clipboard!"
+                      on="click"
+                      pinned
+                      position="top center"
+                      trigger={
+                        <button
+                          onClick={copyJobLinkToClipboard(jidChunk)}
+                          className={'ui icon button copy'}
+                        >
+                          <i className="icon-link icon" />
+                        </button>
+                      }
+                    />
                   </div>
                 </div>
                 <div className="titles-compare">
@@ -525,11 +529,6 @@ class AnalyzeChunksResume extends React.Component {
         }, 400)
       })
     }
-
-    $('.ui.icon.button.copy').popup({
-      on: 'click',
-      hideOnScroll: true,
-    })
   }
 
   render() {

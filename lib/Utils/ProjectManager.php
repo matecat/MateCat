@@ -2321,11 +2321,12 @@ class ProjectManager {
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // avoid blank filenames
-            if(!empty($originalFileName)){
+            if ( !empty( $originalFileName ) ) {
 
                 // get metadata
                 $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
-                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
                 $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2352,10 +2353,10 @@ class ProjectManager {
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 $fileStructures[ $fid ] = [
-                    'fid' => $fid,
+                    'fid'               => $fid,
                     'original_filename' => $originalFileName,
                     'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type' => $mimeType
+                    'mime_type'         => $mimeType
                 ];
             }
         }

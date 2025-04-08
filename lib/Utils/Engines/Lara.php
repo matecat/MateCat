@@ -6,6 +6,7 @@ use AMQHandler;
 use Constants_Engines;
 use Engine;
 use Engines\MMT\MMTServiceApi;
+use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
 use Engines_MMT;
@@ -25,13 +26,10 @@ use Log;
 use Projects_ProjectDao;
 use RedisHandler;
 use ReflectionException;
-use RuntimeException;
-use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
 use Users_UserDao;
 use Users_UserStruct;
 
@@ -57,11 +55,6 @@ class Lara extends Engines_AbstractEngine {
      * @var Engines_MMT
      */
     private Engines_EngineInterface $mmt_GET_Fallback;
-
-    /**
-     * @var ?Engines_MMT
-     */
-    private ?Engines_EngineInterface $mmt_SET_PrivateLicense = null;
 
     /**
      * @throws Exception
@@ -100,19 +93,7 @@ class Lara extends Engines_AbstractEngine {
                 'MMT-preimport'    => false,
         ];
         $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
-
-        if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-            $mmtStruct                    = EnginesModel_MMTStruct::getStruct();
-            $mmtStruct->type              = Constants_Engines::MT;
-            $mmtStruct->extra_parameters  = [
-                    'MMT-License'      => $extraParams[ 'MMT-License' ],
-                    'MMT-pretranslate' => true,
-                    'MMT-preimport'    => false,
-            ];
-            $this->mmt_SET_PrivateLicense = Engine::createTempInstance( $mmtStruct );
-        }
-
-        $this->clientLoaded = new Translator( $credentials );
+        $this->clientLoaded          = new Translator( $credentials );
 
         return $this->clientLoaded;
     }
@@ -181,7 +162,6 @@ class Lara extends Engines_AbstractEngine {
             return $tm_key->key;
         }, $tm_keys );
 
-
         // init lara client and mmt fallback
         $client = $this->_getClient();
 
@@ -189,7 +169,7 @@ class Lara extends Engines_AbstractEngine {
         $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             // for MMT
-            $_config[ 'include_score' ] = true;
+            $_config[ 'include_score' ] = isset($_config['mt_evaluation']) && $_config['mt_evaluation'] == 1;
             $_config[ 'priority' ]      = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
@@ -246,25 +226,8 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            $mmtClient = MMTServiceApi::newInstance()
-                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
-                ->setLicense( INIT::$MMT_DEFAULT_LICENSE );
-
-            try {
-                $qualityEstimation = $mmtClient->qualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
-                $score = $qualityEstimation['score'];
-
-                Log::doJsonLog( [
-                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                    'source'                 => $_config[ 'source' ],
-                    'target'                 => $_config[ 'target' ],
-                    'segment'                => $_config[ 'segment' ],
-                    'translation'            => $translation,
-                    'score'                  => $score,
-                ] );
-
-            } catch (\Exception $exception){
-                $score = 0;
+            if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1){
+                $score = $this->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
             }
 
         } catch ( LaraException $t ) {
@@ -299,19 +262,47 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        $matchAsArray = ( new Engines_Results_MyMemory_Matches(
-            $_config[ 'segment' ],
-            $translation,
-            100 - $this->getPenalty() . "%",
-            "MT-" . $this->getName(),
-            date( "Y-m-d" )
-        ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );;
+        return ( new Engines_Results_MyMemory_Matches([
+            'source' => $_config[ 'source' ],
+            'target' => $_config[ 'target' ],
+            'raw_segment' => $_config[ 'segment' ],
+            'raw_translation' => $translation,
+            'match' => $this->getStandardPenalty(),
+            'created-by' => $this->getMTName(),
+            'create-date' => date( "Y-m-d" ),
+            'score' => $score ?? null
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+    }
 
-        if($score){
-            $matchAsArray[ 'score' ] = $score;
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return float|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
+    {
+        try {
+            $score = $this->mmt_GET_Fallback->getQualityEstimation($source, $target, $sentence, $translation);
+
+            Log::doJsonLog( [
+                'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                'source'                 => $source,
+                'target'                 => $target,
+                'segment'                => $sentence,
+                'translation'            => $translation,
+                'score'                  => $score,
+            ] );
+
+            return $score;
+
+        } catch (MMTServiceApiException $exception){
+            Log::doJsonLog( [
+                'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
+                'error'                        => $exception->getMessage(),
+            ] );
         }
-
-        return $matchAsArray;
     }
 
     /**
@@ -325,53 +316,7 @@ class Lara extends Engines_AbstractEngine {
      * @throws Exception
      */
     public function update( $_config ) {
-
-        $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
-
-        if( empty( $_keys ) ) {
-            Log::doJsonLog( [ "LARA: update skipped. No keys provided." ] );
-            return true;
-        }
-
-        try {
-
-            $time_start = microtime( true );
-            // call lara
-            $client->memories->addTranslation(
-                    $_keys,
-                    $_config[ 'source' ],
-                    $_config[ 'target' ],
-                    $_config[ 'segment' ],
-                    $_config[ 'translation' ],
-                    $_config[ 'tuid' ],
-                    $_config[ 'context_before' ],
-                    $_config[ 'context_after' ],
-            );
-            $time_end = microtime( true );
-            $time     = $time_end - $time_start;
-
-            Log::doJsonLog( [
-                    'LARA REQUEST'    => 'PUT https://api.laratranslate.com/memories/content',
-                    'timing'          => [ 'Total Time' => $time, 'Request Start Time' => $time_start, 'Request End Time' => $time_end ],
-                    'keys'            => $_keys,
-                    'source'          => $_config[ 'source' ],
-                    'target'          => $_config[ 'target' ],
-                    'sentence'        => $_config[ 'segment' ],
-                    'translation'     => $_config[ 'translation' ],
-                    'tuid'            => $_config[ 'tuid' ],
-                    'sentence_before' => $_config[ 'context_before' ],
-                    'sentence_after'  => $_config[ 'context_after' ],
-            ] );
-
-        } catch ( Exception $e ) {
-            // for any exception (HTTP connection or timeout) requeue
-            return false;
-        }
-
-        // let MMT to have the last word on requeue
-        return !empty( $this->mmt_SET_PrivateLicense ) ? $this->mmt_SET_PrivateLicense->update( $_config ) : true;
-
+        return true;
     }
 
     /**
@@ -398,17 +343,6 @@ class Lara extends Engines_AbstractEngine {
     public function deleteMemory( array $memoryKey ): array {
         $clientMemories = $this->_getClient()->memories;
         try {
-
-            if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-                $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
-                $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
-
-                $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
-                if ( !empty( $memoryMMT ) ) {
-                    $this->mmt_SET_PrivateLicense->deleteMemory( $memoryMMT );
-                }
-            }
-
             return $clientMemories->delete( trim( $memoryKey[ 'id' ] ) )->jsonSerialize();
         } catch ( LaraApiException $e ) {
             if ( $e->getCode() == 404 ) {
@@ -429,42 +363,14 @@ class Lara extends Engines_AbstractEngine {
 
 
     /**
-     * @throws LaraException
-     * @throws Exception
+     * @param string           $filePath
+     * @param string           $memoryKey
+     * @param Users_UserStruct $user
+     *
+     * @return null
      */
     public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
-
-        $clientMemories = $this->_getClient()->memories;
-
-        if ( !$clientMemories->get( 'ext_my_' . trim( $memoryKey ) ) ) {
-            return null;
-        }
-
-        $fp_out = gzopen( "$filePath.gz", 'wb9' );
-
-        if ( !$fp_out ) {
-            $fp_out = null;
-            throw new RuntimeException( 'IOException. Unable to create temporary file.' );
-        }
-
-        $tmpFileObject = new SplFileObject( $filePath, 'r' );
-
-        while ( !$tmpFileObject->eof() ) {
-            gzwrite( $fp_out, $tmpFileObject->fgets() );
-        }
-
-        $tmpFileObject = null;
-        gzclose( $fp_out );
-
-        $res = $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
-        Log::doJsonLog( $res );
-
-        $fp_out = null;
-
-        if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-            $this->mmt_SET_PrivateLicense->importMemory( $filePath, $memoryKey, $user );
-        }
-
+        return null;
     }
 
     /**
