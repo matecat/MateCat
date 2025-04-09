@@ -186,7 +186,7 @@ export const SegmentFooterTabGlossary = ({
       try {
         const data = await checkMymemoryStatus({uuid})
 
-        if (data.responseData.id > 0) {
+        if (data.responseData?.id > 0) {
           successCallback(data)
           return
         }
