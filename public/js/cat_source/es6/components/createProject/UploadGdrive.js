@@ -16,7 +16,6 @@ import {CreateProjectContext} from './CreateProjectContext'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
 import DriveIcon from '../../../../../img/icons/DriveIcon'
 
-window.onGDriveApiLoad = () => {}
 export const UploadGdrive = () => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
