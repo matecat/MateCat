@@ -96,7 +96,7 @@ const apiUserMockResponse = {
           projects: 1,
         },
       ],
-      pending_invitations: ['federico@translated.net'],
+      pending_invitations: ['fede@translated.net'],
     },
     {
       id: 4,

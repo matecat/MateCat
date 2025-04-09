@@ -275,7 +275,7 @@ const SegmentUtils = {
     const segments = SegmentStore.getAllSegments()
     const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
 
-    const {internal_id: internalId} = segmentInStore
+    const {internal_id: internalId} = segmentInStore ?? {}
 
     const segmentsGroupInternalId = segments.filter(
       (segment) => segment.internal_id === internalId,

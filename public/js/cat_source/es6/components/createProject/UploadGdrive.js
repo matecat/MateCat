@@ -35,8 +35,10 @@ export const UploadGdrive = () => {
   const openGDrivePrev = usePrevious(openGDrive)
 
   useEffect(() => {
-    gapi.load('auth', {callback: setAuthApiLoaded(true)})
-    gapi.load('picker', {callback: setPickerApiLoaded(true)})
+    if (gapi) {
+      gapi.load('auth', {callback: setAuthApiLoaded(true)})
+      gapi.load('picker', {callback: setPickerApiLoaded(true)})
+    }
   }, [])
 
   useEffect(() => {
