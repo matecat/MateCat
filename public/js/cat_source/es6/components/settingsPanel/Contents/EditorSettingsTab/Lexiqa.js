@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react'
 import Switch from '../../../common/Switch'
 import LXQ from '../../../../utils/lxq.main'
 import ApplicationStore from '../../../../stores/ApplicationStore'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const checkLexiqaIsEnabled = ({
   sourceLang,
@@ -77,7 +77,7 @@ export const Lexiqa = ({sourceLang, targetLangs}) => {
   */}
       <div className="option-description">
         <h3>
-          QA by <img src="/public/img/lexiqa-new-2.png" />
+          QA by <img src="/public/img/lexiqa-logo-transparent.png" />
         </h3>
         <p>
           {!lexiqaLicense && (

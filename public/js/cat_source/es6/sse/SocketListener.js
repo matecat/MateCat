@@ -5,13 +5,14 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import CommonUtils from '../utils/commonUtils'
 import CommentsActions from '../actions/CommentsActions'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import UserActions from '../actions/UserActions'
 import {v4 as uuidV4} from 'uuid'
+import Cookies from 'js-cookie'
+import useAuth from '../hooks/useAuth'
 
 const SocketListener = ({isAuthenticated, userId}) => {
   const {forceLogout} = useContext(ApplicationWrapperContext)
-
   const eventHandlers = {
     disconnected: () => {
       CatToolActions.clientConnected(false)
@@ -170,6 +171,32 @@ const SocketListener = ({isAuthenticated, userId}) => {
         isCompleted: data.completed,
         hasError: Boolean(data?.has_error),
       })
+    },
+    global_messages: (data) => {
+      const message = data.message
+      if (
+        message &&
+        typeof Cookies.get('msg-' + message.token) == 'undefined' &&
+        new Date(message.expire) > new Date()
+      ) {
+        const notification = {
+          uid: message.token,
+          title: message.title ? message.title : 'Notice',
+          text: message.message,
+          type: message.level ? message.level : 'warning',
+          autoDismiss: false,
+          position: 'bl',
+          allowHtml: true,
+          closeCallback: function () {
+            const expireDate = new Date(message.expire)
+            Cookies.set('msg-' + message.token, '', {
+              expires: expireDate,
+              secure: true,
+            })
+          },
+        }
+        CatToolActions.addNotification(notification)
+      }
     },
     quota_exceeded: () => {
       CatToolActions.showLaraQuotaExceeded()

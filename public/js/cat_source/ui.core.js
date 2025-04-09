@@ -1,5 +1,4 @@
 import {isUndefined} from 'lodash'
-import Cookies from 'js-cookie'
 import $ from 'jquery'
 
 import CatToolActions from './es6/actions/CatToolActions'
@@ -306,52 +305,11 @@ window.UI = {
         if (data.details) {
           SegmentActions.updateGlobalWarnings(data.details)
         }
-
-        // check for messages
-        if (data.messages) {
-          var msgArray = $.parseJSON(data.messages)
-          if (msgArray.length > 0) {
-            UI.displayMessage(msgArray)
-          }
-        }
-
-        $(document).trigger('getWarning:global:success', {resp: data})
+        CommonUtils.dispatchCustomEvent('getWarning:global:success')
       })
       .catch((errors) => {
         OfflineUtils.failedConnection()
       })
-  },
-  displayMessage: function (messages) {
-    var self = this
-    if ($('body').hasClass('incomingMsg')) return false
-    $.each(messages, function () {
-      var elem = this
-      if (
-        typeof Cookies.get('msg-' + this.token) == 'undefined' &&
-        new Date(this.expire) > new Date() &&
-        typeof self.displayedMessages !== 'undefined' &&
-        self.displayedMessages.indexOf(this.token) < 0
-      ) {
-        var notification = {
-          title: elem.title ? elem.title : 'Notice',
-          text: this.msg,
-          type: elem.level ? elem.level : 'warning',
-          autoDismiss: false,
-          position: 'bl',
-          allowHtml: true,
-          closeCallback: function () {
-            var expireDate = new Date(elem.expire)
-            Cookies.set('msg-' + elem.token, '', {
-              expires: expireDate,
-              secure: true,
-            })
-          },
-        }
-        CatToolActions.addNotification(notification)
-        self.displayedMessages.push(elem.token)
-        return false
-      }
-    })
   },
   registerQACheck: function () {
     clearTimeout(UI.pendingQACheck)
@@ -499,7 +457,7 @@ window.UI = {
         }
         data.translation.segment = segment
         data.segment = segment
-        $(document).trigger('setTranslation:success', data)
+        CommonUtils.dispatchCustomEvent('setTranslation:success', data)
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }

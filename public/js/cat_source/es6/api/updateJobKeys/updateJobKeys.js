@@ -17,16 +17,18 @@ export const updateJobKeys = async ({
   currentPassword = config.currentPassword,
   getPublicMatches,
   dataTm,
-  tmPrioritization,
 }) => {
-  const paramsData = {
+
+  const paramsData = Object.entries({
+    action: 'updateJobKeys',
     job_id: idJob,
     job_pass: password,
     get_public_matches: getPublicMatches,
     data: dataTm,
     current_password: currentPassword,
-    tm_prioritization: tmPrioritization,
-  }
+  })
+    .filter(([, value]) => typeof value !== 'undefined')
+    .reduce((acc, [key, value]) => ({...acc, [key]: value}), {})
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {

@@ -1,6 +1,7 @@
-@import '../commons/divider';
-@import '../commons/shadows';
-
+@use '../commons/divider';
+@use '../commons/shadows';
+@use "../commons/colors";
+@use "../commons/variables";
 h1,
 h2,
 h3,
@@ -21,7 +22,7 @@ input {
     position: relative;
     .re-warning-not-added-issue {
       p {
-        background: $notification-error;
+        background: variables.$notification-error;
         color: #fff;
         padding: 5px 10px;
         a {
@@ -123,13 +124,13 @@ input {
                 padding: 5px 10px;
                 margin-bottom: 0;
                 .re-revisor {
-                  color: $approvedGreen;
+                  color: colors.$approvedGreen;
                 }
                 .re-revisor2 {
-                  color: $approved2Green;
+                  color: colors.$approved2Green;
                 }
                 .re-translator {
-                  color: $translatedBlue;
+                  color: colors.$translatedBlue;
                 }
                 .re-comment-date {
                   color: lightslategray;
@@ -206,7 +207,7 @@ input {
       }
     }
     .re-created {
-      background: $grey3;
+      background: colors.$grey3;
       padding: 10px 10px 10px;
       margin-bottom: 0;
       .issues {
@@ -259,7 +260,7 @@ article {
   margin-left: -14px;
   position: absolute;
   &.error {
-    border-top: 12px solid $notification-error;
+    border-top: 12px solid variables.$notification-error;
   }
   &.warning {
     border-top: 12px solid #ffeb3b;
@@ -268,7 +269,7 @@ article {
 
 .re-wrapper.thereAreIssues .re-open-view.re-issues {
   top: -1px;
-  border-top: 12px solid $grey3;
+  border-top: 12px solid colors.$grey3;
 }
 
 section {
@@ -322,7 +323,7 @@ section {
   .segment-side-buttons .revise-button {
     text-decoration: none !important;
     font-size: 28px;
-    color: $grey1;
+    color: colors.$grey1;
     font-weight: bold;
   }
 
@@ -352,7 +353,7 @@ section {
     left: 35px;
     position: absolute;
     top: 2px;
-    background: $redDefault;
+    background: colors.$redDefault;
     color: #fff;
     border: 1px solid #fff;
     border-radius: 14px;
@@ -367,7 +368,7 @@ section {
   }
 
   .revise-button-2 {
-    background: $approved2Green;
+    background: colors.$approved2Green;
   }
 }
 
@@ -378,6 +379,6 @@ section {
 
 //Download Button
 .downloadtr-button.approved-2ndpass {
-  background: $approved2Green;
+  background: colors.$approved2Green;
   color: #fff !important;
 }

@@ -177,7 +177,7 @@ class TMAnalysisWorker extends AbstractWorker {
          * if the first match is MT perform QA realignment because some MT engines breaks tags
          * also perform a tag ID check and mismatch validation
          */
-        if ( $new_match_type == Constants_Engines::MT ) {
+        if ( in_array( $new_match_type, [ 'MT', 'ICE_MT' ] ) ) {
 
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
             $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
@@ -191,21 +191,16 @@ class TMAnalysisWorker extends AbstractWorker {
             );
             $check->realignMTSpaces();
 
-            //this should every time be ok because MT preserve tags, but we use the check on the errors
-            //for logic correctness
-            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
-
         } else {
 
-            // Otherwise try to perform only the tagCheck
+            // Otherwise, try to perform only the tagCheck
             $check = $this->initPostProcess( $queueElement->params->segment, $suggestion, $queueElement->params->source, $queueElement->params->target );
             $check->performTagCheckOnly();
 
-            //_TimeStampMsg( $check->getErrors() );
-
-            $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
-
         }
+
+        //In case of MT matches this should every time be ok because MT preserve tags, but we perform also the check for Memories.
+        $err_json = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         // perform a consistency check as setTranslation does
         //  to add spaces to translation if needed
@@ -516,17 +511,17 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMatches( QueueElement $queueElement ): array {
 
-        $_config                 = [];
-        $_config[ 'pid' ]        = $queueElement->params->pid;
-        $_config[ 'segment' ]    = $queueElement->params->segment;
-        $_config[ 'source' ]     = $queueElement->params->source;
-        $_config[ 'target' ]     = $queueElement->params->target;
-        $_config[ 'email' ]      = INIT::$MYMEMORY_TM_API_KEY;
+        $_config              = [];
+        $_config[ 'pid' ]     = $queueElement->params->pid;
+        $_config[ 'segment' ] = $queueElement->params->segment;
+        $_config[ 'source' ]  = $queueElement->params->source;
+        $_config[ 'target' ]  = $queueElement->params->target;
+        $_config[ 'email' ]   = INIT::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
-        $_config[ 'priority_key' ] = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'priority_key' ]      = $queueElement->params->tm_prioritization ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -537,13 +532,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // penalty_key
         $penalty_key = [];
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
+        $tm_keys     = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
 
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
                 $_config[ 'id_user' ][] = $tm_key->key;
 
-                if(isset($tm_key->penalty) and is_numeric($tm_key->penalty)){
+                if ( isset( $tm_key->penalty ) and is_numeric( $tm_key->penalty ) ) {
                     $penalty_key[] = $tm_key->penalty;
                 } else {
                     $penalty_key[] = 0;
@@ -551,8 +546,8 @@ class TMAnalysisWorker extends AbstractWorker {
             }
         }
 
-        if(!empty($penalty_key)){
-            $_config['penalty_key'] = $penalty_key;
+        if ( !empty( $penalty_key ) ) {
+            $_config[ 'penalty_key' ] = $penalty_key;
         }
 
         $_config[ 'num_result' ] = 3;

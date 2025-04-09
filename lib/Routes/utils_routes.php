@@ -70,6 +70,7 @@ route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', [ 'API\App\QualityFrameworkController', 'job' ] );
 
 route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 'changePassword' ] );
+route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
@@ -167,3 +168,10 @@ route( '/api/app/new-project', 'POST', ['API\App\CreateProjectController', 'crea
 route( '/api/app/convert-file', 'POST', ['API\App\ConvertFileController', 'handle' ] );
 route( '/api/app/set-chunk-completed', 'POST', ['API\App\SetChunkCompletedController', 'complete' ] );
 route( '/api/app/download-analysis-report', 'POST', ['API\App\DownloadAnalysisReportController', 'download' ] );
+
+// Metadata
+$klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
+    route( '', 'GET', [ '\API\App\JobMetadataController', 'get' ] );
+    route( '', 'POST', [ '\API\App\JobMetadataController', 'save' ] );
+    route( '/[:key]', 'DELETE', [ '\API\App\JobMetadataController', 'delete' ] );
+} );

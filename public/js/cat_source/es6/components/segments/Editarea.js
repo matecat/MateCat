@@ -22,7 +22,6 @@ import CommonUtils from '../../utils/commonUtils'
 import TagBox from './utils/DraftMatecatUtils/TagMenu/TagBox'
 import insertTag from './utils/DraftMatecatUtils/TagMenu/insertTag'
 import checkForMissingTags from './utils/DraftMatecatUtils/TagMenu/checkForMissingTag'
-import updateEntityData from './utils/DraftMatecatUtils/updateEntityData'
 import LexiqaUtils from '../../utils/lxq.main'
 import updateLexiqaWarnings from './utils/DraftMatecatUtils/updateLexiqaWarnings'
 import {tagSignatures} from './utils/DraftMatecatUtils/tagModel'
@@ -126,12 +125,10 @@ class Editarea extends React.Component {
       },
       previousSourceTagMap: null,
     }
-    const cleanTagsTranslation =
-      DraftMatecatUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.removeTagsFromText(translation),
-      )
     this.props.updateCounter(
-      DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
+      DraftMatecatUtils.getCharactersCounter(
+        this.getTextToApplyCounter(translation),
+      ),
     )
 
     this.updateTranslationDebounced = debounce(
@@ -142,6 +139,25 @@ class Editarea extends React.Component {
 
     // insertTagAtSelection debouced function avoids broken insert for languages with oncomposition event ex. Korean
     this.insertTagAtSelectionDebounced = debounce(this.insertTagAtSelection, 1)
+  }
+
+  getTextToApplyCounter = (translation) => {
+    const canCountTagsAsChars =
+      CatToolStore.getCurrentProjectTemplate().characterCounterCountTags
+    if (canCountTagsAsChars) {
+      return DraftMatecatUtils.excludeSomeTagsTransformToText(translation, [
+        'g',
+        'bx',
+        'ex',
+        'x',
+      ])
+    } else {
+      const cleanTagsTranslation =
+        DraftMatecatUtils.decodePlaceholdersToPlainText(
+          DraftMatecatUtils.removeTagsFromText(translation),
+        )
+      return cleanTagsTranslation
+    }
   }
 
   getSearchParams = () => {
@@ -250,12 +266,10 @@ class Editarea extends React.Component {
       )
       newEditorState = EditorState.moveSelectionToEnd(newEditorState)
 
-      const cleanTagsTranslation =
-        DraftMatecatUtils.decodePlaceholdersToPlainText(
-          DraftMatecatUtils.removeTagsFromText(translation),
-        )
       this.props.updateCounter(
-        DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation),
+        DraftMatecatUtils.getCharactersCounter(
+          this.getTextToApplyCounter(translation),
+        ),
       )
       this.setState(
         {
@@ -329,11 +343,10 @@ class Editarea extends React.Component {
         missingTags,
         lxqDecodedTranslation,
       )
-      const cleanTranslation = DraftMatecatUtils.decodePlaceholdersToPlainText(
-        DraftMatecatUtils.removeTagsFromText(decodedSegment),
-      )
       this.props.updateCounter(
-        DraftMatecatUtils.getCharactersCounter(cleanTranslation),
+        DraftMatecatUtils.getCharactersCounter(
+          this.getTextToApplyCounter(decodedSegment),
+        ),
       )
       // console.log('updatingTranslationInStore');
       UI.registerQACheck()
@@ -464,6 +477,10 @@ class Editarea extends React.Component {
       SegmentConstants.REFRESH_TAG_MAP,
       this.refreshTagMap,
     )
+    SegmentStore.addListener(
+      SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+      this.refreshCharactersCounterRules,
+    )
     setTimeout(() => {
       this.checkDecorators()
       this.updateTranslationInStore()
@@ -504,6 +521,10 @@ class Editarea extends React.Component {
     this.setNewTranslation(this.props.segment.sid, this.props.translation)
   }
 
+  refreshCharactersCounterRules = () => {
+    this.setNewTranslation(this.props.segment.sid, this.props.translation)
+  }
+
   componentWillUnmount() {
     SegmentStore.removeListener(
       SegmentConstants.REPLACE_TRANSLATION,
@@ -520,6 +541,10 @@ class Editarea extends React.Component {
     SegmentStore.removeListener(
       SegmentConstants.REFRESH_TAG_MAP,
       this.refreshTagMap,
+    )
+    SegmentStore.removeListener(
+      SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+      this.refreshCharactersCounterRules,
     )
 
     const {editor: editorElement} = this.editor
@@ -1699,7 +1724,10 @@ class Editarea extends React.Component {
         segmentTargetTagMap,
         [],
       )
-      SegmentActions.getSegmentsQa(this.props.segment)
+      SegmentActions.getSegmentsQa({
+        ...this.props.segment,
+        translation: newTranslation,
+      })
     }, 100)
   }
 }

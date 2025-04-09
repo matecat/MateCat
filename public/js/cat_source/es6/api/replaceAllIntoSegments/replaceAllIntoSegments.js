@@ -38,6 +38,7 @@ export const replaceAllIntoSegments = async ({
     matchcase,
     exactmatch,
     replace,
+    inCurrentChunkOnly: true, // replace is fixed in context of current chunk
     revision_number: revisionNumber,
   }
   const formData = new FormData()

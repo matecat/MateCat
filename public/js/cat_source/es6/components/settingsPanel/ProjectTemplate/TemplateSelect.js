@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
 import Check from '../../../../../../img/icons/Check'
-import {ApplicationWrapperContext} from '../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const TemplateSelect = ({
   projectTemplates,

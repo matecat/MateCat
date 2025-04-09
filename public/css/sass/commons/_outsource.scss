@@ -1,5 +1,6 @@
+@use "../commons/colors";
 .after-open-outsource {
-  border-left: 2px solid $translatedBlue;
+  border-left: 2px solid colors.$translatedBlue;
   padding-left: 13px !important;
 }
 .outsource-container {
@@ -267,7 +268,7 @@
     }
   }
   .open-job-box {
-    background-color: $grey2;
+    background-color: colors.$grey2;
     padding: 35px 30px 25px 40px;
     width: 100%;
     cursor: auto;
@@ -329,7 +330,7 @@
   }
 
   .background-outsource-vendor {
-    background: $grey3;
+    background: colors.$grey3;
     width: 100%;
     padding-bottom: 15px;
     padding-top: 15px;
@@ -494,7 +495,7 @@
         }
         .revision-box {
           padding: 4px 0px;
-          background-color: $grey2;
+          background-color: colors.$grey2;
           margin-bottom: 10px;
           height: 28px;
           .add-revision {
@@ -608,14 +609,14 @@
               position: relative;
               top: 2px;
               font-size: 15px;
-              background: $grey2;
+              background: colors.$grey2;
               color: #000000;
             }
           }
           .delivery-box {
             padding: 14px 15px;
             text-align: left;
-            border: 1px solid $grey2;
+            border: 1px solid colors.$grey2;
             .fields {
               .field {
                 label {
@@ -662,7 +663,7 @@
                   padding: 9px 11px;
                   vertical-align: top;
                   font-size: 18px;
-                  border: 1px solid $translatedBlue;
+                  border: 1px solid colors.$translatedBlue;
                   border-radius: 2px;
                   box-shadow: none !important;
                   background-color: #ffffff !important;
@@ -671,12 +672,12 @@
                   &:hover {
                     text-decoration: none;
                     //box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                    border: 1px solid $translatedBlue;
-                    background-color: $grey3;
+                    border: 1px solid colors.$translatedBlue;
+                    background-color: colors.$grey3;
                   }
                   &:focus {
                     box-shadow: none !important;
-                    background-color: $grey3 !important;
+                    background-color: colors.$grey3 !important;
                   }
                 }
               }
@@ -777,7 +778,7 @@
                 cursor: pointer;
                 transition: 0.3s ease;
                 &.active {
-                  background: $greenDefault;
+                  background: colors.$greenDefault;
                 }
               }
             }
@@ -920,7 +921,7 @@
                       position: relative;
                       top: 1px;
                       &.online-item {
-                        background-color: $translatedBlue;
+                        background-color: colors.$translatedBlue;
                       }
                       &.offline-item {
                         background-color: gray;
@@ -1000,7 +1001,7 @@
             top: -15px;
             .need-it-faster-box {
               .delivery-box {
-                border: 1px solid $grey2;
+                border: 1px solid colors.$grey2;
               }
             }
             .delivery-box {

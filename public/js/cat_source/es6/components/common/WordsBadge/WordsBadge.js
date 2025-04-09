@@ -16,7 +16,7 @@ export const WordsBadge = ({
         name,
         onChange,
         value,
-        validatePattern: /./,
+        validateChip: /./,
         separators: [',', SPECIALS_SEPARATORS.EnterKey],
         placeholder,
         disabled,

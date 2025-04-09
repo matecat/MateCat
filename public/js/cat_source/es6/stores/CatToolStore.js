@@ -26,6 +26,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   haveKeysGlossary: undefined,
   jobMetadata: undefined,
   _projectProgress: undefined,
+  _currentProjectTemplate: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -120,6 +121,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   },
   emitChange: function () {
     this.emit.apply(this, arguments)
+  },
+  getCurrentProjectTemplate() {
+    return this._currentProjectTemplate
+  },
+  setCurrentProjectTemplate: function (currentProjectTemplate) {
+    this._currentProjectTemplate = currentProjectTemplate
   },
 })
 

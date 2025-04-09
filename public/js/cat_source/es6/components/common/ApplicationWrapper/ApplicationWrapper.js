@@ -1,40 +1,12 @@
-import React, {
-  createContext,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import React, {createContext, useEffect, useRef, useState} from 'react'
 import useAuth from '../../../hooks/useAuth'
-import Cookies from 'js-cookie'
-import CatToolActions from '../../../actions/CatToolActions'
 import {onModalWindowMounted} from '../../modals/ModalWindow'
 import CommonUtils from '../../../utils/commonUtils'
 import {FORCE_ACTIONS, ForcedActionModal} from './ForcedActionModal'
 import ModalsActions from '../../../actions/ModalsActions'
 import UserConstants from '../../../constants/UserConstants'
-import ApplicationStore from '../../../stores/ApplicationStore'
 import UserStore from '../../../stores/UserStore'
-
-// Custom event handler class: allows namespaced events
-class EventHandlerClass {
-  constructor() {
-    this.functionMap = {}
-  }
-
-  addEventListener(event, func) {
-    this.functionMap[event] = func
-    document.addEventListener(event.split('.')[0], this.functionMap[event])
-  }
-
-  removeEventListener(event) {
-    document.removeEventListener(event.split('.')[0], this.functionMap[event])
-    delete this.functionMap[event]
-  }
-}
-window.eventHandler = new EventHandlerClass()
-
-export const ApplicationWrapperContext = createContext({})
+import {ApplicationWrapperContext} from './ApplicationWrapperContext'
 
 export const ApplicationWrapper = ({children}) => {
   const {
@@ -49,37 +21,6 @@ export const ApplicationWrapper = ({children}) => {
   } = useAuth()
 
   const [forceReload, setForceReload] = useState(false)
-
-  const checkGlobalMassages = useCallback(() => {
-    if (config.global_message) {
-      const messages = JSON.parse(config.global_message)
-      messages.forEach((elem) => {
-        if (
-          !isUserLogged ||
-          (typeof Cookies.get('msg-' + elem.token) == 'undefined' &&
-            new Date(elem.expire) > new Date())
-        ) {
-          const notification = {
-            title: elem.title ? elem.title : 'Notice',
-            text: elem.msg,
-            type: elem.level ? elem.level : 'warning',
-            autoDismiss: false,
-            position: 'bl',
-            allowHtml: true,
-            closeCallback: function () {
-              const expireDate = new Date(elem.expire)
-              Cookies.set('msg-' + elem.token, '', {
-                expires: expireDate,
-                secure: true,
-              })
-            },
-          }
-          CatToolActions.addNotification(notification)
-          return false
-        }
-      })
-    }
-  }, [isUserLogged])
 
   const checkForPopupToOpen = useRef()
   checkForPopupToOpen.current = () => {
@@ -115,10 +56,6 @@ export const ApplicationWrapper = ({children}) => {
         break
     }
   }
-
-  useEffect(() => {
-    if (typeof isUserLogged === 'boolean') checkGlobalMassages()
-  }, [isUserLogged, checkGlobalMassages])
 
   useEffect(() => {
     const forceReloadFn = () => {

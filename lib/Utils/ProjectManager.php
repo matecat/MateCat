@@ -198,6 +198,8 @@ class ProjectManager {
                             'dictation'                               => null,
                             'show_whitespace'                         => null,
                             'character_counter'                       => null,
+                            'character_counter_mode'                  => null,
+                            'character_counter_count_tags'            => null,
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
@@ -274,7 +276,7 @@ class ProjectManager {
      * @throws Exception
      */
     protected function _sanitizeProjectName() {
-        $newName = self::_sanitizeName( $this->projectStructure[ 'project_name' ] );
+        $newName = Utils::sanitizeName( $this->projectStructure[ 'project_name' ] );
 
         if ( !$newName ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -392,22 +394,22 @@ class ProjectManager {
             $options[ 'from_api' ] = 1;
         }
 
-        // dictation
+        // dictation (LEGACY CODE TO BE REMOVED)
         if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ] !== null ) {
             $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
         }
 
-        // show_whitespace
+        // show_whitespace (LEGACY CODE TO BE REMOVED)
         if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ] !== null ) {
             $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
         }
 
-        // character_counter
+        // character_counter (LEGACY CODE TO BE REMOVED)
         if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ] !== null ) {
             $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
         }
 
-        // ai_assistant
+        // ai_assistant (LEGACY CODE TO BE REMOVED)
         if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ] !== null ) {
             $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
         }
@@ -1378,6 +1380,7 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
+            $this->features->run( 'validateJobCreation', $newJob, $projectStructure );
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
@@ -1387,6 +1390,16 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             $jobsMetadataDao = new Jobs\MetadataDao();
+
+            // character_counter_count_tags
+            if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ($projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0") );
+            }
+
+            // character_counter_mode
+            if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
+            }
 
             // tm_prioritization
             if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
@@ -1437,8 +1450,6 @@ class ProjectManager {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
-
-            $this->features->run( 'processJobsCreated', $newJob, $projectStructure );
 
         }
 
@@ -2309,41 +2320,44 @@ class ProjectManager {
 
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
-            // get metadata
-            $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+            // avoid blank filenames
+            if(!empty($originalFileName)){
 
-            $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
-            $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
+                // get metadata
+                $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+                $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
-            if ( $this->gdriveSession ) {
-                $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
-                if ( $gdriveFileId ) {
-                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
-                    $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
+                if ( $this->gdriveSession ) {
+                    $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
+                    if ( $gdriveFileId ) {
+                        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                        $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
+                    }
                 }
-            }
 
-            $moved = $fs->moveFromCacheToFileDir(
+                $moved = $fs->moveFromCacheToFileDir(
                     $fileDateSha1Path,
                     $this->projectStructure[ 'source_language' ],
                     $fid,
                     $originalFileName
-            );
+                );
 
-            // check if the files were moved
-            if ( true !== $moved ) {
-                throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
-            }
+                // check if the files were moved
+                if ( true !== $moved ) {
+                    throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
+                }
 
-            $this->projectStructure[ 'file_id_list' ]->append( $fid );
+                $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-            $fileStructures[ $fid ] = [
-                    'fid'               => $fid,
+                $fileStructures[ $fid ] = [
+                    'fid' => $fid,
                     'original_filename' => $originalFileName,
                     'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type'         => $mimeType
-            ];
+                    'mime_type' => $mimeType
+                ];
+            }
         }
 
         return $fileStructures;
@@ -2809,23 +2823,6 @@ class ProjectManager {
 
         // Definitely DISABLED
         return [ 'prec' => null, 'seg' => $segment, 'succ' => null ];
-
-    }
-
-    protected static function _sanitizeName( $nameString ) {
-
-        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
-        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
-        $nameString = str_replace( '_.', ".", $nameString );
-
-        // project name validation
-        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
-
-        if ( !preg_match( $pattern, $nameString ) ) {
-            return false;
-        }
-
-        return $nameString;
 
     }
 

@@ -2,7 +2,7 @@ import React, {useContext, useEffect} from 'react'
 import {mountPage} from './mountPage'
 import Header from '../components/header/Header'
 import OnBoarding from '../components/onBoarding/OnBoarding'
-import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 
 const SignIn = () => {
   const {isUserLogged} = useContext(ApplicationWrapperContext)

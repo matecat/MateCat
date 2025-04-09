@@ -21,13 +21,14 @@ const CROSS_LANG_CONTRIBUTIONS = 'cross_language_matches';
 const BULK_STATUS_CHANGE_TYPE = 'bulk_segment_status_change';
 
 const LOGOUT = 'logout';
-
 const UPGRADE = 'upgrade';
 const RELOAD = 'force_reload';
 const ENGINE_QUOTA_EXCEEDED = 'quota_exceeded';
-
 const MESSAGE_NAME = 'message';
+const GLOBAL_MESSAGES = 'global_messages';
+
 module.exports.MESSAGE_NAME = MESSAGE_NAME;
+module.exports.GLOBAL_MESSAGES = GLOBAL_MESSAGES;
 
 module.exports.MessageHandler = class {
 
@@ -55,6 +56,13 @@ module.exports.MessageHandler = class {
       case COMMENTS_TYPE:
         room = message.data.id_job.toString();
         break;
+      case GLOBAL_MESSAGES:
+        this.application.sendBroadcastServiceMessage(
+            MESSAGE_NAME,
+            {data: message.data.payload}
+        );
+
+        return;
       default:
         room = message.data.id_client;
         break;
@@ -72,7 +80,6 @@ module.exports.MessageHandler = class {
       MESSAGE_NAME,
       {data: message.data.payload}
     );
-
   }
 }
 

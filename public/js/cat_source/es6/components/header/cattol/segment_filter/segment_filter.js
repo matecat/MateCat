@@ -60,7 +60,7 @@ let SegmentFilterUtils = {
 
   initEvents: () => {
     if (SegmentFilterUtils.enabled()) {
-      $(document).on('segmentsAdded', function () {
+      document.addEventListener('segmentsAdded', function () {
         if (SegmentFilterUtils.filtering()) {
           SegmentFilterUtils.tryToFocusLastSegment()
         }

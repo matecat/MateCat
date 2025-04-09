@@ -1,4 +1,4 @@
-@import 'commons/colors';
+@use 'commons/colors';
 html,
 body {
   height: 100%;
@@ -16,8 +16,8 @@ body {
   -moz-transition: all 100ms ease-in;
   font-size: 14px;
   line-height: 1.4285em;
-  background: $white;
-  color: $black;
+  background: colors.$white;
+  color: colors.$black;
   &.no-min-width {
     min-width: auto;
   }
@@ -119,33 +119,6 @@ ul {
 
 .hide {
   display: none;
-}
-
-.btn-grey {
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  margin: 0 5px;
-  border-radius: 2px;
-  font-size: 18px;
-  color: #333;
-  background: #f6f6f6;
-  background: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(#f6f6f6),
-    to(#e2e3e5)
-  );
-  background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
-  background: linear-gradient(top, #f6f6f6, #e2e3e5);
-  line-height: 20px;
-}
-
-.btn-grey,
-.btn-grey {
-  color: $grey2;
-  background: white;
 }
 
 .clear {
@@ -560,10 +533,6 @@ section mark.searchMarker.currSearchItem {
     background: url(/public/img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;
   }
   /* Google Sheet */
-
-  .fileinput-button {
-    background: $translatedBlue;
-  }
 }
 
 
@@ -609,8 +578,6 @@ a.unarchive-project:before,
 a.unarchive-project:after,
 .splitpoint:before,
 .notific:before,
-#clear-all-files:before,
-#clear-all-gdrive:before,
 #swaplang:after,
 .more:before,
 .more.minus:before,
@@ -620,8 +587,6 @@ a.unarchive-project:after,
 .delete button:before,
 .cancel button:before,
 .graysmall:hover .trash:before,
-.fileupload-buttonbar .fileinput-button:before,
-#add-files:before,
 .splitpoint-delete:after,
 #point2seg:after,
 .warnings:before,
@@ -647,13 +612,6 @@ header .filter:before,
 
 header .filter:before {
   content: '\f0b0';
-}
-
-.fileupload-buttonbar .fileinput-button:before,
-#add-files:before {
-  content: '\f067';
-  font-size: 14px;
-  margin-right: 5px;
 }
 
 .close:before {
@@ -690,13 +648,6 @@ header .filter:before {
 #point2seg:after {
   content: '\e903';
   font-size: 24px;
-}
-
-#clear-all-gdrive:before,
-#clear-all-files:before {
-  content: '\f00d';
-  font-size: 14px;
-  margin-right: 5px;
 }
 
 #swaplang:after {
@@ -1137,7 +1088,7 @@ a.unarchive-project:after {
 #menu-site li a.bigblue {
   font-size: 17px !important;
   border: none !important;
-  color: $darkBlue !important;
+  color: colors.$darkBlue !important;
   border-radius: 18px;
   background-color: #fff;
   padding: 4px 18px;
@@ -1147,7 +1098,7 @@ a.unarchive-project:after {
 }
 
 #menu-site li a.bigred:hover {
-  color: $darkBlueHover !important;
+  color: colors.$darkBlueHover !important;
 }
 
 #menu-site li a:hover {
@@ -1180,10 +1131,10 @@ body svg {
     > span {
       display: block;
       text-align: center;
-      background-color: $grey7;
+      background-color: colors.$grey7;
       border-radius: 4px;
       padding: 2px 4px;
-      color: $white;
+      color: colors.$white;
       font-size: 14px;
       white-space: nowrap;
     }

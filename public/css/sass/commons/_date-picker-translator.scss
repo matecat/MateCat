@@ -1,13 +1,14 @@
+@use "../commons/colors";
 .xdsoft_datetimepicker {
   font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_today {
-  color: $translatedBlue;
+  color: colors.$translatedBlue;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td.xdsoft_current {
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   box-shadow: none;
   color: #ffffff;
 }
@@ -20,13 +21,13 @@
 
 .xdsoft_datetimepicker .xdsoft_calendar td:active {
   color: #ffffff !important;
-  background: $translatedBlue !important;
+  background: colors.$translatedBlue !important;
   box-shadow: none !important;
 }
 
 .xdsoft_datetimepicker .xdsoft_calendar td:focus {
   color: #ffffff !important;
-  background: $translatedBlue !important;
+  background: colors.$translatedBlue !important;
   box-shadow: none !important;
 }
 
@@ -35,7 +36,7 @@
   .xdsoft_time_box
   > div
   > div.xdsoft_current {
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   box-shadow: none;
 }
 
@@ -46,7 +47,7 @@
 }
 
 .xdsoft_datetimepicker .blue-gradient-button {
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   color: white;
   font-family: Calibri;
   border: 1px solid #797979 !important;
@@ -54,7 +55,7 @@
 }
 
 .xdsoft_datetimepicker .blue-gradient-button:hover {
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24) !important;
   color: #fff;

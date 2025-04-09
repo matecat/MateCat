@@ -78,7 +78,6 @@ class ContributionStructTest extends AbstractTest {
         $this->contributionStruct->oldSegment           = $this->contributionStruct->segment; //we do not change the segment source
         $this->contributionStruct->oldTranslation       = $this->contributionStruct->translation . " TEST";
 
-
     }
 
     public function tearDown(): void {
@@ -106,7 +105,8 @@ class ContributionStructTest extends AbstractTest {
                 'context_after'        => '',
                 'props'                => [],
                 'id_mt'                => null,
-                'id_file'              => null
+                'id_file'              => null,
+                'contextIsSpice'       => false
         ];
 
         $this->assertEquals( $expected, $this->contributionStruct->toArray() );

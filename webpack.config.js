@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const WebpackConcatPlugin = require('webpack-concat-files-plugin')
 const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
+const TerserPlugin = require('terser-webpack-plugin')
 const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
@@ -101,7 +102,7 @@ const matecatConfig = async ({env}, {mode}) => {
   files.forEach((file) => {
     const data = fs.readFileSync(file)
     const config = eval(data.toString('utf8'))
-    pluginConfig = {...pluginConfig, ...pluginWebpackConfig}
+    pluginConfig = {...pluginConfig, ...config}
   })
   if (pluginConfig.sentryWebpackPlugin) {
     pluginConfig.sentryWebpackPlugin.release = {
@@ -131,7 +132,36 @@ const matecatConfig = async ({env}, {mode}) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
+        minSize: 20000, // Minimum size in bytes for a chunk to be generated
+        maxSize: 244000, // Maximum size in bytes for a chunk before it is split
+        maxInitialRequests: Infinity,
+        automaticNameDelimiter: '-',
+        cacheGroups: {
+          vendors: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+        },
       },
+      minimize: !isDev,
+      minimizer: [
+        new TerserPlugin({
+          parallel: true,
+          terserOptions: {
+            compress: {
+              drop_console: !isDev,
+            },
+            output: {
+              comments: false,
+            },
+          },
+        }),
+      ],
+    },
+    cache: {
+      type: 'filesystem',
+      cacheDirectory: path.resolve(__dirname, 'node_modules/.cache/webpack'),
     },
     module: {
       rules: [
@@ -143,12 +173,21 @@ const matecatConfig = async ({env}, {mode}) => {
             path.resolve(__dirname, 'plugins'),
           ],
           exclude: '/node_modules/',
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'],
+          use: [
+            {
+              loader: 'thread-loader',
+              options: {
+                workers: 2,
+              },
             },
-          },
+            {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env'],
+                cacheDirectory: true,
+              },
+            },
+          ],
         },
         {
           test: /\.css$/i,
@@ -213,9 +252,6 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
       ],
       upload: [
-        path.resolve(__dirname, 'public/js/upload_main.js'),
-        path.resolve(__dirname, 'public/js/gdrive.upload.js'),
-        path.resolve(__dirname, 'public/js/gdrive.picker.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
         path.resolve(
           __dirname,
@@ -257,7 +293,6 @@ const matecatConfig = async ({env}, {mode}) => {
         ),
       ],
       xliffToTarget: [
-        path.resolve(__dirname, 'public/js/upload_main.js'),
         path.resolve(
           __dirname,
           'public/js/cat_source/es6/pages/XliffToTarget.js',
@@ -307,22 +342,11 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      new WebpackConcatPlugin({
+      /*new WebpackConcatPlugin({
         bundles: [
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/jquery-ui-1.14.0.min.js',
-              './public/js/lib/fileupload/tmpl.min.js',
-              './public/js/lib/fileupload/load-image.min.js',
-              './public/js/lib/fileupload/canvas-to-blob.min.js',
-              './public/js/lib/fileupload/jquery.image-gallery.min.js',
-              './public/js/lib/fileupload/jquery.iframe-transport.js',
-              './public/js/lib/fileupload/jquery.fileupload.js',
-              './public/js/lib/fileupload/jquery.fileupload-fp.js',
-              './public/js/lib/fileupload/jquery.fileupload-ui.js',
-              './public/js/lib/fileupload/jquery.fileupload-jui.js',
-              './public/js/lib/fileupload/locale.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/lib_upload.min.js',
@@ -334,14 +358,12 @@ const matecatConfig = async ({env}, {mode}) => {
             },
           },
         ],
-      }),
+      }),*/
       new WebpackConcatPlugin({
         bundles: [
           {
             src: [
               './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/jquery-ui-1.14.0.min.js',
-              './public/js/lib/jquery-dateFormat.min.js',
               './public/js/lib/semantic.min.js',
             ],
             dest: './public/build/libs.js',

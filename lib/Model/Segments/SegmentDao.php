@@ -633,7 +633,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                 files.filename,
                 s.id AS sid,
                 s.segment,
-                s.internal_id,
+                TO_BASE64(CONCAT(s.id_file_part, '_', s.internal_id)) as internal_id,
                 s.segment_hash,
                 IF ( st.status='NEW', NULL, st.translation ) AS translation,
                 IF( st.locked AND match_type = 'ICE', 1, 0 ) AS ice_locked,
@@ -973,13 +973,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $idJob
-     * @param     $password
-     * @param     $limit
-     * @param     $offset
+     * @param $idJob
+     * @param $password
+     * @param $limit
+     * @param $offset
      * @param int $ttl
-     *
-     * @return DataAccess_IDaoStruct[]
+     * @return array|DataAccess_IDaoStruct[]
+     * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
@@ -1047,7 +1047,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             j.id = :id_job 
                         AND
                             j.password = :password
-                        AND id_segment BETWEEN j.job_first_segment AND ( j.job_first_segment + " . $offset . " )
+                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ($limit+$offset) . " )
                             GROUP BY id_segment
                             LIMIT " . $limit . "
                         ) AS X ON _m_id = segment_translation_events.id
@@ -1067,13 +1067,13 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param     $idProject
-     * @param     $password
-     * @param     $limit
-     * @param     $offset
+     * @param $idProject
+     * @param $password
+     * @param $limit
+     * @param $offset
      * @param int $ttl
-     *
-     * @return DataAccess_IDaoStruct[]
+     * @return array|DataAccess_IDaoStruct[]
+     * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdProjectAndPassword( $idProject, $password, $limit, $offset, $ttl = 0 ) {
         $thisDao = new self();
@@ -1138,8 +1138,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                             projects p ON p.id = j.id_project
                         WHERE
                             p.id = :id_project
-                        AND id_segment BETWEEN j.job_first_segment AND j.job_last_segment
+                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ($limit+$offset) . " )
                             GROUP BY id_segment
+                            LIMIT " . $limit . "
                         ) AS X ON _m_id = segment_translation_events.id
                 ) ste ON ste.ste_id_segment = st.id_segment
             WHERE

@@ -1,9 +1,56 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
 import Switch from '../../../../common/Switch'
-import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {NumbersDashBadge} from './NumbersDashBadge'
+
+const convertTranslateSlidesToServer = (value) =>
+  value.reduce((acc, cur) => {
+    const [firstNum, secondNum] = cur.split('-')
+    const arrayLength =
+      typeof secondNum === 'string'
+        ? parseInt(secondNum) - parseInt(firstNum) + 1
+        : 1
+    const result = new Array(arrayLength)
+      .fill('')
+      .map((item, index) => parseInt(firstNum) + index)
+      .filter((value) => acc.every((valueCompare) => valueCompare !== value))
+
+    return [...acc, ...result].sort((a, b) => a - b)
+  }, [])
+
+const convertTranslateSlidesToView = (value) =>
+  value
+    .reduce((acc, cur, index, arr) => {
+      const accCopy = [...acc]
+      const lastElement = accCopy.pop()
+
+      const isLastRangeCompleted =
+        typeof lastElement === 'string' && lastElement.indexOf('-') > -1
+      if (isLastRangeCompleted) {
+        return [...acc, [cur]]
+      } else {
+        if (!Array.isArray(lastElement)) return [...acc, [cur]]
+
+        const lastValue = lastElement[lastElement.length - 1]
+        if (cur - 1 === lastValue && index < arr.length - 1) {
+          return [...accCopy, [...lastElement, cur]]
+        } else {
+          if (cur - 1 === lastValue && index === arr.length - 1) {
+            return [...accCopy, `${lastElement[0]}-${cur}`]
+          }
+          return [
+            ...accCopy,
+            lastElement.length > 1
+              ? `${lastElement[0]}-${lastElement[lastElement.length - 1]}`
+              : lastElement[0].toString(),
+            [cur],
+          ]
+        }
+      }
+    }, [])
+    .map((value) => (Array.isArray(value) ? value[0].toString() : value))
 
 export const MsPowerpoint = () => {
   const {currentTemplate, modifyingCurrentTemplate} =
@@ -30,11 +77,23 @@ export const MsPowerpoint = () => {
     if (typeof formData === 'undefined') return
 
     const {translate_slides, extract_hidden_slides, ...propsValue} = formData
-
     const restPropsValue = {
       ...propsValue,
       ...(!extract_hidden_slides
-        ? {translate_slides}
+        ? {
+            translate_slides: Array.isArray(translate_slides)
+              ? convertTranslateSlidesToServer(
+                  translate_slides.filter((value) => {
+                    const [firstValue, secondValue] = value.split('-')
+                    return (
+                      parseInt(secondValue) > parseInt(firstValue) ||
+                      (typeof firstValue === 'string' &&
+                        typeof secondValue === 'undefined')
+                    )
+                  }),
+                )
+              : translate_slides,
+          }
         : {extract_hidden_slides}),
     }
 
@@ -52,7 +111,12 @@ export const MsPowerpoint = () => {
   // set default values for current template
   useEffect(() => {
     Object.entries(msPowerpoint.current).forEach(([key, value]) =>
-      setValue(key, value),
+      setValue(
+        key,
+        key === 'translate_slides' && Array.isArray(value)
+          ? convertTranslateSlidesToView(value)
+          : value,
+      ),
     )
     if (Array.isArray(msPowerpoint.current.translate_slides))
       setValue('extract_hidden_slides', false)
@@ -140,7 +204,7 @@ export const MsPowerpoint = () => {
           name="translate_slides"
           disabled={formData?.extract_hidden_slides}
           render={({field: {onChange, value, name}}) => (
-            <WordsBadge
+            <NumbersDashBadge
               name={name}
               value={value}
               onChange={onChange}
