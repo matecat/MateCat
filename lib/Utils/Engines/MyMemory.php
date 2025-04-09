@@ -367,6 +367,30 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
+     * Check the entry status on myMemory
+     *
+     * @param string $uuid
+     * @return array
+     */
+    public function entryStatus( string $uuid )
+    {
+        $this->call( "entry_status_relative_url", [
+            'uuid' => $uuid
+        ], false );
+
+        // 1 second timeout
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_TIMEOUT => 1
+            ]
+        );
+
+        /**
+         * @var Engines_Results_MyMemory_TmxResponse
+         */
+        return $this->result;
+    }
+
+    /**
      * Post a file to myMemory
      *
      * Remove the first line from csv (source and target)
@@ -786,7 +810,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * MyMemory private endpoint
      *
      * @param $config
-     * @return array
+     *
+     * @return array|Engines_Results_MyMemory_TagProjectionResponse
      */
     public function getTagProjection( $config ) {
 

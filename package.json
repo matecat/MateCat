@@ -88,14 +88,9 @@
     "terser-webpack-plugin": "^5.3.11",
     "thread-loader": "^4.0.4",
     "undici": "^5.28.2",
-<<<<<<< HEAD
     "webpack": "5.97.1",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "6.0.1",
-=======
-    "webpack": "5.96.1",
-    "webpack-cli": "5.1.4",
->>>>>>> e92722a07e1550920dff6672fd1c3f5bc1842c00
     "webpack-concat-files-plugin": "^0.5.2",
     "whatwg-fetch": "^3.6.20"
   },

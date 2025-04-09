@@ -287,6 +287,14 @@ class ConvertFile
     }
 
     /**
+     * @return bool
+     */
+    public function hasErrors(): bool
+    {
+        return count($this->getErrors()) > 0;
+    }
+
+    /**
      * Check on executed conversion results
      * @return array
      */
