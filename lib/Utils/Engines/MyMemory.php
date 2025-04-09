@@ -378,6 +378,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             'uuid' => $uuid
         ], false );
 
+        // 1 second timeout
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_TIMEOUT => 1
+            ]
+        );
+
         /**
          * @var Engines_Results_MyMemory_TmxResponse
          */
