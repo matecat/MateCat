@@ -254,7 +254,7 @@ class ConvertFileController extends KleinController {
         return [
             'code' => Constants\ConversionHandlerStatus::ZIP_HANDLING,
             'data' => $zipFiles,
-            'errors' => $convertFile->getErrors(),
+            'errors' => []  ,
             'warning' => [],
         ];
     }
