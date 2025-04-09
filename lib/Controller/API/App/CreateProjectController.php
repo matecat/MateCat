@@ -156,6 +156,9 @@ class CreateProjectController extends KleinController {
             $projectStructure[ 'ai_assistant' ]      = $this->data['ai_assistant'];
             $projectStructure[ 'tm_prioritization' ] = $this->data['tm_prioritization'] ?? null;
 
+            $projectStructure[ 'character_counter_mode' ] = $this->data['character_counter_mode'] ?? null;
+            $projectStructure[ 'character_counter_count_tags' ] = $this->data['character_counter_count_tags'] ?? null;
+
             // MMT Glossaries
             // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
             $engine = Engine::getInstance( $this->data['mt_engine'] );
