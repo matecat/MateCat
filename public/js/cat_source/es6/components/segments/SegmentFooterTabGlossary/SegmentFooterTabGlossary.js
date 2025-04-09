@@ -19,6 +19,7 @@ import TermForm from './TermForm'
 import {SegmentContext} from '../SegmentContext'
 import SegmentUtils from '../../../utils/segmentUtils'
 import {SegmentFooterTabError} from '../SegmentFooterTabError'
+import {checkMymemoryStatus} from '../../../api/checkMymemoryStatus'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -174,19 +175,54 @@ export const SegmentFooterTabGlossary = ({
     [modifyElement, segment.sid, selectsActive, termForm, clientId],
   )
 
+  const pollMymemoryStatus = async (
+    {uuid},
+    successCallback,
+    timeoutCallback,
+  ) => {
+    const startTime = Date.now()
+
+    const checkCondition = async () => {
+      try {
+        const data = await checkMymemoryStatus({uuid})
+
+        if (successCallback(data)) {
+          return
+        }
+
+        if (Date.now() - startTime >= 60000) {
+          if (timeoutCallback) {
+            timeoutCallback()
+          }
+          return
+        }
+
+        setTimeout(checkCondition, 1000)
+      } catch (error) {
+        setTimeout(checkCondition, 1000)
+      }
+    }
+
+    await checkCondition()
+  }
+
   // get TM keys and add actions listener
   useEffect(() => {
     const refreshCheckQa = () =>
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+
+    const addGlossaryCallback = () => {
+      setSearchTerm('')
+      resetForm()
+      refreshGlossary()
+      refreshCheckQa()
+    }
     const addGlossaryItem = (payload) => {
-      console.log(payload)
-      setTimeout(() => {
-        setIsLoading(false)
-        setSearchTerm('')
-        resetForm()
-        refreshGlossary()
-        refreshCheckQa()
-      }, 500)
+      pollMymemoryStatus(
+        {uuid: payload.request_id},
+        addGlossaryCallback,
+        addGlossaryCallback,
+      )
     }
     const setDomains = ({entries}) => {
       setDomainsResponse(entries)
