@@ -52,7 +52,6 @@ const ProjectContainer = ({
   projectTeam.current = teams.find(
     (team) => team.get('id') === project.get('id_team'),
   )
-  const lastActivityController = useRef()
 
   const hideProjectAfterChangeAssignee = useRef()
   hideProjectAfterChangeAssignee.current = (projectCompare, user) => {
@@ -258,14 +257,10 @@ const ProjectContainer = ({
 
   const getLastAction = useRef()
   getLastAction.current = () => {
-    lastActivityController.current = new AbortController()
-    getLastProjectActivityLogAction(
-      {
-        id: project.get('id'),
-        password: project.get('password'),
-      },
-      lastActivityController.current,
-    ).then((data) => {
+    getLastProjectActivityLogAction({
+      id: project.get('id'),
+      password: project.get('password'),
+    }).then((data) => {
       const lastAction = data.activity[0] ? data.activity[0] : null
       setLastAction(lastAction)
       setJobsActions(data.activity)
@@ -462,7 +457,6 @@ const ProjectContainer = ({
         ManageConstants.CHANGE_PROJECT_ASSIGNEE,
         hideProjectAfterChangeAssignee.current,
       )
-      lastActivityController.current.abort?.()
     }
   }, [project])
 
