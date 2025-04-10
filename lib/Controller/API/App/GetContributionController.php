@@ -86,7 +86,7 @@ class GetContributionController extends KleinController {
             $contributionRequest->resultNum         = $num_results;
             $contributionRequest->crossLangTargets  = $this->getCrossLanguages($cross_language);
 
-            if ( $this->isRevision($id_job, $password) ) {
+            if ( $this->isRevision() ) {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
             } else {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;

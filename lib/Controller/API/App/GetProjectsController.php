@@ -37,7 +37,7 @@ class GetProjectsController extends KleinController {
             $source = $request['source'];
             $target = $request['target'];
             $status = $request['status'];
-            $only_completed = $request['only_completed'];
+            $only_completed = $request['onlycompleted'];
             $id_team = $request['id_team'];
             $id_assignee = $request['id_assignee'];
             $no_assignee = $request['no_assignee'];

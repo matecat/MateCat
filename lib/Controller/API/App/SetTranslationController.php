@@ -195,7 +195,7 @@ class SetTranslationController extends KleinController {
              * Translation is inserted here.
              */
             try {
-                CatUtils::addSegmentTranslation( $new_translation, $this->isRevision($this->data['id_job'], $this->data['password']) );
+                CatUtils::addSegmentTranslation( $new_translation, $this->isRevision() );
             } catch ( ControllerReturnException $e ) {
                 $db->rollback();
                 throw new RuntimeException($e->getMessage());
@@ -206,7 +206,7 @@ class SetTranslationController extends KleinController {
              */
             $this->featureSet->run( 'postAddSegmentTranslation', [
                 'chunk'       => $this->data['chunk'],
-                'is_review'   => $this->isRevision($this->data['id_job'], $this->data['password']),
+                'is_review'   => $this->isRevision(),
                 'logged_user' => $this->user
             ] );
 
@@ -648,7 +648,7 @@ class SetTranslationController extends KleinController {
             $translation->translation_date       = date( "Y-m-d H:i:s" );
 
             try {
-                CatUtils::addSegmentTranslation( $translation, $this->isRevision($this->data['id_job'], $this->data['password']) );
+                CatUtils::addSegmentTranslation( $translation, $this->isRevision() );
             } catch ( ControllerReturnException $e ) {
                 Database::obtain()->rollback();
                 throw new RuntimeException($e->getMessage());
@@ -721,7 +721,7 @@ class SetTranslationController extends KleinController {
     {
         //update total time to edit
         $tte = $old_translation[ 'time_to_edit' ];
-        if ( !$this->isRevision($this->data['id_job'], $this->data['password']) ) {
+        if ( !$this->isRevision() ) {
             if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
                 $tte += $new_translation[ 'time_to_edit' ];
             }
@@ -837,7 +837,7 @@ class SetTranslationController extends KleinController {
          * Set the new contribution in queue
          */
         $contributionStruct               = new ContributionSetStruct();
-        $contributionStruct->fromRevision = $this->isRevision($this->data['id_segment'], $this->data['password']);
+        $contributionStruct->fromRevision = $this->isRevision();
         $contributionStruct->id_file      = ( $filesParts !== null ) ? $filesParts->id_file : null;
         $contributionStruct->id_job       = $this->data['id_job'];
         $contributionStruct->job_password = $this->data['password'];

@@ -203,19 +203,25 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @param $id_job
-     * @param $password
      * @return bool|null
      */
-    protected function isRevision($id_job, $password): ?bool
+    protected function isRevision(): ?bool
     {
-        $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $id_job, $password );
+        $controller = $this;
 
-        if ( null === $isRevision ) {
-            $isRevision = CatUtils::getIsRevisionFromReferer();
+        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
+            $jid        = $controller->id_job;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( !$isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromReferer();
+            }
+
+            return $isRevision;
         }
 
-        return $isRevision;
+        return CatUtils::getIsRevisionFromReferer();
     }
 
     /**

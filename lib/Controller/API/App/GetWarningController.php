@@ -14,7 +14,6 @@ use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments_SegmentDao;
 use Translations\WarningDao;
-use Utils;
 
 class GetWarningController extends KleinController {
 
@@ -48,8 +47,7 @@ class GetWarningController extends KleinController {
                     'errors' => [],
                     'token' => (!empty($token) ? $token : null)
                 ],
-                $qa->render(),
-                Utils::getGlobalMessage()
+                $qa->render()
             );
 
             $result = $this->featureSet->filter( 'filterGlobalWarnings', $result, [

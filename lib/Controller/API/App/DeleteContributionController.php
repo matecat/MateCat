@@ -57,7 +57,7 @@ class DeleteContributionController extends KleinController {
 
             //get job's TM keys
             try {
-                $userRole = ( $this->isRevision($id_job, $password) ) ?  TmKeyManagement_Filter::ROLE_REVISOR : TmKeyManagement_Filter::ROLE_TRANSLATOR;
+                $userRole = ( $this->isRevision() ) ?  TmKeyManagement_Filter::ROLE_REVISOR : TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
                 //get TM keys with read grants
                 $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $userRole );

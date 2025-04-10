@@ -28,7 +28,7 @@ class SetChunkCompletedController extends KleinController {
                 'uid'               => $this->user->getUid(),
                 'remote_ip_address' => Utils::getRealIpAddr(),
                 'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-                'is_review'         => $this->isRevision($request['id_job'], $request['password'])
+                'is_review'         => $this->isRevision()
             ] );
 
             $model = new EventModel( $request['job'], $struct );
