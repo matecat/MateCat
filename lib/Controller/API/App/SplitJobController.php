@@ -82,6 +82,11 @@ class SplitJobController extends KleinController {
     {
         try {
             $request = $this->validateTheRequest();
+
+            if ( empty( $request['job_pass'] ) ) {
+                throw new InvalidArgumentException("No job password provided", -4);
+            }
+
             $projectStructure = $this->getProjectStructure(
                 $request['project_id'],
                 $request['project_pass'],
@@ -133,10 +138,6 @@ class SplitJobController extends KleinController {
 
         if ( empty( $job_id) ) {
             throw new InvalidArgumentException("No id job provided", -3);
-        }
-
-        if ( empty( $job_pass ) ) {
-            throw new InvalidArgumentException("No job password provided", -4);
         }
 
         return [
