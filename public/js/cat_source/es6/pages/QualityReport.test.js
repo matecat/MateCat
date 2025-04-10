@@ -1306,6 +1306,9 @@ test('renders properly', async () => {
         },
       })
     }),
+    http.get('/api/app/user/login/socket', () => {
+      return HttpResponse.json({})
+    }),
   )
 
   const header = document.createElement('header')
