@@ -329,7 +329,7 @@ class EngineController extends KleinController {
 
             $engine = Engine::createTempInstance( $result );
 
-            if ( $engine->isAdaptive() ) {
+            if ( $engine->isAdaptiveMT() ) {
                 //retrieve OWNER Engine License
                 ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
             }
