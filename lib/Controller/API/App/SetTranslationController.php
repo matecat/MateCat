@@ -366,7 +366,7 @@ class SetTranslationController extends KleinController {
             // a query to do the update is executed...
             // Avoid this by setting a key on redis with a reasonable TTL
             $redisHandler = new RedisHandler();
-            $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
+            $job_status   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->data['id_job'] );
             if (
             (
                 (
@@ -376,7 +376,7 @@ class SetTranslationController extends KleinController {
                 and empty( $job_status )
             )
             ) {
-                $redisHandler->getConnection()->setex( 'job_completeness:' . $this->id_job, 60 * 60 * 24 * 15, true ); //15 days
+                $redisHandler->getConnection()->setex( 'job_completeness:' . $this->data['id_job'], 60 * 60 * 24 * 15, true ); //15 days
 
                 try {
                     $update_completed = Jobs_JobDao::setJobComplete( $this->data['chunk'] );
@@ -385,7 +385,7 @@ class SetTranslationController extends KleinController {
 
                 if ( empty( $update_completed ) ) {
                     $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-                    $redisHandler->getConnection()->del( 'job_completeness:' . $this->id_job );
+                    $redisHandler->getConnection()->del( 'job_completeness:' . $this->data['id_job'] );
                     $this->log( $msg );
                     Utils::sendErrMailReport( $msg );
                 }
@@ -744,7 +744,6 @@ class SetTranslationController extends KleinController {
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
         $editLogSegmentStruct->translation    = $new_translation[ 'translation' ];
-        $editLogSegmentStruct->pe_effort_perc = null;
 
         $newPEE          = $editLogSegmentStruct->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
@@ -830,7 +829,7 @@ class SetTranslationController extends KleinController {
             return;
         }
 
-        $ownerUid   = Jobs_JobDao::getOwnerUid( $this->id_job, $this->password );
+        $ownerUid   = Jobs_JobDao::getOwnerUid( (int)$this->data['id_job'], $this->data['password']);
         $filesParts = ( new FilesPartsDao() )->getBySegmentId( $this->data['id_segment'] );
 
         /**
