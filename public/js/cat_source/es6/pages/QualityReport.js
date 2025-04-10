@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 import ReactDOM from 'react-dom'
 import QualityReportActions from '../actions/QualityReportActions'
 import QualityReportStore from '../stores/QualityReportStore'
@@ -11,6 +11,8 @@ import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper
 import {CookieConsent} from '../components/common/CookieConsent'
 import {mountPage} from './mountPage'
 import SocketListener from '../sse/SocketListener'
+import {DropdownMenu} from '../components/common/DropdownMenu/DropdownMenu'
+import {BUTTON_SIZE} from '../components/common/Button/Button'
 
 const getReviseUrlParameter = () => {
   const url = new URL(window.location.href)
@@ -31,9 +33,6 @@ export const QualityReport = () => {
   )
   const [idSegment, setIdSegment] = useState()
   const [qualitySummary, setQualitySummary] = useState()
-
-  const reviewDropdownRef = useRef()
-  const wasInitReviewDropDown = useRef(false)
 
   const headerMountPoint = document.querySelector('header')
   const HeaderPortal = usePortal(headerMountPoint)
@@ -111,37 +110,15 @@ export const QualityReport = () => {
   }
 
   useEffect(() => {
-    // init review dropdown
-    if (
-      secondPassReviewEnabled &&
-      reviewDropdownRef.current &&
-      !wasInitReviewDropDown.current
-    ) {
-      $(reviewDropdownRef.current).dropdown({
-        onChange: function (value) {
-          if (value && value !== '') {
-            updateUrlParameter(value)
-            setRevisionToShow(value)
-            setQualitySummary(
-              jobInfo.get('quality_summary').find((item) => {
-                return item.get('revision_number') === parseInt(value)
-              }),
-            )
-          }
-        },
-      })
-      wasInitReviewDropDown.current = true
+    if (secondPassReviewEnabled && revisionToShow && revisionToShow !== '') {
+      updateUrlParameter(revisionToShow)
+      setQualitySummary(
+        jobInfo.get('quality_summary').find((item) => {
+          return item.get('revision_number') === parseInt(revisionToShow)
+        }),
+      )
     }
-  }, [jobInfo])
-
-  /*useEffect(() => {
-    let quality_summary
-    if (jobInfo) {
-      quality_summary = jobInfo.get('quality_summary').find((value) => {
-        return value.get('revision_number') === parseInt(revisionToShow)
-      })
-    }
-  }, [revisionToShow])*/
+  }, [jobInfo, revisionToShow])
 
   const spinnerContainer = {
     position: 'absolute',
@@ -179,7 +156,71 @@ export const QualityReport = () => {
                     <div className="qr-filter-list">
                       <div className="filter-dropdown right-10">
                         <div className={'filter-reviewType active'}>
-                          <div
+                          <DropdownMenu
+                            dropdownClassName={'qr-reviewType-dropdown'}
+                            toggleButtonProps={{
+                              children: (
+                                <div
+                                  className="ui top left pointing dropdown basic tiny button right-0"
+                                  style={{marginBottom: '12px'}}
+                                >
+                                  {revisionToShow === '1' ? (
+                                    <div className="text">
+                                      <div
+                                        className={
+                                          'ui revision-color empty circular label'
+                                        }
+                                      />
+                                      Revision
+                                    </div>
+                                  ) : (
+                                    <div className="text">
+                                      <div
+                                        className={
+                                          'ui second-revision-color empty circular label'
+                                        }
+                                      />
+                                      2nd Revision
+                                    </div>
+                                  )}
+                                </div>
+                              ),
+                              size: BUTTON_SIZE.ICON_STANDARD,
+                            }}
+                            items={[
+                              {
+                                label: (
+                                  <>
+                                    <div
+                                      className={
+                                        'ui revision-color empty circular label'
+                                      }
+                                    />
+                                    Revision
+                                  </>
+                                ),
+                                onClick: () => {
+                                  setRevisionToShow('1')
+                                },
+                              },
+                              {
+                                label: (
+                                  <>
+                                    <div
+                                      className={
+                                        'ui second-revision-color empty circular label'
+                                      }
+                                    />
+                                    2nd Revision
+                                  </>
+                                ),
+                                onClick: () => {
+                                  setRevisionToShow('2')
+                                },
+                              },
+                            ]}
+                          />
+                          {/*<div
                             className="ui top left pointing dropdown basic tiny button right-0"
                             style={{marginBottom: '12px'}}
                             ref={reviewDropdownRef}
@@ -230,7 +271,7 @@ export const QualityReport = () => {
                                 2nd Revision
                               </div>
                             </div>
-                          </div>
+                          </div>*/}
                         </div>
                       </div>
                     </div>
