@@ -257,7 +257,7 @@ class CommentController extends KleinController {
             'id_segment' => $id_segment,
             'source_page' => $source_page,
             'is_anonymous' => $is_anonymous,
-            'revision_number' => $revision_number,
+            'revision_number' => (int)$revision_number,
             'first_seg' => $first_seg,
             'last_seg' => $last_seg,
             'id_comment' => $id_comment,
