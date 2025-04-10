@@ -35,6 +35,8 @@ class OutsourceToController extends KleinController {
                 ->setJobList( $jobList )
                 ->setFixedDelivery( $fixedDelivery )
                 ->setTypeOfService( $typeOfService )
+                ->setUser($this->user)
+                ->setFeatures($this->featureSet)
                 ->performQuote();
 
             /*
@@ -58,7 +60,7 @@ class OutsourceToController extends KleinController {
              */
             $client_output = $outsourceTo->getQuotesResult();
 
-            $this->response->json( [
+            return $this->response->json( [
                 'errors' => [],
                 'data' => array_values( $client_output ),
                 'return_url' => [
