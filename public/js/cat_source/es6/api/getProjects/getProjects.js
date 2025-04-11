@@ -32,7 +32,7 @@ export const getProjects = async ({
     formData.append(key, data[key])
   })
 
-  const res = await fetch(`${getMatecatApiDomain()}?action=getProjects`, {
+  const res = await fetch(`${getMatecatApiDomain()}api/app/get-projects`, {
     method: 'POST',
     credentials: 'include',
     body: formData,

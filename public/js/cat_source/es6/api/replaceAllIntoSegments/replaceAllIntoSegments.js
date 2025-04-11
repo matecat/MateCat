@@ -29,8 +29,6 @@ export const replaceAllIntoSegments = async ({
   revisionNumber = config.revisionNumber,
 }) => {
   const paramsData = {
-    action: 'getSearch',
-    function: 'replaceAll',
     job: idJob,
     password,
     token,
@@ -48,7 +46,7 @@ export const replaceAllIntoSegments = async ({
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=getSearch`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/replace-all`, {
     method: 'POST',
     body: formData,
     credentials: 'include',

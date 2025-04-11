@@ -5,8 +5,8 @@ namespace API\App;
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
-use Jobs_JobStruct;
 use Files\FilesPartsDao;
+use Jobs_JobStruct;
 
 class FilesController extends AbstractStatefulKleinController {
 

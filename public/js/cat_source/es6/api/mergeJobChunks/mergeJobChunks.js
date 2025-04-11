@@ -3,7 +3,6 @@ import {flattenObject} from '../../utils/queryString'
 
 export const mergeJobChunks = async (project, job) => {
   const params = flattenObject({
-    exec: 'merge',
     project_id: project.id,
     project_pass: project.password,
     job_id: job.id,
@@ -13,7 +12,7 @@ export const mergeJobChunks = async (project, job) => {
   Object.keys(params).forEach((key) => {
     formData.append(key, params[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=splitJob`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/split-job-merge`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
