@@ -449,7 +449,7 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
-
+            $payload[ 'request_id' ] = $response->responseData['uuid'];
             $message[ 'payload' ] = $payload;
         }
 
