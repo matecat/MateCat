@@ -1543,7 +1543,7 @@ AppDispatcher.register(function (action) {
         action.sid,
         normalizeSetUpdateGlossary(action.payload.term),
       )
-      SegmentStore.emitChange(action.actionType)
+      SegmentStore.emitChange(action.actionType, action.payload)
       SegmentStore.emitChange(
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,

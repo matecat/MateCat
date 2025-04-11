@@ -1041,11 +1041,6 @@ const SegmentActions = {
   },
   addGlossaryItemToCache: (sid, payload) => {
     AppDispatcher.dispatch({
-      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-      sid: sid,
-      message: 'A glossary item has been added',
-    })
-    AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
       payload,
@@ -1072,11 +1067,6 @@ const SegmentActions = {
   },
 
   updateglossaryCache: (sid, payload) => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-      sid: sid,
-      message: 'A glossary item has been updated',
-    })
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_GLOSSARY,
       sid: sid,
