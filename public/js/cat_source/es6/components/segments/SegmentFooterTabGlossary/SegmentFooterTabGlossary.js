@@ -229,8 +229,8 @@ export const SegmentFooterTabGlossary = ({
     const addGlossaryItem = (payload, update) => {
       pollMymemoryStatus(
         {uuid: payload.request_id},
-        () => addGlossaryCallback(update),
-        () => addGlossaryCallback(update),
+        () => setTimeout(() => addGlossaryCallback(update), 1000),
+        () => setTimeout(() => addGlossaryCallback(update), 1000),
       )
     }
     const setDomains = ({entries}) => {
