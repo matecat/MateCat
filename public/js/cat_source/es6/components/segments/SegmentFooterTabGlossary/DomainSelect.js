@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from 'react'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
 
-export const DomainSelect = () => {
+export const DomainSelect = ({disabled = false}) => {
   const {domains, setDomains, selectsActive, setSelectsActive} =
     useContext(TabGlossaryContext)
 
@@ -31,6 +31,7 @@ export const DomainSelect = () => {
     <div ref={ref}>
       <Select
         className="glossary-select domain-select"
+        isDisabled={disabled}
         name="glossary-term-domain"
         label="Domain"
         placeholder="No domain"

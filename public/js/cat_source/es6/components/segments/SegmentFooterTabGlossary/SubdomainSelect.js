@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef} from 'react'
 import {Select} from '../../common/Select'
 import {TabGlossaryContext} from './TabGlossaryContext'
 
-export const SubdomainSelect = () => {
+export const SubdomainSelect = ({disabled = false}) => {
   const {subdomains, setSubdomains, selectsActive, setSelectsActive} =
     useContext(TabGlossaryContext)
 
@@ -39,7 +39,7 @@ export const SubdomainSelect = () => {
         options={subdomains}
         activeOption={selectsActive.subdomain}
         checkSpaceToReverse={false}
-        isDisabled={!selectsActive.domain}
+        isDisabled={!selectsActive.domain || disabled}
         onSelect={(option) => {
           if (option) {
             updateSelectActive('subdomain', option)
