@@ -218,7 +218,7 @@ class CreateProjectController extends KleinController {
 
             return $this->response->json([
                 'data' => [
-                    'id_project' => $projectStructure[ 'id_project' ],
+                    'id_project' => (int)$projectStructure[ 'id_project' ],
                     'password'   => $projectStructure[ 'ppassword' ]
                 ],
                 'errors' => [],
@@ -264,7 +264,7 @@ class CreateProjectController extends KleinController {
         $xliff_parameters = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING  );
         $xliff_parameters_template_id = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $qa_model_template_id = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $payable_rate_template_id = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
+        $payable_rate_template_id = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $target_language_mt_engine_id = filter_var( $this->request->param( 'target_language_mt_engine_id' ), FILTER_SANITIZE_NUMBER_INT );
 
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
