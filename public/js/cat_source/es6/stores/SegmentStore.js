@@ -1544,11 +1544,13 @@ AppDispatcher.register(function (action) {
         normalizeSetUpdateGlossary(action.payload.term),
       )
       SegmentStore.emitChange(action.actionType, action.payload)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      setTimeout(() => {
+        SegmentStore.emitChange(
+          SegmentConstants.RENDER_SEGMENTS,
+          SegmentStore._segments,
+          action.fid,
+        )
+      }, 500)
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
       SegmentStore.addOrUpdateGlossaryItem(
@@ -1556,11 +1558,14 @@ AppDispatcher.register(function (action) {
         normalizeSetUpdateGlossary(action.payload.term),
       )
       SegmentStore.emitChange(action.actionType, action.payload)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      setTimeout(() => {
+        SegmentStore.emitChange(
+          SegmentConstants.RENDER_SEGMENTS,
+          SegmentStore._segments,
+          action.fid,
+        )
+      }, 500)
+
       break
     case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
     case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:
