@@ -689,9 +689,14 @@ class FastAnalysis extends AbstractDaemon {
 
                         $jobsMetadataDao   = new MetadataDao();
                         $tm_prioritization = $jobsMetadataDao->get( $id_job, $password, 'tm_prioritization', 10 * 60 );
+                        $mt_evaluation = $jobsMetadataDao->get( $id_job, $password, 'mt_evaluation', 10 * 60 );
 
                         if ( $tm_prioritization !== null ) {
                             $queue_element[ 'tm_prioritization' ] = $tm_prioritization->value == 1;
+                        }
+
+                        if ( $mt_evaluation !== null ) {
+                            $queue_element[ 'mt_evaluation' ] = $mt_evaluation->value == 1;
                         }
 
                         $element            = new QueueElement();
@@ -846,7 +851,7 @@ HD;
      *
      * @return Context
      */
-    protected function _getQueueAddressesByPriority( int $queueLen, int $id_mt_engine ): Context {
+    protected function _getQueueAddressesByPriority( int $queueLen, int $id_mt_engine ): ?Context {
 
         $mtEngine = null;
         try {
