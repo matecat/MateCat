@@ -1550,7 +1550,7 @@ AppDispatcher.register(function (action) {
           SegmentStore._segments,
           action.fid,
         )
-      }, 500)
+      }, 1600)
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
       SegmentStore.addOrUpdateGlossaryItem(
@@ -1564,7 +1564,7 @@ AppDispatcher.register(function (action) {
           SegmentStore._segments,
           action.fid,
         )
-      }, 500)
+      }, 1600)
 
       break
     case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
