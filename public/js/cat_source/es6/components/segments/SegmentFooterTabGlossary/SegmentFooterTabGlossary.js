@@ -217,7 +217,7 @@ export const SegmentFooterTabGlossary = ({
       setSearchTerm('')
       resetForm()
       refreshGlossary()
-      refreshCheckQa()
+      setTimeout(refreshCheckQa, 500)
       AppDispatcher.dispatch({
         actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
         sid: segment.sid,
