@@ -13,6 +13,7 @@ use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
+use InvalidArgumentException;
 use Jobs_JobDao;
 use Klein\Response;
 use RuntimeException;
@@ -54,17 +55,17 @@ class CopyAllSourceToTargetController extends KleinController {
         $this->log( "Requested massive copy-source-to-target for job $id_job." );
 
         if ( empty( $id_job ) ) {
-            throw new \InvalidArgumentException("Empty id job", -1);
+            throw new InvalidArgumentException("Empty id job", -1);
 
         }
         if ( empty( $pass ) ) {
-            throw new \InvalidArgumentException("Empty job password", -2);
+            throw new InvalidArgumentException("Empty job password", -2);
         }
 
         $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $pass );
 
         if ( empty( $job_data ) ) {
-            throw new \InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
+            throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
         }
 
         return [

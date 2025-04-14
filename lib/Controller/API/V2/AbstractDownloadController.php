@@ -12,6 +12,7 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ZipArchive;
 use ZipContentObject;
 
 abstract class AbstractDownloadController extends AbstractStatefulKleinController
@@ -215,8 +216,8 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $outputFile = tempnam( "/tmp", "zipmatecat" );
         }
 
-        $zip = new \ZipArchive();
-        $zip->open( $outputFile, \ZipArchive::OVERWRITE );
+        $zip = new ZipArchive();
+        $zip->open( $outputFile, ZipArchive::OVERWRITE );
 
         $rev_index_name = [];
         $rev_index_duplicate_count = [];

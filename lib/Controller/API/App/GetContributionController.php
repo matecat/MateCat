@@ -8,6 +8,7 @@ use Chunks_ChunkDao;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Exception;
+use FeatureSet;
 use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
@@ -198,7 +199,7 @@ class GetContributionController extends KleinController {
      */
     private function rewriteContributionContexts( $source, $target, &$request ): void
     {
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(

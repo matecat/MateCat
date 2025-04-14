@@ -70,7 +70,7 @@ class SetTranslationController extends KleinController {
 
             //check tag mismatch
             //get original source segment, first
-            $dao                   = new \Segments_SegmentDao( \Database::obtain() );
+            $dao                   = new Segments_SegmentDao( \Database::obtain() );
             $this->data['segment'] = $dao->getById( $this->data['id_segment'] );
 
             $segment     = $this->filter->fromLayer0ToLayer2( $this->data[ 'segment' ][ 'segment' ] );

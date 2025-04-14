@@ -8,6 +8,7 @@ use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
 use Chunks_ChunkDao;
 use Exception;
+use InvalidArgumentException;
 use Jobs_JobStruct;
 use Klein\Response;
 use LQA\QA;
@@ -71,11 +72,11 @@ class GetWarningController extends KleinController {
         $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
 
         if ( empty( $id_job ) ) {
-            throw new \InvalidArgumentException("Empty id job", -1);
+            throw new InvalidArgumentException("Empty id job", -1);
         }
 
         if ( empty( $password ) ) {
-            throw new \InvalidArgumentException("Empty job password", -2);
+            throw new InvalidArgumentException("Empty job password", -2);
         }
 
         return [
@@ -173,11 +174,11 @@ class GetWarningController extends KleinController {
         $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
 
         if ( empty( $id_job ) ) {
-            throw new \InvalidArgumentException("Empty id job", -1);
+            throw new InvalidArgumentException("Empty id job", -1);
         }
 
         if ( empty( $password ) ) {
-            throw new \InvalidArgumentException("Empty job password", -2);
+            throw new InvalidArgumentException("Empty job password", -2);
         }
 
         return [

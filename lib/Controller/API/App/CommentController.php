@@ -18,6 +18,7 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use Klein\Response;
 use Log;
+use Projects_ProjectDao;
 use RuntimeException;
 use Stomp\Transport\Message;
 use Teams\MembershipDao;
@@ -443,7 +444,7 @@ class CommentController extends KleinController {
      * @throws \ReflectionException
      */
     private function projectData($id_project) {
-        return ( new \Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
+        return ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
     }
 
     /**
