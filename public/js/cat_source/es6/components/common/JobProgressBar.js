@@ -49,7 +49,7 @@ const JobProgressBar = ({
                 content={'Translated ' + translatedPerc.toFixed(1) + '%'}
               >
                 <a
-                  className="translated-barp"
+                  className="translated-bar"
                   style={{
                     width: translatedPerc + '%',
                   }}
