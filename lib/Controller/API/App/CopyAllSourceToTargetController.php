@@ -97,7 +97,7 @@ class CopyAllSourceToTargetController extends KleinController {
             $batchEventCreator->setFeatureSet( $features );
             $batchEventCreator->setProject( $chunk->getProject() );
 
-            $source_page = ReviewUtils::revisionNumberToSourcePage( $revision_number );
+            $source_page = ReviewUtils::revisionNumberToSourcePage( (int)$revision_number );
             $segments    = $chunk->getSegments();
 
             $affected_rows = 0;
