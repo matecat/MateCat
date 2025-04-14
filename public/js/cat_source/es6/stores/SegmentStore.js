@@ -1528,13 +1528,6 @@ AppDispatcher.register(function (action) {
         SegmentStore._segments,
         action.fid,
       )
-      setTimeout(() => {
-        SegmentStore.emitChange(
-          SegmentConstants.RENDER_SEGMENTS,
-          SegmentStore._segments,
-          action.fid,
-        )
-      }, 1000)
       SegmentStore.emitChange(action.actionType, action.sid)
       break
     case SegmentConstants.DELETE_FROM_GLOSSARY:
