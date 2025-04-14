@@ -142,7 +142,7 @@ class GetSearchController extends KleinController {
         $password = filter_var( $this->request->param( 'password' ), FILTER_UNSAFE_RAW );
         $isMatchCaseRequested = filter_var( $this->request->param( 'matchcase' ), FILTER_VALIDATE_BOOLEAN );
         $isExactMatchRequested = filter_var( $this->request->param( 'exactmatch' ), FILTER_VALIDATE_BOOLEAN );
-        $strictMode = filter_var( $this->request->param( 'strict_mode' ), FILTER_VALIDATE_BOOLEAN );
+        $inCurrentChunkOnly = filter_var( $this->request->param( 'inCurrentChunkOnly' ), FILTER_VALIDATE_BOOLEAN );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_VALIDATE_INT );
 
         if ( empty( $job ) ) {
@@ -176,7 +176,7 @@ class GetSearchController extends KleinController {
             'replacement'           => $replace,
             'isMatchCaseRequested'  => $isMatchCaseRequested,
             'isExactMatchRequested' => $isExactMatchRequested,
-            'strictMode'            => $strictMode,
+            'inCurrentChunkOnly'    => $inCurrentChunkOnly,
         ] );
 
         return [
@@ -189,7 +189,7 @@ class GetSearchController extends KleinController {
             'password' => $password,
             'isMatchCaseRequested' => $isMatchCaseRequested,
             'isExactMatchRequested' => $isExactMatchRequested,
-            'strictMode' => $strictMode,
+            'inCurrentChunkOnly' => $inCurrentChunkOnly,
             'revisionNumber' => $revision_number,
             'queryParams' => $queryParams,
         ];
