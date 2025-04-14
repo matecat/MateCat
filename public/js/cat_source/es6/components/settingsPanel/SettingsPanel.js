@@ -126,10 +126,12 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
             component: <EditorSettingsTab />,
           },
           {
-            id: SETTINGS_PANEL_TABS.editorOther,
-            label: 'Other',
-            description: 'Adjust other project creation settings.',
-            component: <EditorOtherTab />,
+            ...(config.ownerIsMe === 1 && {
+              id: SETTINGS_PANEL_TABS.editorOther,
+              label: 'Other',
+              description: 'Adjust other project creation settings.',
+              component: <EditorOtherTab />,
+            }),
           },
         ]
       : []),
