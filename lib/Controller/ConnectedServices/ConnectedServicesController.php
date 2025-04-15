@@ -11,7 +11,6 @@ namespace ConnectedServices;
 
 use API\App\Json\ConnectedService;
 use API\Commons\AbstractStatefulKleinController;
-use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;

@@ -1,6 +1,7 @@
 <?php
 
 use Langs\LanguageDomains;
+use Model\Analysis\Status;
 
 /**
  * Concrete Class to negotiate a Quote/Login/Review/Confirm communication
@@ -168,11 +169,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         /**
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
-        $x = new StatusController();
-        $x->setIdProject( $this->pid );
-        $x->setPpassword( $this->ppassword );
-        $x->doAction();
-        $volAnalysis = $x->getApiOutput();
+
+        $_project_data = Projects_ProjectDao::getProjectAndJobData( $this->pid );
+        $analysisStatus = new Status( $_project_data, $this->features, $this->user );
+        $volAnalysis = json_encode($analysisStatus->fetchData()->getResult());
 
         /**
          *************************** GET SUBJECT **************************************

@@ -14,27 +14,27 @@ import {
 import {BUTTON_SIZE} from '../common/Button/Button'
 
 export const ActionMenu = ({
-  jobUrls,
-  qrMenu = true,
-  cattoolMenu = false,
-  isReview,
-  projectName,
-  source_code,
-  target_code,
-  jid,
-  password,
-  reviewPassword,
-  allowLinkToAnalysis,
-  analysisEnabled,
-  pid,
-  showReviseLink = true,
-}) => {
+                             jobUrls,
+                             qrMenu = true,
+                             cattoolMenu = false,
+                             isReview,
+                             projectName,
+                             source_code,
+                             target_code,
+                             jid,
+                             password,
+                             reviewPassword,
+                             allowLinkToAnalysis,
+                             analysisEnabled,
+                             pid,
+                             showReviseLink = true,
+                           }) => {
   useHotkeys(
-    Shortcuts.cattol.events.openShortcutsModal.keystrokes[
-      Shortcuts.shortCutsKeyType
-    ],
-    (e) => openShortcutsModal(e),
-    {enableOnContentEditable: true},
+      Shortcuts.cattol.events.openShortcutsModal.keystrokes[
+          Shortcuts.shortCutsKeyType
+          ],
+      (e) => openShortcutsModal(e),
+      {enableOnContentEditable: true},
   )
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
@@ -49,24 +49,24 @@ export const ActionMenu = ({
   const getQualityReportMenu = () => {
     return [
       ...(jobUrls.revise_urls
-        ? [
+          ? [
             {
               label: (
-                <>
-                  <span>Revise</span>
-                </>
+                  <>
+                    <span>Revise</span>
+                  </>
               ),
               onClick: () => {
                 window.open(jobUrls.revise_urls[0].url)
               },
             },
           ]
-        : null),
+          : null),
       {
         label: (
-          <>
-            <span>Translate</span>
-          </>
+            <>
+              <span>Translate</span>
+            </>
         ),
         onClick: () => {
           window.open(jobUrls.translate_url)
@@ -74,14 +74,14 @@ export const ActionMenu = ({
       },
       {
         label: (
-          <>
+            <>
             <span
-              className={`${isExportCsvDisabled ? ' disabled' : ''}`}
-              title="Export CSV"
+                className={`${isExportCsvDisabled ? ' disabled' : ''}`}
+                title="Export CSV"
             >
               Download QA Report CSV
             </span>
-          </>
+            </>
         ),
         onClick: () => {
           !isExportCsvDisabled ? handlerExportCsv() : null
@@ -89,14 +89,14 @@ export const ActionMenu = ({
       },
       {
         label: (
-          <>
+            <>
             <span
-              className={`${isExportJsonDisabled ? ' disabled' : ''}`}
-              title="Export JSON"
+                className={`${isExportJsonDisabled ? ' disabled' : ''}`}
+                title="Export JSON"
             >
               Download QA Report JSON
             </span>
-          </>
+            </>
         ),
         onClick: () => {
           !isExportJsonDisabled ? handlerExportJson() : null
@@ -123,58 +123,58 @@ export const ActionMenu = ({
   const getCattoolMenu = () => {
     return [
       ...(!isReview && showReviseLink
-        ? [
+          ? [
             {
               label: (
-                <>
-                  <span title="Revise">Revise</span>
-                </>
+                  <>
+                    <span title="Revise">Revise</span>
+                  </>
               ),
               onClick: () => {
                 window.open(
-                  `/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`,
+                    `/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`,
                 )
               },
             },
           ]
-        : []),
+          : []),
       ...(isReview
-        ? [
+          ? [
             {
               label: (
-                <>
-                  <span title="Translate">Translate</span>
-                </>
+                  <>
+                    <span title="Translate">Translate</span>
+                  </>
               ),
               onClick: () => {
                 window.open(
-                  `/translate/${projectName}/${source_code}-${target_code}/${jid}-${password}`,
+                    `/translate/${projectName}/${source_code}-${target_code}/${jid}-${password}`,
                 )
               },
             },
           ]
-        : []),
+          : []),
       ...(allowLinkToAnalysis && analysisEnabled
-        ? [
+          ? [
             {
               label: (
-                <>
-                  <span title="Analysis">Volume analysis</span>
-                </>
+                  <>
+                    <span title="Analysis">Volume analysis</span>
+                  </>
               ),
               onClick: () => {
                 window.open(`/jobanalysis/${pid}-${jid}-${password}`)
               },
             },
           ]
-        : []),
+          : []),
       {
         label: (
-          <>
+            <>
             <span title="XLIFF-to-target converter">
               XLIFF-to-target converter
             </span>
-          </>
+            </>
         ),
         onClick: () => {
           window.open(`/utils/xliff-to-target`)
@@ -182,9 +182,9 @@ export const ActionMenu = ({
       },
       {
         label: (
-          <>
-            <span title="Shortcuts">Shortcuts</span>
-          </>
+            <>
+              <span title="Shortcuts">Shortcuts</span>
+            </>
         ),
         onClick: openShortcutsModal,
       },
@@ -195,85 +195,85 @@ export const ActionMenu = ({
     setIsExportCsvDisabled(true)
 
     exportQualityReport()
-      .then(({blob, filename}) => {
-        const aTag = document.createElement('a')
-        const blobURL = URL.createObjectURL(blob)
-        aTag.download = filename
-        aTag.href = blobURL
-        document.body.appendChild(aTag)
-        aTag.click()
-        document.body.removeChild(aTag)
-      })
-      .catch((errors) => {
-        const notification = {
-          title: 'Error',
-          text: `Downloading CSV error status code: ${errors.status}`,
-          type: 'error',
-        }
-        CatToolActions.addNotification(notification)
-      })
-      .finally(() => setIsExportCsvDisabled(false))
+        .then(({blob, filename}) => {
+          const aTag = document.createElement('a')
+          const blobURL = URL.createObjectURL(blob)
+          aTag.download = filename
+          aTag.href = blobURL
+          document.body.appendChild(aTag)
+          aTag.click()
+          document.body.removeChild(aTag)
+        })
+        .catch((errors) => {
+          const notification = {
+            title: 'Error',
+            text: `Downloading CSV error status code: ${errors.status}`,
+            type: 'error',
+          }
+          CatToolActions.addNotification(notification)
+        })
+        .finally(() => setIsExportCsvDisabled(false))
   }
 
   const handlerExportJson = () => {
     setIsExportJsonDisabled(true)
 
     exportQualityReport({format: 'json'})
-      .then(({blob, filename}) => {
-        const aTag = document.createElement('a')
-        const blobURL = URL.createObjectURL(blob)
-        aTag.download = filename
-        aTag.href = blobURL
-        document.body.appendChild(aTag)
-        aTag.click()
-        document.body.removeChild(aTag)
-      })
-      .catch((errors) => {
-        const notification = {
-          title: 'Error',
-          text: `Downloading JSON error status code: ${errors.status}`,
-          type: 'error',
-        }
-        CatToolActions.addNotification(notification)
-      })
-      .finally(() => setIsExportJsonDisabled(false))
+        .then(({blob, filename}) => {
+          const aTag = document.createElement('a')
+          const blobURL = URL.createObjectURL(blob)
+          aTag.download = filename
+          aTag.href = blobURL
+          document.body.appendChild(aTag)
+          aTag.click()
+          document.body.removeChild(aTag)
+        })
+        .catch((errors) => {
+          const notification = {
+            title: 'Error',
+            text: `Downloading JSON error status code: ${errors.status}`,
+            type: 'error',
+          }
+          CatToolActions.addNotification(notification)
+        })
+        .finally(() => setIsExportJsonDisabled(false))
   }
 
   const handlerExportXML = () => {
-      setIsExportXMLDisabled(true)
+    setIsExportXMLDisabled(true)
 
-      exportQualityReport({format: 'xml'})
-          .then(({blob, filename}) => {
-              const aTag = document.createElement('a')
-              const blobURL = URL.createObjectURL(blob)
-              aTag.download = filename
-              aTag.href = blobURL
-              document.body.appendChild(aTag)
-              aTag.click()
-              document.body.removeChild(aTag)
-          })
-          .catch((errors) => {
-              const notification = {
-                  title: 'Error',
-                  text: `Downloading XML error status code: ${errors.status}`,
-                  type: 'error',
-              }
-              CatToolActions.addNotification(notification)
-          })
-          .finally(() => setIsExportXMLDisabled(false))
+    exportQualityReport({format: 'xml'})
+        .then(({blob, filename}) => {
+          const aTag = document.createElement('a')
+          const blobURL = URL.createObjectURL(blob)
+          aTag.download = filename
+          aTag.href = blobURL
+          document.body.appendChild(aTag)
+          aTag.click()
+          document.body.removeChild(aTag)
+        })
+        .catch((errors) => {
+          const notification = {
+            title: 'Error',
+            text: `Downloading XML error status code: ${errors.status}`,
+            type: 'error',
+          }
+          CatToolActions.addNotification(notification)
+        })
+        .finally(() => setIsExportXMLDisabled(false))
   }
 
   return (
-    <DropdownMenu
-      dropdownClassName="action-menu"
-      align={DROPDOWN_MENU_ALIGN.RIGHT}
-      toggleButtonProps={{
-        children: <Icon3Dots />,
-        size: BUTTON_SIZE.ICON_STANDARD,
-      }}
-      items={
-        cattoolMenu ? getCattoolMenu() : qrMenu ? getQualityReportMenu() : null
-      }
-    />
+      <DropdownMenu
+          dropdownClassName="action-menu"
+          align={DROPDOWN_MENU_ALIGN.RIGHT}
+          toggleButtonProps={{
+            children: <Icon3Dots />,
+            size: BUTTON_SIZE.ICON_STANDARD,
+          }}
+          items={
+            cattoolMenu ? getCattoolMenu() : qrMenu ? getQualityReportMenu() : null
+          }
+      />
   )
 }

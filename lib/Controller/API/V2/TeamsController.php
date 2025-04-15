@@ -19,6 +19,7 @@ use API\V2\Json\Team;
 use Exception;
 use InvalidArgumentException;
 use ReflectionException;
+use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Teams\TeamStruct;
@@ -61,7 +62,7 @@ class TeamsController extends KleinController {
                 'type'       => $params[ 'type' ]
         ) );
 
-        $model = new \TeamModel( $teamStruct );
+        $model = new TeamModel( $teamStruct );
         foreach ( $params[ 'members' ] as $email ) {
             $model->addMemberEmail( $email );
         }

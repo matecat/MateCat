@@ -1367,7 +1367,7 @@ class ProjectManager {
             $newJob->id_project        = $projectStructure[ 'id_project' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
-            $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
+            $newJob->id_tms            = $projectStructure[ 'tms_engine' ] ?? 1;
             $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
             $newJob->last_update       = date( "Y-m-d H:i:s" );
