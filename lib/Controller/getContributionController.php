@@ -159,9 +159,14 @@ class getContributionController extends ajaxController {
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+        $mt_evaluation  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
 
         if ( $dialect_strict !== null ) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
+        }
+
+        if ( $mt_evaluation !== null ) {
+            $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
         }
 
         $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
@@ -206,6 +211,7 @@ class getContributionController extends ajaxController {
                     'id_client' => $contributionRequest->id_client,
                     'userRole' => $contributionRequest->userRole,
                     'tm_prioritization' => $contributionRequest->tm_prioritization,
+                    'mt_evaluation' => $contributionRequest->mt_evaluation,
                     'penalty_key' => $contributionRequest->penalty_key,
                     'crossLangTargets' => $contributionRequest->crossLangTargets,
                     'fromTarget' => $contributionRequest->fromTarget,

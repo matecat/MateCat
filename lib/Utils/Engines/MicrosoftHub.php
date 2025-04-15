@@ -18,7 +18,7 @@
  */
 class Engines_MicrosoftHub extends Engines_AbstractEngine {
 
-    use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
+    use \Engines\Traits\Oauth;
 
     private $rawXmlErrStruct = <<<TAG
             <html>
@@ -148,7 +148,7 @@ TAG;
 
         }
 
-        return $this->_composeResponseAsMatch( $all_args, $decoded );
+        return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
@@ -199,7 +199,7 @@ TAG;
     protected function _formatRecursionError() {
 
         return $this->_composeResponseAsMatch(
-                [],
+                '',
                 [
                         'error'          => [
                                 'code'     => -499,
