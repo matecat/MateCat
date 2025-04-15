@@ -58,12 +58,10 @@ class OutsourceToController extends KleinController {
              *               ),
              *   );
              */
-            $client_output = $outsourceTo->getQuotesResult();
-
             return $this->response->json( [
                 'code' => 1,
                 'errors' => [],
-                'data' => array_values( $client_output ),
+                'data' => array_values( $outsourceTo->getQuotesResult() ),
                 'return_url' => [
                     'url_ok'          => $outsourceTo->getOutsourceLoginUrlOk(),
                     'url_ko'          => $outsourceTo->getOutsourceLoginUrlKo(),

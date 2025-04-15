@@ -110,7 +110,7 @@ class OutsourceVendor extends React.Component {
             }
 
             self.quoteResponse = quoteData.data[0]
-            let chunk = Immutable.fromJS(quoteData.data[0][0])
+            let chunk = fromJS(quoteData.data[0][0])
 
             self.url_ok = quoteData.return_url.url_ok
             self.url_ko = quoteData.return_url.url_ko

@@ -569,6 +569,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $cartElem[ "currency" ]      = !empty( $newCurrency ) ? $newCurrency : $cartElem[ "currency" ];
         $cartElem[ "timezone" ]      = !empty( $newTimezone ) ? $newTimezone : $cartElem[ "timezone" ];
         $cartElem[ "typeOfService" ] = !empty( $newTypeOfService ) ? $newTypeOfService : $cartElem[ "typeOfService" ];
+        $cartElem[ "outsourced" ]    = true;
 
         $this->__addCartElement( $cartElem );
     }
