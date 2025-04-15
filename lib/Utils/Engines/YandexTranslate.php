@@ -65,27 +65,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $mt_result = new Engines_Results_MT( $decoded );
-
-        if ( $mt_result->error->code < 0 ) {
-            $mt_result            = $mt_result->get_as_array();
-            $mt_result[ 'error' ] = (array)$mt_result[ 'error' ];
-
-            return $mt_result;
-        }
-
-        $mt_match_res = new Engines_Results_MyMemory_Matches(
-                $all_args[ 1 ][ "text" ],
-                $mt_result->translatedText,
-                100 - $this->getPenalty() . "%",
-                "MT-" . $this->getName(),
-                date( "Y-m-d" )
-        );
-
-        $mt_res = $mt_match_res->getMatches();
-
-        return $mt_res;
-
+        return $this->_composeResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
     }
 
     public function get( $_config ) {

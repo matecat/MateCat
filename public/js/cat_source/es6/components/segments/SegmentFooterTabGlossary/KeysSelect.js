@@ -5,7 +5,11 @@ import {TabGlossaryContext} from './TabGlossaryContext'
 import SegmentUtils from '../../../utils/segmentUtils'
 import CatToolActions from '../../../actions/CatToolActions'
 
-export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
+export const KeysSelect = ({
+  className = '',
+  onToggleOption = () => false,
+  disabled = false,
+}) => {
   const {keys, selectsActive, setSelectsActive, modifyElement} =
     useContext(TabGlossaryContext)
 
@@ -23,7 +27,7 @@ export const KeysSelect = ({className = '', onToggleOption = () => false}) => {
       options={keys.length ? keys : [{id: '0', name: '+ Create glossary key'}]}
       activeOptions={selectsActive.keys}
       checkSpaceToReverse={false}
-      isDisabled={!!modifyElement}
+      isDisabled={!!modifyElement || disabled}
       onToggleOption={(option) => {
         if (option) {
           const {keys: activeKeys} = selectsActive

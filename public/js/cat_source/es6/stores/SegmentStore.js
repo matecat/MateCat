@@ -48,9 +48,7 @@ import segment from '../components/segments/Segment'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-const normalizeSetUpdateGlossary = (terms) => {
-  const {term} = terms
-
+const normalizeSetUpdateGlossary = (term) => {
   const metadataKeys = term.metadata.keys
     ? term.metadata.keys
     : [{key: term.metadata.key, key_name: term.metadata.key_name}]
@@ -1543,26 +1541,17 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.CHANGE_GLOSSARY:
       SegmentStore.addOrUpdateGlossaryItem(
         action.sid,
-        normalizeSetUpdateGlossary(action.terms),
+        normalizeSetUpdateGlossary(action.payload.term),
       )
-      SegmentStore.emitChange(action.actionType)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      SegmentStore.emitChange(action.actionType, action.payload)
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
       SegmentStore.addOrUpdateGlossaryItem(
         action.sid,
-        normalizeSetUpdateGlossary(action.terms),
+        normalizeSetUpdateGlossary(action.payload.term),
       )
-      SegmentStore.emitChange(action.actionType)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      SegmentStore.emitChange(action.actionType, action.payload)
+
       break
     case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
     case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:

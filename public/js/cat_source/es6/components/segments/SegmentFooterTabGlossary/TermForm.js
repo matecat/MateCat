@@ -47,7 +47,7 @@ const TermForm = () => {
       SegmentActions.updateGlossaryItem(getRequestPayloadTemplate())
     } else {
       SegmentActions.addGlossaryItem(getRequestPayloadTemplate())
-      CatToolActions.setHaveKeysGlossary(true)
+      // CatToolActions.setHaveKeysGlossary(true)
 
       const updatedDomains = domain
         ? keys.reduce(
@@ -144,12 +144,14 @@ const TermForm = () => {
           <label>Definition</label>
           <input
             name="glossary-term-definition"
+            disabled={isLoading}
             value={termForm[DEFINITION]}
             onChange={(event) => updateTermForm(DEFINITION, event.target.value)}
           />
         </div>
         <div className="glossary-tm-container">
           <KeysSelect
+            disabled={isLoading}
             className={`${
               highlightMandatoryOnSubmit.keys
                 ? ' select_highlight_mandatory'
@@ -158,10 +160,10 @@ const TermForm = () => {
             onToggleOption={() => setHighlightMandatoryOnSubmit({})}
           />
           <div className="input-with-label__wrapper">
-            <DomainSelect />
+            <DomainSelect disabled={isLoading} />
           </div>
           <div className="input-with-label__wrapper">
-            <SubdomainSelect />
+            <SubdomainSelect disabled={isLoading} />
           </div>
         </div>
       </div>
@@ -181,6 +183,7 @@ const TermForm = () => {
             } glossary-term-original`}
             name="glossary-term-original"
             value={termForm[ORIGINAL_TERM]}
+            disabled={isLoading}
             onChange={(event) =>
               updateTermForm(ORIGINAL_TERM, event.target.value)
             }
@@ -200,6 +203,7 @@ const TermForm = () => {
             } glossary-term-translated`}
             name="glossary-term-translated"
             value={termForm[TRANSLATED_TERM]}
+            disabled={isLoading}
             onChange={(event) =>
               updateTermForm(TRANSLATED_TERM, event.target.value)
             }
@@ -217,6 +221,7 @@ const TermForm = () => {
               <label>Notes</label>
               <textarea
                 className="input-large"
+                disabled={isLoading}
                 name="glossary-term-description-source"
                 value={termForm[ORIGINAL_DESCRIPTION]}
                 onChange={(event) =>
@@ -231,6 +236,7 @@ const TermForm = () => {
             >
               <label>Example of use</label>
               <textarea
+                disabled={isLoading}
                 className="input-large"
                 name="glossary-term-example-source"
                 value={termForm[ORIGINAL_EXAMPLE]}
@@ -250,6 +256,7 @@ const TermForm = () => {
               <textarea
                 className="input-large"
                 name="glossary-term-description-target"
+                disabled={isLoading}
                 value={termForm[TRANSLATED_DESCRIPTION]}
                 onChange={(event) =>
                   updateTermForm(TRANSLATED_DESCRIPTION, event.target.value)
@@ -265,6 +272,7 @@ const TermForm = () => {
               <textarea
                 className="input-large"
                 name="glossary-term-example-target"
+                disabled={isLoading}
                 value={termForm[TRANSLATED_EXAMPLE]}
                 onChange={(event) =>
                   updateTermForm(TRANSLATED_EXAMPLE, event.target.value)
