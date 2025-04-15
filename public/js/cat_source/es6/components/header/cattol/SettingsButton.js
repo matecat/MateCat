@@ -1,11 +1,12 @@
 import React from 'react'
+import {Shortcuts} from '../../../utils/shortcuts'
 
 export const SettingsButton = ({openTmPanel}) => {
   return (
     <div
       className="action-submenu ui floating"
       id="action-settings"
-      title="Settings"
+      title={`Settings (${Shortcuts.cattol.events.openSettings.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
       onClick={openTmPanel}
     >
       <svg
