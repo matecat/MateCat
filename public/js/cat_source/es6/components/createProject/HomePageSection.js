@@ -88,7 +88,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/public/img/icons/home/home-collaboration.svg" />
+              <img src="/public/img/icons/home/home-work.svg" />
               <h3>Work from anywhere</h3>
             </div>
             <p>
@@ -108,7 +108,7 @@ export const HomePageSection = () => {
         <span>Check all benefits Matecat has to offer!</span>
         <Button
           type={BUTTON_TYPE.PRIMARY}
-          size={BUTTON_SIZE.MEDIUM}
+          size={BUTTON_SIZE.BIG}
           onClick={() =>
             window.open('https://site.matecat.com/benefits', '_blank')
           }
