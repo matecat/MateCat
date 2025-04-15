@@ -210,8 +210,8 @@ class SegmentTarget extends React.Component {
               className="removeAllTags"
               size={BUTTON_SIZE.ICON_SMALL}
               mode={BUTTON_MODE.OUTLINE}
-              alt="Remove all tags"
-              title="Remove all tags"
+              alt={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+              title={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
               onClick={this.removeTagsFromText.bind(this)}
             >
               <RemoveTagsIcon />
