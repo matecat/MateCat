@@ -2,7 +2,7 @@ import Switch from '../../../common/Switch'
 import React, {useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import SegmentActions from '../../../../actions/SegmentActions'
-import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 const checkGuessTagIsEnabled = ({
   sourceLang,

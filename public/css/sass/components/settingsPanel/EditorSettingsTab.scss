@@ -8,7 +8,7 @@
     border-bottom: 0;
   }
 
-  h2 {
+  > h2 {
     font-size: 30px;
     text-align: left;
     margin-bottom: 15px;
@@ -17,6 +17,7 @@
 
   .options-box h3 {
     font-size: 19px;
+    margin-bottom: 0;
   }
 
   .options-box .option-description {
@@ -35,10 +36,11 @@
   }
 
   .options-box.qa-box img {
-    width: 65px !important;
+    width: 75px !important;
     margin-right: 10px !important;
     vertical-align: middle;
     margin-left: 5px;
+    margin-top: -5px;
   }
 
   .select-with-label__wrapper {

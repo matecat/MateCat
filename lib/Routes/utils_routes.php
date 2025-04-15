@@ -70,6 +70,7 @@ route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', [ 'API\App\QualityFrameworkController', 'job' ] );
 
 route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 'changePassword' ] );
+route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
@@ -86,7 +87,13 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_keys', 'POST', [ '\API\App\GlossaryController', 'keys' ] );
     route( '/_search', 'POST', [ '\API\App\GlossaryController', 'search' ] );
     route( '/_set', 'POST', [ '\API\App\GlossaryController', 'set' ] );
+    route( '/_status', 'POST', [ '\API\App\GlossaryController', 'status' ] );
     route( '/_update', 'POST', [ '\API\App\GlossaryController', 'update' ] );
+} );
+
+// MyMemory
+$klein->with( '/api/app/mymemory', function () {
+    route( '/status/[:uuid]', 'GET', [ '\API\App\MyMemoryController', 'status' ] );
 } );
 
 // AI Assistant
@@ -118,4 +125,11 @@ $klein->with( '/api/app/project-template', function () {
 // FILTERS CONFIG
 $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
+} );
+
+// Metadata
+$klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
+    route( '', 'GET', [ '\API\App\JobMetadataController', 'get' ] );
+    route( '', 'POST', [ '\API\App\JobMetadataController', 'save' ] );
+    route( '/[:key]', 'DELETE', [ '\API\App\JobMetadataController', 'delete' ] );
 } );

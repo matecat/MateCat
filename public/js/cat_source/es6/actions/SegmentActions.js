@@ -1039,16 +1039,11 @@ const SegmentActions = {
         }
       })
   },
-  addGlossaryItemToCache: (sid, terms) => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-      sid: sid,
-      message: 'A glossary item has been added',
-    })
+  addGlossaryItemToCache: (sid, payload) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.ADD_GLOSSARY_ITEM,
       sid: sid,
-      terms,
+      payload,
     })
   },
   errorAddGlossaryItemToCache: (sid, error) => {
@@ -1071,16 +1066,11 @@ const SegmentActions = {
       })
   },
 
-  updateglossaryCache: (sid, terms) => {
-    AppDispatcher.dispatch({
-      actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
-      sid: sid,
-      message: 'A glossary item has been updated',
-    })
+  updateglossaryCache: (sid, payload) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_GLOSSARY,
       sid: sid,
-      terms,
+      payload,
     })
   },
   errorUpdateglossaryCache: (sid, error) => {
@@ -1605,11 +1595,12 @@ const SegmentActions = {
       actionType: SegmentConstants.HIDE_AI_ASSISTANT,
     })
   },
-  characterCounter: ({sid, counter, limit}) => {
+  characterCounter: ({sid, counter, segmentCharacters, limit}) => {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHARACTER_COUNTER,
       sid,
       counter,
+      segmentCharacters,
       limit,
     })
   },
@@ -1655,7 +1646,7 @@ const SegmentActions = {
         } else {
           SegmentActions.setSegmentWarnings(segment.original_sid, {}, {})
         }
-        $(document).trigger('getWarning:local:success', {
+        CommonUtils.dispatchCustomEvent('getWarning:local:success', {
           resp: data,
           segment: segment,
         })
@@ -1793,6 +1784,11 @@ const SegmentActions = {
     )
     AppDispatcher.dispatch({
       actionType: SegmentConstants.REFRESH_TAG_MAP,
+    })
+  },
+  changeCharactersCounterRules: function () {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
     })
   },
 }

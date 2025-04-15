@@ -6,19 +6,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {object} object
  * @param {string} object.id
  * @param {string} object.password
- * @param {AbortController} controller
- * @param {AbortSignal} controller.signal
  * @returns {Promise<object>}
  */
-export const getLastProjectActivityLogAction = async (
-  {id, password},
-  {signal},
-) => {
+export const getLastProjectActivityLogAction = async ({id, password}) => {
   const response = await fetch(
     `${getMatecatApiDomain()}api/v2/activity/project/${id}/${password}/last`,
     {
       credentials: 'include',
-      signal,
     },
   )
 

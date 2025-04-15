@@ -3,18 +3,32 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 /**
  * Change name of project
  *
- * @param {string} idOrg
  * @param {string} idProject
+ * @param {string} password
  * @param {string} name
  * @returns {Promise<object>}
  */
-export const changeProjectName = async (idOrg, idProject, name) => {
+export const changeProjectName = async ({
+  idProject,
+  passwordProject,
+  newName,
+}) => {
+  const paramsData = {
+    name: newName,
+  }
+
+  const formData = new FormData()
+
+  Object.keys(paramsData).forEach((key) => {
+    formData.append(key, paramsData[key])
+  })
+
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/teams/${idOrg}/projects/${idProject}`,
+    `${getMatecatApiDomain()}api/app/projects/${idProject}/${passwordProject}/change-name`,
     {
-      method: 'PUT',
+      method: 'POST',
       credentials: 'include',
-      body: JSON.stringify({name}),
+      body: formData,
     },
   )
 

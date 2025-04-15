@@ -60,6 +60,20 @@
     },
     "filters_template_id": {
       "type": ["null", "integer", "string"]
+    },
+    "character_counter_count_tags": {
+      "type": "boolean"
+    },
+    "character_counter_mode": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "exclude_cjk",
+        "all_one"
+      ]
+    },
+    "dialect_strict": {
+      "type":  ["null", "boolean"]
     }
   },
   "required": [

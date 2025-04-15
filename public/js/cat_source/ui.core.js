@@ -1,5 +1,4 @@
 import {isUndefined} from 'lodash'
-import Cookies from 'js-cookie'
 import $ from 'jquery'
 
 import CatToolActions from './es6/actions/CatToolActions'
@@ -306,8 +305,7 @@ window.UI = {
         if (data.details) {
           SegmentActions.updateGlobalWarnings(data.details)
         }
-
-        $(document).trigger('getWarning:global:success', {resp: data})
+        CommonUtils.dispatchCustomEvent('getWarning:global:success')
       })
       .catch((errors) => {
         OfflineUtils.failedConnection()
@@ -459,7 +457,7 @@ window.UI = {
         }
         data.translation.segment = segment
         data.segment = segment
-        $(document).trigger('setTranslation:success', data)
+        CommonUtils.dispatchCustomEvent('setTranslation:success', data)
         if (config.alternativesEnabled) {
           UI.getTranslationMismatches(id_segment)
         }

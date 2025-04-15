@@ -48,9 +48,7 @@ import segment from '../components/segments/Segment'
 
 EventEmitter.prototype.setMaxListeners(0)
 
-const normalizeSetUpdateGlossary = (terms) => {
-  const {term} = terms
-
+const normalizeSetUpdateGlossary = (term) => {
   const metadataKeys = term.metadata.keys
     ? term.metadata.keys
     : [{key: term.metadata.key, key_name: term.metadata.key_name}]
@@ -1260,10 +1258,14 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         : filteredWithoutCurrent
     SegmentStore._aiSuggestions = [...update, {sid, suggestion}]
   },
-  setSegmentCharactersCounter: function (sid, counter) {
+  setSegmentCharactersCounter: function (sid, counter, segmentCharacters) {
     const index = this.getSegmentIndex(sid)
     if (index === -1) return
     this._segments = this._segments.setIn([index, 'charactersCounter'], counter)
+    this._segments = this._segments.setIn(
+      [index, 'segmentCharacters'],
+      segmentCharacters,
+    )
   },
 })
 
@@ -1539,26 +1541,17 @@ AppDispatcher.register(function (action) {
     case SegmentConstants.CHANGE_GLOSSARY:
       SegmentStore.addOrUpdateGlossaryItem(
         action.sid,
-        normalizeSetUpdateGlossary(action.terms),
+        normalizeSetUpdateGlossary(action.payload.term),
       )
-      SegmentStore.emitChange(action.actionType)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      SegmentStore.emitChange(action.actionType, action.payload)
       break
     case SegmentConstants.ADD_GLOSSARY_ITEM:
       SegmentStore.addOrUpdateGlossaryItem(
         action.sid,
-        normalizeSetUpdateGlossary(action.terms),
+        normalizeSetUpdateGlossary(action.payload.term),
       )
-      SegmentStore.emitChange(action.actionType)
-      SegmentStore.emitChange(
-        SegmentConstants.RENDER_SEGMENTS,
-        SegmentStore._segments,
-        action.fid,
-      )
+      SegmentStore.emitChange(action.actionType, action.payload)
+
       break
     case SegmentConstants.ERROR_ADD_GLOSSARY_ITEM:
     case SegmentConstants.ERROR_DELETE_FROM_GLOSSARY:
@@ -1926,10 +1919,15 @@ AppDispatcher.register(function (action) {
       )
       break
     case SegmentConstants.CHARACTER_COUNTER:
-      SegmentStore.setSegmentCharactersCounter(action.sid, action.counter)
+      SegmentStore.setSegmentCharactersCounter(
+        action.sid,
+        action.counter,
+        action.segmentCharacters,
+      )
       SegmentStore.emitChange(SegmentConstants.CHARACTER_COUNTER, {
         sid: action.sid,
         counter: action.counter,
+        segmentCharacters: action.segmentCharacters,
         limit: action.limit,
       })
       break
@@ -1992,6 +1990,9 @@ AppDispatcher.register(function (action) {
         SegmentConstants.RENDER_SEGMENTS,
         SegmentStore._segments,
       )
+      break
+    case SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES:
+      SegmentStore.emitChange(SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES)
       break
     default:
       SegmentStore.emitChange(action.actionType, action.sid, action.data)
