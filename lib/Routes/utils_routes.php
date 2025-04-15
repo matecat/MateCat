@@ -87,7 +87,13 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_keys', 'POST', [ '\API\App\GlossaryController', 'keys' ] );
     route( '/_search', 'POST', [ '\API\App\GlossaryController', 'search' ] );
     route( '/_set', 'POST', [ '\API\App\GlossaryController', 'set' ] );
+    route( '/_status', 'POST', [ '\API\App\GlossaryController', 'status' ] );
     route( '/_update', 'POST', [ '\API\App\GlossaryController', 'update' ] );
+} );
+
+// MyMemory
+$klein->with( '/api/app/mymemory', function () {
+    route( '/status/[:uuid]', 'GET', [ '\API\App\MyMemoryController', 'status' ] );
 } );
 
 // AI Assistant

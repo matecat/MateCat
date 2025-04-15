@@ -33,7 +33,7 @@ class DownloadQRController extends BaseChunkController {
     /**
      * @var array
      */
-    private $allowedFormats = ['csv', 'json'];
+    private $allowedFormats = ['csv', 'json', 'xml'];
 
     /**
      * Download QR to a file
@@ -131,6 +131,10 @@ class DownloadQRController extends BaseChunkController {
 
         if($this->format === 'csv'){
             $uniqueFile = $this->createCSVFile($data, $categoryIssues);
+        }
+
+        if($this->format === 'xml'){
+            $uniqueFile = $this->createXMLFile($data, $categoryIssues);
         }
 
         if(!isset($uniqueFile)){
@@ -328,6 +332,105 @@ class DownloadQRController extends BaseChunkController {
         unlink($tmpFilePath);
 
         return $fileContent;
+    }
+
+    private function createXMLFile(array $data, array $categoryIssues = []){
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<segments>';
+
+        foreach ($data as $datum){
+
+            // comments
+            $comments = $datum[31];
+
+            // issues
+            $issues = $datum[30];
+            unset($datum[30]);
+            $issueValues = [];
+
+            foreach ($categoryIssues as $categoryIssue){
+                $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $issueValues[$categoryIssue] = [
+                    'count' => $count,
+                    'comments' => (isset($comments[$categoryIssue])) ? $comments[$categoryIssue] : [],
+                ];
+            }
+
+            $xml .= '<segment>';
+            $xml .= '<sid>'.$datum[0].'</sid>';
+            $xml .= '<target>'.$datum[1].'</target>';
+            $xml .= '<segment>'.$datum[2].'</segment>';
+            $xml .= '<raw_word_count>'.$datum[3].'</raw_word_count>';
+            $xml .= '<translation>'.$datum[4].'</translation>';
+            $xml .= '<version>'.$datum[5].'</version>';
+            $xml .= '<ice_locked>'.$datum[6].'</ice_locked>';
+            $xml .= '<status>'.$datum[7].'</status>';
+            $xml .= '<time_to_edit>'.$datum[8].'</time_to_edit>';
+            $xml .= '<filename>'.$datum[9].'</filename>';
+            $xml .= '<id_file>'.$datum[10].'</id_file>';
+            $xml .= '<warning>'.$datum[11].'</warning>';
+            $xml .= '<suggestion_match>'.$datum[12].'</suggestion_match>';
+            $xml .= '<suggestion_source>'.$datum[13].'</suggestion_source>';
+            $xml .= '<suggestion>'.$datum[14].'</suggestion>';
+            $xml .= '<edit_distance>'.$datum[15].'</edit_distance>';
+            $xml .= '<locked>'.$datum[16].'</locked>';
+            $xml .= '<match_type>'.$datum[17].'</match_type>';
+            $xml .= '<pee>'.$datum[18].'</pee>';
+            $xml .= '<ice_modified>'.$datum[19].'</ice_modified>';
+            $xml .= '<secs_per_word>'.$datum[20].'</secs_per_word>';
+            $xml .= '<parsed_time_to_edit>'.$datum[21].'</parsed_time_to_edit>';
+            $xml .= '<last_translation>'.$datum[22].'</last_translation>';
+            $xml .= '<revision>'.$datum[23].'</revision>';
+            $xml .= '<second_pass_revision>'.$datum[24].'</second_pass_revision>';
+            $xml .= '<pee_translation_revise>'.$datum[25].'</pee_translation_revise>';
+            $xml .= '<pee_translation_suggestion>'.$datum[26].'</pee_translation_suggestion>';
+            $xml .= '<version_number>'.$datum[27].'</version_number>';
+            $xml .= '<source_page>'.$datum[28].'</source_page>';
+            $xml .= '<is_pre_translated>'.$datum[29].'</is_pre_translated>';
+
+            //$issueValues
+            $xml .= '<issues>';
+
+            foreach ($issueValues as $label => $issueValue){
+
+                $count = $issueValue['count'];
+                $comments = $issueValue['comments'];
+
+                $xml .= '<issue>';
+                $xml .= '<label>'.$label.'</label>';
+                $xml .= '<count>'.$count.'</count>';
+                $xml .= '<comments>';
+
+                if(!empty($comments)){
+                    foreach ($comments as $comment){
+                        $xml .= '<comment>';
+                        $xml .= '<id>'.$comment['id'].'</id>';
+                        $xml .= '<uid>'.$comment['uid'].'</uid>';
+                        $xml .= '<id_qa_entry>'.$comment['id_qa_entry'].'</id_qa_entry>';
+                        $xml .= '<create_date>'.$comment['create_date'].'</create_date>';
+                        $xml .= '<comment>'.$comment['comment'].'</comment>';
+                        $xml .= '<source_page>'.$comment['source_page'].'</source_page>';
+                        $xml .= '</comment>';
+                    }
+                }
+
+                $xml .= '</comments>';
+                $xml .= '</issue>';
+            }
+
+            $xml .= '</issues>';
+            $xml .= '</segment>';
+        }
+
+        $xml .= '</segments>';
+
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML(html_entity_decode($xml));
+        $dom->formatOutput = true;
+
+        return $dom->saveXML();
     }
 
     /**

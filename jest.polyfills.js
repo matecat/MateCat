@@ -8,7 +8,16 @@
  * Consider migrating to a more modern test runner if
  * you don't want to deal with this.
  */
-
+import 'web-streams-polyfill/polyfill'
+if (typeof global.BroadcastChannel === 'undefined') {
+  global.BroadcastChannel = class {
+    constructor(channel) {
+      this.channel = channel
+    }
+    postMessage(message) {}
+    close() {}
+  }
+}
 const {TextDecoder, TextEncoder, ReadableStream} = require('node:util')
 
 Object.defineProperties(globalThis, {
