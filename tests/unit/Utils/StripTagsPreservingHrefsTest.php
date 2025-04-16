@@ -34,4 +34,12 @@ class StripTagsPreservingHrefsTest extends AbstractTest {
 
         $this->assertEquals( $expected, $stripTags );
     }
+
+    public function testCanPreserveImgSrc() {
+        $html      = '<p>This is a simple test. <img src="https://placehold.co/600x400" alt="Test"/></p>';
+        $stripTags = Utils::stripTagsPreservingHrefs( $html );
+        $expected  = 'This is a simple test. https://placehold.co/600x400';
+
+        $this->assertEquals( $expected, $stripTags );
+    }
 }
