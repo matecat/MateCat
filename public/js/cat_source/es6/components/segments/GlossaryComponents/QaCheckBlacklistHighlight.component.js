@@ -70,21 +70,24 @@ class QaCheckBlacklistHighlight extends Component {
     const {children} = this.props
 
     const term = this.getTermDetails()
-    const {source, target} = term
+
+    const {source, target} = term || {}
 
     return (
-      <Tooltip
-        stylePointerElement={{display: 'inline-block', position: 'relative'}}
-        content={
-          source.term
-            ? `${target.term} is flagged as a forbidden translation for ${source.term}`
-            : `${target.term} is flagged as a forbidden word`
-        }
-      >
-        <div ref={this.contentRef} className="blacklistItem">
-          <span>{children}</span>
-        </div>
-      </Tooltip>
+      term && (
+        <Tooltip
+          stylePointerElement={{display: 'inline-block', position: 'relative'}}
+          content={
+            source.term
+              ? `${target.term} is flagged as a forbidden translation for ${source.term}`
+              : `${target.term} is flagged as a forbidden word`
+          }
+        >
+          <div ref={this.contentRef} className="blacklistItem">
+            <span>{children}</span>
+          </div>
+        </Tooltip>
+      )
     )
   }
 }
