@@ -425,7 +425,7 @@ class DownloadQRController extends BaseChunkController {
 
         $dom = new \DOMDocument;
         $dom->preserveWhiteSpace = false;
-        $dom->loadXML(html_entity_decode($xml));
+        $dom->loadXML($xml, LIBXML_NOENT);
         $dom->formatOutput = true;
 
         return $dom->saveXML();
