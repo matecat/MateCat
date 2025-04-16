@@ -18,6 +18,7 @@ use Constants_TranslationStatus;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
+use Engines_MMT;
 use Engines_MyMemory;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_TMS;
@@ -522,6 +523,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'context_after' ]     = $queueElement->params->context_after;
         $_config[ 'additional_params' ] = @$queueElement->params->additional_params;
         $_config[ 'priority_key' ]      = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'job_id' ]            = $queueElement->params->id_job ?? null;
 
         $jobsMetadataDao = new MetadataDao();
         $dialect_strict  = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'dialect_strict', 10 * 60 );
@@ -600,11 +602,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // Do nothing, skip frame
         }
 
-
-        // mt evaluation => ice_mt
-        $mt_evaluation = $jobsMetadataDao->get( $queueElement->params->id_job, $queueElement->params->password, 'mt_evaluation', 10 * 60 )->value ?? null;
-
-        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_evaluation );
+        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement );
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
             usort( $matches, "self::_compareScore" );
@@ -634,7 +632,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement, bool $mt_evaluation = null ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
 
         $mt_result = false;
 
@@ -650,8 +648,15 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // set for lara engine in case, this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
+            $config[ 'mt_evaluation' ]   = $queueElement->params->mt_evaluation;
 
-            //if a callback is not set only the first argument is returned, get the config params from the callback
+            $mt_evaluation = $config['mt_evaluation'] ?? null;
+
+            if(!isset($config['job_id'])){
+                $config['job_id'] = $queueElement->params->id_job;
+            }
+
+            // if a callback is not set only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement, $mt_evaluation );
 
             $mt_result = $mtEngine->get( $config );

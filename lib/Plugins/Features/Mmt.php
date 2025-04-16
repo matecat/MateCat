@@ -181,32 +181,7 @@ class Mmt extends BaseFeature {
         return $config;
 
     }
-
-    public static function analysisBeforeMTGetContribution( $config, Engines_AbstractEngine $engine, QueueElement $queueElement, $mt_evaluation ) {
-
-        if ( $engine instanceof Engines_MMT ) {
-
-            $contextRs  = ( new \Jobs\MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $queueElement->params->id_job, 'mt_context' );
-            $mt_context = @array_pop( $contextRs );
-
-            if ( !empty( $mt_context ) ) {
-                $config[ 'mt_context' ] = $mt_context->value;
-            }
-
-            if ( $mt_evaluation ) {
-                $config[ 'include_score' ] = true;
-            }
-
-            $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
-            $config[ 'priority' ]   = 'background';
-            $config[ 'keys' ]       = $config[ 'id_user' ] ?? [];
-
-        }
-
-        return $config;
-
-    }
-
+    
     public static function getG2FallbackSecretKey() {
         $secret_key       = [ 'secret_key' => null ];
         $config_file_path = realpath( INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
