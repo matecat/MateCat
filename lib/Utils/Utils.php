@@ -805,12 +805,20 @@ class Utils {
         @$htmlDom->loadHTML( $html );
 
         $links = $htmlDom->getElementsByTagName( 'a' );
+        $images = $htmlDom->getElementsByTagName( 'img' );
 
         /** @var DOMElement $link */
         foreach ( $links as $link ) {
             $linkLabel       = $link->nodeValue;
             $linkHref        = $link->getAttribute( 'href' );
             $link->nodeValue = $linkLabel . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
+        }
+
+        /** @var DOMElement $link */
+        foreach ( $images as $image ) {
+            $src = $image->getAttribute( 'src' );
+            $span = $htmlDom->createElement('span', $src);
+            $image->parentNode->insertBefore($span);
         }
 
         $html = $htmlDom->saveHtml( $htmlDom->documentElement );
