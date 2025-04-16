@@ -4,9 +4,6 @@
 [submodule "plugins/aligner"]
 	path = plugins/aligner
 	url = git@github.com:matecat/aligner_plugin.git
-[submodule "plugins/kudo"]
-	path = plugins/kudo
-	url = git@github.com:matecat/kudo_plugin.git
 [submodule "plugins/patreon"]
 	path = plugins/patreon
 	url = git@github.com:matecat/patreon_plugin.git
