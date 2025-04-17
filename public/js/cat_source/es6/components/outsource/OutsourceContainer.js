@@ -1,10 +1,11 @@
 import React from 'react'
 import Cookies from 'js-cookie'
-
+import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 
 import AssignToTranslator from './AssignToTranslator'
 import OutsourceVendor from './OutsourceVendor'
+import {Popup} from 'semantic-ui-react'
 
 class OutsourceContainer extends React.Component {
   constructor(props) {
@@ -71,7 +72,6 @@ class OutsourceContainer extends React.Component {
       window.removeEventListener('click', self.handleDocumentClick)
       window.removeEventListener('keydown', self._handleEscKey)
     }
-    $(this.languageTooltip).popup()
   }
 
   render() {
@@ -106,26 +106,27 @@ class OutsourceContainer extends React.Component {
                     ID: {this.props.idJobLabel}
                   </div>
                 ) : null}
-                <div
-                  className="source-target languages-tooltip"
-                  ref={(tooltip) => (this.languageTooltip = tooltip)}
-                  data-html={
+                <Popup
+                  content={
                     this.props.job.get('sourceTxt') +
                     ' > ' +
                     this.props.job.get('targetTxt')
                   }
-                  data-variation="tiny"
-                >
-                  <div className="source-box">
-                    {this.props.job.get('sourceTxt')}
-                  </div>
-                  <div className="in-to">
-                    <i className="icon-chevron-right icon" />
-                  </div>
-                  <div className="target-box">
-                    {this.props.job.get('targetTxt')}
-                  </div>
-                </div>
+                  trigger={
+                    <div className="source-target languages-tooltip">
+                      <div className="source-box">
+                        {this.props.job.get('sourceTxt')}
+                      </div>
+                      <div className="in-to">
+                        <i className="icon-chevron-right icon" />
+                      </div>
+                      <div className="target-box">
+                        {this.props.job.get('targetTxt')}
+                      </div>
+                    </div>
+                  }
+                />
+
                 <div className="job-payable">
                   <div>
                     <span id="words">{this.props.standardWC}</span> words

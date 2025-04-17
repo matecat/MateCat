@@ -1,6 +1,6 @@
 import React from 'react'
 import {map} from 'lodash/collection'
-
+import $ from 'jquery'
 import JobAnalyzeHeader from './JobAnalyzeHeader'
 import JobTableHeader from './JobTableHeader'
 import ChunkAnalyze from './ChunkAnalyze'

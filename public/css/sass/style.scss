@@ -86,7 +86,7 @@ header .wrapper {
   color: #fff;
 }
 
-body.search-open header .action-menu #action-search {
+body.search-open header .header-menu #action-search {
   /*background-image: url("../../img/icons/icon-search-active.svg");*/
   opacity: 1;
   svg {
@@ -2616,7 +2616,7 @@ header {
     }
   }
 
-  .action-menu {
+  .header-menu {
     display: grid;
     /*grid-template-columns: repeat(9, auto);*/
     grid-auto-flow: column;
@@ -2625,9 +2625,6 @@ header {
     justify-content: right;
     column-gap: 15px;
     z-index: 4;
-    &.qr-element {
-      grid-template-columns: auto;
-    }
 
     #previewDropdown[data-download='false'] li.downloadTranslation,
     #previewDropdown[data-download='true'] li.previewLink {
@@ -2933,10 +2930,6 @@ header {
           fill: #fff;
         }
       }
-    }
-    #action-three-dots {
-    }
-    #action-settings {
     }
   }
 }

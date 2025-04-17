@@ -7,7 +7,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
-    <script src="${basepath}public/js/lib/jquery-3.7.1.min.js"></script>
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
         var config = {
@@ -21,28 +20,7 @@
 <body>
 
 <div class="iepopup job_archived">
-    <script tal:attributes="nonce x_nonce_unique_id">
-        $( "body" ).on( 'click', '#reactivate-job', function ( e ) {
-            e.preventDefault();
-            $.post(
-                    "/",
-                {
-                    action:         "changeJobsStatus",
-                    new_status:     "active",
-                    res:            "job",
-                    id:             config.job_id,
-                    password:      config.password
-                })
-                .done(function(d){
-                    if(d.data == 'OK') {
-                        setTimeout(function() {
-                            location.reload(true);
-                        }, 300);
-                    }
-                });
-        } );
 
-    </script>
     <a href="${basepath}" class="logoblack"></a><br/>
 
     <strong style="font-size:160%">This job has been archived.</strong><br/><br/>
@@ -54,5 +32,36 @@
         to reactivate it<br/>
         If you continue to get this page, email us at <a href="mailto:${support_mail}">${support_mail}</a>.</p>
 </div>
+<script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+  document.getElementById('reactivate-job').addEventListener('click', function(e) {
+    e.preventDefault();
+
+    const params = new URLSearchParams({
+      action: "changeJobsStatus",
+      new_status: "active",
+      res: "job",
+      id: config.job_id,
+      password: config.password
+    });
+
+    fetch('/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params.toString()
+    })
+        .then(response => response.json())
+        .then(data => {
+          if (data.data === 'OK') {
+            setTimeout(function() {
+              location.reload(true);
+            }, 300);
+          }
+        })
+        .catch(error => console.error('Error:', error));
+  });
+
+</script>
 </body>
 </html>

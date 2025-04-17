@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
+import $ from 'jquery'
 import {Header} from '../components/header/cattol/Header'
 import SegmentsContainer from '../components/segments/SegmentsContainer'
 import CatToolStore from '../stores/CatToolStore'
