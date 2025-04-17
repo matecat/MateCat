@@ -198,30 +198,14 @@ abstract class DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
-
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
-
-        if ( !empty( $_cacheResult ) ) {
-            return $_cacheResult;
-        }
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
-        $stmt->execute( $bindParams );
-        $result = $stmt->fetchAll();
-        $stmt->closeCursor();
-
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
-
-        return $result;
-
+        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams );
     }
 
     /**
-     * @deprecated We should use the new cache system `DaoCacheTrait::_destroyObjectCacheMap` or `DaoCacheTrait::_destroyObjectCacheMapElement`
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
+        return $this->_destroyObjectCacheMap( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
     }
 
     /**

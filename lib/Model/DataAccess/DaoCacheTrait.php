@@ -54,12 +54,12 @@ trait DaoCacheTrait {
 
 
     /**
-     * @deprecated We should use the new cache system `DaoCacheTrait::_getFromCacheMap`
-     *
      * @param string $query A query
      *
      * @return mixed
      * @throws ReflectionException
+     * @deprecated We should use the new cache system `DaoCacheTrait::_getFromCacheMap`
+     *
      */
     protected function _getFromCache( string $query ): ?array {
         if ( INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
@@ -97,12 +97,12 @@ trait DaoCacheTrait {
     }
 
     /**
-     * @deprecated We should use the new cache system `DaoCacheTrait::_setInCacheMap`. The new method uses a clean, human-readable key instead of a md5 hash. It also allows grouping multiple queries under a single namespace (`$keyMap`).
-     *
      * @param $query string
      * @param $value array
      *
      * @return void|null
+     * @deprecated We should use the new cache system `DaoCacheTrait::_setInCacheMap`. The new method uses a clean, human-readable key instead of a md5 hash. It also allows grouping multiple queries under a single namespace (`$keyMap`).
+     *
      */
     protected function _setInCache( string $query, array $value ) {
         if ( $this->cacheTTL == 0 ) {
@@ -159,6 +159,7 @@ trait DaoCacheTrait {
             $key = md5( $query );
             self::$cache_con->hset( $keyMap, $key, serialize( $value ) );
             self::$cache_con->expire( $keyMap, $this->cacheTTL );
+            self::$cache_con->setex( $key, $this->cacheTTL, $keyMap );
             $this->_logCache( "SETMAP: " . $keyMap, $key, $value, $query );
         }
     }
@@ -194,16 +195,17 @@ trait DaoCacheTrait {
     /**
      * Destroy a single element in the hash set
      *
-     * @param string $keyMap
+     * @param string $reverseKeyMap
      * @param string $keyElementName
      *
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _destroyObjectCacheMapElement( string $keyMap, string $keyElementName ) {
+    protected function _destroyObjectCacheMapElement( string $reverseKeyMap, string $keyElementName ) {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] );
+            $keyMap = self::$cache_con->get( $reverseKeyMap );
+            return self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] ); // let the hashset expire by himself instead of calling HLEN and DEL
         }
 
         return false;
@@ -213,15 +215,18 @@ trait DaoCacheTrait {
     /**
      * Destroy a hash set
      *
-     * @param string $keyMap
+     * @param string $reverseKeyMap
      *
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _destroyObjectCacheMap( string $keyMap ) {
+    protected function _destroyObjectCacheMap( string $reverseKeyMap ) {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( $keyMap );
+            $keyMap = self::$cache_con->get( $reverseKeyMap );
+            $res = self::$cache_con->del( $keyMap );
+            self::$cache_con->del( $reverseKeyMap );
+            return $res;
         }
 
         return false;
@@ -229,13 +234,13 @@ trait DaoCacheTrait {
     }
 
     /**
-     * @deprecated We should use the new cache system `DaoCacheTrait::_destroyObjectCacheMap`
-     *
      * @param string $key
      * @param ?bool  $makeHash
      *
      * @return bool
      * @throws ReflectionException
+     *
+     * @deprecated We should use the new cache system `DaoCacheTrait::_destroyObjectCacheMap`
      *
      */
     protected function _destroyCache( string $key, ?bool $makeHash = true ): bool {
