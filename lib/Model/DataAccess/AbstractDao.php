@@ -188,40 +188,31 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
-     *
      * @param PDOStatement          $stmt
      * @param DataAccess_IDaoStruct $fetchClass
      * @param array                 $bindParams
      *
      * @return DataAccess_IDaoStruct[]
      * @throws ReflectionException
+     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
+     *
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
+        $keyMap = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
+                "::" .
+                debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
+                "-" .
+                implode( ":", $bindParams );
 
-        if ( !empty( $_cacheResult ) ) {
-            return $_cacheResult;
-        }
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
-        $stmt->execute( $bindParams );
-        $result = $stmt->fetchAll();
-        $stmt->closeCursor();
-
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
-
-        return $result;
-
+        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
     }
 
     /**
-     * @deprecated We should use the new cache system `DaoCacheTrait::_destroyObjectCacheMap` or `DaoCacheTrait::_destroyObjectCacheMapElement`
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
+        return $this->_destroyCache( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
     }
 
     /**
@@ -245,7 +236,8 @@ abstract class DataAccess_AbstractDao {
                     debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
                     "::" .
                     debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
-                    "-" . implode( ":", $bindParams );
+                    "-" .
+                    implode( ":", $bindParams );
         }
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
