@@ -38,6 +38,15 @@ export const ActionMenu = ({
   )
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
+  const [isExportXMLDisabled, setIsExportXMLDisabled] = useState(false)
+  const dropdownThreeDots = useRef()
+
+  const initDropdowns = () => {
+    // 3Dots
+    if (dropdownThreeDots.current) {
+      $(dropdownThreeDots.current).dropdown()
+    }
+  }
 
   const openShortcutsModal = (event) => {
     event.preventDefault()
@@ -99,6 +108,21 @@ export const ActionMenu = ({
         ),
         onClick: () => {
           !isExportJsonDisabled ? handlerExportJson() : null
+        },
+      },
+      {
+        label: (
+          <>
+            <span
+              className={`item${isExportXMLDisabled ? ' disabled' : ''}`}
+              title="Export XML"
+            >
+              Download QA Report JSON
+            </span>
+          </>
+        ),
+        onClick: () => {
+          !isExportXMLDisabled ? handlerExportXML() : null
         },
       },
     ]
@@ -221,6 +245,29 @@ export const ActionMenu = ({
         CatToolActions.addNotification(notification)
       })
       .finally(() => setIsExportJsonDisabled(false))
+  }
+  const handlerExportXML = () => {
+    setIsExportXMLDisabled(true)
+
+    exportQualityReport({format: 'xml'})
+      .then(({blob, filename}) => {
+        const aTag = document.createElement('a')
+        const blobURL = URL.createObjectURL(blob)
+        aTag.download = filename
+        aTag.href = blobURL
+        document.body.appendChild(aTag)
+        aTag.click()
+        document.body.removeChild(aTag)
+      })
+      .catch((errors) => {
+        const notification = {
+          title: 'Error',
+          text: `Downloading XML error status code: ${errors.status}`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .finally(() => setIsExportXMLDisabled(false))
   }
 
   return (

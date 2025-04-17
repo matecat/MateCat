@@ -251,6 +251,7 @@ TAB;
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
+
         /**
          * general check on the keys of TSM object returned
          */
@@ -270,6 +271,8 @@ TAB;
         $this->assertTrue( $result->matches[ 2 ] instanceof Engines_Results_MyMemory_Matches );
 
         $result->matches = $result->get_matches_as_array();
+
+
 
         /**
          * 1st match
@@ -328,8 +331,8 @@ TAB;
         $this->assertEquals( "Legal_and_Notarial", $result->matches[ 2 ][ 'subject' ] );
         $this->assertEquals( "Europa.eu", $result->matches[ 2 ][ 'created_by' ] );
         $this->assertEquals( "Europa.eu", $result->matches[ 2 ][ 'last_updated_by' ] );
-        $this->assertEquals( "0000-00-00 00:00:00", $result->matches[ 2 ][ 'create_date' ] );
-        $this->assertEquals( "0000-00-00", $result->matches[ 2 ][ 'last_update_date' ] );
+        $this->assertEquals( "1970-01-01", $result->matches[ 2 ][ 'create_date' ] );
+        $this->assertEquals( "1970-01-01", $result->matches[ 2 ][ 'last_update_date' ] );
         $this->assertEquals( "58%", $result->matches[ 2 ][ 'match' ] );
         $this->assertEquals( [], $result->matches[ 2 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 2 ][ 'source_note' ] );
