@@ -133,8 +133,8 @@ $klein->with( '/api/v3/projects/[:id_project]/[:password]', function () {
     route( '', 'GET', [ 'API\V2\ProjectsController', 'get' ] ); //this do not show some info like teams and translators
     route( '/urls', 'GET', [ 'API\V2\UrlsController', 'urls' ] );
     route( '/jobs/[:id_job]/merge', 'POST', [ 'API\V2\JobMergeController', 'merge' ] );
-    route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/check', 'POST', [ 'API\V2\JobSplitController', 'check' ] );
-    route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/apply', 'POST', [ 'API\V2\JobSplitController', 'apply' ] );
+    route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/check', 'POST', [ 'API\V2\SplitJobController', 'check' ] );
+    route( '/jobs/[:id_job]/[:job_password]/split/[:num_split]/apply', 'POST', [ 'API\V2\SplitJobController', 'apply' ] );
     route( '/creation_status', 'GET', [ 'API\V2\ProjectCreationStatusController', 'get' ] );
     route( '/completion_status', 'GET', [ 'API\V2\ProjectCompletionStatus', 'status' ] );
     route( '/due_date', 'PUT', [ 'API\V2\ProjectsController', 'updateDueDate' ] );
