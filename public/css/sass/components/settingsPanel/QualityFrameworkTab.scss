@@ -70,6 +70,7 @@
       min-height: 64px;
       background-color: colors.$grey3;
       font-weight: bold;
+      z-index: 1;
     }
 
     .row {
@@ -124,7 +125,7 @@
       position: sticky;
       top: 0;
       background-color: colors.$grey3;
-
+      z-index: 1;
       > :first-child {
         position: sticky;
         left: 0;
