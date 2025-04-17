@@ -10,8 +10,32 @@ class QaCheckGlossaryHighlight extends Component {
     this.contentRef = createRef()
   }
   getTermDetails = () => {
-    const {contentState, missingTerms, start, end, children} = this.props
+    const {contentState, missingTerms, start, end, blockKey, children} =
+      this.props
     if (tagSignatures.space) {
+      const getBlocksBefore = (key) => {
+        const blocks = []
+
+        const iterate = (key) => {
+          const block = contentState.getBlockBefore(key)
+          if (block) {
+            blocks.unshift(block)
+            iterate(block.getKey())
+          }
+        }
+
+        iterate(key)
+
+        return blocks
+      }
+
+      const differenceIndex = getBlocksBefore(blockKey).reduce((acc, cur) => {
+        return acc + cur.getLength() + 1
+      }, 0)
+
+      const startAbsolute = start + differenceIndex
+      const endAbsolute = end + differenceIndex
+
       const fakeContentBlock = {
         getText: () => contentState.getPlainText(),
         getEntityAt: () => false,
@@ -46,7 +70,7 @@ class QaCheckGlossaryHighlight extends Component {
               ' ',
             )
 
-          if (startB === start || endB === end) {
+          if (startB === startAbsolute || endB === endAbsolute) {
             result = missingTerms.find(({matching_words: matchingWords}) =>
               matchingWords.find(
                 (value) => value.toLowerCase() === words.toLowerCase(),
