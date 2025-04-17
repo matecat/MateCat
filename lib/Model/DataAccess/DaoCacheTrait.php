@@ -54,6 +54,8 @@ trait DaoCacheTrait {
 
 
     /**
+     * @deprecated We should use the new cache system `DaoCacheTrait::_getFromCacheMap`
+     *
      * @param string $query A query
      *
      * @return mixed
@@ -95,6 +97,8 @@ trait DaoCacheTrait {
     }
 
     /**
+     * @deprecated We should use the new cache system `DaoCacheTrait::_setInCacheMap`. The new method uses a clean, human-readable key instead of a md5 hash. It also allows grouping multiple queries under a single namespace (`$keyMap`).
+     *
      * @param $query string
      * @param $value array
      *
@@ -137,6 +141,9 @@ trait DaoCacheTrait {
     }
 
     /**
+     * This method uses a clean, human-readable key instead of a md5 hash.
+     * It also allows grouping multiple queries under a single namespace (`$keyMap`).
+     *
      * @param string $keyMap
      * @param        $query string
      * @param        $value array
@@ -204,11 +211,32 @@ trait DaoCacheTrait {
     }
 
     /**
+     * Destroy a hash set
+     *
+     * @param string $keyMap
+     *
+     * @return bool|int
+     * @throws ReflectionException
+     */
+    protected function _destroyObjectCacheMap( string $keyMap ) {
+        $this->_cacheSetConnection();
+        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
+            return self::$cache_con->del( $keyMap );
+        }
+
+        return false;
+
+    }
+
+    /**
+     * @deprecated We should use the new cache system `DaoCacheTrait::_destroyObjectCacheMap`
+     *
      * @param string $key
      * @param ?bool  $makeHash
      *
      * @return bool
      * @throws ReflectionException
+     *
      */
     protected function _destroyCache( string $key, ?bool $makeHash = true ): bool {
         $this->_cacheSetConnection();
