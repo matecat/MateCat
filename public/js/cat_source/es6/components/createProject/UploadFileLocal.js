@@ -1,4 +1,10 @@
-import React, {useEffect, useState, useCallback, useContext} from 'react'
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useContext,
+  useRef,
+} from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
 import CreateProjectActions from '../../actions/CreateProjectActions'
@@ -47,6 +53,7 @@ function UploadFileLocal() {
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
+  const filesInterval = useRef([])
   useEffect(() => {
     restartConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
@@ -136,6 +143,7 @@ function UploadFileLocal() {
             ),
           )
           const interval = startConvertFakeProgress(file)
+          filesInterval.current.push(interval)
           convertFileRequest({
             file_name: name,
             source_lang: sourceLang.code,
@@ -244,9 +252,15 @@ function UploadFileLocal() {
   }
 
   const restartConversions = () => {
+    clearIntervals()
     CreateProjectActions.enableAnalyzeButton(false)
+    setFiles((prevFiles) =>
+      prevFiles.map((f) => ({...f, converted: false, convertedProgress: 0})),
+    )
     files.forEach((f) => {
       if (f.uploaded && !f.error) {
+        const interval = startConvertFakeProgress(f.file)
+        filesInterval.current.push(interval)
         convertFileRequest({
           file_name: f.name,
           source_lang: sourceLang.code,
@@ -254,7 +268,20 @@ function UploadFileLocal() {
           segmentation_rule: segmentationRule,
           filters_extraction_parameters_template_id:
             extractionParameterTemplateId,
-        }).then(() => {
+        }).then(({data, errors, warnings}) => {
+          clearInterval(interval)
+          setFiles((prevFiles) =>
+            prevFiles.map((file) =>
+              file.file === f.file
+                ? {
+                    ...file,
+                    convertedProgress: 100,
+                    converted: true,
+                    warning: warnings ? warnings[0].message : null,
+                  }
+                : file,
+            ),
+          )
           CreateProjectActions.enableAnalyzeButton(true)
         })
       }
@@ -317,6 +344,7 @@ function UploadFileLocal() {
   }
 
   const deleteAllFiles = () => {
+    clearIntervals()
     files.forEach((file) => {
       fileUploadDelete({
         file: file.name,
@@ -376,6 +404,11 @@ function UploadFileLocal() {
 
   const handleDragOver = (e) => {
     e.preventDefault()
+  }
+
+  const clearIntervals = () => {
+    filesInterval.current.forEach((interval) => clearInterval(interval))
+    filesInterval.current = []
   }
 
   const startConvertFakeProgress = (file) => {
