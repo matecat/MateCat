@@ -96,7 +96,13 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt->execute( [ $token ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, Users_UserStruct::class );
 
-        return $stmt->fetch();
+        $result = $stmt->fetch();
+
+        if($result instanceof Users_UserStruct){
+            return $result;
+        }
+
+        return null;
     }
 
     /**
