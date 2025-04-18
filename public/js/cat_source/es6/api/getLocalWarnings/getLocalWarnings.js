@@ -10,7 +10,6 @@ export const getLocalWarnings = async ({
   characters_counter,
 }) => {
   const paramsData = {
-    action: 'getWarning',
     id,
     id_job,
     password,
@@ -26,7 +25,7 @@ export const getLocalWarnings = async ({
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}&type=local`,
+    `${getMatecatApiDomain()}api/app/get-local-warning`,
     {
       method: 'POST',
       credentials: 'include',

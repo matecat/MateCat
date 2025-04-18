@@ -1159,7 +1159,7 @@ const apiGetProjects = {
 const executeMswServer = (response) => {
   mswServer.use(
     ...[
-      http.post(config.basepath, () => {
+      http.post(config.basepath + 'api/app/get-projects', () => {
         return HttpResponse.json(response)
       }),
     ],

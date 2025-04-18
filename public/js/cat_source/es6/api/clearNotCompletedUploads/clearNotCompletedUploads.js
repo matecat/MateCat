@@ -8,16 +8,14 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const clearNotCompletedUploads = async (time = new Date().getTime()) => {
-  const paramsData = {
-    exec: 'clearNotCompletedUploads',
-  }
+  const paramsData = {}
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=ajaxUtils&${time}`,
+    `${getMatecatApiDomain()}api/app/clear-not-completed-uploads`,
     {
       method: 'POST',
       body: formData,

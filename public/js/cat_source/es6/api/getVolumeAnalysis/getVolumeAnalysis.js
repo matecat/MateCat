@@ -22,7 +22,7 @@ export const getVolumeAnalysis = async (
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=getVolumeAnalysis`,
+    `${getMatecatApiDomain()}api/app/get-volume-analysis`,
     {
       method: 'POST',
       credentials: 'include',
