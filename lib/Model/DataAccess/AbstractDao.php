@@ -53,7 +53,7 @@ abstract class DataAccess_AbstractDao {
             $con = Database::obtain();
         }
 
-        $this->database = $con;
+        $this->database             = $con;
         self::$auto_increment_field = [];
     }
 
@@ -194,43 +194,51 @@ abstract class DataAccess_AbstractDao {
      *
      * @return DataAccess_IDaoStruct[]
      * @throws ReflectionException
+     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
+     *
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
+        $keyMap = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
+                "::" .
+                debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
+                "-" .
+                implode( ":", $bindParams );
 
-        if ( !empty( $_cacheResult ) ) {
-            return $_cacheResult;
-        }
-
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
-        $stmt->execute( $bindParams );
-        $result = $stmt->fetchAll();
-        $stmt->closeCursor();
-
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
-
-        return $result;
-
+        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
     }
 
     /**
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
+        return $this->_deleteCacheByKey( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
     }
 
     /**
-     * @param string       $keyMap
+     * * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
+     *
+     *  Replacement for deprecated `AbstractDao::_fetchObject`
+     *
      * @param PDOStatement $stmt
      * @param string       $fetchClass
      * @param array        $bindParams
      *
+     * @param string|null  $keyMap
+     *
      * @return DataAccess_IDaoStruct[]
      * @throws ReflectionException
      */
-    protected function _fetchObjectMap( string $keyMap, PDOStatement $stmt, string $fetchClass, array $bindParams ): array {
+    protected function _fetchObjectMap( PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null ): array {
+
+        if ( empty( $keyMap ) ) {
+            $keyMap =
+                    debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
+                    "::" .
+                    debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
+                    "-" .
+                    implode( ":", $bindParams );
+        }
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 

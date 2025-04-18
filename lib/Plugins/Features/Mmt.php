@@ -10,10 +10,11 @@
 namespace Features;
 
 
+use API\App\CreateProjectController;
 use API\Commons\Exceptions\AuthenticationError;
+use API\V1\NewController;
 use BasicFeatureStruct;
 use Constants_Engines;
-use createProjectController;
 use Database;
 use Engine;
 use Engines\MMT\MMTServiceApiException;
@@ -29,8 +30,6 @@ use FeatureSet;
 use INIT;
 use Jobs_JobStruct;
 use Log;
-use NewController;
-use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_MemoryKeyDao;
@@ -159,8 +158,8 @@ class Mmt extends BaseFeature {
             }, $tm_keys );
 
             $jobsMetadataDao = new \Jobs\MetadataDao();
-            $contextRs  = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
-            $mt_context = @array_pop( $contextRs );
+            $contextRs       = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
+            $mt_context      = @array_pop( $contextRs );
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
@@ -181,7 +180,7 @@ class Mmt extends BaseFeature {
         return $config;
 
     }
-    
+
     public static function getG2FallbackSecretKey() {
         $secret_key       = [ 'secret_key' => null ];
         $config_file_path = realpath( INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
@@ -229,7 +228,7 @@ class Mmt extends BaseFeature {
     /**
      * Called in @param $projectFeatures
      *
-     * @param $controller NewController|createProjectController
+     * @param $controller NewController|CreateProjectController
      *
      * @return array
      * @throws MMTServiceApiException
@@ -238,47 +237,13 @@ class Mmt extends BaseFeature {
      *      Called in @see NewController::__appendFeaturesToProject()
      *
      */
-    public function filterCreateProjectFeatures( $projectFeatures, $controller ) {
+    public function filterCreateProjectFeatures( $projectFeatures, $controller, $mt_engine_id ) {
 
-        $engine = Engine::getInstance( $controller->postInput[ 'mt_engine' ] );
+        $engine = Engine::getInstance( $mt_engine_id );
         if ( $engine instanceof Engines_MMT ) {
-            /**
-             * @var $availableLangs
-             *     <code>
-             *     {
-             *     "en":["it","zh-TW"],
-             *     "de":["en"]
-             *     }
-             *     </code>
-             */
-            $availableLangs       = $engine->getAvailableLanguages();
-            $target_language_list = explode( ",", $controller->postInput[ 'target_lang' ] );
-            $source_language      = $controller->postInput[ 'source_lang' ];
-
-            foreach ( $availableLangs as $source => $availableTargets ) {
-
-                //take only the language code $langCode is passed by reference, change the value from inside the callback
-                array_walk( $availableTargets, function ( &$langCode ) {
-                    [ $langCode, ] = explode( "-", $langCode );
-                } );
-
-                [ $mSourceCode, ] = explode( "-", $source_language );
-                if ( $source == $mSourceCode ) {
-                    foreach ( $target_language_list as $_matecatTarget ) {
-                        [ $mTargetCode, ] = explode( "-", $_matecatTarget );
-                        if ( in_array( $mTargetCode, $availableTargets ) ) {
-                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = $controller->postInput[ 'mt_engine' ];
-                        } else {
-                            $controller->postInput[ 'target_language_mt_engine_id' ][ $_matecatTarget ] = 1; // MyMemory
-                        }
-                    }
-                }
-            }
-
             $feature               = new BasicFeatureStruct();
             $feature->feature_code = self::FEATURE_CODE;
             $projectFeatures[]     = $feature;
-
         }
 
         return $projectFeatures;
