@@ -147,7 +147,7 @@ trait DaoCacheTrait {
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _destroyObjectCacheMapElement( string $reverseKeyMap, string $keyElementName ) {
+    protected function _removeObjectCacheMapElement( string $reverseKeyMap, string $keyElementName ) {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
             $keyMap = self::$cache_con->get( $reverseKeyMap );
@@ -169,7 +169,7 @@ trait DaoCacheTrait {
      * @throws ReflectionException
      *
      */
-    protected function _destroyCache( string $key, ?bool $isReverseKeyMap = true ): bool {
+    protected function _deleteCacheByKey( string $key, ?bool $isReverseKeyMap = true ): bool {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
 

@@ -6,7 +6,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers DataAccess_AbstractDao::_destroyCache
+ * @covers DataAccess_AbstractDao::_deleteCacheByKey
  * User: dinies
  * Date: 18/04/16
  * Time: 18.17
@@ -55,7 +55,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
      * It destroys the cache memory about a given key.
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_destroyCache
+     * @covers DataAccess_AbstractDao::_deleteCacheByKey
      */
     public function test__destroyCache_basic_key_value() {
         $this->cache_key               = "key";
@@ -76,7 +76,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
      * It fails to destroy the cache memory about a given key because this key isn't cached.
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_destroyCache
+     * @covers DataAccess_AbstractDao::_deleteCacheByKey
      */
     public function test__destroyCache_not_cached_key_value() {
         $this->cache_key               = "key";
@@ -92,7 +92,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
      * It destroys the cache memory about a given key.
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_destroyCache
+     * @covers DataAccess_AbstractDao::_deleteCacheByKey
      */
     public function test__destroyCache_frequent_key_value() {
         $this->cache_key = "SELECT * FROM engines WHERE id = 0 AND active = 0 AND type = 'NONE'";

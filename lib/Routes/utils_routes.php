@@ -140,9 +140,9 @@ route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'get
 route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
 route( '/api/app/get-global-warning', 'POST', [ 'API\App\GetWarningController', 'global' ] );
 route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', 'local' ] );
-route( '/api/app/split-job-apply', 'POST', [ 'API\App\SplitJobController', 'apply' ] );
-route( '/api/app/split-job-check', 'POST', [ 'API\App\SplitJobController', 'check' ] );
-route( '/api/app/split-job-merge', 'POST', [ 'API\App\SplitJobController', 'merge' ] );
+route( '/api/app/split-job-apply', 'POST', [ 'API\V2\SplitJobController', 'apply' ] ); // Same API as public V2
+route( '/api/app/split-job-check', 'POST', [ 'API\V2\SplitJobController', 'check' ] ); // Same API as public V2
+route( '/api/app/split-job-merge', 'POST', [ 'API\V2\SplitJobController', 'merge' ] ); // Same API as public V2
 route( '/api/app/user-keys-delete', 'POST', [ 'API\App\UserKeysController', 'delete' ] );
 route( '/api/app/user-keys-update', 'POST', [ 'API\App\UserKeysController', 'update' ] );
 route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'newKey' ] );

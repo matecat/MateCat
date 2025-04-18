@@ -190,7 +190,7 @@ class ProjectManager {
                             'file_segments_count'                     => [],
                             'due_date'                                => null,
                             'qa_model'                                => null,
-                            'target_language_mt_engine_id'            => [],
+                            'target_language_mt_engine_association'   => [],
                             'standard_word_count'                     => 0,
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
@@ -1368,7 +1368,7 @@ class ProjectManager {
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
             $newJob->id_tms            = $projectStructure[ 'tms_engine' ] ?? 1;
-            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
+            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_association' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
             $newJob->last_update       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
@@ -1393,7 +1393,7 @@ class ProjectManager {
 
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ($projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0") );
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0" ) );
             }
 
             // character_counter_mode
@@ -2321,11 +2321,11 @@ class ProjectManager {
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // avoid blank filenames
-            if(!empty($originalFileName)){
+            if ( !empty( $originalFileName ) ) {
 
                 // get metadata
-                $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
-                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+                $meta                = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
                 $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2338,10 +2338,10 @@ class ProjectManager {
                 }
 
                 $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    $this->projectStructure[ 'source_language' ],
-                    $fid,
-                    $originalFileName
+                        $fileDateSha1Path,
+                        $this->projectStructure[ 'source_language' ],
+                        $fid,
+                        $originalFileName
                 );
 
                 // check if the files were moved
@@ -2352,10 +2352,10 @@ class ProjectManager {
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 $fileStructures[ $fid ] = [
-                    'fid' => $fid,
-                    'original_filename' => $originalFileName,
-                    'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type' => $mimeType
+                        'fid'               => $fid,
+                        'original_filename' => $originalFileName,
+                        'path_cached_xliff' => $cachedXliffFilePathName,
+                        'mime_type'         => $mimeType
                 ];
             }
         }

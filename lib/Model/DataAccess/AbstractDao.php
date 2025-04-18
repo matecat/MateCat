@@ -212,7 +212,7 @@ abstract class DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
-        return $this->_destroyCache( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
+        return $this->_deleteCacheByKey( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
     }
 
     /**
