@@ -72,6 +72,7 @@ ErrorDocument 401 /lib/View/401.html
 ErrorDocument 403 /lib/View/403.html
 ErrorDocument 404 /lib/View/404.html
 ErrorDocument 409 /lib/View/409.html
+ErrorDocument 410 /lib/View/410.html
 ErrorDocument 503 /lib/View/503.html
 ErrorDocument 500 /lib/View/500.html
 
