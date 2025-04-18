@@ -64,9 +64,9 @@ class DownloadQRController extends BaseChunkController {
             $prefix = "QR_".$this->idJob. "_". $this->password. "_";
             $filePath = tempnam("/tmp", $prefix);
 
-            $files = $this->composeFilesContentArray($chunk);
-            $this->composeZipFile($filePath, $files);
-            $this->downloadFile('application/zip', $prefix.date('YmdHis').'.zip', $filePath);
+            $fileContent = $this->composeFileContent($chunk);
+            file_put_contents($filePath, $fileContent);
+            $this->downloadFile($this->fileMimeType(), $prefix.date('YmdHis').'.'.$this->format, $filePath);
 
         } catch ( \Exceptions\NotFoundException $e ) {
             $this->response->status()->setCode( 404 );
@@ -90,12 +90,31 @@ class DownloadQRController extends BaseChunkController {
     }
 
     /**
+     * @return string
+     */
+    private function fileMimeType()
+    {
+        if($this->format === 'json'){
+            return 'application/json';
+        }
+
+        if($this->format === 'csv'){
+            return 'text/csv';
+        }
+
+        if($this->format === 'xml'){
+            return 'text/xml';
+        }
+
+        return 'application/octet-stream';
+    }
+
+    /**
      * @param \Jobs_JobStruct $chunk
-     *
-     * @return array
+     * @return bool|false|string
      * @throws \Exception
      */
-    private function composeFilesContentArray( \Jobs_JobStruct $chunk) {
+    private function composeFileContent(\Jobs_JobStruct $chunk) {
 
         $data = [];
 
@@ -139,7 +158,7 @@ class DownloadQRController extends BaseChunkController {
             throw new \Exception('Merging files for download failed.');
         }
 
-        return [$uniqueFile];
+        return $uniqueFile;
     }
 
     /**
