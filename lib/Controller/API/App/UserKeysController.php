@@ -190,6 +190,7 @@ class UserKeysController extends KleinController {
     private function getMemoryToUpdate($key, $description = null)
     {
         $tmService = new TMSService();
+
         //validate the key
         try {
             $keyExists = $tmService->checkCorrectKey( $key );

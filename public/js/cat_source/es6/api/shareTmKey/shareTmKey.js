@@ -8,9 +8,10 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @param {string} options.emails
  * @returns {Promise<object>}
  */
-export const shareTmKey = async ({key, emails}) => {
+export const shareTmKey = async ({key, description, emails}) => {
   const paramsData = {
     key,
+    description,
     emails,
   }
   const formData = new FormData()

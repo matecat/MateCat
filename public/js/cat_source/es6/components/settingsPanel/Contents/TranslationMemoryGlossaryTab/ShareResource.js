@@ -42,6 +42,7 @@ export const ShareResource = ({row, onClose}) => {
     } else {
       shareTmKey({
         key: row.key,
+        description: row.name,
         emails: emails,
       })
         .then(() => {
