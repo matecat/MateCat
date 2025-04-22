@@ -86,6 +86,7 @@ class SetCurrentSegmentController extends KleinController {
 
             return $this->response->json([
                 'code' => 1,
+                'errors' => [],
                 'data' => [],
                 'nextSegmentId' => $nextSegmentId ?? null,
             ]);
