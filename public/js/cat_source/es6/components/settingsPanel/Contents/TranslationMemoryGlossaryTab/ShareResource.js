@@ -99,7 +99,7 @@ export const ShareResource = ({row, onClose}) => {
   }
 
   useEffect(() => {
-    getInfoTmKey({key: row.key}).then((response) => {
+    getInfoTmKey({key: row.key, description: row.name}).then((response) => {
       const users = response.data
       if (users.length > 1)
         setSharedUsers(
