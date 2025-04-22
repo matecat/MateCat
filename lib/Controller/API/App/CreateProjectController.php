@@ -53,7 +53,7 @@ class CreateProjectController extends KleinController {
     public function create(): Response {
         try {
             $this->featureSet->loadFromUserEmail( $this->user->email );
-            $this->validateTheRequest();
+            $this->data = $this->validateTheRequest();
 
             $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
             $default_project_name = $arFiles[ 0 ];
