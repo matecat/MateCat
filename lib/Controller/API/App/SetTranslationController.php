@@ -24,6 +24,7 @@ use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Klein\Response;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
@@ -32,6 +33,7 @@ use RedisHandler;
 use RuntimeException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
+use Segments_SegmentStruct;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use TranslationsSplit_SplitDAO;
@@ -46,10 +48,24 @@ class SetTranslationController extends KleinController {
      */
     private array $data;
 
+    private $id_job;
+
+    private $password;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    private $chunk;
+
+    /**
+     * @var Segments_SegmentStruct
+     */
+    private $segment;  // this comes from DAO
+
     /**
      * @var MateCatFilter
      */
-    protected $filter;
+    private $filter;
 
     /**
      * @var TranslationVersionsHandler
@@ -448,6 +464,7 @@ class SetTranslationController extends KleinController {
 
         //get Job Info, we need only a row of jobs ( split )
         $chunk = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
+        $this->chunk = $chunk;
 
         if ( empty( $chunk ) ) {
             throw new NotFoundException("Wrong password", -3);
@@ -457,6 +474,14 @@ class SetTranslationController extends KleinController {
         if ( strtolower( $chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
             throw new NotFoundException("Job archived", -3);
         }
+
+        //check tag mismatch
+        //get original source segment, first
+        $dao           = new Segments_SegmentDao( Database::obtain() );
+        $this->segment = $dao->getById( $id_segment );
+
+        $this->id_job = $id_job;
+        $this->password = $password;
 
         $data = [
             'id_job' => $id_job ,
@@ -720,14 +745,12 @@ class SetTranslationController extends KleinController {
     private function updateJobPEE( array $old_translation, array $new_translation ): void
     {
         //update total time to edit
-        $tte = $old_translation[ 'time_to_edit' ];
-        if ( !$this->isRevision() ) {
-            if ( !Utils::stringsAreEqual( $new_translation[ 'translation' ], $old_translation[ 'translation' ] ) ) {
-                $tte += $new_translation[ 'time_to_edit' ];
-            }
+        $jobTotalTTEForTranslation = $this->chunk[ 'total_time_to_edit' ];
+        if ( !self::isRevision() ) {
+            $jobTotalTTEForTranslation += $new_translation[ 'time_to_edit' ];
         }
 
-        $segmentRawWordCount  = $this->data['segment']->raw_word_count;
+        $segmentRawWordCount  = $this->segment->raw_word_count;
         $editLogSegmentStruct = new EditLogSegmentStruct(
             [
                 'suggestion'     => $old_translation[ 'suggestion' ],
@@ -743,7 +766,7 @@ class SetTranslationController extends KleinController {
         $oldPEE          = $editLogSegmentStruct->getPEE();
         $oldPee_weighted = $oldPEE * $segmentRawWordCount;
 
-        $editLogSegmentStruct->translation    = $new_translation[ 'translation' ];
+        $editLogSegmentStruct->translation = $new_translation[ 'translation' ];
 
         $newPEE          = $editLogSegmentStruct->getPEE();
         $newPee_weighted = $newPEE * $segmentRawWordCount;
@@ -751,36 +774,36 @@ class SetTranslationController extends KleinController {
         if ( $editLogSegmentStruct->isValidForEditLog() ) {
             //if the segment was not valid for editlog, and now it is, then just add the weighted pee
             if ( !$oldSegmentStatus->isValidForEditLog() ) {
-                $newTotalJobPee = ( $this->data['chunk'][ 'avg_post_editing_effort' ] + $newPee_weighted );
+                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] + $newPee_weighted );
             } //otherwise, evaluate it normally
             else {
-                $newTotalJobPee = ( $this->data['chunk'][ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
+                $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
             }
 
             Jobs_JobDao::updateFields(
 
-                [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                 [
-                    'id'       => $this->data['id_job'],
-                    'password' => $this->data['password']
+                    'id'       => $this->id_job,
+                    'password' => $this->password
                 ] );
 
         } //segment was valid but now it is no more valid
         elseif ( $oldSegmentStatus->isValidForEditLog() ) {
-            $newTotalJobPee = ( $this->data['chunk'][ 'avg_post_editing_effort' ] - $oldPee_weighted );
+            $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
             Jobs_JobDao::updateFields(
-                [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $tte ],
+                [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                 [
-                    'id'       => $this->data['id_job'],
-                    'password' => $this->data['password']
+                    'id'       => $this->id_job,
+                    'password' => $this->password
                 ] );
-        } else {
+        } elseif ( $jobTotalTTEForTranslation != 0 ) {
             Jobs_JobDao::updateFields(
-                [ 'total_time_to_edit' => $tte ],
+                [ 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                 [
-                    'id'       => $this->data['id_job'],
-                    'password' => $this->data['password']
+                    'id'       => $this->id_job,
+                    'password' => $this->password
                 ] );
         }
     }
