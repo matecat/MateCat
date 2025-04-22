@@ -167,12 +167,7 @@ class SetTranslationController extends KleinController {
                 }
             }
 
-            // time_to_edit should be increased only if the translation was changed
-            $new_translation->time_to_edit = 0;
-            if ( false === Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
-                $new_translation->time_to_edit = $this->data['time_to_edit'];
-            }
-
+            $new_translation->time_to_edit = $this->data['time_to_edit'];
 
             /**
              * Update Time to Edit and
