@@ -86,8 +86,8 @@
     text-decoration: none;
     color: colors.$grey6;
     &:hover {
-      background-color: #f2f5f7 !important;
-      color: #0055b8 !important;
+      background-color: colors.$grey5 !important;
+      color: colors.$darkBlue !important;
     }
   }
 }
