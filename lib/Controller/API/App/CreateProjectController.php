@@ -30,6 +30,8 @@ use Projects_MetadataDao;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
+use TmKeyManagement_TmKeyManagement;
+use TmKeyManagement_TmKeyStruct;
 use Utils;
 use Validator\EngineValidator;
 use Validator\JSONValidator;
@@ -187,12 +189,12 @@ class CreateProjectController extends KleinController {
             }
 
             // with the qa template id
-            if ( !empty( $this->data[ 'qaModelTemplate' ] ) ) {
-                $projectStructure[ 'qa_model_template' ] = $this->data[ 'qaModelTemplate' ]->getDecodedModel();
+            if ( !empty( $this->data[ 'qa_model_template' ] ) ) {
+                $projectStructure[ 'qa_model_template' ] = $this->data[ 'qa_model_template' ]->getDecodedModel();
             }
 
-            if ( !empty( $this->data[ 'payableRateModelTemplate' ] ) ) {
-                $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payableRateModelTemplate' ]->id;
+            if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
+                $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
             }
 
             //TODO enable from CONFIG
@@ -243,7 +245,7 @@ class CreateProjectController extends KleinController {
         $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
+        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
         $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
         $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
@@ -325,9 +327,9 @@ class CreateProjectController extends KleinController {
                 'pretranslate_101'              => $pretranslate_101,
                 'tm_prioritization'             => $tm_prioritization,
                 'id_team'                       => $id_team,
-                'mmt_glossaries'                => $mmt_glossaries,
-                'deepl_id_glossary'             => $deepl_id_glossary,
-                'deepl_formality'               => $deepl_formality,
+                'mmt_glossaries'                => (!empty($mmt_glossaries)) ? $mmt_glossaries : null,
+                'deepl_id_glossary'             => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
+                'deepl_formality'               => (!empty($deepl_formality)) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
                 'dictation'                     => $dictation,
@@ -336,19 +338,19 @@ class CreateProjectController extends KleinController {
                 'character_counter_count_tags'  => $character_counter_count_tags,
                 'character_counter_mode'        => $character_counter_mode,
                 'ai_assistant'                  => $ai_assistant,
-                'dialect_strict'                => $dialect_strict,
-                'filters_extraction_parameters' => $filters_extraction_parameters,
-                'xliff_parameters'              => $xliff_parameters,
+                'dialect_strict'                => (!empty($dialect_strict)) ? $dialect_strict : null,
+                'filters_extraction_parameters' => (!empty($filters_extraction_parameters)) ? $filters_extraction_parameters : null,
+                'xliff_parameters'              => (!empty($xliff_parameters)) ? $xliff_parameters : null,
                 'xliff_parameters_template_id'  => $xliff_parameters_template_id,
                 'qa_model_template_id'          => $qa_model_template_id,
                 'payable_rate_template_id'      => $payable_rate_template_id,
-                'array_keys'                    => $array_keys,
+                'array_keys'                    => (!empty($array_keys)) ? $array_keys : [],
                 'postPrivateTmKey'              => $postPrivateTmKey,
                 'mt_engine'                     => $mt_engine,
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
                 'only_private'                  => $only_private,
-                'due_date'                      => $due_date,
+                'due_date'                      => $due_date ?? null,
         ];
 
         $this->setMetadataFromPostInput( $data );
@@ -388,6 +390,18 @@ class CreateProjectController extends KleinController {
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
 
         return $data;
+    }
+
+    /**
+     * @param $elem
+     * @return array
+     */
+    private static function sanitizeTmKeyArr( $elem ) {
+        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element->complete_format = true;
+        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+
+        return $elem->toArray();
     }
 
     /**
@@ -637,12 +651,11 @@ class CreateProjectController extends KleinController {
 
     /**
      * @param null $xliff_parameters
-     * @param null xliff_parameters_template_id
-     *
-     * @return object|null
+     * @param null $xliff_parameters_template_id
+     * @return array|null
      * @throws Exception
      */
-    private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?string {
+    private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
