@@ -307,7 +307,7 @@ class NewController extends KleinController {
 
             $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-            $projectStructure[ 'due_date' ]                              = ( !isset( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
+            $projectStructure[ 'due_date' ]                              = ( !empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
             $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
             $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
 
@@ -315,6 +315,9 @@ class NewController extends KleinController {
             $projectStructure[ 'uid' ]          = $this->user->getUid();
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
+
+            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
 
             // mmtGlossaries
             if ( $request[ 'mmt_glossaries' ] ) {
@@ -455,6 +458,8 @@ class NewController extends KleinController {
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
         $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85) //YYY
+        $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
+        $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
         /**
          * Uber plugin callback
@@ -568,6 +573,8 @@ class NewController extends KleinController {
                 'speech2text'                               => $speech2text,
                 'tag_projection'                            => $tag_projection,
                 'project_features'                          => $project_features,
+                'character_counter_count_tags'              => $character_counter_count_tags,
+                'character_counter_mode'                    => $character_counter_mode,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association
         ];
     }
@@ -749,7 +756,8 @@ class NewController extends KleinController {
     }
 
     /**
-     * @param $private_tm_key
+     * @param string $private_tm_key
+     * @param string $private_tm_key_json
      *
      * @return array
      * @throws Exception
@@ -767,7 +775,7 @@ class NewController extends KleinController {
 
                 // first check if `filters_extraction_parameters` is a valid JSON
                 if ( !Utils::isJson( $json ) ) {
-                    throw new Exception( "filters_extraction_parameters is not a valid JSON" );
+                    throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
                 $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
@@ -1091,7 +1099,7 @@ class NewController extends KleinController {
                     'prefer_more'
             ];
 
-            if ( in_array( $deepl_formality, $allowedFormalities ) ) {
+            if ( !in_array( $deepl_formality, $allowedFormalities ) ) {
                 throw new InvalidArgumentException( "Incorrect DeepL formality value (default, prefer_less and prefer_more are the allowed values)" );
             }
 
