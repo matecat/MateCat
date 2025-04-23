@@ -129,7 +129,6 @@ class UserKeysController extends KleinController {
      */
     protected function getKeyUsersInfo( array $userMemoryKeys ): array
     {
-
         $_userStructs = [];
         foreach( $userMemoryKeys[0]->tm_key->getInUsers() as $userStruct ){
             $_userStructs[] = new Users_ClientUserFacade( $userStruct );
@@ -169,7 +168,7 @@ class UserKeysController extends KleinController {
         return [
             'key' => $key,
             'emails' => $emails,
-            'description' => $description,
+            'description' => (!empty($description)) ? $description : null,
         ];
     }
 
