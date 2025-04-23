@@ -1,5 +1,6 @@
 import React from 'react'
 import JobProgressBar from '../common/JobProgressBar'
+import {Popup} from 'semantic-ui-react'
 
 class ProductionSummary extends React.Component {
   getTimeToEdit = () => {
@@ -13,32 +14,28 @@ class ProductionSummary extends React.Component {
       .join(':')
   }
 
-  componentDidUpdate() {
-    if (this.props.jobInfo) {
-      $(this.progressBar).find('.translate-tooltip').popup()
-    }
-  }
-
-  componentDidMount() {
-    $(this.tooltip).popup({
-      position: 'bottom right',
-      className: {
-        popup: 'ui popup qr-score-popup',
-      },
-      hoverable: true,
-    })
-  }
-
   render() {
     const {qualitySummary, jobInfo} = this.props
 
-    const tooltipText =
-      '<div style="color:gray">Matecat calculates the score as follows: </br></br>' +
-      '<code>(Tot. error points * 1000) / reviewed words</code></br>' +
-      'Reviewed words =  raw words - unmodified ICE matches</br></br>' +
-      'The score is compared to a max. amount of tolerated error points.' +
-      '<a style="text-decoration: underline" href="https://guides.matecat.com/quality-report-in-matecat" target="_blank">Learn more</a>' +
-      '</div>'
+    const tooltipText = (
+      <div style={{color: 'gray'}}>
+        Matecat calculates the score as follows: <br />
+        <br />
+        <code>(Tot. error points * 1000) / reviewed words</code>
+        <br />
+        Reviewed words = raw words - unmodified ICE matches
+        <br />
+        <br />
+        The score is compared to a max. amount of tolerated error points.
+        <a
+          style={{textDecoration: 'underline'}}
+          href="https://guides.matecat.com/quality-report-in-matecat"
+          target="_blank"
+        >
+          Learn more
+        </a>
+      </div>
+    )
     const score = parseFloat(qualitySummary.get('score'))
     const limit = qualitySummary.get('passfail')
       ? parseInt(qualitySummary.getIn(['passfail', 'options', 'limit']))
@@ -151,14 +148,18 @@ class ProductionSummary extends React.Component {
                 </div>
               )}
             </div>
-
-            <div
-              className="qr-label"
-              data-html={tooltipText}
-              ref={(tooltip) => (this.tooltip = tooltip)}
-            >
-              Threshold {limit} <i className="icon-info icon" />
-            </div>
+            <Popup
+              content={tooltipText}
+              position="bottom right"
+              // /**/ popper={{className: 'ui popup qr-score-popup'}}
+              hoverable
+              wide="very"
+              trigger={
+                <div className="qr-label">
+                  Threshold {limit} <i className="icon-info icon" />
+                </div>
+              }
+            />
           </div>
         ) : null}
       </div>

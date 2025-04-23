@@ -1,6 +1,8 @@
 import React from 'react'
+import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
 import {ANALYSIS_STATUS, SEGMENTS_STATUS} from '../../constants/Constants'
+import {Popup} from 'semantic-ui-react'
 
 class AnalyzeHeader extends React.Component {
   constructor(props) {
@@ -231,11 +233,7 @@ class AnalyzeHeader extends React.Component {
               <div className="progress-bar">
                 <div className="progr">
                   <div className="meter">
-                    <a
-                      className="approved-bar translate-tooltip"
-                      data-html={'Approved ' + width}
-                      style={{width: width}}
-                    />
+                    <a className="approved-bar" style={{width: width}} />
                   </div>
                 </div>
               </div>
@@ -321,16 +319,22 @@ class AnalyzeHeader extends React.Component {
               Matecat gives you more matches than any other tool thanks to a
               better integration of machine translation and translation
               memories.
-              <span
-                style={{marginLeft: '2px'}}
-                data-html={tooltipText}
-                ref={(tooltip) => (this.tooltip = tooltip)}
-              >
-                <span
-                  className="icon-info icon"
-                  style={{position: 'relative', top: '2px', color: '#a7a7a7'}}
-                />
-              </span>
+              <Popup
+                content={tooltipText}
+                position="bottom center"
+                trigger={
+                  <span style={{marginLeft: '2px'}}>
+                    <span
+                      className="icon-info icon"
+                      style={{
+                        position: 'relative',
+                        top: '2px',
+                        color: '#a7a7a7',
+                      }}
+                    />
+                  </span>
+                }
+              />
             </p>
           </div>
         </div>
@@ -382,9 +386,6 @@ class AnalyzeHeader extends React.Component {
   }
 
   componentDidMount() {
-    $(this.tooltip).popup({
-      position: 'bottom center',
-    })
     let self = this
     let status = this.props.data.get('status')
     if (status === ANALYSIS_STATUS.DONE) {
