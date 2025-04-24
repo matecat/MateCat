@@ -304,16 +304,10 @@ class CreateProjectController extends KleinController {
         }
 
         $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
-
-        // NOTE: This is for debug purpose only,
-        // NOTE: Global $_POST Overriding from CLI
-        // $this->__postInput = filter_var_array( $_POST, $filterArgs );
-
-
-        $mt_engine      = ( $mt_engine != null ? $mt_engine : 0 );
-        $private_tm_key = $postPrivateTmKey;
-        $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
-        $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
+        $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
+        $private_tm_key   = $postPrivateTmKey;
+        $only_private     = ( is_null( $get_public_matches ) ? false : !$get_public_matches );
+        $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
         $data = [
                 'file_name'                     => $file_name,
