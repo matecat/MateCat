@@ -307,7 +307,7 @@ class NewController extends KleinController {
 
             $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-            $projectStructure[ 'due_date' ]                              = ( !empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
+            $projectStructure[ 'due_date' ]                              = ( empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
             $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
             $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
 
@@ -316,6 +316,9 @@ class NewController extends KleinController {
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
 
+            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
+            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
             $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
             $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
 
@@ -465,6 +468,9 @@ class NewController extends KleinController {
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $dictation                                 = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
+        $show_whitespace                           = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
+        $ai_assistant                              = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
 
         /**
          * Uber plugin callback
@@ -581,6 +587,9 @@ class NewController extends KleinController {
                 'mt_evaluation'                             => $mt_evaluation,
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
+                'dictation'                                 => $dictation,
+                'show_whitespace'                           => $show_whitespace,
+                'ai_assistant'                              => $ai_assistant,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association
         ];
     }
@@ -790,9 +799,10 @@ class NewController extends KleinController {
                 $validatorObject->json = $json;
 
                 $validator  = new JSONValidator( $schema );
-                $jsonObject = $validator->validate( $validatorObject );
+                $validator->validate( $validatorObject );
 
-                $tm_prioritization = $jsonObject->tm_prioritization;
+                $privateTmKeyJsonObject = json_decode($json);
+                $tm_prioritization = $privateTmKeyJsonObject->tm_prioritization;
 
                 $private_tm_key = array_map(
                         function ( $item ) {
@@ -803,7 +813,7 @@ class NewController extends KleinController {
                                     'penalty' => $item->penalty,
                             ];
                         },
-                        $jsonObject->keys
+                        $privateTmKeyJsonObject->keys
                 );
 
             } else {
@@ -826,6 +836,10 @@ class NewController extends KleinController {
             }
         } catch ( Exception $e ) {
             throw new InvalidArgumentException( $e->getMessage(), -6 );
+        }
+
+        if ( count( $private_tm_key ) > self::MAX_NUM_KEYS ) {
+            throw new Exception( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS, -2 );
         }
 
         $private_tm_key = array_values( array_filter( $private_tm_key ) );
