@@ -359,6 +359,10 @@ class NewController extends KleinController {
                 $projectStructure[ 'xliff_parameters' ] = $request[ 'xliff_parameters' ];
             }
 
+            if ( $request[ 'mt_evaluation' ] ) {
+                $projectStructure[ 'mt_evaluation' ] = true;
+            }
+
             //set features override
             $projectStructure[ 'project_features' ] = $request[ 'project_features' ];
 
@@ -458,6 +462,7 @@ class NewController extends KleinController {
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
         $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85) //YYY
+        $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
@@ -573,6 +578,7 @@ class NewController extends KleinController {
                 'speech2text'                               => $speech2text,
                 'tag_projection'                            => $tag_projection,
                 'project_features'                          => $project_features,
+                'mt_evaluation'                             => $mt_evaluation,
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association
