@@ -154,15 +154,13 @@ class CreateProjectController extends KleinController {
             $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
             $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-
-            $projectStructure[ 'dictation' ]         = $this->data[ 'dictation' ];
-            $projectStructure[ 'show_whitespace' ]   = $this->data[ 'show_whitespace' ];
-            $projectStructure[ 'character_counter' ] = $this->data[ 'character_counter' ];
-            $projectStructure[ 'ai_assistant' ]      = $this->data[ 'ai_assistant' ];
-            $projectStructure[ 'tm_prioritization' ] = $this->data[ 'tm_prioritization' ] ?? null;
-
-            $projectStructure[ 'character_counter_mode' ]       = (!empty($this->data[ 'character_counter_mode' ])) ? $this->data[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = (!empty($this->data[ 'character_counter_count_tags' ])) ? $this->data[ 'character_counter_count_tags' ] : null;
+            $projectStructure[ 'dictation' ]                             = (!empty($this->data[ 'dictation' ])) ? $this->data[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]                       = (!empty($this->data[ 'show_whitespace' ])) ? $this->data[ 'show_whitespace' ] : null;
+            $projectStructure[ 'character_counter' ]                     = (!empty($this->data[ 'character_counter' ])) ? $this->data[ 'character_counter' ] : null;
+            $projectStructure[ 'ai_assistant' ]                          = (!empty($this->data[ 'ai_assistant' ])) ? $this->data[ 'ai_assistant' ] : null;
+            $projectStructure[ 'tm_prioritization' ]                     = (!empty($this->data[ 'tm_prioritization' ])) ? $this->data[ 'tm_prioritization' ] : null;
+            $projectStructure[ 'character_counter_mode' ]                = (!empty($this->data[ 'character_counter_mode' ])) ? $this->data[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ]          = (!empty($this->data[ 'character_counter_count_tags' ])) ? $this->data[ 'character_counter_count_tags' ] : null;
 
             // MMT Glossaries
             // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
@@ -325,19 +323,19 @@ class CreateProjectController extends KleinController {
                 'job_subject'                   => $job_subject,
                 'pretranslate_100'              => $pretranslate_100,
                 'pretranslate_101'              => $pretranslate_101,
-                'tm_prioritization'             => $tm_prioritization,
+                'tm_prioritization'             => (!empty($tm_prioritization)) ? $tm_prioritization : null,
                 'id_team'                       => $id_team,
                 'mmt_glossaries'                => (!empty($mmt_glossaries)) ? $mmt_glossaries : null,
                 'deepl_id_glossary'             => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
                 'deepl_formality'               => (!empty($deepl_formality)) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
-                'dictation'                     => $dictation,
-                'show_whitespace'               => $show_whitespace,
-                'character_counter'             => $character_counter,
-                'character_counter_count_tags'  => $character_counter_count_tags,
-                'character_counter_mode'        => $character_counter_mode,
-                'ai_assistant'                  => $ai_assistant,
+                'dictation'                     => (!empty($dictation)) ? $dictation : null,
+                'show_whitespace'               => (!empty($show_whitespace)) ? $show_whitespace : null,
+                'character_counter'             => (!empty($character_counter)) ? $character_counter : null,
+                'character_counter_count_tags'  => (!empty($character_counter_count_tags)) ? $character_counter_count_tags : null,
+                'character_counter_mode'        => (!empty($character_counter_mode)) ? $character_counter_mode : null,
+                'ai_assistant'                  => (!empty($ai_assistant)) ? $ai_assistant : null,
                 'dialect_strict'                => (!empty($dialect_strict)) ? $dialect_strict : null,
                 'filters_extraction_parameters' => (!empty($filters_extraction_parameters)) ? $filters_extraction_parameters : null,
                 'xliff_parameters'              => (!empty($xliff_parameters)) ? $xliff_parameters : null,
@@ -350,7 +348,7 @@ class CreateProjectController extends KleinController {
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
                 'only_private'                  => $only_private,
-                'due_date'                      => $due_date ?? null,
+                'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
         ];
 
         $this->setMetadataFromPostInput( $data );
