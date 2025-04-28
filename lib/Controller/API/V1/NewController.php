@@ -288,7 +288,7 @@ class NewController extends KleinController {
             $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
             $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
             $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
-            $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
+                $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
             $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
             $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
             $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
