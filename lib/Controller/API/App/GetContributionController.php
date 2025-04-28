@@ -12,6 +12,7 @@ use FeatureSet;
 use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
+use Jobs\MetadataDao;
 use Klein\Response;
 use Matecat\SubFiltering\MateCatFilter;
 use Segments_SegmentDao;
@@ -45,6 +46,8 @@ class GetContributionController extends KleinController {
             $switch_languages = $request['switch_languages'];
             $context_before = $request['context_before'];
             $context_after = $request['context_after'];
+            $context_list_before = $request['context_list_before'];
+            $context_list_after = $request['context_list_after'];
             $id_before = $request['id_before'];
             $id_after = $request['id_after'];
             $cross_language = $request['cross_language'];
@@ -77,10 +80,14 @@ class GetContributionController extends KleinController {
             $contributionRequest->user              = $owner;
             $contributionRequest->dataRefMap        = $dataRefMap;
             $contributionRequest->contexts          = [
-                'context_before' => $request['context_before'],
-                'segment'        => $request['text'],
-                'context_after'  => $request['context_after']
+                'context_before' => $context_before,
+                'segment'        => $text,
+                'context_after'  => $context_after
             ];
+
+            $contributionRequest->context_list_before = $context_list_before;
+            $contributionRequest->context_list_after  = $context_list_after;
+
             $contributionRequest->jobStruct         = $jobStruct;
             $contributionRequest->projectStruct     = $projectStruct;
             $contributionRequest->segmentId         = $id_segment;
@@ -94,6 +101,44 @@ class GetContributionController extends KleinController {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
             } else {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            }
+
+            $jobsMetadataDao = new MetadataDao();
+            $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+            $mt_evaluation  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+
+            if ( $dialect_strict !== null ) {
+                $contributionRequest->dialect_strict = $dialect_strict->value == 1;
+            }
+
+            if ( $mt_evaluation !== null ) {
+                $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
+            }
+
+            $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
+
+            if ( $tm_prioritization !== null ) {
+                $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
+            }
+
+            if($contributionRequest->concordanceSearch){
+                $contributionRequest->resultNum = 10;
+            }
+
+            // penalty_key
+            $penalty_key = [];
+            $tmKeys = json_decode( $jobStruct->tm_keys, true );
+
+            foreach ($tmKeys as $tmKey){
+                if(isset($tmKey['penalty']) and is_numeric($tmKey['penalty'])){
+                    $penalty_key[] = $tmKey['penalty'];
+                } else {
+                    $penalty_key[] = 0;
+                }
+            }
+
+            if(!empty($penalty_key)){
+                $contributionRequest->penalty_key = $penalty_key;
             }
 
             Request::contribution( $contributionRequest );
@@ -112,6 +157,7 @@ class GetContributionController extends KleinController {
                         'id_client' => $contributionRequest->id_client,
                         'userRole' => $contributionRequest->userRole,
                         'tm_prioritization' => $contributionRequest->tm_prioritization,
+                        'mt_evaluation' => $contributionRequest->mt_evaluation,
                         'penalty_key' => $contributionRequest->penalty_key,
                         'crossLangTargets' => $contributionRequest->crossLangTargets,
                         'fromTarget' => $contributionRequest->fromTarget,
@@ -145,6 +191,8 @@ class GetContributionController extends KleinController {
         $switch_languages = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
         $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
         $context_after = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
+        $context_list_before = filter_var($this->request->param( 'context_list_before'),FILTER_SANITIZE_STRING, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $context_list_after = filter_var($this->request->param( 'context_list_after'),FILTER_SANITIZE_STRING, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $id_before = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
         $id_after = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
         $cross_language = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
@@ -194,6 +242,8 @@ class GetContributionController extends KleinController {
             'id_before' => $id_before,
             'id_after' => $id_after,
             'cross_language' => $cross_language,
+            'context_list_after' => json_decode( $context_list_after, true ),
+            'context_list_before' => json_decode( $context_list_before, true ),
         ];
     }
 
