@@ -18,6 +18,9 @@ use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
+    protected $id_job;
+    protected $received_password;
+
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
@@ -166,6 +169,9 @@ class DeleteContributionController extends KleinController {
         if ( empty( $password ) ) {
             throw new InvalidArgumentException( "missing job password", -6);
         }
+
+        $this->id_job = $id_job;
+        $this->received_password = $received_password;
 
         return [
             'id_segment' => $id_segment ,

@@ -21,6 +21,9 @@ use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
+    protected $id_job;
+    protected $received_password;
+
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
@@ -171,6 +174,9 @@ class GetContributionController extends KleinController {
         if ( empty( $id_client ) ) {
             throw new InvalidArgumentException("missing id_client", -5);
         }
+
+        $this->id_job = $id_job;
+        $this->received_password = $received_password;
 
         return [
             'id_client' => $id_client,

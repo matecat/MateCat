@@ -21,6 +21,9 @@ use TmKeyManagement_TmKeyStruct;
 
 class UpdateJobKeysController extends KleinController {
 
+    protected $id_job;
+    protected $received_password;
+
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
@@ -189,6 +192,9 @@ class UpdateJobKeysController extends KleinController {
         if ( empty( $jobData ) or !$pCheck->grantJobAccessByJobData( $jobData, $job_pass ) ) {
             throw new AuthenticationError("Wrong password", -10);
         }
+
+        $this->id_job = $job_id;
+        $this->received_password = $current_password;
 
         return [
             'job_id' => $job_id,
