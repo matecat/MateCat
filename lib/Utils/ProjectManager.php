@@ -425,6 +425,12 @@ class ProjectManager {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
 
+        // add json parameters to the project metadata as json string
+        if( $options[ 'mt_qe_workflow_enable' ] ) {
+            $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
+            $options[ 'mt_qe_workflow_payable_rate' ] = json_encode( $options[ 'mt_qe_workflow_payable_rate' ] );
+        }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.

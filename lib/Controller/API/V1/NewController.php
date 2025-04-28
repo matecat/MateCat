@@ -29,6 +29,8 @@ use LQA\ModelDao;
 use LQA\ModelStruct;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use MTQE\PayableRate\MTQEPayableRateTemplateDao;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 use MTQE\Templates\MTQEWorkflowTemplateDao;
 use PayableRates\CustomPayableRateDao;
@@ -303,7 +305,7 @@ class NewController extends KleinController {
             $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
 
             //default get all public matches from TM
-            $projectStructure[ 'only_private' ] = ( !isset( $request[ 'get_public_matches' ] ) ? false : !$request[ 'get_public_matches' ] );
+            $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
 
             $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
             $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
@@ -316,11 +318,11 @@ class NewController extends KleinController {
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
 
-            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
-            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
+            $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
+            $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
+            $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
             // mmtGlossaries
             if ( $request[ 'mmt_glossaries' ] ) {
@@ -434,7 +436,7 @@ class NewController extends KleinController {
         $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
-        $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
+        $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] );
         $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
@@ -463,8 +465,8 @@ class NewController extends KleinController {
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
-        $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
-        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85) //YYY
+        $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null; // QE workflow payable rates template id
+        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85)
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
@@ -485,7 +487,7 @@ class NewController extends KleinController {
 
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
-        [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine ); // YYY Fix bug
+        [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
         [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
@@ -504,11 +506,10 @@ class NewController extends KleinController {
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation( $target_lang, $mt_engine );
 
         if ( $mt_qe_workflow_enable ) {
-            $metadata[ 'mt_qe_workflow_enable' ]     = $mt_qe_workflow_enable;
-            $metadata[ 'mt_qe_workflow_parameters' ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
-            if ( !empty( $mt_qe_workflow_payable_rate_template_id ) ) {
-                $metadata[ 'mt_qe_workflow_payable_rate_template_id' ] = $mt_qe_workflow_payable_rate_template_id; // YYY TODO or default
-            }
+            $metadata[ 'mt_qe_workflow_enable' ]       = $mt_qe_workflow_enable;
+            $metadata[ 'mt_qe_workflow_parameters' ]   = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
+            $metadata[ 'mt_qe_workflow_payable_rate' ] = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
+            $payableRateModelTemplate                  = null; // disable and remove TM payable rates
         }
 
         if ( !empty( $project_info ) ) {
@@ -799,10 +800,9 @@ class NewController extends KleinController {
                 $validatorObject->json = $json;
 
                 $validator  = new JSONValidator( $schema );
-                $validator->validate( $validatorObject );
+                $jsonObject = $validator->validate( $validatorObject );
 
-                $privateTmKeyJsonObject = json_decode($json);
-                $tm_prioritization = $privateTmKeyJsonObject->tm_prioritization;
+                $tm_prioritization = $jsonObject->tm_prioritization;
 
                 $private_tm_key = array_map(
                         function ( $item ) {
@@ -813,7 +813,7 @@ class NewController extends KleinController {
                                     'penalty' => $item->penalty,
                             ];
                         },
-                        $privateTmKeyJsonObject->keys
+                        $jsonObject->keys
                 );
 
             } else {
@@ -1213,8 +1213,6 @@ class NewController extends KleinController {
     }
 
     /**
-     * YYY json validation
-     *
      * @param int|null    $mt_qe_workflow_template_id
      * @param string|null $mt_qe_workflow_template_raw_parameters
      *
@@ -1255,6 +1253,30 @@ class NewController extends KleinController {
         } else {
             return new MTQEWorkflowParams();
         }
+
+    }
+
+    /**
+     * @param int|null $mt_qe_workflow_payable_rate_template_id
+     *
+     * @return MTQEPayableRateBreakdowns
+     * @throws Exception
+     */
+    private function validateMTQEPayableRateBreakdownsOrDefault( ?int $mt_qe_workflow_payable_rate_template_id = null ): MTQEPayableRateBreakdowns {
+
+        if ( !empty( $mt_qe_workflow_payable_rate_template_id ) ) {
+
+            $mtQeWorkflowTemplate = MTQEPayableRateTemplateDao::getByIdAndUser( $mt_qe_workflow_payable_rate_template_id, $this->getUser()->uid );
+
+            if ( $mtQeWorkflowTemplate === null ) {
+                throw new InvalidArgumentException( "mt_qe_workflow_payable_rate_template_id not valid" );
+            }
+
+            return $mtQeWorkflowTemplate->breakdowns;
+
+        }
+
+        return new MTQEPayableRateBreakdowns;
 
     }
 

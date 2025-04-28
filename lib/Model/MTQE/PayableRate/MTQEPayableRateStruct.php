@@ -7,26 +7,27 @@
  *
  */
 
-namespace MTQE\Templates;
+namespace MTQE\PayableRate;
 
 use DataAccess_AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
+use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 
-class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";
     public int     $uid         = 0;
+    public int     $version     = 1;
     public ?string $created_at  = null;
     public ?string $modified_at = null;
     public ?string $deleted_at  = null;
 
     /**
-     * @var MTQEWorkflowParams|null
+     * @var MTQEPayableRateBreakdowns|null
      */
-    public ?MTQEWorkflowParams $params = null;
+    public ?MTQEPayableRateBreakdowns $breakdowns = null;
 
     /**
      * @param string $json
@@ -34,16 +35,16 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
      *
      * @return $this
      */
-    public function hydrateFromJSON( string $json, $uid = null ): MTQEWorkflowTemplateStruct {
+    public function hydrateFromJSON( string $json, $uid = null ): MTQEPayableRateStruct {
 
         $decoded_json = json_decode( $json, true );
 
         if ( !isset( $decoded_json[ 'name' ] ) ) {
-            throw new DomainException( "Cannot instantiate a new MTQEWorkflowTemplateStruct. Invalid data provided.", 400 );
+            throw new DomainException( "Cannot instantiate a new MTQEPayableRateStruct. Invalid data provided.", 400 );
         }
 
         if ( empty( $uid ) && empty( $decoded_json[ 'uid' ] ) ) {
-            throw new DomainException( "Cannot instantiate a new MTQEWorkflowTemplateStruct. Invalid user id provided.", 400 );
+            throw new DomainException( "Cannot instantiate a new MTQEPayableRateStruct. Invalid user id provided.", 400 );
         }
 
         $this->uid  = $decoded_json[ 'uid' ] ?? $uid;
@@ -51,6 +52,10 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
 
         if ( isset( $decoded_json[ 'id' ] ) ) {
             $this->id = $decoded_json[ 'id' ];
+        }
+
+        if ( isset( $decoded_json[ 'version' ] ) ) {
+            $this->version = $decoded_json[ 'version' ];
         }
 
         if ( isset( $decoded_json[ 'created_at' ] ) ) {
@@ -66,8 +71,8 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
         }
 
         // params
-        if ( isset( $decoded_json[ 'params' ] ) ) {
-            ( is_string( $decoded_json[ 'params' ] ) ) ? $this->hydrateParamsFromJson( $decoded_json[ 'params' ] ) : $this->hydrateParamsFromDataArray( $decoded_json[ 'params' ] );
+        if ( isset( $decoded_json[ 'breakdowns' ] ) ) {
+            ( is_string( $decoded_json[ 'breakdowns' ] ) ) ? $this->hydrateBreakdownsFromJson( $decoded_json[ 'breakdowns' ] ) : $this->hydrateBreakdownsFromDataArray( $decoded_json[ 'breakdowns' ] );
         }
 
         return $this;
@@ -77,21 +82,21 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
     /**
      * @param string $jsonParams
      *
-     * @return MTQEWorkflowTemplateStruct
+     * @return MTQEPayableRateStruct
      */
-    public function hydrateParamsFromJson( string $jsonParams ): MTQEWorkflowTemplateStruct {
+    public function hydrateBreakdownsFromJson( string $jsonParams ): MTQEPayableRateStruct {
         $rules = json_decode( $jsonParams, true );
 
-        return $this->hydrateParamsFromDataArray( $rules );
+        return $this->hydrateBreakdownsFromDataArray( $rules );
     }
 
-    public function hydrateParamsFromDataArray( array $params ): MTQEWorkflowTemplateStruct {
+    public function hydrateBreakdownsFromDataArray( array $params ): MTQEPayableRateStruct {
 
-        $this->params = new MTQEWorkflowParams();
+        $this->breakdowns = new MTQEPayableRateBreakdowns();
 
         // rules
-        if ( isset( $params[ 'params' ] ) ) {
-            $this->params = new MTQEWorkflowParams( $params[ 'params' ] );
+        if ( isset( $params[ 'breakdowns' ] ) ) {
+            $this->breakdowns = new MTQEPayableRateBreakdowns( $params[ 'breakdowns' ] );
         }
 
         return $this;
@@ -102,7 +107,7 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
      * @inheritDoc
      */
     public function jsonSerialize() {
-        return (array) $this;
+        return (array)$this;
     }
 
     public function __toString(): string {

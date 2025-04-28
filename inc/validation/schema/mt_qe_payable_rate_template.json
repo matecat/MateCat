@@ -3,7 +3,7 @@
   "type": "object",
   "required": [
     "name",
-    "params"
+    "breakdowns"
   ],
   "properties": {
     "id": {
@@ -17,6 +17,10 @@
     "uid": {
       "type": "integer",
       "minimum": 1
+    },
+    "version": {
+        "type": "integer",
+        "minimum": 1
     },
     "created_at": {
       "type": [
@@ -39,8 +43,8 @@
       ],
       "format": "date-time"
     },
-    "params": {
-      "$ref": "mt_qe_workflow_params.json"
+    "breakdowns": {
+      "$ref": "mt_qe_payable_rate.json"
     }
   },
   "additionalProperties": false
