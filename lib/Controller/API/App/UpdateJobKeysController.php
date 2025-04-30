@@ -189,7 +189,7 @@ class UpdateJobKeysController extends KleinController {
         $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $current_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $get_public_matches = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
-        $tm_keys = filter_var( $this->request->param( 'data' ), FILTER_UNSAFE_RAW, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
+        $tm_keys = filter_var( $this->request->param( 'data' ), FILTER_UNSAFE_RAW, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
         $tm_keys = CatUtils::sanitizeJSON($tm_keys);
 
         if ( empty( $job_id ) ) {
