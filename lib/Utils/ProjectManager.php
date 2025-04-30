@@ -203,8 +203,8 @@ class ProjectManager {
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'mt_evaluation'                           => false,
-                            'tm_prioritization'                       => null
+                            'tm_prioritization'                       => null,
+                            'mt_qe_workflow_payable_rate'             => null
                     ] );
         }
 
@@ -425,10 +425,10 @@ class ProjectManager {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
 
+        // mt evaluation => ice_mt already in metadata
         // add json parameters to the project metadata as json string
-        if( $options[ 'mt_qe_workflow_enable' ] ) {
+        if ( $options[ 'mt_qe_workflow_enabled' ] ) {
             $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
-            $options[ 'mt_qe_workflow_payable_rate' ] = json_encode( $options[ 'mt_qe_workflow_payable_rate' ] );
         }
 
         /**
@@ -1326,8 +1326,12 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            // get payable rates
-            if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+            // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
+            if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
+                $payableRatesTemplate = null;
+                $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+                // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $payableRates );
@@ -1421,11 +1425,6 @@ class ProjectManager {
                         $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
-            }
-
-            // mt evaluation => ice_mt
-            if ( $this->projectStructure[ 'mt_evaluation' ] ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'mt_evaluation', true );
             }
 
             try {

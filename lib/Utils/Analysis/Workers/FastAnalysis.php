@@ -254,8 +254,12 @@ class FastAnalysis extends AbstractDaemon {
                      * Ensure we have fresh data from the master node
                      */
                     Database::obtain()->getConnection()->beginTransaction();
-                    $projectStruct         = Projects_ProjectDao::findById( $pid );
-                    $projectFeaturesString = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
+                    $projectStruct              = Projects_ProjectDao::findById( $pid );
+                    $projectFeaturesString      = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
+                    $mt_evaluation              = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION );
+                    $mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED );
+                    $mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS );
+                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
                     Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -263,7 +267,11 @@ class FastAnalysis extends AbstractDaemon {
                             $projectFeaturesString,
                             PayableRates::$DEFAULT_PAYABLE_RATES,
                             $featureSet,
-                            $perform_Tms_Analysis
+                            $perform_Tms_Analysis,
+                            $mt_evaluation,
+                            $mt_qe_workflow_enabled,
+                            $mt_qe_workflow_parameters,
+                            $mt_quality_value_in_editor
                     );
 
                 } catch ( Exception $e ) {
@@ -465,7 +473,11 @@ class FastAnalysis extends AbstractDaemon {
             string                 $projectFeaturesString,
             array                  $equivalentWordMapping,
             FeatureSet             $featureSet,
-            bool                   $perform_Tms_Analysis = true
+            bool                   $perform_Tms_Analysis = true,
+            ?bool                  $mt_evaluation = false,
+            ?bool                  $mt_qe_workflow_enabled = false,
+            ?string                $mt_qe_workflow_parameters = "",
+            ?int                   $mt_quality_value_in_editor = 85
     ): int {
 
         $pid               = $projectStruct->id;
@@ -689,14 +701,27 @@ class FastAnalysis extends AbstractDaemon {
 
                         $jobsMetadataDao   = new MetadataDao();
                         $tm_prioritization = $jobsMetadataDao->get( $id_job, $password, 'tm_prioritization', 10 * 60 );
-                        $mt_evaluation = $jobsMetadataDao->get( $id_job, $password, 'mt_evaluation', 10 * 60 );
+                        $dialect_strict    = $jobsMetadataDao->get( $id_job, $password, 'dialect_strict', 10 * 60 );
 
                         if ( $tm_prioritization !== null ) {
                             $queue_element[ 'tm_prioritization' ] = $tm_prioritization->value == 1;
                         }
 
-                        if ( $mt_evaluation !== null ) {
-                            $queue_element[ 'mt_evaluation' ] = $mt_evaluation->value == 1;
+                        if ( $mt_evaluation ) {
+                            $queue_element[ 'mt_evaluation' ] = $mt_evaluation;
+                        }
+
+                        if ( $dialect_strict ) {
+                            $queue_element[ 'dialect_strict' ] = $dialect_strict->value == 1;
+                        }
+
+                        if ( $mt_qe_workflow_enabled ) {
+                            $queue_element[ 'mt_qe_workflow_enabled' ]    = $mt_qe_workflow_enabled;
+                            $queue_element[ 'mt_qe_workflow_parameters' ] = $mt_qe_workflow_parameters;
+                        }
+
+                        if ( $mt_quality_value_in_editor ) {
+                            $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor;
                         }
 
                         $element            = new QueueElement();

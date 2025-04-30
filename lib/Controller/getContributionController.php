@@ -6,6 +6,9 @@ use Files\FilesPartsDao;
 use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
 
+/**
+ * @deprecated do not work anymore since ajaxController has been removed, for back reference only
+ */
 class getContributionController extends ajaxController {
 
     protected $id_job;

@@ -5,7 +5,6 @@ namespace Utils\Engines;
 use AMQHandler;
 use Constants_Engines;
 use Engine;
-use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_EngineInterface;
@@ -189,8 +188,7 @@ class Lara extends Engines_AbstractEngine {
         $_config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             // for MMT
-            $_config[ 'include_score' ] = isset($_config['mt_evaluation']) && $_config['mt_evaluation'] == 1;
-            $_config[ 'priority' ]      = 'background';
+            $_config[ 'priority' ] = 'background';
 
             // analysis on Lara is disabled, fallback on MMT
             return $this->mmt_GET_Fallback->get( $_config );
@@ -246,8 +244,8 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            if(isset($_config['mt_evaluation']) and $_config['mt_evaluation'] == 1){
-                $score = $this->getQualityEstimation($_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation);
+            if ( isset( $_config[ 'include_score' ] ) and $_config[ 'include_score' ] == 1 ) {
+                $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation );
             }
 
         } catch ( LaraException $t ) {
@@ -282,15 +280,15 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches([
-            'source' => $_config[ 'source' ],
-            'target' => $_config[ 'target' ],
-            'raw_segment' => $_config[ 'segment' ],
-            'raw_translation' => $translation,
-            'match' => $this->getStandardPenalty(),
-            'created-by' => $this->getMTName(),
-            'create-date' => date( "Y-m-d" ),
-            'score' => $score ?? null
+        return ( new Engines_Results_MyMemory_Matches( [
+                'source'          => $_config[ 'source' ],
+                'target'          => $_config[ 'target' ],
+                'raw_segment'     => $_config[ 'segment' ],
+                'raw_translation' => $translation,
+                'match'           => $this->getStandardPenalty( $_config[ 'mt_penalty' ] ),
+                'created-by'      => $this->getMTName(),
+                'create-date'     => date( "Y-m-d" ),
+                'score'           => $score ?? null
         ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
     }
 
@@ -299,28 +297,28 @@ class Lara extends Engines_AbstractEngine {
      * @param $target
      * @param $sentence
      * @param $translation
+     *
      * @return float|null
      */
-    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
-    {
+    public function getQualityEstimation( $source, $target, $sentence, $translation ): ?float {
         try {
-            $score = $this->mmt_GET_Fallback->getQualityEstimation($source, $target, $sentence, $translation);
+            $score = $this->mmt_GET_Fallback->getQualityEstimation( $source, $target, $sentence, $translation );
 
             Log::doJsonLog( [
-                'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
-                'source'                 => $source,
-                'target'                 => $target,
-                'segment'                => $sentence,
-                'translation'            => $translation,
-                'score'                  => $score,
+                    'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
+                    'source'                 => $source,
+                    'target'                 => $target,
+                    'segment'                => $sentence,
+                    'translation'            => $translation,
+                    'score'                  => $score,
             ] );
 
             return $score;
 
-        } catch (MMTServiceApiException $exception){
+        } catch ( MMTServiceApiException $exception ) {
             Log::doJsonLog( [
-                'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
-                'error'                        => $exception->getMessage(),
+                    'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
+                    'error'                        => $exception->getMessage(),
             ] );
         }
     }
@@ -340,8 +338,9 @@ class Lara extends Engines_AbstractEngine {
         $client = $this->_getClient();
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
 
-        if( empty( $_keys ) ) {
+        if ( empty( $_keys ) ) {
             Log::doJsonLog( [ "LARA: update skipped. No keys provided." ] );
+
             return true;
         }
 

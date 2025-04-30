@@ -348,6 +348,10 @@ class NewController extends KleinController {
                 $projectStructure[ 'qa_model' ] = $request[ 'qaModel' ]->getDecodedModel();
             }
 
+            if ( $request[ 'mt_qe_workflow_payable_rate' ] ) {
+                $projectStructure[ 'mt_qe_workflow_payable_rate' ] = $request[ 'mt_qe_workflow_payable_rate' ];
+            }
+
             if ( $request[ 'payableRateModelTemplate' ] ) {
                 $projectStructure[ 'payable_rate_model_id' ] = $request[ 'payableRateModelTemplate' ]->id;
             }
@@ -362,10 +366,6 @@ class NewController extends KleinController {
 
             if ( $request[ 'xliff_parameters' ] ) {
                 $projectStructure[ 'xliff_parameters' ] = $request[ 'xliff_parameters' ];
-            }
-
-            if ( $request[ 'mt_evaluation' ] ) {
-                $projectStructure[ 'mt_evaluation' ] = true;
             }
 
             //set features override
@@ -466,7 +466,7 @@ class NewController extends KleinController {
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
         $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null; // QE workflow payable rates template id
-        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85)
+        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
@@ -506,10 +506,17 @@ class NewController extends KleinController {
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation( $target_lang, $mt_engine );
 
         if ( $mt_qe_workflow_enable ) {
-            $metadata[ 'mt_qe_workflow_enable' ]       = $mt_qe_workflow_enable;
-            $metadata[ 'mt_qe_workflow_parameters' ]   = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
-            $metadata[ 'mt_qe_workflow_payable_rate' ] = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
-            $payableRateModelTemplate                  = null; // disable and remove TM payable rates
+
+            // engines restrictions
+            if ( $mt_engine == 1 ) {
+                throw new InvalidArgumentException( 'MT Engine 1 is not supported for QE Workflows' );
+            }
+
+            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
+            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
+            // does not put this in the options, we do not want to save it in the DB as metadata
+            $mt_qe_PayableRate = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
+            $mt_evaluation     = true; // force mt_evaluation because it is the default for mt_qe_workflows
         }
 
         if ( !empty( $project_info ) ) {
@@ -541,7 +548,11 @@ class NewController extends KleinController {
         }
 
         if ( $mt_quality_value_in_editor ) {
-            $metadata[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor;
+            $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
+        }
+
+        if ( $mt_evaluation ) {
+            $metadata[ Projects_MetadataDao::MT_EVALUATION ] = true;
         }
 
         return [
@@ -591,7 +602,8 @@ class NewController extends KleinController {
                 'dictation'                                 => $dictation,
                 'show_whitespace'                           => $show_whitespace,
                 'ai_assistant'                              => $ai_assistant,
-                'target_language_mt_engine_association'     => $target_language_mt_engine_association
+                'target_language_mt_engine_association'     => $target_language_mt_engine_association,
+                'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null
         ];
     }
 
