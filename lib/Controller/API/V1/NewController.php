@@ -1107,7 +1107,7 @@ class NewController extends KleinController {
      *
      * @param null $deepl_formality
      *
-     * @return null
+     * @return string|null
      */
     private function validateDeepLFormality( $deepl_formality = null ): ?string {
 
