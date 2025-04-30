@@ -75,7 +75,7 @@ class GetContributionController extends KleinController {
 
             $contributionRequest                    = new ContributionRequestStruct();
             $contributionRequest->id_file           = $file->id_file;
-            $contributionRequest->id_job            = $this->id_job;
+            $contributionRequest->id_job            = $id_job;
             $contributionRequest->password          = $received_password;
             $contributionRequest->user              = $owner;
             $contributionRequest->dataRefMap        = $dataRefMap;

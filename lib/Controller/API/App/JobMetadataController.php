@@ -96,6 +96,10 @@ class JobMetadataController extends KleinController {
                     throw new Exception( 'Missing `value` property', 400 );
                 }
 
+                if($item['value'] === ""){
+                    throw new Exception( 'Empty `value` property', 400 );
+                }
+
                 $struct = $dao->set($params['id_job'], $params['password'], $item['key'], $item['value']);
                 $return[] = $struct;
             }

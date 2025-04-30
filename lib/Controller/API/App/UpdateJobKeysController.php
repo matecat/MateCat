@@ -182,9 +182,9 @@ class UpdateJobKeysController extends KleinController {
      */
     private function validateTheRequest(): array
     {
-        $character_counter_mode = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $character_counter_count_tags = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
-        $tm_prioritization = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_VALIDATE_BOOLEAN );
+        $character_counter_mode = ($this->request->param( 'character_counter_mode' ) !== null) ? filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] ) : null;
+        $character_counter_count_tags = ($this->request->param( 'character_counter_count_tags' ) !== null) ? filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN ) : null;
+        $tm_prioritization = ($this->request->param( 'tm_prioritization' ) !== null) ? filter_var( $this->request->param( 'tm_prioritization' ), FILTER_VALIDATE_BOOLEAN ) : null;
         $job_id = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
         $job_pass = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $current_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
