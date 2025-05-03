@@ -12,6 +12,7 @@ use TestHelpers\AbstractTest;
  * Time: 18.17
  */
 class DestroyCacheAbstractClassTest extends AbstractTest {
+
     protected $reflector;
     protected $method;
     /**
@@ -24,6 +25,9 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
     protected $number_of_keys_removed;
     protected $bool_cache_hit;
 
+    /**
+     * @throws ReflectionException
+     */
     public function setUp(): void {
         parent::setUp();
         $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
@@ -31,7 +35,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
         $this->method           = $this->reflector->getMethod( "_destroyCache" );
         $this->method->setAccessible( true );
 
-        $this->cache_con = $this->reflector->getProperty( "cache_con" );
+        $this->cache_con = $this->reflector->getProperty( "cache_con" ); // the redis client
         $this->cache_con->setAccessible( true );
         $this->cache_con->setValue( $this->databaseInstance, new Client( INIT::$REDIS_SERVERS ) );
 
@@ -48,8 +52,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
     }
 
     /**
-     * @param string :  key
-     * It destroy the cache memory about a given key.
+     * It destroys the cache memory about a given key.
      *
      * @group  regression
      * @covers DataAccess_AbstractDao::_destroyCache
@@ -62,7 +65,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
         $value                         = serialize( $this->cache_value_for_the_key );
         $this->cache_con->getValue( $this->databaseInstance )->setex( $key, $TTL, $value );
 
-        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $this->cache_key );
+        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $key, false );
         $this->bool_cache_hit         = $this->cache_con->getValue( $this->databaseInstance )->get( $this->cache_key );
         $this->assertNull( $this->bool_cache_hit );
         $this->assertEquals( 1, $this->number_of_keys_removed );
@@ -70,7 +73,6 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
     }
 
     /**
-     * @param string :  key
      * It fails to destroy the cache memory about a given key because this key isn't cached.
      *
      * @group  regression
@@ -87,8 +89,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
     }
 
     /**
-     * @param string :  key
-     * It destroy the cache memory about a given key.
+     * It destroys the cache memory about a given key.
      *
      * @group  regression
      * @covers DataAccess_AbstractDao::_destroyCache
@@ -121,7 +122,7 @@ class DestroyCacheAbstractClassTest extends AbstractTest {
         $value                         = serialize( $this->cache_value_for_the_key );
         $this->cache_con->getValue( $this->databaseInstance )->setex( $key, $TTL, $value );
 
-        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $this->cache_key );
+        $this->number_of_keys_removed = $this->method->invoke( $this->databaseInstance, $key, false );
         $this->bool_cache_hit         = $this->cache_con->getValue( $this->databaseInstance )->get( $this->cache_key );
         $this->assertNull( $this->bool_cache_hit );
         $this->assertEquals( 1, $this->number_of_keys_removed );
