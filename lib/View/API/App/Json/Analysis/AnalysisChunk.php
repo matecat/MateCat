@@ -9,6 +9,7 @@
 
 namespace API\App\Json\Analysis;
 
+use API\App\Json\Analysis\Constants\ConstantsInterface;
 use Engine;
 use Exception;
 use Jobs_JobStruct;
@@ -22,43 +23,43 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @var AnalysisJobSummary
      */
-    protected $summary = null;
+    protected AnalysisJobSummary $summary;
 
     /**
      * @var AnalysisFile[]
      */
-    protected $files = [];
+    protected array $files = [];
     /**
      * @var Jobs_JobStruct
      */
-    protected $chunkStruct;
+    protected Jobs_JobStruct $chunkStruct;
     /**
-     * @var mixed
+     * @var string
      */
-    protected $projectName;
+    protected string $projectName;
     /**
      * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
     /**
      * @var int
      */
-    protected $total_raw = 0;
+    protected int $total_raw = 0;
     /**
      * @var int
      */
-    protected $total_equivalent = 0;
+    protected int $total_equivalent = 0;
     /**
      * @var int
      */
-    protected $total_industry = 0;
+    protected int $total_industry = 0;
 
-    public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user ) {
+    public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user, ConstantsInterface $matchConstantsClass ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user        = $user;
-        $this->summary     = new AnalysisJobSummary();
+        $this->summary     = new AnalysisJobSummary( $matchConstantsClass );
     }
 
     /**
@@ -66,7 +67,7 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return $this
      */
-    public function setFile( AnalysisFile $file ) {
+    public function setFile( AnalysisFile $file ): AnalysisChunk {
         $this->files[ $file->getId() ] = $file;
 
         return $this;
@@ -75,7 +76,7 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @throws Exception
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'password'         => $this->chunkStruct->password,
                 'status'           => $this->chunkStruct->status,
@@ -93,14 +94,14 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @return Jobs_JobStruct
      */
-    public function getChunkStruct() {
+    public function getChunkStruct(): Jobs_JobStruct {
         return $this->chunkStruct;
     }
 
     /**
      * @return string
      */
-    public function getPassword() {
+    public function getPassword(): string {
         return $this->chunkStruct->password;
     }
 
@@ -109,21 +110,21 @@ class AnalysisChunk implements JsonSerializable {
      *
      * @return bool
      */
-    public function hasFile( $id ) {
+    public function hasFile( $id ): bool {
         return array_key_exists( $id, $this->files );
     }
 
     /**
-     * @return AnalysisFile[]|null
+     * @return AnalysisFile[]
      */
-    public function getFiles() {
+    public function getFiles(): array {
         return $this->files;
     }
 
     /**
      * @throws Exception
      */
-    private function getEngines() {
+    private function getEngines(): array {
 
         // this can happen even when fast analysis is not completed
         if ( !is_numeric( $this->chunkStruct->id_tms ) || !is_numeric( $this->chunkStruct->id_mt_engine ) ) {
@@ -132,13 +133,13 @@ class AnalysisChunk implements JsonSerializable {
 
         try {
             $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
-        } catch (\Exception $exception){
+        } catch ( Exception $exception ) {
             $tmEngine = null;
         }
 
         try {
             $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
-        } catch (\Exception $exception){
+        } catch ( Exception $exception ) {
             $mtEngine = null;
         }
 
@@ -152,7 +153,7 @@ class AnalysisChunk implements JsonSerializable {
      * @return array
      * @throws Exception
      */
-    private function getMemoryKeys() {
+    private function getMemoryKeys(): array {
         $tmKeys = [];
 
         // this can happen even when fast analysis is not completed
@@ -172,7 +173,7 @@ class AnalysisChunk implements JsonSerializable {
     /**
      * @return AnalysisJobSummary
      */
-    public function getSummary() {
+    public function getSummary(): AnalysisJobSummary {
         return $this->summary;
     }
 

@@ -9,6 +9,7 @@
 
 namespace API\App\Json\Analysis;
 
+use API\App\Json\Analysis\Constants\ConstantsInterface;
 use JsonSerializable;
 
 class AnalysisFile implements MatchContainerInterface, JsonSerializable {
@@ -48,14 +49,15 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      */
     protected $total_equivalent = 0;
 
-    public function __construct( $id, $id_file_part, $name, $original_name ) {
+    public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass ) {
         $this->id            = (int)$id;
         $this->id_file_part  = $id_file_part;
         $this->name          = $name;
         $this->original_name = $original_name;
-        foreach ( MatchConstants::forValue as $matchType ) {
-            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
+        foreach ( $matchConstantsClass::forValue() as $matchType ) {
+            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType, $matchConstantsClass );
         }
+
     }
 
     public function jsonSerialize() {

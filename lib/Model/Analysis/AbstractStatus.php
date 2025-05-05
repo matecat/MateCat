@@ -8,18 +8,16 @@ use API\App\Json\Analysis\AnalysisFile;
 use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
-use API\App\Json\Analysis\MatchConstants;
-use API\Commons\Exceptions\AuthenticationError;
+use API\App\Json\Analysis\Constants\MatchConstantsFactory;
 use Chunks_ChunkDao;
 use Constants_ProjectStatus;
 use Exception;
 use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
-use INIT;
 use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use OutsourceTo_OutsourceAvailable;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Routes;
@@ -169,7 +167,10 @@ abstract class AbstractStatus {
      */
     protected function loadObjects() {
 
-        $target       = null;
+        $target                 = null;
+        $mt_qe_workflow_enabled = ( new Projects_MetadataDao )->get( $this->project->id, Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED, 60 * 60 )->value ?? false;
+        $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
+
         $this->result = $project = new AnalysisProject(
                 $this->_project_data[ 0 ][ 'pname' ],
                 $this->_project_data[ 0 ][ 'status_analysis' ],
@@ -179,7 +180,8 @@ abstract class AbstractStatus {
                         $this->_others_in_queue,
                         $this->total_segments,
                         $this->status_project
-                )
+                ),
+                $matchConstantsClass
         );
 
         $project->setAnalyzeLink( $this->getAnalyzeLink() );
@@ -200,7 +202,7 @@ abstract class AbstractStatus {
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
                 $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
-                $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );
             }
@@ -216,12 +218,12 @@ abstract class AbstractStatus {
             if ( !isset( $file ) || $file->getId() != $segInfo[ 'id_file' ] || !$chunk->hasFile( $segInfo[ 'id_file' ] ) ) {
                 $originalFile = ( !empty( $segInfo[ 'tag_key' ] ) and $segInfo[ 'tag_key' ] === 'original' ) ? $segInfo[ 'tag_value' ] : $segInfo[ 'filename' ];
                 $id_file_part = ( !empty( $segInfo[ 'id_file_part' ] ) ) ? (int)$segInfo[ 'id_file_part' ] : null;
-                $file         = new AnalysisFile( $segInfo[ 'id_file' ], $id_file_part, $segInfo[ 'filename' ], $originalFile );
+                $file         = new AnalysisFile( $segInfo[ 'id_file' ], $id_file_part, $segInfo[ 'filename' ], $originalFile, $matchConstantsClass );
                 $chunk->setFile( $file );
             }
             // Runtime Initialization Completed
 
-            $matchType = MatchConstants::toExternalMatchTypeValue( $segInfo[ 'match_type' ] ?? 'NEW' );
+            $matchType = $matchConstantsClass::toExternalMatchTypeValue( $segInfo[ 'match_type' ] ?? 'NEW' );
 
             // increment file totals
             $file->incrementRaw( $segInfo[ 'raw_word_count' ] );
@@ -286,7 +288,7 @@ abstract class AbstractStatus {
                 $chunkStruct->target        = $lang_pair[ 1 ];
                 $chunkStruct->payable_rates = $_job_fallback[ 'payable_rates' ];
 
-                $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user );
+                $chunk = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );
 

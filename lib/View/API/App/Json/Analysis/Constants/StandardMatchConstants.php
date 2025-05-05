@@ -7,11 +7,17 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace API\App\Json\Analysis\Constants;
 
 use RuntimeException;
 
-class MatchConstants {
+class StandardMatchConstants extends AbstractConstants {
+
+    protected static string $workflow_type = '';
+
+    public static function getWorkflowType(): string {
+        return static::$workflow_type;
+    }
 
     /*
      * These constants refer to the values sent by the APIs and need to be converted
@@ -31,7 +37,7 @@ class MatchConstants {
     const _INTERNAL     = 'internal';
     const _NUMBERS_ONLY = 'numbers_only';
 
-    const forValue = [
+    protected static array $forValue = [
             self::_NEW          => self::_NEW,
             self::_50_74        => self::_50_74,
             self::_75_84        => self::_75_84,
@@ -121,22 +127,6 @@ class MatchConstants {
             default:
                 return self::_NEW;
         }
-
-    }
-
-    /**
-     * @param string $name
-     *
-     * @return string
-     * @throws RuntimeException
-     */
-    public static function validate( string $name ): string {
-
-        if ( !array_key_exists( $name, self::forValue ) ) {
-            throw new RuntimeException( "Invalid match type: " . $name );
-        }
-
-        return $name;
 
     }
 

@@ -58,7 +58,7 @@ class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoObjectStruct imple
      *
      * @return array The object properties as an associative array.
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return (array)$this;
     }
 
