@@ -79,13 +79,15 @@ class CommentController extends KleinController {
             $commentDao       = new Comments_CommentDao( Database::obtain() );
             $new_record = $commentDao->resolveThread( $comment_struct );
 
-            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
             $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
             $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
             return $this->response->json([
                 "data" => [
-                    'entries' => $payload,
+                    'entries' => [
+                        'comments' => [$new_record]
+                    ],
                     'user' => [
                         'full_name' => $this->user->fullName()
                     ]
@@ -118,13 +120,15 @@ class CommentController extends KleinController {
                 $commentDao->saveComment( $mentioned_comment );
             }
 
-            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
             $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
             $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
             return $this->response->json([
                 "data" => [
-                    'entries' => $payload,
+                    'entries' => [
+                        'comments' => [$new_record]
+                    ],
                     'user' => [
                         'full_name' => $this->user->fullName()
                     ]
