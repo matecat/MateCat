@@ -274,9 +274,10 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * @return string
      */
     public function getStandardPenalty( ?int $penalty = null ) {
-        if( $penalty !== null ){
+        if ( $penalty !== null ) {
             return 100 - $penalty . "%";
         }
+
         return 100 - $this->getPenalty() . "%";
     }
 
@@ -409,7 +410,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return float|null
      */
-    public function getQualityEstimation( $source, $target, $sentence, $translation ): ?float {
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ): ?float {
         return null;
     }
 

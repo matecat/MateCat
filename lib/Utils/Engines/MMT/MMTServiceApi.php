@@ -118,17 +118,18 @@ class MMTServiceApi {
      * @param $target
      * @param $sentence
      * @param $translation
+     *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function qualityEstimation($source, $target, $sentence, $translation)
-    {
+    public function qualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ) {
         return $this->send( 'GET', "$this->baseUrl/translate/qe", [
-            "source" => $source,
-            "target" => $target,
-            "sentence" => $sentence,
-            "translation" => $translation,
-        ]);
+                "source"            => $source,
+                "target"            => $target,
+                "sentence"          => $sentence,
+                "translation"       => $translation,
+                'purfect_engine_id' => $mt_qe_engine_id
+        ] );
     }
 
 
@@ -373,9 +374,9 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $text
+     * @param      $source
+     * @param      $target
+     * @param      $text
      * @param null $contextVector
      * @param null $hints
      * @param null $projectId
@@ -385,12 +386,27 @@ class MMTServiceApi {
      * @param null $glossaries
      * @param null $ignoreGlossaryCase
      * @param null $include_score
+     *
      * @return mixed|void
      * @throws MMTServiceApiException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null, $include_score = null ) {
+    public function translate(
+            $source,
+            $target,
+            $text,
+            $contextVector = null,
+            $hints = null,
+            $projectId = null,
+            $timeout = null,
+            $priority = null,
+            $session = null,
+            $glossaries = null,
+            $ignoreGlossaryCase = null,
+            $include_score = null,
+            $mt_qe_engine_id = 'default'
+    ) {
 
-        if(empty($text)){
+        if ( empty( $text ) ) {
             return;
         }
 
@@ -418,7 +434,8 @@ class MMTServiceApi {
         }
 
         if ( $include_score ) {
-            $params[ 'include_score' ] = true;
+            $params[ 'include_score' ]   = true;
+            $params[ 'purfect_engine_id' ] = $mt_qe_engine_id;
         }
 
         return $this->send( 'GET', "$this->baseUrl/translate", $params, false, $timeout );
@@ -494,17 +511,6 @@ class MMTServiceApi {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         ];
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             * For php >= 5.5.0 we use \CURLFile , so we can force and set safe upload to true
-             *
-             * @see MMTServiceApi::_setCulFileUpload()
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-        }
 
         if ( count( $headers ) > 0 ) {
             $options[ CURLOPT_HTTPHEADER ] = $headers;

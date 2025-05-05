@@ -421,10 +421,6 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        if ( $contributionStruct->mt_evaluation ) {
-            $_config[ 'include_score' ] = $contributionStruct->mt_evaluation;
-        }
-
         if ( $contributionStruct->dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
         }
@@ -539,7 +535,11 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
-                $config[ 'include_score' ]       = $contributionStruct->mt_evaluation; // mt evaluation => ice_mt
+
+                if ( $contributionStruct->mt_evaluation ) {
+                    $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
+                    $config[ 'mt_qe_engine_id' ] = $contributionStruct->mt_qe_engine_id;
+                }
 
                 $mt_result = $mt_engine->get( $config );
             }

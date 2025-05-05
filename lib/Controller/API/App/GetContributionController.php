@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use Jobs\MetadataDao;
 use Klein\Response;
 use Matecat\SubFiltering\MateCatFilter;
+use MTQE\Templates\DTO\MTQEWorkflowParams;
 use Projects_MetadataDao;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
@@ -61,14 +62,27 @@ class GetContributionController extends KleinController {
             $projectStruct = $jobStruct->getProject();
             $this->featureSet->loadForProject( $projectStruct );
 
+            $contributionRequest = new ContributionRequestStruct();
+
             if ( !$concordance_search ) {
+
                 $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
+
+                $contributionRequest->mt_evaluation =
+                        (bool)( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_EVALUATION, 60 * 60 )->value ??
+                        //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
+                        (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on jobs metadata
+                        false;
+
+                if( $contributionRequest->mt_evaluation ){
+                    $contributionRequest->mt_qe_engine_id = ( new MTQEWorkflowParams( json_decode( ( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS, 60 * 60 )->value, true ) ?? [] ) )->qe_model_type; // params or default configuration (NULL safe)
+                }
+
             }
 
             $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
             $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
 
-            $contributionRequest                    = new ContributionRequestStruct();
             $contributionRequest->id_file           = $file->id_file;
             $contributionRequest->id_job            = $this->id_job;
             $contributionRequest->password          = $received_password;
@@ -93,12 +107,6 @@ class GetContributionController extends KleinController {
             } else {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
             }
-
-            $contributionRequest->mt_evaluation =
-                    (bool)( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_EVALUATION, 60 * 60 )->value ??
-                    //TODO REMOVE after a reasonable amount of time
-                    (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on jobs metadata
-                    false;
 
             Request::contribution( $contributionRequest );
 

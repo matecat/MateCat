@@ -244,8 +244,8 @@ class Lara extends Engines_AbstractEngine {
             }
 
             // Get score from MMT Quality Estimation
-            if ( isset( $_config[ 'include_score' ] ) and $_config[ 'include_score' ] == 1 ) {
-                $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation );
+            if ( isset( $_config[ 'include_score' ] ) and $_config[ 'include_score' ] ) {
+                $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] );
             }
 
         } catch ( LaraException $t ) {
@@ -293,16 +293,20 @@ class Lara extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
      *
      * @return float|null
      */
-    public function getQualityEstimation( $source, $target, $sentence, $translation ): ?float {
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ): ?float {
+
+        $score = null;
+
         try {
-            $score = $this->mmt_GET_Fallback->getQualityEstimation( $source, $target, $sentence, $translation );
+            $score = $this->mmt_GET_Fallback->getQualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
 
             Log::doJsonLog( [
                     'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
@@ -313,14 +317,15 @@ class Lara extends Engines_AbstractEngine {
                     'score'                  => $score,
             ] );
 
-            return $score;
-
         } catch ( MMTServiceApiException $exception ) {
             Log::doJsonLog( [
                     'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
                     'error'                        => $exception->getMessage(),
             ] );
+        } finally {
+            return $score;
         }
+
     }
 
     /**

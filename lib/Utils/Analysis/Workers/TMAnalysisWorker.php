@@ -608,9 +608,13 @@ class TMAnalysisWorker extends AbstractWorker {
          *
          */
         $matches = [];
+
+        // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
+        $mt_qe_config = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters, true ) ?? [] ); // params or default configuration (NULL safe)
+
         try {
 
-            $tms_match = $this->__filterTMMatches( $this->_getTM( $tmsEngine, $_config ), $queueElement );
+            $tms_match = $this->__filterTMMatches( $this->_getTM( $tmsEngine, $_config ), $queueElement->params->mt_qe_workflow_enabled, $mt_qe_config );
             if ( !empty( $tms_match ) ) {
                 $matches = $tms_match;
             }
@@ -623,7 +627,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // Do nothing, skip frame
         }
 
-        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement );
+        $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_qe_config );
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
             usort( $matches, "self::_compareScore" );
@@ -645,21 +649,19 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Filters Translation Memory (TM) matches based on specific criteria defined in the MTQE workflow parameters.
      *
-     * @param array        $matches      An array of TM matches to be filtered.
-     * @param QueueElement $queueElement The queue element containing parameters and workflow settings.
+     * @param array              $matches An array of TM matches to be filtered.
+     * @param bool               $mt_qe_workflow_enabled
+     * @param MTQEWorkflowParams $mt_qe_config
      *
      * @return array The filtered array of TM matches.
      */
-    private function __filterTMMatches( array $matches, QueueElement $queueElement ): array {
-
-        // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-        $mt_qe_config = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters, true ) ?? [] ); // params or default configuration
+    private function __filterTMMatches( array $matches, bool $mt_qe_workflow_enabled, MTQEWorkflowParams $mt_qe_config ): array {
 
         // Filter the matches array using a callback function.
-        return array_filter( $matches, function ( $match ) use ( $mt_qe_config, $queueElement ) {
+        return array_filter( $matches, function ( $match ) use ( $mt_qe_config, $mt_qe_workflow_enabled ) {
 
             // Check if the MTQE workflow is enabled.
-            if ( $queueElement->params->mt_qe_workflow_enabled ) {
+            if ( $mt_qe_workflow_enabled ) {
 
                 // If the "analysis_ignore_101" flag is set, ignore all matches.
                 if ( $mt_qe_config->analysis_ignore_101 ) {
@@ -690,14 +692,15 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
-     * @param Engines_AbstractEngine  $mtEngine
-     * @param                         $_config
+     * @param Engines_AbstractEngine $mtEngine
+     * @param array                  $_config
      *
-     * @param QueueElement            $queueElement
+     * @param QueueElement           $queueElement
+     * @param MTQEWorkflowParams     $mt_qe_config
      *
      * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, $_config, QueueElement $queueElement ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, MTQEWorkflowParams $mt_qe_config ) {
 
         $mt_result = false;
 
@@ -705,10 +708,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $mtEngine->setFeatureSet( $this->featureSet );
 
-            //tell to the engine that this is the analysis phase ( some engines want to skip the analysis )
+            //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // YYY if mt_qe_workflow_enabled force Engine skipAnalysis to false
+            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis to false to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
                 $mtEngine->setSkipAnalysis( false );
             }
@@ -720,6 +723,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
             $config[ 'mt_penalty' ]      = $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null; // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
+            $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_type;
 
             if ( !isset( $config[ 'job_id' ] ) ) {
                 $config[ 'job_id' ] = $queueElement->params->id_job;
