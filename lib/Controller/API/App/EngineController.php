@@ -341,7 +341,7 @@ class EngineController extends KleinController {
                         $engineDAO->delete( $newCreatedDbRowStruct );
                         $this->destroyUserEnginesCache();
 
-                        throw new Exception($message, $code);return;
+                        throw new Exception($message, $code);
                     }
                 }
 
