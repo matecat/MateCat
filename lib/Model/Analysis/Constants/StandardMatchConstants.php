@@ -30,7 +30,7 @@ class StandardMatchConstants extends AbstractConstants {
     const _100_PUBLIC   = "tm_100_public";
     const _ICE          = "ice";
     const _MT           = "MT";
-    const _ICE_MT       = "ice_MT";
+    const _ICE_MT       = "ice_mt";
     const _REPETITIONS  = 'repetitions';
     const _INTERNAL     = 'internal';
     const _NUMBERS_ONLY = 'numbers_only';

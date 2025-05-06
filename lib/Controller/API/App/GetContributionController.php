@@ -75,7 +75,8 @@ class GetContributionController extends KleinController {
                         false;
 
                 if ( $contributionRequest->mt_evaluation ) {
-                    $contributionRequest->mt_qe_engine_id = ( new MTQEWorkflowParams( json_decode( ( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS, 60 * 60 )->value ?? null, true ) ?? [] ) )->qe_model_type; // params or default configuration (NULL safe)
+                    $mt_qe_workflow_parameters         = new MTQEWorkflowParams( json_decode( $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ), true ) ?? [] ); // params or default configuration (NULL safe)
+                    $contributionRequest->mt_qe_config = (string)$mt_qe_workflow_parameters;
                 }
 
             }

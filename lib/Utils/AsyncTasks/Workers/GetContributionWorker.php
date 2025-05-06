@@ -19,6 +19,8 @@ use INIT;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
+use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PostProcess;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
@@ -501,7 +503,7 @@ class GetContributionWorker extends AbstractWorker {
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
-                $tms_match  = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
+                $tms_match  = $this->__filterTMMatches( $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] ), $contributionStruct->mt_qe_workflow_enabled, new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) ) );
             }
         }
 
@@ -551,6 +553,49 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         return [ $mt_result, $matches ];
+    }
+
+    /**
+     * Filters Translation Memory (TM) matches based on specific criteria defined in the MTQE workflow parameters.
+     *
+     * @param array              $matches An array of TM matches to be filtered.
+     * @param bool               $mt_qe_workflow_enabled
+     * @param MTQEWorkflowParams $mt_qe_config
+     *
+     * @return array The filtered array of TM matches.
+     */
+    private function __filterTMMatches( array $matches, bool $mt_qe_workflow_enabled, MTQEWorkflowParams $mt_qe_config ): array {
+
+        // Filter the matches array using a callback function.
+        return array_filter( $matches, function ( $match ) use ( $mt_qe_config, $mt_qe_workflow_enabled ) {
+
+            // Check if the MTQE workflow is enabled.
+            if ( $mt_qe_workflow_enabled ) {
+
+                // If the "analysis_ignore_101" flag is set, ignore all matches.
+                if ( $mt_qe_config->analysis_ignore_101 ) {
+                    return false;
+                }
+
+                // If the "analysis_ignore_100" flag is set, ignore matches with a score <= 100 unless they are ICE matches.
+                if ( $mt_qe_config->analysis_ignore_100 ) {
+                    if ( (int)$match[ 'match' ] <= 100 && !$match[ InternalMatchesConstants::TM_ICE ] ) {
+                        return false;
+                    }
+                }
+
+                // By definition, ignore all matches with a score below 100 when the MTQE workflow is enabled.
+                if ( (int)$match[ 'match' ] < 100 ) {
+                    return false;
+                }
+
+            }
+
+            // If none of the conditions above are met, include the match.
+            return true;
+
+        } );
+
     }
 
     /**

@@ -24,7 +24,7 @@ class MTQEMatchConstants extends AbstractConstants {
     const TM_100              = "tm_100";
     const TM_100_PUBLIC       = "tm_100_public";
     const ICE                 = "ice";
-    const ICE_MT              = "ice_MT";
+    const ICE_MT              = "ice_mt";
     const REPETITIONS         = 'repetitions';
     const TOP_QUALITY_MT      = 'top_quality_mt';
     const HIGHER_QUALITY_MT   = 'higher_quality_mt';
