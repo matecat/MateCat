@@ -5,7 +5,10 @@ import {isNull} from 'lodash/lang'
 import TextUtils from '../../utils/textUtils'
 import SegmentQRLine from './SegmentQRLine'
 import SegmentQRIssue from './SegmentQRIssue'
-import {SEGMENTS_STATUS} from '../../constants/Constants'
+import {
+  ANLYSIS_BUCKETS_LABELS,
+  SEGMENTS_STATUS,
+} from '../../constants/Constants'
 import DraftMatecatUtils from '../segments/utils/DraftMatecatUtils'
 
 class SegmentQR extends React.Component {
@@ -422,6 +425,12 @@ class SegmentQR extends React.Component {
           <div className="segment-id">{this.props.segment.get('id')}</div>
           <div className="segment-production-container">
             <div className="segment-production">
+              <div className="production match-type">
+                Match type:{' '}
+                <b>
+                  {ANLYSIS_BUCKETS_LABELS[this.props.segment.get('match_type')]}
+                </b>
+              </div>
               <div className="production word-speed">
                 Secs/Word: <b>{this.getWordsSpeed()}</b>
               </div>
