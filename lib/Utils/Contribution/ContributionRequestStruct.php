@@ -13,7 +13,6 @@ namespace Contribution;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
 use Jobs_JobStruct;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
 use Projects_ProjectStruct;
 
 class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
@@ -79,10 +78,10 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $tm_prioritization = null;
 
-    public                    $mt_evaluation              = null;
-    public string $mt_qe_config;
-    public ?string            $mt_qe_engine_id            = null;
-    public ?string            $mt_quality_value_in_editor = null;
+    public         $mt_evaluation              = null;
+    public ?string $mt_qe_config               = null;
+    public ?string $mt_qe_engine_id            = null;
+    public ?string $mt_quality_value_in_editor = null;
 
     public $penalty_key = [];
 

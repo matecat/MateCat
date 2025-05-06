@@ -481,7 +481,7 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'get_mt' ] = false;
         }
 
-        $mt_qe_configuration = new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) );
+        $mt_qe_configuration = new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) ?? [] );
 
         /**
          * if No TM server and No MT selected $_TMS is not defined,
@@ -505,7 +505,7 @@ class GetContributionWorker extends AbstractWorker {
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
-                $tms_match  = $this->__filterTMMatches( $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] ), $contributionStruct->mt_qe_workflow_enabled, $mt_qe_configuration );
+                $tms_match  = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
             }
         }
 
@@ -539,13 +539,11 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
+                $config[ 'mt_penalty' ]          = $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null; // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
                     $config[ 'mt_qe_engine_id' ] = $mt_qe_configuration->qe_model_type;
-                    if( $contributionStruct->mt_qe_workflow_enabled ){
-
-                    }
                 }
 
                 $mt_result = $mt_engine->get( $config );
@@ -558,49 +556,6 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         return [ $mt_result, $matches ];
-    }
-
-    /**
-     * Filters Translation Memory (TM) matches based on specific criteria defined in the MTQE workflow parameters.
-     *
-     * @param array              $matches An array of TM matches to be filtered.
-     * @param bool               $mt_qe_workflow_enabled
-     * @param MTQEWorkflowParams $mt_qe_config
-     *
-     * @return array The filtered array of TM matches.
-     */
-    private function __filterTMMatches( array $matches, bool $mt_qe_workflow_enabled, MTQEWorkflowParams $mt_qe_config ): array {
-
-        // Filter the matches array using a callback function.
-        return array_filter( $matches, function ( $match ) use ( $mt_qe_config, $mt_qe_workflow_enabled ) {
-
-            // Check if the MTQE workflow is enabled.
-            if ( $mt_qe_workflow_enabled ) {
-
-                // If the "analysis_ignore_101" flag is set, ignore all matches.
-                if ( $mt_qe_config->ignore_101 ) {
-                    return false;
-                }
-
-                // If the "analysis_ignore_100" flag is set, ignore matches with a score <= 100 unless they are ICE matches.
-                if ( $mt_qe_config->ignore_100 ) {
-                    if ( (int)$match[ 'match' ] <= 100 && !$match[ InternalMatchesConstants::TM_ICE ] ) {
-                        return false;
-                    }
-                }
-
-                // By definition, ignore all matches with a score below 100 when the MTQE workflow is enabled.
-                if ( (int)$match[ 'match' ] < 100 ) {
-                    return false;
-                }
-
-            }
-
-            // If none of the conditions above are met, include the match.
-            return true;
-
-        } );
-
     }
 
     /**

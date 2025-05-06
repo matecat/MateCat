@@ -69,9 +69,9 @@ class GetContributionController extends KleinController {
                 $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
 
                 $contributionRequest->mt_evaluation =
-                        (bool)( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_EVALUATION, 60 * 60 )->value ??
+                        (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
                         //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                        (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on jobs metadata
+                        (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                         false;
 
                 if ( $contributionRequest->mt_evaluation ) {

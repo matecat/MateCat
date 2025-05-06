@@ -10,14 +10,14 @@
 namespace MTQE\Templates\DTO;
 
 use Constants_TranslationStatus;
-use DataAccess_AbstractDaoObjectStruct;
+use DataAccess_AbstractDaoSilentStruct;
 use JsonSerializable;
 
-class MTQEWorkflowParams extends DataAccess_AbstractDaoObjectStruct implements JsonSerializable {
+class MTQEWorkflowParams extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
-    public bool   $ignore_100                      = false;
-    public bool   $ignore_101                      = false;
-    public bool   $confirm_best_quality_mt         = true;
+    public bool $analysis_ignore_100 = false;
+    public bool $analysis_ignore_101 = false;
+    public bool $confirm_best_quality_mt = true;
     public bool   $lock_best_quality_mt            = false;
     public string $best_quality_mt_analysis_status = Constants_TranslationStatus::STATUS_APPROVED;
     public string $qe_model_type                   = "default";
