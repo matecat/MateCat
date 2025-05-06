@@ -4,7 +4,6 @@ namespace API\App;
 
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
 use Constants_TranslationStatus;
 use Database;
 use Exception;
@@ -15,6 +14,7 @@ use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Klein\Response;
 use RuntimeException;
 use Translations_SegmentTranslationDao;
@@ -36,7 +36,7 @@ class CopyAllSourceToTargetController extends KleinController {
             $revision_number = $request['revision_number'];
             $job_data = $request['job_data'];
 
-            return $this->saveEventsAndUpdateTranslations( $job_data->id, $job_data->password, $revision_number);
+            return $this->saveEventsAndUpdateTranslations( $job_data, $revision_number);
         } catch (Exception $exception){
             $this->returnException($exception);
         }
@@ -77,20 +77,18 @@ class CopyAllSourceToTargetController extends KleinController {
     }
 
     /**
-     * @param $job_id
-     * @param $password
+     * @param Jobs_JobStruct $chunk
      * @param $revision_number
      * @return Response
      * @throws Exception
      */
-    private function saveEventsAndUpdateTranslations($job_id, $password, $revision_number): Response
+    private function saveEventsAndUpdateTranslations(Jobs_JobStruct $chunk, $revision_number): Response
     {
         try {
             // BEGIN TRANSACTION
             $database = Database::obtain();
             $database->begin();
 
-            $chunk    = Chunks_ChunkDao::getByIdAndPassword( $job_id, $password );
             $features = $chunk->getProject()->getFeaturesSet();
 
             $batchEventCreator = new TranslationEventsHandler( $chunk );
@@ -119,7 +117,6 @@ class CopyAllSourceToTargetController extends KleinController {
                 $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
                 $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
-
                 try {
                     $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 } catch ( Exception $e ) {
@@ -129,8 +126,14 @@ class CopyAllSourceToTargetController extends KleinController {
                 }
 
                 if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                    $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
-                    $batchEventCreator->addEvent( $segmentTranslationEventModel );
+                    try {
+                        $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
+                        $batchEventCreator->addEvent( $segmentTranslationEventModel );
+                    } catch ( Exception $e ) {
+                        $database->rollback();
+
+                        throw new RuntimeException("Job archived or deleted", -5);
+                    }
                 }
             }
 
@@ -150,7 +153,7 @@ class CopyAllSourceToTargetController extends KleinController {
             $this->log( 'Segment Translation events saved completed' );
             $this->log( $data );
 
-            $database->commit();
+            $database->commit(); // COMMIT TRANSACTION
 
             return $this->response->json([
                 'data' => $data

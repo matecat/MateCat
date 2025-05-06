@@ -256,19 +256,19 @@ class CommentController extends KleinController {
         }
 
         return [
+            'first_seg' => $first_seg,
             'id_client' => $id_client,
-            'username' => $username,
+            'id_comment' => $id_comment,
             'id_job' => $id_job,
             'id_segment' => $id_segment,
-            'source_page' => $source_page,
             'is_anonymous' => $is_anonymous,
-            'revision_number' => (int)$revision_number,
-            'first_seg' => $first_seg,
-            'last_seg' => $last_seg,
-            'id_comment' => $id_comment,
-            'password' => $password,
-            'message' => $message,
             'job' => $job,
+            'last_seg' => $last_seg,
+            'message' => $message,
+            'password' => $password,
+            'revision_number' => (int)$revision_number,
+            'source_page' => $source_page,
+            'username' => $username,
         ];
     }
 
