@@ -423,7 +423,7 @@ class SetTranslationController extends KleinController {
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $propagate = filter_var( $this->request->param( 'propagate' ), FILTER_NULL_ON_FAILURE );
+        $propagate = filter_var( $this->request->param( 'propagate' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
         $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $time_to_edit = filter_var( $this->request->param( 'time_to_edit' ), FILTER_SANITIZE_NUMBER_INT );
         $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
