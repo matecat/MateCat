@@ -543,6 +543,9 @@ class GetContributionWorker extends AbstractWorker {
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
                     $config[ 'mt_qe_engine_id' ] = $mt_qe_configuration->qe_model_type;
+                    if( $contributionStruct->mt_qe_workflow_enabled ){
+
+                    }
                 }
 
                 $mt_result = $mt_engine->get( $config );

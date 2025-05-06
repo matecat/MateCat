@@ -11,7 +11,7 @@ namespace Model\Analysis\Constants;
 
 class StandardMatchConstants extends AbstractConstants {
 
-    protected static string $workflow_type = '';
+    protected static string $workflow_type = 'standard';
 
     public static function getWorkflowType(): string {
         return static::$workflow_type;
