@@ -481,6 +481,8 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'get_mt' ] = false;
         }
 
+        $mt_qe_configuration = new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) );
+
         /**
          * if No TM server and No MT selected $_TMS is not defined,
          * so we want not to perform TMS Call
@@ -503,7 +505,7 @@ class GetContributionWorker extends AbstractWorker {
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
-                $tms_match  = $this->__filterTMMatches( $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] ), $contributionStruct->mt_qe_workflow_enabled, new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) ) );
+                $tms_match  = $this->__filterTMMatches( $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] ), $contributionStruct->mt_qe_workflow_enabled, $mt_qe_configuration );
             }
         }
 
@@ -540,7 +542,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
-                    $config[ 'mt_qe_engine_id' ] = $contributionStruct->mt_qe_engine_id;
+                    $config[ 'mt_qe_engine_id' ] = $mt_qe_configuration->qe_model_type;
                 }
 
                 $mt_result = $mt_engine->get( $config );
@@ -573,12 +575,12 @@ class GetContributionWorker extends AbstractWorker {
             if ( $mt_qe_workflow_enabled ) {
 
                 // If the "analysis_ignore_101" flag is set, ignore all matches.
-                if ( $mt_qe_config->analysis_ignore_101 ) {
+                if ( $mt_qe_config->ignore_101 ) {
                     return false;
                 }
 
                 // If the "analysis_ignore_100" flag is set, ignore matches with a score <= 100 unless they are ICE matches.
-                if ( $mt_qe_config->analysis_ignore_100 ) {
+                if ( $mt_qe_config->ignore_100 ) {
                     if ( (int)$match[ 'match' ] <= 100 && !$match[ InternalMatchesConstants::TM_ICE ] ) {
                         return false;
                     }

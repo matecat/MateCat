@@ -668,12 +668,12 @@ class TMAnalysisWorker extends AbstractWorker {
             if ( $mt_qe_workflow_enabled ) {
 
                 // If the "analysis_ignore_101" flag is set, ignore all matches.
-                if ( $mt_qe_config->analysis_ignore_101 ) {
+                if ( $mt_qe_config->ignore_101 ) {
                     return false;
                 }
 
                 // If the "analysis_ignore_100" flag is set, ignore matches with a score <= 100 unless they are ICE matches.
-                if ( $mt_qe_config->analysis_ignore_100 ) {
+                if ( $mt_qe_config->ignore_100 ) {
                     if ( (int)$match[ 'match' ] <= 100 && !$match[ InternalMatchesConstants::TM_ICE ] ) {
                         return false;
                     }

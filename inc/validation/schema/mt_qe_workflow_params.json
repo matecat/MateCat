@@ -2,11 +2,11 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "analysis_ignore_100": {
+    "ignore_100": {
       "type": "boolean",
       "default": false
     },
-    "analysis_ignore_101": {
+    "ignore_101": {
       "type": "boolean",
       "default": false
     },
