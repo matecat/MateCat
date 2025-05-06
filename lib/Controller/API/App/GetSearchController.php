@@ -82,7 +82,11 @@ class GetSearchController extends KleinController {
             }
 
             return $this->response->json([
-                'success' => true
+                "errors" => [],
+                "data" => [],
+                "token" => $request['token'] ?? null,
+                "total" => $res['count'] ?? 0,
+                "segments" => $res[ 'sid_list' ]
             ]);
 
         } catch (Exception $exception){
