@@ -8,6 +8,8 @@ use Constants_Engines;
 use Database;
 use DomainException;
 use Engine;
+use Engines\MMT\MMTServiceApi;
+use Engines\MMT\MMTServiceApiException;
 use EnginesModel\DeepLStruct;
 use EnginesModel\LaraStruct;
 use EnginesModel_AltlangStruct;
@@ -20,6 +22,7 @@ use EnginesModel_MicrosoftHubStruct;
 use EnginesModel_SmartMATEStruct;
 use EnginesModel_YandexTranslateStruct;
 use Exception;
+use INIT;
 use InvalidArgumentException;
 use Klein\Response;
 use Lara\LaraException;
@@ -204,6 +207,12 @@ class EngineController extends KleinController {
             }
 
             $engineList = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->user );
+            $UserMetadataDao = new MetadataDao();
+            $engineEnabled   = $UserMetadataDao->get( $this->user->uid, $newEngineStruct->class_load );
+
+            if ( !empty( $engineEnabled ) ) {
+                unset( $engineList[ $newEngineStruct->class_load ] );
+            }
 
             $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
             $newCreatedDbRowStruct = null;
@@ -216,13 +225,10 @@ class EngineController extends KleinController {
 
             if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
 
-                $error = $this->featureSet->filter(
-                    'engineCreationFailed',
-                    [ 'code' => -9, 'message' => "Creation failed. Generic error" ],
-                    $newEngineStruct->class_load
-                );
+                $engine_type = explode( "\\", $newEngineStruct->class_load );
+                $engine_type = array_pop( $engine_type );
 
-                throw new DomainException($error['message'], $error['code']);
+                throw new Exception("Creation failed. Only one $engine_type engine is allowed.", 403);
             }
 
             if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
@@ -240,6 +246,44 @@ class EngineController extends KleinController {
                     $this->destroyUserEnginesCache();
 
                     throw new DomainException($mt_result[ 'error' ]);
+                }
+
+            } elseif( $newEngineStruct instanceof EnginesModel_IntentoStruct ){
+
+                $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+                $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
+                $config[ 'segment' ] = "Hello World";
+                $config[ 'source' ]  = "en-US";
+                $config[ 'target' ]  = "fr-FR";
+
+                $mt_result = $newTestCreatedMT->get( $config );
+
+                if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
+
+                    switch ($mt_result[ 'error' ][ 'code' ]){
+
+                        // wrong provider credentials
+                        case -2:
+                            $code = $mt_result[ 'error' ][ 'http_code' ] ?? 413;
+                            $message = $mt_result[ 'error' ][ 'message' ];
+                            break;
+
+                        // not valid license
+                        case -403:
+                            $code = 413;
+                            $message = "The Intento license you entered cannot be used inside CAT tools. Please subscribe to a suitable license to start using Intento as MT engine.";
+                            break;
+
+                        default:
+                            $code = 500;
+                            $message = "Intento license not valid, please verify its validity and try again";
+                            break;
+                    }
+
+                    $engineDAO->delete( $newCreatedDbRowStruct );
+                    $this->destroyUserEnginesCache();
+
+                    throw new Exception($message, $code);
                 }
 
             } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
@@ -264,15 +308,41 @@ class EngineController extends KleinController {
                 /**
                  * @var $newTestCreatedMT Lara
                  */
-                $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+                $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+                $config              = $newTestCreatedMT->getConfigStruct();
+                $config[ 'segment' ] = "Hello World";
+                $config[ 'source' ]  = "en-US";
+                $config[ 'target' ]  = "it-IT";
 
                 try {
-                    $newTestCreatedMT->getAvailableLanguages();
+                    $newTestCreatedMT->get( $config );
                 } catch ( LaraException $e ) {
+                    $code = $e->getCode();
+                    $message = $e->getMessage();
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
-                    throw new DomainException($e->getMessage(), $e->getCode());
+                    throw new Exception($message, $code);
+                }
+
+                // Check MMT License
+                $mmtLicense = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray()['MMT-License'];
+
+                if(!empty($mmtLicense)){
+                    $mmtClient = MMTServiceApi::newInstance()
+                        ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                        ->setLicense( $mmtLicense );
+
+                    try {
+                        $mmtClient->me();
+                    } catch (MMTServiceApiException $e){
+                        $code = $e->getCode();
+                        $message = "ModernMT license not valid, please verify its validity and try again" ;
+                        $engineDAO->delete( $newCreatedDbRowStruct );
+                        $this->destroyUserEnginesCache();
+
+                        throw new Exception($message, $code);return;
+                    }
                 }
 
                 $UserMetadataDao = new MetadataDao();
@@ -289,13 +359,15 @@ class EngineController extends KleinController {
                 }
             }
 
+            $engine_type = explode( "\\", $newCreatedDbRowStruct->class_load );
+
             return $this->response->json([
                 'data' => [
                     'id'          => $newCreatedDbRowStruct->id,
                     'name'        => $newCreatedDbRowStruct->name,
                     'description' => $newCreatedDbRowStruct->description,
                     'type'        => $newCreatedDbRowStruct->type,
-                    'engine_type' => $newCreatedDbRowStruct->class_load,
+                    'engine_type' => $engine_type,
                 ],
                 'errors' => [],
             ]);
