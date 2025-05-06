@@ -125,12 +125,6 @@ const SegmentQRLine = ({
               {segment.get('suggestion_source')} - {suggestionMatch}%
             </b>
           </div>
-          {/*{segment.get('suggestion_source') &&
-          segment.get('suggestion_source') !== 'MT' ? (
-            <div className={'tm-percent ' + suggestionMatchClass}>
-              {suggestionMatch}%
-            </div>
-          ) : null}*/}
         </div>
       ) : null}
 
