@@ -22,12 +22,12 @@ class StandardMatchConstants extends AbstractConstants {
      * into the values that are used internally and to be inserted into the database.
      */
     const _NEW          = "new";
-    const _50_74        = "50_74";
-    const _75_84        = "75_84";
-    const _85_94        = "85_94";
-    const _95_99        = "95_99";
-    const _100          = "100";
-    const _100_PUBLIC   = "100_public";
+    const _50_74        = "tm_50_74";
+    const _75_84        = "tm_75_84";
+    const _85_94        = "tm_85_94";
+    const _95_99        = "tm_95_99";
+    const _100          = "tm_100";
+    const _100_PUBLIC   = "tm_100_public";
     const _ICE          = "ice";
     const _MT           = "MT";
     const _ICE_MT       = "ice_MT";

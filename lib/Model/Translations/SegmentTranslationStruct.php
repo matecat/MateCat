@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\ArrayAccessTrait;
+use Model\Analysis\Constants\InternalMatchesConstants;
 
 class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
 
@@ -36,7 +37,7 @@ class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilent
 
     public function isICE(): bool {
         // In some cases, ICEs are not locked (translations from bilingual xliff). Only consider locked ICEs
-        return $this->match_type == Constants_SegmentTranslationsMatchType::ICE && $this->locked;
+        return $this->match_type == InternalMatchesConstants::TM_ICE && $this->locked;
     }
 
     /**

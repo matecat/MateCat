@@ -13,7 +13,8 @@ use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\EntryDao;
-use Model\Analysis\Constants\StandardMatchConstants;
+use Model\Analysis\Constants\MatchConstantsFactory;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;
@@ -85,7 +86,7 @@ class SegmentAnalysisController extends KleinController {
         $totalPages = ceil( $segmentsCount / $perPage );
         $isLast     = ( (int)$page === (int)$totalPages );
 
-        if ( ( $page > $totalPages && $totalPages > 0 ) ||  $page <= 0 ) {
+        if ( ( $page > $totalPages && $totalPages > 0 ) || $page <= 0 ) {
             throw new Exception( 'Page number ' . $page . ' is not valid' );
         }
 
@@ -131,8 +132,10 @@ class SegmentAnalysisController extends KleinController {
         $issuesAggregate     = $issuesNotesAndIdRequests[ 'issuesAggregate' ];
         $idRequestsAggregate = $issuesNotesAndIdRequests[ 'idRequestsAggregate' ];
 
+        $mt_qe_workflow_enabled = $jobStruct->getProject()->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ) {
-            $segments[] = $this->formatSegment( $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate );
+            $segments[] = $this->formatSegment( $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate, $mt_qe_workflow_enabled );
         }
 
         return $segments;
@@ -240,8 +243,10 @@ class SegmentAnalysisController extends KleinController {
         $issuesAggregate     = $issuesNotesAndIdRequests[ 'issuesAggregate' ];
         $idRequestsAggregate = $issuesNotesAndIdRequests[ 'idRequestsAggregate' ];
 
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+
         foreach ( $segmentsForAnalysis as $segmentForAnalysis ) {
-            $segments[] = $this->formatSegment( $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate );
+            $segments[] = $this->formatSegment( $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate, $mt_qe_workflow_enabled );
         }
 
         return $segments;
@@ -302,7 +307,7 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function formatSegment( DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate ) {
+    private function formatSegment( DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate, $mt_qe_workflow_enabled = false ) {
         // id_request
         $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 
@@ -319,6 +324,8 @@ class SegmentAnalysisController extends KleinController {
             $issues = $issuesAggregate[ $segmentForAnalysis->id_job ][ $segmentForAnalysis->id ];
         }
 
+        $matchConstants = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
+
         return [
                 'id_segment'            => (int)$segmentForAnalysis->id,
                 'id_chunk'              => (int)$segmentForAnalysis->id_job,
@@ -333,7 +340,7 @@ class SegmentAnalysisController extends KleinController {
                 'target_lang'           => $segmentForAnalysis->target,
                 'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
                 'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type'            => StandardMatchConstants::toExternalMatchTypeValue( $segmentForAnalysis->match_type ?? 'NEW' ),
+                'match_type'            => $matchConstants::toExternalMatchTypeValue( $segmentForAnalysis->match_type ?? 'NEW' ),
                 'revision_number'       => ( $segmentForAnalysis->source_page ) ? ReviewUtils::sourcePageToRevisionNumber( $segmentForAnalysis->source_page ) : null,
                 'issues'                => $issues,
                 'notes'                 => ( !empty( $notesAggregate[ $segmentForAnalysis->id ] ) ? $notesAggregate[ $segmentForAnalysis->id ] : [] ),
