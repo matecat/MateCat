@@ -45,7 +45,7 @@ export const EMAIL_PATTERN =
 
 export const METADATA_KEY = 'cross_language_matches'
 
-export const ANLYSIS_BUCKETS_LABELS = {
+export const ANALYSIS_BUCKETS_LABELS = {
   MT: 'Machine Translation',
   NO_MATCH: 'New',
   REPETITIONS: 'Repetitions',
