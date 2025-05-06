@@ -19,16 +19,6 @@ use JsonSerializable;
 
 class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoObjectStruct implements JsonSerializable {
 
-    const ICE_MT              = 'ICE_MT';
-    const TOP_QUALITY_MT      = 'TOP_QUALITY_MT';
-    const HIGHER_QUALITY_MT   = 'HIGHER_QUALITY_MT';
-    const STANDARD_QUALITY_MT = 'STANDARD_QUALITY_MT';
-
-    const ice_mt              = 'ice_mt';
-    const top_quality_mt      = 'top_quality_mt';
-    const higher_quality_mt   = 'higher_quality_mt';
-    const standard_quality_mt = 'standard_quality_mt';
-
     /** @var int $ice The rate for ICE matches. Default is 0. */
     public int $ice = 0;
 

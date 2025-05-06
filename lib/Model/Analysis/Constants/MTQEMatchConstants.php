@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json\Analysis\Constants;
+namespace Model\Analysis\Constants;
 
 class MTQEMatchConstants extends AbstractConstants {
 
@@ -49,50 +49,33 @@ class MTQEMatchConstants extends AbstractConstants {
      * @return string
      */
     public static function toInternalMatchTypeValue( string $match_type ): string {
-        switch ( $match_type ) {
-            case self::REPETITIONS:
-                return strtoupper( self::REPETITIONS );
-            case self::TM_100:
-                return '100%';
-            case self::TM_100_PUBLIC :
-                return '100%_PUBLIC';
-            case self::ICE:
-                return strtoupper( self::ICE );
-            case self::ICE_MT:
-                return strtoupper( self::ICE_MT );
-            case self::TOP_QUALITY_MT:
-                return strtoupper( self::TOP_QUALITY_MT );
-            case self::HIGHER_QUALITY_MT:
-                return strtoupper( self::HIGHER_QUALITY_MT );
-            case self::STANDARD_QUALITY_MT:
-            default:
-                return strtoupper( self::STANDARD_QUALITY_MT );
-        }
+        $mapping = [
+                self::REPETITIONS         => InternalMatchesConstants::REPETITIONS,
+                self::TM_100              => InternalMatchesConstants::TM_100,
+                self::TM_100_PUBLIC       => InternalMatchesConstants::TM_100_PUBLIC,
+                self::ICE                 => InternalMatchesConstants::TM_ICE,
+                self::ICE_MT              => InternalMatchesConstants::ICE_MT,
+                self::TOP_QUALITY_MT      => InternalMatchesConstants::TOP_QUALITY_MT,
+                self::HIGHER_QUALITY_MT   => InternalMatchesConstants::HIGHER_QUALITY_MT,
+                self::STANDARD_QUALITY_MT => InternalMatchesConstants::STANDARD_QUALITY_MT,
+        ];
 
+        return $mapping[ $match_type ] ?? strtoupper( $match_type );
     }
 
     public static function toExternalMatchTypeValue( string $match_type ): string {
-        switch ( $match_type ) {
-            case strtoupper( self::REPETITIONS ):
-                return self::REPETITIONS;
-            case '100%':
-                return self::TM_100;
-            case '100%_PUBLIC'  :
-                return self::TM_100_PUBLIC;
-            case strtoupper( self::ICE ):
-                return self::ICE;
-            case strtoupper( self::ICE_MT ):
-                return self::ICE_MT;
-            case strtoupper( self::TOP_QUALITY_MT ):
-                return self::TOP_QUALITY_MT;
-            case strtoupper( self::HIGHER_QUALITY_MT ):
-                return self::HIGHER_QUALITY_MT;
-            case strtoupper( self::STANDARD_QUALITY_MT ):
-            default:
-                return self::STANDARD_QUALITY_MT;
+        $mapping = [
+                InternalMatchesConstants::REPETITIONS         => self::REPETITIONS,
+                InternalMatchesConstants::TM_100              => self::TM_100,
+                InternalMatchesConstants::TM_100_PUBLIC       => self::TM_100_PUBLIC,
+                InternalMatchesConstants::TM_ICE              => self::ICE,
+                InternalMatchesConstants::ICE_MT              => self::ICE_MT,
+                InternalMatchesConstants::TOP_QUALITY_MT      => self::TOP_QUALITY_MT,
+                InternalMatchesConstants::HIGHER_QUALITY_MT   => self::HIGHER_QUALITY_MT,
+                InternalMatchesConstants::STANDARD_QUALITY_MT => self::STANDARD_QUALITY_MT,
+        ];
 
-        }
-
+        return $mapping[ $match_type ] ?? strtolower( $match_type );
     }
 
 }

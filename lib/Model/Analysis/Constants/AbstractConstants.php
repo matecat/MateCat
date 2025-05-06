@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json\Analysis\Constants;
+namespace Model\Analysis\Constants;
 
 use RuntimeException;
 

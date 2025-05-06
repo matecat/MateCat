@@ -3,8 +3,8 @@
 namespace Model\Analysis;
 
 use API\App\Json\Analysis\AnalysisProject;
-use API\App\Json\Analysis\Constants\StandardMatchConstants;
 use API\App\Json\Analysis\MatchContainerInterface;
+use Model\Analysis\Constants\StandardMatchConstants;
 
 /**
  * Created by PhpStorm.

@@ -2,7 +2,6 @@
 
 namespace API\V3;
 
-use API\App\Json\Analysis\Constants\StandardMatchConstants;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
@@ -14,6 +13,7 @@ use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\EntryDao;
+use Model\Analysis\Constants\StandardMatchConstants;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;

@@ -2,12 +2,12 @@
 
 namespace Xliff\DTO;
 
-use API\App\Json\Analysis\Constants\StandardMatchConstants;
 use Constants_TranslationStatus;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use LogicException;
+use Model\Analysis\Constants\StandardMatchConstants;
 use RecursiveArrayObject;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {

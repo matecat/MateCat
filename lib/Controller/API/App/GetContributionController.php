@@ -74,7 +74,7 @@ class GetContributionController extends KleinController {
                         (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on jobs metadata
                         false;
 
-                if( $contributionRequest->mt_evaluation ){
+                if ( $contributionRequest->mt_evaluation ) {
                     $contributionRequest->mt_qe_engine_id = ( new MTQEWorkflowParams( json_decode( ( new Projects_MetadataDao )->get( $projectStruct->id, Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS, 60 * 60 )->value ?? null, true ) ?? [] ) )->qe_model_type; // params or default configuration (NULL safe)
                 }
 
@@ -83,24 +83,25 @@ class GetContributionController extends KleinController {
             $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
             $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
 
-            $contributionRequest->id_file           = $file->id_file;
-            $contributionRequest->id_job            = $this->id_job;
-            $contributionRequest->password          = $received_password;
-            $contributionRequest->user              = $owner;
-            $contributionRequest->dataRefMap        = $dataRefMap;
-            $contributionRequest->contexts          = [
+            $contributionRequest->id_file                    = $file->id_file;
+            $contributionRequest->id_job                     = $this->id_job;
+            $contributionRequest->password                   = $received_password;
+            $contributionRequest->user                       = $owner;
+            $contributionRequest->dataRefMap                 = $dataRefMap;
+            $contributionRequest->contexts                   = [
                     'context_before' => $request[ 'context_before' ],
                     'segment'        => $request[ 'text' ],
                     'context_after'  => $request[ 'context_after' ]
             ];
-            $contributionRequest->jobStruct         = $jobStruct;
-            $contributionRequest->projectStruct     = $projectStruct;
-            $contributionRequest->segmentId         = $id_segment;
-            $contributionRequest->id_client         = $id_client;
-            $contributionRequest->concordanceSearch = $concordance_search;
-            $contributionRequest->fromTarget        = $switch_languages;
-            $contributionRequest->resultNum         = $num_results;
-            $contributionRequest->crossLangTargets  = $this->getCrossLanguages( $cross_language );
+            $contributionRequest->jobStruct                  = $jobStruct;
+            $contributionRequest->projectStruct              = $projectStruct;
+            $contributionRequest->segmentId                  = $id_segment;
+            $contributionRequest->id_client                  = $id_client;
+            $contributionRequest->concordanceSearch          = $concordance_search;
+            $contributionRequest->fromTarget                 = $switch_languages;
+            $contributionRequest->resultNum                  = $num_results;
+            $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
+            $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
 
             if ( $this->isRevision() ) {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;

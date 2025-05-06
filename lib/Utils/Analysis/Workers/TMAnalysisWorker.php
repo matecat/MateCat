@@ -12,7 +12,6 @@ namespace Analysis\Workers;
 use Analysis\Queue\RedisKeys;
 use API\Commons\Exceptions\AuthenticationError;
 use Constants\Ices;
-use Constants_Engines;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
 use Database;
@@ -29,7 +28,7 @@ use INIT;
 use Jobs_JobDao;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PDOException;
 use PostProcess;
@@ -162,7 +161,12 @@ class TMAnalysisWorker extends AbstractWorker {
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
         $suggestion = $bestMatch[ 'raw_translation' ]; //No layering needed
 
-        $equivalentWordMapping = json_decode( $queueElement->params->payable_rates, true );
+        $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
+
+        // When MTQE is enabled, the NO_MATCH type is not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
+        if ( empty( $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] ) ) {
+            $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] = 100;
+        }
 
         $new_match_type = $this->_getNewMatchType(
                 $bestMatch,
@@ -176,13 +180,19 @@ class TMAnalysisWorker extends AbstractWorker {
         $standard_words = $eq_words;
 
         /**
-         * if the first match is MT perform QA realignment because some MT engines breaks tags
+         * if the first match is MT, perform QA realignment because some MT engines break tags
          * also perform a tag ID check and mismatch validation
          */
-        if ( in_array( $new_match_type, [ 'MT', 'ICE_MT' ] ) ) {
+        if ( in_array( $new_match_type, [
+                InternalMatchesConstants::MT,
+                InternalMatchesConstants::ICE_MT,
+                InternalMatchesConstants::TOP_QUALITY_MT,
+                InternalMatchesConstants::HIGHER_QUALITY_MT,
+                InternalMatchesConstants::STANDARD_QUALITY_MT
+        ] ) ) {
 
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
-            $standard_words = $equivalentWordMapping[ "NO_MATCH" ] * $queueElement->params->raw_word_count / 100;
+            $standard_words = $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
             $check = $this->initPostProcess(
@@ -233,7 +243,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'translation' ]            = $suggestion;
         $tm_data[ 'suggestion' ]             = $suggestion;
         $tm_data[ 'suggestions_array' ]      = $suggestion_json;
-        $tm_data[ 'match_type' ]             = $new_match_type;
+        $tm_data[ 'match_type' ]             = strtoupper( $new_match_type ); // force the upper case to be consistent (redundant)
         $tm_data[ 'eq_word_count' ]          = ( $eq_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $eq_words;
         $tm_data[ 'standard_word_count' ]    = ( $standard_words > $queueElement->params->raw_word_count ) ? $queueElement->params->raw_word_count : $standard_words;
         $tm_data[ 'tm_analysis_status' ]     = "DONE";
@@ -244,10 +254,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ];
         if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
-            if ( strpos( $tm_data[ 'suggestion_source' ], Constants_Engines::MT ) === false ) {
-                $tm_data[ 'suggestion_source' ] = Constants_Engines::TM;
+            if ( strpos( $tm_data[ 'suggestion_source' ], InternalMatchesConstants::MT ) === false ) {
+                $tm_data[ 'suggestion_source' ] = InternalMatchesConstants::TM;
             } else {
-                $tm_data[ 'suggestion_source' ] = Constants_Engines::MT;
+                $tm_data[ 'suggestion_source' ] = InternalMatchesConstants::MT;
             }
         }
 
@@ -280,7 +290,7 @@ class TMAnalysisWorker extends AbstractWorker {
         foreach ( $this->_matches as $match ) {
             // return $match if not MT and quality >= 75
             if (
-                    stripos( $match[ 'created_by' ], Constants_Engines::MT ) === false and
+                    stripos( $match[ 'created_by' ], InternalMatchesConstants::MT ) === false and
                     (int)$match[ 'match' ] >= 75
             ) {
                 return $match;
@@ -344,9 +354,9 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _lockAndPreTranslateStatusCheck( array $tm_data, Params $queueElementParams ): array {
 
         //Separates if branches to make the conditions more readable
-        if ( stripos( $tm_data[ 'suggestion_match' ], "100%" ) !== false ) {
+        if ( stripos( $tm_data[ 'suggestion_match' ], InternalMatchesConstants::TM_100 ) !== false ) {
 
-            if ( $tm_data[ 'match_type' ] == "ICE" ) {
+            if ( $tm_data[ 'match_type' ] == InternalMatchesConstants::TM_ICE ) {
 
                 [ $lang, ] = explode( '-', $queueElementParams->target );
 
@@ -364,7 +374,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         }
 
-        if ( $queueElementParams->mt_qe_workflow_enabled && $tm_data[ 'match_type' ] == MTQEPayableRateBreakdowns::ICE_MT ) {
+        if ( $queueElementParams->mt_qe_workflow_enabled && $tm_data[ 'match_type' ] == InternalMatchesConstants::ICE_MT ) {
             $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
             $tm_data[ 'locked' ] = false;
         }
@@ -392,13 +402,13 @@ class TMAnalysisWorker extends AbstractWorker {
             array        $equivalentWordMapping
     ): string {
 
-        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], Constants_Engines::MT ) !== false ? Constants_Engines::MT : $bestMatch[ 'match' ] );
+        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], InternalMatchesConstants::MT ) !== false ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] );
         $fast_match_type       = strtoupper( $queueElement->params->match_type );
         $fast_exact_match_type = $queueElement->params->fast_exact_match_type;
 
         /* is Public TM */
         $publicTM = empty( $bestMatch[ 'memory_key' ] );
-        $isICE    = isset( $bestMatch[ 'ICE' ] ) && $bestMatch[ 'ICE' ];
+        $isICE    = isset( $bestMatch[ InternalMatchesConstants::TM_ICE ] ) && $bestMatch[ InternalMatchesConstants::TM_ICE ];
 
         $fast_match_type = strtoupper( $fast_match_type );
         $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
@@ -407,28 +417,28 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_rate_paid        = 0;
         $ind                 = null;
 
-        if ( stripos( $tm_match_type, Constants_Engines::MT ) !== false ) {
+        if ( stripos( $tm_match_type, InternalMatchesConstants::MT ) !== false ) {
 
             if ( !empty( $bestMatch[ 'score' ] ) && $bestMatch[ 'score' ] >= 0.9 ) {
-                $tm_match_fuzzy_band = MTQEPayableRateBreakdowns::ICE_MT;
-                $tm_rate_paid        = !$queueElement->params->mt_qe_workflow_enabled ? $equivalentWordMapping[ strtoupper( MTQEPayableRateBreakdowns::ice_mt ) ] : $equivalentWordMapping[ MTQEPayableRateBreakdowns::ice_mt ];
+                $tm_match_fuzzy_band = InternalMatchesConstants::ICE_MT;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::ICE_MT ];
             } else {
 
                 if ( !$queueElement->params->mt_qe_workflow_enabled ) { // default behaviour
-                    $tm_match_fuzzy_band = Constants_Engines::MT;
-                    $tm_rate_paid        = $equivalentWordMapping[ Constants_Engines::MT ]; // set all scores as generic MT
+                    $tm_match_fuzzy_band = InternalMatchesConstants::MT;
+                    $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::MT ]; // set all scores as generic MT
                 } else {
 
                     // set values for MTQEPayableRateBreakdowns
                     if ( $bestMatch[ 'score' ] >= 0.8 ) {
-                        $tm_match_fuzzy_band = MTQEPayableRateBreakdowns::TOP_QUALITY_MT;
-                        $tm_rate_paid        = $equivalentWordMapping[ MTQEPayableRateBreakdowns::top_quality_mt ];
+                        $tm_match_fuzzy_band = InternalMatchesConstants::TOP_QUALITY_MT;
+                        $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::TOP_QUALITY_MT ];
                     } elseif ( $bestMatch[ 'score' ] >= 0.5 ) {
-                        $tm_match_fuzzy_band = MTQEPayableRateBreakdowns::HIGHER_QUALITY_MT;
-                        $tm_rate_paid        = $equivalentWordMapping[ MTQEPayableRateBreakdowns::higher_quality_mt ];
+                        $tm_match_fuzzy_band = InternalMatchesConstants::HIGHER_QUALITY_MT;;
+                        $tm_rate_paid = $equivalentWordMapping[ InternalMatchesConstants::HIGHER_QUALITY_MT ];
                     } else {
-                        $tm_match_fuzzy_band = MTQEPayableRateBreakdowns::STANDARD_QUALITY_MT;
-                        $tm_rate_paid        = $equivalentWordMapping[ MTQEPayableRateBreakdowns::standard_quality_mt ];
+                        $tm_match_fuzzy_band = InternalMatchesConstants::STANDARD_QUALITY_MT;
+                        $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::STANDARD_QUALITY_MT ];
                     }
 
                 }
@@ -439,13 +449,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $ind = intval( $tm_match_type );
 
-            if ( $ind == "100" ) {
+            if ( $ind == 100 ) {
 
                 if ( $isICE ) {
-                    $tm_match_fuzzy_band = "ICE";
+                    $tm_match_fuzzy_band = InternalMatchesConstants::TM_ICE;
                     $tm_rate_paid        = ( isset( $equivalentWordMapping[ $tm_match_fuzzy_band ] ) ) ? $equivalentWordMapping[ $tm_match_fuzzy_band ] : null;
                 } else {
-                    $tm_match_fuzzy_band = ( $publicTM ) ? "100%_PUBLIC" : "100%";
+                    $tm_match_fuzzy_band = ( $publicTM ) ? InternalMatchesConstants::TM_100_PUBLIC : InternalMatchesConstants::TM_100;
                     $tm_rate_paid        = $equivalentWordMapping[ $tm_match_fuzzy_band ];
                 }
 
@@ -456,36 +466,26 @@ class TMAnalysisWorker extends AbstractWorker {
              * So this block of code results unused
              */
             if ( $ind < 50 ) {
-                $tm_match_fuzzy_band = "NO_MATCH";
-                $tm_rate_paid        = $equivalentWordMapping[ "NO_MATCH" ];
+                $tm_match_fuzzy_band = InternalMatchesConstants::NO_MATCH;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ];
             }
 
             if ( $ind >= 50 and $ind < 75 ) {
-                $tm_match_fuzzy_band = "50%-74%";
-                $tm_rate_paid        = $equivalentWordMapping[ "50%-74%" ];
+                $tm_match_fuzzy_band = InternalMatchesConstants::TM_50_74;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::TM_50_74 ];
             }
 
-            /*
-             * @author Roberto Tucci
-             * Jobs before 27th April 2015 had a unique category: 75%-99%
-             * From this date the category has been split into 3 categories.
-             * this condition grants back-compatibility with old jobs and related analysis
-             */
-            if ( !isset( $equivalentWordMapping[ "75%-99%" ] ) ) {
-                if ( $ind >= 75 && $ind <= 84 ) {
-                    $tm_match_fuzzy_band = "75%-84%";
-                    $tm_rate_paid        = $equivalentWordMapping[ "75%-84%" ];
-                } elseif ( $ind >= 85 && $ind <= 94 ) {
-                    $tm_match_fuzzy_band = "85%-94%";
-                    $tm_rate_paid        = $equivalentWordMapping[ "85%-94%" ];
-                } elseif ( $ind >= 95 && $ind <= 99 ) {
-                    $tm_match_fuzzy_band = "95%-99%";
-                    $tm_rate_paid        = $equivalentWordMapping[ "95%-99%" ];
-                }
-            } elseif ( $ind >= 75 and $ind <= 99 ) {
-                $tm_match_fuzzy_band = "75%-99%";
-                $tm_rate_paid        = $equivalentWordMapping[ "75%-99%" ];
+            if ( $ind >= 75 && $ind <= 84 ) {
+                $tm_match_fuzzy_band = InternalMatchesConstants::TM_75_84;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::TM_75_84 ];
+            } elseif ( $ind >= 85 && $ind <= 94 ) {
+                $tm_match_fuzzy_band = InternalMatchesConstants::TM_85_94;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::TM_85_94 ];
+            } elseif ( $ind >= 95 && $ind <= 99 ) {
+                $tm_match_fuzzy_band = InternalMatchesConstants::TM_95_99;
+                $tm_rate_paid        = $equivalentWordMapping[ InternalMatchesConstants::TM_95_99 ];
             }
+
         }
 
         // if MM says is ICE, return ICE
@@ -494,18 +494,18 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         // if there is a repetition with a 100% match type, return 100%
-        if ( $ind == 100 && $fast_match_type == 'REPETITIONS' ) {
+        if ( $ind == 100 && $fast_match_type == InternalMatchesConstants::REPETITIONS ) {
             return $tm_match_fuzzy_band;
         }
 
-        // if there is a repetition from Fast, keep it in REPETITIONS bucket
-        if ( $fast_match_type == 'REPETITIONS' ) {
+        // if there is a repetition from Fast, keep it in the REPETITIONS bucket
+        if ( $fast_match_type == InternalMatchesConstants::REPETITIONS ) {
             return $fast_match_type;
         }
 
         // if Fast match type > TM match type, return it
         // otherwise return the TM match type
-        if ( $fast_match_type === 'INTERNAL' ) {
+        if ( $fast_match_type === InternalMatchesConstants::INTERNAL ) {
             $ind_fast = intval( $fast_exact_match_type );
 
             if ( $ind_fast > $ind ) {
@@ -519,7 +519,11 @@ class TMAnalysisWorker extends AbstractWorker {
          * Apply the TM discount rate and/or force the value obtained from TM for
          * matches between 50%-74% because is never returned in Fast Analysis; it's rate is set default as equals to NO_MATCH
          */
-        if ( in_array( $fast_match_type, [ 'INTERNAL', 'REPETITIONS' ] ) && $tm_rate_paid <= $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
+        if (
+                in_array( $fast_match_type, [ InternalMatchesConstants::INTERNAL, InternalMatchesConstants::REPETITIONS ] )
+                && $tm_rate_paid <= $fast_rate_paid
+                || $fast_match_type == InternalMatchesConstants::NO_MATCH
+        ) {
             return $tm_match_fuzzy_band;
         }
 
@@ -549,7 +553,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'priority_key' ]      = $queueElement->params->tm_prioritization ?? null;
         $_config[ 'job_id' ]            = $queueElement->params->id_job ?? null;
 
-        if ( $queueElement->params->dialect_strict ) {
+        if ( $queueElement->params->dialect_strict ?? false ) { //null coalesce operator when dialect_strict is not set
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;
         }
 
@@ -670,7 +674,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
                 // If the "analysis_ignore_100" flag is set, ignore matches with a score <= 100 unless they are ICE matches.
                 if ( $mt_qe_config->analysis_ignore_100 ) {
-                    if ( (int)$match[ 'match' ] <= 100 && !$match[ 'ICE' ] ) {
+                    if ( (int)$match[ 'match' ] <= 100 && !$match[ InternalMatchesConstants::TM_ICE ] ) {
                         return false;
                     }
                 }

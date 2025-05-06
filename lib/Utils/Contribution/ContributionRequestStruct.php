@@ -80,6 +80,7 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
 
     public $mt_evaluation = null;
     public ?string $mt_qe_engine_id = null;
+    public ?string $mt_quality_value_in_editor = null;
 
     public $penalty_key = [];
 

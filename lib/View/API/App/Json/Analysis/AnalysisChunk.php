@@ -9,11 +9,11 @@
 
 namespace API\App\Json\Analysis;
 
-use API\App\Json\Analysis\Constants\ConstantsInterface;
 use Engine;
 use Exception;
 use Jobs_JobStruct;
 use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
 use TmKeyManagement_Filter;
 use Url\JobUrlBuilder;
 use Users_UserStruct;

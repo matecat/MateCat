@@ -9,8 +9,8 @@
 
 namespace API\App\Json\Analysis;
 
-use API\App\Json\Analysis\Constants\ConstantsInterface;
 use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
 
 class AnalysisProject implements JsonSerializable {
 
