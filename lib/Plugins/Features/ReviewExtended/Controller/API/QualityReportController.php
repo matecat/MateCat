@@ -197,7 +197,7 @@ class QualityReportController extends BaseChunkController {
             $seg[ 'last_revisions' ]             = $segment->last_revisions;
             $seg[ 'last_translation' ]           = $segment->last_translation;
             $seg[ 'locked' ]                     = $segment->locked;
-            $seg[ 'match_type' ]                 = $matchConstants::toExternalMatchTypeValue( $segment->match_type );
+            $seg[ 'match_type' ]                 = $matchConstants::toExternalMatchTypeName( $segment->match_type );
             $seg[ 'parsed_time_to_edit' ]        = $segment->parsed_time_to_edit;
             $seg[ 'pee' ]                        = $segment->pee;
             $seg[ 'pee_translation_revise' ]     = $segment->pee_translation_revise;

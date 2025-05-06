@@ -15,6 +15,7 @@ use Exceptions\NotFoundException;
 use FeatureSet;
 use Jobs_JobStruct;
 use Langs\LanguageDomains;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use OutsourceTo_OutsourceAvailable;
 use Projects_MetadataDao;
@@ -223,7 +224,7 @@ abstract class AbstractStatus {
             }
             // Runtime Initialization Completed
 
-            $matchType = $matchConstantsClass::toExternalMatchTypeValue( $segInfo[ 'match_type' ] ?? 'NEW' );
+            $matchType = $matchConstantsClass::toExternalMatchTypeName( $segInfo[ 'match_type' ] ?? InternalMatchesConstants::NEW );
 
             // increment file totals
             $file->incrementRaw( $segInfo[ 'raw_word_count' ] );

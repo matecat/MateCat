@@ -340,7 +340,7 @@ class SegmentAnalysisController extends KleinController {
                 'target_lang'           => $segmentForAnalysis->target,
                 'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
                 'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type'            => $matchConstants::toExternalMatchTypeValue( $segmentForAnalysis->match_type ?? 'NEW' ),
+                'match_type'            => $matchConstants::toExternalMatchTypeName( $segmentForAnalysis->match_type ?? 'NEW' ),
                 'revision_number'       => ( $segmentForAnalysis->source_page ) ? ReviewUtils::sourcePageToRevisionNumber( $segmentForAnalysis->source_page ) : null,
                 'issues'                => $issues,
                 'notes'                 => ( !empty( $notesAggregate[ $segmentForAnalysis->id ] ) ? $notesAggregate[ $segmentForAnalysis->id ] : [] ),

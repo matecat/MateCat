@@ -13,9 +13,9 @@ use RuntimeException;
 
 interface ConstantsInterface {
 
-    public static function toInternalMatchTypeValue( string $match_type ): string;
+    public static function toInternalMatchTypeName( string $match_type ): string;
 
-    public static function toExternalMatchTypeValue( string $match_type ): string;
+    public static function toExternalMatchTypeName( string $match_type ): string;
 
     /**
      * @param string $name

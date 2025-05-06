@@ -9,7 +9,7 @@
 
 namespace Model\Analysis\Constants;
 
-class StandardMatchConstants extends AbstractConstants {
+class StandardMatchTypeNamesConstants extends AbstractConstants {
 
     protected static string $workflow_type = 'standard';
 
@@ -58,7 +58,7 @@ class StandardMatchConstants extends AbstractConstants {
      *
      * @return string
      */
-    public static function toInternalMatchTypeValue( string $match_type ): string {
+    public static function toInternalMatchTypeName( string $match_type ): string {
         $mapping = [
                 self::_REPETITIONS  => InternalMatchesConstants::REPETITIONS,
                 self::_INTERNAL     => InternalMatchesConstants::INTERNAL,
@@ -78,7 +78,7 @@ class StandardMatchConstants extends AbstractConstants {
         return $mapping[ $match_type ] ?? strtoupper( $match_type );
     }
 
-    public static function toExternalMatchTypeValue( string $match_type ): string {
+    public static function toExternalMatchTypeName( string $match_type ): string {
         $mapping = [
                 InternalMatchesConstants::REPETITIONS   => self::_REPETITIONS,
                 InternalMatchesConstants::INTERNAL      => self::_INTERNAL,

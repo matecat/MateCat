@@ -163,18 +163,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
 
-        // When MTQE is enabled, the NO_MATCH type is not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
-        if ( empty( $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] ) ) {
-            $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] = 100;
-        }
-
         $new_match_type = $this->_getNewMatchType(
                 $bestMatch,
                 $queueElement,
                 $equivalentWordMapping
         );
 
-        $eqWordMapping = ( isset( $equivalentWordMapping[ $new_match_type ] ) ) ? $equivalentWordMapping[ $new_match_type ] : null;
+        $eqWordMapping = $equivalentWordMapping[ $new_match_type ] ?? 100;
 
         $eq_words       = $eqWordMapping * $queueElement->params->raw_word_count / 100;
         $standard_words = $eq_words;
@@ -192,7 +187,7 @@ class TMAnalysisWorker extends AbstractWorker {
         ] ) ) {
 
             //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
-            $standard_words = $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] * $queueElement->params->raw_word_count / 100;
+            $standard_words = ( $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] ?? 100 ) * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
             $check = $this->initPostProcess(
@@ -411,7 +406,9 @@ class TMAnalysisWorker extends AbstractWorker {
         $isICE    = isset( $bestMatch[ InternalMatchesConstants::TM_ICE ] ) && $bestMatch[ InternalMatchesConstants::TM_ICE ];
 
         $fast_match_type = strtoupper( $fast_match_type );
-        $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ];
+
+        // When MTQE is enabled, the NO_MATCH and INTERNAL types are not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
+        $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ] ?? 100;
 
         $tm_match_fuzzy_band = "";
         $tm_rate_paid        = 0;
@@ -505,7 +502,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // if Fast match type > TM match type, return it
         // otherwise return the TM match type
-        if ( $fast_match_type === InternalMatchesConstants::INTERNAL ) {
+        if ( $fast_match_type === InternalMatchesConstants::INTERNAL && !$queueElement->params->mt_qe_workflow_enabled ) {
             $ind_fast = intval( $fast_exact_match_type );
 
             if ( $ind_fast > $ind ) {

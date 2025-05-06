@@ -9,7 +9,7 @@
 
 namespace Model\Analysis\Constants;
 
-class MTQEMatchConstants extends AbstractConstants {
+class MTQEMatchTypeNamesConstants extends AbstractConstants {
 
     protected static string $workflow_type = 'mtqe';
 
@@ -48,7 +48,7 @@ class MTQEMatchConstants extends AbstractConstants {
      *
      * @return string
      */
-    public static function toInternalMatchTypeValue( string $match_type ): string {
+    public static function toInternalMatchTypeName( string $match_type ): string {
         $mapping = [
                 self::REPETITIONS         => InternalMatchesConstants::REPETITIONS,
                 self::TM_100              => InternalMatchesConstants::TM_100,
@@ -63,7 +63,7 @@ class MTQEMatchConstants extends AbstractConstants {
         return $mapping[ $match_type ] ?? strtoupper( $match_type );
     }
 
-    public static function toExternalMatchTypeValue( string $match_type ): string {
+    public static function toExternalMatchTypeName( string $match_type ): string {
         $mapping = [
                 InternalMatchesConstants::REPETITIONS         => self::REPETITIONS,
                 InternalMatchesConstants::TM_100              => self::TM_100,

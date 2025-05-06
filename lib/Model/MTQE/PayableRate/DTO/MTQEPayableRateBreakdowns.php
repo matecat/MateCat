@@ -14,10 +14,10 @@
 
 namespace MTQE\PayableRate\DTO;
 
-use DataAccess_AbstractDaoObjectStruct;
+use DataAccess_AbstractDaoSilentStruct;
 use JsonSerializable;
 
-class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoObjectStruct implements JsonSerializable {
+class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
     /** @var int $ice The rate for ICE matches. Default is 0. */
     public int $ice = 0;

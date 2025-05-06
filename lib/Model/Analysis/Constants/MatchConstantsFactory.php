@@ -17,7 +17,7 @@ class MatchConstantsFactory {
      * @return ConstantsInterface
      */
     public static function getInstance( ?bool $mt_we_workflow_enabled = false ): ConstantsInterface {
-        return !$mt_we_workflow_enabled ? new StandardMatchConstants : new MTQEMatchConstants;
+        return !$mt_we_workflow_enabled ? new StandardMatchTypeNamesConstants : new MTQEMatchTypeNamesConstants;
     }
 
 }
