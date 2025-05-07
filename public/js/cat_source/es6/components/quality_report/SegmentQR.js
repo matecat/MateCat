@@ -426,7 +426,7 @@ class SegmentQR extends React.Component {
           <div className="segment-production-container">
             <div className="segment-production">
               <div className="production match-type">
-                Match type:{' '}
+                Analysis:{' '}
                 <b>
                   {
                     ANALYSIS_BUCKETS_LABELS[
