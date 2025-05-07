@@ -69,7 +69,7 @@ const JobTableHeader = ({workflowType, rates, iceMTRawWords}) => {
       </div>
     </div>
   ) : workflowType === ANALYSIS_WORKFLOW_TYPES.MTQE ? (
-    <div className="job-table-header">
+    <div className="job-table-header mtqe">
       <div className="job-table-header-title">
         <div>Analysis bucket</div>
         <div>Payable rate</div>

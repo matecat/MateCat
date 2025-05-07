@@ -117,7 +117,7 @@ const ChunkAnalyzeHeader = ({
       </div>
     </div>
   ) : workflowType === ANALYSIS_WORKFLOW_TYPES.MTQE ? (
-    <div className={`chunk-analyze-info`}>
+    <div className={`chunk-analyze-info mtqe`}>
       {showFiles && <div className={`chunk-analyze-info-background`} />}
       <div>
         <div className={`chunk-analyze-info-header ${showFiles ? 'open' : ''}`}>
