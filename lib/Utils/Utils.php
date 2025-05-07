@@ -807,6 +807,7 @@ class Utils {
         $links = $htmlDom->getElementsByTagName( 'a' );
         $images = $htmlDom->getElementsByTagName( 'img' );
 
+        // replace <a> with a label(href)
         /** @var DOMElement $link */
         foreach ( $links as $link ) {
             $linkLabel       = $link->nodeValue;
@@ -814,11 +815,14 @@ class Utils {
             $link->nodeValue = $linkLabel . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
         }
 
-        /** @var DOMElement $link */
-        foreach ( $images as $image ) {
+        // replace <img> with src
+        $i = $images->length - 1;
+        while ($i > -1) {
+            $image = $images->item($i);
             $src = $image->getAttribute( 'src' );
-            $span = $htmlDom->createElement('span', $src);
-            $image->parentNode->insertBefore($span);
+            $newElement = $htmlDom->createTextNode($src);
+            $image->parentNode->replaceChild($newElement, $image);
+            $i--;
         }
 
         $html = $htmlDom->saveHtml( $htmlDom->documentElement );

@@ -42,4 +42,25 @@ class StripTagsPreservingHrefsTest extends AbstractTest {
 
         $this->assertEquals( $expected, $stripTags );
     }
+
+    public function testCanPreserveMultipleImgSrc() {
+        $html      = 'tags: Shift_completed_EWA, plugin.figma.2025-03-11.17-19-52
+                    screenshot: <img src="https://d20j2y33fgycdj.cloudfront.net/uploads/screenshots/e291c5153be4b268f0471bbf8fccb7f4/screenshot-2b201adbc23c19e5.jpg">;
+                    screenshot: <img src="https://d20j2y33fgycdj.cloudfront.net/uploads/screenshots/724d01f93ba1190dd73c3aafe7359a2c/screenshot-a24a7ac16eea3b9a.jpg">';
+
+        $stripTags = Utils::stripTagsPreservingHrefs( $html );
+        $expected  = 'tags: Shift_completed_EWA, plugin.figma.2025-03-11.17-19-52
+                    screenshot: https://d20j2y33fgycdj.cloudfront.net/uploads/screenshots/e291c5153be4b268f0471bbf8fccb7f4/screenshot-2b201adbc23c19e5.jpg;
+                    screenshot: https://d20j2y33fgycdj.cloudfront.net/uploads/screenshots/724d01f93ba1190dd73c3aafe7359a2c/screenshot-a24a7ac16eea3b9a.jpg';
+
+        $this->assertEquals( $expected, $stripTags );
+    }
+
+    public function testWithMoreImages() {
+        $html      = '<img src="https://placehold.co/600x400" alt="Test"/> test <img src="https://placehold.co/600x400" alt="Test"/> test <img src="https://placehold.co/600x400" alt="Test"/>';
+        $stripTags = Utils::stripTagsPreservingHrefs( $html );
+        $expected  = 'https://placehold.co/600x400 test https://placehold.co/600x400 test https://placehold.co/600x400';
+
+        $this->assertEquals( $expected, $stripTags );
+    }
 }
