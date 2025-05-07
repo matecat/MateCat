@@ -83,7 +83,7 @@ const ChunkAnalyzeFile = ({file, index, size, rates, workflowType}) => {
       </div>
     </div>
   ) : workflowType === ANALYSIS_WORKFLOW_TYPES.MTQE ? (
-    <div className={`chunk-file-detail`}>
+    <div className={`chunk-file-detail mtqe`}>
       <div
         className={`chunk-file-detail-background ${size === index ? 'last' : ''} `}
       />

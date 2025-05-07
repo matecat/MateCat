@@ -54,16 +54,16 @@ const SegmentQRLine = ({
         ? 101
         : parseInt(segment.get('suggestion_match'))
     suggestionMatchClass =
-      suggestionMatch === 101
-        ? 'per-blu'
-        : suggestionMatch === 100
-          ? 'per-green'
-          : suggestionMatch > 0 && suggestionMatch <= 99
-            ? 'per-orange'
-            : suggestionMatch === 0
-              ? 'per-red'
-              : segment.get('suggestion_source') === 'MT'
-                ? 'per-yellow'
+      segment.get('suggestion_source') === 'MT'
+        ? 'per-yellow'
+        : suggestionMatch === 101
+          ? 'per-blu'
+          : suggestionMatch === 100
+            ? 'per-green'
+            : suggestionMatch > 0 && suggestionMatch <= 99
+              ? 'per-orange'
+              : suggestionMatch === 0
+                ? 'per-red'
                 : ''
   }
 
@@ -121,9 +121,13 @@ const SegmentQRLine = ({
       {showSuggestionSource ? (
         <div className="segment-content qr-spec">
           <div className={'tm-percent ' + suggestionMatchClass}>
-            <b>
-              {segment.get('suggestion_source')} - {suggestionMatch}%
-            </b>
+            {segment.get('suggestion_source') !== 'MT' ? (
+              <b>
+                {segment.get('suggestion_source')} - {suggestionMatch}%
+              </b>
+            ) : (
+              <b>{segment.get('suggestion_source')}</b>
+            )}
           </div>
         </div>
       ) : null}
