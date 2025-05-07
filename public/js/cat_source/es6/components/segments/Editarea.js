@@ -912,6 +912,7 @@ class Editarea extends React.Component {
           : this.state.editorState,
         direction,
         isShiftPressed: true,
+        deleteEntity: true,
       })
 
       if (updatedStateNearEntity) {
@@ -923,7 +924,7 @@ class Editarea extends React.Component {
           Modifier.replaceText(contentState, selectionState, null),
           'insert-characters',
         )
-        this.onChange(updatedEditorState)
+        this.onChange(updatedEditorState, true)
         return 'delete-entity'
       }
     }
@@ -1181,10 +1182,6 @@ class Editarea extends React.Component {
           [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         }
       }
-      editorState = EditorState.acceptSelection(
-        editorState,
-        editorState.getSelection().set('hasFocus', true),
-      )
       this.setState(
         () => ({
           activeDecorators: newActiveDecorators,
