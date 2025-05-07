@@ -924,7 +924,7 @@ class Editarea extends React.Component {
           Modifier.replaceText(contentState, selectionState, null),
           'insert-characters',
         )
-        this.onChange(updatedEditorState, true)
+        this.onChange(updatedEditorState)
         return 'delete-entity'
       }
     }
