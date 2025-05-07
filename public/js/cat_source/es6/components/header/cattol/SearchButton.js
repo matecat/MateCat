@@ -18,7 +18,7 @@ export const SearchButton = () => {
         <div
           className="action-submenu ui floating dropdown"
           id="action-search"
-          title={`Search or Filter results (${Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+          title={`Open search panel (${Shortcuts.cattol.events.openSearch.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
           onClick={openSearch}
         >
           <svg
