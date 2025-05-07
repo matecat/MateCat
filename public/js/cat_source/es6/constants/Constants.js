@@ -44,3 +44,18 @@ export const EMAIL_PATTERN =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
 export const METADATA_KEY = 'cross_language_matches'
+
+export const ANALYSIS_BUCKETS_LABELS = {
+  MT: 'Machine Translation',
+  NO_MATCH: 'New',
+  REPETITIONS: 'Repetitions',
+  INTERNAL: 'Internal 75-99%',
+  '50%-74%': 'TM Partial 50-74%',
+  '75%-84%': 'TM Partial 75-84%',
+  '85%-94%': 'TM Partial 85-94%',
+  '95%-99%': 'TM Partial 95-99%',
+  '100%': 'TM 100%',
+  '100%_PUBLIC': 'Public TM 100%',
+  ICE: 'TM 100% in context',
+  ICE_MT: 'Top Quality Machine Translation',
+}
