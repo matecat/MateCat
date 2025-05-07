@@ -912,7 +912,6 @@ class Editarea extends React.Component {
           : this.state.editorState,
         direction,
         isShiftPressed: true,
-        deleteEntity: true,
       })
 
       if (updatedStateNearEntity) {
