@@ -964,7 +964,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                     <a
                       href="#"
                       className="autofillTag"
-                      title="Copy missing tags from source to target"
+                      title={`Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType]})`}
                     >
                       {' '}
                     </a>
