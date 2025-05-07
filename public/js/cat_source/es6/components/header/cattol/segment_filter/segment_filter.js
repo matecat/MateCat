@@ -134,7 +134,7 @@ let SegmentFilterUtils = {
     SegmentFilterUtils.filteringSegments = true
     filter.revision = config.isReview
     var password = config.isReview ? config.review_password : config.password
-    getFilteredSegments(config.id_job, password, filter, filter.revision_number)
+    getFilteredSegments(config.id_job, password, filter, config.revisionNumber)
       .then((data) => {
         CommonUtils.clearStorage('SegmentFilter')
 
