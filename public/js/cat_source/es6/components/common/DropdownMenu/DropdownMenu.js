@@ -138,6 +138,7 @@ export const DropdownMenu = ({
           className={`dropdownmenu ${dropdownClassName}`}
         >
           {items.map(renderItem)}
+          <RadixDropdownMenu.Arrow className="dropdownMenuArrow" />
         </RadixDropdownMenu.Content>
       </RadixDropdownMenu.Portal>
     </RadixDropdownMenu.Root>

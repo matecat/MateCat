@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-
+import $ from 'jquery'
 import Icon3Dots from '../icons/Icon3Dots'
 import {exportQualityReport} from '../../api/exportQualityReport'
 import CatToolActions from '../../actions/CatToolActions'
@@ -7,6 +7,11 @@ import ShortCutsModal from '../modals/ShortCutsModal'
 import ModalsActions from '../../actions/ModalsActions'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
+import {
+  DROPDOWN_MENU_ALIGN,
+  DropdownMenu,
+} from '../common/DropdownMenu/DropdownMenu'
+import {BUTTON_SIZE} from '../common/Button/Button'
 
 export const ActionMenu = ({
   jobUrls,
@@ -50,99 +55,148 @@ export const ActionMenu = ({
   }
 
   const getQualityReportMenu = () => {
-    return (
-      <ul className="menu">
-        {jobUrls.revise_urls ? (
-          <li className="item" title="Revise" data-value="revise">
-            <a href={jobUrls.revise_urls[0].url}>Revise</a>
-          </li>
-        ) : null}
-        <li className="item" title="Translate" data-value="translate">
-          <a href={jobUrls.translate_url}>Translate</a>
-        </li>
-        <li
-          className={`item${isExportCsvDisabled ? ' disabled' : ''}`}
-          title="Export CSV"
-          data-value="export-csv"
-        >
-          <span onClick={!isExportCsvDisabled ? handlerExportCsv : () => {}}>
-            Download QA Report CSV
-          </span>
-        </li>
-        <li
-          className={`item${isExportJsonDisabled ? ' disabled' : ''}`}
-          title="Export JSON"
-          data-value="export-json"
-        >
-          <span onClick={!isExportJsonDisabled ? handlerExportJson : () => {}}>
-            Download QA Report JSON
-          </span>
-        </li>
-        <li
-          className={`item${isExportXMLDisabled ? ' disabled' : ''}`}
-          title="Export XML"
-          data-value="export-xml"
-        >
-          <span onClick={!isExportXMLDisabled ? handlerExportXML : () => {}}>
-            Download QA Report XML
-          </span>
-        </li>
-      </ul>
-    )
+    return [
+      ...(jobUrls.revise_urls
+        ? [
+            {
+              label: (
+                <>
+                  <span>Revise</span>
+                </>
+              ),
+              onClick: () => {
+                window.open(jobUrls.revise_urls[0].url)
+              },
+            },
+          ]
+        : null),
+      {
+        label: (
+          <>
+            <span>Translate</span>
+          </>
+        ),
+        onClick: () => {
+          window.open(jobUrls.translate_url)
+        },
+      },
+      {
+        label: (
+          <>
+            <span
+              className={`${isExportCsvDisabled ? ' disabled' : ''}`}
+              title="Export CSV"
+            >
+              Download QA Report CSV
+            </span>
+          </>
+        ),
+        onClick: () => {
+          !isExportCsvDisabled ? handlerExportCsv() : null
+        },
+      },
+      {
+        label: (
+          <>
+            <span
+              className={`${isExportJsonDisabled ? ' disabled' : ''}`}
+              title="Export JSON"
+            >
+              Download QA Report JSON
+            </span>
+          </>
+        ),
+        onClick: () => {
+          !isExportJsonDisabled ? handlerExportJson() : null
+        },
+      },
+      {
+        label: (
+          <>
+            <span
+              className={`item${isExportXMLDisabled ? ' disabled' : ''}`}
+              title="Export XML"
+            >
+              Download QA Report JSON
+            </span>
+          </>
+        ),
+        onClick: () => {
+          !isExportXMLDisabled ? handlerExportXML() : null
+        },
+      },
+    ]
   }
 
   const getCattoolMenu = () => {
-    return (
-      <ul className="menu">
-        {!isReview && showReviseLink && (
-          <li className="item" title="Revise" data-value="revise">
-            <a
-              href={`/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`}
-            >
-              Revise
-            </a>
-          </li>
-        )}
-        {isReview && (
-          <li className="item" title="Translate" data-value="translate">
-            <a
-              href={`/translate/${projectName}/${source_code}-${target_code}/${jid}-${password}`}
-            >
-              Translate
-            </a>
-          </li>
-        )}
-        {allowLinkToAnalysis && analysisEnabled && (
-          <li className="item" title="Analysis" data-value="analisys">
-            <a
-              rel="noreferrer"
-              target="_blank"
-              href={`/jobanalysis/${pid}-${jid}-${password}`}
-            >
-              Volume analysis
-            </a>
-          </li>
-        )}
-
-        <li
-          className="item"
-          title="XLIFF-to-target converter"
-          data-value="target"
-        >
-          <a rel="noreferrer" target="_blank" href={`/utils/xliff-to-target`}>
-            XLIFF-to-target converter
-          </a>
-        </li>
-        <li
-          className="item shortcuts"
-          title="Shortcuts"
-          data-value="shortcuts"
-          onClick={openShortcutsModal}
-        >
-          <a>Shortcuts</a>
-        </li>
-      </ul>
-    )
+    return [
+      ...(!isReview && showReviseLink
+        ? [
+            {
+              label: (
+                <>
+                  <span title="Revise">Revise</span>
+                </>
+              ),
+              onClick: () => {
+                window.open(
+                  `/revise/${projectName}/${source_code}-${target_code}/${jid}-${reviewPassword}`,
+                )
+              },
+            },
+          ]
+        : []),
+      ...(isReview
+        ? [
+            {
+              label: (
+                <>
+                  <span title="Translate">Translate</span>
+                </>
+              ),
+              onClick: () => {
+                window.open(
+                  `/translate/${projectName}/${source_code}-${target_code}/${jid}-${password}`,
+                )
+              },
+            },
+          ]
+        : []),
+      ...(allowLinkToAnalysis && analysisEnabled
+        ? [
+            {
+              label: (
+                <>
+                  <span title="Analysis">Volume analysis</span>
+                </>
+              ),
+              onClick: () => {
+                window.open(`/jobanalysis/${pid}-${jid}-${password}`)
+              },
+            },
+          ]
+        : []),
+      {
+        label: (
+          <>
+            <span title="XLIFF-to-target converter">
+              XLIFF-to-target converter
+            </span>
+          </>
+        ),
+        onClick: () => {
+          window.open(`/utils/xliff-to-target`)
+        },
+      },
+      {
+        label: (
+          <>
+            <span title="Shortcuts">Shortcuts</span>
+          </>
+        ),
+        onClick: openShortcutsModal,
+      },
+    ]
   }
 
   const handlerExportCsv = () => {
@@ -192,46 +246,41 @@ export const ActionMenu = ({
       })
       .finally(() => setIsExportJsonDisabled(false))
   }
+  const handlerExportXML = () => {
+    setIsExportXMLDisabled(true)
 
-    const handlerExportXML = () => {
-        setIsExportXMLDisabled(true)
-
-        exportQualityReport({format: 'xml'})
-            .then(({blob, filename}) => {
-                const aTag = document.createElement('a')
-                const blobURL = URL.createObjectURL(blob)
-                aTag.download = filename
-                aTag.href = blobURL
-                document.body.appendChild(aTag)
-                aTag.click()
-                document.body.removeChild(aTag)
-            })
-            .catch((errors) => {
-                const notification = {
-                    title: 'Error',
-                    text: `Downloading XML error status code: ${errors.status}`,
-                    type: 'error',
-                }
-                CatToolActions.addNotification(notification)
-            })
-            .finally(() => setIsExportXMLDisabled(false))
-    }
-
-  useEffect(() => {
-    initDropdowns()
-  }, [dropdownThreeDots.current])
+    exportQualityReport({format: 'xml'})
+      .then(({blob, filename}) => {
+        const aTag = document.createElement('a')
+        const blobURL = URL.createObjectURL(blob)
+        aTag.download = filename
+        aTag.href = blobURL
+        document.body.appendChild(aTag)
+        aTag.click()
+        document.body.removeChild(aTag)
+      })
+      .catch((errors) => {
+        const notification = {
+          title: 'Error',
+          text: `Downloading XML error status code: ${errors.status}`,
+          type: 'error',
+        }
+        CatToolActions.addNotification(notification)
+      })
+      .finally(() => setIsExportXMLDisabled(false))
+  }
 
   return (
-    <div className={'action-menu qr-element'}>
-      <div
-        className={'action-submenu ui pointing top center floating dropdown'}
-        id={'action-three-dots'}
-        ref={dropdownThreeDots}
-      >
-        <Icon3Dots />
-        {qrMenu && !cattoolMenu && getQualityReportMenu()}
-        {cattoolMenu && getCattoolMenu()}
-      </div>
-    </div>
+    <DropdownMenu
+      dropdownClassName="action-menu"
+      align={DROPDOWN_MENU_ALIGN.RIGHT}
+      toggleButtonProps={{
+        children: <Icon3Dots />,
+        size: BUTTON_SIZE.ICON_STANDARD,
+      }}
+      items={
+        cattoolMenu ? getCattoolMenu() : qrMenu ? getQualityReportMenu() : null
+      }
+    />
   )
 }

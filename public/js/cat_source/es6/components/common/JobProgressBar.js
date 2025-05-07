@@ -31,31 +31,16 @@ const JobProgressBar = ({
             <div className="bg-loader" />
           ) : (
             <>
-              {/*<Tooltip*/}
-              {/*  content={*/}
-              {/*    'Rejected ' +*/}
-              {/*    job.get('stats').get('REJECTED_PERC_FORMATTED') +*/}
-              {/*    '%'*/}
-              {/*  }*/}
-              {/*>*/}
-              {/*  <a*/}
-              {/*    className="warning-bar translate-tooltip"*/}
-              {/*    style={{*/}
-              {/*      width: job.get('stats').get('REJECTED_PERC') + '%',*/}
-              {/*    }}*/}
-              {/*    ref={rejectedTooltip}*/}
-              {/*  />*/}
-              {/*</Tooltip>*/}
               <Tooltip content={'Approved ' + approved2Perc.toFixed(1) + '%'}>
                 <a
-                  className="approved-bar-2nd-pass translate-tooltip"
+                  className="approved-bar-2nd-pass"
                   style={{width: approved2Perc + '%'}}
                   ref={approved2ndPassTooltip}
                 />
               </Tooltip>
               <Tooltip content={'Approved ' + approvedPerc.toFixed(1) + '%'}>
                 <a
-                  className="approved-bar translate-tooltip"
+                  className="approved-bar"
                   style={{width: approvedPerc + '%'}}
                   ref={approvedTooltip}
                 />
@@ -64,8 +49,7 @@ const JobProgressBar = ({
                 content={'Translated ' + translatedPerc.toFixed(1) + '%'}
               >
                 <a
-                  className="translated-bar translate-tooltip"
-                  data-variation="tiny"
+                  className="translated-bar"
                   style={{
                     width: translatedPerc + '%',
                   }}
@@ -74,7 +58,7 @@ const JobProgressBar = ({
               </Tooltip>
               <Tooltip content={'Draft ' + draftPerc.toFixed(1) + '%'}>
                 <a
-                  className="draft-bar translate-tooltip"
+                  className="draft-bar"
                   style={{
                     width: draftPerc + '%',
                   }}
