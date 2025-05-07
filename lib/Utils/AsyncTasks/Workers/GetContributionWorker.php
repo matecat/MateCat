@@ -19,7 +19,6 @@ use INIT;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PostProcess;
 use Stomp\Exception\StompException;
@@ -481,8 +480,6 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'get_mt' ] = false;
         }
 
-        $mt_qe_configuration = new MTQEWorkflowParams( json_decode( $contributionStruct->mt_qe_config, true ) ?? [] );
-
         /**
          * if No TM server and No MT selected $_TMS is not defined,
          * so we want not to perform TMS Call
@@ -499,6 +496,7 @@ class GetContributionWorker extends AbstractWorker {
             $temp_matches = [];
 
             if ( $this->issetSourceAndTarget( $config ) ) {
+                $tmEngine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
                 $temp_matches = $tmEngine->get( $config );
             }
 
@@ -539,12 +537,12 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
-                $config[ 'mt_penalty' ]          = $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null; // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
-                    $config[ 'mt_qe_engine_id' ] = $mt_qe_configuration->qe_model_type;
                 }
+
+                $mt_engine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 $mt_result = $mt_engine->get( $config );
             }

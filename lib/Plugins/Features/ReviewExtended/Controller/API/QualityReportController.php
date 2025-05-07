@@ -77,6 +77,9 @@ class QualityReportController extends BaseChunkController {
 
         $this->project = $this->chunk->getProject();
 
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
+
         $ref_segment = (int)$this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
         $step        = (int)$this->request->param( 'step' );
@@ -115,6 +118,7 @@ class QualityReportController extends BaseChunkController {
             $segments               = $this->_formatSegments( $segments, $ttlArray, $filesInfo, $mt_qe_workflow_enabled );
 
             $this->response->json( [
+                    'workflow_type' => $matchConstantsClass::getWorkflowType(),
                     'segments'      => $segments,
                     'first_segment' => (int)$filesInfo[ 'first_segment' ],
                     'last_segment'  => (int)$filesInfo[ 'last_segment' ],

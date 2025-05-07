@@ -715,14 +715,11 @@ class FastAnalysis extends AbstractDaemon {
                             $queue_element[ 'dialect_strict' ] = $dialect_strict->value == 1;
                         }
 
+                        $queue_element[ 'mt_qe_workflow_enabled' ]    = $mt_qe_workflow_enabled ?? false;
                         if ( $mt_qe_workflow_enabled ) {
-                            $queue_element[ 'mt_qe_workflow_enabled' ]    = $mt_qe_workflow_enabled;
                             $queue_element[ 'mt_qe_workflow_parameters' ] = $mt_qe_workflow_parameters;
                         }
-
-                        if ( $mt_quality_value_in_editor ) {
-                            $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor;
-                        }
+                        $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor ?? false;
 
                         $element            = new QueueElement();
                         $element->params    = $queue_element;

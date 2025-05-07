@@ -11,7 +11,7 @@
 
 class Engines_Apertium extends Engines_AbstractEngine {
 
-    protected $_config = [
+    protected array $_config = [
             'segment' => null,
             'source'  => null,
             'target'  => null,

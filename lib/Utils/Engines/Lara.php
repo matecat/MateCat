@@ -245,7 +245,7 @@ class Lara extends Engines_AbstractEngine {
 
             // Get score from MMT Quality Estimation
             if ( isset( $_config[ 'include_score' ] ) and $_config[ 'include_score' ] ) {
-                $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] );
+                $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] ?? 'default' );
             }
 
         } catch ( LaraException $t ) {
@@ -285,7 +285,7 @@ class Lara extends Engines_AbstractEngine {
                 'target'          => $_config[ 'target' ],
                 'raw_segment'     => $_config[ 'segment' ],
                 'raw_translation' => $translation,
-                'match'           => $this->getStandardPenalty( $_config[ 'mt_penalty' ] ),
+                'match'           => $this->getStandardPenaltyString(),
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null
@@ -301,7 +301,7 @@ class Lara extends Engines_AbstractEngine {
      *
      * @return float|null
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ): ?float {
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float {
 
         $score = null;
 

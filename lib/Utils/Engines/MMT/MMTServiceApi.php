@@ -16,18 +16,18 @@ class MMTServiceApi {
 
     const DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
-    private $baseUrl;
-    private $license;
-    private $client = 0;
-    private $platform;
-    private $platformVersion;
+    private string  $baseUrl;
+    private ?string $license         = null;
+    private int     $client          = 0;
+    private ?string $platform        = null;
+    private ?string $platformVersion = null;
 
     /**
      * @param string|null $baseUrl
      *
      * @return MMTServiceApi
      */
-    public static function newInstance( $baseUrl = null ) {
+    public static function newInstance( ?string $baseUrl = null ): MMTServiceApi {
         $baseUrl = $baseUrl == null ? self::DEFAULT_BASE_URL : rtrim( $baseUrl, "/" );
 
         return new static( $baseUrl );
@@ -38,7 +38,7 @@ class MMTServiceApi {
      *
      * @param string $baseUrl
      */
-    private function __construct( $baseUrl ) {
+    private function __construct( string $baseUrl ) {
         $this->baseUrl = $baseUrl;
     }
 
@@ -60,7 +60,7 @@ class MMTServiceApi {
      *
      * @return MMTServiceApi
      */
-    public function setLicense( $license ) {
+    public function setLicense( string $license ): MMTServiceApi {
         $this->license = $license;
 
         return $this;
@@ -71,7 +71,7 @@ class MMTServiceApi {
      *
      * @return MMTServiceApi
      */
-    public function setClient( $client ) {
+    public function setClient( int $client ): MMTServiceApi {
         $this->client = $client;
 
         return $this;
@@ -114,10 +114,11 @@ class MMTServiceApi {
     /**
      * Get the Quality Estimation of a translation
      *
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
      *
      * @return mixed
      * @throws MMTServiceApiException
@@ -156,12 +157,12 @@ class MMTServiceApi {
     /**
      * @param             $name
      * @param string|null $description
-     * @param null        $externalId
+     * @param string|null $externalId
      *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function createMemory( $name, $description = null, $externalId = null ) {
+    public function createMemory( $name, ?string $description = null, ?string $externalId = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories", [
                 'name' => $name, 'description' => $description, 'external_id' => $externalId
         ] );
@@ -173,7 +174,7 @@ class MMTServiceApi {
      * @return array
      * @throws MMTServiceApiException
      */
-    public function deleteMemory( $id ) {
+    public function deleteMemory( $id ): ?array {
         return $this->send( 'DELETE', "$this->baseUrl/memories/$id" );
     }
 
@@ -227,19 +228,20 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function updateMemory( $id, $name, $description = null ) {
+    public function updateMemory( $id, $name, ?string $description = null ) {
         return $this->send( 'PUT', "$this->baseUrl/memories/$id", [
                 'name' => $name, 'description' => $description
         ] );
     }
 
     /**
-     * @param $externalIds
+     * @param array $externalIds
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function connectMemories( $externalIds ) {
+    public function connectMemories( array $externalIds ) {
         return $this->send( 'POST', "$this->baseUrl/memories/connect", [
                 'external_ids' => implode( ',', $externalIds )
         ] );
@@ -320,7 +322,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function importIntoMemoryContent( $id, $tmx, $compression = null ) {
+    public function importIntoMemoryContent( $id, $tmx, ?string $compression = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
                 'tmx' => $this->_setCulFileUpload( $tmx ), 'compression' => $compression
         ], true );
@@ -366,7 +368,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getContextVectorFromFile( $source, $targets, $file, $compression = null, $hints = null, $limit = null ) {
+    public function getContextVectorFromFile( $source, $targets, $file, ?string $compression = null, ?array $hints = null, ?int $limit = null ) {
         return $this->send( 'GET', "$this->baseUrl/context-vector", [
                 'source'      => $source, 'targets' => implode( ',', $targets ), 'content' => $this->_setCulFileUpload( $file ),
                 'compression' => $compression, 'hints' => ( $hints ? implode( ',', $hints ) : null ), 'limit' => $limit
@@ -374,21 +376,23 @@ class MMTServiceApi {
     }
 
     /**
-     * @param      $source
-     * @param      $target
-     * @param      $text
-     * @param null $contextVector
-     * @param null $hints
-     * @param null $projectId
-     * @param null $timeout
-     * @param null $priority
-     * @param null $session
-     * @param null $glossaries
-     * @param null $ignoreGlossaryCase
-     * @param null $include_score
+     * @param             $source
+     * @param             $target
+     * @param             $text
+     * @param null        $contextVector
+     * @param null        $hints
+     * @param null        $projectId
+     * @param null        $timeout
+     * @param null        $priority
+     * @param null        $session
+     * @param null        $glossaries
+     * @param null        $ignoreGlossaryCase
+     * @param null        $include_score
+     * @param string|null $mt_qe_engine_id
      *
      * @return mixed|void
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
     public function translate(
             $source,
@@ -403,7 +407,7 @@ class MMTServiceApi {
             $glossaries = null,
             $ignoreGlossaryCase = null,
             $include_score = null,
-            $mt_qe_engine_id = 'default'
+            string $mt_qe_engine_id = 'default'
     ) {
 
         if ( empty( $text ) ) {
@@ -434,7 +438,7 @@ class MMTServiceApi {
         }
 
         if ( $include_score ) {
-            $params[ 'include_score' ]   = true;
+            $params[ 'include_score' ]     = true;
             $params[ 'purfect_engine_id' ] = $mt_qe_engine_id;
         }
 
@@ -457,16 +461,17 @@ class MMTServiceApi {
     }
 
     /**
-     * @param string $method
-     * @param string $url
-     * @param array  $params
-     * @param bool   $multipart
-     * @param int    $timeout
+     * @param string     $method
+     * @param string     $url
+     * @param array|null $params
+     * @param bool       $multipart
+     * @param int|null   $timeout
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    protected function send( $method, $url, $params = null, $multipart = false, $timeout = null ) {
+    protected function send( string $method, string $url, ?array $params = null, ?bool $multipart = false, ?int $timeout = null ) {
         if ( $params ) {
             $params = array_filter( $params, function ( $value ) {
                 return $value !== null;
@@ -560,7 +565,7 @@ class MMTServiceApi {
      * @return mixed|null
      * @throws MMTServiceApiException
      */
-    private function parse( $body ) {
+    private function parse( string $body ): ?array {
         $json = json_decode( $body, true );
 
         if ( json_last_error() != JSON_ERROR_NONE ) {

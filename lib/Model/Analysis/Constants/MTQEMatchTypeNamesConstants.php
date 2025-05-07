@@ -60,7 +60,7 @@ class MTQEMatchTypeNamesConstants extends AbstractConstants {
                 self::STANDARD_QUALITY_MT => InternalMatchesConstants::STANDARD_QUALITY_MT,
         ];
 
-        return $mapping[ $match_type ] ?? strtoupper( $match_type );
+        return $mapping[ $match_type ] ?? InternalMatchesConstants::STANDARD_QUALITY_MT;
     }
 
     public static function toExternalMatchTypeName( string $match_type ): string {
@@ -75,7 +75,7 @@ class MTQEMatchTypeNamesConstants extends AbstractConstants {
                 InternalMatchesConstants::STANDARD_QUALITY_MT => self::STANDARD_QUALITY_MT,
         ];
 
-        return $mapping[ $match_type ] ?? strtolower( $match_type );
+        return $mapping[ $match_type ] ?? self::STANDARD_QUALITY_MT;
     }
 
 }

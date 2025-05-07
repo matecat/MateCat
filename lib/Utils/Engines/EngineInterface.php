@@ -48,6 +48,13 @@ interface Engines_EngineInterface {
     public function setAnalysis(): Engines_EngineInterface;
 
     /**
+     * @param int $mt_penalty
+     *
+     * @return Engines_EngineInterface
+     */
+    public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
+
+    /**
      * @return EnginesModel_EngineStruct
      */
     public function getEngineRecord(): EnginesModel_EngineStruct;
@@ -110,5 +117,5 @@ interface Engines_EngineInterface {
      *
      * @return float|null
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ): ?float;
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float;
 }

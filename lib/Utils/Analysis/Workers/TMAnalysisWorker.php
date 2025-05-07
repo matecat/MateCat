@@ -408,7 +408,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $fast_match_type = strtoupper( $fast_match_type );
 
         // When MTQE is enabled, the NO_MATCH and INTERNAL types are not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
-        $fast_rate_paid  = $equivalentWordMapping[ $fast_match_type ] ?? 100;
+        $fast_rate_paid = $equivalentWordMapping[ $fast_match_type ] ?? 100;
 
         $tm_match_fuzzy_band = "";
         $tm_rate_paid        = 0;
@@ -610,12 +610,16 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $matches = [];
 
-        // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
-        $mt_qe_config = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters, true ) ?? [] ); // params or default configuration (NULL safe)
+        $mt_qe_config = null;
+
+        if( $queueElement->params->mt_qe_workflow_enabled ){
+            // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
+            $mt_qe_config = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters ?? null, true ) ?? [] ); // params or default configuration (NULL safe)
+        }
 
         try {
 
-            $tms_match = $this->__filterTMMatches( $this->_getTM( $tmsEngine, $_config ), $queueElement->params->mt_qe_workflow_enabled, $mt_qe_config );
+            $tms_match = $this->__filterTMMatches( $this->_getTM( $tmsEngine, $_config, $queueElement ), $queueElement->params->mt_qe_workflow_enabled, $mt_qe_config );
             if ( !empty( $tms_match ) ) {
                 $matches = $tms_match;
             }
@@ -650,13 +654,13 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Filters Translation Memory (TM) matches based on specific criteria defined in the MTQE workflow parameters.
      *
-     * @param array              $matches An array of TM matches to be filtered.
-     * @param bool               $mt_qe_workflow_enabled
-     * @param MTQEWorkflowParams $mt_qe_config
+     * @param array                   $matches An array of TM matches to be filtered.
+     * @param bool                    $mt_qe_workflow_enabled
+     * @param MTQEWorkflowParams|null $mt_qe_config
      *
      * @return array The filtered array of TM matches.
      */
-    private function __filterTMMatches( array $matches, bool $mt_qe_workflow_enabled, MTQEWorkflowParams $mt_qe_config ): array {
+    private function __filterTMMatches( array $matches, bool $mt_qe_workflow_enabled, ?MTQEWorkflowParams $mt_qe_config ): array {
 
         // Filter the matches array using a callback function.
         return array_filter( $matches, function ( $match ) use ( $mt_qe_config, $mt_qe_workflow_enabled ) {
@@ -701,7 +705,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return bool|Engines_Results_AbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, MTQEWorkflowParams $mt_qe_config ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ) {
 
         $mt_result = false;
 
@@ -715,16 +719,17 @@ class TMAnalysisWorker extends AbstractWorker {
             // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis to false to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
                 $mtEngine->setSkipAnalysis( false );
+                $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_type;
             }
 
             $config = $mtEngine->getConfigStruct();
             $config = array_merge( $config, $_config );
 
+            $mtEngine->setMTPenalty( $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
+
             // set for lara engine in case, this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
-            $config[ 'mt_penalty' ]      = $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null; // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
-            $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_type;
 
             if ( !isset( $config[ 'job_id' ] ) ) {
                 $config[ 'job_id' ] = $queueElement->params->id_job;
@@ -769,7 +774,7 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ValidationError
      * @throws Exception
      */
-    protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config ) {
+    protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config, QueueElement $queueElement ) {
 
         /**
          * @var $tmsEngine Engines_MyMemory
@@ -778,6 +783,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $config = $tmsEngine->getConfigStruct();
         $config = array_merge( $config, $_config );
+
+        $tmsEngine->setMTPenalty( $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
 
         /** @var $tms_match Engines_Results_MyMemory_TMS */
         $tms_match = $tmsEngine->get( $config );

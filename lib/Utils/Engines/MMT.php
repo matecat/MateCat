@@ -23,7 +23,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     protected bool $_isAdaptiveMT = true;
 
-    protected $_config = [
+    protected array $_config = [
             'segment'        => null,
             'translation'    => null,
             'newsegment'     => null,
@@ -38,14 +38,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     ];
 
     /**
-     * @var array
-     */
-    protected $_head_parameters = [];
-
-    /**
      * @var bool
      */
-    protected $_skipAnalysis = true;
+    protected bool $_skipAnalysis = true;
 
     public function __construct( $engineRecord ) {
 
@@ -62,21 +57,11 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * MMT exception name from tag_projection call
-     * @see Engines_MMT::_decode
-     */
-    const LanguagePairNotSupportedException = 1;
-
-    protected static $_supportedExceptions = [
-            'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
-    ];
-
-    /**
      * Get MMTServiceApi client
      *
      * @return MMTServiceApi
      */
-    protected function _getClient() {
+    protected function _getClient(): MMTServiceApi {
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $license     = $extraParams[ 'MMT-License' ];
@@ -103,6 +88,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      *
      * @return array|Engines_Results_AbstractResponse
      * @throws ReflectionException
+     * @throws Exception
      */
     public function get( $_config ) {
 
@@ -144,7 +130,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'glossaries' ] ?? null,
                     $_config[ 'ignore_glossary_case' ] ?? null,
                     $_config[ 'include_score' ] ?? null,
-                    $_config[ 'mt_qe_engine_id' ] ?? null
+                    $_config[ 'mt_qe_engine_id' ] ?? 'default'
             );
 
             return ( new Engines_Results_MyMemory_Matches( [
@@ -152,7 +138,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     'target'          => $_config[ 'target' ],
                     'raw_segment'     => $_config[ 'segment' ],
                     'raw_translation' => $translation[ 'translation' ],
-                    'match'           => $this->getStandardPenalty( $_config[ 'mt_penalty' ] ),
+                    'match'           => $this->getStandardPenaltyString(),
                     'created-by'      => $this->getMTName(),
                     'create-date'     => date( "Y-m-d" ),
                     'score'           => $translation[ 'score' ] ?? null
@@ -415,7 +401,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @internal param array $langPairs
      *
      */
-    protected function getContext( SplFileObject $file, $source, $targets ) {
+    protected function getContext( SplFileObject $file, string $source, array $targets ): ?array {
 
         $fileName = $file->getRealPath();
         $file->rewind();
@@ -488,50 +474,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $rawValue
+     * @param       $rawValue
+     * @param array $parameters
+     * @param null  $function
      *
-     * @return Engines_Results_AbstractResponse
+     * @return void
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
-
-        $args         = func_get_args();
-        $functionName = $args[ 2 ];
-
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
-        } else {
-
-            if ( $rawValue[ 'responseStatus' ] >= 400 ) {
-                $_rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
-                foreach ( self::$_supportedExceptions as $exception => $code ) {
-                    if ( stripos( $rawValue[ 'error' ][ 'response' ], $exception ) !== false ) {
-                        $_rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
-                        break;
-                    }
-                }
-                $rawValue = $_rawValue;
-            }
-
-            $decoded = $rawValue; // already decoded in case of error
-
-        }
-
-        switch ( $functionName ) {
-            default:
-                //this case should not be reached
-                $result_object = Engines_Results_MMT_ExceptionError::getInstance( [
-                        'error'          => [
-                                'code'     => -1100,
-                                'message'  => " Unknown Error.",
-                                'response' => " Unknown Error." // Some useful info might still be contained in the response body
-                        ],
-                        'responseStatus' => 400
-                ] ); //return generic error
-                break;
-        }
-
-        return $result_object;
-
+        // Not used since MMT works with an external client
     }
 
     /**
@@ -666,7 +616,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return float|null
      * @throws MMTServiceApiException
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ): ?float {
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float {
         $client            = $this->_getClient();
         $qualityEstimation = $client->qualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
 

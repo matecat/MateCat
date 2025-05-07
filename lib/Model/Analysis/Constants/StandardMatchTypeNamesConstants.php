@@ -75,7 +75,7 @@ class StandardMatchTypeNamesConstants extends AbstractConstants {
                 self::_NEW          => InternalMatchesConstants::NEW,
         ];
 
-        return $mapping[ $match_type ] ?? strtoupper( $match_type );
+        return $mapping[ $match_type ] ?? InternalMatchesConstants::NEW;
     }
 
     public static function toExternalMatchTypeName( string $match_type ): string {
@@ -95,7 +95,7 @@ class StandardMatchTypeNamesConstants extends AbstractConstants {
                 InternalMatchesConstants::NEW           => self::_NEW,
         ];
 
-        return $mapping[ $match_type ] ?? strtolower( $match_type );
+        return $mapping[ $match_type ] ?? self::_NEW;
     }
 
 }

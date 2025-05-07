@@ -8,6 +8,8 @@
  *
  */
 
+use Engines\Traits\Oauth;
+
 /**
  * Class Engines_MicrosoftHub
  * @property string oauth_url
@@ -18,7 +20,7 @@
  */
 class Engines_MicrosoftHub extends Engines_AbstractEngine {
 
-    use \Engines\Traits\Oauth;
+    use Oauth;
 
     private $rawXmlErrStruct = <<<TAG
             <html>
@@ -32,7 +34,7 @@ class Engines_MicrosoftHub extends Engines_AbstractEngine {
             </html>
 TAG;
 
-    protected $_config = [
+    protected array $_config = [
             'segment'     => null,
             'translation' => null,
             'source'      => null,
@@ -50,6 +52,9 @@ TAG;
             'scope'      => "http://api.microsofttranslator.com"
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
         if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
@@ -90,12 +95,13 @@ TAG;
      * @param null  $function
      *
      * @return array|Engines_Results_MT
+     * @throws Exception
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();
 
-        if ( isset( $rawValue[ 'error' ] ) && !empty( $rawValue[ 'error' ] ) ) {
+        if ( !empty( $rawValue[ 'error' ] ) ) {
             $xmlObj = simplexml_load_string( $rawValue[ 'error' ][ 'response' ], 'SimpleXMLElement', LIBXML_NOENT );
             if ( empty( $xmlObj ) ) {
                 $jsonObj = json_decode( $rawValue[ 'error' ][ 'response' ] );
@@ -113,7 +119,7 @@ TAG;
 
         $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NOEMPTYTAG );
 
-        foreach ( (array)$xmlObj[ 0 ] as $key => $val ) {
+        foreach ( (array)$xmlObj[ 0 ] as $val ) {
 
             /*$decoded = [
                     'data' => [
@@ -135,7 +141,6 @@ TAG;
                     $tmpTag .= $dDoc->saveXML( $node );
                 }
             }
-
 
             $decoded = [
                     'data' => [

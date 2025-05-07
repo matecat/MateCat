@@ -169,7 +169,7 @@ abstract class AbstractStatus {
     protected function loadObjects() {
 
         $target                 = null;
-        $mt_qe_workflow_enabled = ( new Projects_MetadataDao )->get( $this->project->id, Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED, 60 * 60 )->value ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         $this->result = $project = new AnalysisProject(
@@ -224,7 +224,7 @@ abstract class AbstractStatus {
             }
             // Runtime Initialization Completed
 
-            $matchType = $matchConstantsClass::toExternalMatchTypeName( $segInfo[ 'match_type' ] ?? InternalMatchesConstants::NEW );
+            $matchType = $matchConstantsClass::toExternalMatchTypeName( $segInfo[ 'match_type' ] );
 
             // increment file totals
             $file->incrementRaw( $segInfo[ 'raw_word_count' ] );

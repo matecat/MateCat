@@ -74,11 +74,6 @@ class GetContributionController extends KleinController {
                         (bool)( new MetadataDao() )->get( $contributionRequest->id_job, $contributionRequest->password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                         false;
 
-                if ( $contributionRequest->mt_evaluation ) {
-                    $mt_qe_workflow_parameters         = new MTQEWorkflowParams( json_decode( $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ), true ) ?? [] ); // params or default configuration (NULL safe)
-                    $contributionRequest->mt_qe_config = (string)$mt_qe_workflow_parameters;
-                }
-
             }
 
             $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
@@ -102,7 +97,7 @@ class GetContributionController extends KleinController {
             $contributionRequest->fromTarget                 = $switch_languages;
             $contributionRequest->resultNum                  = $num_results;
             $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
-            $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
+            $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? false;
 
             if ( $this->isRevision() ) {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
