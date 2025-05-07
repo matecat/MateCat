@@ -416,7 +416,15 @@ const createActivityLogUrl = (project) => {
   return getActivityLogUrl(project.get('id'), project.get('password'))
 }
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 test('Rendering elements', async () => {
+  window.ResizeObserver = ResizeObserver
+
   executeMswServer()
   const {props, project, teams, team} = getFakeProperties(
     fakeProjectsData.project,
@@ -445,8 +453,10 @@ test('Rendering elements', async () => {
 
   const href = screen.getByTestId('last-action-activity').getAttribute('href')
   expect(href).toBe(createActivityLogUrl(project))
+  const dropdown = screen.getByTestId('teams-dropdown')
+  expect(dropdown).toBeInTheDocument()
 
-  await userEvent.click(screen.getByTestId('teams-dropdown'))
+  await userEvent.click(dropdown)
 
   // check teams menu items
   teams.forEach((team) => {

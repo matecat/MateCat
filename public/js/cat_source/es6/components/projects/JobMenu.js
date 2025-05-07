@@ -1,11 +1,15 @@
 import React from 'react'
 import ManageActions from '../../actions/ManageActions'
+import {JOB_STATUS} from '../../constants/Constants'
+import {
+  DROPDOWN_MENU_ALIGN,
+  DropdownMenu,
+} from '../common/DropdownMenu/DropdownMenu'
+import DotsHorizontal from '../../../../../img/icons/DotsHorizontal'
 class JobMenu extends React.Component {
   constructor(props) {
     super(props)
   }
-
-  getMoreLinks() {}
 
   openSecondPassUrl() {
     if (
@@ -28,20 +32,6 @@ class JobMenu extends React.Component {
     }
   }
 
-  getReviseMenuLink() {
-    let reviseUrl = this.props.reviseUrl
-    return (
-      <div
-        className={'item'}
-        onClick={() => window.open(reviseUrl, '_blank')}
-        data-testid="revise-item"
-      >
-        <i className="icon-edit icon" />
-        Revise
-      </div>
-    )
-  }
-
   getSecondPassReviewMenuLink() {
     if (
       this.props.project.has('features') &&
@@ -62,22 +52,33 @@ class JobMenu extends React.Component {
           this.props.jobId +
           '-' +
           this.props.job.get('revise_passwords').get(1).get('password')
-        return (
-          <div className="item" onClick={() => window.open(url, '_blank')}>
-            <i className="icon-edit icon" />
-            Revise 2
-          </div>
-        )
+        return [
+          {
+            label: (
+              <>
+                <i className="icon-edit icon" />
+                Revise 2
+              </>
+            ),
+            onClick: () => {
+              window.open(url, '_blank')
+            },
+          },
+        ]
       } else {
-        return (
-          <div
-            className="item"
-            onClick={() => this.retrieveSecondPassReviewLink()}
-          >
-            <i className="icon-edit icon" />
-            Generate Revise 2
-          </div>
-        )
+        return [
+          {
+            label: (
+              <>
+                <i className="icon-edit icon" />
+                Generate Revise 2
+              </>
+            ),
+            onClick: () => {
+              this.retrieveSecondPassReviewLink()
+            },
+          },
+        ]
       }
     }
     return ''
@@ -95,10 +96,6 @@ class JobMenu extends React.Component {
     })
   }
 
-  componentDidMount() {
-    $(this.dropdown).dropdown()
-  }
-
   render() {
     let qaReportUrl = this.props.qAReportUrl
     let jobTMXUrl = this.props.jobTMXUrl
@@ -106,177 +103,233 @@ class JobMenu extends React.Component {
 
     let originalUrl = this.props.originalUrl
 
-    let downloadButton = this.props.getDownloadLabel
-    let splitButton
-    if (!this.props.isChunkOutsourced && config.splitEnabled) {
-      splitButton = !this.props.isChunk ? (
-        <div className="item" onClick={this.props.openSplitModalFn}>
-          <i className="icon-expand icon" />
-          Split
-        </div>
-      ) : (
-        <div className="item" onClick={this.props.openMergeModalFn}>
-          <i className="icon-compress icon" />
-          Merge
-        </div>
-      )
-    }
-    let menuHtml = (
-      <div
-        className="menu"
-        ref={(dropdown) => (this.dropdown = dropdown)}
-        title="Job menu"
-      >
-        <div className="item submenu">
-          <i className="icon-refresh icon" /> <a>Change Password</a>
-          <i className="dropdown icon" />
-          <div className="menu" data-testid="change-password-submenu">
-            <div
-              className={'item'}
-              onClick={() => this.props.changePasswordFn()}
-            >
-              Translate
-            </div>
-            <div
-              className={'item'}
-              onClick={() => this.props.changePasswordFn(1)}
-            >
-              Revise
-            </div>
-            {/*If second pass enabled*/}
-            {this.props.job.has('revise_passwords') &&
-            this.props.job.get('revise_passwords').size > 1 ? (
-              <div
-                className={'item'}
-                onClick={() => this.props.changePasswordFn(2)}
-              >
-                2nd Revise
-              </div>
-            ) : null}
-          </div>
-        </div>
-        {splitButton}
-        {this.getReviseMenuLink()}
-        {this.getSecondPassReviewMenuLink()}
-        {this.getMoreLinks()}
-        <div className="divider" />
-        <div
-          className="item"
-          onClick={() => window.open(qaReportUrl, '_blank')}
-        >
-          <i className="icon-qr-matecat icon" /> QA Report
-        </div>
-        {downloadButton}
-        <div className="divider" />
-        <div
-          className="item"
-          onClick={() => window.open(originalUrl, '_blank')}
-        >
-          <i className="icon-download icon" /> Download Original
-        </div>
-        <div
-          className="item"
-          onClick={() => window.open(exportXliffUrl, '_blank')}
-        >
-          <i className="icon-download icon" /> Export XLIFF
-        </div>
-        <div className="item" onClick={() => window.open(jobTMXUrl, '_blank')}>
-          <i className="icon-download icon" /> Export TMX
-        </div>
-        <div className="divider" />
-        <div className="item" onClick={this.props.archiveJobFn}>
-          <i className="icon-drawer icon" /> Archive job
-        </div>
-        <div className="item" onClick={this.props.cancelJobFn}>
-          <i className="icon-trash-o icon" /> Cancel job
-        </div>
-      </div>
+    const items = [
+      ...(this.props.status === JOB_STATUS.ACTIVE
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-refresh icon" />
+                  Change Password
+                </>
+              ),
+              items: [
+                {
+                  label: <>Translate</>,
+                  onClick: () => {
+                    this.props.changePasswordFn()
+                  },
+                },
+                {
+                  label: <>Revise</>,
+                  onClick: () => {
+                    this.props.changePasswordFn(1)
+                  },
+                },
+                ...(this.props.job.has('revise_passwords') &&
+                this.props.job.get('revise_passwords').size > 1
+                  ? [
+                      {
+                        label: <>2nd Revise</>,
+                        onClick: () => {
+                          this.props.changePasswordFn(2)
+                        },
+                      },
+                    ]
+                  : []),
+              ],
+            },
+          ]
+        : []),
+      ...(!this.props.isChunkOutsourced &&
+      config.splitEnabled &&
+      !this.props.isChunk
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-expand icon" />
+                  Split
+                </>
+              ),
+              onClick: () => {
+                this.props.openSplitModalFn()
+              },
+            },
+          ]
+        : !this.props.isChunkOutsourced &&
+            config.splitEnabled &&
+            this.props.isChunk
+          ? [
+              {
+                label: (
+                  <>
+                    <i className="icon-compress icon" />
+                    Merge
+                  </>
+                ),
+                onClick: () => {
+                  this.props.openMergeModalFn()
+                },
+              },
+            ]
+          : []),
+      'separator',
+      {
+        label: (
+          <>
+            <i className="icon-edit icon" />
+            Revise
+          </>
+        ),
+        onClick: () => {
+          window.open(this.props.reviseUrl, '_blank')
+        },
+      },
+      ...this.getSecondPassReviewMenuLink(),
+      {
+        label: (
+          <>
+            <i className="icon-qr-matecat icon" /> QA Report
+          </>
+        ),
+        onClick: () => {
+          window.open(qaReportUrl, '_blank')
+        },
+      },
+      'separator',
+      ...(this.props.getDownloadLabel
+        ? [
+            {
+              label: this.props.getDownloadLabel.label,
+              onClick: () => {
+                this.props.getDownloadLabel.action()
+              },
+              disabled: this.props.disableDownload,
+            },
+          ]
+        : []),
+      {
+        label: (
+          <>
+            <i className="icon-download icon" /> Download Original
+          </>
+        ),
+        onClick: () => {
+          window.open(originalUrl, '_blank')
+        },
+      },
+      {
+        label: (
+          <>
+            <i className="icon-download icon" /> Export XLIFF
+          </>
+        ),
+        onClick: () => {
+          window.open(exportXliffUrl, '_blank')
+        },
+      },
+      {
+        label: (
+          <>
+            <i className="icon-download icon" /> Export TMX
+          </>
+        ),
+        onClick: () => {
+          window.open(jobTMXUrl, '_blank')
+        },
+      },
+      'separator',
+      ...(this.props.status === JOB_STATUS.ACTIVE
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer icon" />
+                  Archive job
+                </>
+              ),
+              onClick: () => {
+                this.props.archiveJobFn()
+              },
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-trash-o icon" />
+                  Cancel job
+                </>
+              ),
+              onClick: () => {
+                this.props.cancelJobFn()
+              },
+            },
+          ]
+        : []),
+      ...(this.props.status === JOB_STATUS.ARCHIVED
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer unarchive-project icon" />
+                  Unarchive job
+                </>
+              ),
+              onClick: () => {
+                this.props.activateJobFn()
+              },
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-trash-o icon" />
+                  Cancel job
+                </>
+              ),
+              onClick: () => {
+                this.props.cancelJobFn()
+              },
+            },
+          ]
+        : []),
+      ...(this.props.status === JOB_STATUS.CANCELLED
+        ? [
+            {
+              label: (
+                <>
+                  <i className="icon-drawer unarchive-project icon" />
+                  Resume job
+                </>
+              ),
+              onClick: () => {
+                this.props.activateJobFn()
+              },
+            },
+            {
+              label: (
+                <>
+                  <i className="icon-trash-o icon" />
+                  Delete job permanently
+                </>
+              ),
+              onClick: () => {
+                this.props.deleteJobFn()
+              },
+            },
+          ]
+        : []),
+    ]
+    return (
+      <DropdownMenu
+        className="job-menu"
+        items={items}
+        toggleButtonProps={{
+          children: <DotsHorizontal size={18} />,
+          testId: 'job-menu-button',
+        }}
+        align={DROPDOWN_MENU_ALIGN.RIGHT}
+      />
     )
-    if (this.props.status === 'archived') {
-      menuHtml = (
-        <div className="menu">
-          {splitButton}
-          {this.getReviseMenuLink()}
-          {this.getMoreLinks()}
-          <div
-            className="item"
-            onClick={() => window.open(qaReportUrl, '_blank')}
-          >
-            <i className="icon-qr-matecat icon" /> QA Report
-          </div>
-          {downloadButton}
-          <div className="divider" />
-          <div
-            className="item"
-            onClick={() => window.open(originalUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Download Original
-          </div>
-          <div
-            className="item"
-            onClick={() => window.open(exportXliffUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Export XLIFF
-          </div>
-          <div
-            className="item"
-            onClick={() => window.open(jobTMXUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Export TMX
-          </div>
-          <div className="divider" />
-          <div className="item" onClick={this.props.activateJobFn}>
-            <i className="icon-drawer unarchive-project icon" /> Unarchive job
-          </div>
-          <div className="item" onClick={this.props.cancelJobFn}>
-            <i className="icon-trash-o icon" /> Cancel job
-          </div>
-        </div>
-      )
-    } else if (this.props.status === 'cancelled') {
-      menuHtml = (
-        <div className="menu">
-          {splitButton}
-          {this.getReviseMenuLink()}
-          {this.getMoreLinks()}
-          <div
-            className="item"
-            onClick={() => window.open(qaReportUrl, '_blank')}
-          >
-            <i className="icon-qr-matecat icon" /> QA Report
-          </div>
-          {downloadButton}
-          <div className="divider" />
-          <div
-            className="item"
-            onClick={() => window.open(originalUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Download Original
-          </div>
-          <div
-            className="item"
-            onClick={() => window.open(exportXliffUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Export XLIFF
-          </div>
-          <div
-            className="item"
-            onClick={() => window.open(jobTMXUrl, '_blank')}
-          >
-            <i className="icon-download icon" /> Export TMX
-          </div>
-          <div className="divider" />
-          <div className="item" onClick={this.props.activateJobFn}>
-            <i className="icon-drawer unarchive-project icon" /> Resume job
-          </div>
-          <div className="item" onClick={this.props.deleteJobFn}>
-            <i className="icon-drawer delete-project icon" /> Delete job
-            permanently
-          </div>
-        </div>
-      )
-    }
-    return menuHtml
   }
 }
 

@@ -45,13 +45,14 @@
     "react-tagsinput": "^3.19.0",
     "react-transition-group": "^4.2.2",
     "react-virtual": "^2.10.4",
+    "semantic-ui-react": "^2.1.5",
     "socket.io-client": "^4.8.1",
     "sprintf-js": "^1.1.2",
     "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@babel/core": "7.26.10",
-    "@babel/eslint-parser": "7.26.10",
+    "@babel/eslint-parser": "7.27.0",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
     "@babel/plugin-transform-runtime": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
@@ -99,5 +100,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.0.90"
+  "version": "3.1.3"
 }

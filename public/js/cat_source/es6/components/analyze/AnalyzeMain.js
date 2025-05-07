@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {debounce} from 'lodash/function'
-
+import $ from 'jquery'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'

@@ -4,18 +4,20 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin: 2px 0;
   border-radius: 4px;
   padding: 8px;
   max-height: var(--radix-dropdown-menu-content-available-height);
   overflow-y: auto;
   background-color: colors.$white;
-  color: black;
+  color: colors.$grey6;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
   animation: 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards dropdownmenu-fadeIn;
-
+  z-index: 7;
   &.subDropdown {
     background-color: colors.$white;
+  }
+  .dropdownMenuArrow {
+    fill: colors.$white
   }
 }
 
@@ -36,7 +38,7 @@
   width: 100%;
   padding: 8px;
   white-space: nowrap;
-  color: colors.$black;
+  color: colors.$grey6;
   cursor: pointer;
   outline: none;
 
@@ -56,8 +58,8 @@
   &[data-highlighted]:not([data-disabled]),
   &:not([data-disabled]).selected,
   &[data-state='checked']:not([data-disabled]) {
-    background-color: rgba(colors.$translatedBlueTransparent, 0.14);
-    color: colors.$translatedBlueActive;
+    background-color: colors.$grey5 !important;
+    color: colors.$darkBlue !important;
   }
   &[data-disabled],
   &[data-disabled]:hover {

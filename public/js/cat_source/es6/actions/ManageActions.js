@@ -307,7 +307,7 @@ let ManageActions = {
   },
 
   assignTranslator: function (projectId, jobId, jobPassword, translator) {
-    if ($('body').hasClass('manage')) {
+    if (document.body.classList.contains('manage')) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.ASSIGN_TRANSLATOR,
         projectId: projectId,
