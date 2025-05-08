@@ -15,7 +15,6 @@ use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
 use ApiKeys_ApiKeyDao;
 use Exception;
-use Klein\Response;
 use Utils;
 
 class KeyCheckController extends KleinController {

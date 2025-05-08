@@ -19,8 +19,6 @@ export const uploadTm = async ({
   password = config.password,
 }) => {
   const paramsData = {
-    action: 'loadTMX',
-    exec: 'newTM',
     tm_key: tmKey,
     name: keyName,
     r: '1',
@@ -37,7 +35,7 @@ export const uploadTm = async ({
   )
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/new-tmx`,
     {
       method: 'POST',
       body: formData,

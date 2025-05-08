@@ -11,7 +11,6 @@ export const getTagProjection = async ({
   id_segment,
 }) => {
   const paramsData = {
-    action: 'getTagProjection',
     id_job,
     password,
     source,
@@ -28,7 +27,7 @@ export const getTagProjection = async ({
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/get-tag-projection`,
     {
       method: 'POST',
       credentials: 'include',

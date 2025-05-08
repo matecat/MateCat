@@ -10,6 +10,7 @@ use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
+use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
@@ -369,14 +370,16 @@ class GlossaryController extends KleinController {
     /**
      * @param $json
      * @param $jsonSchema
-     *
      * @throws InvalidValue
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws \Validator\Errors\JSONValidatorException
+     * @throws \Validator\Errors\JsonValidatorGenericException
      */
     private function validateJson( $json, $jsonSchema ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
 
-        $validator = new \Validator\JSONValidator( $jsonSchema );
+        $validator = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {
