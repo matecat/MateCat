@@ -61,12 +61,9 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( PDOException $e ) {
         $klein->response()->code( 503 );
-//        $klein->response()->json( ( new Error( [ $e ]  ) )->render() );
-//        Utils::sendErrMailReport( $exception->getMessage() . " " . $exception->getTraceAsString(), 'Generic error' );
         Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
     } catch ( Throwable $e ) {
         $klein->response()->code( 500 );
-//        Utils::sendErrMailReport( $exception->getMessage() . " " . $exception->getTraceAsString(), 'Generic error' );
         Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     }

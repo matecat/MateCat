@@ -18,7 +18,6 @@ abstract class controller implements IController {
     use TimeLogger;
     use AuthenticationTrait;
 
-    protected        $model;
     protected string $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
     /**
@@ -46,36 +45,16 @@ abstract class controller implements IController {
     /**
      * Controllers Factory
      *
-     * Initialize the Controller Instance and route the
-     * API Calls to the right Controller
+     * Initialize the Controller Instance
      *
-     * @return mixed
+     * @return IController
      */
-    public static function getInstance() {
-
-        if ( isset( $_REQUEST[ 'api' ] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ) {
-
-            if ( empty( $_REQUEST[ 'action' ] ) ) {
-                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "api/docs", true, 303 ); //Redirect 303 See Other
-                die();
-            }
-
-            $_REQUEST[ 'action' ][ 0 ] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
-            $_REQUEST[ 'action' ]      = preg_replace_callback( '/_([a-z])/', function ( $c ) {
-                return strtoupper( $c[ 1 ] );
-            }, $_REQUEST[ 'action' ] );
-
-            $_POST[ 'action' ] = $_REQUEST[ 'action' ];
-
-            //set the log to the API Log
-            Log::$fileName = 'API.log';
-
-        }
+    public static function getInstance(): IController {
 
         //Default :  catController
         $action     = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( $_GET[ 'action' ] ?? 'cat' );
-        $actionList = explode( '\\', $action ); // do not accept namespaces ( Security issue: directory traversal )
-        $action     = end( $actionList ); // do not accept namespaces ( Security issue: directory traversal )
+        $actionList = explode( '\\', $action ); // do not accept namespaces (Security issue: directory traversal)
+        $action     = end( $actionList ); // do not accept namespaces (Security issue: directory traversal)
         $className  = $action . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers
@@ -108,13 +87,6 @@ abstract class controller implements IController {
         header( "Cache-Control: no-store, no-cache, must-revalidate, max-age=0" );
         header( "Cache-Control: post-check=0, pre-check=0", false );
         header( "Pragma: no-cache" );
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getModel() {
-        return $this->model;
     }
 
 }

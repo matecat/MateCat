@@ -193,12 +193,10 @@ class Bootstrap {
         } catch ( PDOException $e ) {
             $code    = 503;
             $message = "Service Unavailable";
-//            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
             Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         } catch ( Throwable $e ) {
             $code    = 500;
             $message = "Internal Server Error";
-//            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
             Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
@@ -206,7 +204,7 @@ class Bootstrap {
 
             header( "HTTP/1.1 " . $code . " " . $message );
 
-            if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+            if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] ?? "" == 'POST' ) {
 
                 //json_rersponse
                 if ( INIT::$PRINT_ERRORS ) {

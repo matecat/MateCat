@@ -41,9 +41,12 @@ class oauthResponseHandlerController extends BaseKleinViewController {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function afterConstruct() {
-        $this->setTemplateVars();
         $this->setView( INIT::$TEMPLATE_ROOT . '/oauth_response_handler.html' );
+        $this->setTemplateVars();
     }
 
     /**

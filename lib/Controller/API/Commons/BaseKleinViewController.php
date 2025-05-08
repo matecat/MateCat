@@ -3,7 +3,9 @@
 namespace API\Commons;
 
 use AbstractControllers\IController;
+use Exception;
 use INIT;
+use PHPTAL;
 use PHPTALWithAppend;
 use Utils;
 
@@ -14,10 +16,11 @@ use Utils;
  * Time: 10:24
  */
 class BaseKleinViewController extends AbstractStatefulKleinController implements IController {
+
     /**
      * @var PHPTALWithAppend
      */
-    protected $view;
+    protected PHPTAL $view;
 
     /**
      * @throws Exception

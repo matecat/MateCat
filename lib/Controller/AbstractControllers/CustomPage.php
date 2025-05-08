@@ -13,7 +13,7 @@ class CustomPage extends viewController {
     /**
      * @var integer
      */
-    protected $httpCode;
+    protected int $httpCode;
 
     /**
      * @throws ReflectionException
@@ -35,12 +35,15 @@ class CustomPage extends viewController {
     /**
      * @param $httpCode integer
      */
-    public function setCode( $httpCode ) {
+    public function setCode( int $httpCode ) {
         $this->httpCode = $httpCode;
     }
 
+    /**
+     * @throws Exception
+     */
     public function doAction() {
-        $this->renderCustomHTTP( $this->template, $this->httpCode );
+        $this->finalize();
     }
 
     /**
@@ -48,7 +51,7 @@ class CustomPage extends viewController {
      *
      * @return void
      */
-    public function setTemplateVars( $customVars = [] ) {
+    public function setTemplateVars( array $customVars = [] ) {
 
         foreach ( $customVars as $varName => $value ) {
             $this->template->{$varName} = $value;

@@ -182,18 +182,14 @@ abstract class viewController extends controller {
         return CatUtils::getIsRevisionFromRequestUri();
     }
 
-    protected function render404( $customTemplate = '404.html' ) {
-        $this->renderCustomHTTP( $customTemplate, 404 );
-    }
-
-    /**
-     * @throws Exception
-     */
-    protected function renderCustomHTTP( $customTemplate, $httpCode ) {
-        $status = new HttpStatus( $httpCode );
-        header( "HTTP/1.0 " . $status->getFormattedString() );
-        $this->finalize();
-        die();
+    protected function render404() {
+        $controllerInstance = new CustomPage();
+        $controllerInstance->setTemplate( '404.html' );
+        $controllerInstance->setCode( 404 );
+        try {
+            $controllerInstance->doAction();
+        } catch ( Exception $e ) {}
+        die(); // do not complete the response, set header 404 in render404 instead of 200
     }
 
     /**
