@@ -149,8 +149,8 @@ export const MachineTranslationTab = () => {
           })
         }
       })
-      .catch((error) => {
-        if (error && error.length) setError(error[0])
+      .catch(({errors}) => {
+        if (errors && errors.message) setError(errors)
       })
       .finally(() => setIsAddMTEngineRequestInProgress(false))
   }

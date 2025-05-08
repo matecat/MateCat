@@ -369,8 +369,6 @@ class FsFilesStorage extends AbstractFilesStorage {
                         new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
-
-
             // XXX we have here two different variables:
             //  \FilesStorage\S3FilesStorage::QUEUE_FOLDER and INIT::$QUEUE_PROJECT_REPOSITORY
 //            $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $subPathName;

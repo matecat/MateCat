@@ -182,7 +182,11 @@ let TranslationMatches = {
 
     if (isUndefined(config.id_client)) {
       setTimeout(function () {
-        TranslationMatches.getContribution(segmentSid, next)
+        TranslationMatches.getContribution(
+          segmentSid,
+          next,
+          crossLanguageSettings,
+        )
       }, 3000)
       // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()

@@ -31,7 +31,7 @@ class ShareTmModal extends React.Component {
   }
 
   shareTmKeyByEmail() {
-    const {tmKey, callback} = this.props
+    const {tmKey, description, callback} = this.props
     const emails = this.emails.value
     const {result: validEmails, emails: errorEmails} =
       CommonUtils.validateEmailList(emails)
@@ -43,6 +43,7 @@ class ShareTmModal extends React.Component {
     } else {
       shareTmKey({
         key: tmKey,
+        description: description,
         emails: emails,
       })
         .then(() => {

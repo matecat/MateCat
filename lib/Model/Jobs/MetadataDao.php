@@ -107,10 +107,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
      */
     public function set( $id_job, $password, $key, $value ) {
         $sql = "INSERT INTO job_metadata " .
-                " ( id_job, password, `key`, value ) " .
+                " ( `id_job`, `password`, `key`, `value` ) " .
                 " VALUES " .
                 " ( :id_job, :password, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE value = :value ";
+                " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

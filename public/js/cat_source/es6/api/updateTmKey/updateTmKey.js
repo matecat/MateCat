@@ -10,8 +10,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const updateTmKey = async ({key, description, penalty}) => {
   const paramsData = {
-    action: 'userKeys',
-    exec: 'update',
     key,
     description,
     penalty,
@@ -22,7 +20,7 @@ export const updateTmKey = async ({key, description, penalty}) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/user-keys-update`,
     {
       method: 'POST',
       body: formData,
@@ -30,7 +28,13 @@ export const updateTmKey = async ({key, description, penalty}) => {
     },
   )
 
-  if (!response.ok) return Promise.reject(response)
+  if (!response.ok)
+    if (response.headers.get('Content-Length') !== '0') {
+      const data = await response.json()
+      return Promise.reject({response, errors: data.errors ?? data})
+    } else {
+      return Promise.reject({response})
+    }
 
   const {errors, ...data} = await response.json()
   if (errors && errors.length > 0) return Promise.reject(errors)

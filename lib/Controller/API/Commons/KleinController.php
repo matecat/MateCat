@@ -6,20 +6,26 @@ use AbstractControllers\IController;
 use AbstractControllers\TimeLogger;
 use API\Commons\Authentication\AuthenticationHelper;
 use API\Commons\Authentication\AuthenticationTrait;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
+use CatUtils;
+use DomainException;
 use Exception;
+use Exceptions\NotFoundException;
 use FeatureSet;
+use InvalidArgumentException;
 use Klein\Request;
 use Klein\Response;
+use Log;
 use ReflectionException;
+use RuntimeException;
+use SebastianBergmann\Invoker\TimeoutException;
+use Swaggest\JsonSchema\InvalidValue;
+use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
 
-/**
- * @property  int    revision_number
- * @property  string password
- * @property  int    id_job
- */
 abstract class KleinController implements IController {
 
     use TimeLogger;
@@ -189,5 +195,103 @@ abstract class KleinController implements IController {
      */
     protected function isJsonRequest() {
         return preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) );
+    }
+
+    /**
+     * @return bool|null
+     */
+    protected function isRevision(): ?bool
+    {
+        $controller = $this;
+
+        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
+            $jid        = $controller->id_job;
+            $password   = $controller->received_password;
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
+
+            if ( !$isRevision ) {
+                $isRevision = CatUtils::getIsRevisionFromReferer();
+            }
+
+            return $isRevision;
+        }
+
+        return CatUtils::getIsRevisionFromReferer();
+    }
+
+    /**
+     * @param Exception $exception
+     * @return Response
+     */
+    protected function returnException(Exception $exception): Response
+    {
+        // determine http code
+        switch (get_class($exception)){
+
+            case InvalidValue::class:
+            case JSONValidatorException::class:
+            case JsonValidatorGenericException::class:
+            case InvalidArgumentException::class:
+            case DomainException::class:
+                $httpCode = 400;
+                break;
+
+            case AuthenticationError::class:
+                $httpCode = 401;
+                break;
+
+            case NotFoundException::class:
+                $httpCode = 404;
+                break;
+
+            case RuntimeException::class:
+                $httpCode = 500;
+                break;
+
+            case TimeoutException::class:
+                $httpCode = 504;
+                break;
+
+            default:
+                $httpCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+                break;
+        }
+
+        $this->response->code($httpCode);
+
+        return $this->response->json([
+            'errors' => [
+                "code" => $exception->getCode(),
+                "message" => $exception->getMessage(),
+                "debug" => [
+                    "trace" => $exception->getTrace(),
+                    "file" => $exception->getFile(),
+                    "line" => $exception->getLine(),
+                ]
+            ]
+        ]);
+    }
+
+    /**
+     * @param $id_segment
+     * @return array
+     */
+    protected function parseIdSegment($id_segment): array
+    {
+        $parsedSegment = explode( "-", $id_segment );
+
+        return [
+            'id_segment' => $parsedSegment[0],
+            'split_num' => $parsedSegment[1],
+        ];
+    }
+
+    /**
+     * @param $message
+     * @param null $filename
+     */
+    protected function log($message, $filename = null ): void
+    {
+        Log::doJsonLog( $message, $filename );
     }
 }
