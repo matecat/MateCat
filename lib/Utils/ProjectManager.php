@@ -1362,6 +1362,9 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
+            // Replace {{pid}} with project ID for new keys created with empty name
+            $projectStructure[ 'tm_keys' ] = str_replace("{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ]);
+
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
@@ -3069,10 +3072,12 @@ class ProjectManager {
                     $newTmKey->tm   = true;
                     $newTmKey->glos = true;
 
-                    //THIS IS A NEW KEY and must be inserted into the user keyring
-                    //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                    // THIS IS A NEW KEY and must be inserted into the user keyring
+                    // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
                     // assign TMX name to the key
-                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
+
+                    // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? str_replace("{{pid}}", $this->projectStructure[ 'id_project' ], $_tmKey[ 'name' ]) : $firstTMXFileName );
 
                     $newMemoryKey->tm_key = $newTmKey;
                     $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
