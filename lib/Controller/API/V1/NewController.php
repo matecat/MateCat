@@ -493,7 +493,7 @@ class NewController extends KleinController {
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
-        [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json, $project_name );
+        [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
         $team                                  = $this->validateTeam( $id_team );
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
@@ -790,12 +790,11 @@ class NewController extends KleinController {
     /**
      * @param string $private_tm_key
      * @param string $private_tm_key_json
-     * @param string $project_name
      *
      * @return array
      * @throws Exception
      */
-    protected function validateTmAndKeys( string $private_tm_key = "", string $private_tm_key_json = "", string $project_name = "" ): array {
+    protected function validateTmAndKeys( string $private_tm_key = "", string $private_tm_key_json = "" ): array {
 
         $new_keys          = [];
         $private_tm_user   = null;
@@ -885,14 +884,14 @@ class NewController extends KleinController {
                     $private_tm_pass = $newUser->pass;
 
                     $private_tm_key[ $__key_idx ] =
-                            [
-                                    'key'     => $newUser->key,
-                                    'name'    => 'New resource created for project ' . $project_name,
-                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
-                                    'r'       => $tm_key[ 'r' ],
-                                    'w'       => $tm_key[ 'w' ]
-                            ];
-                    $new_keys[]                   = $newUser->key;
+                        [
+                            'key'     => $newUser->key,
+                            'name'    => 'New resource created for project {{pid}}',
+                            'penalty' => $tm_key[ 'penalty' ] ?? null,
+                            'r'       => $tm_key[ 'r' ],
+                            'w'       => $tm_key[ 'w' ]
+                        ];
+                    $new_keys[] = $newUser->key;
 
                 } catch ( Exception $e ) {
                     throw new Exception( $e->getMessage(), -1 );
