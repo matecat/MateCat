@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
@@ -40,7 +40,7 @@ use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
 
-class CreateProjectController extends KleinController {
+class CreateProjectController extends AbstractStatefulKleinController {
 
     private array $data     = [];
     private array $metadata = [];
