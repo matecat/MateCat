@@ -291,7 +291,7 @@ class NewController extends KleinController {
             $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
             $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
             $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
-                $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
+            $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
             $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
             $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
             $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
@@ -319,12 +319,12 @@ class NewController extends KleinController {
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
 
-            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
-            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter' ]            = (!empty($request[ 'character_counter' ])) ? $request[ 'character_counter' ] : null;
-            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
+            $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
+            $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
+            $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
+            $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
             // mmtGlossaries
             if ( $request[ 'mmt_glossaries' ] ) {
@@ -451,7 +451,7 @@ class NewController extends KleinController {
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
-        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT ) ?: 85; // used to set the absolute value of an MT match (previously fixed to 85) //YYY
+        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
@@ -885,14 +885,14 @@ class NewController extends KleinController {
                     $private_tm_pass = $newUser->pass;
 
                     $private_tm_key[ $__key_idx ] =
-                        [
-                            'key'     => $newUser->key,
-                            'name'    => 'New resource created for project ' . $project_name,
-                            'penalty' => $tm_key[ 'penalty' ] ?? null,
-                            'r'       => $tm_key[ 'r' ],
-                            'w'       => $tm_key[ 'w' ]
-                        ];
-                    $new_keys[] = $newUser->key;
+                            [
+                                    'key'     => $newUser->key,
+                                    'name'    => 'New resource created for project ' . $project_name,
+                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'r'       => $tm_key[ 'r' ],
+                                    'w'       => $tm_key[ 'w' ]
+                            ];
+                    $new_keys[]                   = $newUser->key;
 
                 } catch ( Exception $e ) {
                     throw new Exception( $e->getMessage(), -1 );

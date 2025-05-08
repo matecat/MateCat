@@ -902,7 +902,6 @@ class SetTranslationController extends KleinController {
         Set::contribution( $contributionStruct );
 
         if ( $contributionStruct->id_mt > 1 ) {
-            $contributionStruct = $this->featureSet->filter( 'filterSetContributionMT', null, $contributionStruct, $this->data['project'] );
             Set::contributionMT( $contributionStruct );
         }
     }

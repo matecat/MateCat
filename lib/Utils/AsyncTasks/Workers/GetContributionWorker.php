@@ -521,7 +521,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config    = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
-                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
+                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct ); //MMT
 
                 $config[ 'pid' ]                 = $jobStruct->id_project;
                 $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
