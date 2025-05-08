@@ -24,7 +24,7 @@ class GetVolumeAnalysisController extends KleinController {
             $request = $this->validateTheRequest();
             $_project_data = Projects_ProjectDao::getProjectAndJobData( $request['pid'] );
             $passCheck = new AjaxPasswordCheck();
-            $access    = $passCheck->grantProjectAccess( $_project_data, $request['ppassword'] ) or $passCheck->grantProjectJobAccessOnJobPass( $_project_data, null, $request['jpassword'] );
+            $access    = $passCheck->grantProjectAccess( $_project_data, $request['ppassword'] ) || $passCheck->grantProjectJobAccessOnJobPass( $_project_data, null, $request['jpassword'] );
 
             if ( !$access ) {
                 throw new AuthenticationError("Wrong Password. Access denied", -10);
@@ -52,8 +52,8 @@ class GetVolumeAnalysisController extends KleinController {
             throw new InvalidArgumentException("No id project provided", -1);
         }
 
-        if ( empty( $ppassword ) ) {
-            throw new InvalidArgumentException("No project password provided", -2);
+        if ( empty( $ppassword ) and empty( $jpassword ) ) {
+            throw new InvalidArgumentException("No project of job password provided", -2);
         }
 
         return [

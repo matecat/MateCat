@@ -15,6 +15,9 @@ use Utils;
 
 class SetChunkCompletedController extends KleinController {
 
+    protected $id_job;
+    protected $received_password;
+
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
@@ -65,11 +68,14 @@ class SetChunkCompletedController extends KleinController {
             throw new InvalidArgumentException( "Missing id password", -2);
         }
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
+        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
 
         if ( empty( $job ) ) {
             throw new InvalidArgumentException( "wrong password", -10);
         }
+
+        $this->id_job = $id_job;
+        $this->received_password = $received_password;
 
         return [
             'id_job' => $id_job,

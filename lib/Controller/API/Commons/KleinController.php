@@ -26,11 +26,6 @@ use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
 
-/**
- * @property  int    revision_number
- * @property  string password
- * @property  int    id_job
- */
 abstract class KleinController implements IController {
 
     use TimeLogger;

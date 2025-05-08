@@ -18,6 +18,9 @@ use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
+    protected $id_job;
+    protected $received_password;
+
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
@@ -133,7 +136,7 @@ class DeleteContributionController extends KleinController {
         $source = filter_var( $this->request->param( 'seg' ), FILTER_UNSAFE_RAW );
         $target = filter_var( $this->request->param( 'tra' ), FILTER_UNSAFE_RAW );
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_translator = !empty($this->request->param( 'id_translator')) ? filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_NUMBER_INT ) : null;
         $id_match = filter_var( $this->request->param( 'id_match' ), FILTER_SANITIZE_NUMBER_INT );
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -167,10 +170,13 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing job password", -6);
         }
 
+        $this->id_job = $id_job;
+        $this->received_password = $received_password;
+
         return [
-            'id_segment' => $id_segment ,
-            'source_lang' =>  $source_lang ,
-            'target_lang' =>  $target_lang ,
+            'id_segment' => $id_segment,
+            'source_lang' =>  $source_lang,
+            'target_lang' =>  $target_lang,
             'source' =>  $source ,
             'target' =>  $target ,
             'id_job' =>  $id_job ,

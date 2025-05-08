@@ -46,31 +46,33 @@ class SetTranslationController extends KleinController {
     /**
      * @var array
      */
-    private array $data;
+    protected array $data;
 
-    private $id_job;
+    protected $id_job;
 
-    private $password;
+    protected $password;
+
+    protected $received_password;
 
     /**
      * @var Jobs_JobStruct
      */
-    private $chunk;
+    protected $chunk;
 
     /**
      * @var Segments_SegmentStruct
      */
-    private $segment;  // this comes from DAO
+    protected $segment;  // this comes from DAO
 
     /**
      * @var MateCatFilter
      */
-    private $filter;
+    protected $filter;
 
     /**
      * @var TranslationVersionsHandler
      */
-    private $VersionsHandler;
+    protected $VersionsHandler;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -421,7 +423,7 @@ class SetTranslationController extends KleinController {
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $propagate = filter_var( $this->request->param( 'propagate' ), FILTER_NULL_ON_FAILURE );
+        $propagate = filter_var( $this->request->param( 'propagate' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
         $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
         $time_to_edit = filter_var( $this->request->param( 'time_to_edit' ), FILTER_SANITIZE_NUMBER_INT );
         $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
@@ -477,6 +479,7 @@ class SetTranslationController extends KleinController {
 
         $this->id_job = $id_job;
         $this->password = $password;
+        $this->received_password = $received_password;
 
         $data = [
             'id_job' => $id_job ,

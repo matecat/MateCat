@@ -79,13 +79,15 @@ class CommentController extends KleinController {
             $commentDao       = new Comments_CommentDao( Database::obtain() );
             $new_record = $commentDao->resolveThread( $comment_struct );
 
-            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
             $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
             $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
             return $this->response->json([
                 "data" => [
-                    'entries' => $payload,
+                    'entries' => [
+                        'comments' => [$new_record]
+                    ],
                     'user' => [
                         'full_name' => $this->user->fullName()
                     ]
@@ -118,13 +120,15 @@ class CommentController extends KleinController {
                 $commentDao->saveComment( $mentioned_comment );
             }
 
-            $payload = $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
+            $this->enqueueComment($new_record, $request['job']->id_project, $request['id_job'], $request['id_client']);
             $users = $this->resolveUsers($comment_struct, $request['job'], $users_mentioned_id);
             $this->sendEmail($comment_struct, $request['job'], $users, $users_mentioned);
 
             return $this->response->json([
                 "data" => [
-                    'entries' => $payload,
+                    'entries' => [
+                        'comments' => [$new_record]
+                    ],
                     'user' => [
                         'full_name' => $this->user->fullName()
                     ]
@@ -252,19 +256,19 @@ class CommentController extends KleinController {
         }
 
         return [
+            'first_seg' => $first_seg,
             'id_client' => $id_client,
-            'username' => $username,
+            'id_comment' => $id_comment,
             'id_job' => $id_job,
             'id_segment' => $id_segment,
-            'source_page' => $source_page,
             'is_anonymous' => $is_anonymous,
-            'revision_number' => (int)$revision_number,
-            'first_seg' => $first_seg,
-            'last_seg' => $last_seg,
-            'id_comment' => $id_comment,
-            'password' => $password,
-            'message' => $message,
             'job' => $job,
+            'last_seg' => $last_seg,
+            'message' => $message,
+            'password' => $password,
+            'revision_number' => (int)$revision_number,
+            'source_page' => $source_page,
+            'username' => $username,
         ];
     }
 
