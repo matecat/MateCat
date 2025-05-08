@@ -82,7 +82,11 @@ class GetSearchController extends KleinController {
             }
 
             return $this->response->json([
-                'success' => true
+                "errors" => [],
+                "data" => [],
+                "token" => $request['token'] ?? null,
+                "total" => $res['count'] ?? 0,
+                "segments" => $res[ 'sid_list' ]
             ]);
 
         } catch (Exception $exception){
@@ -152,6 +156,8 @@ class GetSearchController extends KleinController {
         if ( empty( $password ) ) {
             throw new InvalidArgumentException("missing job password", -3);
         }
+
+        $job = (int)$job;
 
         switch ( $status ) {
             case 'translated':
@@ -310,11 +316,11 @@ class GetSearchController extends KleinController {
         }
 
         try {
-            $strictMode = ( null !== $queryParams[ 'strictMode' ] ) ? $queryParams[ 'strictMode' ] : true;
+            $inCurrentChunkOnly = $queryParams[ 'inCurrentChunkOnly' ];
             $jodData = $this->getJobData($request['job'], $request['password']);
             $searchModel = $this->getSearchModel($queryParams, $jodData);
 
-            return $searchModel->search( $strictMode );
+            return $searchModel->search($inCurrentChunkOnly);
         } catch ( Exception $e ) {
             throw new RuntimeException("internal error: see the log", -1000);
         }
@@ -372,8 +378,7 @@ class GetSearchController extends KleinController {
                         $TPropagation,
                         $chunk,
                         $id_segment,
-                        $project,
-                        $versionsHandler
+                        $project
                     );
 
                 } catch ( Exception $e ) {

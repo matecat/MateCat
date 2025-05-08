@@ -92,11 +92,11 @@ class GetTagProjectionController extends KleinController {
         $source_lang = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $target_lang = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
 
-        if ( is_null( $source ) || $source === '' ) {
+        if ( empty( $source ) ) {
             throw new InvalidArgumentException("missing source segment" , -1);
         }
 
-        if ( is_null( $target ) || $target === '' ) {
+        if ( empty( $target ) ) {
             throw new InvalidArgumentException("missing target segment" , -2);
         }
 

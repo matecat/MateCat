@@ -103,10 +103,6 @@ class GetWarningController extends KleinController {
             $segment_status = $request['segment_status'];
             $characters_counter = $request['characters_counter'];
 
-            if(empty($segment_status)){
-                $segment_status = 'draft';
-            }
-
             /**
              * Update 2015/08/11, roberto@translated.net
              * getWarning needs the segment status too because of a bug:
@@ -170,7 +166,7 @@ class GetWarningController extends KleinController {
         $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
         $logs = filter_var( $this->request->param( 'logs' ), FILTER_UNSAFE_RAW );
-        $segment_status = filter_var( $this->request->param( 'segment_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+        $segment_status = filter_var( $this->request->param( 'segment_status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
 
         if ( empty( $id_job ) ) {
@@ -179,6 +175,17 @@ class GetWarningController extends KleinController {
 
         if ( empty( $password ) ) {
             throw new InvalidArgumentException("Empty job password", -2);
+        }
+
+        /**
+         * Update 2015/08/11, roberto@translated.net
+         * getWarning needs the segment status too because of a bug:
+         *   sometimes the client calls getWarning and sends an empty trg_content
+         *   because the suggestion has not been loaded yet.
+         *   This happens only if segment is in status NEW
+         */
+        if(empty($segment_status)){
+            $segment_status = 'draft';
         }
 
         return [
