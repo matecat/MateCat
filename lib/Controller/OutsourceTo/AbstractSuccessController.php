@@ -12,7 +12,7 @@ use Outsource\ConfirmationStruct;
  * The user will be redirected on this class to get the session quote data.
  *
  */
-abstract class OutsourceTo_AbstractSuccessController extends viewController {
+abstract class OutsourceTo_AbstractSuccessController extends viewController { //YYY move to a BaseKleinViewController
 
     /**
      *
