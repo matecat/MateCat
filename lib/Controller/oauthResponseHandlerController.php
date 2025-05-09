@@ -24,26 +24,22 @@ class oauthResponseHandlerController extends BaseKleinViewController {
         ] );
 
         if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . INIT::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
-            $this->close( 401 );
+            $this->render( 401 );
         }
 
         if ( !empty( $params[ 'code' ] ) ) {
             $this->_processSuccessfulOAuth( $params[ 'code' ], $params[ 'provider' ] );
         }
 
-        $this->close( 200 );
+        $this->render( 200 );
 
     }
 
-    public function setTemplateVars() {
-        if ( isset( $_SESSION[ 'wanted_url' ] ) ) {
-            $this->view->wanted_url = $_SESSION[ 'wanted_url' ]; //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
-        }
-    }
-
+    /**
+     * @return void
+     */
     protected function afterConstruct() {
-        $this->setTemplateVars();
-        $this->setView( INIT::$TEMPLATE_ROOT . '/oauth_response_handler.html' );
+        $this->setView( 'oauth_response_handler.html', [ 'wanted_url' => $_SESSION[ 'wanted_url' ] ?? null ] ); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
     }
 
     /**
@@ -86,15 +82,8 @@ class oauthResponseHandlerController extends BaseKleinViewController {
             $token            = $client->getAccessTokenFromAuthCode( $code );
             $this->remoteUser = $client->getResourceOwner( $token );
         } catch ( Exception $exception ) {
-            $this->close( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );
+            $this->render( $exception->getCode() >= 400 && $exception->getCode() < 500 ? $exception->getCode() : 400 );
         }
-    }
-
-    protected function close( int $code ) {
-        $this->response->code( $code );
-        $this->response->body( $this->view->execute() );
-        $this->response->send();
-        die();
     }
 
 }

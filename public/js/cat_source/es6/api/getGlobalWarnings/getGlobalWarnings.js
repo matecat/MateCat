@@ -2,7 +2,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const getGlobalWarnings = async ({id_job, password}) => {
   const paramsData = {
-    action: 'getWarning',
     id_job,
     password,
   }
@@ -13,7 +12,7 @@ export const getGlobalWarnings = async ({id_job, password}) => {
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/get-global-warning`,
     {
       method: 'POST',
       credentials: 'include',

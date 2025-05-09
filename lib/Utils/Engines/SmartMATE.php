@@ -24,7 +24,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             'scope'         => "translate"
     ];
 
-    protected $_config = [
+    protected array $_config = [
             'segment'     => null,
             'translation' => null,
             'source'      => null,
@@ -51,6 +51,9 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();

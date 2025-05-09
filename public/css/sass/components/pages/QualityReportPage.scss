@@ -685,7 +685,7 @@ header {
                             background: #0abeed;
                             color: #ffffff;
                             padding: 0 3px;
-                            font-size: 14px;
+                            font-size: 16px;
                           }
                           .per-yellow {
                             padding: 0 3px;
@@ -694,9 +694,6 @@ header {
                           }
                         }
                       }
-                      &.qr-diff-off {
-                      }
-
                       &.qr-diff-on {
                         .segment-container {
                           box-shadow: none !important;
@@ -981,7 +978,7 @@ header {
 }
 
 .per-orange {
-  background: colors.$orangeDefault !important;
+  background: colors.$rebuttedRed !important;
   color: #fff !important;
 }
 

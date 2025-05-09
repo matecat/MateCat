@@ -28,7 +28,6 @@ export const deleteContribution = async ({
   sid,
 }) => {
   const dataParams = {
-    action: 'deleteContribution',
     source_lang: sourceLanguage,
     target_lang: targetLanguage,
     id_job: idJob,
@@ -46,7 +45,7 @@ export const deleteContribution = async ({
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=deleteContribution`,
+    `${getMatecatApiDomain()}api/app/delete-contribution`,
     {
       method: 'POST',
       credentials: 'include',

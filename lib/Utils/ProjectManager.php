@@ -190,7 +190,7 @@ class ProjectManager {
                             'file_segments_count'                     => [],
                             'due_date'                                => null,
                             'qa_model'                                => null,
-                            'target_language_mt_engine_id'            => [],
+                            'target_language_mt_engine_association'   => [],
                             'standard_word_count'                     => 0,
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
@@ -203,8 +203,8 @@ class ProjectManager {
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'mt_evaluation'                           => false,
-                            'tm_prioritization'                       => null
+                            'tm_prioritization'                       => null,
+                            'mt_qe_workflow_payable_rate'             => null
                     ] );
         }
 
@@ -423,6 +423,12 @@ class ProjectManager {
         // pretranslate_101
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
+        }
+
+        // mt evaluation => ice_mt already in metadata
+        // add json parameters to the project metadata as json string
+        if ( $options[ 'mt_qe_workflow_enabled' ] ) {
+            $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
         }
 
         /**
@@ -1320,8 +1326,12 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            // get payable rates
-            if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+            // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
+            if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
+                $payableRatesTemplate = null;
+                $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+                // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $payableRates );
@@ -1362,13 +1372,16 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
+            // Replace {{pid}} with project ID for new keys created with empty name
+            $projectStructure[ 'tm_keys' ] = str_replace("{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ]);
+
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
-            $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
-            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
+            $newJob->id_tms            = $projectStructure[ 'tms_engine' ] ?? 1;
+            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_association' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
             $newJob->last_update       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
@@ -1393,7 +1406,7 @@ class ProjectManager {
 
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ($projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0") );
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0" ) );
             }
 
             // character_counter_mode
@@ -1415,11 +1428,6 @@ class ProjectManager {
                         $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
-            }
-
-            // mt evaluation => ice_mt
-            if ( $this->projectStructure[ 'mt_evaluation' ] ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'mt_evaluation', true );
             }
 
             try {
@@ -2321,11 +2329,11 @@ class ProjectManager {
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
             // avoid blank filenames
-            if(!empty($originalFileName)){
+            if ( !empty( $originalFileName ) ) {
 
                 // get metadata
-                $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
-                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix($cachedXliffFilePathName, PATHINFO_FILENAME);
+                $meta                = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
                 $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2338,10 +2346,10 @@ class ProjectManager {
                 }
 
                 $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    $this->projectStructure[ 'source_language' ],
-                    $fid,
-                    $originalFileName
+                        $fileDateSha1Path,
+                        $this->projectStructure[ 'source_language' ],
+                        $fid,
+                        $originalFileName
                 );
 
                 // check if the files were moved
@@ -2352,10 +2360,10 @@ class ProjectManager {
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 $fileStructures[ $fid ] = [
-                    'fid' => $fid,
-                    'original_filename' => $originalFileName,
-                    'path_cached_xliff' => $cachedXliffFilePathName,
-                    'mime_type' => $mimeType
+                        'fid'               => $fid,
+                        'original_filename' => $originalFileName,
+                        'path_cached_xliff' => $cachedXliffFilePathName,
+                        'mime_type'         => $mimeType
                 ];
             }
         }
@@ -3069,10 +3077,12 @@ class ProjectManager {
                     $newTmKey->tm   = true;
                     $newTmKey->glos = true;
 
-                    //THIS IS A NEW KEY and must be inserted into the user keyring
-                    //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                    // THIS IS A NEW KEY and must be inserted into the user keyring
+                    // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
                     // assign TMX name to the key
-                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
+
+                    // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? str_replace("{{pid}}", $this->projectStructure[ 'id_project' ], $_tmKey[ 'name' ]) : $firstTMXFileName );
 
                     $newMemoryKey->tm_key = $newTmKey;
                     $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];

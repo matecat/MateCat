@@ -6,16 +6,13 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const checkConnectionPing = async () => {
-  const dataParams = {
-    action: 'ajaxUtils',
-    exec: 'ping',
-  }
+  const dataParams = {}
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
     formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=ajaxUtils`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/ping`, {
     method: 'POST',
     credentials: 'include',
     body: formData,

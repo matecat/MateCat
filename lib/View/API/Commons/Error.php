@@ -11,18 +11,19 @@ namespace API\Commons;
 
 
 use Exception;
+use INIT;
 use Throwable;
 
 class Error {
 
-    private $data;
+    private array $data;
 
     /**
      * Error constructor.
      *
      * @param Exception[] $exceptions
      */
-    public function __construct( $exceptions = [] ) {
+    public function __construct( array $exceptions = [] ) {
         $this->data = $exceptions;
     }
 
@@ -42,15 +43,16 @@ class Error {
             if ( $error instanceof Throwable ) {
                 $code   = $error->getCode();
                 $output = $error->getMessage();
+                if ( INIT::$PRINT_ERRORS ) {
+                    $row[ 'errors' ][ 0 ][ 'trace' ] = $error->getTrace();
+                }
             } else {
                 $code   = -1000;
                 $output = $error;
             }
 
-            $row[ 'errors' ][] = [
-                    "code"    => $code,
-                    "message" => $output
-            ];
+            $row[ 'errors' ][ 0 ][ 'code' ] = $code;
+            $row[ 'errors' ][ 0 ][ 'message' ] = $output;
 
         }
 

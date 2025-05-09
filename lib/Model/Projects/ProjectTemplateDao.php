@@ -612,7 +612,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
      */
     private
     static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
     /**
