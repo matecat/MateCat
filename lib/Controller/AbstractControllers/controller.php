@@ -52,10 +52,12 @@ abstract class controller implements IController {
     public static function getInstance(): IController {
 
         //Default :  catController
-        $action     = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( $_GET[ 'action' ] ?? 'cat' );
+        $action     = $_REQUEST[ 'action' ] ?? 'cat';
         $actionList = explode( '\\', $action ); // do not accept namespaces (Security issue: directory traversal)
-        $action     = end( $actionList ); // do not accept namespaces (Security issue: directory traversal)
-        $className  = $action . "Controller";
+        $action     = end( $actionList );
+        $actionList = explode( '/', $action ); // do not accept directory separator (Security issue: directory traversal)
+        $action     = end( $actionList );
+        $className  = ( trim( $action ) ?: 'cat' ) . "Controller";
 
         //Put here all actions we want to be performed by ALL controllers
 

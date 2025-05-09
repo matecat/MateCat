@@ -6,6 +6,7 @@ use API\App\Json\UserProfile;
 use ApiKeys_ApiKeyDao;
 use ApiKeys_ApiKeyStruct;
 use ConnectedServices\ConnectedServiceDao;
+use Log;
 use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;
@@ -33,7 +34,11 @@ class AuthenticationHelper {
     private static ?AuthenticationHelper $instance   = null;
 
     /**
-     * @throws ReflectionException
+     * @param array       $session
+     * @param string|null $api_key
+     * @param string|null $api_secret
+     *
+     * @return AuthenticationHelper
      */
     public static function getInstance( array &$session, ?string $api_key = null, ?string $api_secret = null ): AuthenticationHelper {
         if ( !self::$instance ) {

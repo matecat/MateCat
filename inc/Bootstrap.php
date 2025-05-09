@@ -16,7 +16,7 @@ class Bootstrap {
     /**
      * @var FeatureSet
      */
-    private $autoLoadedFeatureSet;
+    private FeatureSet $autoLoadedFeatureSet;
 
     public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
         new self( $config_file, $task_runner_config_file );
@@ -97,35 +97,23 @@ class Bootstrap {
             Log::doJsonLog( $e->getMessage() );
         }
 
-        if ( !is_dir( INIT::$STORAGE_DIR ) ) {
-            mkdir( INIT::$STORAGE_DIR, 0755, true );
-        }
-        if ( !is_dir( INIT::$LOG_REPOSITORY ) ) {
-            mkdir( INIT::$LOG_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$UPLOAD_REPOSITORY ) ) {
-            mkdir( INIT::$UPLOAD_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$FILES_REPOSITORY ) ) {
-            mkdir( INIT::$FILES_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
-            mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$ANALYSIS_FILES_REPOSITORY ) ) {
-            mkdir( INIT::$ANALYSIS_FILES_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
-            mkdir( INIT::$ZIP_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$CONVERSIONERRORS_REPOSITORY ) ) {
-            mkdir( INIT::$CONVERSIONERRORS_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$TMP_DOWNLOAD ) ) {
-            mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
-        }
-        if ( !is_dir( INIT::$QUEUE_PROJECT_REPOSITORY ) ) {
-            mkdir( INIT::$QUEUE_PROJECT_REPOSITORY, 0755, true );
+        $directories = [
+                INIT::$STORAGE_DIR,
+                INIT::$LOG_REPOSITORY,
+                INIT::$UPLOAD_REPOSITORY,
+                INIT::$FILES_REPOSITORY,
+                INIT::$CACHE_REPOSITORY,
+                INIT::$ANALYSIS_FILES_REPOSITORY,
+                INIT::$ZIP_REPOSITORY,
+                INIT::$CONVERSIONERRORS_REPOSITORY,
+                INIT::$TMP_DOWNLOAD,
+                INIT::$QUEUE_PROJECT_REPOSITORY,
+        ];
+
+        foreach ( $directories as $directory ) {
+            if ( !is_dir( $directory ) ) {
+                mkdir( $directory, 0755, true );
+            }
         }
 
         //auth sections
@@ -167,8 +155,6 @@ class Bootstrap {
 
         Log::$fileName = 'fatal_errors.txt';
 
-        $response_message = "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>";
-
         try {
             /**
              * @var $exception Exception
@@ -200,16 +186,27 @@ class Bootstrap {
             Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
+        self::formatOutputErrors( $code, $message, $exception );
+        die(); // do not complete the response and set the header
+
+    }
+
+    private static function formatOutputErrors( int $httpStatusCode, string $httpStatusMessage, Throwable $exception ) {
+
+        $response_message = "Oops... We got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>";
+
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
-            header( "HTTP/1.1 " . $code . " " . $message );
+            $isAPI = preg_match( '#/api/*#', $_SERVER[ 'REQUEST_URI' ] ?? "" );
 
-            if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $_SERVER[ 'REQUEST_METHOD' ] ?? "" == 'POST' ) {
+            if ( strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ?? null ) == 'xmlhttprequest' || $isAPI ) {
+
+                header( "HTTP/1.1 " . $httpStatusCode . " " . $httpStatusMessage );
 
                 //json_rersponse
                 if ( INIT::$PRINT_ERRORS ) {
                     echo json_encode( [
-                            "errors" => [ [ "code" => -1000, "message" => $exception->getMessage() ] ], "data" => []
+                            "errors" => [ [ "code" => -1000, "message" => $exception->getMessage(), "trace" => $exception->getTrace() ] ], "data" => []
                     ] );
                 } else {
                     echo json_encode( [
@@ -223,18 +220,23 @@ class Bootstrap {
                 }
 
             } else {
-                $controllerInstance = new CustomPage();
-                $controllerInstance->setTemplate( "$code.html" );
-                $controllerInstance->setCode( $code );
-                $controllerInstance->doAction();
-            }
 
+                if ( INIT::$PRINT_ERRORS  ) {
+                    $report = [
+                            'message' => $exception->getMessage(),
+                            'trace'   => $exception->getTraceAsString(),
+                    ];
+                }
+
+                $controllerInstance = new CustomPageView();
+                $controllerInstance->setView( $httpStatusCode . '.html', $report ?? [], $httpStatusCode );
+                $controllerInstance->renderAndClose();
+
+            }
         } else {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
         }
-
-        die(); // do not complete the response and set the header
 
     }
 
@@ -249,10 +251,10 @@ class Bootstrap {
                 E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         ];
 
-        # Getting last error
+        # Getting the last error
         $error = error_get_last();
 
-        # Checking if last error is a fatal error
+        # Checking if the last error is a fatal error
         if ( isset( $error[ 'type' ] ) )
             switch ( $error[ 'type' ] ) {
                 case E_CORE_ERROR:
@@ -261,62 +263,22 @@ class Bootstrap {
                 case E_USER_ERROR:
                 case E_RECOVERABLE_ERROR:
 
-                    if ( !ob_get_level() ) {
-                        ob_start();
-                    } else {
-                        ob_end_clean();
-                        ob_start();
-                    }
-
-                    debug_print_backtrace();
-                    $output = ob_get_contents();
-                    ob_end_clean();
-
-                    # Here we handle the error, displaying HTML, logging, ...
-                    $output .= "<pre>\n";
-                    $output .= "[ {$errorType[$error['type']]} ]\n\t";
-                    $output .= "{$error['message']}\n\t";
-                    $output .= "Not Recoverable Error on line {$error['line']} in file " . $error[ 'file' ];
-                    $output .= " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                    $output .= " - REQUEST URI: " . var_export( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-                    $output .= " - REQUEST Message: " . var_export( $_REQUEST, true ) . "\n";
-                    $output .= "\n\t";
-                    $output .= "Aborting...\n";
-                    $output .= "</pre>";
-
-                    $isAPI = preg_match( '#/api/*#', @$_SERVER[ 'REQUEST_URI' ] );
-
                     Log::$fileName = 'fatal_errors.txt';
-                    Log::doJsonLog( $output );
-//                    Utils::sendErrMailReport( $output );
+                    $backtrace     = debug_backtrace();
 
-                    if ( stripos( PHP_SAPI, 'cli' ) === false ) {
-                        header( "HTTP/1.1 500 Internal Server Error" );
+                    $exception = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
+
+                    try {
+                        $reflector = new ReflectionProperty( $exception, 'trace' );
+                        $reflector->setAccessible( true );
+                        $reflector->setValue( $exception, $backtrace );
+                    } catch ( ReflectionException $e ) {
+
                     }
 
-                    if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $isAPI ) {
-
-                        //json_response
-                        if ( INIT::$PRINT_ERRORS ) {
-                            echo json_encode( [
-                                    "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => []
-                            ] );
-                        } else {
-                            echo json_encode( [
-                                    "errors"  => [
-                                            [
-                                                    "code"    => -1000,
-                                                    "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
-                                            ]
-                                    ], "data" => []
-                            ] );
-                        }
-
-                    } elseif ( INIT::$PRINT_ERRORS ) {
-                        echo $output;
-                    }
-
-                    break;
+                    Log::doJsonLog( $exception );
+                    self::formatOutputErrors( 500, "Internal Server Error", $exception );
+                    die();
             }
 
     }
@@ -392,7 +354,7 @@ class Bootstrap {
 
         $env = self::$CONFIG[ self::$CONFIG[ 'ENV' ] ];
 
-        // check if outsource is disabled by environment
+        // check if outsource is disabled by the environment
         $enable_outsource = getenv( 'ENABLE_OUTSOURCE' );
 
         if ( $enable_outsource == "false" ) {
@@ -484,7 +446,7 @@ class Bootstrap {
      *
      * @return bool true if all mandatory keys are present, false otherwise
      */
-    public static function areMandatoryKeysPresent() {
+    public static function areMandatoryKeysPresent(): bool {
         $merged_config = array_merge( self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
 
         foreach ( INIT::$MANDATORY_KEYS as $key ) {

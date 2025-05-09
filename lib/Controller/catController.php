@@ -313,39 +313,30 @@ class catController extends viewController {
         }
 
         if ( $this->job_not_found ) {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( 'job_not_found.html' );
-            $controllerInstance->setTemplateVars( [ "support_mail" => INIT::$SUPPORT_MAIL ] );
-            $controllerInstance->setCode( 404 );
-            $controllerInstance->doAction();
-            die();
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
+            $controllerInstance->renderAndClose();
         }
 
         if ( $this->job_cancelled ) {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( 'job_cancelled.html' );
-            $controllerInstance->setTemplateVars( [
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_cancelled.html', [
                     "support_mail" => INIT::$SUPPORT_MAIL,
                     "owner_email"  => $ownerMail
             ] );
-            $controllerInstance->setCode( 200 );
-            $controllerInstance->doAction();
-            die();
+            $controllerInstance->renderAndClose();
         }
 
         if ( $this->job_archived ) {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( 'job_archived.html' );
-            $controllerInstance->setTemplateVars( [
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_archived.html', [
                     "support_mail" => INIT::$SUPPORT_MAIL,
                     "owner_email"  => $ownerMail,
                     'jid'          => $this->jid,
                     'password'     => $this->password,
                     'jobOwnerIsMe' => $jobOwnerIsMe
             ] );
-            $controllerInstance->setCode( 200 );
-            $controllerInstance->doAction();
-            die();
+            $controllerInstance->renderAndClose();
         }
 
         $this->template->jid             = $this->jid;

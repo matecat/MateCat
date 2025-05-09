@@ -11,6 +11,11 @@
             background: url(/public/img/offline.png) no-repeat center center;
             margin-top: 60px;
         }
+        .e {
+            text-align: start;
+            margin: auto;
+            width: 35%;
+        }
     </style>
 </head>
 <body class="started">
@@ -38,6 +43,10 @@
     <div class="cat"></div>
     <h1><span>500</span> Internal Server Error.</h1>
     <h2>Oops! We got an error...</h2>
+    <pre class="e">
+${message | string: }
+${trace | string: }
+    </pre>
 </div>
 </body>
 </html>

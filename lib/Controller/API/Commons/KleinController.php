@@ -117,6 +117,7 @@ abstract class KleinController implements IController {
         $this->featureSet = new FeatureSet();
         $this->identifyUser( $this->useSession );
         $this->afterConstruct();
+
     }
 
     /**
@@ -154,7 +155,7 @@ abstract class KleinController implements IController {
 
     }
 
-    public function getRequest() {
+    public function getRequest(): Request {
         return $this->request;
     }
 

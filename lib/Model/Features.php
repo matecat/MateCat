@@ -111,10 +111,10 @@ class Features {
      *
      * @return string
      */
-    public static function getPluginClass( $code ) {
+    public static function getPluginClass( $code ): string {
         $instance = static::getInstance();
         if ( !isset( $instance->PLUGIN_CLASSES[ $code ] ) ) {
-            //try default auto loading for internal plugins
+            //try default autoloading for internal plugins
             return '\\Features\\' . Utils::underscoreToCamelCase( $code );
         }
 
