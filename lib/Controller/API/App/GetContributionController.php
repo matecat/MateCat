@@ -34,23 +34,23 @@ class GetContributionController extends KleinController {
         try {
             $request = $this->validateTheRequest();
 
-            $id_client           = $request[ 'id_client' ];
-            $id_job              = $request[ 'id_job' ];
-            $id_segment          = $request[ 'id_segment' ];
-            $num_results         = $request[ 'num_results' ];
-            $text                = $request[ 'text' ];
-            $id_translator       = $request[ 'id_translator' ];
-            $password            = $request[ 'password' ];
-            $received_password   = $request[ 'received_password' ];
-            $concordance_search  = $request[ 'concordance_search' ];
-            $switch_languages    = $request[ 'switch_languages' ];
-            $context_before      = $request[ 'context_before' ];
-            $context_after       = $request[ 'context_after' ];
-            $context_list_before = $request[ 'context_list_before' ];
-            $context_list_after  = $request[ 'context_list_after' ];
-            $id_before           = $request[ 'id_before' ];
-            $id_after            = $request[ 'id_after' ];
-            $cross_language      = $request[ 'cross_language' ];
+            $id_client = $request['id_client'];
+            $id_job = $request['id_job'];
+            $id_segment = $request['id_segment'];
+            $num_results = $request['num_results'];
+            $text = $request['text'];
+            $id_translator = $request['id_translator'];
+            $password = $request['password'];
+            $received_password = $request['received_password'];
+            $concordance_search = $request['concordance_search'];
+            $switch_languages = $request['switch_languages'];
+            $context_before = $request['context_before'];
+            $context_after = $request['context_after'];
+            $context_list_before = $request['context_list_before'];
+            $context_list_after = $request['context_list_after'];
+            $id_before = $request['id_before'];
+            $id_after = $request['id_after'];
+            $cross_language = $request['cross_language'];
 
             if ( $id_translator == 'unknown_translator' ) {
                 $id_translator = "";
@@ -60,7 +60,7 @@ class GetContributionController extends KleinController {
                 $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
             }
 
-            $jobStruct  = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+            $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
             $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
 
             $projectStruct = $jobStruct->getProject();
@@ -80,18 +80,19 @@ class GetContributionController extends KleinController {
 
             }
 
-            $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
-            $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
+            $file = (new FilesPartsDao())->getBySegmentId($id_segment);
+            $owner = (new Users_UserDao())->getProjectOwner( $id_job );
 
-            $contributionRequest->id_file    = $file->id_file;
-            $contributionRequest->id_job     = $id_job;
-            $contributionRequest->password   = $received_password;
-            $contributionRequest->user       = $owner;
-            $contributionRequest->dataRefMap = $dataRefMap;
-            $contributionRequest->contexts   = [
-                    'context_before' => $context_before,
-                    'segment'        => $text,
-                    'context_after'  => $context_after
+            $contributionRequest                    = new ContributionRequestStruct();
+            $contributionRequest->id_file           = $file->id_file;
+            $contributionRequest->id_job            = $id_job;
+            $contributionRequest->password          = $received_password;
+            $contributionRequest->user              = $owner;
+            $contributionRequest->dataRefMap        = $dataRefMap;
+            $contributionRequest->contexts          = [
+                'context_before' => $context_before,
+                'segment'        => $text,
+                'context_after'  => $context_after
             ];
 
             $contributionRequest->context_list_before = $context_list_before;
@@ -115,67 +116,72 @@ class GetContributionController extends KleinController {
 
             $jobsMetadataDao = new MetadataDao();
             $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+            $mt_evaluation  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
 
             if ( $dialect_strict !== null ) {
                 $contributionRequest->dialect_strict = $dialect_strict->value == 1;
             }
 
-            $tm_prioritization = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
+            if ( $mt_evaluation !== null ) {
+                $contributionRequest->mt_evaluation = $mt_evaluation->value == 1;
+            }
+
+            $tm_prioritization  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'tm_prioritization', 10 * 60 );
 
             if ( $tm_prioritization !== null ) {
                 $contributionRequest->tm_prioritization = $tm_prioritization->value == 1;
             }
 
-            if ( $contributionRequest->concordanceSearch ) {
+            if($contributionRequest->concordanceSearch){
                 $contributionRequest->resultNum = 10;
             }
 
             // penalty_key
             $penalty_key = [];
-            $tmKeys      = json_decode( $jobStruct->tm_keys, true );
+            $tmKeys = json_decode( $jobStruct->tm_keys, true );
 
-            foreach ( $tmKeys as $tmKey ) {
-                if ( isset( $tmKey[ 'penalty' ] ) and is_numeric( $tmKey[ 'penalty' ] ) ) {
-                    $penalty_key[] = $tmKey[ 'penalty' ];
+            foreach ($tmKeys as $tmKey){
+                if(isset($tmKey['penalty']) and is_numeric($tmKey['penalty'])){
+                    $penalty_key[] = $tmKey['penalty'];
                 } else {
                     $penalty_key[] = 0;
                 }
             }
 
-            if ( !empty( $penalty_key ) ) {
+            if(!empty($penalty_key)){
                 $contributionRequest->penalty_key = $penalty_key;
             }
 
             Request::contribution( $contributionRequest );
 
-            return $this->response->json( [
-                    'errors' => [],
-                    'data'   => [
-                            "message"   => "OK",
-                            "id_client" => $id_client,
-                            "request"   => [
-                                    'session_id'        => $contributionRequest->getSessionId(),
-                                    'id_file'           => (int)$contributionRequest->id_file,
-                                    'id_job'            => (int)$contributionRequest->id_job,
-                                    'password'          => $contributionRequest->password,
-                                    'contexts'          => $contributionRequest->contexts,
-                                    'id_client'         => $contributionRequest->id_client,
-                                    'userRole'          => $contributionRequest->userRole,
-                                    'tm_prioritization' => $contributionRequest->tm_prioritization,
-                                    'mt_evaluation'     => $contributionRequest->mt_evaluation,
-                                    'penalty_key'       => $contributionRequest->penalty_key,
-                                    'crossLangTargets'  => $contributionRequest->crossLangTargets,
-                                    'fromTarget'        => $contributionRequest->fromTarget,
-                                    'dialect_strict'    => $contributionRequest->dialect_strict,
-                                    'segmentId'         => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
-                                    'resultNum'         => (int)$contributionRequest->resultNum,
-                                    'concordanceSearch' => $contributionRequest->concordanceSearch,
-                            ]
+            return $this->response->json([
+                'errors' => [],
+                'data' => [
+                    "message" => "OK",
+                    "id_client" => $id_client,
+                    "request" => [
+                        'session_id' => $contributionRequest->getSessionId(),
+                        'id_file' => (int)$contributionRequest->id_file,
+                        'id_job' => (int)$contributionRequest->id_job,
+                        'password' => $contributionRequest->password,
+                        'contexts' => $contributionRequest->contexts,
+                        'id_client' => $contributionRequest->id_client,
+                        'userRole' => $contributionRequest->userRole,
+                        'tm_prioritization' => $contributionRequest->tm_prioritization,
+                        'mt_evaluation' => $contributionRequest->mt_evaluation,
+                        'penalty_key' => $contributionRequest->penalty_key,
+                        'crossLangTargets' => $contributionRequest->crossLangTargets,
+                        'fromTarget' => $contributionRequest->fromTarget,
+                        'dialect_strict' => $contributionRequest->dialect_strict,
+                        'segmentId' => $contributionRequest->segmentId ? (string)$contributionRequest->segmentId : null,
+                        'resultNum' => (int)$contributionRequest->resultNum,
+                        'concordanceSearch' => $contributionRequest->concordanceSearch,
                     ]
-            ] );
+                ]
+            ]);
 
-        } catch ( Exception $exception ) {
-            return $this->returnException( $exception );
+        } catch (Exception $exception){
+            return $this->returnException($exception);
         }
     }
 
@@ -207,47 +213,47 @@ class GetContributionController extends KleinController {
             //in case of user concordance search skip these lines
             //because segment can be optional
             if ( empty( $id_segment ) ) {
-                throw new InvalidArgumentException( "missing id_segment", -1 );
+                throw new InvalidArgumentException("missing id_segment", -1);
             }
         }
 
         if ( is_null( $text ) or $text === '' ) {
-            throw new InvalidArgumentException( "missing text", -2 );
+            throw new InvalidArgumentException("missing text", -2);
         }
 
         if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException( "missing id job", -3 );
+            throw new InvalidArgumentException("missing id job", -3);
         }
 
         if ( empty( $password ) ) {
-            throw new InvalidArgumentException( "missing job password", -4 );
+            throw new InvalidArgumentException("missing job password", -4);
         }
 
         if ( empty( $id_client ) ) {
-            throw new InvalidArgumentException( "missing id_client", -5 );
+            throw new InvalidArgumentException("missing id_client", -5);
         }
 
-        $this->id_job            = $id_job;
+        $this->id_job = $id_job;
         $this->received_password = $received_password;
 
         return [
-                'id_client'           => $id_client,
-                'id_job'              => $id_job,
-                'id_segment'          => $id_segment,
-                'num_results'         => $num_results,
-                'text'                => $text,
-                'id_translator'       => $id_translator,
-                'password'            => $password,
-                'received_password'   => $received_password,
-                'concordance_search'  => $concordance_search,
-                'switch_languages'    => $switch_languages,
-                'context_before'      => $context_before,
-                'context_after'       => $context_after,
-                'id_before'           => $id_before,
-                'id_after'            => $id_after,
-                'cross_language'      => $cross_language,
-                'context_list_after'  => json_decode( $context_list_after, true ),
-                'context_list_before' => json_decode( $context_list_before, true ),
+            'id_client' => $id_client,
+            'id_job' => $id_job,
+            'id_segment' => $id_segment,
+            'num_results' => $num_results,
+            'text' => $text,
+            'id_translator' => $id_translator,
+            'password' => $password,
+            'received_password' => $received_password,
+            'concordance_search' => $concordance_search,
+            'switch_languages' => $switch_languages,
+            'context_before' => $context_before,
+            'context_after' => $context_after,
+            'id_before' => $id_before,
+            'id_after' => $id_after,
+            'cross_language' => $cross_language,
+            'context_list_after' => json_decode( $context_list_after, true ),
+            'context_list_before' => json_decode( $context_list_before, true ),
         ];
     }
 
@@ -263,11 +269,11 @@ class GetContributionController extends KleinController {
 
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
-                [
-                        'id_before'  => $request[ 'id_before' ],
-                        'id_segment' => $request[ 'id_segment' ],
-                        'id_after'   => $request[ 'id_after' ]
-                ]
+            [
+                'id_before'  => $request['id_before'],
+                'id_segment' => $request['id_segment'],
+                'id_after'   => $request['id_after']
+            ]
         );
 
         $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $request );
@@ -275,15 +281,15 @@ class GetContributionController extends KleinController {
         $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
 
         if ( $segmentsList->id_before ) {
-            $request[ 'context_before' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
+            $request['context_before'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
         }
 
         if ( $segmentsList->id_segment ) {
-            $request[ 'text' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
+            $request['text'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_segment->segment );
         }
 
         if ( $segmentsList->id_after ) {
-            $request[ 'context_after' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
+            $request['context_after'] = $Filter->fromLayer0ToLayer1( $segmentsList->id_after->segment );
         }
     }
 

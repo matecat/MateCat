@@ -291,7 +291,7 @@ class NewController extends KleinController {
             $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
             $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
             $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
-            $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
+                $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
             $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
             $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
             $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
@@ -319,12 +319,12 @@ class NewController extends KleinController {
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
 
-            $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
-            $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
-            $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
+            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
+            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
+            $projectStructure[ 'character_counter' ]            = (!empty($request[ 'character_counter' ])) ? $request[ 'character_counter' ] : null;
+            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
 
             // mmtGlossaries
             if ( $request[ 'mmt_glossaries' ] ) {
@@ -368,6 +368,10 @@ class NewController extends KleinController {
 
             if ( $request[ 'xliff_parameters' ] ) {
                 $projectStructure[ 'xliff_parameters' ] = $request[ 'xliff_parameters' ];
+            }
+
+            if ( $request[ 'mt_evaluation' ] ) {
+                $projectStructure[ 'mt_evaluation' ] = true;
             }
 
             //set features override
@@ -1228,6 +1232,8 @@ class NewController extends KleinController {
     }
 
     /**
+     * YYY json validation
+     *
      * @param int|null    $mt_qe_workflow_template_id
      * @param string|null $mt_qe_workflow_template_raw_parameters
      *
