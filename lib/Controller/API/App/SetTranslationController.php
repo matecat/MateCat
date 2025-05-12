@@ -430,8 +430,8 @@ class SetTranslationController extends KleinController {
         $translation = filter_var( $this->request->param( 'translation' ), FILTER_UNSAFE_RAW );
         $segment = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
         $version = filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT );
-        $chosen_suggestion_index = filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT );
-        $suggestion_array = filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW );
+        $chosen_suggestion_index = $this->request->param( 'chosen_suggestion_index' ) !== null ? filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT ) : null;
+        $suggestion_array = $this->request->param( 'suggestion_array' ) !== null ? filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW ) : null;
         $status = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $splitStatuses = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
