@@ -239,7 +239,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     private static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
     /**

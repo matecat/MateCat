@@ -96,7 +96,7 @@ class JobMetadataController extends KleinController {
                     throw new Exception( 'Missing `value` property', 400 );
                 }
 
-                if(empty($item['value'])){
+                if($item['value'] === ""){
                     throw new Exception( 'Empty `value` property', 400 );
                 }
 

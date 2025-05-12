@@ -541,7 +541,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      */
     private
     static function destroyQueryPaginated( int $uid ) {
-        ( new static() )->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        ( new static() )->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
 }

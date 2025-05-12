@@ -3,7 +3,9 @@
 namespace API\V3;
 
 use API\V2\BaseChunkController;
+use Exception;
 use QualityReport\QualityReportSegmentModel;
+use ZipArchive;
 
 
 class DownloadQRController extends BaseChunkController {
@@ -136,7 +138,7 @@ class DownloadQRController extends BaseChunkController {
         }
 
         if(!isset($uniqueFile)){
-            throw new \Exception('Merging files for download failed.');
+            throw new Exception('Merging files for download failed.');
         }
 
         return [$uniqueFile];
@@ -502,9 +504,9 @@ class DownloadQRController extends BaseChunkController {
      * @param array  $files
      */
     private function composeZipFile($filename, array $files) {
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive;
 
-        if ($zip->open($filename, \ZipArchive::CREATE)) {
+        if ($zip->open($filename, ZipArchive::CREATE)) {
             foreach ($files as $index => $fileContent){
                 $zip->addFromString( "qr_file__".($index+1)."." . $this->format, $fileContent);
             }

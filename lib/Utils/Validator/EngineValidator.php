@@ -3,6 +3,7 @@
 namespace Validator;
 
 use Engine;
+use Engines_AbstractEngine;
 use Exception;
 
 class EngineValidator {
@@ -11,10 +12,10 @@ class EngineValidator {
      * @param $uid
      * @param $engineClass
      *
-     * @return \Engines_AbstractEngine
+     * @return Engines_AbstractEngine
      * @throws Exception
      */
-    public static function engineBelongsToUser( $engineId, int $uid, $engineClass = null ) {
+    public static function engineBelongsToUser( $engineId, int $uid, $engineClass = null ): Engines_AbstractEngine {
         $engine       = Engine::getInstance( $engineId );
         $engineRecord = $engine->getEngineRecord();
 

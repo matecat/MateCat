@@ -49,8 +49,6 @@ RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activi
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
-RewriteRule ^api/v1/new$ index.php?api=true&action=new [QSA,L]
-
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]

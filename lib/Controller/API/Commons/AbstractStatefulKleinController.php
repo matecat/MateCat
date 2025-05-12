@@ -8,7 +8,6 @@
 
 namespace API\Commons;
 
-use Bootstrap;
 use Exception;
 
 abstract class AbstractStatefulKleinController extends KleinController {
