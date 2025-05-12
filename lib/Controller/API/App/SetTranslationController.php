@@ -52,7 +52,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
     protected ?string $password = null;
 
-    protected ? string $received_password = null;
+    protected ?string $received_password = null;
 
     /**
      * @var Jobs_JobStruct
@@ -99,7 +99,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $check->setTargetSegLang( $this->data[ 'chunk' ]->target );
             $check->setIdSegment( $this->data[ 'id_segment' ] );
 
-            if ( isset( $this->data[ 'characters_counter' ] ) ) {
+            if ( isset( $this->data[ 'characters_counter' ] ) and is_numeric( $this->data[ 'characters_counter' ] ) ) {
                 $check->setCharactersCount( $this->data[ 'characters_counter' ] );
             }
 
@@ -429,7 +429,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $segment                 = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
         $version                 = filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT );
         $chosen_suggestion_index = filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE ] );
-        $suggestion_array        = filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW );
+        $suggestion_array        = filter_var( $this->request->param( 'suggestion_array' ), FILTER_SANITIZE_STRING, [ 'filter' => FILTER_UNSAFE_RAW, 'flags' => FILTER_FLAG_EMPTY_STRING_NULL | FILTER_NULL_ON_FAILURE ] );
         $status                  = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $splitStatuses           = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $context_before          = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
@@ -490,7 +490,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'context_after'           => $context_after,
                 'id_before'               => $id_before,
                 'id_after'                => $id_after,
-                'revisionNumber'          => (int)$revisionNumber,
+                'revisionNumber'          => $revisionNumber !== null ? (int)$revisionNumber : null,
                 'guess_tag_used'          => $guess_tag_used,
                 'characters_counter'      => $characters_counter,
                 'propagate'               => $propagate,
@@ -835,16 +835,16 @@ class SetTranslationController extends AbstractStatefulKleinController {
         /**
          * Set the new contribution in the queue
          */
-        $contributionStruct               = new ContributionSetStruct();
-        $contributionStruct->fromRevision = $this->isRevision();
-        $contributionStruct->id_file      = ( $filesParts !== null ) ? $filesParts->id_file : null;
-        $contributionStruct->id_job       = $this->data[ 'id_job' ];
-        $contributionStruct->job_password = $this->data[ 'password' ];
-        $contributionStruct->id_segment   = $this->data[ 'id_segment' ];
-        $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
-        $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;
+        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct->fromRevision         = $this->isRevision();
+        $contributionStruct->id_file              = ( $filesParts !== null ) ? $filesParts->id_file : null;
+        $contributionStruct->id_job               = $this->data[ 'id_job' ];
+        $contributionStruct->job_password         = $this->data[ 'password' ];
+        $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
+        $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
+        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
