@@ -101,7 +101,7 @@ class SetTranslationController extends KleinController {
             $check->setTargetSegLang( $this->data['chunk']->target );
             $check->setIdSegment( $this->data['id_segment'] );
 
-            if ( isset( $this->data[ 'characters_counter' ] ) ) {
+            if ( isset( $this->data[ 'characters_counter' ] ) and is_numeric($this->data['characters_counter']) ) {
                 $check->setCharactersCount( $this->data[ 'characters_counter' ] );
             }
 
@@ -429,16 +429,16 @@ class SetTranslationController extends KleinController {
         $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $translation = filter_var( $this->request->param( 'translation' ), FILTER_UNSAFE_RAW );
         $segment = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
-        $version = filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT );
-        $chosen_suggestion_index = filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT );
-        $suggestion_array = filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW );
+        $version = $this->request->param( 'version' ) !== null ? filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT ) : null;
+        $chosen_suggestion_index = $this->request->param( 'chosen_suggestion_index' ) !== null ? filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT ) : null;
+        $suggestion_array = $this->request->param( 'suggestion_array' ) !== null ? filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW ) : null;
         $status = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $splitStatuses = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
         $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
         $context_after = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
         $id_before = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
         $id_after = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
-        $revisionNumber = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
+        $revisionNumber = $this->request->param( 'revision_number' ) !== null ? filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT ) : null;
         $guess_tag_used = filter_var( $this->request->param( 'guess_tag_used' ), FILTER_VALIDATE_BOOLEAN );
         $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
 
@@ -498,7 +498,7 @@ class SetTranslationController extends KleinController {
             'context_after' => $context_after ,
             'id_before' => $id_before ,
             'id_after' => $id_after ,
-            'revisionNumber' => (int)$revisionNumber ,
+            'revisionNumber' => $revisionNumber !== null ? (int)$revisionNumber : null,
             'guess_tag_used' => $guess_tag_used ,
             'characters_counter' => $characters_counter ,
             'propagate' => $propagate ,
