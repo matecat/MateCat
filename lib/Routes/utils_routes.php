@@ -127,6 +127,54 @@ $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
 
+// MISC (OLD AJAX ROUTES)
+route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
+route( '/api/app/outsource-to', 'POST', [ 'API\App\OutsourceToController', 'outsource' ] );
+route( '/api/app/get-volume-analysis', 'POST', [ 'API\App\GetVolumeAnalysisController', 'analysis' ] );
+route( '/api/app/get-projects', 'POST', [ 'API\App\GetProjectsController', 'fetch' ] );
+route( '/api/app/delete-contribution', 'POST', [ 'API\App\DeleteContributionController', 'delete' ] );
+route( '/api/app/comment/resolve', 'POST', [ 'API\App\CommentController', 'resolve' ] );
+route( '/api/app/comment/delete', 'POST', [ 'API\App\CommentController', 'delete' ] );
+route( '/api/app/comment/create', 'POST', [ 'API\App\CommentController', 'create' ] );
+route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'getRange' ] );
+route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
+route( '/api/app/get-global-warning', 'POST', [ 'API\App\GetWarningController', 'global' ] );
+route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', 'local' ] );
+route( '/api/app/split-job-apply', 'POST', [ 'API\V2\SplitJobController', 'apply' ] ); // Same API as public V2
+route( '/api/app/split-job-check', 'POST', [ 'API\V2\SplitJobController', 'check' ] ); // Same API as public V2
+route( '/api/app/split-job-merge', 'POST', [ 'API\V2\SplitJobController', 'merge' ] ); // Same API as public V2
+route( '/api/app/user-keys-delete', 'POST', [ 'API\App\UserKeysController', 'delete' ] );
+route( '/api/app/user-keys-update', 'POST', [ 'API\App\UserKeysController', 'update' ] );
+route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'newKey' ] );
+route( '/api/app/user-keys-info', 'POST', [ 'API\App\UserKeysController', 'info' ] );
+route( '/api/app/user-keys-share', 'POST', [ 'API\App\UserKeysController', 'share' ] );
+route( '/api/app/create-random-user', 'POST', [ 'API\App\CreateRandUserController', 'create' ] );
+route( '/api/app/get-tag-projection', 'POST', [ 'API\App\GetTagProjectionController', 'call' ] );
+route( '/api/app/set-current-segment', 'POST', [ 'API\App\SetCurrentSegmentController', 'set' ] );
+route( '/api/app/get-segments', 'POST', [ 'API\App\GetSegmentsController', 'segments' ] );
+route( '/api/app/ping', 'POST', [ 'API\App\AjaxUtilsController', 'ping' ] );
+route( '/api/app/check-tm-key', 'POST', [ 'API\App\AjaxUtilsController', 'checkTMKey' ] );
+route( '/api/app/clear-not-completed-uploads', 'POST', [ 'API\App\AjaxUtilsController', 'clearNotCompletedUploads' ] );
+route( '/api/app/get-translation-mismatches', 'POST', [ 'API\App\GetTranslationMismatchesController', 'get' ] );
+route( '/api/app/add-engine', 'POST', [ 'API\App\EngineController', 'add' ] );
+route( '/api/app/disable-engine', 'POST', [ 'API\App\EngineController', 'disable' ] );
+route( '/api/app/get-contribution', 'POST', [ 'API\App\GetContributionController', 'get' ] );
+route( '/api/app/search', 'POST', [ 'API\App\GetSearchController', 'search' ] );
+route( '/api/app/replace-all', 'POST', [ 'API\App\GetSearchController', 'replaceAll' ] );
+route( '/api/app/redo-replace-all', 'POST', [ 'API\App\GetSearchController', 'redoReplaceAll' ] );
+route( '/api/app/undo-replace-all', 'POST', [ 'API\App\GetSearchController', 'undoReplaceAll' ] );
+route( '/api/app/update-job-keys', 'POST', [ 'API\App\UpdateJobKeysController', 'update' ] );
+route( '/api/app/set-translation', 'POST', [ 'API\App\SetTranslationController', 'translate' ] );
+route( '/api/app/split-segment', 'POST', ['API\App\SplitSegmentController', 'split' ] );
+route( '/api/app/new-tmx', 'POST', ['API\App\LoadTMXController', 'newTM' ] );
+route( '/api/app/upload-tmx-status', 'POST', ['API\App\LoadTMXController', 'uploadStatus' ] );
+route( '/api/app/change-job-status', 'POST', ['API\App\ChangeJobsStatusController', 'changeStatus' ] );
+route( '/api/app/download-tmx', 'POST', ['API\App\DownloadTMXController', 'download' ] );
+route( '/api/app/new-project', 'POST', ['API\App\CreateProjectController', 'create' ] );
+route( '/api/app/convert-file', 'POST', ['API\App\ConvertFileController', 'handle' ] );
+route( '/api/app/set-chunk-completed', 'POST', ['API\App\SetChunkCompletedController', 'complete' ] );
+route( '/api/app/download-analysis-report', 'POST', ['API\App\DownloadAnalysisReportController', 'download' ] );
+
 // Metadata
 $klein->with( '/api/app/jobs/[:id_job]/[:password]/metadata', function () {
     route( '', 'GET', [ '\API\App\JobMetadataController', 'get' ] );

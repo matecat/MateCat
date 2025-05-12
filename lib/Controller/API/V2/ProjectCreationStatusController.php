@@ -54,7 +54,6 @@ class ProjectCreationStatusController extends KleinController {
 
         } else {
 
-
             // project is created, find it with password
             try {
                 $project = Projects_ProjectDao::findByIdAndPassword( $this->request->id_project, $this->request->password );
@@ -65,7 +64,7 @@ class ProjectCreationStatusController extends KleinController {
             $featureSet = $project->getFeaturesSet();
             $result     = $featureSet->filter( 'filterCreationStatus', $result, $project );
 
-            if ( empty( $result ) ) {
+            if ( empty( $result['id_project'] ) ) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;

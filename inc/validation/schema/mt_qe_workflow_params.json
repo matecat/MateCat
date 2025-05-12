@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "analysis_ignore_100": {
+      "type": "boolean",
+      "default": false
+    },
+    "analysis_ignore_101": {
+      "type": "boolean",
+      "default": false
+    },
+    "confirm_best_quality_mt": {
+      "type": "boolean",
+      "default": true
+    },
+    "lock_best_quality_mt": {
+      "type": "boolean",
+      "default": false
+    },
+    "best_quality_mt_analysis_status": {
+      "type": "string",
+      "enum": [
+        "second_pass_approved",
+        "approved",
+        "translated"
+      ],
+      "default": "approved"
+    },
+    "qe_model_type": {
+      "type": "string",
+      "minLength": 3,
+      "default": "default"
+    }
+  },
+  "additionalProperties": false
+}

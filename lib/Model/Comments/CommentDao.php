@@ -52,12 +52,12 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Comments_CommentStruct $comment
+     * @param Comments_BaseCommentStruct $comment
      *
      * @return bool
      * @throws ReflectionException
      */
-    public function deleteComment( Comments_CommentStruct $comment ): bool {
+    public function deleteComment( Comments_BaseCommentStruct $comment ): bool {
         $sql  = "DELETE from comments WHERE id = :id";
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( $sql );

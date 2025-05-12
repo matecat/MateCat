@@ -14,9 +14,9 @@
 namespace API\Commons\Validators;
 
 use API\Commons\KleinController;
-use Jobs_JobStruct;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use ReflectionException;

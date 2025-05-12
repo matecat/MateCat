@@ -6,7 +6,6 @@ export const getTranslationMismatches = async ({
   id_job,
 }) => {
   const paramsData = {
-    action: 'getTranslationMismatches',
     password,
     id_segment,
     id_job,
@@ -18,7 +17,7 @@ export const getTranslationMismatches = async ({
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/get-translation-mismatches`,
     {
       method: 'POST',
       credentials: 'include',
