@@ -7,7 +7,6 @@ use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
 use CatUtils;
-use CustomPage;
 use CustomPageView;
 use Exception;
 use FlashMessage;
