@@ -501,7 +501,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForToDo( $where, $data ) {
+    public static function getSqlForToDo( $where, &$data ) {
 
         $sql_condition = "";
         $sql_sp = "";
@@ -512,6 +512,13 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
 
         if(array_key_exists("status_approved", $data)) {
             $sql_condition = " OR st.status = :status_approved ";
+        }
+
+        // Unset unneeded params for the query
+        if (strpos($sql_condition, "status_approved") !== false) {
+            unset($data['status_translated']);
+        } elseif (strpos($sql_condition, "status_translated") !== false) {
+            unset($data['status_approved']);
         }
 
         $sql = "
