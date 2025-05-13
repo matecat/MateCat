@@ -37,8 +37,6 @@ RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
 
-RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
-
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
 
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
@@ -49,16 +47,11 @@ RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activi
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
-RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
 RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
 
 RewriteRule ^utils/pee$ router.php [L]
-
-RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
-RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
-RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor

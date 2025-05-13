@@ -10,8 +10,10 @@ namespace Features\TranslationEvents\Model;
 
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
+use DataAccess_IDaoStruct;
 use Database;
 use PDO;
+use ReflectionException;
 
 class TranslationEventDao extends \DataAccess_AbstractDao {
 
@@ -143,7 +145,8 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
      * @param array $id_segment_list
      * @param int   $id_job
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
+     * @throws ReflectionException
      */
     public function getTteForSegments( $id_segment_list, $id_job ) {
         $in  = str_repeat( '?,', count( $id_segment_list ) - 1 ) . '?';
@@ -164,7 +167,7 @@ class TranslationEventDao extends \DataAccess_AbstractDao {
         $stmt              = $this->_getStatementForQuery( $sql );
         $id_segment_list[] = $id_job;
 
-        return @$this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list );
+        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list ) ?? null;
     }
 
     /**

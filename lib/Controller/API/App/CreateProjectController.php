@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
@@ -30,6 +30,7 @@ use Projects_MetadataDao;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
+use Teams\TeamStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Utils;
@@ -39,7 +40,7 @@ use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
 
-class CreateProjectController extends KleinController {
+class CreateProjectController extends AbstractStatefulKleinController {
 
     private array $data     = [];
     private array $metadata = [];
@@ -288,7 +289,7 @@ class CreateProjectController extends KleinController {
         if ( $array_keys ) { // some keys are selected from panel
 
             //remove duplicates
-            foreach ( $array_keys as $pos => $value ) {
+            foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
@@ -306,7 +307,7 @@ class CreateProjectController extends KleinController {
         $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
         $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
         $private_tm_key   = $postPrivateTmKey;
-        $only_private     = ( is_null( $get_public_matches ) ? false : !$get_public_matches );
+        $only_private     = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
         $data = [
@@ -388,7 +389,7 @@ class CreateProjectController extends KleinController {
      * @param $elem
      * @return array
      */
-    private static function sanitizeTmKeyArr( $elem ) {
+    private static function sanitizeTmKeyArr( $elem ): array {
         $element                  = new TmKeyManagement_TmKeyStruct( $elem );
         $element->complete_format = true;
         $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
@@ -564,7 +565,7 @@ class CreateProjectController extends KleinController {
      * @param null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
-     * @throws \Exception
+     * @throws Exception
      */
     private function validatePayableRateTemplate( $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
@@ -715,10 +716,10 @@ class CreateProjectController extends KleinController {
     /**
      * @param null $id_team
      *
-     * @return \Teams\TeamStruct|null
+     * @return TeamStruct|null
      * @throws Exception
      */
-    private function setTeam( $id_team = null ) {
+    private function setTeam( $id_team = null ): ?TeamStruct {
         if ( is_null( $id_team ) ) {
             return $this->user->getPersonalTeam();
         }
@@ -741,7 +742,7 @@ class CreateProjectController extends KleinController {
      *
      * @throws Exception
      */
-    private function getFileMetadata( $filename ) {
+    private function getFileMetadata( $filename ): array {
         $info          = XliffProprietaryDetect::getInfo( $filename );
         $isXliff       = XliffFiles::isXliff( $filename );
         $isGlossary    = XliffFiles::isGlossaryFile( $filename );

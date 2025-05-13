@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use Jobs\MetadataDao;
 use Klein\Response;
 use Matecat\SubFiltering\MateCatFilter;
+use Projects_MetadataDao;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
@@ -29,8 +30,7 @@ class GetContributionController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function get(): Response
-    {
+    public function get(): Response {
         try {
             $request = $this->validateTheRequest();
 
@@ -66,8 +66,18 @@ class GetContributionController extends KleinController {
             $projectStruct = $jobStruct->getProject();
             $this->featureSet->loadForProject( $projectStruct );
 
+            $contributionRequest = new ContributionRequestStruct();
+
             if ( !$concordance_search ) {
+
                 $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
+
+                $contributionRequest->mt_evaluation =
+                        (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
+                        //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
+                        (bool)( new MetadataDao() )->get( $id_job, $received_password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                        false;
+
             }
 
             $file = (new FilesPartsDao())->getBySegmentId($id_segment);
@@ -88,14 +98,15 @@ class GetContributionController extends KleinController {
             $contributionRequest->context_list_before = $context_list_before;
             $contributionRequest->context_list_after  = $context_list_after;
 
-            $contributionRequest->jobStruct         = $jobStruct;
-            $contributionRequest->projectStruct     = $projectStruct;
-            $contributionRequest->segmentId         = $id_segment;
-            $contributionRequest->id_client         = $id_client;
-            $contributionRequest->concordanceSearch = $concordance_search;
-            $contributionRequest->fromTarget        = $switch_languages;
-            $contributionRequest->resultNum         = $num_results;
-            $contributionRequest->crossLangTargets  = $this->getCrossLanguages($cross_language);
+            $contributionRequest->jobStruct                  = $jobStruct;
+            $contributionRequest->projectStruct              = $projectStruct;
+            $contributionRequest->segmentId                  = $id_segment;
+            $contributionRequest->id_client                  = $id_client;
+            $contributionRequest->concordanceSearch          = $concordance_search;
+            $contributionRequest->fromTarget                 = $switch_languages;
+            $contributionRequest->resultNum                  = $num_results;
+            $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
+            $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? false;
 
             if ( $this->isRevision() ) {
                 $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -177,26 +188,25 @@ class GetContributionController extends KleinController {
     /**
      * @return array
      */
-    private function validateTheRequest()
-    {
-        $id_client = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $num_results = filter_var( $this->request->param( 'num_results' ), FILTER_SANITIZE_NUMBER_INT );
-        $text = filter_var( $this->request->param( 'text' ), FILTER_UNSAFE_RAW );
-        $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $concordance_search = filter_var( $this->request->param( 'is_concordance' ), FILTER_VALIDATE_BOOLEAN );
-        $switch_languages = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
-        $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
-        $context_after = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
-        $context_list_before = filter_var($this->request->param( 'context_list_before'),FILTER_SANITIZE_STRING, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $context_list_after = filter_var($this->request->param( 'context_list_after'),FILTER_SANITIZE_STRING, ['flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $id_before = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_after = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
-        $cross_language = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
-        $text = trim( $text );
+    private function validateTheRequest() {
+        $id_client           = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $id_job              = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_segment          = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $num_results         = filter_var( $this->request->param( 'num_results' ), FILTER_SANITIZE_NUMBER_INT );
+        $text                = filter_var( $this->request->param( 'text' ), FILTER_UNSAFE_RAW );
+        $id_translator       = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $password            = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $received_password   = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $concordance_search  = filter_var( $this->request->param( 'is_concordance' ), FILTER_VALIDATE_BOOLEAN );
+        $switch_languages    = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
+        $context_before      = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
+        $context_after       = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
+        $context_list_before = filter_var( $this->request->param( 'context_list_before' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $context_list_after  = filter_var( $this->request->param( 'context_list_after' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $id_before           = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_after            = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
+        $cross_language      = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
+        $text                = trim( $text );
 
         if ( !$concordance_search ) {
             //execute these lines only in segment contribution search,
@@ -251,10 +261,10 @@ class GetContributionController extends KleinController {
      * @param $source
      * @param $target
      * @param $request
+     *
      * @throws Exception
      */
-    private function rewriteContributionContexts( $source, $target, &$request ): void
-    {
+    private function rewriteContributionContexts( $source, $target, &$request ): void {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
@@ -288,10 +298,10 @@ class GetContributionController extends KleinController {
      * ("en-GB," => [0 => 'en-GB'])
      *
      * @param $cross_language
+     *
      * @return array
      */
-    private function getCrossLanguages($cross_language): array
-    {
+    private function getCrossLanguages( $cross_language ): array {
         return !empty( $cross_language ) ? explode( ",", rtrim( $cross_language[ 0 ], ',' ) ) : [];
     }
 }

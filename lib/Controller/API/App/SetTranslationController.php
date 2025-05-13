@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
@@ -41,45 +41,44 @@ use TranslationsSplit_SplitStruct;
 use Utils;
 use WordCount\WordCountStruct;
 
-class SetTranslationController extends KleinController {
+class SetTranslationController extends AbstractStatefulKleinController {
 
     /**
      * @var array
      */
     protected array $data;
 
-    protected $id_job;
+    protected ?int $id_job = null;
 
-    protected $password;
+    protected ?string $password = null;
 
-    protected $received_password;
+    protected ?string $received_password = null;
 
     /**
      * @var Jobs_JobStruct
      */
-    protected $chunk;
+    protected Jobs_JobStruct $chunk;
 
     /**
-     * @var Segments_SegmentStruct
+     * @var Segments_SegmentStruct|null
      */
-    protected $segment;  // this comes from DAO
+    protected ?Segments_SegmentStruct $segment = null;  // this comes from DAO
 
     /**
      * @var MateCatFilter
      */
-    protected $filter;
+    protected MateCatFilter $filter;
 
     /**
-     * @var TranslationVersionsHandler
+     * @var ?TranslationVersionsHandler
      */
-    protected $VersionsHandler;
+    protected ?TranslationVersionsHandler $VersionsHandler = null;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function translate(): Response
-    {
+    public function translate(): Response {
         try {
             $this->data = $this->validateTheRequest();
             $this->checkData();
@@ -88,8 +87,7 @@ class SetTranslationController extends KleinController {
 
             //check tag mismatch
             //get original source segment, first
-            $dao                   = new Segments_SegmentDao( \Database::obtain() );
-            $this->data['segment'] = $dao->getById( $this->data['id_segment'] );
+            $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer2( $this->data[ 'segment' ][ 'segment' ] );
             $translation = $this->filter->fromLayer0ToLayer2( $this->data[ 'translation' ] );
@@ -132,8 +130,8 @@ class SetTranslationController extends KleinController {
 
             $old_translation = $this->getOldTranslation();
 
-            $old_suggestion_array = json_decode( $this->data['suggestion_array'] );
-            $old_suggestion       = ( $this->data['chosen_suggestion_index'] !== null ? @$old_suggestion_array[ $this->data['chosen_suggestion_index'] - 1 ] : null );
+            $old_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
+            $old_suggestion       = $this->data[ 'chosen_suggestion_index' ] !== null ? $old_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
             $new_translation                         = new Translations_SegmentTranslationStruct();
             $new_translation->id_segment             = $this->data['id_segment'];
@@ -146,7 +144,7 @@ class SetTranslationController extends KleinController {
             $new_translation->suggestion_position    = ( $this->data['chosen_suggestion_index'] !== null ? $this->data['chosen_suggestion_index'] : $old_translation->suggestion_position );
             $new_translation->warning                = $check->thereAreWarnings();
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-            $new_translation->suggestion             = ( ( !empty( $old_suggestion ) ) ? $old_suggestion->translation : $old_translation->suggestion );
+            $new_translation->suggestion             = !empty( $old_suggestion ) ? $old_suggestion->translation : $old_translation->suggestion;
             $new_translation->suggestion_source      = $old_translation->suggestion_source;
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
@@ -157,7 +155,7 @@ class SetTranslationController extends KleinController {
                 // update suggestion match
                 if ( $old_suggestion->match == "MT" ) {
                     // case 1. is MT
-                    $new_translation->suggestion_match  = 85;
+                    $new_translation->suggestion_match  = $old_suggestion->match;
                     $new_translation->suggestion_source = Constants_Engines::MT;
                 } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
@@ -348,13 +346,13 @@ class SetTranslationController extends KleinController {
 
             try {
                 $this->featureSet->run( 'setTranslationCommitted', [
-                    'translation'      => $new_translation,
-                    'old_translation'  => $old_translation,
-                    'propagated_ids'   => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
-                    'chunk'            => $this->data['chunk'],
-                    'segment'          => $this->data['segment'],
-                    'user'             => $this->user,
-                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->data['revisionNumber'] )
+                        'translation'      => $new_translation,
+                        'old_translation'  => $old_translation,
+                        'propagated_ids'   => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ?? null,
+                        'chunk'            => $this->data[ 'chunk' ],
+                        'segment'          => $this->data[ 'segment' ],
+                        'user'             => $this->user,
+                        'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->data[ 'revisionNumber' ] )
                 ] );
 
             } catch ( Exception $e ) {
@@ -364,11 +362,11 @@ class SetTranslationController extends KleinController {
 
             try {
                 $result = $this->featureSet->filter( 'filterSetTranslationResult', $result, [
-                    'translation'     => $new_translation,
-                    'old_translation' => $old_translation,
-                    'propagated_ids'  => isset( $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ) ? $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] : null,
-                    'chunk'           => $this->data['chunk'],
-                    'segment'         => $this->data['segment']
+                        'translation'     => $new_translation,
+                        'old_translation' => $old_translation,
+                        'propagated_ids'  => $propagationTotal[ 'segments_for_propagation' ][ 'propagated_ids' ] ?? null,
+                        'chunk'           => $this->data[ 'chunk' ],
+                        'segment'         => $this->data[ 'segment' ]
                 ] );
             } catch ( Exception $e ) {
                 $this->log( "Exception in filterSetTranslationResult callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
@@ -418,36 +416,36 @@ class SetTranslationController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest()
-    {
-        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $password = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $received_password = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $propagate = filter_var( $this->request->param( 'propagate' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
-        $id_segment = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $time_to_edit = filter_var( $this->request->param( 'time_to_edit' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_translator = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $translation = filter_var( $this->request->param( 'translation' ), FILTER_UNSAFE_RAW );
-        $segment = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
-        $version = $this->request->param( 'version' ) !== null ? filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT ) : null;
-        $chosen_suggestion_index = $this->request->param( 'chosen_suggestion_index' ) !== null ? filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT ) : null;
-        $suggestion_array = $this->request->param( 'suggestion_array' ) !== null ? filter_var( $this->request->param( 'suggestion_array' ), FILTER_UNSAFE_RAW ) : null;
-        $status = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $splitStatuses = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH  ] );
-        $context_before = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
-        $context_after = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
-        $id_before = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_after = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
-        $revisionNumber = $this->request->param( 'revision_number' ) !== null ? filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT ) : null;
-        $guess_tag_used = filter_var( $this->request->param( 'guess_tag_used' ), FILTER_VALIDATE_BOOLEAN );
-        $characters_counter = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
+    private function validateTheRequest(): array {
+
+        $id_job                  = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $password                = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $received_password       = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $propagate               = filter_var( $this->request->param( 'propagate' ), FILTER_VALIDATE_BOOLEAN, [ 'flags' => FILTER_NULL_ON_FAILURE ] );
+        $id_segment              = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT ); // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
+        $time_to_edit            = filter_var( $this->request->param( 'time_to_edit' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE ] ) ?? 0;
+        $id_translator           = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $translation             = filter_var( $this->request->param( 'translation' ), FILTER_UNSAFE_RAW );
+        $segment                 = filter_var( $this->request->param( 'segment' ), FILTER_UNSAFE_RAW );
+        $version                 = filter_var( $this->request->param( 'version' ), FILTER_SANITIZE_NUMBER_INT );
+        $chosen_suggestion_index = filter_var( $this->request->param( 'chosen_suggestion_index' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR | FILTER_NULL_ON_FAILURE ] );
+        $suggestion_array        = filter_var( $this->request->param( 'suggestion_array' ), FILTER_SANITIZE_STRING, [ 'filter' => FILTER_UNSAFE_RAW, 'flags' => FILTER_FLAG_EMPTY_STRING_NULL | FILTER_NULL_ON_FAILURE ] );
+        $status                  = filter_var( $this->request->param( 'status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $splitStatuses           = filter_var( $this->request->param( 'splitStatuses' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $context_before          = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
+        $context_after           = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
+        $id_before               = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_after                = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
+        $revisionNumber          = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
+        $guess_tag_used          = filter_var( $this->request->param( 'guess_tag_used' ), FILTER_VALIDATE_BOOLEAN );
+        $characters_counter      = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
 
         /*
          * set by the client, mandatory
          * check propagation flag, if it is null the client not sent it, leave default true, otherwise set the value
          */
-        $propagate             = (!is_null($propagate)) ? $propagate : null; /* do nothing */
-        $client_target_version = ( empty( $version ) ? '0' : $version );
+        $propagate             = $propagate ?? null; /* do nothing */
+        $client_target_version = $version ?? 0;
         $status                = strtoupper( $status );
         $split_statuses        = explode( ",", strtoupper( $splitStatuses ) ); //strtoupper transforms null to ""
 
@@ -475,7 +473,7 @@ class SetTranslationController extends KleinController {
         //check tag mismatch
         //get original source segment, first
         $dao           = new Segments_SegmentDao( Database::obtain() );
-        $this->segment = $dao->getById( $id_segment );
+        $this->segment = $dao->getById( (int)$id_segment ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         $this->id_job = $id_job;
         $this->password = $password;
@@ -516,9 +514,8 @@ class SetTranslationController extends KleinController {
     /**
      * @return bool
      */
-    private function isSplittedSegment(): bool
-    {
-        return !empty( $this->data['split_statuses'][ 0 ] ) && !empty( $this->data['split_num'] );
+    private function isSplittedSegment(): bool {
+        return !empty( $this->data[ 'split_statuses' ][ 0 ] ) && !empty( $this->data[ 'split_num' ] );
     }
 
     /**
@@ -527,9 +524,8 @@ class SetTranslationController extends KleinController {
      * If splitted segments have different statuses, we reset status
      * to draft.
      */
-    private function setStatusForSplittedSegment(): void
-    {
-        if ( count( array_unique( $this->data['split_statuses'] ) ) == 1 ) {
+    private function setStatusForSplittedSegment(): void {
+        if ( count( array_unique( $this->data[ 'split_statuses' ] ) ) == 1 ) {
             // IF ALL translation chunks are in the same status,
             // we take the status for the entire segment
             $this->data['status'] = $this->data['split_statuses'][ 0 ];
@@ -541,9 +537,8 @@ class SetTranslationController extends KleinController {
     /**
      * @throws Exception
      */
-    protected function checkData(): void
-    {
-        $this->data['project'] = $this->data['chunk']->getProject();
+    protected function checkData(): void {
+        $this->data[ 'project' ] = $this->data[ 'chunk' ]->getProject();
 
         $featureSet = $this->getFeatureSet();
         $featureSet->loadForProject( $this->data['project'] );
@@ -558,9 +553,9 @@ class SetTranslationController extends KleinController {
             throw new RuntimeException( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
 
-        $explodeIdSegment = explode( "-", $this->data['id_segment']);
-        $this->data['id_segment'] = $explodeIdSegment[0];
-        $this->data['split_num'] = $explodeIdSegment[1];
+        $explodeIdSegment           = explode( "-", $this->data[ 'id_segment' ] );
+        $this->data[ 'id_segment' ] = $explodeIdSegment[ 0 ];
+        $this->data[ 'split_num' ]  = $explodeIdSegment[ 1 ] ?? null;
 
         if ( empty( $this->data['id_segment'] ) ) {
             throw new Exception("missing id_segment", -1);
@@ -580,8 +575,7 @@ class SetTranslationController extends KleinController {
      *
      * @throws Exception
      */
-    private function checkStatus( $status ): void
-    {
+    private function checkStatus( $status ): void {
         switch ( $status ) {
             case Constants_TranslationStatus::STATUS_TRANSLATED:
             case Constants_TranslationStatus::STATUS_APPROVED:
@@ -603,8 +597,7 @@ class SetTranslationController extends KleinController {
     /**
      * @throws Exception
      */
-    private function getContexts(): void
-    {
+    private function getContexts(): void {
         //Get contexts
         $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
             [
@@ -628,8 +621,7 @@ class SetTranslationController extends KleinController {
     /**
      * init VersionHandler
      */
-    private function initVersionHandler(): void
-    {
+    private function initVersionHandler(): void {
         // fix null pointer error
         if (
             $this->data['chunk'] !== null and
@@ -645,9 +637,8 @@ class SetTranslationController extends KleinController {
      * @return Translations_SegmentTranslationStruct
      * @throws Exception
      */
-    private function getOldTranslation(): ?Translations_SegmentTranslationStruct
-    {
-        $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->data['id_segment'], $this->data['id_job'] );
+    private function getOldTranslation(): ?Translations_SegmentTranslationStruct {
+        $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->data[ 'id_segment' ], $this->data[ 'id_job' ] );
 
         if ( empty( $old_translation ) ) {
             $old_translation = new Translations_SegmentTranslationStruct();
@@ -702,10 +693,9 @@ class SetTranslationController extends KleinController {
      * @return bool
      */
     private function canUpdateSuggestion(
-        Translations_SegmentTranslationStruct $new_translation,
-        Translations_SegmentTranslationStruct $old_translation,
-        $old_suggestion = null ): bool
-    {
+            Translations_SegmentTranslationStruct $new_translation,
+            Translations_SegmentTranslationStruct $old_translation,
+                                                  $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }
@@ -740,8 +730,7 @@ class SetTranslationController extends KleinController {
      * @param array $old_translation
      * @param array $new_translation
      */
-    private function updateJobPEE( array $old_translation, array $new_translation ): void
-    {
+    private function updateJobPEE( array $old_translation, array $new_translation ): void {
         //update total time to edit
         $jobTotalTTEForTranslation = $this->chunk[ 'total_time_to_edit' ];
         if ( !self::isRevision() ) {
@@ -815,10 +804,9 @@ class SetTranslationController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function getTranslationObject( $saved_translation ): array
-    {
+    private function getTranslationObject( $saved_translation ): array {
         return [
-            'version_number' => @$saved_translation[ 'version_number' ],
+            'version_number' => $saved_translation[ 'version_number' ] ?? null,
             'sid'            => $saved_translation[ 'id_segment' ],
             'translation'    => $this->filter->fromLayer0ToLayer2( $saved_translation[ 'translation' ] ),
             'status'         => $saved_translation[ 'status' ]
@@ -832,40 +820,39 @@ class SetTranslationController extends KleinController {
      *
      * @throws Exception
      */
-    private function evalSetContribution( $_Translation, $old_translation ): void
-    {
-        if ( in_array( $this->data['status'], [
-            Constants_TranslationStatus::STATUS_DRAFT,
-            Constants_TranslationStatus::STATUS_NEW
+    private function evalSetContribution( $_Translation, $old_translation ): void {
+        if ( in_array( $this->data[ 'status' ], [
+                Constants_TranslationStatus::STATUS_DRAFT,
+                Constants_TranslationStatus::STATUS_NEW
         ] ) ) {
             return;
         }
 
         $skip_set_contribution = false;
         $skip_set_contribution = $this->featureSet->filter( 'filter_skip_set_contribution',
-            $skip_set_contribution, $_Translation, $old_translation
+                false, $_Translation, $old_translation
         );
 
         if ( $skip_set_contribution ) {
             return;
         }
 
-        $ownerUid   = Jobs_JobDao::getOwnerUid( (int)$this->data['id_job'], $this->data['password']);
-        $filesParts = ( new FilesPartsDao() )->getBySegmentId( $this->data['id_segment'] );
+        $ownerUid   = Jobs_JobDao::getOwnerUid( (int)$this->data[ 'id_job' ], $this->data[ 'password' ] );
+        $filesParts = ( new FilesPartsDao() )->getBySegmentId( (int)$this->data[ 'id_segment' ] ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         /**
-         * Set the new contribution in queue
+         * Set the new contribution in the queue
          */
-        $contributionStruct               = new ContributionSetStruct();
-        $contributionStruct->fromRevision = $this->isRevision();
-        $contributionStruct->id_file      = ( $filesParts !== null ) ? $filesParts->id_file : null;
-        $contributionStruct->id_job       = $this->data['id_job'];
-        $contributionStruct->job_password = $this->data['password'];
-        $contributionStruct->id_segment   = $this->data['id_segment'];
-        $contributionStruct->segment      = $this->filter->fromLayer0ToLayer1( $this->data['segment'][ 'segment' ] );
-        $contributionStruct->translation  = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key      = INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid          = ( $ownerUid !== null ) ? $ownerUid : 0;;
+        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct->fromRevision         = $this->isRevision();
+        $contributionStruct->id_file              = ( $filesParts !== null ) ? $filesParts->id_file : null;
+        $contributionStruct->id_job               = $this->data[ 'id_job' ];
+        $contributionStruct->job_password         = $this->data[ 'password' ];
+        $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
+        $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
+        $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
+        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data['segment'][ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );

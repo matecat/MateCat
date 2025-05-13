@@ -29,9 +29,9 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     public $projectStruct;
 
     public $contexts = [
-        'context_before' => null,
-        'segment'        => null,
-        'context_after'  => null
+            'context_before' => null,
+            'segment'        => null,
+            'context_after'  => null
     ];
 
     public ?array $context_list_before = null;
@@ -72,13 +72,14 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
      */
     public $fromTarget = false;
 
-    public $crossLangTargets = [] ;
+    public $crossLangTargets = [];
 
     public $dialect_strict = null;
 
     public $tm_prioritization = null;
 
-    public $mt_evaluation = null;
+    public         $mt_evaluation              = null;
+    public ?string $mt_quality_value_in_editor = null;
 
     public $penalty_key = [];
 
@@ -111,20 +112,22 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
     /**
      * @return Jobs_JobStruct|\Jobs_JobStruct
      */
-    public function getJobStruct(){
-        if( $this->__jobStruct == null ){
+    public function getJobStruct() {
+        if ( $this->__jobStruct == null ) {
             $this->__jobStruct = new Jobs_JobStruct( (array)$this->jobStruct );
         }
+
         return $this->__jobStruct;
     }
 
     /**
      * @return Projects_ProjectStruct
      */
-    public function getProjectStruct(){
-        if( $this->__projectStruct == null ){
+    public function getProjectStruct() {
+        if ( $this->__projectStruct == null ) {
             $this->__projectStruct = new Projects_ProjectStruct( (array)$this->projectStruct );
         }
+
         return $this->__projectStruct;
     }
 
@@ -134,11 +137,12 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
      * @return \Engines_AbstractEngine
      * @throws \Exception
      */
-    public function getTMEngine( \FeatureSet $featureSet ){
-        if( $this->__tms == null ){
+    public function getTMEngine( \FeatureSet $featureSet ) {
+        if ( $this->__tms == null ) {
             $this->__tms = \Engine::getInstance( $this->getJobStruct()->id_tms );
             $this->__tms->setFeatureSet( $featureSet );
         }
+
         return $this->__tms;
     }
 
@@ -148,30 +152,31 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements DataA
      * @return \Engines_AbstractEngine
      * @throws \Exception
      */
-    public function getMTEngine( \FeatureSet $featureSet ){
-        if( $this->__mt_engine == null ){
+    public function getMTEngine( \FeatureSet $featureSet ) {
+        if ( $this->__mt_engine == null ) {
             $this->__mt_engine = \Engine::getInstance( $this->getJobStruct()->id_mt_engine );
             $this->__mt_engine->setFeatureSet( $featureSet );
         }
+
         return $this->__mt_engine;
     }
 
-    public function getContexts(){
+    public function getContexts() {
         return (object)$this->contexts;
     }
 
-    public function getUser(){
-        if( $this->__user == null ){
+    public function getUser() {
+        if ( $this->__user == null ) {
             $this->__user = new \Users_UserStruct( (array)$this->user );
         }
+
         return $this->__user;
     }
 
     /**
      * @return string
      */
-    public function getSessionId()
-    {
-        return md5($this->id_file. '-' . $this->id_job . '-' . $this->password);
+    public function getSessionId() {
+        return md5( $this->id_file . '-' . $this->id_job . '-' . $this->password );
     }
 }

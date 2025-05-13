@@ -8,7 +8,6 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Constants_SegmentTranslationsMatchType;
 use Constants_TranslationStatus;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_AbstractDao;
@@ -16,6 +15,7 @@ use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use Jobs_JobStruct;
+use Model\Analysis\Constants\InternalMatchesConstants;
 
 class SegmentFilterDao extends DataAccess_AbstractDao {
 
@@ -89,38 +89,38 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
             switch ( $filter->sampleType() ) {
                 case 'mt':
                     $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::MT,
+                            'match_type' => InternalMatchesConstants::MT,
                     ] );
                     break;
 
                 case 'matches':
                     $data = array_merge( $data, [
-                            'match_type_100_public' => Constants_SegmentTranslationsMatchType::_100_PUBLIC,
-                            'match_type_100'        => Constants_SegmentTranslationsMatchType::_100,
+                            'match_type_100_public' => InternalMatchesConstants::TM_100_PUBLIC,
+                            'match_type_100'        => InternalMatchesConstants::TM_100,
                     ] );
                     break;
 
                 case 'fuzzies_50_74':
                     $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::_50_74,
+                            'match_type' => InternalMatchesConstants::TM_50_74,
                     ] );
                     break;
 
                 case 'fuzzies_75_84':
                     $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::_75_84,
+                            'match_type' => InternalMatchesConstants::TM_75_84,
                     ] );
                     break;
 
                 case 'fuzzies_85_94':
                     $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::_85_94,
+                            'match_type' => InternalMatchesConstants::TM_85_94,
                     ] );
                     break;
 
                 case 'fuzzies_95_99':
                     $data = array_merge( $data, [
-                            'match_type' => Constants_SegmentTranslationsMatchType::_95_99,
+                            'match_type' => InternalMatchesConstants::TM_95_99,
                     ] );
                     break;
 

@@ -9,7 +9,7 @@
 
 class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
-    protected $_config = [
+    protected array $_config = [
             'q'      => null,
             'source' => null,
             'target' => null,
@@ -25,7 +25,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
     /**
      * @param       $rawValue
      * @param array $parameters
-     * @param null $function
+     * @param null  $function
      *
      * @return array|Engines_Results_MT|mixed
      * @throws Exception
@@ -68,13 +68,13 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
             $parameters[ 'key' ] = $this->client_secret;
         }
 
-        if ( isset($_config['key']) and !empty($_config['key']) ) {
-            $parameters[ 'key' ] = $_config['key'];
+        if ( isset( $_config[ 'key' ] ) and !empty( $_config[ 'key' ] ) ) {
+            $parameters[ 'key' ] = $_config[ 'key' ];
         }
 
-        $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
-        $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
-        $parameters[ 'q' ]      = $_config[ 'segment' ];
+        $parameters[ 'target' ]     = $this->_fixLangCode( $_config[ 'target' ] );
+        $parameters[ 'source' ]     = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'q' ]          = $_config[ 'segment' ];
 
         $this->_setAdditionalCurlParams(
                 [

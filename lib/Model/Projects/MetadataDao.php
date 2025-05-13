@@ -1,8 +1,5 @@
 <?php
 
-use Exceptions\NotFoundException;
-use Projects\ChunkOptionsModel;
-
 class Projects_MetadataDao extends DataAccess_AbstractDao {
     const FEATURES_KEY = 'features';
     const TABLE        = 'project_metadata';
@@ -14,6 +11,11 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
     const SPLIT_EQUIVALENT_WORD_TYPE = 'eq_word_count';
     const SPLIT_RAW_WORD_TYPE        = 'raw_word_count';
+
+    const MT_QUALITY_VALUE_IN_EDITOR = 'mt_quality_value_in_editor';
+    const MT_EVALUATION              = 'mt_evaluation';
+    const MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
+    const MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 
@@ -51,9 +53,10 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     public function destroyMetadataCache( $id ): bool {
-      $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
-      return $this->_destroyObjectCache( $stmt, Projects_MetadataStruct::class, [ 'id_project' => $id ] );
-  }
+        $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
+
+        return $this->_destroyObjectCache( $stmt, Projects_MetadataStruct::class, [ 'id_project' => $id ] );
+    }
 
     /**
      * @param int    $id_project

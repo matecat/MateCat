@@ -22,21 +22,26 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param array $ids
-     * @param int   $ttl
+     * @param array    $ids
+     * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return Segments_SegmentNoteStruct[]
+     * @throws ReflectionException
      */
-    public static function getBySegmentIds( array $ids = [], $ttl = 86400 ) {
+    public static function getBySegmentIds( array $ids = [], int $ttl = 86400 ): array {
 
         $thisDao = new self();
         $conn    = $thisDao->getDatabaseHandler();
         $stmt    = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment IN ( " . implode( ', ', $ids ) . " ) " );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
+        /** @var  $result Segments_SegmentNoteStruct[] */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
                 new Segments_SegmentNoteStruct(),
                 []
         );
+
+        return $result;
+
     }
 
     public static function insertRecord( $values ) {

@@ -117,6 +117,7 @@ abstract class KleinController implements IController {
         $this->featureSet = new FeatureSet();
         $this->identifyUser( $this->useSession );
         $this->afterConstruct();
+
     }
 
     /**
@@ -154,7 +155,7 @@ abstract class KleinController implements IController {
 
     }
 
-    public function getRequest() {
+    public function getRequest(): Request {
         return $this->request;
     }
 
@@ -200,8 +201,7 @@ abstract class KleinController implements IController {
     /**
      * @return bool|null
      */
-    protected function isRevision(): ?bool
-    {
+    protected function isRevision(): ?bool {
         $controller = $this;
 
         if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
@@ -221,12 +221,12 @@ abstract class KleinController implements IController {
 
     /**
      * @param Exception $exception
+     *
      * @return Response
      */
-    protected function returnException(Exception $exception): Response
-    {
+    protected function returnException( Exception $exception ): Response {
         // determine http code
-        switch (get_class($exception)){
+        switch ( get_class( $exception ) ) {
 
             case InvalidValue::class:
             case JSONValidatorException::class:
@@ -257,41 +257,40 @@ abstract class KleinController implements IController {
                 break;
         }
 
-        $this->response->code($httpCode);
+        $this->response->code( $httpCode );
 
-        return $this->response->json([
-            'errors' => [
-                "code" => $exception->getCode(),
-                "message" => $exception->getMessage(),
-                "debug" => [
-                    "trace" => $exception->getTrace(),
-                    "file" => $exception->getFile(),
-                    "line" => $exception->getLine(),
+        return $this->response->json( [
+                'errors' => [
+                        "code"    => $exception->getCode(),
+                        "message" => $exception->getMessage(),
+                        "debug"   => [
+                                "trace" => $exception->getTrace(),
+                                "file"  => $exception->getFile(),
+                                "line"  => $exception->getLine(),
+                        ]
                 ]
-            ]
-        ]);
+        ] );
     }
 
     /**
      * @param $id_segment
+     *
      * @return array
      */
-    protected function parseIdSegment($id_segment): array
-    {
+    protected function parseIdSegment( $id_segment ): array {
         $parsedSegment = explode( "-", $id_segment );
 
         return [
-            'id_segment' => $parsedSegment[0],
-            'split_num' => $parsedSegment[1],
+                'id_segment' => $parsedSegment[ 0 ],
+                'split_num'  => $parsedSegment[ 1 ],
         ];
     }
 
     /**
-     * @param $message
+     * @param      $message
      * @param null $filename
      */
-    protected function log($message, $filename = null ): void
-    {
+    protected function log( $message, $filename = null ): void {
         Log::doJsonLog( $message, $filename );
     }
 }
