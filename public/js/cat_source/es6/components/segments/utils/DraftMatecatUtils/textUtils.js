@@ -3,7 +3,7 @@ import {
   getDefaultCharsSize,
 } from '../../../../utils/charsSizeCounterUtil'
 import TEXT_UTILS from '../../../../utils/textUtils'
-import {unescapeHTMLinTags} from './tagUtils'
+import {decodeHtmlEntities, unescapeHTMLinTags} from './tagUtils'
 
 // export const decodeTagsToPlainText = (text) => {
 //   let decoded = ''
@@ -72,7 +72,7 @@ export const regexWordDelimiter =
 
 export const getCharactersCounter = (value) => {
   const cleanedContent = TEXT_UTILS.removeHiddenCharacters(
-    unescapeHTMLinTags(value),
+    decodeHtmlEntities(value),
   )
   const defaultCounter = charsSizeCounter.map.default ?? getDefaultCharsSize
 
