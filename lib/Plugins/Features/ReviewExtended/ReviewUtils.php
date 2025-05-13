@@ -8,10 +8,10 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ModelStruct;
 
@@ -72,11 +72,11 @@ class ReviewUtils {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return int[]
      */
-    public static function validRevisionNumbers( Chunks_ChunkStruct $chunk ): array {
+    public static function validRevisionNumbers( Jobs_JobStruct $chunk ): array {
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk );
 
         return array_map( function ( $chunkReview ) {

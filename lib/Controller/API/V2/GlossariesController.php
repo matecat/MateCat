@@ -14,6 +14,7 @@ use API\Commons\Validators\LoginValidator;
 use Bootstrap;
 use Exception;
 use InvalidArgumentException;
+use Klein\Request;
 use Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -25,9 +26,9 @@ use Validator\GlossaryCSVValidatorObject;
 class GlossariesController extends AbstractStatefulKleinController {
 
     /**
-     * @var \Klein\Request
+     * @var Request
      */
-    protected $request;
+    protected Request $request;
 
     protected $name;
     protected $tm_key;

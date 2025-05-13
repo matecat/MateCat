@@ -9,27 +9,28 @@
 namespace Teams;
 
 use Constants_Teams;
-use DataAccess_IDaoStruct;
+use DataAccess_AbstractDao;
 use Database;
+use Exception;
 use PDO;
 use ReflectionException;
 use Users_UserStruct;
 use Utils;
 
-class TeamDao extends \DataAccess_AbstractDao {
+class TeamDao extends DataAccess_AbstractDao {
 
     const TABLE       = "teams";
     const STRUCT_TYPE = "TeamStruct";
 
-    protected static $auto_increment_field = array( 'id' );
-    protected static $primary_keys         = array( 'id' );
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
-    protected static $_query_find_by_id         = " SELECT * FROM teams WHERE id = :id ";
-    protected static $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
-    protected static $_query_get_user_teams     = " SELECT * FROM teams WHERE created_by = :created_by ";
-    protected static $_update_team_by_id        = " UPDATE teams SET name = :name WHERE id = :id ";
+    protected static string $_query_find_by_id         = " SELECT * FROM teams WHERE id = :id ";
+    protected static string $_query_get_personal_by_id = " SELECT * FROM teams WHERE created_by = :created_by AND `type` = :type ";
+    protected static string $_query_get_user_teams     = " SELECT * FROM teams WHERE created_by = :created_by ";
+    protected static string $_update_team_by_id        = " UPDATE teams SET name = :name WHERE id = :id ";
 
-    protected static $_query_get_assignee_with_projects = "
+    protected static string $_query_get_assignee_with_projects = "
         SELECT COUNT(1) AS projects, id_assignee AS uid
         FROM projects 
         WHERE 
@@ -37,7 +38,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         GROUP BY id_assignee;
     ";
 
-    protected static $_sql_delete_empty_team = "
+    protected static string $_sql_delete_empty_team = "
         DELETE FROM teams 
         WHERE id = :id_team and type != 'personal' 
     ";
@@ -47,12 +48,12 @@ class TeamDao extends \DataAccess_AbstractDao {
      *
      * @param TeamStruct $teamStruct
      *
-     * @return int|void
+     * @return int
      */
-    public function delete( TeamStruct $teamStruct ) {
+    public function delete( TeamStruct $teamStruct ): int {
         $sql  = " DELETE FROM teams WHERE id = ? ";
         $stmt = $this->getDatabaseHandler()->getConnection()->prepare( $sql );
-        $stmt->execute( array( $teamStruct->id ) );
+        $stmt->execute( [ $teamStruct->id ] );
 
         return $stmt->rowCount();
     }
@@ -60,20 +61,24 @@ class TeamDao extends \DataAccess_AbstractDao {
     /**
      * @param $id
      *
-     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|TeamStruct
+     * @return TeamStruct
+     * @throws ReflectionException
      */
-    public function findById( $id ) {
+    public function findById( $id ): ?TeamStruct {
 
         $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
         $teamQuery     = new TeamStruct();
         $teamQuery->id = $id;
 
-        return $this->_fetchObject( $stmt,
+        /** @var $res TeamStruct */
+        $res = $this->_fetchObject( $stmt,
                 $teamQuery,
-                array(
+                [
                         'id' => $teamQuery->id,
-                )
-        )[ 0 ];
+                ]
+        )[ 0 ] ?? null;
+
+        return $res;
 
     }
 
@@ -81,12 +86,13 @@ class TeamDao extends \DataAccess_AbstractDao {
      * @param Users_UserStruct $user
      *
      * @return TeamStruct
+     * @throws ReflectionException
      */
-    public function createPersonalTeam( Users_UserStruct $user ) {
-        return $this->createUserTeam( $user, array(
+    public function createPersonalTeam( Users_UserStruct $user ): TeamStruct {
+        return $this->createUserTeam( $user, [
                 'name' => 'Personal',
                 'type' => Constants_Teams::PERSONAL
-        ) );
+        ] );
     }
 
     /**
@@ -94,15 +100,17 @@ class TeamDao extends \DataAccess_AbstractDao {
      * @param array            $params
      *
      * @return  TeamStruct
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function createUserTeam( Users_UserStruct $orgCreatorUser, $params = array() ) {
+    public function createUserTeam( Users_UserStruct $orgCreatorUser, array $params = [] ): TeamStruct {
 
-        $teamStruct = new TeamStruct( array(
+        $teamStruct = new TeamStruct( [
                 'name'       => $params[ 'name' ],
                 'created_by' => $orgCreatorUser->uid,
                 'created_at' => Utils::mysqlTimestamp( time() ),
                 'type'       => $params[ 'type' ]
-        ) );
+        ] );
 
         $orgId          = TeamDao::insertStruct( $teamStruct );
         $teamStruct->id = $orgId;
@@ -112,7 +120,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         $params[ 'members' ][] = $orgCreatorUser->email;
 
         // wrap createList() in a transaction
-        if(false === Database::obtain()->getConnection()->inTransaction()){
+        if ( false === Database::obtain()->getConnection()->inTransaction() ) {
             Database::obtain()->getConnection()->beginTransaction();
         }
 
@@ -125,7 +133,7 @@ class TeamDao extends \DataAccess_AbstractDao {
         ] );
         $teamStruct->setMembers( $membersList );
 
-        if(false === Database::obtain()->getConnection()->inTransaction()){
+        if ( false === Database::obtain()->getConnection()->inTransaction() ) {
             Database::obtain()->getConnection()->commit();
         }
 
@@ -136,16 +144,18 @@ class TeamDao extends \DataAccess_AbstractDao {
     /**
      * @param TeamStruct $team
      *
-     * @return DataAccess_IDaoStruct[]|MembershipStruct[]
+     * @return MembershipStruct[]
+     * @throws ReflectionException
      */
-    public function getAssigneeWithProjectsByTeam( TeamStruct $team ){
+    public function getAssigneeWithProjectsByTeam( TeamStruct $team ): array {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
+
         return $this->_fetchObject( $stmt,
                 new MembershipStruct(),
-                array(
+                [
                         'id_team' => $team->id,
-                )
+                ]
         );
 
     }
@@ -153,26 +163,36 @@ class TeamDao extends \DataAccess_AbstractDao {
     /**
      * @param TeamStruct $team
      *
-     * @return bool|int
+     * @return bool
+     * @throws ReflectionException
      */
-    public function destroyCacheAssignee( TeamStruct $team ){
+    public function destroyCacheAssignee( TeamStruct $team ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
+
         return $this->_destroyObjectCache( $stmt,
-                array(
+                MembershipStruct::class,
+                [
                         'id_team' => $team->id,
-                )
+                ]
         );
     }
 
-    public function destroyCacheById( $id ) {
+    /**
+     * @param int $id
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function destroyCacheById( int $id ): bool {
         $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
         $teamQuery     = new TeamStruct();
         $teamQuery->id = $id;
 
         return $this->_destroyObjectCache( $stmt,
-                array(
+                TeamStruct::class,
+                [
                         'id' => $teamQuery->id,
-                )
+                ]
         );
     }
 
@@ -187,12 +207,12 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getPersonalByUid( $uid ): TeamStruct {
+    public function getPersonalByUid( int $uid ): TeamStruct {
         $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $uid;
@@ -202,27 +222,40 @@ class TeamDao extends \DataAccess_AbstractDao {
          */
         return $this->_fetchObject( $stmt,
                 $teamQuery,
-                array(
+                [
                         'created_by' => $teamQuery->created_by,
                         'type'       => Constants_Teams::PERSONAL
-                )
+                ]
         )[ 0 ];
     }
 
-    public function destroyCachePersonalByUid( $uid ) {
+    /**
+     * @param int $uid
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function destroyCachePersonalByUid( int $uid ): bool {
         $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $uid;
 
         return $this->_destroyObjectCache( $stmt,
-                array(
+                TeamStruct::class,
+                [
                         'created_by' => $teamQuery->created_by,
                         'type'       => Constants_Teams::PERSONAL
-                )
+                ]
         );
     }
 
-    public function findUserCreatedTeams( \Users_UserStruct $user ) {
+    /**
+     * @param Users_UserStruct $user
+     *
+     * @return TeamStruct|null
+     * @throws ReflectionException
+     */
+    public function findUserCreatedTeams( Users_UserStruct $user ) {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
@@ -231,33 +264,45 @@ class TeamDao extends \DataAccess_AbstractDao {
 
         return static::resultOrNull( $this->_fetchObject( $stmt,
                 $teamQuery,
-                array(
+                [
                         'created_by' => $teamQuery->created_by,
-                )
+                ]
         )[ 0 ] );
 
     }
 
-    public function destroyCacheUserCreatedTeams( \Users_UserStruct $user ) {
+    /**
+     * @param Users_UserStruct $user
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function destroyCacheUserCreatedTeams( Users_UserStruct $user ) {
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();
         $teamQuery->created_by = $user->uid;
 
         return $this->_destroyObjectCache( $stmt,
-                array(
+                TeamStruct::class,
+                [
                         'created_by' => $teamQuery->created_by,
-                )
+                ]
         );
     }
 
-    public function updateTeamName( TeamStruct $org ) {
+    /**
+     * @param TeamStruct $org
+     *
+     * @return TeamStruct
+     */
+    public function updateTeamName( TeamStruct $org ): TeamStruct {
         Database::obtain()->begin();
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( self::$_update_team_by_id );
         $stmt->bindValue( ':id', $org->id, PDO::PARAM_INT );
-        $stmt->bindValue( ':name', $org->name, PDO::PARAM_STR );
+        $stmt->bindValue( ':name', $org->name );
 
         $stmt->execute();
         $conn->commit();
@@ -270,11 +315,11 @@ class TeamDao extends \DataAccess_AbstractDao {
      *
      * @return int
      */
-    public function deleteTeam( TeamStruct $team ){
+    public function deleteTeam( TeamStruct $team ): int {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( static::$_sql_delete_empty_team ) ;
+        $stmt = $conn->prepare( static::$_sql_delete_empty_team );
         $stmt->execute( [
-                'id_team'       => $team->id
+                'id_team' => $team->id
         ] );
 
         return $stmt->rowCount();

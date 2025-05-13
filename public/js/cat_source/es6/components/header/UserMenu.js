@@ -1,100 +1,44 @@
-import React, {useEffect, useRef} from 'react'
-import IconUserLogout from '../icons/IconUserLogout'
-import {logoutUser} from '../../api/logoutUser'
-import CatToolStore from '../../stores/CatToolStore'
-import CatToolConstants from '../../constants/CatToolConstants'
-import CatToolActions from '../../actions/CatToolActions'
+import React, {useContext} from 'react'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {
+  POPOVER_ALIGN,
+  POPOVER_VERTICAL_ALIGN,
+  Popover,
+} from '../common/Popover/Popover'
+import {
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+  Button,
+} from '../common/Button/Button'
+import CommonUtils from '../../utils/commonUtils'
+import ModalsActions from '../../actions/ModalsActions'
 
-export const UserMenu = ({user, userLogged}) => {
-  const dropdownProfile = useRef()
-  const showPopup = useRef(true)
+export const UserMenu = () => {
+  const {isUserLogged, userInfo, logout} = useContext(ApplicationWrapperContext)
 
-  const openLoginModal = () => {
-    APP.openLoginModal()
-  }
+  const loggedRender = () => {
+    const {metadata, user} = userInfo
+    const avatarImg = metadata
+      ? (metadata[`${metadata.oauth_provider}_picture`] ?? null)
+      : null
 
-  const openManage = () => {
-    document.location.href = '/manage'
-  }
+    const openPreferencesModal = () => ModalsActions.openPreferencesModal()
 
-  const openPreferencesModal = () => {
-    APP.openPreferencesModal()
-  }
-
-  const logoutUserFn = () => {
-    logoutUser().then(() => {
-      if ($('body').hasClass('manage')) {
-        location.href = config.hostpath + config.basepath
-      } else {
-        window.location.reload()
-      }
-    })
-  }
-
-  useEffect(() => {
-    const initMyProjectsPopup = () => {
-      if (showPopup.current) {
-        const tooltipTex =
-          "<h4 class='header'>Manage your projects</h4>" +
-          "<div class='content'>" +
-          '<p>Click here, then "My projects" to retrieve and manage all the projects you have created in Matecat.</p>' +
-          "<a class='close-popup-teams'>Got it!</a>" +
-          '</div>'
-        $(dropdownProfile.current)
-          .popup({
-            on: 'click',
-            onHidden: () => removePopup(),
-            html: tooltipTex,
-            closable: false,
-            onCreate: () => onCreatePopup(),
-            className: {
-              popup: 'ui popup user-menu-tooltip',
-            },
-          })
-          .popup('show')
-        showPopup.cuurent = false
-      }
+    const logoutUserFn = () => {
+      logout()
     }
 
-    const removePopup = () => {
-      $(dropdownProfile.current).popup('destroy')
-      CatToolActions.setPopupUserMenuCookie()
-      return true
-    }
-
-    const onCreatePopup = () => {
-      $('.close-popup-teams').on('click', () => {
-        $(dropdownProfile.current).popup('hide')
-      })
-    }
-    if ($(dropdownProfile.current).length) {
-      $(dropdownProfile.current).dropdown()
-    }
-    CatToolStore.addListener(
-      CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-      initMyProjectsPopup,
-    )
-    return () => {
-      CatToolStore.removeListener(
-        CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-        initMyProjectsPopup,
-      )
-    }
-  }, [])
-
-  return (
-    <div
-      className="ui dropdown"
-      ref={dropdownProfile}
-      id="profile-menu"
-      data-testid="user-menu"
-    >
-      {userLogged ? (
-        <>
-          {user?.metadata && user.metadata.gplus_picture ? (
+    return (
+      <Popover
+        toggleButtonProps={{
+          type: BUTTON_TYPE.PRIMARY,
+          mode: BUTTON_MODE.GHOST,
+          size: BUTTON_SIZE.ICON_STANDARD,
+          children: avatarImg ? (
             <img
-              className="ui mini circular image ui-user-top-image"
-              src={user.metadata.gplus_picture + '?sz=80'}
+              className="user-menu-popover-avatar"
+              src={`${avatarImg}`}
               title="Personal settings"
               alt="Profile picture"
             />
@@ -104,48 +48,77 @@ export const UserMenu = ({user, userLogged}) => {
               data-testid="user-menu-metadata"
               title="Personal settings"
             >
-              {config.userShortName}
+              {CommonUtils.getUserShortName(userInfo.user)}
             </div>
-          )}
-          <div className="menu">
-            <div
-              className="item"
-              data-value="Manage"
-              id="manage-item"
-              onClick={openManage}
-            >
-              My Projects
-            </div>
-            <div
-              className="item"
-              data-value="profile"
-              id="profile-item"
-              onClick={openPreferencesModal}
-              data-testid="profile-item"
-            >
-              Profile
-            </div>
-            <div
-              className="item"
-              data-value="logout"
-              id="logout-item"
-              data-testid="logout-item"
-              onClick={logoutUserFn}
-            >
-              Logout
+          ),
+        }}
+        align={POPOVER_ALIGN.RIGHT}
+        verticalAlign={POPOVER_VERTICAL_ALIGN.BOTTOM}
+      >
+        <div className="user-menu-popover-content">
+          <div className="user-info">
+            {avatarImg ? (
+              <img
+                className="user-avatar"
+                src={`${avatarImg}`}
+                title="Personal settings"
+                alt="Profile picture"
+              />
+            ) : (
+              <div className="ui user circular image ui-user-top-image user-avatar">
+                {CommonUtils.getUserShortName(userInfo.user)}
+              </div>
+            )}
+            <div className="user-name-and-email">
+              <div>{`${user.first_name} ${user.last_name}`}</div>
+              <div>{user.email}</div>
             </div>
           </div>
-        </>
-      ) : (
-        <div
-          className="ui user-nolog label"
-          onClick={openLoginModal}
-          title="Login"
-        >
-          {/*<i className="icon-user22"/>*/}
-          <IconUserLogout width={40} height={40} color={'#fff'} />
+          <hr />
+          <ul>
+            <li>
+              <a className="item" href="/manage">
+                My Projects
+              </a>
+            </li>
+            <li>
+              <div className="item" onClick={openPreferencesModal}>
+                Profile
+              </div>
+            </li>
+            <li>
+              <div className="item" onClick={logoutUserFn}>
+                Logout
+              </div>
+            </li>
+          </ul>
         </div>
-      )}
-    </div>
+      </Popover>
+    )
+  }
+
+  return (
+    typeof isUserLogged === 'boolean' &&
+    (isUserLogged ? (
+      loggedRender()
+    ) : (
+      <div className="header-buttons">
+        <Button
+          className={'header-button-signin'}
+          mode={BUTTON_MODE.OUTLINE}
+          size={BUTTON_SIZE.MEDIUM}
+          onClick={ModalsActions.openLoginModal}
+        >
+          Sign In
+        </Button>
+        <Button
+          className={'header-button-signup'}
+          onClick={ModalsActions.openRegisterModal}
+          size={BUTTON_SIZE.MEDIUM}
+        >
+          Sign Up
+        </Button>
+      </div>
+    ))
   )
 }

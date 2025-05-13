@@ -10,23 +10,24 @@ namespace AbstractControllers;
 
 
 use FeatureSet;
+use Users_UserStruct;
 
 interface IController {
 
     /**
-     * @return null|\Users_UserStruct
+     * @return null|Users_UserStruct
      */
-    public function getUser();
+    public function getUser(): ?Users_UserStruct;
 
-    public function userIsLogged();
+    public function isLoggedIn(): bool;
 
     public function getFeatureSet();
 
     /**
-     * @param FeatureSet $features
+     * @param FeatureSet $featureSet
      *
      * @return mixed
      */
-    public function setFeatureSet( FeatureSet $features );
+    public function setFeatureSet( FeatureSet $featureSet );
 
 }

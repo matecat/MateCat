@@ -2,24 +2,25 @@
 
 namespace LQA;
 
-use Chunks_ChunkStruct;
 use Constants;
 use DataAccess\ShapelessConcreteStruct;
 use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use PDO;
+use ReflectionException;
 
 class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     const TABLE = "qa_chunk_reviews";
 
-    public static $primary_keys = [
+    public static array $primary_keys = [
             'id'
     ];
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
     public function updatePassword( $id_job, $old_password, $new_password ) {
@@ -112,13 +113,13 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @param null               $source_page
      *
      * @return int
      */
-    public function getPenaltyPointsForChunk( Chunks_ChunkStruct $chunk, $source_page = null ) {
+    public function getPenaltyPointsForChunk( Jobs_JobStruct $chunk, $source_page = null ) {
         if ( is_null( $source_page ) ) {
             $source_page = Constants::SOURCE_PAGE_REVISION;
         }
@@ -148,7 +149,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         return $penalty_points;
     }
 
-    public function countTimeToEdit( Chunks_ChunkStruct $chunk, $source_page ) {
+    public function countTimeToEdit( Jobs_JobStruct $chunk, $source_page ) {
         $sql = "
             SELECT SUM( time_to_edit ) FROM jobs
                 JOIN segment_translation_events ste
@@ -212,17 +213,18 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunkStruct
-     * @param int|null           $ttl
+     * @param Jobs_JobStruct $chunkStruct
+     * @param int|null       $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws ReflectionException
      */
-    public function findChunkReviews( Chunks_ChunkStruct $chunkStruct, ?int $ttl = null ) {
+    public function findChunkReviews( Jobs_JobStruct $chunkStruct, ?int $ttl = 0 ): array {
         return $this->_findChunkReviews( [ $chunkStruct ], null, $ttl );
     }
 
     /**
-     * @param Chunks_ChunkStruct[] $chunkStructsArray
+     * @param Jobs_JobStruct[] $chunkStructsArray
      *
      * @return ChunkReviewStruct[]
      */
@@ -231,23 +233,24 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunkStruct
+     * @param Jobs_JobStruct $chunkStruct
      * @param int                $source_page
      *
      * @return ChunkReviewStruct[]
      */
-    public function findChunkReviewsForSourcePage( Chunks_ChunkStruct $chunkStruct, int $source_page = Constants::SOURCE_PAGE_REVISION ): array {
+    public function findChunkReviewsForSourcePage( Jobs_JobStruct $chunkStruct, int $source_page = Constants::SOURCE_PAGE_REVISION ): array {
         $sql_condition = " WHERE source_page = $source_page ";
 
         return $this->_findChunkReviews( [ $chunkStruct ], $sql_condition );
     }
 
     /**
-     * @param Chunks_ChunkStruct[] $chunksArray
-     * @param string|null          $default_condition
-     * @param int|null             $ttl
+     * @param Jobs_JobStruct[] $chunksArray
+     * @param string|null      $default_condition
+     * @param int|null         $ttl
      *
      * @return ChunkReviewStruct[]
+     * @throws ReflectionException
      */
     protected function _findChunkReviews( array $chunksArray, ?string $default_condition = ' WHERE 1 = 1 ', ?int $ttl = 1 /* 1 second, only to avoid multiple queries to mysql during the same script execution */ ): array {
 
@@ -261,16 +264,16 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunkStruct
+     * @param Jobs_JobStruct $chunkStruct
      *
      * @return bool|int
      */
-    public function destroyCacheForFindChunkReviews( Chunks_ChunkStruct $chunkStruct ) {
+    public function destroyCacheForFindChunkReviews( Jobs_JobStruct $chunkStruct ) {
 
         $findChunkReviewsStatement = $this->_findChunkReviewsStatement( [ $chunkStruct ], null );
         $stmt                      = $this->_getStatementForQuery( $findChunkReviewsStatement[ 'sql' ] );
 
-        return $this->_destroyObjectCache( $stmt, $findChunkReviewsStatement[ 'parameters' ] );
+        return $this->_destroyObjectCache( $stmt, ChunkReviewStruct::class, $findChunkReviewsStatement[ 'parameters' ] );
 
     }
 
@@ -463,7 +466,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param      $data array of data to use
      *
      * @return ChunkReviewStruct
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @internal param bool $setDefaults
      */
     public static function createRecord( $data ) {
@@ -558,8 +561,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         /**
          * @var $chunkReview ChunkReviewStruct
          */
-        $chunkReview = $data[ 'chunkReview' ];
-        $data[ 'force_pass_at' ]        = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
+        $chunkReview             = $data[ 'chunkReview' ];
+        $data[ 'force_pass_at' ] = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
 
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division

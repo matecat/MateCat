@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import {SettingsPanelContext} from './SettingsPanelContext'
 import {ContentWrapper} from './ContentWrapper'
 import {MachineTranslationTab} from './Contents/MachineTranslationTab'
-import {AdvancedOptionsTab} from './Contents/AdvancedOptionsTab'
+import {OtherTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
@@ -17,6 +17,16 @@ import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
+import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
+import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
+import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
+import {EditorSettingsTab} from './Contents/EditorSettingsTab'
+import ModalsActions from '../../actions/ModalsActions'
+import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
+import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
+import {debounce, isEqual} from 'lodash'
+import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
+import {EditorOtherTab} from './Contents/EditorOtherTab'
 
 let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
   'openTab',
@@ -25,9 +35,12 @@ let tabOpenFromQueryString = new URLSearchParams(window.location.search).get(
 export const SETTINGS_PANEL_TABS = {
   translationMemoryGlossary: 'tm',
   machineTranslation: 'mt',
-  advancedOptions: 'options',
+  other: 'other',
   analysis: 'analysis',
   qualityFramework: 'qf',
+  fileImport: 'fileImport',
+  editorSettings: 'editorSettings',
+  editorOther: 'editorOther',
 }
 
 export const TEMPLATE_PROPS_BY_TAB = {
@@ -35,18 +48,25 @@ export const TEMPLATE_PROPS_BY_TAB = {
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
     SCHEMA_KEYS.pretranslate100,
+    SCHEMA_KEYS.tmPrioritization,
   ],
   [SETTINGS_PANEL_TABS.machineTranslation]: [SCHEMA_KEYS.mt],
   [SETTINGS_PANEL_TABS.qualityFramework]: [SCHEMA_KEYS.qaModelTemplateId],
+  [SETTINGS_PANEL_TABS.fileImport]: [
+    SCHEMA_KEYS.segmentationRule,
+    SCHEMA_KEYS.filtersTemplateId,
+    SCHEMA_KEYS.XliffConfigTemplateId,
+  ],
   [SETTINGS_PANEL_TABS.analysis]: [SCHEMA_KEYS.payableRateTemplateId],
-  [SETTINGS_PANEL_TABS.advancedOptions]: [
+  [SETTINGS_PANEL_TABS.other]: [
     SCHEMA_KEYS.speech2text,
     SCHEMA_KEYS.tagProjection,
     SCHEMA_KEYS.lexica,
     SCHEMA_KEYS.crossLanguageMatches,
-    SCHEMA_KEYS.segmentationRule,
     SCHEMA_KEYS.idTeam,
   ],
+  [SETTINGS_PANEL_TABS.editorSettings]: [],
+  [SETTINGS_PANEL_TABS.editorOther]: [],
 }
 
 const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
@@ -65,30 +85,56 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
         'Manage your machine translation engines and select which should be used on your new project. <a href="https://guides.matecat.com/machine-translation-engines" target="_blank">More details</a>',
       component: <MachineTranslationTab />,
     },
-    ...(!isCattool && config.isLoggedIn
+    ...(!isCattool
       ? [
           {
             id: SETTINGS_PANEL_TABS.qualityFramework,
             label: 'Quality framework',
             description:
-              'Manage your quality frameworks and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
+              'Manage your quality frameworks and select which should be used on your new project. <a href="https://guides.matecat.com/quality-framework" target="_blank">More details</a>',
             component: <QualityFrameworkTab />,
+          },
+          {
+            id: SETTINGS_PANEL_TABS.fileImport,
+            label: 'File import',
+            description:
+              'Set up your file import preferences for new projects.  <a href="https://guides.matecat.com/file-import" target="_blank">More details</a>',
+            component: <FileImportTab />,
           },
           {
             id: SETTINGS_PANEL_TABS.analysis,
             label: 'Analysis',
             description:
-              'Manage your billing models and select which should be used on your new project. <a href="#" target="_blank">More details</a>',
+              'Manage your billing models and select which should be used on your new project. <a href="https://guides.matecat.com/billing-model" target="_blank">More details</a>',
             component: <AnalysisTab />,
+          },
+          {
+            id: SETTINGS_PANEL_TABS.other,
+            label: 'Other',
+            description: 'Adjust other project creation settings.',
+            component: <OtherTab />,
           },
         ]
       : []),
-    {
-      id: SETTINGS_PANEL_TABS.advancedOptions,
-      label: 'Advanced settings',
-      description: 'Advanced settings for your project',
-      component: <AdvancedOptionsTab />,
-    },
+    ...(isCattool
+      ? [
+          {
+            id: SETTINGS_PANEL_TABS.editorSettings,
+            label: 'Editor settings',
+            description:
+              'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
+            component: <EditorSettingsTab />,
+          },
+          {
+            ...(config.ownerIsMe === 1 && {
+              id: SETTINGS_PANEL_TABS.editorOther,
+              label: 'Other',
+              description: 'Adjust other project creation settings.',
+              component: <EditorOtherTab />,
+            }),
+          },
+        ]
+      : []),
   ]
 }
 
@@ -142,6 +188,27 @@ export const SettingsPanel = ({
   // templates quality framework
   const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
   const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
+  const fileImportFiltersParamsTemplates = useTemplates(
+    FILTERS_PARAMS_SCHEMA_KEYS,
+  )
+  const fileImportXliffSettingsTemplates = useTemplates(
+    XLIFF_SETTINGS_SCHEMA_KEYS,
+  )
+
+  // Sync filters template with conversion file
+  useSyncTemplateWithConvertFile({
+    ...fileImportFiltersParamsTemplates,
+    defaultTemplate: defaultFiltersParams,
+    idTemplate: currentProjectTemplate?.filtersTemplateId,
+    getTemplates: getFiltersParamsTemplates,
+    checkIfUpdate: (filtersTemplate) => {
+      if (!isEqual(filtersTemplate, CreateProjectStore.getFiltersTemplate())) {
+        CreateProjectStore.updateProject({
+          filtersTemplate,
+        })
+      }
+    },
+  })
 
   const wrapperRef = useRef()
 
@@ -248,11 +315,10 @@ export const SettingsPanel = ({
 
   const openLoginModal = () => {
     setIsVisible(false)
-    APP.openLoginModal()
+    ModalsActions.openLoginModal()
   }
 
-  const isEnabledProjectTemplateComponent =
-    config.isLoggedIn === 1 && !config.is_cattool
+  const isEnabledProjectTemplateComponent = !config.is_cattool
 
   return (
     <SettingsPanelContext.Provider
@@ -276,6 +342,8 @@ export const SettingsPanel = ({
         isEnabledProjectTemplateComponent,
         qualityFrameworkTemplates,
         analysisTemplates,
+        fileImportFiltersParamsTemplates,
+        fileImportXliffSettingsTemplates,
       }}
     >
       <div

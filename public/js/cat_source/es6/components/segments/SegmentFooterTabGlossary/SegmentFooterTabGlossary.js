@@ -19,6 +19,8 @@ import TermForm from './TermForm'
 import {SegmentContext} from '../SegmentContext'
 import SegmentUtils from '../../../utils/segmentUtils'
 import {SegmentFooterTabError} from '../SegmentFooterTabError'
+import {checkMymemoryStatus} from '../../../api/checkMymemoryStatus'
+import AppDispatcher from '../../../stores/AppDispatcher'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -174,18 +176,62 @@ export const SegmentFooterTabGlossary = ({
     [modifyElement, segment.sid, selectsActive, termForm, clientId],
   )
 
+  const pollMymemoryStatus = async (
+    {uuid},
+    successCallback,
+    timeoutCallback,
+  ) => {
+    const startTime = Date.now()
+
+    const checkCondition = async () => {
+      try {
+        const data = await checkMymemoryStatus({uuid})
+
+        if (data.responseData?.id > 0) {
+          successCallback(data)
+          return
+        }
+
+        if (Date.now() - startTime >= 60000) {
+          if (timeoutCallback) {
+            timeoutCallback()
+          }
+          return
+        }
+
+        setTimeout(checkCondition, 1000)
+      } catch (error) {
+        setTimeout(checkCondition, 1000)
+      }
+    }
+
+    await checkCondition()
+  }
+
   // get TM keys and add actions listener
   useEffect(() => {
     const refreshCheckQa = () =>
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
-    const addGlossaryItem = () => {
-      setTimeout(() => {
-        setIsLoading(false)
-        setSearchTerm('')
-        resetForm()
-        refreshGlossary()
-        refreshCheckQa()
-      }, 500)
+    const updateGlossaryItem = (payload) => addGlossaryItem(payload, true)
+    const addGlossaryCallback = (update = false) => {
+      setSearchTerm('')
+      resetForm()
+      refreshGlossary()
+      setTimeout(refreshCheckQa, 500)
+      AppDispatcher.dispatch({
+        actionType: SegmentConstants.SHOW_FOOTER_MESSAGE,
+        sid: segment.sid,
+        message: update
+          ? 'A glossary item has been updated'
+          : 'A glossary item has been added',
+      })
+    }
+    const addGlossaryItem = (payload, update) => {
+      pollMymemoryStatus(
+        {uuid: payload.request_id},
+        () => setTimeout(() => addGlossaryCallback(update), 1000),
+        () => setTimeout(() => addGlossaryCallback(update), 1000),
+      )
     }
     const setDomains = ({entries}) => {
       setDomainsResponse(entries)
@@ -229,13 +275,12 @@ export const SegmentFooterTabGlossary = ({
       SegmentConstants.ADD_GLOSSARY_ITEM,
       addGlossaryItem,
     )
-    SegmentStore.addListener(SegmentConstants.CHANGE_GLOSSARY, addGlossaryItem)
+    SegmentStore.addListener(
+      SegmentConstants.CHANGE_GLOSSARY,
+      updateGlossaryItem,
+    )
     CatToolStore.addListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
     CatToolStore.addListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-    CatToolStore.addListener(
-      CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-      refreshGlossary,
-    )
     CatToolStore.addListener(
       CatToolConstants.HAVE_KEYS_GLOSSARY,
       onReceiveHaveKeysGlossary,
@@ -256,14 +301,10 @@ export const SegmentFooterTabGlossary = ({
       )
       SegmentStore.removeListener(
         SegmentConstants.CHANGE_GLOSSARY,
-        addGlossaryItem,
+        updateGlossaryItem,
       )
       CatToolStore.removeListener(CatToolConstants.UPDATE_DOMAINS, setDomains)
       CatToolStore.removeListener(CatToolConstants.UPDATE_TM_KEYS, setJobTmKeys)
-      CatToolStore.removeListener(
-        CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-        refreshGlossary,
-      )
       CatToolStore.removeListener(
         CatToolConstants.HAVE_KEYS_GLOSSARY,
         onReceiveHaveKeysGlossary,
@@ -384,8 +425,8 @@ export const SegmentFooterTabGlossary = ({
         keys.length > 1
           ? SegmentUtils.getSelectedKeysGlossary(keys)
           : keys.length === 1
-          ? [keys[0]]
-          : [],
+            ? [keys[0]]
+            : [],
     }))
   }, [keys])
 
@@ -518,7 +559,7 @@ export const SegmentFooterTabGlossary = ({
         tabIndex="0"
       >
         {!clientConnected ? (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         ) : haveKeysGlossary ? (
           <>
             <SearchTerms />

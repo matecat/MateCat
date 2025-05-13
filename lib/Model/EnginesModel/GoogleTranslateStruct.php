@@ -32,9 +32,9 @@ class EnginesModel_GoogleTranslateStruct extends EnginesModel_EngineStruct {
     /**
      * @var array
      */
-    public $extra_parameters = array(
+    public $extra_parameters = [
             'client_secret' => ""
-    );
+    ];
 
     /**
      * @var string

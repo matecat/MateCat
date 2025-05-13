@@ -75,14 +75,17 @@ class Search extends React.Component {
     if (this.state.funcFindButton) {
       SearchUtils.execFind(this.state.search)
     }
+
+    const {guess_tag: guessTag} = this.props.userInfo.metadata
+
     this.setState({
       funcFindButton: false,
-      ...(config.tag_projection_enabled === 1 && {
+      ...(guessTag === 1 && {
         previousIsTagProjectionEnabled: true,
       }),
     })
     // disable tag projection
-    if (config.tag_projection_enabled === 1) {
+    if (guessTag === 1) {
       SegmentActions.changeTagProjectionStatus(false)
     }
   }
@@ -195,7 +198,7 @@ class Search extends React.Component {
     this.dropdownInit = false
     UI.body.removeClass('searchActive')
     this.handleClearClick()
-    if (UI.segmentIsLoaded(UI.currentSegmentId)) {
+    if (SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)) {
       setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
     } else {
       CatToolActions.onRender({
@@ -246,7 +249,7 @@ class Search extends React.Component {
     let self = this
     let props = {
       modalName: 'confirmReplace',
-      text: 'Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)',
+      text: 'Do you really want to replace this text in all search results?',
       successText: 'Continue',
       successCallback: function () {
         SearchUtils.execReplaceAll(self.state.search)
@@ -262,7 +265,9 @@ class Search extends React.Component {
             ModalsActions.showModalComponent(
               AlertModal,
               {
-                text: errors[0].message,
+                text: errors?.length
+                  ? errors[0].message
+                  : 'We got an error, please contact support',
               },
               'Replace All Alert',
             )

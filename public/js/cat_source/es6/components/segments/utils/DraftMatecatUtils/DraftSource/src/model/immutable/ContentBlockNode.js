@@ -9,9 +9,8 @@
  */
 
 import findRangesImmutable from './findRangesimmutable'
-import Immutable from 'immutable'
+import {List, Map, OrderedSet, Record, Repeat} from 'immutable'
 import {CharacterMetadata} from 'draft-js'
-const {List, Map, OrderedSet, Record, Repeat} = Immutable
 const EMPTY_SET = OrderedSet()
 
 const defaultRecord = {

@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import {debounce} from 'lodash/function'
-import {TransitionGroup, CSSTransition} from 'react-transition-group'
-
+import $ from 'jquery'
 import AnalyzeHeader from './AnalyzeHeader'
 import AnalyzeChunksResume from './AnalyzeChunksResume'
 import ProjectAnalyze from './ProjectAnalyze'
@@ -16,8 +15,8 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
     position: 'absolute',
     height: '100%',
     width: '100%',
-    backgroundColor: 'rgba(76, 69, 69, 0.3)',
-    top: $(parentRef.current).scrollTop(),
+    // backgroundColor: 'rgba(76, 69, 69, 0.3)',
+    // top: $(parentRef.current).scrollTop(),
     left: 0,
     zIndex: 3,
   }
@@ -53,7 +52,8 @@ const AnalyzeMain = ({volumeAnalysis, project, parentRef}) => {
   useEffect(() => {
     parentRef.current.addEventListener('scroll', debounce(handleScroll, 200))
     return () => {
-      parentRef.current.removeEventListener('scroll', handleScroll)
+      parentRef.current &&
+        parentRef.current.removeEventListener('scroll', handleScroll)
     }
   })
 

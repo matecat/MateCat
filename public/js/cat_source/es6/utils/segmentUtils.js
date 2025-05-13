@@ -1,8 +1,8 @@
-import {isNull} from 'lodash'
-
 import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
+import {SEGMENTS_STATUS} from '../constants/Constants'
+import UserStore from '../stores/UserStore'
 
 const SegmentUtils = {
   /**
@@ -11,11 +11,24 @@ const SegmentUtils = {
    */
   tpCanActivate: undefined,
   TagProjectionCanActivate: undefined,
+  localStorageUnlockedSegments: 'unlocked-segments-' + config.id_job,
+
+  checkTPSupportedLanguage: function () {
+    const languagesKey = `${config.source_code.split('-')[0]}-${config.target_code.split('-')[0]}`
+    const languagesKeyRev = `${config.target_code.split('-')[0]}-${config.source_code.split('-')[0]}`
+    return Object.keys(config.tag_projection_languages).some(
+      (key) => key === languagesKey || key === languagesKeyRev,
+    )
+  },
   /**
    * Tag Projection: check if is enable the Tag Projection
    */
   checkTPEnabled: function () {
-    return !!config.tag_projection_enabled && !!!config.isReview
+    return (
+      this.checkTPSupportedLanguage() &&
+      UserStore.getUserMetadata()?.guess_tags === 1 &&
+      !!!config.isReview
+    )
   },
   /**
    * Check if the  the Tag Projection in the current segment is enabled and still not tagged
@@ -45,42 +58,56 @@ const SegmentUtils = {
   isIceSegment: function (segment) {
     return segment.ice_locked === '1'
   },
+  isSecondPassLockedSegment: function (segment) {
+    return (
+      segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
+      segment.revision_number === 2 &&
+      config.revisionNumber !== 2
+    )
+  },
   isUnlockedSegment: function (segment) {
-    return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
-  },
-
-  /**
-   * Characters counter local storage
-   */
-  isCharacterCounterEnable: () =>
-    !!JSON.parse(window.localStorage.getItem('characterCounter'))?.find(
-      (item) => Object.keys(item)[0] === config.id_job,
-    ),
-  setCharacterCounterOptionValue: (isActive) => {
-    const MAX_ITEMS = 2000
-
-    const cachedItems =
-      JSON.parse(window.localStorage.getItem('characterCounter')) ?? []
-    if (cachedItems.length > MAX_ITEMS) cachedItems.shift()
-    const prevValue = cachedItems.filter(
-      (item) => Object.keys(item)[0] !== config.id_job,
+    // return !isNull(CommonUtils.getFromStorage('unlocked-' + segment.sid))
+    if (localStorage.getItem(this.localStorageUnlockedAllSegments)) return true
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
     )
-
-    window.localStorage.setItem(
-      'characterCounter',
-      JSON.stringify([
-        ...prevValue,
-        ...(isActive ? [{[config.id_job]: true}] : []),
-      ]),
+    let index = -1
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      index = segmentsUnlocked.indexOf(segment.sid)
+    }
+    return index !== -1
+  },
+  addUnlockedSegment: function (sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      if (segmentsUnlocked.indexOf(sid) === -1) segmentsUnlocked.push(sid)
+    } else {
+      segmentsUnlocked = [sid]
+    }
+    localStorage.setItem(
+      this.localStorageUnlockedSegments,
+      segmentsUnlocked.join(),
     )
   },
-  /**
-   * AI assistant
-   */
-  isAiAssistantAuto: () =>
-    JSON.parse(window.localStorage.getItem('aiAssistant')) == true,
-  setAiAssistantOptionValue: (isActive) => {
-    window.localStorage.setItem('aiAssistant', isActive)
+  removeUnlockedSegment(sid) {
+    let segmentsUnlocked = localStorage.getItem(
+      this.localStorageUnlockedSegments,
+    )
+    if (segmentsUnlocked) {
+      segmentsUnlocked = segmentsUnlocked.split(',')
+      const index = segmentsUnlocked.indexOf(sid)
+      if (index > -1) {
+        segmentsUnlocked.splice(index, 1)
+        localStorage.setItem(
+          this.localStorageUnlockedSegments,
+          segmentsUnlocked.join(),
+        )
+      }
+    }
   },
   /**
    * Selected keys glossary job local storage
@@ -114,20 +141,11 @@ const SegmentUtils = {
     )
   },
   segmentHasNote: (segment) => {
-    return segment.notes ||
+    return !!(
+      segment.notes ||
       segment.context_groups?.context_json ||
       segment.metadata?.length > 0
-      ? true
-      : false
-  },
-  /**
-   * Check Multi match languages
-   */
-  checkCrossLanguageSettings: function () {
-    const settings = localStorage.getItem('multiMatchLangs')
-    if (settings && Object.keys(JSON.parse(settings)).length)
-      return JSON.parse(settings)
-    return undefined
+    )
   },
   /**
    * Retrieve the file id of a segment
@@ -148,6 +166,24 @@ const SegmentUtils = {
       }
     })
     return statuses
+  },
+  getSegmentContext: (sid) => {
+    const segments = SegmentStore.getAllSegments()
+    const segmentIndex = SegmentStore.getSegmentIndex(sid)
+    if (segmentIndex === -1) {
+      throw new Error('Segment not found.')
+    }
+
+    const beforeStartIndex = Math.max(0, segmentIndex - 5)
+    const beforeElements = segments.slice(beforeStartIndex, segmentIndex)
+
+    const afterEndIndex = Math.min(segments.length, segmentIndex + 3)
+    const afterElements = segments.slice(segmentIndex + 1, afterEndIndex)
+
+    return {
+      contextListBefore: beforeElements.map((segment) => segment.segment),
+      contextListAfter: afterElements.map((segment) => segment.segment),
+    }
   },
   createSetTranslationRequest: (segment, status, propagate = false) => {
     let {translation, segment: segmentSource, original_sid: sid} = segment
@@ -183,7 +219,9 @@ const SegmentUtils = {
       translation: translation,
       segment: segmentSource,
       time_to_edit: UI.editTime ? UI.editTime : new Date() - UI.editStart,
-      chosen_suggestion_index: segment.choosenSuggestionIndex,
+      chosen_suggestion_index: !config.isReview
+        ? segment.choosenSuggestionIndex
+        : undefined,
       propagate: propagate,
       context_before: contextBefore,
       id_before: idBefore,
@@ -199,9 +237,10 @@ const SegmentUtils = {
           ).toString()
         : null,
       characters_counter: segment.charactersCounter,
-      suggestion_array: segment.contributions
-        ? JSON.stringify(segment.contributions.matches)
-        : undefined,
+      suggestion_array:
+        segment.contributions && !config.isReview
+          ? JSON.stringify(segment.contributions.matches)
+          : undefined,
     }
   },
   /**
@@ -220,6 +259,47 @@ const SegmentUtils = {
         totalTranslation += UI.splittedTranslationPlaceholder
     })
     return totalTranslation
+  },
+  isReadonlySegment: function (segment) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase === 'revise'
+    return projectCompletionCheck || segment.readonly === 'true'
+  },
+  getRelativeTransUnitCharactersCounter: ({
+    sid,
+    charactersCounter = 0,
+    shouldCountTagsAsChars = false,
+  }) => {
+    const segments = SegmentStore.getAllSegments()
+    const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
+
+    const {internal_id: internalId} = segmentInStore ?? {}
+
+    const segmentsGroupInternalId = segments.filter(
+      (segment) => segment.internal_id === internalId,
+    )
+
+    const unitCharacters = segmentsGroupInternalId
+      .filter((segment) => segment.sid !== sid)
+      .reduce((acc, cur) => {
+        const cleanTagsTranslation = shouldCountTagsAsChars
+          ? DraftMatecatUtils.excludeSomeTagsTransformToText(cur.translation, [
+              'g',
+              'bx',
+              'ex',
+              'x',
+            ])
+          : DraftMatecatUtils.decodePlaceholdersToPlainText(
+              DraftMatecatUtils.removeTagsFromText(cur.translation),
+            )
+        return (
+          acc + DraftMatecatUtils.getCharactersCounter(cleanTagsTranslation)
+        )
+      }, charactersCounter)
+
+    return {segmentCharacters: charactersCounter, unitCharacters}
   },
 }
 

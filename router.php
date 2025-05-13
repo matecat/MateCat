@@ -16,13 +16,20 @@ Bootstrap::start();
 
 $klein = new Klein();
 
-function route( $path, $method, $controller, $action ) {
+/**
+ * @param string $path
+ * @param string $method
+ * @param array  $callback
+ *
+ * @return void
+ */
+function route( string $path, string $method, array $callback ) {
     global $klein;
 
-    $klein->respond( $method, $path, function () use ( $controller, $action ) {
-        $reflect  = new ReflectionClass( $controller );
+    $klein->respond( $method, $path, function () use ( $callback ) {
+        $reflect  = new ReflectionClass( $callback[ 0 ] );
         $instance = $reflect->newInstanceArgs( func_get_args() );
-        $instance->respond( $action );
+        $instance->respond( $callback[ 1 ] );
     } );
 }
 
@@ -70,6 +77,7 @@ require './lib/Routes/api_v1_routes.php';
 require './lib/Routes/api_v2_routes.php';
 require './lib/Routes/api_v3_routes.php';
 require './lib/Routes/gdrive_routes.php';
+require './lib/Routes/oauth_routes.php';
 require './lib/Routes/utils_routes.php';
 Features::loadRoutes( $klein );
 

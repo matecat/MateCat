@@ -2,14 +2,14 @@
 
 namespace PayableRates;
 
-use Analysis_PayableRates;
+use Analysis\PayableRates;
 use DataAccess_AbstractDaoSilentStruct;
 use DataAccess_IDaoStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
-use Langs_Languages;
+use Langs\Languages;
 
 class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
@@ -27,14 +27,28 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      * @return string
      */
     public function breakdownsToJson(): string {
-        return json_encode( $this->breakdowns );
+        return json_encode( $this->getBreakdownsArray() );
     }
 
     /**
      * @return array
      */
-    public function getBreakdownsArray(): array {
-        return ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
+    protected function getBreakdownsArray(): array {
+        $this->breakdowns = ( is_string( $this->breakdowns ) ? json_decode( $this->breakdowns, true ) : $this->breakdowns );
+
+        // WARNING: backward compatibility for old data stored, they could not have ICE_MT
+        foreach ( $this->breakdowns as $sourceLang => $targetLanguages ) {
+            if ( $sourceLang == 'default' ) {
+                continue;
+            }
+            foreach ( $targetLanguages as $targetLanguage => $targetPayableRates ) {
+                if ( !isset( $targetPayableRates[ 'ICE_MT' ] ) ) {
+                    $this->breakdowns[ $sourceLang ][ $targetLanguage ][ 'ICE_MT' ] = $targetPayableRates[ 'MT' ];
+                }
+            }
+        }
+
+        return $this->breakdowns;
     }
 
     /**
@@ -44,30 +58,14 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
      * @return array
      */
     public function getPayableRates( string $source, string $target ): array {
-        $languages  = Langs_Languages::getInstance();
+
         $breakdowns = $this->getBreakdownsArray();
 
-        // $isoSource and $isoTarget is in 'isocode' format
-        // $source and $target are in 'rfc3066code' format
-        $isoSource = $languages->convertLanguageToIsoCode( $source );
-        $isoTarget = $languages->convertLanguageToIsoCode( $target );
-
-        if ( $isoSource === null ) {
-            return $breakdowns[ 'default' ];
-        }
-
-        if ( $isoTarget === null ) {
-            return $breakdowns[ 'default' ];
-        }
-
-        $this->validateLanguage( $isoSource );
-        $this->validateLanguage( $isoTarget );
         $this->validateLanguage( $source );
         $this->validateLanguage( $target );
 
-        $resolveBreakdowns = Analysis_PayableRates::resolveBreakdowns( $breakdowns, $source, $target );
+        return PayableRates::resolveBreakdowns( $breakdowns, $source, $target, $breakdowns[ 'default' ] );
 
-        return ( !empty( $resolveBreakdowns ) ) ? $resolveBreakdowns : $breakdowns[ 'default' ];
     }
 
     /**
@@ -132,10 +130,8 @@ class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct impleme
     private function validateLanguage( $lang ) {
         // rfc3066code --->  es-ES
         // isocode     --->  es
-        $format    = ( strlen( $lang ) > 3 ) ? 'rfc3066code' : 'isocode';
-        $languages = Langs_Languages::getInstance();
-
-        if ( !$languages->isValidLanguage( $lang, $format ) ) {
+        $languages = Languages::getInstance();
+        if ( !$languages->isValidLanguage( $lang ) ) {
             throw new DomainException( $lang . ' is not a supported language', 403 );
         }
     }

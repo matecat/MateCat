@@ -2,12 +2,9 @@
 
 namespace Filters\DTO;
 
-use Countable;
 use JsonSerializable;
 
-class MSExcel implements IDto, JsonSerializable, Countable {
-
-    use DefaultTrait;
+class MSExcel implements IDto, JsonSerializable {
 
     private bool  $extract_doc_properties = false;
     private bool  $extract_hidden_cells   = false;
@@ -95,39 +92,15 @@ class MSExcel implements IDto, JsonSerializable, Countable {
 
         $format = [];
 
-        if ( $this->extract_doc_properties ) {
-            $format[ 'extract_doc_properties' ] = $this->extract_doc_properties;
-        }
-
-        if ( $this->extract_hidden_cells ) {
-            $format[ 'extract_hidden_cells' ] = $this->extract_hidden_cells;
-        }
-
-        if ( $this->extract_diagrams ) {
-            $format[ 'extract_diagrams' ] = $this->extract_diagrams;
-        }
-
-        if ( $this->extract_drawings ) {
-            $format[ 'extract_drawings' ] = $this->extract_drawings;
-        }
-
-        if ( $this->extract_sheet_names ) {
-            $format[ 'extract_sheet_names' ] = $this->extract_sheet_names;
-        }
-
-        if ( !empty( $this->exclude_columns ) ) {
-            $format[ 'exclude_columns' ] = $this->exclude_columns;
-        }
+        $format[ 'extract_doc_properties' ] = $this->extract_doc_properties;
+        $format[ 'extract_hidden_cells' ]   = $this->extract_hidden_cells;
+        $format[ 'extract_diagrams' ]       = $this->extract_diagrams;
+        $format[ 'extract_drawings' ]       = $this->extract_drawings;
+        $format[ 'extract_sheet_names' ]    = $this->extract_sheet_names;
+        $format[ 'exclude_columns' ]        = $this->exclude_columns;
 
         return $format;
 
-    }
-
-    /**
-     * @return int
-     */
-    public function count(): int {
-        return count( $this->jsonSerialize() );
     }
 
 }

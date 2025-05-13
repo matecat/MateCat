@@ -1,5 +1,6 @@
 <?php
 
+use Langs\Languages;
 use PayableRates\CustomPayableRateStruct;
 use TestHelpers\AbstractTest;
 
@@ -15,7 +16,7 @@ class CustomPayableRateStructTest extends AbstractTest {
      * @test
      */
     public function convertLanguageToIsoCode() {
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         $langs     = [
                 'es-419' => 'es',
                 'es-ES'  => 'es',
@@ -39,6 +40,7 @@ class CustomPayableRateStructTest extends AbstractTest {
         $model->id         = 12;
         $model->name       = 'test';
         $model->version    = 2;
+
         $model->breakdowns = '
             {
                 "default": {
@@ -67,8 +69,7 @@ class CustomPayableRateStructTest extends AbstractTest {
                         "REPETITIONS": 70,
                         "INTERNAL": 70,
                         "MT": 70,
-                        "ICE": 70,
-                        "ICE_MT": 70
+                        "ICE": 70
                     }
                 },
                 "en-US": {
@@ -104,6 +105,11 @@ class CustomPayableRateStructTest extends AbstractTest {
             $errorMessage = 'Error for language combination ' . $languageCombo[ 0 ] . '<->' . $languageCombo[ 1 ] . '. Exp. ' . $languageCombo[ 2 ] . ', got ' . $payableRate[ 'MT' ];
 
             $this->assertEquals( $languageCombo[ 2 ], $payableRate[ 'MT' ], $errorMessage );
+
+            // NO ICE_MT set for en-AU -> fr-CA
+            $errorMessage = 'Error for language combination ' . $languageCombo[ 0 ] . '<->' . $languageCombo[ 1 ] . '. Exp. ' . $languageCombo[ 2 ] . ', got ' . $payableRate[ 'ICE_MT' ] ?? "null";
+            $this->assertEquals( $languageCombo[ 2 ], $payableRate[ 'ICE_MT' ], $errorMessage );
+
         }
     }
 }

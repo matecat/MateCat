@@ -6,6 +6,7 @@ use DataAccess_AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
+use Filters\DTO\Dita;
 use Filters\DTO\Json;
 use Filters\DTO\MSExcel;
 use Filters\DTO\MSPowerpoint;
@@ -13,22 +14,22 @@ use Filters\DTO\MSWord;
 use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
-use stdClass;
 
 class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
 
-    public ?int           $id            = null;
-    public string         $name;
-    public int            $uid;
-    public ?string        $created_at    = null;
-    public ?string        $modified_at   = null;
-    public ?string        $deleted_at    = null;
+    public ?int          $id            = null;
+    public string        $name;
+    public int           $uid;
+    public ?string       $created_at    = null;
+    public ?string       $modified_at   = null;
+    public ?string       $deleted_at    = null;
     public ?Yaml         $yaml          = null;
     public ?Xml          $xml           = null;
     public ?Json         $json          = null;
     public ?MSWord       $ms_word       = null;
     public ?MSExcel      $ms_excel      = null;
     public ?MSPowerpoint $ms_powerpoint = null;
+    public ?Dita         $dita          = null;
 
     /**
      * @return null
@@ -73,6 +74,13 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
     }
 
     /**
+     * @return null
+     */
+    public function getDita(): ?Dita {
+        return $this->dita;
+    }
+
+    /**
      * @param Yaml|null $yaml
      */
     public function setYaml( ?Yaml $yaml ): void {
@@ -114,6 +122,13 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         $this->ms_powerpoint = $ms_powerpoint;
     }
 
+    /**
+     * @param Dita|null $dita
+     */
+    public function setDita( ?Dita $dita ): void {
+        $this->dita = $dita;
+    }
+
     protected function hydrateDtoFromArray( string $dtoClass, array $data ) {
 
         $dto = new $dtoClass();
@@ -137,6 +152,9 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 break;
             case MSPowerpoint::class:
                 $this->setMsPowerpoint( $dto );
+                break;
+            case Dita::class:
+                $this->setDita( $dto );
                 break;
         }
 
@@ -176,6 +194,11 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         // ms powerpoint
         if ( isset( $json[ 'ms_powerpoint' ] ) ) {
             is_array( $json[ 'ms_powerpoint' ] ) ? $this->hydrateDtoFromArray( MSPowerpoint::class, $json[ 'ms_powerpoint' ] ) : $this->hydrateDtoFromArray( MSPowerpoint::class, json_decode( $json[ 'ms_powerpoint' ], true ) );
+        }
+
+        // dita
+        if ( isset( $json[ 'dita' ] ) ) {
+            is_array( $json[ 'dita' ] ) ? $this->hydrateDtoFromArray( Dita::class, $json[ 'dita' ] ) : $this->hydrateDtoFromArray( Dita::class, json_decode( $json[ 'dita' ], true ) );
         }
 
     }
@@ -223,6 +246,7 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
         $this->setMsExcel( new MSExcel() );
         $this->setMsWord( new MSWord() );
         $this->setMsPowerpoint( new MSPowerpoint() );
+        $this->setDita( new Dita() );
 
         $this->hydrateAllDto( $json );
 
@@ -244,29 +268,10 @@ class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct imp
                 'ms_word'       => $this->ms_word,
                 'ms_excel'      => $this->ms_excel,
                 'ms_powerpoint' => $this->ms_powerpoint,
-                'createdAt'     => DateTimeUtil::formatIsoDate( $this->created_at ),
-                'modifiedAt'    => DateTimeUtil::formatIsoDate( $this->modified_at )
+                'dita'          => $this->dita,
+                'created_at'    => DateTimeUtil::formatIsoDate( $this->created_at ),
+                'modified_at'   => DateTimeUtil::formatIsoDate( $this->modified_at )
         ];
-    }
-
-    public static function default( int $uid ): stdClass {
-
-        $default       = new stdClass();
-        $default->id   = 0;
-        $default->uid  = $uid;
-        $default->name = "default";
-
-        $default->xml           = Xml::default();
-        $default->yaml          = Yaml::default();
-        $default->json          = Json::default();
-        $default->ms_word       = MSWord::default();
-        $default->ms_excel      = MSExcel::default();
-        $default->ms_powerpoint = MSPowerpoint::default();
-        $default->created_at    = date( "Y-m-d H:i:s" );
-        $default->modified_at   = date( "Y-m-d H:i:s" );
-
-        return $default;
-
     }
 
 }

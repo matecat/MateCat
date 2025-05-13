@@ -1,60 +1,93 @@
-import React, {Component} from 'react'
-import TooltipInfo from '../TooltipInfo/TooltipInfo.component'
+import React, {Component, createRef} from 'react'
+import Tooltip from '../../common/Tooltip'
+import {tagSignatures} from '../utils/DraftMatecatUtils/tagModel'
+import TEXT_UTILS from '../../../utils/textUtils'
 
 class QaCheckBlacklistHighlight extends Component {
   constructor(props) {
     super(props)
-    this.state = {
-      showTooltip: false,
-    }
-    this.tooltipDelay
+    this.contentRef = createRef()
   }
-  tooltipToggle = () => {
-    // this will trigger a rerender in the main Editor Component
-    clearTimeout(this.tooltipDelay)
-    this.tooltipDelay = setTimeout(() => {
-      this.setState({
-        showTooltip: true,
-      })
-    }, 400)
-  }
-  removeTooltip = () => {
-    clearTimeout(this.tooltipDelay)
-    this.setState({
-      showTooltip: false,
-    })
-  }
-  render() {
-    const {children} = this.props
-    const {showTooltip} = this.state
+  getTermDetails = () => {
+    const {contentState, blackListedTerms, start, end, children} = this.props
+    if (tagSignatures.space) {
+      const fakeContentBlock = {
+        getText: () => contentState.getPlainText(),
+        getEntityAt: () => false,
+      }
 
-    const text = children[0].props.text
-    const term = this.props.blackListedTerms.find(
-      ({matching_words: matchingWords}) =>
+      const matches = blackListedTerms
+        .reduce(
+          (acc, {matching_words}) => [
+            ...acc,
+            ...matching_words.map((words) =>
+              tagSignatures.space
+                ? words.replace(
+                    tagSignatures.space.regex,
+                    '​' + tagSignatures.space.placeholder + '​',
+                  )
+                : words,
+            ),
+          ],
+          [],
+        )
+        .sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? 1 : -1)) // Order words alphabetically descending to prioritize composite terms ex. ['Guest favorite', 'guest']
+
+      if (matches.length) {
+        const {regex, regexCallback} = TEXT_UTILS.getGlossaryMatchRegex(matches)
+        let result
+        const callback = (startB, endB) => {
+          const words = fakeContentBlock
+            .getText()
+            .substring(startB, endB)
+            .replace(
+              new RegExp('​' + tagSignatures.space.placeholder + '​'),
+              ' ',
+            )
+
+          if (startB === start || endB === end) {
+            result = blackListedTerms.find(({matching_words: matchingWords}) =>
+              matchingWords.find(
+                (value) => value.toLowerCase() === words.toLowerCase(),
+              ),
+            )
+          }
+        }
+        regexCallback(regex, fakeContentBlock, callback)
+        return result
+      }
+    } else {
+      const text = children[0].props.text.trim()
+      const result = blackListedTerms.find(({matching_words: matchingWords}) =>
         matchingWords.find(
           (value) => value.toLowerCase() === text.toLowerCase(),
         ),
-    )
-    const {source, target} = term
+      )
+      return result
+    }
+  }
+  render() {
+    const {children} = this.props
+
+    const term = this.getTermDetails()
+
+    const {source, target} = term || {}
 
     return (
-      <div className="blacklistItem">
-        {showTooltip && (
-          <TooltipInfo
-            text={
-              source.term
-                ? `${target.term} is flagged as a forbidden translation for ${source.term}`
-                : `${target.term} is flagged as a forbidden word`
-            }
-          />
-        )}
-        <span
-          onMouseEnter={() => this.tooltipToggle()}
-          onMouseLeave={() => this.removeTooltip()}
+      term && (
+        <Tooltip
+          stylePointerElement={{display: 'inline-block', position: 'relative'}}
+          content={
+            source.term
+              ? `${target.term} is flagged as a forbidden translation for ${source.term}`
+              : `${target.term} is flagged as a forbidden word`
+          }
         >
-          {children}
-        </span>
-      </div>
+          <div ref={this.contentRef} className="blacklistItem">
+            <span>{children}</span>
+          </div>
+        </Tooltip>
+      )
     )
   }
 }

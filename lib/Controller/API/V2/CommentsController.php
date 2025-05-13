@@ -10,47 +10,46 @@ namespace API\V2;
 
 
 use API\Commons\Validators\ChunkPasswordValidator;
-use API\V2\Json\SegmentComment;
-use Chunks_ChunkStruct;
+use API\Commons\Validators\LoginValidator;
 use Comments_CommentDao;
+use Exception;
+use Jobs_JobStruct;
 
 class CommentsController extends BaseChunkController {
 
     /**
-     * @var Chunks_ChunkStruct
-     */
-    protected $chunk;
-
-    /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( Jobs_JobStruct $chunk ): CommentsController {
         $this->chunk = $chunk;
 
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function index() {
 
         $this->return404IfTheJobWasDeleted();
 
-        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, array(
-            'from_id' => $this->request->param( 'from_id' )
-        ));
+        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, [
+                'from_id' => $this->request->param( 'from_id' )
+        ] );
 
-        $formatted = new SegmentComment( $comments ) ;
-        $this->response->json( array('comments' => $formatted->render() ) ) ;
+        $this->response->json( [ 'comments' => $comments ] );
     }
 
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Validator  = new ChunkPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

@@ -1,5 +1,5 @@
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {isUndefined} from 'lodash'
 
 import TextUtils from '../../utils/textUtils'
@@ -157,8 +157,8 @@ class SegmentFooterMultiMatches extends React.Component {
         !isUndefined(this.props.segment.cl_contributions)) &&
         ((!isUndefined(nextProps.segment.cl_contributions) &&
           isUndefined(this.props.segment.cl_contributions)) ||
-          !Immutable.fromJS(this.props.segment.cl_contributions).equals(
-            Immutable.fromJS(nextProps.segment.cl_contributions),
+          !fromJS(this.props.segment.cl_contributions).equals(
+            fromJS(nextProps.segment.cl_contributions),
           ))) ||
       this.props.active_class !== nextProps.active_class ||
       this.props.tab_class !== nextProps.tab_class
@@ -255,7 +255,7 @@ class SegmentFooterMultiMatches extends React.Component {
             )}
           </div>
         ) : (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         )}
       </div>
     )

@@ -12,8 +12,6 @@
     },
  */
 
-import {SPACE_PLACEHOLDER_STORAGE_KEY} from '../../../../constants/Constants'
-
 const tagSignaturesMap = {
   ph: {
     type: 'ph',
@@ -254,11 +252,7 @@ const tagSignaturesMiddleware = (() => {
 })()
 
 const setTagSignatureMiddleware = tagSignaturesMiddleware.set
-// check space placeholder is active on init
-setTagSignatureMiddleware(
-  'space',
-  () => window.localStorage.getItem(SPACE_PLACEHOLDER_STORAGE_KEY) === 'true',
-)
+
 const tagSignatures = new Proxy(tagSignaturesMap, {
   getOwnPropertyDescriptor(target, prop) {
     const value = tagSignaturesMiddleware.callbacks[prop]?.(target[prop])
@@ -276,6 +270,11 @@ const tagSignatures = new Proxy(tagSignaturesMap, {
     return typeof value === 'object' ? value : target[prop]
   },
 })
+
+const initTagSignature = ({show_whitespace}) => {
+  // check space placeholder is active on init
+  setTagSignatureMiddleware('space', () => show_whitespace === 1)
+}
 
 function TagStruct(offset = -1, length = 0, type = null, name = null) {
   this.offset = offset
@@ -400,4 +399,5 @@ export {
   isToReplaceForLexiqa,
   getTagSignature,
   setTagSignatureMiddleware,
+  initTagSignature,
 }

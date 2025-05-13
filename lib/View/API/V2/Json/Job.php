@@ -12,12 +12,12 @@ namespace API\V2\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
-use Langs_LanguageDomains;
-use Langs_Languages;
+use Jobs_JobStruct;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
 use OutsourceTo_OutsourceAvailable;
@@ -81,11 +81,11 @@ class Job {
     }
 
     /**
-     * @param Chunks_ChunkStruct $jStruct
+     * @param Jobs_JobStruct $jStruct
      *
      * @return array
      */
-    protected function getKeyList( Chunks_ChunkStruct $jStruct ) {
+    protected function getKeyList( Jobs_JobStruct $jStruct ) {
 
         if ( empty( $this->user ) ) {
             return [];
@@ -102,7 +102,7 @@ class Job {
     }
 
     /**
-     * @param                         $chunk Chunks_ChunkStruct
+     * @param                         $chunk Jobs_JobStruct
      *
      * @param Projects_ProjectStruct  $project
      * @param FeatureSet              $featureSet
@@ -110,7 +110,7 @@ class Job {
      * @return array
      * @throws Exception
      */
-    public function renderItem( Chunks_ChunkStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
 
         $outsourceInfo = $chunk->getOutsource();
         $tStruct       = $chunk->getTranslator();
@@ -124,12 +124,12 @@ class Job {
 
         $jobStats = WordCountStruct::loadFromJob( $chunk );
 
-        $lang_handler = Langs_Languages::getInstance();
+        $lang_handler = Languages::getInstance();
 
-        $subject_handler = Langs_LanguageDomains::getInstance();
+        $subject_handler = LanguageDomains::getInstance();
         $subjectsHashMap = $subject_handler->getEnabledHashMap();
 
-        $warningsCount   = $chunk->getWarningsCount();
+        $warningsCount = $chunk->getWarningsCount();
 
         // Added 5 minutes cache here
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $chunk, 60 * 5 );

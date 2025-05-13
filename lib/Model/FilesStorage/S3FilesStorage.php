@@ -42,7 +42,6 @@ class S3FilesStorage extends AbstractFilesStorage {
     const QUEUE_FOLDER           = 'queue-projects';
     const ZIP_FOLDER             = 'originalZip';
     const FAST_ANALYSIS_FOLDER   = 'fast-analysis';
-    const OBJECTS_SAFE_DELIMITER = '__';
 
     /**
      * @var Client
@@ -463,29 +462,34 @@ class S3FilesStorage extends AbstractFilesStorage {
                         new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
-            // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
-            $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
 
-            // Example: aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT --> aad03b600bc4792b3dc4bf3a2d7191327a482d4a__it-IT
-            $subPathName = str_replace( '|', self::OBJECTS_SAFE_DELIMITER, $iterator->getSubPathName() );
+            if ( !$item->isDir() ) {
 
-            $key = $prefix . DIRECTORY_SEPARATOR . $subPathName;
+                $subPathName = $iterator->getSubPathName();
 
-            if ( $item->isDir() ) {
-                // create folder
-                $s3Client->createFolder( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $key ] );
-            } else {
+                // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
+                $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
+
+                if ( stripos( $subPathName, "|" ) !== false ) {
+                    // Example: aad03b600_3dc4bf3a2d|it-IT → abc12de006__it-IT - where abc12de006 == sha1(aad03b600_3dc4bf3a2d|it-IT)
+                    $short_hash  = sha1( $iterator->getSubPathName() );
+                    $pathParts   = explode( "|", $iterator->getSubPathName() );
+                    $lang        = array_pop( $pathParts );
+                    $subPathName = $short_hash . self::OBJECTS_SAFE_DELIMITER . $lang;
+                }
+
+                $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
 
                 // upload file
                 $s3Client->uploadItem( [
                         'bucket' => static::$FILES_STORAGE_BUCKET,
-                        'key'    => $key,
+                        'key'    => $subPathName,
                         'source' => $item->getPathName()
                 ] );
 
                 // save on redis the hash map files
-                if ( strpos( $key, '.' ) === false ) {
-                    $hasSet[ $key ] = file( $item->getPathname(), FILE_IGNORE_NEW_LINES );
+                if ( strpos( $subPathName, '.' ) === false ) {
+                    $hasSet[ $subPathName ] = file( $item->getPathname(), FILE_IGNORE_NEW_LINES );
                 }
 
             }

@@ -26,6 +26,7 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   haveKeysGlossary: undefined,
   jobMetadata: undefined,
   _projectProgress: undefined,
+  _currentProjectTemplate: undefined,
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -121,6 +122,12 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   emitChange: function () {
     this.emit.apply(this, arguments)
   },
+  getCurrentProjectTemplate() {
+    return this._currentProjectTemplate
+  },
+  setCurrentProjectTemplate: function (currentProjectTemplate) {
+    this._currentProjectTemplate = currentProjectTemplate
+  },
 })
 
 // Register callback to handle all updates
@@ -150,9 +157,6 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.RELOAD_SEGMENT_FILTER:
       CatToolStore.emitChange(CatToolConstants.RELOAD_SEGMENT_FILTER)
-      break
-    case CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP:
-      CatToolStore.emitChange(CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP)
       break
     case CatToolConstants.STORE_FILES_INFO:
       CatToolStore.storeFilesInfo(action.files)
@@ -211,6 +215,8 @@ AppDispatcher.register(function (action) {
         style,
         onCloseCallback,
         isCloseButtonDisabled,
+        showHeader,
+        styleBody,
       } = action
       CatToolStore.emitChange(
         ModalsConstants.SHOW_MODAL,
@@ -219,6 +225,8 @@ AppDispatcher.register(function (action) {
         title,
         style,
         onCloseCallback,
+        showHeader,
+        styleBody,
         isCloseButtonDisabled,
       )
       break
@@ -247,12 +255,6 @@ AppDispatcher.register(function (action) {
         ...action,
       })
       break
-    case CatToolConstants.ON_TM_KEYS_CHANGE_STATUS:
-      CatToolActions.retrieveJobKeys(true)
-      CatToolStore.emitChange(CatToolConstants.ON_TM_KEYS_CHANGE_STATUS, {
-        ...action,
-      })
-      break
     case CatToolConstants.HAVE_KEYS_GLOSSARY:
       CatToolStore.setHaveKeysGlossary(action.value)
       CatToolStore.emitChange(CatToolConstants.HAVE_KEYS_GLOSSARY, {
@@ -267,6 +269,11 @@ AppDispatcher.register(function (action) {
       break
     case CatToolConstants.GET_JOB_METADATA:
       CatToolStore.emitChange(CatToolConstants.GET_JOB_METADATA, {
+        ...action,
+      })
+      break
+    case CatToolConstants.SEGMENT_FILTER_ERROR:
+      CatToolStore.emitChange(CatToolConstants.SEGMENT_FILTER_ERROR, {
         ...action,
       })
       break

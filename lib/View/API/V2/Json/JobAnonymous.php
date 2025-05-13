@@ -10,13 +10,14 @@
 namespace API\V2\Json;
 
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use Users_UserStruct;
 
 class JobAnonymous extends Job {
 
     /**
      * @param Users_UserStruct|null $user
+     *
      * @return $this|Job
      */
     public function setUser( Users_UserStruct $user = null ) {
@@ -33,7 +34,7 @@ class JobAnonymous extends Job {
     }
 
     /**
-     * @param                         $chunk Chunks_ChunkStruct
+     * @param                         $chunk Jobs_JobStruct
      *
      * @param \Projects_ProjectStruct $project
      * @param \FeatureSet             $featureSet
@@ -41,7 +42,7 @@ class JobAnonymous extends Job {
      * @return array
      * @throws \Exception
      */
-    public function renderItem( Chunks_ChunkStruct $chunk, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
 
         $jobJson = parent::renderItem( $chunk, $project, $featureSet );
 

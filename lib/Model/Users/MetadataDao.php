@@ -4,35 +4,36 @@ namespace Users;
 
 use Database;
 use PDO;
+use ReflectionException;
 
 class MetadataDao extends \DataAccess_AbstractDao {
 
-    const TABLE = 'user_metadata' ;
+    const TABLE = 'user_metadata';
 
     const _query_metadata_by_uid_key = "SELECT * FROM user_metadata WHERE uid = :uid AND `key` = :key ";
 
-    public function getAllByUidList( Array $UIDs ) {
+    public function getAllByUidList( array $UIDs ) {
 
-        if( empty( $UIDs ) ){
+        if ( empty( $UIDs ) ) {
             return [];
         }
 
         $stmt = $this->_getStatementForQuery(
-                "SELECT * FROM user_metadata WHERE " .
-                " uid IN( " . str_repeat( '?,', count( $UIDs ) - 1 ) . '?' . " ) "
+            "SELECT * FROM user_metadata WHERE " .
+            " uid IN( " . str_repeat( '?,', count( $UIDs ) - 1 ) . '?' . " ) "
         );
 
         /**
          * @var $rs MetadataStruct[]
          */
         $rs = $this->_fetchObject(
-                $stmt,
-                new MetadataStruct(),
-                $UIDs
+            $stmt,
+            new MetadataStruct(),
+            $UIDs
         );
 
         $resultSet = [];
-        foreach( $rs as $metaDataRow ){
+        foreach ( $rs as $metaDataRow ) {
             $resultSet[ $metaDataRow->uid ][] = $metaDataRow;
         }
 
@@ -46,28 +47,32 @@ class MetadataDao extends \DataAccess_AbstractDao {
             "SELECT * FROM user_metadata WHERE " .
             " uid = :uid "
         );
-        $stmt->execute( array( 'uid' => $uid ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users\MetadataStruct');
+        $stmt->execute( [ 'uid' => $uid ] );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users\MetadataStruct' );
+
         return $stmt->fetchAll();
     }
+
     /**
      * @param $uid
      * @param $key
      *
      * @return MetadataStruct
+     * @throws ReflectionException
      */
-  public function get( $uid, $key ) {
-      $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
-      $result = $this->_fetchObject( $stmt, new MetadataStruct(), [
-              'uid' => $uid,
-              'key' => $key
-      ] );
-      return @$result[0];
-  }
+    public function get( $uid, $key ): ?MetadataStruct {
+        $stmt   = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
+        /** @var $result MetadataStruct */
+        $result = $this->_fetchObject( $stmt, new MetadataStruct(), [
+            'uid' => $uid,
+            'key' => $key
+        ] );
+        return $result[ 0 ] ?? null;
+    }
 
   public function destroyCacheKey( $uid, $key ){
       $stmt = $this->_getStatementForQuery( self::_query_metadata_by_uid_key );
-      return $this->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'key' => $key ] );
+      return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'uid' => $uid, 'key' => $key ] );
   }
 
     /**
@@ -77,53 +82,53 @@ class MetadataDao extends \DataAccess_AbstractDao {
      *
      * @return MetadataStruct
      */
-  public function set($uid, $key, $value) {
-      $sql  = "INSERT INTO user_metadata " .
-              " ( uid, `key`, value ) " .
-              " VALUES " .
-              " ( :uid, :key, :value ) " .
-              " ON DUPLICATE KEY UPDATE value = :value ";
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare( $sql );
-      $stmt->execute( array(
-              'uid'   => $uid,
-              'key'   => $key,
-              'value' => $value
-      ) );
+    public function set( $uid, $key, $value ) {
+        $sql  = "INSERT INTO user_metadata " .
+            " ( uid, `key`, value ) " .
+            " VALUES " .
+            " ( :uid, :key, :value ) " .
+            " ON DUPLICATE KEY UPDATE value = :value ";
 
-      $this->destroyCacheKey( $uid, $key );
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+            'uid'   => $uid,
+            'key'   => $key,
+            'value' => (is_array($value)) ? serialize($value) : $value,
+        ] );
 
-      return new MetadataStruct( [
-              'id'    => $conn->lastInsertId(),
-              'uid'   => $uid,
-              'key'   => $key,
-              'value' => $value
-      ] );
+        $this->destroyCacheKey( $uid, $key );
 
-  }
+        return new MetadataStruct( [
+            'id'    => $conn->lastInsertId(),
+            'uid'   => $uid,
+            'key'   => $key,
+            'value' => $value
+        ] );
+
+    }
 
 
     /**
-     * @param int $uid
+     * @param int    $uid
      * @param string $key
      */
-  public function delete($uid, $key) {
-      $sql = "DELETE FROM user_metadata " .
-          " WHERE uid = :uid " .
-          " AND `key` = :key "  ;
+    public function delete( $uid, $key ) {
+        $sql = "DELETE FROM user_metadata " .
+            " WHERE uid = :uid " .
+            " AND `key` = :key ";
 
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(  $sql );
-      $stmt->execute( array(
-          'uid' => $uid,
-          'key' => $key,
-      ) );
-      $this->destroyCacheKey( $uid, $key );
-  }
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( [
+            'uid' => $uid,
+            'key' => $key,
+        ] );
+        $this->destroyCacheKey( $uid, $key );
+    }
 
-  protected function _buildResult($array_result)
-  {
-      // TODO: Implement _buildResult() method.
-  }
+    protected function _buildResult( array $array_result ) {
+        // TODO: Implement _buildResult() method.
+    }
 
 }

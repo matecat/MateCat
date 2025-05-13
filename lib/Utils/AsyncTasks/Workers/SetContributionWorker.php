@@ -12,7 +12,6 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Engines_EngineInterface;
-use Engines_NONE;
 use Exception;
 use Exceptions\ValidationError;
 use Jobs_JobStruct;
@@ -84,6 +83,13 @@ class SetContributionWorker extends AbstractWorker {
 
         $this->_loadEngine( $jobStruct );
 
+        /**
+         * @see Engines_AbstractEngine::$_isAdaptiveMT
+         */
+        if ( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ) {
+            return;
+        }
+
         $config             = $this->_engine->getConfigStruct();
         $config[ 'source' ] = $jobStruct->source;
         $config[ 'target' ] = $jobStruct->target;
@@ -114,7 +120,7 @@ class SetContributionWorker extends AbstractWorker {
      */
     protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
 
-        if ( empty( $this->_engine ) ) {
+        if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
@@ -176,6 +182,7 @@ class SetContributionWorker extends AbstractWorker {
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
+        $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
 
         $this->_doLog( "Executing Update on " . get_class( $this->_engine ) );
         $res = $this->_engine->update( $config );

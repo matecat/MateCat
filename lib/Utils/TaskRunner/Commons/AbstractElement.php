@@ -8,6 +8,7 @@
  */
 
 namespace TaskRunner\Commons;
+
 use ArrayAccess;
 use DomainException;
 use stdClass;
@@ -26,10 +27,10 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      *
      * @param array $array_params
      */
-    public function __construct( Array $array_params = array() ) {
+    public function __construct( array $array_params = [] ) {
         if ( $array_params != null ) {
             foreach ( $array_params as $property => $value ) {
-                if( is_array( $value ) ){
+                if ( is_array( $value ) ) {
                     $value = new Params( $value );
                 }
                 $this->$property = $value;
@@ -48,21 +49,13 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
     }
 
     /**
-     * Object to Array conversion method
-     * @return array
-     */
-    public function toArray(){
-        return (array)$this;
-    }
-
-    /**
      * ArrayAccess interface implementation
      *
      * @param mixed $offset
      *
      * @return bool
      */
-    public function offsetExists( $offset ) {
+    public function offsetExists( $offset ): bool {
         return property_exists( $this, $offset );
     }
 
@@ -74,7 +67,10 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      * @return null
      */
     public function offsetGet( $offset ) {
-        if( $this->offsetExists( $offset ) ) return $this->$offset;
+        if ( $this->offsetExists( $offset ) ) {
+            return $this->$offset;
+        }
+
         return null;
     }
 
@@ -85,7 +81,9 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      * @param mixed $value
      */
     public function offsetSet( $offset, $value ) {
-        if( $this->offsetExists( $offset ) ) $this->$offset = $value;
+        if ( $this->offsetExists( $offset ) ) {
+            $this->$offset = $value;
+        }
     }
 
     /**
@@ -94,7 +92,25 @@ abstract class AbstractElement extends stdClass implements ArrayAccess {
      * @param mixed $offset
      */
     public function offsetUnset( $offset ) {
-        if( $this->offsetExists( $offset ) ) $this->$offset = null;
+        if ( $this->offsetExists( $offset ) ) {
+            $this->$offset = null;
+        }
+    }
+
+    /**
+     * Recursive Object to Array conversion method
+     */
+    public function toArray(): array {
+        $nestedParamsObject = [];
+        foreach ( $this as $key => $item ) {
+            if ( $item instanceof AbstractElement ) {
+                $nestedParamsObject[ $key ] = $item->toArray();
+            } else {
+                $nestedParamsObject[ $key ] = $item;
+            }
+        }
+
+        return $nestedParamsObject;
     }
 
 }

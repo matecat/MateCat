@@ -18,21 +18,23 @@ export const updateJobKeys = async ({
   getPublicMatches,
   dataTm,
 }) => {
-  const paramsData = {
+  const paramsData = Object.entries({
     action: 'updateJobKeys',
     job_id: idJob,
     job_pass: password,
     get_public_matches: getPublicMatches,
     data: dataTm,
     current_password: currentPassword,
-  }
+  })
+    .filter(([, value]) => typeof value !== 'undefined')
+    .reduce((acc, [key, value]) => ({...acc, [key]: value}), {})
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/update-job-keys`,
     {
       method: 'POST',
       body: formData,

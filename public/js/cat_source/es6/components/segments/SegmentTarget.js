@@ -10,6 +10,23 @@ import SegmentWarnings from './SegmentWarnings'
 import SegmentActions from '../../actions/SegmentActions'
 import {SegmentContext} from './SegmentContext'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {
+  removeTagsFromText,
+  textHasTags,
+} from './utils/DraftMatecatUtils/tagUtils'
+import {Button, BUTTON_MODE, BUTTON_SIZE} from '../common/Button/Button'
+import RemoveTagsIcon from '../../../../../img/icons/RemoveTagsIcon'
+import AddTagsIcon from '../../../../../img/icons/AddTagsIcon'
+import UpperCaseIcon from '../../../../../img/icons/UpperCaseIcon'
+import LowerCaseIcon from '../../../../../img/icons/LowerCaseIcon'
+import CapitalizeIcon from '../../../../../img/icons/CapitalizeIcon'
+import QualityReportIcon from '../../../../../img/icons/QualityReportIcon'
+import ReviseLockIcon from '../../../../../img/icons/ReviseLockIcon'
+import OfflineUtils from '../../utils/offlineUtils'
+import SegmentUtils from '../../utils/segmentUtils'
+import CatToolStore from '../../stores/CatToolStore'
+import {Shortcuts} from '../../utils/shortcuts'
+import {UseHotKeysComponent} from '../../hooks/UseHotKeysComponent'
 
 class SegmentTarget extends React.Component {
   static contextType = SegmentContext
@@ -19,6 +36,7 @@ class SegmentTarget extends React.Component {
     this.state = {
       showFormatMenu: false,
       charactersCounter: 0,
+      segmentCharacters: 0,
       charactersCounterLimit: undefined,
     }
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
@@ -86,6 +104,11 @@ class SegmentTarget extends React.Component {
     return issues
   }
 
+  removeTagsFromText() {
+    const cleanText = removeTagsFromText(this.props.segment.translation)
+    SegmentActions.replaceEditAreaTextContent(this.props.segment.sid, cleanText)
+  }
+
   getTargetArea(translation) {
     const {segment} = this.context
     const {showFormatMenu} = this.state
@@ -123,20 +146,23 @@ class SegmentTarget extends React.Component {
           </div>
           <div className="toolbar">
             {config.isReview ? (
-              <a
-                href="#"
-                className="revise-lock-editArea active"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
-              />
+                className="revise-lock-editArea-active"
+              >
+                <ReviseLockIcon />
+              </Button>
             ) : null}
           </div>
         </div>
       )
     } else {
-      var s2tMicro = ''
-      var tagModeButton = ''
-      var tagCopyButton = ''
+      let tagCopyButton,
+        removeTagsButton,
+        s2tMicro = ''
 
       //Speeche2Text
       var s2t_enabled = this.context.speech2textEnabledFn()
@@ -169,22 +195,67 @@ class SegmentTarget extends React.Component {
           </div>
         )
       }
-
-      // Todo: aggiungere la classe 'hasTagsAutofill' alla <section> del segmento permetteva al tasto di mostrarsi riga 3844 del file style.scss
+      if (textHasTags(translation)) {
+        removeTagsButton = (
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.removeTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.removeTagsFromText.bind(this)}
+            />
+            <Button
+              className="removeAllTags"
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Remove all tags"
+              title="Remove all tags"
+              onClick={this.removeTagsFromText.bind(this)}
+            >
+              <RemoveTagsIcon />
+            </Button>
+          </>
+        )
+      }
       if (
         segment.missingTagsInTarget &&
         segment.missingTagsInTarget.length > 0 &&
         this.editArea
       ) {
         tagCopyButton = (
-          <a
-            className="autofillTag"
-            alt="Copy missing tags from source to target"
-            title="Copy missing tags from source to target"
-            onClick={this.editArea.addMissingSourceTagsToTarget}
-          />
+          <>
+            <UseHotKeysComponent
+              shortcut={
+                Shortcuts.cattol.events.addTags.keystrokes[
+                  Shortcuts.shortCutsKeyType
+                ]
+              }
+              callback={this.editArea.addMissingSourceTagsToTarget}
+            />
+            <Button
+              size={BUTTON_SIZE.ICON_SMALL}
+              mode={BUTTON_MODE.OUTLINE}
+              alt="Copy missing tags from source to target"
+              title="Copy missing tags from source to target"
+              onClick={this.editArea.addMissingSourceTagsToTarget}
+            >
+              <AddTagsIcon />
+            </Button>
+          </>
         )
       }
+
+      const qrLink =
+        '/revise-summary/' +
+        config.id_job +
+        '-' +
+        config.password +
+        '?revision_type=' +
+        (config.revisionNumber ? config.revisionNumber : 1) +
+        '&id_segment=' +
+        this.props.segment.sid
 
       //Text Area
       textAreaContainer = (
@@ -199,36 +270,29 @@ class SegmentTarget extends React.Component {
           {s2tMicro}
           <div className="toolbar">
             {config.isReview ? (
-              <a
-                href="#"
-                className="revise-lock-editArea"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onClick={this.lockEditArea.bind(this)}
                 title="Highlight text and assign an issue to the selected text."
-              />
+              >
+                <ReviseLockIcon />
+              </Button>
             ) : null}
             {issues.length > 0 || config.isReview ? (
-              <a
-                className="revise-qr-link"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 title="Segment Quality Report."
                 target="_blank"
-                rel="noreferrer"
-                href={
-                  '/revise-summary/' +
-                  config.id_job +
-                  '-' +
-                  config.password +
-                  '?revision_type=' +
-                  (config.revisionNumber ? config.revisionNumber : 1) +
-                  '&id_segment=' +
-                  this.props.segment.sid
-                }
+                onClick={() => window.open(qrLink, '_blank')}
               >
-                QR
-              </a>
+                <QualityReportIcon />
+              </Button>
             ) : null}
-            {tagModeButton}
+            {removeTagsButton}
             {tagCopyButton}
-            <ul
+            <div
               className="editToolbar"
               style={
                 showFormatMenu
@@ -236,22 +300,31 @@ class SegmentTarget extends React.Component {
                   : {visibility: 'hidden'}
               }
             >
-              <li
-                className="uppercase"
-                title="Upper Case"
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('uppercase')}
-              />
-              <li
-                className="lowercase"
-                title="Lower Case"
+                title="Uppercase"
+              >
+                <UpperCaseIcon />
+              </Button>
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('lowercase')}
-              />
-              <li
-                className="capitalize"
-                title="Capitalize"
+                title="Lowercase"
+              >
+                <LowerCaseIcon />
+              </Button>
+              <Button
+                size={BUTTON_SIZE.ICON_SMALL}
+                mode={BUTTON_MODE.OUTLINE}
                 onMouseDown={() => this.editArea.formatSelection('capitalize')}
-              />
-            </ul>
+                title="Capitalize"
+              >
+                <CapitalizeIcon />
+              </Button>
+            </div>
           </div>
         </div>
       )
@@ -310,12 +383,14 @@ class SegmentTarget extends React.Component {
     // dispatch characterCounter action
     if (
       this.state.charactersCounterLimit !== prevState.charactersCounterLimit ||
-      this.state.charactersCounter !== prevState.charactersCounter
+      this.state.charactersCounter !== prevState.charactersCounter ||
+      this.state.segmentCharacters !== prevState.segmentCharacters
     ) {
       setTimeout(() => {
         SegmentActions.characterCounter({
           sid: this.props.segment.sid,
           counter: this.state.charactersCounter,
+          segmentCharacters: this.state.segmentCharacters,
           limit: this.state.charactersCounterLimit,
         })
       })
@@ -326,7 +401,11 @@ class SegmentTarget extends React.Component {
     let buttonsDisabled = false
     let translation = this.props.segment.translation
 
-    if (translation.trim().length === 0) {
+    if (
+      !translation ||
+      translation.trim().length === 0 ||
+      OfflineUtils.offlineCacheRemaining <= 0
+    ) {
       buttonsDisabled = true
     }
 
@@ -347,8 +426,17 @@ class SegmentTarget extends React.Component {
     )
   }
   updateCounter = (value) => {
+    const {segmentCharacters, unitCharacters} =
+      SegmentUtils.getRelativeTransUnitCharactersCounter({
+        sid: this.props.segment.sid,
+        charactersCounter: value,
+        shouldCountTagsAsChars:
+          CatToolStore.getCurrentProjectTemplate().characterCounterCountTags,
+      })
+
     this.setState({
-      charactersCounter: value,
+      charactersCounter: unitCharacters,
+      segmentCharacters,
     })
   }
   toggleFormatMenu = (show) => {

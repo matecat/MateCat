@@ -10,7 +10,7 @@ export const updateMemoryGlossary = async ({engineId, memoryId, name}) => {
     formData.append(key, params[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/update-memory/${memoryId}`,
+    `${getMatecatApiDomain()}api/v3/mmt/${engineId}/memory/update/${memoryId}`,
     {
       method: 'POST',
       credentials: 'include',

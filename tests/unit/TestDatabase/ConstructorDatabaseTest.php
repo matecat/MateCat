@@ -12,14 +12,14 @@ use TestHelpers\AbstractTest;
  */
 class ConstructorDatabaseTest extends AbstractTest {
 
-    protected $reflector;
+    protected ReflectionClass $reflector;
 
     public function setUp(): void {
         parent::setUp();
-        $this->jobDao = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->jobDao->close();
+        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance->close();
 
-        $this->reflector = new ReflectionClass( $this->jobDao );
+        $this->reflector = new ReflectionClass( $this->databaseInstance );
 
     }
 
@@ -38,11 +38,11 @@ class ConstructorDatabaseTest extends AbstractTest {
         // get the singleton static instance reference
         $property = $this->reflector->getProperty( 'instance' );
         $property->setAccessible( true );
-        $property->setValue( $this->jobDao, null ); // unset
+        $property->setValue( $this->databaseInstance, null ); // unset
 
-        $this->expectException( '\InvalidArgumentException' );
+        $this->expectException( TypeError::class );
 
-        $this->jobDao->obtain();
+        $this->databaseInstance->obtain();
 
 
     }

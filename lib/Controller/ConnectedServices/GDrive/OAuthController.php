@@ -8,35 +8,36 @@
 
 namespace ConnectedServices\GDrive;
 
+use API\Commons\AbstractStatefulKleinController;
 use ConnectedServices\GDriveUserAuthorizationModel;
+use Exception;
+use Exceptions\ValidationError;
 use INIT;
+use ReflectionException;
 
-class OAuthController extends \BaseKleinViewController
-{
+class OAuthController extends AbstractStatefulKleinController {
 
     /**
-     * @var \Users_UserStruct
+     * @throws ValidationError
      */
-    protected  $user ;
-
     public function response() {
 
-        // get the cod e from querystring
-        // use the code to ask for a token
-        // encrypt the token in database
+        if( empty( $this->request->param( 'state' ) ) || $_SESSION[ 'googledrive-' . INIT::$XSRF_TOKEN ] !== $this->request->param( 'state' ) ){
+            $this->response->code( 401 );
+            return;
+        }
 
-        // associated with the service....
+        unset( $_SESSION[ 'google-drive-' . INIT::$XSRF_TOKEN ] );
 
-        // TODO: ensure the user is logged in
-
-        // TODO: sanitize this
-        $code = $this->request->param( 'code' );
+        $code  = $this->request->param( 'code' );
         $error = $this->request->param( 'error' );
 
-        if ( isset($code) && $code ) {
-            $this->__handleCode( $code ) ;
-        } else if ( isset( $error ) ) {
-            $this->__handleError( $error );
+        if ( isset( $code ) && $code ) {
+            $this->__handleCode( $code );
+        } else {
+            if ( isset( $error ) ) {
+                $this->__handleError( $error );
+            }
         }
 
         $body =<<<EOF
@@ -50,21 +51,26 @@ EOF;
     }
 
     private function __handleError( $error ) {
-        // TODO:
+
     }
 
+    /**
+     * @throws ValidationError
+     * @throws ReflectionException
+     */
     private function __handleCode( $code ) {
         $model = new GDriveUserAuthorizationModel( $this->user );
-        $model->updateOrCreateRecordByCode( $code ) ;
+        $model->updateOrCreateRecordByCode( $code );
+        $this->refreshClientSessionIfNotApi();
     }
 
+    /**
+     * @throws Exception
+     */
     protected function afterConstruct() {
-
         if ( !$this->user ) {
-            throw  new \Exception('Logged user not found.') ;
+            throw new Exception( 'Logged user not found.' );
         }
-
-        $this->setView( INIT::$TEMPLATE_ROOT . '/ConnectedServices/gdrive_oauth.html');
-
     }
+
 }

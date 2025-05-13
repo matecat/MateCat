@@ -6,23 +6,27 @@
  * @param {string} source_lang
  * @param {string} target_lang
  * @param {string} segmentation_rule
+ * @param filters_extraction_parameters_template_id
  * @param {AbortController} signal
+ * @param restartedConversion
  * @returns {Promise<object>}
  */
 export const convertFileRequest = async ({
-  action,
   file_name,
   source_lang,
   target_lang,
   segmentation_rule,
-  signal,
+  filters_extraction_parameters_template_id,
+  restarted_conversion,
 }) => {
   const dataParams = {
-    action,
+    action: 'convertFile',
     file_name,
     source_lang,
     target_lang,
     segmentation_rule,
+    filters_extraction_parameters_template_id,
+    restarted_conversion,
   }
   const formData = new FormData()
 
@@ -30,10 +34,9 @@ export const convertFileRequest = async ({
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
 
-  const response = await fetch(`action/convertFile/`, {
+  const response = await fetch(`api/app/convert-file`, {
     method: 'POST',
     credentials: 'include',
-    signal: signal,
     body: formData,
   })
 

@@ -2,7 +2,7 @@ import {render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import JobMenu from './JobMenu'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../../../mocks/mswServer'
 import ProjectsStore from '../../stores/ProjectsStore'
@@ -100,7 +100,7 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, props} = fakeProperties
-  const project = Immutable.fromJS(data)
+  const project = fromJS(data)
   const jobs = project.get('jobs')
   const job = jobs.first()
 
@@ -115,11 +115,14 @@ const getFakeProperties = (fakeProperties) => {
       status: job.get('status'),
       job,
       project,
-      getDownloadLabel: (
-        <a className="item">
-          <i className="icon-eye icon" /> Draft
-        </a>
-      ),
+      getDownloadLabel: {
+        label: (
+          <>
+            <i className="icon-eye icon" /> Draft
+          </>
+        ),
+        action: () => {},
+      },
       openSplitModalFn: () => {},
       openMergeModalFn: () => {},
       changePasswordFn: () => {},
@@ -152,14 +155,22 @@ const getRevise2Url = (project, job) => {
     .get(1)
     .get('password')}`
 }
-
-test('Rendering elements', () => {
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+beforeAll(() => {
+  window.ResizeObserver = ResizeObserver
+  return (window.open = jest.fn())
+})
+test('Rendering elements', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
-
+  await userEvent.click(screen.getByTestId('job-menu-button'))
   expect(screen.getByText('Change Password')).toBeInTheDocument()
   expect(screen.getByText('Split')).toBeInTheDocument()
-  expect(screen.getByTestId('revise-item')).toHaveTextContent('Revise')
+  expect(screen.getByText('Revise')).toBeInTheDocument()
   expect(screen.getByText('Generate Revise 2')).toBeInTheDocument()
   expect(screen.getByText('QA Report')).toBeInTheDocument()
   expect(screen.getByText('Draft')).toBeInTheDocument()
@@ -170,13 +181,13 @@ test('Rendering elements', () => {
   expect(screen.getByText('Cancel job')).toBeInTheDocument()
 })
 
-test('Items are enabled', () => {
+test('Items are enabled', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
-
+  await userEvent.click(screen.getByTestId('job-menu-button'))
   expect(screen.getByText('Change Password')).toBeEnabled()
   expect(screen.getByText('Split')).toBeEnabled()
-  expect(screen.getByTestId('revise-item')).toBeEnabled()
+  expect(screen.getByText('Revise')).toBeEnabled()
   expect(screen.getByText('Generate Revise 2')).toBeEnabled()
   expect(screen.getByText('QA Report')).toBeEnabled()
   expect(screen.getByText('Draft')).toBeEnabled()
@@ -188,53 +199,69 @@ test('Items are enabled', () => {
 })
 
 // TODO: Da verificare errore sulla libreria semantic
-test.skip('Change password dropdown menu', () => {
+test.skip('Change password dropdown menu', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
-
-  userEvent.click(screen.getByText('Change Password'))
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  await userEvent.click(screen.getByText('Change Password'))
   expect(screen.getByTestId('change-password-submenu')).toBeVisible()
 })
 
-test('Check items href link', () => {
+test('Check items href link', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobWithoutActivity)
   render(<JobMenu {...props} />)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
 
-  const reviseHref = screen.getByTestId('revise-item').getAttribute('href')
-  expect(reviseHref).toBe(props.reviseUrl)
+  const reviseHref = screen.getByText('Revise')
+  await userEvent.click(reviseHref)
+  expect(window.open).toHaveBeenCalledTimes(1)
+  expect(window.open).toHaveBeenCalledWith(props.reviseUrl, '_blank')
 
-  const qaReportHref = screen.getByText('QA Report').getAttribute('href')
-  expect(qaReportHref).toBe(props.qAReportUrl)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  const qaReportHref = screen.getByText('QA Report')
+  await userEvent.click(qaReportHref)
+  expect(window.open).toHaveBeenCalledTimes(2)
+  expect(window.open).toHaveBeenCalledWith(props.qAReportUrl, '_blank')
 
-  const downloadOriginaletHref = screen
-    .getByText('Download Original')
-    .getAttribute('href')
-  expect(downloadOriginaletHref).toBe(props.originalUrl)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  const downloadOriginaletHref = screen.getByText('Download Original')
+  await userEvent.click(downloadOriginaletHref)
+  expect(window.open).toHaveBeenCalledTimes(3)
+  expect(window.open).toHaveBeenCalledWith(props.originalUrl, '_blank')
 
-  const exportXLIFFtHref = screen.getByText('Export XLIFF').getAttribute('href')
-  expect(exportXLIFFtHref).toBe(props.exportXliffUrl)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  const exportXLIFFtHref = screen.getByText('Export XLIFF')
+  await userEvent.click(exportXLIFFtHref)
+  expect(window.open).toHaveBeenCalledTimes(4)
+  expect(window.open).toHaveBeenCalledWith(props.exportXliffUrl, '_blank')
 
-  const exportTMXtHref = screen.getByText('Export TMX').getAttribute('href')
-  expect(exportTMXtHref).toBe(props.jobTMXUrl)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  const exportTMXtHref = screen.getByText('Export TMX')
+  await userEvent.click(exportTMXtHref)
+  expect(window.open).toHaveBeenCalledTimes(5)
+  expect(window.open).toHaveBeenCalledWith(props.jobTMXUrl, '_blank')
 })
 
-test('Splitted job: check Merge item', () => {
+test('Splitted job: check Merge item', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobSplitted)
   render(<JobMenu {...props} />)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
 
   expect(screen.getByText('Merge')).toBeInTheDocument()
 })
 
-test('Archived job: check Unarchive job item', () => {
+test('Archived job: check Unarchive job item', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobArchived)
   render(<JobMenu {...props} />)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
 
   expect(screen.getByText('Unarchive job')).toBeInTheDocument()
 })
 
-test('Cancelled job: check Resume job item', () => {
+test('Cancelled job: check Resume job item', async () => {
   const {props} = getFakeProperties(fakeProjectsData.jobCancelled)
   render(<JobMenu {...props} />)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
 
   expect(screen.getByText('Resume job')).toBeInTheDocument()
 })
@@ -260,10 +287,10 @@ test('Generate revise 2: onClick flow', async () => {
     props: {...fakeProjectsData.jobGenerateRevise2.props},
   }
 
-  const onUpdate = (projects) => {
+  const onUpdate = async (projects) => {
     updatedData.data = JSON.parse(JSON.stringify(projects.first().toJS()))
     const {props} = getFakeProperties(updatedData)
-    render(<JobMenu {...props} />)
+    rerender(<JobMenu {...props} />)
 
     ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, onUpdate)
   }
@@ -272,14 +299,17 @@ test('Generate revise 2: onClick flow', async () => {
 
   // first render
   const {props} = getFakeProperties(fakeProjectsData.jobGenerateRevise2)
-  render(<JobMenu {...props} />)
+  const {rerender} = render(<JobMenu {...props} />)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
 
-  userEvent.click(screen.getByText('Generate Revise 2'))
-
-  await waitFor(() => {
-    expect(screen.getByText('Revise 2')).toBeInTheDocument()
-    const href = screen.getByText('Revise 2').getAttribute('href')
-    const {project, job} = getFakeProperties(updatedData)
-    expect(href).toBe(getRevise2Url(project, job))
-  })
+  await userEvent.click(screen.getByText('Generate Revise 2'))
+  const {project, job} = getFakeProperties(updatedData)
+  await userEvent.click(screen.getByTestId('job-menu-button'))
+  const revise2 = screen.getByText('Revise 2')
+  expect(revise2).toBeInTheDocument()
+  await userEvent.click(revise2)
+  expect(window.open).toHaveBeenCalledWith(
+    getRevise2Url(project, job),
+    '_blank',
+  )
 })

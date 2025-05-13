@@ -20,8 +20,6 @@ export const markAsResolvedThread = async ({
   password = config.password,
 }) => {
   const dataParams = {
-    action: 'comment',
-    _sub: 'resolve',
     id_job: idJob,
     id_segment: idSegment,
     username,
@@ -33,11 +31,14 @@ export const markAsResolvedThread = async ({
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=comment`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/comment/resolve`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

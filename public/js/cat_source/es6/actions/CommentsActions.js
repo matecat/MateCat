@@ -2,7 +2,7 @@ import AppDispatcher from '../stores/AppDispatcher'
 import CommentsConstants from '../constants/CommentsConstants'
 import {deleteComment} from '../api/deleteComment/deleteComment'
 import {submitComment as submitCommentApi} from '../api/submitComment'
-import TeamsStore from '../stores/TeamsStore'
+import UserStore from '../stores/UserStore'
 import {markAsResolvedThread} from '../api/markAsResolvedThread'
 
 const CommentsActions = {
@@ -13,25 +13,30 @@ const CommentsActions = {
       user: user,
     })
   },
-  sendComment: function (text, sid) {
+  sendComment: function (text, isAnonymous, sid) {
     return submitCommentApi({
       idSegment: sid,
-      username: TeamsStore.getUserName(),
+      username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
       message: text,
-    }).then((resp) => {
-      AppDispatcher.dispatch({
-        actionType: CommentsConstants.ADD_COMMENT,
-        comment: resp.data.entries[0],
-        sid: sid,
-      })
-      return resp
+      isAnonymous,
     })
+      .then((resp) => {
+        AppDispatcher.dispatch({
+          actionType: CommentsConstants.ADD_COMMENT,
+          comment: resp.data.entries.comment[0],
+          sid: sid,
+        })
+        return resp
+      })
+      .catch(() => {
+        // showGenericWarning();
+      })
   },
   resolveThread: function (sid) {
     markAsResolvedThread({
       idSegment: sid,
-      username: TeamsStore.getUserName(),
+      username: UserStore.getUserName(),
       sourcePage: config.revisionNumber ? config.revisionNumber + 1 : 1,
     })
       .then((resp) => {

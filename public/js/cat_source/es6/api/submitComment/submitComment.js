@@ -22,10 +22,9 @@ export const submitComment = async ({
   idJob = config.id_job,
   password = config.password,
   revisionNumber = config.revisionNumber,
+  isAnonymous = false,
 }) => {
   const dataParams = {
-    action: 'comment',
-    _sub: 'create',
     id_job: idJob,
     id_segment: idSegment,
     revision_number: revisionNumber,
@@ -33,17 +32,21 @@ export const submitComment = async ({
     password,
     source_page: sourcePage,
     message,
+    is_anonymous: isAnonymous,
   }
   const formData = new FormData()
 
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=comment`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/comment/create`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

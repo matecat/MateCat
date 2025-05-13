@@ -1,4 +1,5 @@
 import React from 'react'
+import CommonUtils from '../../utils/commonUtils'
 
 class OutsourceInfo extends React.Component {
   constructor(props) {
@@ -193,7 +194,12 @@ class OutsourceInfo extends React.Component {
                   </div>
                   <div className="item open-chat">
                     <div className="content">
-                      <div className="ui button support-tip-button">
+                      <div
+                        className="ui button support-tip-button"
+                        onClick={() => {
+                          CommonUtils.dispatchCustomEvent('openChat')
+                        }}
+                      >
                         <i className="big icon-uniE970 middle aligned icon" />
                         Open chat
                       </div>

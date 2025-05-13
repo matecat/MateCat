@@ -2,26 +2,11 @@ import {render, screen, act, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import React from 'react'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import JobContainer from './JobContainer'
 import ProjectsStore from '../../stores/ProjectsStore'
 import ManageConstants from '../../constants/ManageConstants'
 
-require('../../../../lib/jquery-dateFormat.min.js')
-// high order function -> $.format.date (jquery plugin) - workaround
-const formatDate = (context, fn) => {
-  return function (...args) {
-    const params = args.map((argument) =>
-      typeof argument === 'string' && /hh/i.test(argument)
-        ? argument.toUpperCase()
-        : argument,
-    )
-    return fn.apply(context, params)
-  }
-}
-$.format.date = formatDate($.format, $.format.date)
-
-require('../../../../common')
 window.config = {enable_outsource: 1}
 
 const fakeProjectsData = {
@@ -850,7 +835,7 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, props} = fakeProperties
-  const project = Immutable.fromJS(data)
+  const project = fromJS(data)
   const jobs = project.get('jobs')
   const job = jobs.first()
 

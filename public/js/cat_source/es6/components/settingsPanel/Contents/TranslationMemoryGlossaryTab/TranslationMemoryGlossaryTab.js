@@ -7,17 +7,22 @@ import React, {
 } from 'react'
 import {SettingsPanelTable} from '../../SettingsPanelTable/SettingsPanelTable'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
+import {ApplicationWrapperContext} from '../../../common/ApplicationWrapper/ApplicationWrapperContext'
 import {TMKeyRow} from './TMKeyRow'
 import {TMCreateResourceRow} from './TMCreateResourceRow'
+import CatToolActions from '../../../../actions/CatToolActions'
+import SegmentActions from '../../../../actions/SegmentActions'
+import SegmentStore from '../../../../stores/SegmentStore'
 import {updateJobKeys} from '../../../../api/updateJobKeys'
-
 import Users from '../../../../../../../img/icons/Users'
 import AddWide from '../../../../../../../img/icons/AddWide'
-import CatToolActions from '../../../../actions/CatToolActions'
+import {METADATA_KEY} from '../../../../constants/Constants'
+import {updateJobMetadata} from '../../../../api/updateJobMetadata/updateJobMetadata'
 
 const COLUMNS_TABLE_ACTIVE = [
   {name: 'Lookup'},
   {name: 'Update'},
+  {name: ''},
   {name: ''},
   {name: ''},
   {name: ''},
@@ -87,7 +92,15 @@ export const orderTmKeys = (tmKeys, keysOrdered) => {
 export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
   const mine = tmKeys
     .filter(({key, isActive}) => isOwnerOfKey(key) && isActive)
-    .map(({tm, glos, key, name, r, w}) => ({tm, glos, key, name, r, w}))
+    .map(({tm, glos, key, name, r, w, penalty}) => ({
+      tm,
+      glos,
+      key,
+      name,
+      r,
+      w,
+      penalty,
+    }))
 
   return JSON.stringify({
     ownergroup: [],
@@ -99,14 +112,9 @@ export const getTmDataStructureToSendServer = ({tmKeys = [], keysOrdered}) => {
 export const TranslationMemoryGlossaryTabContext = createContext({})
 
 export const TranslationMemoryGlossaryTab = () => {
-  const {
-    tmKeys,
-    setTmKeys,
-    openLoginModal,
-    modifyingCurrentTemplate,
-    currentProjectTemplate,
-  } = useContext(SettingsPanelContext)
-
+  const {tmKeys, setTmKeys, modifyingCurrentTemplate, currentProjectTemplate} =
+    useContext(SettingsPanelContext)
+  const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
   const isPretranslate100Active = currentProjectTemplate.pretranslate100
   const setIsPretranslate100Active = (value) =>
@@ -114,6 +122,13 @@ export const TranslationMemoryGlossaryTab = () => {
       ...prevTemplate,
       pretranslate100: value,
     }))
+  const isDialectStrictActive = currentProjectTemplate.dialectStrict
+  const setIsDialectStrictActive = (value) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      dialectStrict: value,
+    }))
+  const tmPrioritization = currentProjectTemplate.tmPrioritization
   const [specialRows, setSpecialRows] = useState([
     {
       ...DEFAULT_TRANSLATION_MEMORY,
@@ -128,6 +143,7 @@ export const TranslationMemoryGlossaryTab = () => {
     tmKeys: undefined,
     getPublicMatches: undefined,
     currentProjectTemplate: undefined,
+    tmPrioritization: undefined,
   })
 
   previousStatesRef.current.currentProjectTemplate = currentProjectTemplate
@@ -146,7 +162,12 @@ export const TranslationMemoryGlossaryTab = () => {
           r: false,
           w: false,
           isActive: false,
-          ...(tmFromTemplate && {...tmFromTemplate, isActive: true}),
+          penalty: 0,
+          ...(tmFromTemplate && {
+            ...tmFromTemplate,
+            isActive: true,
+          }),
+          name: tmItem.name,
         }
       }),
     )
@@ -183,7 +204,14 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-      }).then(() => CatToolActions.onTMKeysChangeStatus())
+      }).then(() => {
+        CatToolActions.onTMKeysChangeStatus()
+        SegmentActions.getContributions(
+          SegmentStore.getCurrentSegmentId(),
+          userInfo.metadata[METADATA_KEY],
+          true,
+        )
+      })
     }
   }
 
@@ -282,7 +310,8 @@ export const TranslationMemoryGlossaryTab = () => {
           id,
           key,
           name,
-          isDraggable: isActive && !isSpecialRow && isOwnerOfKey(key),
+          isDraggable:
+            isActive && !isSpecialRow && isOwnerOfKey(key) && !row.isTmFromFile,
           isActive,
           isLocked,
           isExpanded,
@@ -291,8 +320,10 @@ export const TranslationMemoryGlossaryTab = () => {
               ? 'row-content-default-memory'
               : id === SPECIAL_ROWS_ID.addSharedResource ||
                   id === SPECIAL_ROWS_ID.newResource
-                ? 'row-content-create-resource'
-                : '',
+                ? 'settings-panel-row-active row-content-create-resource'
+                : row.isTmFromFile
+                  ? 'row-content-tm-from-file'
+                  : '',
           node: !isCreateResourceRow ? (
             <TMKeyRow key={row.id} {...{row, onExpandRow}} />
           ) : (
@@ -318,22 +349,45 @@ export const TranslationMemoryGlossaryTab = () => {
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
           .filter(({key}) => isOwnerOfKey(key))
-          .some(({key, r, w}) => {
+          .some(({key, r, w, penalty}) => {
             const prevTm = prevTmKeysActive.find((prev) => prev.key === key)
-            return prevTm && (r !== prevTm.r || w !== prevTm.w)
-          })
+            return (
+              prevTm &&
+              (r !== prevTm.r || w !== prevTm.w || penalty !== prevTm.penalty)
+            )
+          }) ||
+        tmPrioritization !== current.tmPrioritization
 
       if (shouldUpdateTmKeysJob) {
+        const tmCurrentProjectTemplate =
+          previousStatesRef.current.currentProjectTemplate.tm
+
+        const keysOrdered = tmCurrentProjectTemplate.map(({key}) => key)
+
         updateJobKeys({
           getPublicMatches,
-          dataTm: getTmDataStructureToSendServer({tmKeys}),
-        }).then(() => CatToolActions.onTMKeysChangeStatus())
+          dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
+        }).then(() => {
+          CatToolActions.onTMKeysChangeStatus()
+          SegmentActions.getContributions(
+            SegmentStore.getCurrentSegmentId(),
+            userInfo.metadata[METADATA_KEY],
+            true,
+          )
+        })
+      }
+
+      if (tmPrioritization !== current.tmPrioritization) {
+        updateJobMetadata({
+          tmPrioritization,
+        })
       }
     }
 
     current.tmKeys = tmKeys
     current.getPublicMatches = getPublicMatches
-  }, [tmKeys, getPublicMatches])
+    current.tmPrioritization = tmPrioritization
+  }, [tmKeys, getPublicMatches, tmPrioritization])
 
   const onAddSharedResource = () =>
     setSpecialRows([
@@ -347,10 +401,11 @@ export const TranslationMemoryGlossaryTab = () => {
     ])
 
   const inactiveKeys = keyRows.filter(
-    ({isActive, name}) =>
+    ({isActive, name, key}) =>
       !isActive &&
       (filterInactiveKeys
-        ? new RegExp(filterInactiveKeys, 'gi').test(name)
+        ? new RegExp(filterInactiveKeys, 'gi').test(name) ||
+          new RegExp(filterInactiveKeys, 'gi').test(key)
         : true),
   )
 
@@ -361,31 +416,49 @@ export const TranslationMemoryGlossaryTab = () => {
         className="translation-memory-glossary-tab settings-panel-contentwrapper-tab-background"
       >
         {!config.is_cattool && (
-          <div className="translation-memory-glossary-tab-pre-translate">
-            <input
-              checked={isPretranslate100Active}
-              onChange={(e) =>
-                setIsPretranslate100Active(e.currentTarget.checked)
-              }
-              type="checkbox"
-              data-testid="pretranslate-checkbox"
-            />
-            Pre-translate 100% matches from TM
+          <div className="translation-memory-glossary-checkbox-container">
+            <div className="translation-memory-glossary-checkbox-item">
+              <input
+                checked={isPretranslate100Active}
+                onChange={(e) =>
+                  setIsPretranslate100Active(e.currentTarget.checked)
+                }
+                type="checkbox"
+                data-testid="pretranslate-checkbox"
+              />
+              Pre-translate 100% matches from TM
+            </div>
+            <div className="translation-memory-glossary-checkbox-item">
+              <input
+                checked={isDialectStrictActive}
+                onChange={(e) =>
+                  setIsDialectStrictActive(e.currentTarget.checked)
+                }
+                type="checkbox"
+                data-testid="dialect-strict-checkbox"
+              />
+              Activate variant-strict matching.{' '}
+              <a
+                href="https://guides.matecat.com/activ#:~:text=In%20order%20to%20maximize%20TM%20leverage%2C%20Matecat%2C%20by%20default%2C%20returns%20TM%20matches%20for%20all%20the%20variants%20of%20your%20project%27s%20languages.%20Matches%20from%20language%20variants%20other%20than%20those%20specified%20for%20the%20project%20incur%20a%201%25%20penalty%20to%20prevent%20them%20from%20being%20used%20for%20pre%2Dtranslation"
+                rel="noreferrer"
+                target="_blank"
+              >
+                More details
+              </a>
+            </div>
           </div>
         )}
         <div className="translation-memory-glossary-tab-active-resources">
           <div className="translation-memory-glossary-tab-table-title">
             <h2>Active Resources</h2>
             <div className="translation-memory-glossary-tab-buttons-group">
-              {config.isLoggedIn && (
-                <button
-                  className="ui primary button settings-panel-button-icon"
-                  onClick={onAddSharedResource}
-                  data-testid="add-shared-resource-tm"
-                >
-                  <Users size={18} /> Add shared resource
-                </button>
-              )}
+              <button
+                className="ui primary button settings-panel-button-icon"
+                onClick={onAddSharedResource}
+                data-testid="add-shared-resource-tm"
+              >
+                <Users size={18} /> Add shared resource
+              </button>
 
               <button
                 className="ui primary button settings-panel-button-icon"
@@ -397,6 +470,7 @@ export const TranslationMemoryGlossaryTab = () => {
             </div>
           </div>
           <SettingsPanelTable
+            className="translation-memory-glossary-tab-active-table"
             columns={COLUMNS_TABLE_ACTIVE}
             rows={keyRows.filter(({isActive}) => isActive)}
             onChangeRowsOrder={onOrderActiveRows}
@@ -413,17 +487,10 @@ export const TranslationMemoryGlossaryTab = () => {
               data-testid="search-inactive-tmkeys"
             />
           </div>
-          {config.isLoggedIn ? (
-            <SettingsPanelTable
-              className="translation-memory-glossary-tab-inactive-table"
-              columns={COLUMNS_TABLE_INACTIVE}
-              rows={inactiveKeys}
-            />
-          ) : (
-            <button className="ui primary button" onClick={openLoginModal}>
-              Login to see your TM
-            </button>
-          )}
+          <SettingsPanelTable
+            columns={COLUMNS_TABLE_INACTIVE}
+            rows={inactiveKeys}
+          />
         </div>
       </div>
     </TranslationMemoryGlossaryTabContext.Provider>

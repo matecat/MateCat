@@ -3,118 +3,35 @@
 <head>
     <meta charset="utf-8"/>
     <title>Activity Log - Matecat</title>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
     <script type="text/javascript" src="${basepath}public/build/libs.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.widgets.js"></script>
+
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}',
+            hostpath: '${hostpath | string:/}',
+        };
+        var conversionFailed = false;
+        var conversionInfo = {};
+    </script>
 
 </head>
 <body class="activity-log-page">
-<header>
-    <div class="wrapper">
 
-        <div class="logo-menu">
-            <a href="${basepath}" class="logo">
-            </a>
-        </div> <!-- .logo-menu -->
-    </div>
-</header>
+<header class="upload-page-header"/>
 
-<div class="activity-log-container">
-<h1>Activity Log</h1>
-    <h1 id="pid">
-        Project: ${projectID} - ${projectName}
-    </h1>
+<div class="activity_log__page"></div>
 
-    <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent" class="activity-log-entry">
-
-        <h3>Project Related Activities:</h3>
-        <div class="search-container">
-            <span class="search-label">Search:</span>
-            <input class="search" type="search" data-column="all" placeholder="Search" />
-        </div>
-        <table id="activity-log" class="activitylog tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0">
-            <thead>
-            <tr>
-                <th><div class="th-inner"><span>User IP</span></div></th>
-                <th><div class="th-inner"><span>Event Date</span></div></th>
-                <th><div class="th-inner"><span>Project ID</span></div></th>
-                <th><div class="th-inner"><span>Job ID</span></div></th>
-                <th><div class="th-inner"><span>Language Pair</span></div></th>
-                <th><div class="th-inner"><span>User Name</span></div></th>
-                <th><div class="th-inner"><span>User Email</span></div></th>
-                <th><div class="th-inner"><span>Action</span></div></th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr tal:define="activity php:array()" tal:repeat="activity jobActivity">
-                <td tal:content="activity/ip | default">Unknown</td>
-                <td tal:content="activity/event_date | default">Unkwnown</td>
-                <td tal:content="activity/id_project | default">-</td>
-                <td tal:content="activity/id_job | default">-</td>
-                <td tal:content="activity/lang_pairs | default">-</td>
-                <td tal:content="activity/name | default">Unknown</td>
-                <td tal:content="activity/email | default">Unkwnown</td>
-                <td tal:content="activity/action | default">Unkwnown</td>
-            </tr>
-            </tbody>
-
-        </table>
-    </div>
-
-
-</div>
-
-<script type="text/javascript">
-    $(function() {
-
-                var table_sorter = $("#activity-log").tablesorter({
-                    widgets: ["filter"],
-                    widgetOptions : {
-                        // use the filter_external option OR use bindSearch function (below)
-                        // to bind external filters.
-                        // filter_external : '.search',
-                        filter_columnFilters: false,
-                        filter_saveFilters : true,
-                        filter_reset: '.reset',
-                        filter_external: '.search'
-                    }
-                });
-
-                var profile_drodown =  $('#user-menu-dropdown').dropdown();
-
-                var profile_modal = $('#profile-item').on('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    $('#modal').trigger('openpreferences');
-                    return false;
-                });
-
-                var logout_action = $('.user-menu-container').on('click', '#logout-item', function (e) {
-                    e.preventDefault();
-                    $.post('/api/app/user/logout', function (data) {
-                        if ($('body').hasClass('manage')) {
-                            location.href = config.hostpath + config.basepath;
-                        } else {
-                            window.location.reload();
-                        }
-                    });
-                });
-
-            }
-    );
-    $( window ).resize(function() {
-        APP.fitText($('#pid'), $('#pid'), 70);
-    });
-</script>
+<div class="notifications-wrapper"></div>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
-<div id="modal" style="z-index: 999999999"></div>
+<div metal:use-macro="templates/common.html/footer_includes" />
+
 </body>
 </html>

@@ -8,16 +8,16 @@
 
 namespace Features\TranslationEvents;
 
-use Chunks_ChunkStruct;
 use Constants;
 use Constants_TranslationStatus;
 use Exception;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\BatchReviewProcessor;
-use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEvent;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;
 use FeatureSet;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use TransactionalTrait;
 
@@ -36,9 +36,9 @@ class TranslationEventsHandler {
     protected FeatureSet $_featureSet;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    protected Chunks_ChunkStruct $_chunk;
+    protected Jobs_JobStruct $_chunk;
 
     /**
      * @var Projects_ProjectStruct
@@ -48,9 +48,9 @@ class TranslationEventsHandler {
     /**
      * TranslationEventsHandler constructor.
      *
-     * @param Chunks_ChunkStruct $chunkStruct
+     * @param Jobs_JobStruct $chunkStruct
      */
-    public function __construct( Chunks_ChunkStruct $chunkStruct ) {
+    public function __construct( Jobs_JobStruct $chunkStruct ) {
         $this->_chunk = $chunkStruct;
     }
 
@@ -211,9 +211,9 @@ class TranslationEventsHandler {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
-    public function getChunk(): Chunks_ChunkStruct {
+    public function getChunk(): Jobs_JobStruct {
         return $this->_chunk;
     }
 

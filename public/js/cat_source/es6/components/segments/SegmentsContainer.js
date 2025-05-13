@@ -1,6 +1,7 @@
 import React, {
   createRef,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -8,7 +9,7 @@ import React, {
   useState,
 } from 'react'
 import PropTypes from 'prop-types'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import ReactDOMServer from 'react-dom/server'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
@@ -25,7 +26,9 @@ import {isUndefined} from 'lodash'
 import SegmentUtils from '../../utils/segmentUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
+const ROW_MARGIN = 3
 const ROW_HEIGHT = 90
 const OVERSCAN = 5
 const COMMENTS_PADDING_TOP = [
@@ -37,14 +40,7 @@ const SEARCH_BAR_OPENED_PADDING_TOP = 80
 
 const listRef = createRef()
 
-function SegmentsContainer({
-  isReview,
-  startSegmentId,
-  firstJobSegment,
-  guessTagActive,
-  speechToTextActive,
-  multiMatchLangs,
-}) {
+function SegmentsContainer({isReview, startSegmentId, firstJobSegment}) {
   useHotkeys(
     Shortcuts.cattol.events.copySource.keystrokes[Shortcuts.shortCutsKeyType],
     (e) => {
@@ -149,7 +145,9 @@ function SegmentsContainer({
     {enableOnContentEditable: true, preventDefault: true},
   )
 
-  const [segments, setSegments] = useState(Immutable.fromJS([]))
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
+  const [segments, setSegments] = useState(fromJS([]))
   const [rows, setRows] = useState([])
   const [essentialRows, setEssentialRows] = useState([])
   const [hasCachedRows, setHasCachedRows] = useState(false)
@@ -165,7 +163,7 @@ function SegmentsContainer({
   const [addedComment, setAddedComment] = useState(undefined)
   const [scrollTopVisible, setScrollTopVisible] = useState(undefined)
   const [isSearchBarOpen, setIsSearchBarOpen] = useState(false)
-  const [clientConnected, setClientConnected] = useState(false)
+  const [clientConnected, setClientConnected] = useState()
   const [clientId, setClientId] = useState()
 
   const persistenceVariables = useRef({
@@ -180,10 +178,27 @@ function SegmentsContainer({
   const cachedRowsHeightMap = useRef(new Map())
   const cachedSegmentsToJS = useRef(new Map())
 
-  const onChangeRowHeight = useCallback((id, newHeight) => {
-    rowsRenderedHeight.current.set(id, newHeight)
-    setOnUpdateRow(Symbol())
-  }, [])
+  const {guess_tags: guessTagActive, dictation: speechToTextActive} =
+    userInfo?.metadata ?? {}
+
+  const onChangeRowHeight = useCallback(
+    (id, newHeight) => {
+      rowsRenderedHeight.current.set(
+        id,
+        getRowHeightWithMargin({
+          id,
+          height: newHeight,
+        }),
+      )
+      setOnUpdateRow(Symbol())
+    },
+    [getRowHeightWithMargin],
+  )
+
+  const multiMatchLangs = useMemo(
+    () => userInfo?.metadata?.cross_language_matches ?? [],
+    [userInfo?.metadata],
+  )
 
   const scrollToParams = useMemo(() => {
     const position = scrollToSelected ? 'auto' : 'start'
@@ -298,8 +313,15 @@ function SegmentsContainer({
     persistence.scrollDirectionTop = scrollValue < persistence.lastScrollTop
     if (scrollBottomValue < 700 && !persistence.scrollDirectionTop) {
       SegmentActions.getMoreSegments('after')
-    } else if (scrollValue < 500 && persistence.scrollDirectionTop) {
+    } else if (
+      scrollValue < 500 &&
+      persistence.scrollDirectionTop &&
+      essentialRows.length !==
+        persistence.currentSegmentsNumberBeforeGetMoreSegments
+    ) {
       SegmentActions.getMoreSegments('before')
+      persistence.currentSegmentsNumberBeforeGetMoreSegments =
+        essentialRows.length
     }
     persistence.lastScrollTop = scrollValue
     setScrollTopVisible(scrollValue > 400)
@@ -337,7 +359,12 @@ function SegmentsContainer({
           ? cached.segment
           : segImmutable.toJS()
 
-      cachedSegmentsToJS.current.set(segment.sid, {segImmutable, segment})
+      cachedSegmentsToJS.current.set(segment.sid, {
+        segImmutable,
+        segment,
+        previousSegmentId: segments.get(index - 1)?.get('sid'),
+        nextSegmentId: segments.get(index + 1)?.get('sid'),
+      })
 
       const collectionType = getCollectionType(segment)
       let collectionTypeSeparator
@@ -373,6 +400,17 @@ function SegmentsContainer({
       return props
     })
   }, [files, isSideOpen, segments])
+
+  // return row height and checks if it have margin
+  const getRowHeightWithMargin = useCallback(({id, height}) => {
+    const {segment, nextSegmentId} = cachedSegmentsToJS.current.get(id)
+    const {segment: nextSegment} =
+      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
+
+    return segment.internal_id !== nextSegment?.internal_id
+      ? height + ROW_MARGIN
+      : height
+  }, [])
 
   // set width and height of area
   useEffect(() => {
@@ -516,7 +554,13 @@ function SegmentsContainer({
           : cachedRowsHeightMap.current.get(newestSid)
         const prevStateRow = cachedHeight
           ? {height: cachedHeight, hasRendered}
-          : {height: ROW_HEIGHT, hasRendered: false}
+          : {
+              height: getRowHeightWithMargin({
+                id: newestSid,
+                height: ROW_HEIGHT,
+              }),
+              hasRendered: false,
+            }
         return {
           id: newestSid,
           height: prevStateRow?.height,
@@ -525,7 +569,7 @@ function SegmentsContainer({
         }
       }),
     )
-  }, [segments, rows])
+  }, [segments, rows, getRowHeightWithMargin])
 
   // cache rows before start index
   useEffect(() => {
@@ -556,11 +600,15 @@ function SegmentsContainer({
       )
       .forEach((row, index) => {
         const cached = cachedRowsHeightMap.current.get(row.id)
+        const previousSegment =
+          index > 0 ? rows[index - 1].segImmutable : undefined
         const newHeight = !cached
-          ? getSegmentRealHeight({
-              segment: row.segImmutable,
-              previousSegment:
-                index > 0 ? rows[index - 1].segImmutable : undefined,
+          ? getRowHeightWithMargin({
+              id: row.id,
+              height: getSegmentRealHeight({
+                segment: row.segImmutable,
+                previousSegment,
+              }),
             })
           : cached
         cachedRowsHeightMap.current.set(row.id, newHeight)
@@ -574,6 +622,7 @@ function SegmentsContainer({
     hasCachedRows,
     startIndex,
     getSegmentRealHeight,
+    getRowHeightWithMargin,
   ])
 
   // adapt scroll when was added more segments before
@@ -598,9 +647,14 @@ function SegmentsContainer({
       contentElement.offsetHeight + additionalHeight
     }px`
 
-    cachedRowsHeightMap.current.set(essentialRows[0].id, ROW_HEIGHT)
+    const defaultRowHeight = getRowHeightWithMargin({
+      id: essentialRows[0].id,
+      height: ROW_HEIGHT,
+    })
 
-    const difference = essentialRows[0].height - ROW_HEIGHT
+    cachedRowsHeightMap.current.set(essentialRows[0].id, defaultRowHeight)
+
+    const difference = essentialRows[0].height - defaultRowHeight
 
     for (let i = 0; i < contentElement.children.length; i++) {
       const rowElement = contentElement.children[i]
@@ -619,7 +673,7 @@ function SegmentsContainer({
     listRef.current.scrollTop = scrollTop
 
     current.haveBeenAddedSegmentsBefore = true
-  }, [rows, essentialRows, hasCachedRows])
+  }, [rows, essentialRows, hasCachedRows, getRowHeightWithMargin])
 
   // updating rows height
   useEffect(() => {
@@ -670,7 +724,7 @@ function SegmentsContainer({
           id,
           height: rowsRenderedHeight.current.get(id)
             ? rowsRenderedHeight.current.get(id)
-            : cachedRowsHeightMap.current.get(id) ?? height,
+            : (cachedRowsHeightMap.current.get(id) ?? height),
           hasRendered,
         })),
       )
@@ -759,22 +813,29 @@ function SegmentsContainer({
     )
     if (!details) return
     const {currentFileId, collectionTypeSeparator} = details
-    const {segment, segImmutable} = cachedSegmentsToJS.current.get(sid)
+    const {segment, segImmutable, previousSegmentId, nextSegmentId} =
+      cachedSegmentsToJS.current.get(sid)
+    const {segment: previousSegment} =
+      cachedSegmentsToJS.current.get(previousSegmentId) ?? {}
+    const {segment: nextSegment} =
+      cachedSegmentsToJS.current.get(nextSegmentId) ?? {}
+
     return {
       segment,
       segImmutable,
-      timeToEdit: config.time_to_edit_enabled,
       isReview,
       speech2textEnabledFn: Speech2Text.enabled,
       setLastSelectedSegment: (sid) => setLastSelectedSegment({sid}),
       setBulkSelection,
       sideOpen: isSideOpen,
       files: files,
-      currentFileId: currentFileId.toString(),
+      currentFileId: currentFileId ? currentFileId.toString() : '0',
       collectionTypeSeparator,
       guessTagActive,
       speechToTextActive,
       multiMatchLangs,
+      previousSegment,
+      nextSegment,
     }
   }
 
@@ -798,7 +859,6 @@ function SegmentsContainer({
             props && (
               <RowSegment
                 {...{
-                  minRowHeight: ROW_HEIGHT,
                   onChangeRowHeight,
                   ...essentialRows[index],
                   ...props,
@@ -903,15 +963,6 @@ const getSegmentStructure = (segment, sideOpen) => {
                     </a>
                     <a
                       href="#"
-                      className="tagModeToggle "
-                      title="Display full/short tags"
-                    >
-                      <span className="icon-chevron-left"> </span>
-                      <span className="icon-tag-expand"> </span>
-                      <span className="icon-chevron-right"> </span>
-                    </a>
-                    <a
-                      href="#"
                       className="autofillTag"
                       title="Copy missing tags from source to target"
                     >
@@ -937,7 +988,7 @@ const getSegmentStructure = (segment, sideOpen) => {
                       {' '}
                       Translated{' '}
                     </a>
-                    <p>CTRL ENTER</p>
+                    <p>CTRL+ENTER</p>
                   </li>
                 </ul>
               </div>
@@ -948,9 +999,6 @@ const getSegmentStructure = (segment, sideOpen) => {
               {' '}
             </a>
           </div>
-        </div>
-        <div className="timetoedit" data-raw-time-to-edit="0">
-          {' '}
         </div>
         <div className="edit-distance">Edit Distance:</div>
       </div>

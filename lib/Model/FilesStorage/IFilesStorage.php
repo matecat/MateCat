@@ -2,7 +2,6 @@
 
 namespace FilesStorage;
 
-use Chunks_ChunkStruct;
 use Exception;
 use FilesStorage\Exceptions\FileSystemException;
 
@@ -147,7 +146,7 @@ interface IFilesStorage {
      *
      * @return mixed
      */
-    public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] );
+    public static function storeFastAnalysisFile( $id_project, array $segments_metadata = [] );
 
     /**
      * Gets a serialized file from fast analysis storage
@@ -222,27 +221,6 @@ interface IFilesStorage {
      * @return bool
      * @throws Exception
      */
-    public function transferFiles($source, $destination);
+    public function transferFiles( $source, $destination );
 
-    /**
-     **********************************************************************************************
-     * 7. BLACKLIST FILE
-     **********************************************************************************************
-     */
-
-    /**
-     * @param /** $filePath
-     *
-     * @return mixed
-     */
-    public function deleteBlacklistFile($filePath);
-
-    /**
-     * @param string              $filePath
-     * @param Chunks_ChunkStruct $chunkStruct
-     * @param                     $uid
-     *
-     * @return mixed
-     */
-    public function saveBlacklistFile($filePath, Chunks_ChunkStruct $chunkStruct, $uid);
 }

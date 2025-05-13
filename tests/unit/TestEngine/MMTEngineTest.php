@@ -75,7 +75,7 @@ H;
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
         $mmtEngine = @$this->getMockBuilder( '\Engines_MMT' )
-                ->setConstructorArgs( [ (object)$record ] )
+                ->setConstructorArgs( [ new EnginesModel_EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 
         $mmtEngine->expects( $this->once() )

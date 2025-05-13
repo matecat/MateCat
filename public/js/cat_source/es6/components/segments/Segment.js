@@ -1,5 +1,5 @@
 import {forEach, isUndefined} from 'lodash'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import React from 'react'
 import {union} from 'lodash/array'
 
@@ -25,8 +25,11 @@ import CatToolStore from '../../stores/CatToolStore'
 import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 class Segment extends React.Component {
+  static contextType = ApplicationWrapperContext
+
   constructor(props) {
     super(props)
 
@@ -44,11 +47,11 @@ class Segment extends React.Component {
     this.forceUpdateSegment = this.forceUpdateSegment.bind(this)
     this.clientReconnection = this.clientReconnection.bind(this)
 
-    let readonly = UI.isReadonlySegment(this.props.segment)
-    this.secondPassLocked =
-      this.props.segment.status?.toUpperCase() === SEGMENTS_STATUS.APPROVED2 &&
-      this.props.segment.revision_number === 2 &&
-      config.revisionNumber !== 2
+    let readonly = SegmentUtils.isReadonlySegment(this.props.segment)
+    this.secondPassLocked = SegmentUtils.isSecondPassLockedSegment(
+      this.props.segment,
+    )
+
     this.state = {
       segment_classes: [],
       autopropagated: this.props.segment.autopropagated_from != 0,
@@ -57,6 +60,8 @@ class Segment extends React.Component {
       inBulk: false,
       tagProjectionEnabled:
         this.props.guessTagActive &&
+        this.props.segment &&
+        this.props.segment.status &&
         (this.props.segment.status.toLowerCase() === 'draft' ||
           this.props.segment.status.toLowerCase() === 'new') &&
         !DraftMatecatUtils.checkXliffTagsInText(
@@ -101,18 +106,8 @@ class Segment extends React.Component {
         SegmentActions.getSegmentsQa(this.props.segment)
       }
 
-      // TODO Remove this block
-      /**************************/
-      //From EditAreaClick
-      if (UI.warningStopped) {
-        UI.warningStopped = false
-        UI.checkWarnings(false)
-      }
       // start old cache
       UI.cacheObjects(this.$section)
-      //end old cache
-
-      UI.evalNextSegment()
 
       $('html').trigger('open') // used by ui.review to open tab Revise in the footer next-unapproved
 
@@ -120,7 +115,7 @@ class Segment extends React.Component {
       setTimeout(() => {
         const segmentId = this.props.segment.original_sid
         //Segment Filter
-        if (SegmentFilterUtils.enabled() && SegmentFilterUtils.filtering()) {
+        if (SegmentFilterUtils.enabled()) {
           SegmentFilterUtils.setStoredState({
             lastSegmentId: segmentId,
           })
@@ -252,7 +247,6 @@ class Segment extends React.Component {
     if (this.props.segment.opened && this.checkIfCanOpenSegment()) {
       classes.push('editor')
       classes.push('opened')
-      classes.push('shadow-1')
     }
     if (
       this.props.segment.modified ||
@@ -397,11 +391,16 @@ class Segment extends React.Component {
         (!this.props.segment.opened || !this.props.segment.openIssues)) ||
         !this.props.sideOpen) &&
       !(this.props.segment.readonly === 'true') &&
-      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit()))
+      (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
+      this.props.segment.sid
     ) {
       return (
         <TranslationIssuesSideButton
-          sid={this.props.segment.sid.split('-')[0]}
+          sid={
+            this.props.segment.splitted
+              ? this.props.segment.sid.split('-')[0]
+              : this.props.segment.sid
+          }
           segment={this.props.segment}
           open={this.props.segment.openIssues}
         />
@@ -415,8 +414,7 @@ class Segment extends React.Component {
     event.stopPropagation()
     if (
       !this.props.segment.unlocked &&
-      config.revisionNumber !== 2 &&
-      this.props.segment.revision_number === 2
+      SegmentUtils.isSecondPassLockedSegment(this.props.segment)
     ) {
       var props = {
         text: 'You are about to edit a segment that has been approved in the 2nd pass review. The project owner and 2nd pass reviser will be notified.',
@@ -595,7 +593,7 @@ class Segment extends React.Component {
         this.openSegment()
       })
       setTimeout(() => {
-        UI.setCurrentSegment()
+        SegmentActions.setCurrentSegment(this.props.segment.sid)
       }, 0)
     }
   }
@@ -642,8 +640,8 @@ class Segment extends React.Component {
   shouldComponentUpdate(nextProps, nextState) {
     return (
       !nextProps.segImmutable.equals(this.props.segImmutable) ||
-      !Immutable.fromJS(nextState.segment_classes).equals(
-        Immutable.fromJS(this.state.segment_classes),
+      !fromJS(nextState.segment_classes).equals(
+        fromJS(this.state.segment_classes),
       ) ||
       nextState.autopropagated !== this.state.autopropagated ||
       nextState.readonly !== this.state.readonly ||
@@ -661,7 +659,7 @@ class Segment extends React.Component {
         SegmentActions.scrollToSegment(this.props.segment.sid)
       }, 200)
       setTimeout(() => {
-        UI.setCurrentSegment()
+        SegmentActions.setCurrentSegment(this.props.segment.sid)
       }, 0)
       setTimeout(() => {
         if (
@@ -694,7 +692,6 @@ class Segment extends React.Component {
 
   render() {
     let job_marker = ''
-    let timeToEdit = ''
 
     let readonly = this.state.readonly
     let showLockIcon =
@@ -704,19 +701,6 @@ class Segment extends React.Component {
     let split_group = this.props.segment.split_group || []
     let autoPropagable = this.props.segment.repetitions_in_chunk !== '1'
     let originalId = this.props.segment.original_sid
-
-    if (this.props.timeToEdit) {
-      this.segment_edit_min = this.props.segment.parsed_time_to_edit[1]
-      this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2]
-    }
-
-    if (this.props.timeToEdit) {
-      timeToEdit =
-        <span className="edit-min">{this.segment_edit_min}</span> +
-        'm' +
-        <span className="edit-sec">{this.segment_edit_sec}</span> +
-        's'
-    }
 
     let translationIssues = this.getTranslationIssues()
     let locked =
@@ -748,6 +732,7 @@ class Segment extends React.Component {
         clientConnected: this.props.clientConnected,
         clientId: this.props.clientId,
         multiMatchLangs,
+        userInfo: this.context.userInfo,
       }
     }
 
@@ -760,7 +745,6 @@ class Segment extends React.Component {
             segment_classes.join(' ') +
             ` source-${config.source_code} target-${config.target_code}`
           }
-          data-hash={this.props.segment.segment_hash}
           data-autopropagated={this.state.autopropagated}
           data-propagable={autoPropagable}
           data-split-group={split_group}
@@ -844,12 +828,6 @@ class Segment extends React.Component {
               saving={this.props.segment.saving}
             />
             <SegmentBody onClick={this.onClickEvent} />
-            <div
-              className="timetoedit"
-              data-raw-time-to-edit={this.props.segment.time_to_edit}
-            >
-              {timeToEdit}
-            </div>
             {SegmentFilter && SegmentFilter.enabled() ? (
               <div className="edit-distance">
                 Edit Distance: {this.props.segment.edit_distance}

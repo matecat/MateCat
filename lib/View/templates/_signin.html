@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Force latest IE rendering engine or ChromeFrame if installed -->
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+    <meta charset="utf-8"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
+    <title>Sign-in | Matecat</title>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta property="og:title" content="Translate a file with Matecat" />
+    <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:url" content="https://www.matecat.com" />
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript" >
+        /*<![CDATA[*/
+        var config = {
+            basepath: '${basepath | string:/}',
+            hostpath: '${hostpath | string:/}',
+            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
+        };
+        /*]]>*/
+    </script>
+</head>
+<body>
+    <div class="signin__page"/>
+    <div metal:use-macro="templates/common.html/footer_includes" />
+    <div class="notifications-wrapper"></div>
+</body>
+</html>

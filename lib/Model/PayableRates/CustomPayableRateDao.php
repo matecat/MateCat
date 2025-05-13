@@ -2,7 +2,7 @@
 
 namespace PayableRates;
 
-use Analysis_PayableRates;
+use Analysis\PayableRates;
 use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
@@ -11,6 +11,7 @@ use Exception;
 use Pagination\Pager;
 use Pagination\PaginationParameters;
 use PDO;
+use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
@@ -19,21 +20,20 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     const TABLE           = 'payable_rate_templates';
     const TABLE_JOB_PIVOT = 'job_custom_payable_rates';
 
-    const query_by_uid_name    = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid AND name = :name";
     const query_by_id_and_user = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id AND uid = :uid";
     const query_by_id          = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND id = :id";
     const query_paginated      = "SELECT * FROM " . self::TABLE . " WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
     const paginated_map_key    = __CLASS__ . "::getAllPaginated";
 
     /**
-     * @var null
+     * @var ?CustomPayableRateDao
      */
-    private static $instance = null;
+    private static ?CustomPayableRateDao $instance = null;
 
     /**
      * @return CustomPayableRateDao|null
      */
-    private static function getInstance() {
+    private static function getInstance(): ?CustomPayableRateDao {
         if ( !isset( self::$instance ) ) {
             self::$instance = new self();
         }
@@ -51,10 +51,10 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         return [
                 'id'                         => 0,
                 'uid'                        => $uid,
-                'payable_rate_template_name' => 'Default',
+                'payable_rate_template_name' => 'Matecat original settings',
                 'version'                    => 1,
                 'breakdowns'                 => [
-                        'default' => Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
+                        'default' => PayableRates::$DEFAULT_PAYABLE_RATES
                 ],
                 'createdAt'                  => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),
                 'modifiedAt'                 => DateTimeUtil::formatIsoDate( date( "Y-m-d H:i:s" ) ),
@@ -62,10 +62,11 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param int $uid
-     * @param int $current
-     * @param int $pagination
-     * @param int $ttl
+     * @param int    $uid
+     * @param string $baseRoute
+     * @param int    $current
+     * @param int    $pagination
+     * @param int    $ttl
      *
      * @return array
      * @throws ReflectionException
@@ -118,27 +119,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
                 'id'  => $id,
                 'uid' => $uid,
-        ] );
-
-        /**
-         * @var $result CustomPayableRateStruct[]
-         */
-        return $result[ 0 ] ?? null;
-    }
-
-    /**
-     * @param int    $uid
-     * @param string $name
-     * @param int    $ttl
-     *
-     * @return CustomPayableRateStruct
-     * @throws ReflectionException
-     */
-    public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ) {
-        $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
-                'uid'  => $uid,
-                'name' => $name,
         ] );
 
         /**
@@ -204,7 +184,6 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         ] );
 
         self::destroyQueryByIdCache( $conn, $customPayableRateStruct->id );
-        self::destroyQueryByUidAndNameCache( $conn, $customPayableRateStruct->uid, $customPayableRateStruct->name );
         self::destroyQueryByIdAndUserCache( $conn, $customPayableRateStruct->id, $customPayableRateStruct->uid );
         self::destroyQueryPaginated( $customPayableRateStruct->uid );
 
@@ -235,19 +214,13 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
         self::destroyQueryPaginated( $uid );
 
         $queryAffected = $stmt->rowCount();
-
-        $stmt = $conn->prepare( "UPDATE project_templates SET payable_rate_template_id = :zero WHERE uid = :uid AND payable_rate_template_id = :id " );
-        $stmt->execute( [
-                'zero' => 0,
-                'id'   => $id,
-                'uid'  => $uid,
-        ] );
+        ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'payable_rate_template_id' );
 
         return $queryAffected;
     }
 
     /**
-     * validate a json against schema and then
+     * validate a JSON against schema and then
      * create a Payable Rate model template from it
      *
      * @param string   $json
@@ -290,19 +263,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      */
     private static function destroyQueryByIdCache( PDO $conn, int $id ) {
         $stmt = $conn->prepare( self::query_by_id );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, ] );
-    }
-
-    /**
-     * @param PDO    $conn
-     * @param int    $uid
-     * @param string $name
-     *
-     * @throws ReflectionException
-     */
-    private static function destroyQueryByUidAndNameCache( PDO $conn, int $uid, string $name ) {
-        $stmt = $conn->prepare( self::query_by_uid_name );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'uid' => $uid, 'name' => $name, ] );
+        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'id' => $id, ] );
     }
 
     /**
@@ -315,7 +276,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
     private
     static function destroyQueryByIdAndUserCache( PDO $conn, int $id, int $uid ) {
         $stmt = $conn->prepare( self::query_by_id_and_user );
-        self::getInstance()->_destroyObjectCache( $stmt, [ 'id' => $id, 'uid' => $uid ] );
+        self::getInstance()->_destroyObjectCache( $stmt, CustomPayableRateStruct::class, [ 'id' => $id, 'uid' => $uid ] );
     }
 
     /**
@@ -325,7 +286,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      */
     private
     static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
 

@@ -10,7 +10,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function inviteToTeamConfirm( $requestInfo, Array $options = [] ) {
+    public static function inviteToTeamConfirm( $requestInfo, array $options = [] ): string {
 
         $host = self::httpHost( $options );
 
@@ -27,68 +27,13 @@ class Routes {
     }
 
     /**
-     * @param       $requestInfo
-     * @param array $options
-     *
-     * @return string
-     * @throws Exception
-     */
-    public static function sendToTranslatorConfirm( $requestInfo, Array $options = [] ) {
-
-//        $host = self::httpHost( $options );
-//        $jwtHandler = new SimpleJWT( [
-//                'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
-//                'email'          => $requestInfo[ 'email' ],
-//                'projects_name'  => $requestInfo[ 'project_name' ],
-//                'id_job'         => $requestInfo[ 'id_job' ],
-//                'password'       => $requestInfo[ 'password' ],
-//                'source'         => $requestInfo[ 'source' ],
-//                'target'         => $requestInfo[ 'target' ],
-//        ] );
-//
-//        $jwtHandler->setTimeToLive( 60 * 60 * 24 * 3 ); //3 days
-
-        return self::translate(
-                $requestInfo[ 'project_name' ],
-                $requestInfo[ 'id_job' ],
-                $requestInfo[ 'password' ],
-                $requestInfo[ 'source' ],
-                $requestInfo[ 'target' ],
-                $options
-        );
-
-//        return "$host/api/app/jobs/translator/share/$jwtHandler";
-
-    }
-
-    /**
-     * @param       $requestInfo
-     * @param array $options
-     *
-     * @return string
-     * @throws Exception
-     */
-    public static function sendToTranslatorUpdate( $requestInfo, Array $options = [] ) {
-
-        return self::translate(
-                $requestInfo[ 'project_name' ],
-                $requestInfo[ 'id_job' ],
-                $requestInfo[ 'password' ],
-                $requestInfo[ 'source' ],
-                $requestInfo[ 'target' ],
-                $options
-        );
-
-    }
-
-    /**
      * @param       $confirmation_token
      * @param array $options
      *
      * @return string
      * @throws Exception
      */
-    public static function passwordReset( $confirmation_token, $options = [] ) {
+    public static function passwordReset( $confirmation_token, array $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/api/app/user/password_reset/$confirmation_token";
@@ -101,7 +46,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function signupConfirmation( $confirmation_token, $options = [] ) {
+    public static function signupConfirmation( $confirmation_token, $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/api/app/user/confirm/$confirmation_token";
@@ -115,24 +60,10 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function qualityReport( $id_job, $password, $options = [] ) {
+    public static function downloadXliff( $id_job, $password, array $options = [] ): string {
         $host = self::httpHost( $options );
 
-        return "$host/api/v2/jobs/{$id_job}/{$password}/quality-report";
-    }
-
-    /**
-     * @param       $id_job
-     * @param       $password
-     * @param array $options
-     *
-     * @return string
-     * @throws Exception
-     */
-    public static function downloadXliff( $id_job, $password, $options = [] ) {
-        $host = self::httpHost( $options );
-
-        return "$host/SDLXLIFF/$id_job/$password/$id_job.zip";
+        return "$host/api/v2/SDLXLIFF/$id_job/$password/$id_job.zip";
     }
 
     /**
@@ -145,12 +76,10 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function downloadOriginal( $id_job, $password, $filename = null, $download_type = 'all', $options = [] ) {
+    public static function downloadOriginal( $id_job, $password, $filename = null, string $download_type = 'all', array $options = [] ): string {
         $host = self::httpHost( $options );
 
         $params = [
-                'id_job'        => $id_job,
-                'password'      => $password,
                 'download_type' => $download_type
         ];
 
@@ -158,13 +87,12 @@ class Routes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadOriginal&" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/original/$id_job/$password?" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
     }
 
     /**
      * @param        $id_job
      * @param        $password
-     * @param        $id_file
      * @param null   $filename
      * @param string $download_type
      * @param array  $options
@@ -172,13 +100,10 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function downloadTranslation( $id_job, $password, $id_file, $filename = null, $download_type = 'all', $options = [] ) {
+    public static function downloadTranslation( $id_job, $password, $filename = null, string $download_type = 'all', array $options = [] ): string {
         $host = self::httpHost( $options );
 
         $params = [
-                'id_job'        => $id_job,
-                'id_file'       => $id_file,
-                'password'      => $password,
                 'download_type' => $download_type
         ];
 
@@ -186,7 +111,7 @@ class Routes {
             $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadFile&" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
+        return "$host/api/v2/translation/$id_job/$password?" . http_build_query( $params, null, '&', PHP_QUERY_RFC3986 );
     }
 
     /**
@@ -200,21 +125,21 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function revise( $project_name, $id_job, $password, $source, $target, $options = [] ) {
-        $host = self::httpHost( $options );
-        $revise = 'revise' ;
+    public static function revise( $project_name, $id_job, $password, $source, $target, array $options = [] ): string {
+        $host   = self::httpHost( $options );
+        $revise = 'revise';
 
-        if ( isset( $options['revision_number']) && $options['revision_number'] > 1 ) {
-            $revise .= $options['revision_number'] ;
+        if ( isset( $options[ 'revision_number' ] ) && $options[ 'revision_number' ] > 1 ) {
+            $revise .= $options[ 'revision_number' ];
         }
 
-        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password" ;
+        $url = "$host/$revise/$project_name/$source-$target/$id_job-$password";
 
-        if ( isset( $options['id_segment']) ) {
-            $url .= '#' . $options['id_segment'] ;
+        if ( isset( $options[ 'id_segment' ] ) ) {
+            $url .= '#' . $options[ 'id_segment' ];
         }
 
-        return $url ;
+        return $url;
     }
 
     /**
@@ -228,7 +153,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function translate( $project_name, $id_job, $password, $source, $target, $options = [] ) {
+    public static function translate( $project_name, $id_job, $password, $source, $target, array $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/translate/$project_name/$source-$target/$id_job-$password";
@@ -241,7 +166,7 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function analyze( $params, $options = [] ) {
+    public static function analyze( $params, array $options = [] ): string {
         $params = Utils::ensure_keys( $params,
                 [ 'project_name', 'id_project', 'password' ]
         );
@@ -257,8 +182,8 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function manage() {
-        $host = self::httpHost( null );
+    public static function manage(): string {
+        $host = self::httpHost();
 
         return "$host/manage";
     }
@@ -269,8 +194,8 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function appRoot( $options = [] ) {
-        $query = isset( $options[ 'query' ] ) ? $options[ 'query' ] : null;
+    public static function appRoot( array $options = [] ): string {
+        $query = $options[ 'query' ] ?? null;
 
         $url = self::httpHost( $options ) . INIT::$BASEURL;
 
@@ -287,17 +212,17 @@ class Routes {
      * @return string
      * @throws Exception
      */
-    public static function pluginsBase( $options = [] ) {
+    public static function pluginsBase( array $options = [] ): string {
         return self::httpHost( $options ) . '/plugins';
     }
 
     /**
-     * @param $params
+     * @param array $params
      *
-     * @return mixed
+     * @return string
      * @throws Exception
      */
-    public static function httpHost( $params ) {
+    public static function httpHost( array $params = [] ): string {
         $host = INIT::$HTTPHOST;
 
         if ( !empty( $params[ 'http_host' ] ) ) {

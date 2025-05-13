@@ -84,7 +84,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
 
         $result = $this->chunk_Dao->getBySegmentTranslation( $this->_translationsStruct );
 
-        $this->assertTrue( $result instanceof Chunks_ChunkStruct );
+        $this->assertTrue( $result instanceof Jobs_JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

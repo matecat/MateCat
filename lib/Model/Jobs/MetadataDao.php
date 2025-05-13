@@ -10,6 +10,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
     const TABLE = 'job_metadata';
 
     const _query_metadata_by_job_id_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND `key` = :key ";
+    const _query_metadata_by_job_password = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password ";
+    const _query_metadata_by_job_password_key = "SELECT * FROM job_metadata WHERE id_job = :id_job AND password = :password AND `key` = :key ";
 
     /**
      * @param     $id_job
@@ -31,23 +33,19 @@ class MetadataDao extends \DataAccess_AbstractDao {
     public function destroyCacheByJobId( $id_job, $key ) {
         $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_id_key );
 
-        return $this->_destroyObjectCache( $stmt, [ 'id_job' => $id_job, 'key' => $key ] );
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_job' => $id_job, 'key' => $key ] );
     }
 
     /**
-     * @param     $id_job
-     * @param     $password
+     * @param $id_job
+     * @param $password
      * @param int $ttl
-     *
-     * @return DataAccess_IDaoStruct[]
+     * @return array|DataAccess_IDaoStruct[]
+     * @throws \ReflectionException
      */
     public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ) {
 
-        $stmt = $this->_getStatementForQuery(
-                "SELECT * FROM job_metadata WHERE " .
-                " id_job = :id_job " .
-                " AND password = :password "
-        );
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
         $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
                 'id_job'   => $id_job,
@@ -55,6 +53,12 @@ class MetadataDao extends \DataAccess_AbstractDao {
         ] );
 
         return @$result;
+    }
+
+    public function destroyCacheByJobAndPassword( $id_job, $password ) {
+        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password );
+
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_job' => $id_job, 'password' => $password ] );
     }
 
     /**
@@ -66,12 +70,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @return MetadataStruct
      */
     public function get( $id_job, $password, $key, $ttl = 0 ) {
-        $stmt = $this->_getStatementForQuery(
-                "SELECT * FROM job_metadata WHERE " .
-                " id_job = :id_job " .
-                " AND password = :password " .
-                " AND `key` = :key "
-        );
+        $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password_key);
 
         $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
                 'id_job'   => $id_job,
@@ -88,6 +87,16 @@ class MetadataDao extends \DataAccess_AbstractDao {
 
     }
 
+    public function destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key ) {
+        $stmt = $this->_getStatementForQuery( self::_query_metadata_by_job_password_key );
+
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [
+            'id_job'   => $id_job,
+            'password' => $password,
+            'key'      => $key
+        ] );
+    }
+
     /**
      * @param $id_job
      * @param $password
@@ -98,10 +107,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
      */
     public function set( $id_job, $password, $key, $value ) {
         $sql = "INSERT INTO job_metadata " .
-                " ( id_job, password, `key`, value ) " .
+                " ( `id_job`, `password`, `key`, `value` ) " .
                 " VALUES " .
                 " ( :id_job, :password, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE value = :value ";
+                " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -113,6 +122,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
         ] );
 
         $this->destroyCacheByJobId( $id_job, $key );
+        $this->destroyCacheByJobAndPassword( $id_job, $password );
+        $this->destroyCacheByJobAndPasswordAndKey( $id_job, $password, $key );
 
         return $this->get( $id_job, $password, $key );
     }
@@ -131,7 +142,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
         ] );
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         // TODO: Implement _buildResult() method.
     }
 

@@ -15,6 +15,7 @@
  */
 
 
+use Langs\Languages;
 use TestHelpers\AbstractTest;
 
 error_reporting( ~E_DEPRECATED );
@@ -64,7 +65,7 @@ class GlossaryImportTest extends AbstractTest {
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-Glossary.csv' );
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
@@ -99,7 +100,7 @@ class GlossaryImportTest extends AbstractTest {
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv' );
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
@@ -123,7 +124,7 @@ class GlossaryImportTest extends AbstractTest {
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'GlossaryInvalidHeaderCopy.csv' );
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
@@ -163,7 +164,7 @@ class GlossaryImportTest extends AbstractTest {
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 
-        Langs_Languages::getInstance();
+        Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, "GlossaryInvalidHeaderCopy.csv" );
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );

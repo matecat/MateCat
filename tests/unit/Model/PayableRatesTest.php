@@ -1,5 +1,6 @@
 <?php
 
+use Analysis\PayableRates;
 use TestHelpers\AbstractTest;
 
 /**
@@ -25,7 +26,7 @@ class PayableRateStructTest extends AbstractTest {
         ];
 
         foreach ( $languageCombos as $languageCombo ) {
-            $payableRate  = Analysis_PayableRates::getPayableRates( $languageCombo[ 0 ], $languageCombo[ 1 ] );
+            $payableRate  = PayableRates::getPayableRates( $languageCombo[ 0 ], $languageCombo[ 1 ] );
             $errorMessage = 'Error for language combination ' . $languageCombo[ 0 ] . '<->' . $languageCombo[ 1 ] . '. Exp. ' . $languageCombo[ 2 ] . ', got ' . $payableRate[ 'MT' ];
 
             $this->assertEquals( $languageCombo[ 2 ], $payableRate[ 'MT' ], $errorMessage );

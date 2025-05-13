@@ -26,12 +26,12 @@ class EnginesModel_IntentoStruct extends EnginesModel_EngineStruct {
     /**
      * @var array
      */
-    public $extra_parameters = array(
-        'apikey' => "",
-        'provider'=> "",
-        'providerkey'=>"",
-        'providercategory'=> ""
-    );
+    public $extra_parameters = [
+            'apikey'           => "",
+            'provider'         => "",
+            'providerkey'      => "",
+            'providercategory' => ""
+    ];
 
     /**
      * @var string

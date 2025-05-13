@@ -13,6 +13,9 @@ use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
+use Exception;
+use RedisHandler;
+use ReflectionException;
 use TeamModel;
 use Teams\PendingInvitations;
 use Teams\TeamDao;
@@ -29,7 +32,7 @@ class TeamMembersController extends KleinController {
      */
     public function index(){
 
-        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
+        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
 
         $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->id_team );
         $teamModel = new TeamModel( $team );
@@ -43,6 +46,10 @@ class TeamMembersController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function update() {
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
@@ -63,6 +70,9 @@ class TeamMembersController extends KleinController {
 
         $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
         $formatter = new Membership( $full_members_list ) ;
+
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [
                 'members' => $formatter->render(),
                 'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )
@@ -70,6 +80,10 @@ class TeamMembersController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function delete(){
         \Database::obtain()->begin();
 
@@ -81,8 +95,11 @@ class TeamMembersController extends KleinController {
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
+        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
         $formatter = new Membership( $membersList ) ;
+
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [
                 'members' => $formatter->render(),
                 'pending_invitations' => $pendingInvitation->hasPengingInvitation( $teamStruct->id )

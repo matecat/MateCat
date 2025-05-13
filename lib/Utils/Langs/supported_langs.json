@@ -756,7 +756,7 @@
         {
             "localized": [
                 {
-                    "en": "Chinese (Simplified)"
+                    "en": "Chinese (Simplified, mainland China)"
                 }
             ],
             "isocode": "zh",
@@ -778,6 +778,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "zh-HK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese (Simplified, Singapore)"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-SG",
             "ocr": {
                 "supported": false,
                 "not_supported_or_rtl": false
@@ -4099,6 +4114,51 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "es-US",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Venezuela)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-VE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Perù)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-PE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Puerto Rico)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-PR",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false

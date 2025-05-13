@@ -4,6 +4,7 @@ namespace API\V2;
 
 use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
 use Database;
@@ -93,7 +94,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $postParams = $this->request->paramsPost();
 
         if ( $postParams[ 'rebutted_at' ] == null ) {
-            $entryDao = new EntryDao( Database::obtain()->getConnection() );
+            $entryDao = new EntryDao( Database::obtain() );
             $issue    = $entryDao->updateRebutted(
                     $this->validator->issue->id, false
             );
@@ -188,6 +189,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 
@@ -203,7 +205,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @return EntryStruct
      */
     private function updateIssueWithRebutted() {
-        $entryDao = new EntryDao( Database::obtain()->getConnection() );
+        $entryDao = new EntryDao( Database::obtain() );
 
         return $entryDao->updateRebutted(
                 $this->validator->issue->id, true

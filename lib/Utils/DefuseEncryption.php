@@ -1,6 +1,7 @@
 <?php
 
 use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 
@@ -87,14 +88,17 @@ class DefuseEncryption {
 
     /**
      * Decrypts an encrypted text
+     *
      * @param $cipherText
-     * @return bool|string  Decrypted text or FALSE when found an error in decryption
+     *
+     * @return null|string  Decrypted text or FALSE when found an error in decryption
+     * @throws EnvironmentIsBrokenException
      */
-    public function decrypt( $cipherText ) {
+    public function decrypt( $cipherText ): ?string {
         try {
             return Crypto::decrypt( $cipherText, $this->key );
         } catch ( WrongKeyOrModifiedCiphertextException $ex ) {
-            return false;
+            return null;
         }
     }
 

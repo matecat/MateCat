@@ -8,6 +8,10 @@
 
 namespace ConnectedServices;
 
+use ConnectedServices\Google\GDrive\GDriveTokenHandler;
+use Exception;
+use Google_Client;
+
 class GDriveTokenVerifyModel {
 
     protected $service;
@@ -18,7 +22,7 @@ class GDriveTokenVerifyModel {
         $this->service = $service;
     }
 
-    public function validOrRefreshed() {
+    public function validOrRefreshed( Google_Client $gClient ): bool {
         $this->refreshed           = false;
         $this->expired             = false;
         $decryptedOauthAccessToken = $this->service->getDecryptedOauthAccessToken();
@@ -30,8 +34,8 @@ class GDriveTokenVerifyModel {
         }
 
         try {
-            $newToken = GDrive::getsNewToken( $decryptedOauthAccessToken );
-        } catch ( \Exception $e ) {
+            $newToken = GDriveTokenHandler::getNewToken( $gClient, $decryptedOauthAccessToken );
+        } catch ( Exception $e ) {
             $this->__expireService();
 
             return false;

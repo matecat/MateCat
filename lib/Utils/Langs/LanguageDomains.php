@@ -1,25 +1,32 @@
 <?php
 
+namespace Langs;
 /*
    this class manages supported languages in the CAT tool
  */
 
-class Langs_LanguageDomains {
+use Exception;
+use INIT;
+use Utils;
 
-    private static $instance; //singleton instance
-    private static $subjectMap;
-    private static $subjectHashMap = [];
+class LanguageDomains {
+
+    private static ?LanguageDomains $instance = null; //singleton instance
+    private static array           $subjectMap;
+    private static array           $subjectHashMap = [];
 
     //access singleton
-    public static function getInstance() {
+    public static function getInstance(): LanguageDomains {
         if ( !self::$instance ) {
-            self::$instance = new Langs_LanguageDomains();
+            self::$instance = new LanguageDomains();
         }
 
         return self::$instance;
     }
 
-    //constructor
+    /**
+     * @throws Exception
+     */
     private function __construct() {
         //get languages file
         //
@@ -29,7 +36,7 @@ class Langs_LanguageDomains {
         $file = INIT::$UTILS_ROOT . '/Langs/languageDomains.json';
 
         $string = file_get_contents( $file );
-        //parse to associative array
+        //parse to an associative array
         $subjects = json_decode( $string, true );
         Utils::raiseJsonExceptionError();
 
@@ -49,17 +56,8 @@ class Langs_LanguageDomains {
     /**
      * @return array
      */
-    public static function getEnabledHashMap(){
+    public static function getEnabledHashMap(): array {
         return self::$subjectHashMap;
     }
 
-    public static function getDisplayDomain( $domainID ) {
-        foreach ( self::$subjectMap as $domain ) {
-            if ( $domain[ 'key' ] == $domainID ) {
-                return $domain[ 'display' ];
-            }
-        }
-
-        return "Generic";
-    }
 }

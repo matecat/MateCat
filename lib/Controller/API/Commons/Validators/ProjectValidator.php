@@ -5,8 +5,9 @@ namespace API\Commons\Validators;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
-use ApiKeys_ApiKeyStruct;
 use Log;
+use Projects_ProjectStruct;
+use Users_UserStruct;
 
 /**
  * @daprecated this should extend Base
@@ -17,18 +18,22 @@ use Log;
 class ProjectValidator extends Base {
 
     /**
-     * @var ApiKeys_ApiKeyStruct
+     * @var Users_UserStruct
      */
-    private $api_record;
+    private $user;
+
+    /**
+     * @var int
+     */
     private $id_project;
 
     /**
-     * @param ApiKeys_ApiKeyStruct $api_record
+     * @param Users_UserStruct $user
      *
      * @return $this
      */
-    public function setApiRecord( $api_record ) {
-        $this->api_record = $api_record;
+    public function setUser( Users_UserStruct $user ) {
+        $this->user = $user;
 
         return $this;
     }
@@ -45,10 +50,17 @@ class ProjectValidator extends Base {
     }
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     private $project;
     private $feature;
+
+    /**
+     * @param Projects_ProjectStruct $project
+     */
+    public function setProject(Projects_ProjectStruct $project) {
+        $this->project = $project;
+    }
 
     public function getProject() {
         return $this->project;
@@ -67,18 +79,20 @@ class ProjectValidator extends Base {
      */
     protected function _validate() {
 
-        $this->project = \Projects_ProjectDao::findById( $this->id_project );
+        if(!$this->project){
+            $this->project = \Projects_ProjectDao::findById( $this->id_project );
+        }
 
         if ( $this->project == false ) {
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "Project not found.", 404 );
         }
 
         if ( !$this->validateFeatureEnabled() ) {
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "Feature not enabled on this project.", 404 );
         }
 
         if( !$this->inProjectScope() ){
-            throw new NotFoundException( "Project Not Found.", 404 );
+            throw new NotFoundException( "You are not allowed to access to this project", 403 );
         }
 
     }
@@ -93,13 +107,13 @@ class ProjectValidator extends Base {
      */
     private function inProjectScope() {
 
-        if( !$this->api_record ){
+        if( !$this->user ){
             throw new AuthenticationError( "Invalid API key", 401 );
         }
 
-        Log::doJsonLog( $this->api_record->getUser()->email );
+        Log::doJsonLog( $this->user->email );
         Log::doJsonLog( $this->project->id_customer );
 
-        return $this->api_record->getUser()->email == $this->project->id_customer;
+        return $this->user->email == $this->project->id_customer;
     }
 }

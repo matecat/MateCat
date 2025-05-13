@@ -25,13 +25,11 @@ export const searchTermIntoSegments = async ({
   status,
   matchcase,
   exactmatch,
-  strictMode,
+  inCurrentChunkOnly,
   replace,
   revisionNumber,
 }) => {
   const paramsData = {
-    action: 'getSearch',
-    function: 'find',
     job: idJob,
     password,
     token,
@@ -40,7 +38,7 @@ export const searchTermIntoSegments = async ({
     status,
     matchcase,
     exactmatch,
-    strict_mode: strictMode,
+    inCurrentChunkOnly: inCurrentChunkOnly,
     replace,
     revision_number: revisionNumber,
   }
@@ -49,7 +47,7 @@ export const searchTermIntoSegments = async ({
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=getSearch`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/search`, {
     method: 'POST',
     body: formData,
     credentials: 'include',

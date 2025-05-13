@@ -1,15 +1,20 @@
+@use "../../commons/colors";
+
 .tooltip-container {
   position: absolute;
   z-index: 12;
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 5px 10px;
-  background-color: $white;
-  box-shadow: 0 0 16px rgba($black, 0.25);
-  color: $grey6;
+  background-color: colors.$white;
+  box-shadow: 0 0 16px rgba(colors.$black, 0.25);
+  color: colors.$grey6;
   pointer-events: none;
-  white-space: pre;
+  white-space: normal;
   text-align: left;
-  border-radius: 5px;
+  max-width: 600px;
+
+  animation: 0.1s linear forwards showing;
+
   &.top {
     transform: translate(-50%, -100%);
   }
@@ -36,34 +41,47 @@
   &.bottom {
     &::before {
       left: 50%;
-      margin-left: -3px;
-      border-left: 3px solid transparent;
-      border-right: 3px solid transparent;
+      margin-left: -4px;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
     }
   }
   &.top::before {
     bottom: -6px;
-    border-top: 6px solid $white;
+    border-top: 6px solid colors.$white;
   }
   &.bottom::before {
     top: -6px;
-    border-bottom: 6px solid $white;
+    border-bottom: 6px solid colors.$white;
   }
   &.left,
   &.right {
     &::before {
       top: 50%;
-      margin-top: -3px;
-      border-top: 3px solid transparent;
-      border-bottom: 3px solid transparent;
+      margin-top: -4px;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
     }
   }
   &.left::before {
     right: -6px;
-    border-left: 6px solid $white;
+    border-left: 6px solid colors.$white;
   }
   &.right::before {
     left: -6px;
-    border-right: 6px solid $white;
+    border-right: 6px solid colors.$white;
+  }
+}
+
+.tooltip-container-interactive {
+  pointer-events: auto;
+}
+
+@keyframes showing {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

@@ -2,7 +2,7 @@
 
 namespace TestHelpers;
 
-use Database;
+use IDatabase;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,7 +15,7 @@ abstract class AbstractTest extends TestCase {
 
     protected $thisTest;
 
-    protected $jobDao;
+    protected $databaseInstance;
     protected $reflectedMethod;
 
     public function setUp(): void {
@@ -32,7 +32,7 @@ abstract class AbstractTest extends TestCase {
     /**
      * @return mixed
      */
-    protected function getTheLastInsertIdByQuery( Database $database_instance ) {
+    protected function getTheLastInsertIdByQuery( IDatabase $database_instance ) {
         $stmt = $database_instance->getConnection()->query( "SELECT LAST_INSERT_ID()" );
         $stmt->execute();
 

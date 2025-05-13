@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <title>Manage Projects - Matecat</title>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with Matecat" />
@@ -14,7 +15,7 @@
     <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
 
-    <script type="text/javascript">
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
@@ -52,11 +53,11 @@
 
 </footer>
 
- <!--Container for MateCat Notifications-->
+ <!--Container for Matecat Notifications-->
 <div class="notifications-wrapper"></div>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
-<div metal:use-macro="common.html/footer_includes" />
+<div metal:use-macro="templates/common.html/footer_includes" />
 </body>
 </html>

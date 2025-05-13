@@ -1,6 +1,7 @@
 import * as DraftMatecatConstants from './editorConstants'
 import QaCheckBlacklistHighlight from '../../GlossaryComponents/QaCheckBlacklistHighlight.component'
 import TextUtils from '../../../../utils/textUtils'
+import {tagSignatures} from './tagModel'
 
 const activateQaCheckBlacklist = (blackListedTerms, sid) => {
   const generateGlossaryDecorator = ({regex, regexCallback}) => {
@@ -21,7 +22,17 @@ const activateQaCheckBlacklist = (blackListedTerms, sid) => {
 
   const createGlossaryRegex = (blacklistArray) => {
     const matches = blacklistArray.reduce(
-      (acc, {matching_words}) => [...acc, ...matching_words],
+      (acc, {matching_words}) => [
+        ...acc,
+        ...matching_words.map((words) =>
+          tagSignatures.space
+            ? words.replace(
+                tagSignatures.space.regex,
+                '​' + tagSignatures.space.placeholder + '​',
+              )
+            : words,
+        ),
+      ],
       [],
     )
 

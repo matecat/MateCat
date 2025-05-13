@@ -6,7 +6,7 @@ import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import ManageConstants from '../constants/ManageConstants'
 import assign from 'object-assign'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 
 EventEmitter.prototype.setMaxListeners(0)
 
@@ -14,7 +14,7 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
   projects: null,
 
   setProjects: function (projects) {
-    this.projects = Immutable.fromJS(projects)
+    this.projects = fromJS(projects)
   },
   /**
    * Update all
@@ -22,16 +22,16 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
   updateAll: function (projects) {
     /*this.projects = this.projects.mergeWith((oldProject, newProject, index) => {
             return (newProject.get('id') === newProject.get('id')) ? oldProject : newProject
-        },Immutable.fromJS(projects));*/
-    // this.projects = this.projects.toSet().union(Immutable.fromJS(projects).toSet()).toList();
+        },fromJS(projects));*/
+    // this.projects = this.projects.toSet().union(fromJS(projects).toSet()).toList();
     //
-    this.projects = Immutable.fromJS(projects)
+    this.projects = fromJS(projects)
   },
   /**
    * Add Projects (pagination)
    */
   addProjects: function (projects) {
-    this.projects = this.projects.concat(Immutable.fromJS(projects))
+    this.projects = this.projects.concat(fromJS(projects))
   },
 
   removeProject: function (project) {
@@ -105,16 +105,12 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     )
   },
 
-  changeProjectName: function (project, newProject) {
-    let projectOld = this.projects.find(function (prj) {
+  changeProjectName: function (project, newName) {
+    const currentProject = this.projects.find(function (prj) {
       return prj.get('id') == project.get('id')
     })
-    let indexProject = this.projects.indexOf(projectOld)
-    this.projects = this.projects.setIn([indexProject, 'name'], newProject.name)
-    this.projects = this.projects.setIn(
-      [indexProject, 'project_slug'],
-      newProject.project_slug,
-    )
+    const indexProject = this.projects.indexOf(currentProject)
+    this.projects = this.projects.setIn([indexProject, 'name'], newName)
   },
 
   changeProjectAssignee: function (project, user) {
@@ -149,7 +145,7 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
       let indexJob = project.get('jobs').indexOf(job)
       this.projects = this.projects.setIn(
         [indexProject, 'jobs', indexJob, 'outsource'],
-        Immutable.fromJS(outsource),
+        fromJS(outsource),
       )
     }
   },
@@ -165,7 +161,7 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     let indexJob = project.get('jobs').indexOf(job)
     this.projects = this.projects.setIn(
       [indexProject, 'jobs', indexJob, 'translator'],
-      Immutable.fromJS(translator),
+      fromJS(translator),
     )
   },
 
@@ -181,7 +177,7 @@ const ProjectsStore = assign({}, EventEmitter.prototype, {
     // let url = config.hostpath + '/revise2/' + project.get('name') + '/'+ job.get('source') +'-'+ job.get('target') +'/'+ jobId +'-'+ secondPassPassword;
     this.projects = this.projects.setIn(
       [indexProject, 'jobs', indexJob, 'revise_passwords', 1],
-      Immutable.fromJS({revision_number: 2, password: secondPassPassword}),
+      fromJS({revision_number: 2, password: secondPassPassword}),
     )
   },
 
@@ -206,8 +202,8 @@ AppDispatcher.register(function (action) {
       ProjectsStore.emitChange(
         action.actionType,
         ProjectsStore.projects,
-        Immutable.fromJS(action.team),
-        Immutable.fromJS(action.teams),
+        fromJS(action.team),
+        fromJS(action.teams),
         action.hideSpinner,
         action.filtering,
       )
@@ -217,7 +213,7 @@ AppDispatcher.register(function (action) {
       ProjectsStore.emitChange(
         action.actionType,
         ProjectsStore.projects,
-        Immutable.fromJS(action.teams),
+        fromJS(action.teams),
         action.hideSpinner,
       )
       break
@@ -281,7 +277,7 @@ AppDispatcher.register(function (action) {
       ProjectsStore.emitChange(action.actionType)
       break
     case ManageConstants.CHANGE_PROJECT_NAME:
-      ProjectsStore.changeProjectName(action.project, action.newProject)
+      ProjectsStore.changeProjectName(action.project, action.newName)
       ProjectsStore.emitChange(
         ManageConstants.UPDATE_PROJECTS,
         ProjectsStore.projects,
@@ -315,10 +311,7 @@ AppDispatcher.register(function (action) {
       )
       break
     case ManageConstants.HIDE_PROJECT:
-      ProjectsStore.emitChange(
-        action.actionType,
-        Immutable.fromJS(action.project),
-      )
+      ProjectsStore.emitChange(action.actionType, fromJS(action.project))
       break
     case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
     case ManageConstants.DISABLE_DOWNLOAD_BUTTON:

@@ -3,6 +3,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import {isUndefined, size} from 'lodash'
@@ -80,9 +81,9 @@ const TAB_ITEMS = {
 }
 const DELAY_MESSAGE = 7000
 
-function SegmentFooter() {
-  const isMac = isMacOS()
+const isMac = isMacOS()
 
+function SegmentFooter() {
   const [configurations, setConfigurations] = useState(
     SegmentStore._footerTabsConfig.toJS(),
   )
@@ -106,6 +107,8 @@ function SegmentFooter() {
   const [message, setMessage] = useState('')
 
   const {segment, clientConnected, multiMatchLangs} = useContext(SegmentContext)
+
+  const previousActiveTab = useRef()
 
   const getHideMatchesCookie = useCallback(() => {
     const cookieName = config.isReview ? 'hideMatchesReview' : 'hideMatches'
@@ -179,7 +182,11 @@ function SegmentFooter() {
     const modifyTabVisibility = (name, visible) =>
       setTabStateChanges({name, visible, enabled: visible})
     const openTab = (sidProp, name) =>
-      segment.sid === sidProp && setActiveTab({name, forceOpen: true})
+      segment.sid === sidProp &&
+      setActiveTab((prevState) => {
+        previousActiveTab.current = prevState
+        return {name, forceOpen: true}
+      })
     const addTabIndex = (sidProp, name, index) =>
       segment.sid === sidProp && setTabStateChanges({name, index})
     const closeAllTabs = () => setTabStateChanges({visible: false})
@@ -314,7 +321,10 @@ function SegmentFooter() {
     if (!name) return
     if (!TAB_ITEMS[name].isEnableCloseButton)
       setTimeout(() => SegmentActions.setTabOpen(segment.sid, name))
-    setActiveTab({name: name})
+    setActiveTab((prevState) => {
+      previousActiveTab.current = prevState
+      return {name: name}
+    })
   }, [userChangedTab, segment?.sid])
 
   // update tab state changes
@@ -340,6 +350,20 @@ function SegmentFooter() {
       })),
     )
   }, [segment, activeTab])
+
+  useEffect(() => {
+    const isOpenTabNotVisible = tabItems
+      .filter(({visible}) => visible)
+      .every(({open}) => !open)
+    if (isOpenTabNotVisible)
+      setActiveTab((prevState) =>
+        typeof prevState === 'object'
+          ? previousActiveTab.current
+            ? previousActiveTab.current
+            : tabItems[0]
+          : prevState,
+      )
+  }, [tabItems])
 
   // remove message after a few seconds
   useEffect(() => {
@@ -508,7 +532,7 @@ function SegmentFooter() {
             <span className="number">
               {countResult ? ' (' + countResult + ')' : ''}
             </span>
-          ) : clientConnected ? (
+          ) : clientConnected || typeof clientConnected === 'undefined' ? (
             <span className="loader loader_on" />
           ) : (
             <i className="icon-warning2 icon" />

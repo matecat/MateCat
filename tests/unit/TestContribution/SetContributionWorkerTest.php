@@ -113,7 +113,18 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create a stub Engine MyMemory
-        $stubEngine = @$this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+        $stubEngine = @$this
+            ->getMockBuilder( '\Engines_MyMemory' )
+            ->onlyMethods(['update', 'getEngineRecord' ])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct->id   = 1;
+        $engineStruct->type = Constants_Engines::TM;
+        $stubEngine->expects( $this->once() )
+                ->method( 'getEngineRecord' )
+                ->willReturn( $engineStruct );
 
         $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
                 ->method( 'update' )
@@ -129,7 +140,11 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this
+            ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -182,7 +197,18 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create a stub Engine MyMemory
-        $stubEngine = @$this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+        $stubEngine = @$this
+            ->getMockBuilder( '\Engines_MyMemory' )
+            ->onlyMethods(['update', 'getEngineRecord' ])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct->id   = 1;
+        $engineStruct->type = Constants_Engines::TM;
+        $stubEngine->expects( $this->once() )
+                ->method( 'getEngineRecord' )
+                ->willReturn( $engineStruct );
 
         $stubEngine->expects( $stubEngineParameterSpy = $this->once() )
                 ->method( 'update' )
@@ -198,7 +224,12 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this
+            ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
+
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
@@ -253,23 +284,26 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this
+            ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
 
-        $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
-        $contributionMockQueueObject->expects( $this->once() )
-                ->method( 'getJobStruct' )
-                ->willReturn(
-                        new Jobs_JobStruct(
-                                [
-                                        'id'       => $this->contributionStruct->id_job,
-                                        'password' => $this->contributionStruct->job_password,
-                                        'source'   => 'en-US',
-                                        'target'   => 'it-IT',
-                                        'id_tms'   => 0,
-                                        'tm_keys'  => '[]'
-                                ]
-                        )
-                );
+        $contributionMockQueueObject
+            ->method( 'getJobStruct' )
+            ->willReturn(
+                new Jobs_JobStruct(
+                    [
+                        'id'       => $this->contributionStruct->id_job,
+                        'password' => $this->contributionStruct->job_password,
+                        'source'   => 'en-US',
+                        'target'   => 'it-IT',
+                        'id_tms'   => 0,
+                        'tm_keys'  => '[]'
+                    ]
+                )
+            );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
         $reflectedMethod->setAccessible( true );
@@ -296,7 +330,17 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create a stub Engine MyMemory
-        $stubEngine = @$this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+        $stubEngine = @$this
+            ->getMockBuilder( '\Engines_MyMemory' )
+            ->disableOriginalConstructor()
+            ->onlyMethods(['update', 'getEngineRecord' ])
+            ->getMock();
+        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct->id   = 1;
+        $engineStruct->type = Constants_Engines::TM;
+        $stubEngine->expects( $this->once() )
+                ->method( 'getEngineRecord' )
+                ->willReturn( $engineStruct );
 
         $stubEngine->expects( $this->once() )
                 ->method( 'update' )
@@ -308,7 +352,11 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement Contribution\ContributionSetStruct
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( '\Contribution\ContributionSetStruct' )->getMock();
+        $contributionMockQueueObject = @$this
+            ->getMockBuilder( '\Contribution\ContributionSetStruct' )
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getProp', 'getJobStruct'])
+            ->getMock();
 
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )
@@ -320,7 +368,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                                         'password' => $this->contributionStruct->job_password,
                                         'source'   => 'en-US',
                                         'target'   => 'it-IT',
-                                        'id_tms'   => 0,
+                                        'id_tms'   => 1,
                                         'tm_keys'  => '[]'
                                 ]
                         )
@@ -331,6 +379,73 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
         $this->expectException( 'TaskRunner\Exceptions\ReQueueException' );
         $reflectedMethod->invokeArgs( $_worker, [ $contributionMockQueueObject ] );
+
+    }
+
+    /**
+     * @test
+     * @throws ReflectionException
+     */
+    public function should_load_the_correct_engine() {
+
+        /**
+         * @var $_worker SetContributionWorker
+         */
+        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( '\AMQHandler' )->getMock() );
+        $_worker->attach( $this );
+
+        $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
+        $reflectedMethod->setAccessible( true );
+        $reflectedMethod->invokeArgs( $_worker, [
+                new Jobs_JobStruct(
+                        [
+                                'id_tms'       => 1,
+                                'id_mt_engine' => 2,
+                        ]
+                )
+        ] );
+
+        $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
+        $reflectionProperty->setAccessible( true );
+        $engineLoaded = $reflectionProperty->getValue( $_worker );
+
+        $this->assertInstanceOf( Engines_MyMemory::class, $engineLoaded );
+
+    }
+
+    /**
+     * @test
+     * @return void
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function should_change_the_engine_from_none_to_the_right_MyMemory(){
+
+        /**
+         * @var $_worker SetContributionWorker
+         */
+        $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( '\AMQHandler' )->getMock() );
+        $_worker->attach( $this );
+
+        //create an empty engine
+        $_worker->setEngine( Engine::getInstance( 0 ) );
+
+
+        $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
+        $reflectedMethod->setAccessible( true );
+        $reflectedMethod->invokeArgs( $_worker, [
+                new Jobs_JobStruct(
+                        [
+                                'id_tms'       => 1
+                        ]
+                )
+        ] );
+
+        $reflectionProperty = new ReflectionProperty( $_worker, '_engine' );
+        $reflectionProperty->setAccessible( true );
+        $engineLoaded = $reflectionProperty->getValue( $_worker );
+
+        $this->assertInstanceOf( Engines_MyMemory::class, $engineLoaded );
 
     }
 

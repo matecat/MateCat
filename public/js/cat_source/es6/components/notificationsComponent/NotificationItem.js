@@ -50,6 +50,7 @@ const NotificationItem = ({
     }, 50)
 
     if (autoDismiss) {
+      clearTimeout(_notificationTimer.current)
       _notificationTimer.current = setTimeout(() => {
         hideNotification()
       }, timer)
@@ -122,9 +123,6 @@ const NotificationItem = ({
 
   return (
     <div className={styleNameContainer} style={getNotificationStyle()}>
-      {position === 'bl' && type === 'info' ? (
-        <div className="notifications-cat-smiling" />
-      ) : null}
       {dismissable ? (
         <span
           className={'notification-close-button'}

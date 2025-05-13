@@ -1,9 +1,9 @@
 <?php
 
 namespace Filters;
-use finfo;
+
 use INIT;
-use Langs_Languages;
+use Langs\Languages;
 use MimeTypes\MimeTypes;
 
 /**
@@ -27,14 +27,14 @@ class OCRCheck {
     /**
      * @var array
      */
-    private $mimeTypes = array(
-        'image/jpeg',
-        'image/gif',
-        'application/octet-stream', //bmp files
-        'image/tiff',
-        'application/pdf',
-        'image/jpeg',
-    );
+    private $mimeTypes = [
+            'image/jpeg',
+            'image/gif',
+            'application/octet-stream', //bmp files
+            'image/tiff',
+            'application/pdf',
+            'image/jpeg',
+    ];
 
     /**
      * @var string
@@ -55,18 +55,18 @@ class OCRCheck {
      *
      * @return bool
      */
-    public function thereIsWarning( $filePath ){
+    public function thereIsWarning( $filePath ) {
 
-        if( !INIT::$FILTERS_OCR_CHECK ){
+        if ( !INIT::$FILTERS_OCR_CHECK ) {
             return false;
         }
 
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
 
-        if( array_search( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) === false ){
+        if ( array_search( $this->source_lang, $languages::getLanguagesWithOcrSupported() ) === false ) {
 
-            $mimeType = (new MimeTypes())->guessMimeType($filePath);
-            if( array_search( $mimeType, $this->mimeTypes ) !== false  ){
+            $mimeType = ( new MimeTypes() )->guessMimeType( $filePath );
+            if ( array_search( $mimeType, $this->mimeTypes ) !== false ) {
                 return true;
             }
         }
@@ -80,18 +80,18 @@ class OCRCheck {
      *
      * @return bool
      */
-    public function thereIsError( $filePath ){
+    public function thereIsError( $filePath ) {
 
-        if( !INIT::$FILTERS_OCR_CHECK ){
+        if ( !INIT::$FILTERS_OCR_CHECK ) {
             return false;
         }
 
-        $languages = Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
 
-        if( array_search( $this->source_lang, $languages::getLanguagesWithOcrNotSupported() ) !== false ){
+        if ( array_search( $this->source_lang, $languages::getLanguagesWithOcrNotSupported() ) !== false ) {
 
-            $mimeType = (new MimeTypes())->guessMimeType($filePath);
-            if( array_search( $mimeType, $this->mimeTypes ) !== false  ){
+            $mimeType = ( new MimeTypes() )->guessMimeType( $filePath );
+            if ( array_search( $mimeType, $this->mimeTypes ) !== false ) {
                 return true;
             }
         }

@@ -14,12 +14,12 @@ use Database;
 
 class QualityReportDao extends DataAccess_AbstractDao {
 
-    protected function _buildResult( $result_array ) {
+    protected function _buildResult( array $array_result ) {
 
     }
 
 
-    public function getAverages( \Chunks_ChunkStruct $chunk ) {
+    public function getAverages( \Jobs_JobStruct $chunk ) {
         $sql = <<<SQL
 
       SELECT
@@ -60,11 +60,11 @@ SQL;
 
     }
     /**
-     * @param \Chunks_ChunkStruct $chunk
+     * @param \Jobs_JobStruct $chunk
      *
      * @return array
      */
-    public static function getSegmentsForQualityReport( \Chunks_ChunkStruct $chunk ) {
+    public static function getSegmentsForQualityReport( \Jobs_JobStruct $chunk ) {
 
         $sql = <<<SQL
 
@@ -197,11 +197,7 @@ SQL;
   issues.severity     as issue_severity,
   issues.comment      as issue_comment,
   issues.target_text  as target_text,
-  issues.uid          as issue_uid,
-
-  translation_warnings.scope as warning_scope,
-  translation_warnings.data as warning_data,
-  translation_warnings.severity as warning_severity
+  issues.uid          as issue_uid
 
 FROM  qa_entries issues
 
@@ -212,9 +208,6 @@ JOIN (
 
   LEFT JOIN qa_categories
     ON issues.id_category = qa_categories.id
-
-  LEFT JOIN translation_warnings
-    ON translation_warnings.id_segment = issues.id_segment
 
     WHERE issues.deleted_at IS NULL AND issues.id_job = ?
 

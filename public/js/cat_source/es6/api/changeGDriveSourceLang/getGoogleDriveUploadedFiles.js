@@ -1,5 +1,9 @@
-export const changeGDriveSourceLang = async (sourceLang) => {
-  let url = `/gdrive/change/${sourceLang}`
+export const changeGDriveSourceLang = async ({
+  sourceLang,
+  segmentation_rule,
+  filters_extraction_parameters_template_id,
+}) => {
+  let url = `/gdrive/change?source=${sourceLang}&segmentation_rule=${segmentation_rule}&filters_extraction_parameters_template_id=${filters_extraction_parameters_template_id}`
 
   const res = await fetch(url, {
     credentials: 'include',

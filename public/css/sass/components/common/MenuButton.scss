@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .menu-button {
   display: flex;
@@ -15,18 +15,18 @@
   }
 
   > button {
-    color: $black;
-    background: $grey4;
+    color: colors.$black;
+    background: colors.$grey4;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid $grey7;
+    border: 1px solid colors.$grey7;
   }
 
   .label {
     border-radius: 2px 0 0 2px;
 
     &:hover {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 
@@ -38,7 +38,7 @@
     padding: 0 2px;
 
     &:hover {
-      color: $grey7;
+      color: colors.$grey7;
     }
   }
 }
@@ -53,11 +53,11 @@
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 4px rgba(0, 0, 0, 0.24);
   padding: 8px;
-  background-color: $white;
+  background-color: colors.$white;
   margin-top: 10px;
 
   > :not(:last-child) {
-    border-bottom: solid 1px $grey4;
+    border-bottom: solid 1px colors.$grey4;
   }
 }
 
@@ -104,7 +104,7 @@
   cursor: pointer;
 
   &:not(:disabled):hover {
-    background-color: $grey9;
-    color: $translatedBlue;
+    background-color: colors.$grey9;
+    color: colors.$translatedBlue;
   }
 }

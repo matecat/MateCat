@@ -10,13 +10,13 @@ namespace Features\ReviewExtended\Controller\API;
 
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
 
@@ -31,7 +31,7 @@ class QualityReportController extends BaseChunkController {
     protected $project;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

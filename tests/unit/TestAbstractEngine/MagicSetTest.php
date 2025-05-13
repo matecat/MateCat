@@ -24,7 +24,7 @@ class MagicSetTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->engine_struct_param                   = new EnginesModel_EngineStruct();
-        $this->engine_struct_param->type             = "MT";
+        $this->engine_struct_param->type             = Constants_Engines::MT;
         $this->engine_struct_param->name             = "DeepLingoTestEngine";
         $this->engine_struct_param->others           = [ 'alfa' => "one", 'beta' => "two" ];
         $this->engine_struct_param->extra_parameters = [ 'gamma' => "three", 'delta' => "four" ];

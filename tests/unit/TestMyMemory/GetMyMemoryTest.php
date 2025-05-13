@@ -56,7 +56,7 @@ class GetMyMemoryTest extends AbstractTest {
                 'prop'          => null,
                 'get_mt'        => true,
                 'id_user'       => [ 0 => "a6043e606ac9b5d7ff24" ],
-                'num_result'    => 3,
+                'num_result'    => 10,
                 'mt_only'       => false,
                 'isConcordance' => false,
                 'isGlossary'    => false,
@@ -166,7 +166,7 @@ class GetMyMemoryTest extends AbstractTest {
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
@@ -183,7 +183,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->exactly( 1 ) )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
+        $this->engine_MyMemory->expects( $this->exactly( 1 ) )->method( '_call' )->with( $url_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
         /**
@@ -230,7 +230,7 @@ TAB;
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
@@ -248,9 +248,10 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
+        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
+
         /**
          * general check on the keys of TSM object returned
          */
@@ -270,6 +271,8 @@ TAB;
         $this->assertTrue( $result->matches[ 2 ] instanceof Engines_Results_MyMemory_Matches );
 
         $result->matches = $result->get_matches_as_array();
+
+
 
         /**
          * 1st match
@@ -328,8 +331,8 @@ TAB;
         $this->assertEquals( "Legal_and_Notarial", $result->matches[ 2 ][ 'subject' ] );
         $this->assertEquals( "Europa.eu", $result->matches[ 2 ][ 'created_by' ] );
         $this->assertEquals( "Europa.eu", $result->matches[ 2 ][ 'last_updated_by' ] );
-        $this->assertEquals( "0000-00-00 00:00:00", $result->matches[ 2 ][ 'create_date' ] );
-        $this->assertEquals( "0000-00-00", $result->matches[ 2 ][ 'last_update_date' ] );
+        $this->assertEquals( "1970-01-01", $result->matches[ 2 ][ 'create_date' ] );
+        $this->assertEquals( "1970-01-01", $result->matches[ 2 ][ 'last_update_date' ] );
         $this->assertEquals( "58%", $result->matches[ 2 ][ 'match' ] );
         $this->assertEquals( [], $result->matches[ 2 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 2 ][ 'source_note' ] );
@@ -369,7 +372,7 @@ TAB;
                                 'langpair'  => 'it-IT|en-US',
                                 'de'        => 'demo@matecat.com',
                                 'mt'        => true,
-                                'numres'    => 3,
+                                'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0
                         ],
@@ -393,7 +396,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
+        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $rawValue_error );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
         /**

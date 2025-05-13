@@ -2,13 +2,15 @@ import React, {useRef} from 'react'
 import {isUndefined, size} from 'lodash'
 import {each, map} from 'lodash/collection'
 import {pick} from 'lodash/object'
-
+import $ from 'jquery'
+import {Popup} from 'semantic-ui-react'
 import OutsourceContainer from '../outsource/OutsourceContainer'
 import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
 import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
+import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 
 class AnalyzeChunksResume extends React.Component {
@@ -119,9 +121,6 @@ class AnalyzeChunksResume extends React.Component {
     e.stopPropagation()
     this.jobLinkRef[jid].select()
     this.jobLinkRef[jid].setSelectionRange(0, 99999)
-    setTimeout(() => {
-      $('.ui.icon.button.copy').popup('hide')
-    }, 3000)
     document.execCommand('copy')
   }
 
@@ -131,17 +130,17 @@ class AnalyzeChunksResume extends React.Component {
     const key = 'first_translate_click' + config.id_project
     if (!sessionStorage.getItem(key)) {
       //Track Translate click
-      const event = {
-        event: 'open_job',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
-        idProject: parseInt(config.id_project),
+      const userInfo = UserStore.getUser()
+      if (userInfo) {
+        const event = {
+          event: 'open_job',
+          userStatus: 'loggedUser',
+          userId: userInfo.user.uid,
+          idProject: parseInt(config.id_project),
+        }
+        CommonUtils.dispatchAnalyticsEvents(event)
+        sessionStorage.setItem(key, 'true')
       }
-      CommonUtils.dispatchAnalyticsEvents(event)
-      sessionStorage.setItem(key, 'true')
     }
     window.open(chunk.urls.t, '_blank')
   }
@@ -222,14 +221,20 @@ class AnalyzeChunksResume extends React.Component {
                       value={chunkAnalysis.urls.t}
                       onClick={(e) => e.stopPropagation()}
                     />
-                    <button
-                      onClick={copyJobLinkToClipboard(jidChunk)}
-                      className={'ui icon button copy'}
-                      data-content="Copied to Clipboard!"
-                      data-position="top center"
-                    >
-                      <i className="icon-link icon" />
-                    </button>
+                    <Popup
+                      content="Copied to Clipboard!"
+                      on="click"
+                      pinned
+                      position="top center"
+                      trigger={
+                        <button
+                          onClick={copyJobLinkToClipboard(jidChunk)}
+                          className={'ui icon button copy'}
+                        >
+                          <i className="icon-link icon" />
+                        </button>
+                      }
+                    />
                   </div>
                 </div>
                 <div className="titles-compare">
@@ -524,11 +529,6 @@ class AnalyzeChunksResume extends React.Component {
         }, 400)
       })
     }
-
-    $('.ui.icon.button.copy').popup({
-      on: 'click',
-      hideOnScroll: true,
-    })
   }
 
   render() {

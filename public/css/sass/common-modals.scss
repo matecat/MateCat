@@ -1,11 +1,7 @@
-@import 'modals/instructionsModal';
-@import 'modals/tmShareModal';
-@import 'modals/PreferenceModal';
-
-body.side-popup {
-  overflow: hidden !important;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-}
+@use 'modals/instructionsModal';
+@use 'modals/tmShareModal';
+@use 'modals/PreferenceModal';
+@use "commons/colors";
 
 h1,
 h2,
@@ -24,18 +20,6 @@ a {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
-ul,
-li,
-ol,
-p,
-button,
-.button,
-.primary,
-input,
-input[type='text'] input[type='email'] .input {
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 ::-webkit-input-placeholder {
   /* Chrome/Opera/Safari */
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
@@ -45,82 +29,17 @@ input[type='text'] input[type='email'] .input {
 /***** Login Footer ****/
 
 #logoutlink,
-.reset-password,
-#resendlink {
+.reset-password {
   margin-bottom: 10px;
   text-decoration: underline;
   float: left;
   cursor: pointer;
-  color: $linkBlue;
+  color: colors.$linkBlue;
 
   &:hover {
     text-decoration: none;
-    color: $linkBlueHover;
+    color: colors.$linkBlueHover;
   }
-}
-
-#resendlink {
-  float: none;
-}
-
-a.ui.primary.right.floated.button.tiny.register-ok {
-  border: 1px solid black;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-  font-size: 16px;
-  padding: 6px 19px;
-}
-
-#welcomebox {
-  float: right;
-  cursor: pointer;
-  position: relative;
-  text-decoration: underline;
-  margin-left: 8px;
-}
-
-.manage #welcomebox {
-  margin-top: 0;
-}
-
-#welcomebox .icon-sort-up {
-  font-size: 22px;
-  float: right;
-  margin-left: 9px;
-}
-
-.user-menu {
-  position: absolute;
-  top: -92px;
-  background-color: white;
-  color: black;
-  text-align: left;
-  font-size: 19px;
-  left: -60px;
-  box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
-  visibility: hidden;
-  transform: translateY(1em);
-  transition:
-    all 0.3s ease-in-out 0s,
-    visibility 0s linear 0.3s,
-    z-index 0s linear 0.01s;
-  z-index: -1;
-  opacity: 0;
-}
-
-.user-menu li {
-  width: 120px;
-  height: 20px;
-  padding: 10px;
-  line-height: 20px;
-  border-bottom: 1px solid black;
-}
-
-#welcomebox:hover .user-menu {
-  visibility: visible;
-  opacity: 1;
-  z-index: 1;
-  transform: translateY(0%);
-  transition-delay: 0s, 0s, 0.3s;
 }
 
 .success-modal,
@@ -132,16 +51,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   text-align: left;
   float: left;
   color: red;
-}
-
-.validation-error.email-translator-error {
-  position: relative;
-  top: -25px;
-  left: 18px;
-  padding: 0px;
-  margin-bottom: 0px;
-  height: 0px;
-  display: none;
 }
 
 .user-info-form,
@@ -157,83 +66,12 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   width: 100%;
 }
 
-.login-container-right {
-  width: 41%;
-  padding: 3% 1% 3% 25px;
-  font-size: 17px;
-  display: inline-block;
-  float: left;
-  box-sizing: border-box;
-  //background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
-  //background-size: 84%;
-  //background-position: 370% center;
-  padding-top: 30px;
-}
-
-.login-container-left {
-  width: 59%;
-  display: inline-block;
-  padding: 20px 0;
-  background: #f8f8f8;
-  border-left: 1px solid #ccc;
-  box-sizing: border-box;
-  text-align: center;
-}
-
-.login-container-right h2,
-.login-container-right p,
-.login-container-right ul {
-  text-align: left;
-}
-
-.add-project-manage {
-  padding-left: 0px !important;
-  margin-left: 20px !important;
-}
-
-.login-container-right ul {
-  margin-left: 30px;
-  margin-top: 25px;
-  margin-bottom: 60px;
-}
-
-.login-container-right .register-button {
-  margin-top: 30px;
-  float: left;
-  margin-left: 50px;
-}
-
-.google-login-button {
-  background: url('../../img/btn_gg_sprite.png') no-repeat;
-  background-position: 0 0;
-}
-
-.google-login-button:hover {
-  background-position: 0 -101px;
-  box-shadow: none !important;
-}
-
-.google-login-button:focus {
-  background-position: 0 -50px;
-}
-
-.google-login-button,
-.google-login-button:hover,
-.google-login-button:focus {
-  background-size: 100%;
-  border: none;
-  height: 30px;
-  box-shadow: none !important;
-}
-
 .forgot-password {
   cursor: pointer;
   text-decoration: underline;
-  color: $linkBlue;
+  color: colors.$linkBlue;
 }
 
-.preferences-modal input[type='text'],
-.preferences-modal input[type='password'],
 .dqf-modal input[type='text'],
 .dqf-modal input[type='password'],
 .login-container-left input,
@@ -260,7 +98,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 .dqf-modal input[disabled] {
   color: #999;
   cursor: not-allowed;
-  background: $grey2;
+  background: colors.$grey2;
 }
 
 .user-info-form input {
@@ -269,12 +107,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   color: #000;
 }
 
-.login-container-right li {
-  margin-bottom: 15px;
-  margin-right: 42px;
-}
-
-.google-login-button,
 .login-button,
 .register-button,
 .register-submit,
@@ -300,18 +132,9 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   padding: 20px 0;
 }
 
-.preferences-modal input:disabled {
-  color: #999;
-  cursor: not-allowed;
-  background: $grey2;
-}
-
-.preferences-modal .reset-password {
-  margin-right: 20px;
-}
-
 .forgot-password-modal {
-  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px 136px;
+  background: url(/public/img/matecat_watch-left-border.png) no-repeat -34px
+    136px;
   background-size: 23%;
   /*width: 385px;*/
   padding: 25px 96px;
@@ -327,19 +150,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   width: 80%;
 }
 
-.register-modal {
-  padding: 25px 15%;
-  text-align: center;
-}
-
-.register-modal h2 {
-  padding: 10px 0 10px 0;
-}
-
-.register-modal .google-login-button {
-  margin-bottom: 0;
-}
-
 .preference-modal-message {
   box-shadow: 0 2px 2px #e2e2e2;
   border-radius: 2px;
@@ -352,7 +162,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 }
 
 .button-loader {
-  background: url(../../img/loader.gif) center center no-repeat;
+  background: url(/public/img/loader.gif) center center no-repeat;
   width: 20px;
   height: 20px;
   visibility: hidden;
@@ -421,7 +231,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
   .modal-logo {
     background-size: inherit;
-    background: url(../../img/logo_matecat_small_white.svg) no-repeat;
+    background: url(/public/img/logo_matecat_small_white.svg) no-repeat;
     background-position-y: center;
     background-size: contain;
     width: 35px;
@@ -433,7 +243,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
     min-height: 50px;
     height: 100%;
     /*color: #000;*/
-    background-color: $grey5;
+    background-color: colors.$grey5;
     border-radius: 0 0 4px 4px;
     margin: 0 auto;
     overflow: hidden;
@@ -560,17 +370,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-.preferences-modal {
-  text-align: left;
-}
-
-.preferences-modal h2 {
-  margin: 0;
-  padding: 0 0 0 15px;
-  font-size: 20px;
-  font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-}
-
 .user-link {
   float: left;
   clear: both;
@@ -578,6 +377,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   margin-left: 66px;
   height: 20px;
   margin-top: 12px;
+  display: flex;
+  gap: 16px;
 }
 
 /* The Close Button */
@@ -607,74 +408,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   border: 1px solid #666;
 }
 
-.matecat-modal-content .btn-confirm-medium:hover,
-.matecat-modal-content .btn-confirm-small:hover {
-  cursor: pointer;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-  color: #ffffff;
-}
-
-.matecat-modal-content .btn-confirm-medium:active {
-  box-shadow: none !important;
-}
-
-.matecat-modal-content .btn-confirm-medium {
-  color: #fff;
-  background: $translatedBlue;
-  border: 1px solid #848689;
-  font-weight: bold;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 2px;
-  font-size: 18px;
-  margin: 16px 0 16px 0px;
-  display: inline-block;
-  text-align: center;
-  position: relative;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
-  background-position: 0 0;
-  background-size: cover;
-  border: none;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button,
-.matecat-modal-content .btn-confirm-medium.google-login-button:hover,
-.matecat-modal-content .btn-confirm-medium.google-login-button:focus {
-  background-size: cover;
-  border: none;
-  height: 30px;
-  width: 160px;
-  margin-left: 0;
-  margin-top: 5px;
-  margin-bottom: 0;
-  box-sizing: content-box;
-}
-
-.matecat-modal-content .btn-confirm-medium.google-login-button:hover {
-  background: url(../../img/btn_gg_sprite.png) no-repeat;
-  background-position: 0 -101px;
-  background-size: cover;
-  box-shadow: none !important;
-}
-
-.matecat-modal-content .btn-confirm-medium.sing-in {
-  margin-left: 0px;
-}
-
-.matecat-modal-content .btn-confirm-medium.sing-up {
-  //margin-left: 0px;
-}
-
-.matecat-modal-content .btn-confirm-medium.register-now {
-  margin-left: 0px;
-}
-
 .matecat-modal-content .disabled,
 .matecat-modal-content .disabled:hover,
 .matecat-modal-content .disabled:active {
@@ -697,10 +430,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   &:hover {
-    color: $darkBlueTransparent;
+    color: colors.$darkBlueTransparent;
   }
-
-
 }
 
 .x-popup:before,
@@ -778,7 +509,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
             width: 40px !important;
             max-width: 40px;
             height: 40px;
-            background-color: $grey2;
+            background-color: colors.$grey2;
             border-radius: 50%;
             vertical-align: middle;
             text-align: center;
@@ -797,13 +528,13 @@ a.ui.primary.right.floated.button.tiny.register-ok {
           .content.email-user-invited {
             font-weight: 100;
             font-size: 14px;
-            color: $grey1;
+            color: colors.$grey1;
           }
 
           .content.pending-msg {
             font-weight: 100;
             font-size: 14px;
-            color: $grey1;
+            color: colors.$grey1;
             white-space: nowrap;
           }
 
@@ -965,17 +696,6 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-.register-modal {
-  .form-divider {
-    margin-top: 25px;
-    margin-bottom: 10px;
-  }
-
-  .condition-google {
-    font-size: 12px;
-  }
-}
-
 .form-divider {
   width: 100%;
   margin: 0 auto;
@@ -1077,7 +797,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
 
       > svg {
         margin-right: 8px;
-        color: $grey6;
+        color: colors.$grey6;
       }
 
       > input {
@@ -1087,7 +807,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         border: none;
 
         &::placeholder {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
 
@@ -1101,7 +821,7 @@ a.ui.primary.right.floated.button.tiny.register-ok {
         margin-right: 2px;
 
         > svg {
-          color: $grey6;
+          color: colors.$grey6;
         }
       }
 
@@ -1180,19 +900,8 @@ a.ui.primary.right.floated.button.tiny.register-ok {
   }
 }
 
-a.login-button.btn-confirm-medium.sing-in.disabled:hover {
-  border: 1px solid #848689;
-}
-
 .dropdown > .menu {
   z-index: 100000000;
-}
-
-.popup.popup-confirm.confirm_checkbox {
-  .boxed {
-    padding-right: 20px;
-    padding-bottom: 15px;
-  }
 }
 
 .shortcuts-modal {
@@ -1352,6 +1061,10 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
                   content: 'T';
                 }
 
+                &.q:after {
+                  content: 'Q';
+                }
+
                 &.up:after {
                   content: 'Arrow up';
                 }
@@ -1428,7 +1141,9 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
   .buttons-popup-container {
     padding: 25px 0 30px;
     border-bottom: 1px solid #f2f4f7;
-
+    display: flex;
+    gap: 20px;
+    align-items: center;
     label {
       font-size: 18px;
       margin-right: 10px;
@@ -1514,5 +1229,12 @@ a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     list-style: disc;
     padding: 10px 20px;
     font-weight: bold;
+  }
+
+  .tm-row-delete-remove-from-content {
+    > :nth-child(2) {
+      margin-top: 15px;
+      margin-bottom: 5px;
+    }
   }
 }

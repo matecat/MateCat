@@ -1,7 +1,7 @@
 import AppDispatcher from '../stores/AppDispatcher'
 import ManageConstants from '../constants/ManageConstants'
-import TeamConstants from '../constants/TeamConstants'
-import TeamsStore from '../stores/TeamsStore'
+import UserConstants from '../constants/UserConstants'
+import UserStore from '../stores/UserStore'
 import {changeProjectName} from '../api/changeProjectName'
 import {changeProjectAssignee} from '../api/changeProjectAssignee'
 import {changeProjectTeam} from '../api/changeProjectTeam'
@@ -15,6 +15,7 @@ import {updateTeamName} from '../api/updateTeamName'
 import CatToolActions from './CatToolActions'
 import {changeProjectStatus} from '../api/changeProjectStatus'
 import {changeJobStatus} from '../api/changeJobStatus'
+import UserActions from './UserActions'
 
 let ManageActions = {
   /********* Projects *********/
@@ -199,7 +200,7 @@ let ManageActions = {
           team = team.set('members', data.members)
           team = team.set('pending_invitations', data.pending_invitations)
           AppDispatcher.dispatch({
-            actionType: TeamConstants.UPDATE_TEAM,
+            actionType: UserConstants.UPDATE_TEAM,
             team: team.toJS(),
           })
         })
@@ -212,32 +213,34 @@ let ManageActions = {
       })
   },
 
-  changeProjectName: function (team, project, newName) {
-    changeProjectName(team.get('id'), project.get('id'), newName).then(
-      (response) => {
-        AppDispatcher.dispatch({
-          actionType: ManageConstants.CHANGE_PROJECT_NAME,
-          project: project,
-          newProject: response.project,
-        })
-      },
-    )
+  changeProjectName: function (project, newName) {
+    changeProjectName({
+      idProject: project.get('id'),
+      passwordProject: project.get('password'),
+      newName,
+    }).then((response) => {
+      AppDispatcher.dispatch({
+        actionType: ManageConstants.CHANGE_PROJECT_NAME,
+        project: project,
+        newName: response.name,
+      })
+    })
   },
 
   changeProjectTeam: function (teamId, project) {
     changeProjectTeam(teamId, project.toJS())
       .then(() => {
-        var team = TeamsStore.teams.find(function (team) {
+        var team = UserStore.teams.find(function (team) {
           return team.get('id') == teamId
         })
         team = team.toJS()
-        const selectedTeam = TeamsStore.getSelectedTeam()
+        const selectedTeam = UserStore.getSelectedTeam()
         if (selectedTeam.type == 'personal' && team.type !== 'personal') {
           getTeamMembers(teamId).then(function (data) {
             team.members = data.members
             team.pending_invitations = data.pending_invitations
             AppDispatcher.dispatch({
-              actionType: TeamConstants.UPDATE_TEAM,
+              actionType: UserConstants.UPDATE_TEAM,
               team: team,
             })
             setTimeout(function () {
@@ -282,7 +285,7 @@ let ManageActions = {
             selectedTeam.members = data.members
             selectedTeam.pending_invitations = data.pending_invitations
             AppDispatcher.dispatch({
-              actionType: TeamConstants.UPDATE_TEAM,
+              actionType: UserConstants.UPDATE_TEAM,
               team: selectedTeam,
             })
             setTimeout(function () {
@@ -304,7 +307,7 @@ let ManageActions = {
   },
 
   assignTranslator: function (projectId, jobId, jobPassword, translator) {
-    if ($('body').hasClass('manage')) {
+    if (document.body.classList.contains('manage')) {
       AppDispatcher.dispatch({
         actionType: ManageConstants.ASSIGN_TRANSLATOR,
         projectId: projectId,
@@ -409,13 +412,13 @@ let ManageActions = {
     createTeam(teamName, members).then((response) => {
       let team = response.team
       this.showReloadSpinner()
-      APP.setTeamInStorage(team.id)
+      UserActions.setTeamInStorage(team.id)
       AppDispatcher.dispatch({
-        actionType: TeamConstants.ADD_TEAM,
+        actionType: UserConstants.ADD_TEAM,
         team: team,
       })
       AppDispatcher.dispatch({
-        actionType: TeamConstants.CHOOSE_TEAM,
+        actionType: UserConstants.CHOOSE_TEAM,
         teamId: team.id,
       })
     })
@@ -423,17 +426,17 @@ let ManageActions = {
 
   changeTeam: function (team) {
     this.showReloadSpinner()
-    APP.setTeamInStorage(team.id)
+    UserActions.setTeamInStorage(team.id)
     getTeamMembers(team.id).then(function (data) {
       let selectedTeam = team
       selectedTeam.members = data.members
       selectedTeam.pending_invitations = data.pending_invitations
       AppDispatcher.dispatch({
-        actionType: TeamConstants.UPDATE_TEAM,
+        actionType: UserConstants.UPDATE_TEAM,
         team: selectedTeam,
       })
       AppDispatcher.dispatch({
-        actionType: TeamConstants.CHOOSE_TEAM,
+        actionType: UserConstants.CHOOSE_TEAM,
         teamId: selectedTeam.id,
       })
     })
@@ -451,16 +454,17 @@ let ManageActions = {
   },
 
   removeUserFromTeam: function (team, user) {
-    var self = this
-    var userId = user.get('uid')
+    const self = this
+    const userId = user.get('uid')
+    const userInfo = UserStore.getUser()
     removeTeamUser(team.toJS(), userId).then(function (data) {
-      if (userId === APP.USER.STORE.user.uid) {
-        const selectedTeam = TeamsStore.getSelectedTeam()
+      if (userId === userInfo.user.uid) {
+        const selectedTeam = UserStore.getSelectedTeam()
 
         if (selectedTeam.id === team.get('id')) {
           getUserData().then(function (data) {
             AppDispatcher.dispatch({
-              actionType: TeamConstants.RENDER_TEAMS,
+              actionType: UserConstants.RENDER_TEAMS,
               teams: data.teams,
             })
             self.changeTeam(data.teams[0])

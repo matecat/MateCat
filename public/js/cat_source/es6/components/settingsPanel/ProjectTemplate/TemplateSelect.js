@@ -1,8 +1,9 @@
-import React, {createRef, useEffect, useState} from 'react'
+import React, {createRef, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import {Select} from '../../common/Select'
 import {IconPin} from '../../icons/IconPin'
 import Check from '../../../../../../img/icons/Check'
+import {ApplicationWrapperContext} from '../../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const TemplateSelect = ({
   projectTemplates,
@@ -11,6 +12,8 @@ export const TemplateSelect = ({
   label,
   maxHeightDroplist,
 }) => {
+  const {isUserLogged} = useContext(ApplicationWrapperContext)
+
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false)
 
   const isModifyingTemplate = projectTemplates.some(
@@ -61,7 +64,7 @@ export const TemplateSelect = ({
         options={options}
         activeOption={activeOption}
         onSelect={onSelect}
-        isDisabled={isLoadingTemplates}
+        isDisabled={isLoadingTemplates || !isUserLogged}
       >
         {({id, name, showActiveOptionIcon}) => {
           const {isDefault} =
@@ -88,7 +91,7 @@ export const TemplateSelect = ({
           }
         }}
       </Select>
-      {isLoadingTemplates && !config.is_cattool && (
+      {isLoadingTemplates && !config.is_cattool && isUserLogged && (
         <div className="project-template-select-loading">
           <div className="project-template-select-loading-icon"></div>
         </div>

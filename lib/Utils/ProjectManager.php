@@ -8,9 +8,10 @@
  */
 
 use ActivityLog\ActivityLogStruct;
+use Analysis\PayableRates;
 use API\Commons\Exceptions\AuthenticationError;
-use ConnectedServices\GDrive as GDrive;
-use ConnectedServices\GDrive\Session;
+use ConnectedServices\Google\GDrive\Session;
+use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -20,7 +21,7 @@ use Files\MetadataDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
-use Jobs\SplitQueue;
+use Langs\Languages;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -81,9 +82,9 @@ class ProjectManager {
     protected $project;
 
     /**
-     * @var Session
+     * @var ?Session
      */
-    protected $gdriveSession;
+    protected ?Session $gdriveSession = null;
 
     /**
      * @var FeatureSet
@@ -111,6 +112,8 @@ class ProjectManager {
      * @var MetadataDao
      */
     protected $metadataDao;
+
+    protected $tm_prioritization;
 
     /**
      * ProjectManager constructor.
@@ -187,13 +190,21 @@ class ProjectManager {
                             'file_segments_count'                     => [],
                             'due_date'                                => null,
                             'qa_model'                                => null,
-                            'target_language_mt_engine_id'            => [],
+                            'target_language_mt_engine_association'   => [],
                             'standard_word_count'                     => 0,
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
+                            'dictation'                               => null,
+                            'show_whitespace'                         => null,
+                            'character_counter'                       => null,
+                            'character_counter_mode'                  => null,
+                            'character_counter_count_tags'            => null,
+                            'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
-                            'xliff_parameters'                        => new RecursiveArrayObject()
+                            'xliff_parameters'                        => new RecursiveArrayObject(),
+                            'mt_evaluation'                           => false,
+                            'tm_prioritization'                       => null
                     ] );
         }
 
@@ -202,7 +213,7 @@ class ProjectManager {
         //get the TMX management component from the factory
         $this->tmxServiceWrapper = new TMSService();
 
-        $this->langService = Langs_Languages::getInstance();
+        $this->langService = Languages::getInstance();
 
         $this->dbHandler = Database::obtain();
 
@@ -265,7 +276,7 @@ class ProjectManager {
      * @throws Exception
      */
     protected function _sanitizeProjectName() {
-        $newName = self::_sanitizeName( $this->projectStructure[ 'project_name' ] );
+        $newName = Utils::sanitizeName( $this->projectStructure[ 'project_name' ] );
 
         if ( !$newName ) {
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -383,6 +394,26 @@ class ProjectManager {
             $options[ 'from_api' ] = 1;
         }
 
+        // dictation (LEGACY CODE TO BE REMOVED)
+        if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ] !== null ) {
+            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
+        }
+
+        // show_whitespace (LEGACY CODE TO BE REMOVED)
+        if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ] !== null ) {
+            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
+        }
+
+        // character_counter (LEGACY CODE TO BE REMOVED)
+        if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ] !== null ) {
+            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
+        }
+
+        // ai_assistant (LEGACY CODE TO BE REMOVED)
+        if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ] !== null ) {
+            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
+        }
+
         // xliff_parameters
         if ( isset( $this->projectStructure[ 'xliff_parameters' ] ) and $this->projectStructure[ 'xliff_parameters' ] instanceof XliffConfigTemplateStruct ) {
             $configModel                   = $this->projectStructure[ 'xliff_parameters' ];
@@ -393,6 +424,7 @@ class ProjectManager {
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
         }
+
         /**
          * Here we have the opportunity to add other features as dependencies of the ones
          * which are already explicitly set.
@@ -446,14 +478,20 @@ class ProjectManager {
     }
 
     /**
+     * @param ArrayObject $options
+     *
+     * @return array
      * @throws Exception
      */
-    private function sanitizeProjectOptions( $options ) {
-        $sanitizer = new ProjectOptionsSanitizer( $options );
+    private function sanitizeProjectOptions( ArrayObject $options ): array {
+        $sanitizer = new ProjectOptionsSanitizer( $options->getArrayCopy() );
+
+        /** @var $langs RecursiveArrayObject */
+        $langs = $this->projectStructure[ 'target_language' ];
 
         $sanitizer->setLanguages(
                 $this->projectStructure[ 'source_language' ],
-                $this->projectStructure[ 'target_language' ]
+                $langs->getArrayCopy()
         );
 
         return $sanitizer->sanitize();
@@ -533,7 +571,7 @@ class ProjectManager {
         $fs = FilesStorageFactory::create();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
-            $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] );
+            $this->gdriveSession = Session::getInstanceForCLI( $this->projectStructure[ 'session' ]->getArrayCopy() );
         }
 
         $this->__checkForProjectAssignment();
@@ -544,6 +582,8 @@ class ProjectManager {
          * Validations should populate the projectStructure with errors and codes.
          */
         $featureSet = ( $this->features !== null ) ? $this->features : new FeatureSet();
+        \Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
+        $featureSet->run( 'loadCustomQualityFramework', $this->projectStructure );
         $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
@@ -552,12 +592,10 @@ class ProjectManager {
          * @var ArrayObject $this ->projectStructure['result']['errors']
          */
         if ( $this->projectStructure[ 'result' ][ 'errors' ]->count() ) {
+            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
+
             return false;
         }
-
-        $this->__createProjectRecord();
-        $this->saveFeaturesInMetadata();
-        $this->saveMetadata();
 
         //sort files in order to process TMX first
         $sortedFiles      = [];
@@ -675,15 +713,14 @@ class ProjectManager {
                 // put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
-                        $this->projectStructure[ 'source_language' ],
                         $this->projectStructure[ 'uploadToken' ],
                         $fileName
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ];
 
-                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . $this->__getStorageFilesDelimiter() . $this->projectStructure[ 'source_language' ] ][] = $fileName;
+                $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
@@ -711,7 +748,7 @@ class ProjectManager {
                 //converted file is inside cache directory
                 //get hash from file name inside UUID dir
                 $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
-                $hashFile = explode( $this->__getStorageFilesDelimiter(), $hashFile );
+                $hashFile = explode( AbstractFilesStorage::OBJECTS_SAFE_DELIMITER, $hashFile );
 
                 // Example:
                 // $hashFile[ 0 ] = 917f7b03c8f54350fb65387bda25fbada43ff7d8
@@ -855,15 +892,19 @@ class ProjectManager {
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
             if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "MateCat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
+                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
-            $featureSet->run( "beforeInsertSegments", $this->projectStructure,
-                    [
+            // check for project Creation, before wasting disk space
+            $this->features->run( "beforeProjectCreation", $this->projectStructure, [
                             'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
+                            'files_raw_wc'           => $this->files_word_count
                     ]
             );
+
+            $this->__createProjectRecord();
+            $this->saveFeaturesInMetadata();
+            $this->saveMetadata();
 
             foreach ( $totalFilesStructure as $fid => $empty ) {
                 $this->_storeSegments( $fid );
@@ -1032,17 +1073,6 @@ class ProjectManager {
         $client->downloadItem( $params );
     }
 
-    /**
-     * @return string
-     */
-    private function __getStorageFilesDelimiter() {
-        if ( AbstractFilesStorage::isOnS3() ) {
-            return S3FilesStorage::OBJECTS_SAFE_DELIMITER;
-        }
-
-        return '|';
-    }
-
     private function __clearFailedProject( Exception $e ) {
         $this->_log( $e->getMessage() );
         $this->_log( $e->getTraceAsString() );
@@ -1171,8 +1201,8 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $this->tmxServiceWrapper->addTmxInMyMemory( $file );
-                    $this->features->run( 'postPushTMX', $file, $this->projectStructure[ 'id_customer' ] );
+                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
                     //don't call the postPushTMX for normal files
@@ -1297,7 +1327,7 @@ class ProjectManager {
                 $payableRates         = json_encode( $payableRates );
             } else {
                 $payableRatesTemplate = null;
-                $payableRates         = Analysis_PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = PayableRates::getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $this->features->filter( "filterPayableRates", $payableRates, $projectStructure[ 'source_language' ], $target ) );
             }
 
@@ -1312,6 +1342,7 @@ class ProjectManager {
                     $newTmKey->tm              = true;
                     $newTmKey->glos            = true;
                     $newTmKey->owner           = true;
+                    $newTmKey->penalty         = $tmKeyObj[ 'penalty' ] ?? null;
                     $newTmKey->name            = $tmKeyObj[ 'name' ];
                     $newTmKey->key             = $tmKeyObj[ 'key' ];
                     $newTmKey->r               = $tmKeyObj[ 'r' ];
@@ -1331,14 +1362,18 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
+            // Replace {{pid}} with project ID for new keys created with empty name
+            $projectStructure[ 'tm_keys' ] = str_replace("{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ]);
+
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
             $newJob->target            = $target;
-            $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
-            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_id' ][ $target ];
+            $newJob->id_tms            = $projectStructure[ 'tms_engine' ] ?? 1;
+            $newJob->id_mt_engine      = $projectStructure[ 'target_language_mt_engine_association' ][ $target ];
             $newJob->create_date       = date( "Y-m-d H:i:s" );
+            $newJob->last_update       = date( "Y-m-d H:i:s" );
             $newJob->subject           = $projectStructure[ 'job_subject' ];
             $newJob->owner             = $projectStructure[ 'owner' ];
             $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
@@ -1348,12 +1383,7 @@ class ProjectManager {
             $newJob->total_raw_wc      = $this->files_word_count;
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
-            $this->features->run( "beforeInsertJobStruct", $newJob, $projectStructure, [
-                            'total_project_segments' => $this->total_segments,
-                            'files_wc'               => $this->files_word_count
-                    ]
-            );
-
+            $this->features->run( 'validateJobCreation', $newJob, $projectStructure );
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
@@ -1362,9 +1392,25 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
+            $jobsMetadataDao = new Jobs\MetadataDao();
+
+            // character_counter_count_tags
+            if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] == true ? "1" : "0" ) );
+            }
+
+            // character_counter_mode
+            if ( isset( $projectStructure[ 'character_counter_mode' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_mode', $projectStructure[ 'character_counter_mode' ] );
+            }
+
+            // tm_prioritization
+            if ( isset( $projectStructure[ 'tm_prioritization' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'tm_prioritization', $projectStructure[ 'tm_prioritization' ] ? 1 : 0 );
+            }
+
             // dialect_strict
             if ( isset( $projectStructure[ 'dialect_strict' ] ) ) {
-                $jobsMetadataDao  = new \Jobs\MetadataDao();
                 $dialectStrictObj = json_decode( $projectStructure[ 'dialect_strict' ], true );
 
                 foreach ( $dialectStrictObj as $lang => $value ) {
@@ -1372,6 +1418,11 @@ class ProjectManager {
                         $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
                 }
+            }
+
+            // mt evaluation => ice_mt
+            if ( $this->projectStructure[ 'mt_evaluation' ] ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'mt_evaluation', true );
             }
 
             try {
@@ -1398,9 +1449,11 @@ class ProjectManager {
                 Files_FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id );
+                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
+
         }
 
         if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
@@ -1413,8 +1466,6 @@ class ProjectManager {
 
         //Clean Translation array
         $this->projectStructure[ 'translations' ]->exchangeArray( [] );
-
-        $this->features->run( 'processJobsCreated', $projectStructure );
 
     }
 
@@ -1594,56 +1645,71 @@ class ProjectManager {
         // update the first chunk of the job to split
         $jobDao->updateStdWcAndTotalWc( $jobToSplit->id, $chunks[ 0 ][ 'standard_word_count' ], $chunks[ 0 ][ 'raw_word_count' ] );
 
+        $newJobList = [];
+
         // create the other chunks of the job to split
         foreach ( $chunks as $contents ) {
+
+            $newJob = clone $jobToSplit;
 
             //IF THIS IS NOT the original job, UPDATE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
-                $jobToSplit[ 'password' ]                = $this->generatePassword();
-                $jobToSplit[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
-                $jobToSplit[ 'avg_post_editing_effort' ] = 0;
-                $jobToSplit[ 'total_time_to_edit' ]      = 0;
+                $newJob[ 'password' ]                = $this->generatePassword();
+                $newJob[ 'create_date' ]             = date( 'Y-m-d H:i:s' );
+                $newJob[ 'avg_post_editing_effort' ] = 0;
+                $newJob[ 'total_time_to_edit' ]      = 0;
             }
 
-            $jobToSplit[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
-            $jobToSplit[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
-            $jobToSplit[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
-            $jobToSplit[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
-            $jobToSplit[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
+            $newJob[ 'last_opened_segment' ]  = $contents[ 'last_opened_segment' ];
+            $newJob[ 'job_first_segment' ]    = $contents[ 'segment_start' ];
+            $newJob[ 'job_last_segment' ]     = $contents[ 'segment_end' ];
+            $newJob[ 'standard_analysis_wc' ] = $contents[ 'standard_word_count' ];
+            $newJob[ 'total_raw_wc' ]         = $contents[ 'raw_word_count' ];
 
-            $stmt = $jobDao->getSplitJobPreparedStatement( $jobToSplit );
+            $stmt = $jobDao->getSplitJobPreparedStatement( $newJob );
             $stmt->execute();
 
             $wCountManager = new CounterModel();
-            $wCountManager->initializeJobWordCount( $jobToSplit->id, $jobToSplit->password );
+            $wCountManager->initializeJobWordCount( $newJob->id, $newJob->password );
 
             if ( $this->dbHandler->affected_rows == 0 ) {
                 $msg = "Failed to split job into " . count( $projectStructure[ 'split_result' ][ 'chunks' ] ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $stmt->queryString, true ) . " \n\n";
-                $msg .= "Failed Statement is: \n" . print_r( $jobToSplit, true ) . "\n";
-//                Utils::sendErrMailReport( $msg );
+                $msg .= "Failed Statement is: \n" . print_r( $newJob, true ) . "\n";
                 $this->_log( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
 
+            $newJobList[] = $newJob;
+
             $stmt->closeCursor();
             unset( $stmt );
-
-            /**
-             * Async worker to re-count avg-PEE and total-TTE for split jobs
-             */
-            SplitQueue::recount( $jobToSplit );
 
             //add here job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
             //add here passwords to list
-            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $jobToSplit[ 'password' ] );
+            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob[ 'password' ] );
 
-            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $jobToSplit[ 'password' ], new ArrayObject( [
+            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $newJob[ 'password' ], new ArrayObject( [
                     $contents[ 'segment_start' ], $contents[ 'segment_end' ]
             ] ) );
 
+        }
+
+        foreach ( $newJobList as $job ) {
+            /**
+             * Async worker to re-count avg-PEE and total-TTE for split jobs
+             */
+            try {
+                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            } catch ( Exception $e ) {
+                # Handle the error, logging, ...
+                $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
+                $output .= "{$e->getMessage()}";
+                $output .= var_export( $job, true );
+                $this->_log( $output );
+            }
         }
 
         ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
@@ -1746,7 +1812,7 @@ class ProjectManager {
         $wCountManager = new CounterModel();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $chunk = new Chunks_ChunkStruct( $first_job->toArray() );
+        $chunk = new Jobs_JobStruct( $first_job->toArray() );
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
         $jobDao = new Jobs_JobDao();
@@ -1910,8 +1976,8 @@ class ProjectManager {
                                         // before calling html_entity_decode function we convert
                                         // all unicode entities with no corresponding HTML entity
                                         //
-                                        $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitesToOriginalValues( $extract_external[ 'seg' ] );
-                                        $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitesToOriginalValues( $target_extract_external[ 'seg' ] );
+                                        $extract_external[ 'seg' ]        = CatUtils::restoreUnicodeEntitiesToOriginalValues( $extract_external[ 'seg' ] );
+                                        $target_extract_external[ 'seg' ] = CatUtils::restoreUnicodeEntitiesToOriginalValues( $target_extract_external[ 'seg' ] );
 
                                         // we don't want THE CONTENT OF TARGET TAG IF PRESENT and EQUAL TO SOURCE???
                                         // AND IF IT IS ONLY A CHAR? like "*" ?
@@ -2257,34 +2323,44 @@ class ProjectManager {
 
         foreach ( $_originalFileNames as $pos => $originalFileName ) {
 
-            // get metadata
-            $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+            // avoid blank filenames
+            if ( !empty( $originalFileName ) ) {
 
-            $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-            $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
+                // get metadata
+                $meta                = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+                $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
+                $mimeType            = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                $fid                 = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
-            if ( $this->gdriveSession ) {
-                $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
-                if ( $gdriveFileId ) {
-                    $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                if ( $this->gdriveSession ) {
+                    $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
+                    if ( $gdriveFileId ) {
+                        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                        $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
+                    }
                 }
+
+                $moved = $fs->moveFromCacheToFileDir(
+                        $fileDateSha1Path,
+                        $this->projectStructure[ 'source_language' ],
+                        $fid,
+                        $originalFileName
+                );
+
+                // check if the files were moved
+                if ( true !== $moved ) {
+                    throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
+                }
+
+                $this->projectStructure[ 'file_id_list' ]->append( $fid );
+
+                $fileStructures[ $fid ] = [
+                        'fid'               => $fid,
+                        'original_filename' => $originalFileName,
+                        'path_cached_xliff' => $cachedXliffFilePathName,
+                        'mime_type'         => $mimeType
+                ];
             }
-
-            $moved = $fs->moveFromCacheToFileDir(
-                    $fileDateSha1Path,
-                    $this->projectStructure[ 'source_language' ],
-                    $fid,
-                    $originalFileName
-            );
-
-            // check if the files were moved
-            if ( true !== $moved ) {
-                throw new Exception( 'Project creation failed. Please refresh page and retry.', -200 );
-            }
-
-            $this->projectStructure[ 'file_id_list' ]->append( $fid );
-
-            $fileStructures[ $fid ] = [ 'fid' => $fid, 'original_filename' => $originalFileName, 'path_cached_xliff' => $cachedXliffFilePathName, 'mime_type' => $mimeType ];
         }
 
         return $fileStructures;
@@ -2339,8 +2415,8 @@ class ProjectManager {
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            /** @var Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = @$this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ];
+            /** @var ?Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
 
@@ -2753,23 +2829,6 @@ class ProjectManager {
 
     }
 
-    protected static function _sanitizeName( $nameString ) {
-
-        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
-        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
-        $nameString = str_replace( '_.', ".", $nameString );
-
-        // project name validation
-        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
-
-        if ( !preg_match( $pattern, $nameString ) ) {
-            return false;
-        }
-
-        return $nameString;
-
-    }
-
     public function generatePassword( $length = 12 ) {
         return Utils::randomString( $length );
     }
@@ -2844,7 +2903,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, due to the <mrk> tags.
+     * more than one Matecat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'aaa' );
@@ -3013,10 +3072,12 @@ class ProjectManager {
                     $newTmKey->tm   = true;
                     $newTmKey->glos = true;
 
-                    //THIS IS A NEW KEY and must be inserted into the user keyring
-                    //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                    // THIS IS A NEW KEY and must be inserted into the user keyring
+                    // So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
                     // assign TMX name to the key
-                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
+
+                    // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? str_replace("{{pid}}", $this->projectStructure[ 'id_project' ], $_tmKey[ 'name' ]) : $firstTMXFileName );
 
                     $newMemoryKey->tm_key = $newTmKey;
                     $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];

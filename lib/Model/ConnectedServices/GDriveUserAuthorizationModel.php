@@ -8,23 +8,28 @@
 
 namespace ConnectedServices;
 
-use ConnectedServices\GDrive\GoogleClientFactory;
+use ConnectedServices\Google\GDrive\GDriveTokenHandler;
+use ConnectedServices\Google\GoogleProvider;
+use Exception;
+use Exceptions\ValidationError;
 use Google_Service_Oauth2;
+use INIT;
+use Log;
 use Utils;
 
 class GDriveUserAuthorizationModel {
 
-    protected $user ;
+    protected $user;
 
-    protected $userInfo ;
-    protected $token ;
+    protected $userInfo;
+    protected $token;
 
-    protected $user_email ;
-    protected $user_remote_id ;
-    protected $user_name ;
+    protected $user_email;
+    protected $user_remote_id;
+    protected $user_name;
 
-    public function __construct(\Users_UserStruct $user) {
-       $this->user = $user ;
+    public function __construct( \Users_UserStruct $user ) {
+        $this->user = $user;
     }
 
     /**
@@ -38,24 +43,24 @@ class GDriveUserAuthorizationModel {
      *
      * @param $code
      *
-     * @throws \Exceptions\ValidationError
+     * @throws ValidationError
+     * @throws Exception
      */
     public function updateOrCreateRecordByCode( $code ) {
         $this->__collectProperties( $code );
 
         // We have the user info email and name, we can save it along with the gdrive token to identify it.
-        \Log::doJsonLog( $this->token ) ;
-        \Log::doJsonLog( $this->userInfo ) ;
+        Log::doJsonLog( $this->token );
+        Log::doJsonLog( $this->userInfo );
 
-        $dao = new ConnectedServiceDao();
+        $dao     = new ConnectedServiceDao();
         $service = $dao->findUserServicesByNameAndEmail(
-            $this->user, ConnectedServiceDao::GDRIVE_SERVICE, $this->user_email
+                $this->user, ConnectedServiceDao::GDRIVE_SERVICE, $this->user_email
         );
 
         if ( $service ) {
-            $this->__updateService($service);
-        }
-        else {
+            $this->__updateService( $service );
+        } else {
             $service = $this->__insertService();
         }
 
@@ -65,54 +70,62 @@ class GDriveUserAuthorizationModel {
     /**
      * @param ConnectedServiceStruct $service
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    private function __updateService(ConnectedServiceStruct $service ) {
-        $dao = new ConnectedServiceDao() ;
-        $dao->updateOauthToken( $this->token, $service ) ;
+    private function __updateService( ConnectedServiceStruct $service ) {
+        $dao = new ConnectedServiceDao();
+        $dao->updateOauthToken( $this->token, $service );
 
-        $service->expired_at = null;
+        $service->expired_at  = null;
         $service->disabled_at = null;
-        $dao->updateStruct( $service ) ;
+        $dao->updateStruct( $service );
     }
 
-    private function __insertService() {
-        $service = new ConnectedServiceStruct(array(
-            'uid' => $this->user->uid,
-            'email' => $this->user_email,
-            'name' => $this->user_name,
-            'service' => ConnectedServiceDao::GDRIVE_SERVICE,
-            'is_default' => 1,
-            'created_at' => Utils::mysqlTimestamp( time() )
-        ));
-        $service->setEncryptedAccessToken( $this->token ) ;
+    /**
+     * @return ConnectedServiceStruct
+     * @throws Exception
+     */
+    private function __insertService(): ConnectedServiceStruct {
+
+        $service = new ConnectedServiceStruct( [
+                'uid'        => $this->user->uid,
+                'email'      => $this->user_email,
+                'name'       => $this->user_name,
+                'service'    => ConnectedServiceDao::GDRIVE_SERVICE,
+                'is_default' => 1,
+                'created_at' => Utils::mysqlTimestamp( time() )
+        ] );
+        $service->setEncryptedAccessToken( $this->token );
         $dao = new ConnectedServiceDao();
 
-        $lastId = $dao->insertStruct( $service ) ;
+        $lastId = $dao->insertStruct( $service );
 
-        return $dao->findById( $lastId ) ;
+        return $dao->findById( $lastId );
+
     }
 
     /**
      * @param $code
+     *
+     * @throws Exception
      */
     private function __collectProperties( $code ) {
-        $gdriveClient = GoogleClientFactory::create();
-        $gdriveClient->authenticate($code);
+        $gdriveClient = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $gdriveClient->fetchAccessTokenWithAuthCode( $code );
         $this->token = $gdriveClient->getAccessToken();
 
         if ( is_array( $this->token ) ) {
             // Enforce token to be passed passed around as json_string, to favour encryption and storage.
             // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
-            $this->token = GDrive::accessTokenToJsonString( $this->token ) ;
+            $this->token = GDriveTokenHandler::accessTokenToJsonString( $this->token );
         }
 
-        $infoService = new Google_Service_Oauth2($gdriveClient);
+        $infoService    = new Google_Service_Oauth2( $gdriveClient );
         $this->userInfo = $infoService->userinfo->get();
 
-        $this->user_email       = $this->userInfo['email'];
-        $this->user_remote_id   = $this->userInfo['id'];
-        $this->user_name        = $this->userInfo['name'];
+        $this->user_email     = $this->userInfo[ 'email' ];
+        $this->user_remote_id = $this->userInfo[ 'id' ];
+        $this->user_name      = $this->userInfo[ 'name' ];
     }
 
 }

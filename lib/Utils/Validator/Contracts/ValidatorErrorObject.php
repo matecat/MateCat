@@ -4,7 +4,7 @@ namespace Validator\Contracts;
 
 use Validator\Errors\JsonValidatorExceptionInterface;
 
-class ValidatorErrorObject  {
+class ValidatorErrorObject {
 
     /**
      * @var JsonValidatorExceptionInterface

@@ -16,9 +16,9 @@ class SendToTranslatorForDeliveryChangeEmail extends SendToTranslatorAbstract {
 
     public function __construct( Users_UserStruct $user, JobsTranslatorsStruct $translator, $projectName ) {
         parent::__construct( $user, $translator, $projectName );
-        $this->title       = "MateCat - Job delivery updated.";
+        $this->title = "Matecat - Job delivery updated.";
         $this->_setTemplate( 'Translator/job_change_delivery_send_to_translator_content.html' );
-        $this->_RoutesMethod = '\Routes::sendToTranslatorUpdate';
+        $this->_RoutesMethod = '\Routes::translate';
     }
 
 }

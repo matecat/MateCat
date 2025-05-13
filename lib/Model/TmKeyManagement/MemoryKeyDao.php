@@ -32,18 +32,18 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-            " (uid, key_value, key_name, key_tm, key_glos, creation_date)
+                " (uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ( :uid, :key_value, :key_name, :key_tm, :key_glos, NOW())";
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute(
-            [
-                "uid"       => $obj->uid,
-                "key_value" => trim($obj->tm_key->key),
-                "key_name"  => ( $obj->tm_key->name == null ) ? '' : trim($obj->tm_key->name),
-                "key_tm"    => ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                "key_glos"  => ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
-            ]
+                [
+                        "uid"       => $obj->uid,
+                        "key_value" => trim( $obj->tm_key->key ),
+                        "key_name"  => ( $obj->tm_key->name == null ) ? '' : trim( $obj->tm_key->name ),
+                        "key_tm"    => ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
+                        "key_glos"  => ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
+                ]
         );
 
         //return the inserted object on success, null otherwise
@@ -210,8 +210,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-            'uid'       => $obj->uid,
-            'key_value' => $obj->tm_key->key
+                'uid'       => $obj->uid,
+                'key_value' => $obj->tm_key->key
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
@@ -221,6 +221,9 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         return null;
     }
 
+    /**
+     * @throws Exception
+     */
     public function disable( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
@@ -231,8 +234,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-            'uid'       => $obj->uid,
-            'key_value' => $obj->tm_key->key
+                'uid'       => $obj->uid,
+                'key_value' => $obj->tm_key->key
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
@@ -252,8 +255,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-            'uid'       => $obj->uid,
-            'key_value' => $obj->tm_key->key
+                'uid'       => $obj->uid,
+                'key_value' => $obj->tm_key->key
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
@@ -267,14 +270,13 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     /**
      * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
      *
-     * @return array|null The input array on success, null otherwise
      * @throws Exception
      */
-    public function createList( Array $obj_arr ) {
+    public function createList( array $obj_arr ) {
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-            " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
+                " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES ";
 
         $values = [];
@@ -308,11 +310,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         }
 
-        if ( $this->database->affected_rows > 0 ) {
-            return $obj_arr;
-        }
-
-        return null;
     }
 
     /**
@@ -331,24 +328,27 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
     /**
      * See parent definition.
-     * @see DataAccess_AbstractDao::sanitizeArray
      *
      * @param array $input
      *
      * @return array
+     * @throws Exception
+     * @see DataAccess_AbstractDao::sanitizeArray
+     *
      */
-    public static function sanitizeArray( array $input ) {
+    public static function sanitizeArray( array $input ): array {
         return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
     /**
      * See in DataAccess_AbstractDao::validatePrimaryKey
-     * @see DataAccess_AbstractDao::_validatePrimaryKey
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
      *
      * @return void
      * @throws Exception
+     * @see DataAccess_AbstractDao::_validatePrimaryKey
+     *
      */
     protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
 
@@ -396,25 +396,25 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {
 
-            $owner_uids = explode(",", $item[ 'owner_uids' ]);
+            $owner_uids = explode( ",", $item[ 'owner_uids' ] );
 
             $build_arr = [
-                'uid'    => $item[ 'uid' ],
-                'tm_key' => new TmKeyManagement_TmKeyStruct( [
-                        'key'       => (string)$item[ 'key_value' ],
-                        'name'      => (string)$item[ 'key_name' ],
-                        'tm'        => (bool)$item[ 'tm' ],
-                        'glos'      => (bool)$item[ 'glos' ],
-                        'is_shared' => ( $item[ 'owners_tot' ] > 1 ),
-                        'in_users'  => $item[ 'in_users' ],
-                        'owner'     => in_array($item[ 'uid' ], $owner_uids),
-                    ]
-                )
+                    'uid'    => $item[ 'uid' ],
+                    'tm_key' => new TmKeyManagement_TmKeyStruct( [
+                                    'key'       => (string)$item[ 'key_value' ],
+                                    'name'      => (string)$item[ 'key_name' ],
+                                    'tm'        => (bool)$item[ 'tm' ],
+                                    'glos'      => (bool)$item[ 'glos' ],
+                                    'is_shared' => ( $item[ 'owners_tot' ] > 1 ),
+                                    'in_users'  => $item[ 'in_users' ],
+                                    'owner'     => in_array( $item[ 'uid' ], $owner_uids ),
+                            ]
+                    )
             ];
 
             $obj = new TmKeyManagement_MemoryKeyStruct( $build_arr );

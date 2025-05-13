@@ -38,6 +38,12 @@ P4[max_executors] = 5
 MAIL[queue_name]    = "mail_queue"
 MAIL[max_executors] = 0
 
+;;###################################
+;;##### Propagation             #####
+;;###################################
+PROPAGATION[queue_name] = "propagation"
+PROPAGATION[max_executors] = 1
+
 ;;##############################
 ;;##### Key Name setContribution #####
 ;;##############################
@@ -49,12 +55,6 @@ CONTRIBUTION[max_executors] = 5
 ;;##############################
 CONTRIBUTION_GET[queue_name]    = "get_contribution"
 CONTRIBUTION_GET[max_executors] = 5
-
-;;##############################
-;;##### Key Name QAChecks  #####
-;;##############################
-QA_CHECKS[queue_name] = "qa_checks"
-QA_CHECKS[max_executors] = 1
 
 ;;##############################
 ;;##### Key Name activity_log #####

@@ -6,7 +6,6 @@ export const setChunkComplete = async ({
   current_password,
 }) => {
   const paramsData = {
-    action: 'Features_ProjectCompletion_SetChunkCompleted',
     id_job,
     password,
     current_password,
@@ -18,7 +17,7 @@ export const setChunkComplete = async ({
   })
 
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/set-chunk-completed`,
     {
       method: 'POST',
       credentials: 'include',

@@ -11,53 +11,55 @@ import matchTagStructure from '../../../segments/utils/DraftMatecatUtils/matchTa
 
 export const transformTagsToHtml = (text, isRtl = 0) => {
   isRtl = !!isRtl
-  try {
-    for (let key in tagSignatures) {
-      const {
-        placeholderRegex,
-        decodeNeeded,
-        style,
-        placeholder,
-        regex,
-        styleRTL,
-        selfClosing,
-      } = tagSignatures[key]
-      if (placeholderRegex) {
-        let globalRegex = new RegExp(
-          placeholderRegex.source,
-          placeholderRegex.flags + 'g',
-        )
-        text = text.replace(globalRegex, (match, text) => {
-          let tagText = decodeNeeded
-            ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
-            : selfClosing
-              ? text
-              : match
-          return (
-            '<span contenteditable="false" class="tag small ' +
-            (isRtl && styleRTL ? styleRTL : style) +
-            '">' +
-            tagText +
-            '</span>'
+  if (text) {
+    try {
+      for (let key in tagSignatures) {
+        const {
+          placeholderRegex,
+          decodeNeeded,
+          style,
+          placeholder,
+          regex,
+          styleRTL,
+          selfClosing,
+        } = tagSignatures[key]
+        if (placeholderRegex) {
+          let globalRegex = new RegExp(
+            placeholderRegex.source,
+            placeholderRegex.flags + 'g',
           )
-        })
-      } else if (regex) {
-        let globalRegex = new RegExp(regex)
-        text = text.replace(globalRegex, (match) => {
-          let tagText = placeholder ? placeholder : match
-          return (
-            '<span contenteditable="false" class="tag small ' +
-            (isRtl && styleRTL ? styleRTL : style) +
-            '">' +
-            tagText +
-            '</span>'
-          )
-        })
+          text = text.replace(globalRegex, (match, text) => {
+            let tagText = decodeNeeded
+              ? Base64.decode(text).replace(/</g, '&lt').replace(/>/g, '&gt') // Forza conversione angolari in &lt o &gt [XLIFF 2.0] Tag senza dataref
+              : selfClosing
+                ? text
+                : match
+            return (
+              '<span contenteditable="false" class="tag small ' +
+              (isRtl && styleRTL ? styleRTL : style) +
+              '">' +
+              tagText +
+              '</span>'
+            )
+          })
+        } else if (regex) {
+          let globalRegex = new RegExp(regex)
+          text = text.replace(globalRegex, (match) => {
+            let tagText = placeholder ? placeholder : match
+            return (
+              '<span contenteditable="false" class="tag small ' +
+              (isRtl && styleRTL ? styleRTL : style) +
+              '">' +
+              tagText +
+              '</span>'
+            )
+          })
+        }
       }
+      text = matchTag(text)
+    } catch (e) {
+      console.error('Error parsing tag in transformTagsToHtml function', e)
     }
-    text = matchTag(text)
-  } catch (e) {
-    console.error('Error parsing tag in transformTagsToHtml function')
   }
   return text
 }
@@ -80,6 +82,45 @@ export const transformTagsToText = (text) => {
         text = text.replace(globalRegex, (match) => {
           return placeholder ? placeholder : match
         })
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing tag in transformTagsToHtml function')
+  }
+  return text
+}
+
+export const excludeSomeTagsTransformToText = (text, excludeTags = []) => {
+  try {
+    for (let key in tagSignatures) {
+      const {placeholderRegex, decodeNeeded, placeholder, regex, type} =
+        tagSignatures[key]
+      const shouldExcludeTag = excludeTags.some((value) => value === type)
+      if (placeholderRegex) {
+        let globalRegex = new RegExp(
+          placeholderRegex.source,
+          placeholderRegex.flags + 'g',
+        )
+        text = text.replace(
+          globalRegex,
+          !shouldExcludeTag
+            ? (match, text) => {
+                return decodeNeeded
+                  ? decodeHtmlEntities(Base64.decode(text))
+                  : match
+              }
+            : '',
+        )
+      } else if (regex) {
+        let globalRegex = new RegExp(regex)
+        text = text.replace(
+          globalRegex,
+          !shouldExcludeTag
+            ? (match) => {
+                return placeholder ? placeholder : match
+              }
+            : '',
+        )
       }
     }
   } catch (e) {
@@ -243,6 +284,21 @@ export const removeTagsFromText = (segmentString) => {
   const regExp = getXliffRegExpression()
   if (segmentString) {
     return segmentString.replace(regExp, '')
+  }
+  return segmentString
+}
+
+/**
+ * Checks if the given segment string contains XLIFF tags.
+ *
+ * @param {string} segmentString - The segment string to check for XLIFF tags.
+ * @returns {boolean|string} - Returns `true` if XLIFF tags are found, `false` if not,
+ *                             or the original segment string if it is empty.
+ */
+export const textHasTags = (segmentString) => {
+  const regExp = getXliffRegExpression()
+  if (segmentString) {
+    return regExp.test(segmentString)
   }
   return segmentString
 }

@@ -5,6 +5,7 @@ RewriteEngine On
 RewriteCond "%{HTTP_HOST}"   "!^www\.matecat\.com" [NC]
 RewriteRule ^robots\.txt$ robots-whitelabel.txt [L]
 
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 
 #RewriteRule ^offline\.html$ /lib/View/offline.html [L]
 #RewriteCond %{REQUEST_URI} !/offline.html [NC]
@@ -21,6 +22,9 @@ RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
+RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
+
+RewriteRule ^signin[/]?$ index.php?action=signin [QSA,L]
 
 RewriteRule ^action/convertFile[/]?$ index.php?action=convertFile [QSA,L]
 
@@ -35,8 +39,6 @@ RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&p
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 
-RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
-
 RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
 
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
@@ -46,8 +48,6 @@ RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activi
 
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
-
-RewriteRule ^api/v1/new$ index.php?api=true&action=new [QSA,L]
 
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
@@ -73,53 +73,28 @@ ErrorDocument 409 /lib/View/409.html
 ErrorDocument 503 /lib/View/503.html
 ErrorDocument 500 /lib/View/500.html
 
+SetEnvIf ^ ^ no-gzip
+SetEnvIfNoCase Request_URI \.(?:css|js)$ !no-gzip
+
 <IfModule mod_expires.c>
-ExpiresActive On
-ExpiresByType text/html "access plus 1 hour"
-ExpiresByType text/css "access plus 1 hour"
-ExpiresByType text/javascript "access plus 1 hour"
-ExpiresByType application/javascript "access plus 1 hour"
-ExpiresByType image/gif "access plus 1 month"
-ExpiresByType image/jpeg "access plus 1 month"
-ExpiresByType image/jpg "access plus 1 month"
-ExpiresByType image/png "access plus 1 month"
-ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
-ExpiresByType image/ico "access plus 1 month"
-ExpiresByType application/x-shockwave-flash "access plus 1 month"
-</IfModule>
-
-<IfModule mod_deflate.c>
-#SetOutputFilter DEFLATE
-
-AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
-AddOutputFilterByType DEFLATE font/truetype
-AddOutputFilterByType DEFLATE application/xml application/xhtml+xml appalication/rss+xml
-AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
-#AddOutputFilterByType DEFLATE application/x-httpd-php
-</IfModule>
-	
-<IfModule mod_setenvif.c>
-SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary
-SetEnvIfNoCase Request_URI \.(?:exe|t?gz|zip|bz2|sit|rar)$ no-gzip dont-vary
-SetEnvIfNoCase Request_URI \.(?:avi|mov|mp3|mp4|rm)$ no-gzip dont-vary
-SetEnvIfNoCase Request_URI \.pdf$ no-gzip dont-vary
-
-BrowserMatch ^Mozilla/4 gzip-only-text/html
-BrowserMatch ^Mozilla/4\.0[678] no-gzip
-BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
-BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
+    ExpiresActive On
+    ExpiresByType text/html "access plus 1 hour"
+    ExpiresByType text/css "access plus 1 hour"
+    ExpiresByType text/javascript "access plus 1 hour"
+    ExpiresByType application/javascript "access plus 1 hour"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
 </IfModule>
 
 <IfModule mod_headers.c>
-SetEnvIfNoCase Origin "https?://.*?$" CORS=$0
-Header set Access-Control-Allow-Origin %{CORS}e env=CORS
-Header set Access-Control-Allow-Credentials "true"
-Header set Access-Control-Allow-Methods "POST,PUT,OPTIONS,DELETE"
-Header set Access-Control-Allow-Headers "Content-Type"
-Header append Vary User-Agent env=!dont-vary
-Header always append X-Frame-Options SAMEORIGIN
-Header always append X-Content-Type-Options nosniff
-Header always append X-XSS-Protection "1; mode=block"
+    Header append Vary User-Agent env=!dont-vary
+    Header always append X-Frame-Options SAMEORIGIN
+    Header always append X-Content-Type-Options nosniff
+    Header always append X-XSS-Protection "1; mode=block"
 </IfModule>
 
 php_value display_errors 0

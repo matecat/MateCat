@@ -3,13 +3,10 @@
 namespace API\V3;
 
 use API\App\Json\Analysis\AnalysisProject;
-use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
-use Constants_JobStatus;
-use Exceptions\ValidationError;
 use Model\Analysis\Status;
 use Projects_ProjectDao;
 
@@ -25,9 +22,7 @@ class StatusController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws AuthenticationError
      * @throws \Exceptions\NotFoundException
-     * @throws ValidationError
      */
     public function index() {
 
@@ -44,7 +39,7 @@ class StatusController extends KleinController {
         if ( !empty( $result->getJobs() ) ) {
             foreach ( $result->getJobs() as $j ) {
                 foreach ( $j->getChunks() as $chunk ) {
-                    if ( $chunk->getChunkStruct()->status_owner !== Constants_JobStatus::STATUS_DELETED ) {
+                    if ( !$chunk->getChunkStruct()->isDeleted() ) {
                         $chunksCount++;
                     }
                 }

@@ -27,7 +27,7 @@ REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -56,6 +56,8 @@ AWS_STORAGE_BASE_BUCKET = "xxxxxxxxxxxxxx"
 AWS_CACHING = true
 AWS_SSL_VERIFY = true
 
+MMT_DEFAULT_LICENSE = "xxxxxxxxxxxxxx"
+
 OPENAI_API_KEY = "xxxxxxxxxxxxxxxxxxxxx"
 OPEN_AI_MODEL = "gpt-3.5-turbo"
 OPEN_AI_TIMEOUT = 30
@@ -80,7 +82,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/local_storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'
@@ -124,7 +126,7 @@ REDIS_SERVERS = "tcp://localhost:6379"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
 QUEUE_CREDENTIALS = "admin:admin"
-SSE_BASE_URL      = "localhost/sse"          ;no trailing slash here
+SOCKET_BASE_URL      = "localhost/sse"          ;no trailing slash here
 STORAGE_DIR = "/home/matecat/cattool/storage"         ;provide an absolute path
 
 SMTP_HOST = 'localhost'

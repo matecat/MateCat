@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 .translation-memory-glossary-tab {
   display: flex;
@@ -28,15 +28,21 @@
   }
 }
 
-.translation-memory-glossary-tab-pre-translate {
+.translation-memory-glossary-checkbox-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 4px;
+  border: 1px dashed colors.$grey8;
+  padding: 10px;
+  margin-bottom: 20px;
+  background: colors.$white;
+}
+
+.translation-memory-glossary-checkbox-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  border-radius: 4px;
-  border: 1px dashed $grey8;
-  padding: 10px;
-  margin-bottom: 20px;
-  background: $white;
 }
 
 .translation-memory-glossary-tab-table-title {
@@ -55,27 +61,49 @@
 
 .translation-memory-glossary-tab-input-text {
   border-radius: 2px;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   padding: 6px;
 }
 
 .translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-table-rows-container {
+      background-color: white;
+    }
+  }
+
+  .settings-panel-table-rowHeading {
+    padding: 0 20px;
+  }
+
   .settings-panel-table-rowHeading,
   .settings-panel-row-content {
-    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 22%;
+    grid-template-columns: 8% 5% minmax(0, 1fr) 20% 5% 14% 18%;
   }
 
   .settings-panel-row {
-    border-top: unset;
+    border: unset;
 
     .row-content-default-memory {
-      grid-template-columns: 8% 5% minmax(0, 1fr) 0 5% 22%;
+      grid-template-columns: 8% 5% minmax(0, 1fr) 5% 14% 18%;
+      padding: 0 10px !important;
+      background-color: transparent;
+
+      > :last-child {
+        grid-column: 6;
+      }
     }
     .row-content-create-resource {
       grid-template-columns: 100%;
+      padding: 0 10px;
 
       > form {
         padding: 0 !important;
+        background-color: unset;
+
+        > :last-child {
+          grid-column: 7;
+        }
       }
     }
   }
@@ -85,15 +113,40 @@
   }
 
   .settings-panel-row-content {
-    background-color: $white;
+    background-color: colors.$white;
   }
 
   .settings-panel-row-active {
-    background-color: $transparentBlue;
+    padding: 10px;
+    background-color: colors.$transparentBlue;
   }
 
   .settings-panel-table-rowHeading-column {
     text-align: center;
+    padding: 0;
+  }
+}
+
+.translation-memory-glossary-tab {
+  .settings-panel-table {
+    .settings-panel-row-content:not(.row-content-create-resource):not(
+        .row-content-default-memory
+      ):not(.row-content-tm-from-file)
+      > :last-child {
+      grid-column: 7;
+    }
+  }
+
+  .settings-panel-table:not(.translation-memory-glossary-tab-active-table) {
+    .settings-panel-row {
+      padding: 0 10px;
+    }
+    .settings-panel-row-content {
+      padding: 0 10px;
+    }
+  }
+
+  .settings-panel-row-content > *:not(.settings-panel-row-drag-handle) {
     padding: 0;
   }
 }
@@ -108,11 +161,17 @@
   justify-content: center;
 }
 
+.tm-key-add-shared-resource {
+  input {
+    width: 90%;
+  }
+}
+
 .tm-key-row-name {
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   border-radius: 3px;
 
   &:focus,
@@ -134,7 +193,7 @@
 }
 
 .tm-key-row-button-item {
-  color: $grey6;
+  color: colors.$grey6;
 
   > :first-child {
     display: flex;
@@ -145,38 +204,40 @@
 
 .tm-key-row-menu-button {
   .menu-button-wrapper {
-    gap: 8px;
-
     > :first-child {
-      min-width: 170px;
+      min-width: 140px;
       border-radius: 2px;
     }
 
     > :last-child {
       border: none;
       background-color: unset;
-      color: $grey6;
+      color: colors.$grey6;
     }
   }
 
   .just-button-import-tmx {
-    min-width: 170px;
+    min-width: 140px;
     border-radius: 2px;
     font-size: 16px;
     color: #000;
-    background: $grey4;
+    background: colors.$grey4;
     padding: 4px 8px;
     text-align: center;
-    border: 1px solid $grey7;
+    border: 1px solid colors.$grey7;
 
     &:hover {
-      background-color: $grey5;
+      background-color: colors.$grey5;
     }
   }
 }
 
+.tm-key-row-menu-button-dropdown {
+  margin-left: -10px;
+}
+
 .tm-key-row-icons {
-  color: $grey;
+  color: colors.$grey;
 }
 
 .translation-memory-glossary-tab-buttons-group {
@@ -189,10 +250,10 @@
   width: 100%;
   padding: 4px;
   border-radius: 3px;
-  border: solid 1px $grey3;
+  border: solid 1px colors.$grey3;
 
   &.error {
-    border: solid 1px $redDefault;
+    border: solid 1px colors.$redDefault;
   }
 }
 
@@ -219,13 +280,23 @@
     }
   }
 
+  .action-form-remove-from {
+    align-items: start;
+
+    > :first-child {
+      gap: 0;
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+
   .translation-memory-glossary-tab-checkbox {
     display: flex;
     gap: 10px;
   }
   .action-form-error {
     input {
-      color: $redDefault;
+      color: colors.$redDefault;
     }
   }
 
@@ -252,12 +323,12 @@
         }
 
         .filename-error {
-          color: $redDefault;
+          color: colors.$redDefault;
         }
       }
 
       > li:nth-child(even) {
-        background-color: $grey4;
+        background-color: colors.$grey4;
       }
     }
 
@@ -265,24 +336,24 @@
       width: 260px;
       height: 6px;
       border-radius: 4px;
-      background-color: $grey8;
+      background-color: colors.$grey8;
 
       > :first-child {
-        background-color: $approvedGreen;
+        background-color: colors.$approvedGreen;
         height: 100%;
         border-radius: 4px;
       }
     }
 
     .import-completed {
-      color: $approvedGreenHover;
+      color: colors.$approvedGreenHover;
     }
 
     .message-error {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: $redDefault;
+      color: colors.$redDefault;
 
       > button {
         padding: 4px;
@@ -297,7 +368,7 @@
     margin-top: 6px;
 
     > :last-child {
-      color: $approvedGreenHover;
+      color: colors.$approvedGreenHover;
     }
   }
 }
@@ -310,5 +381,98 @@
 
 .translation-memory-glossary-tab-delete {
   border-top: 3px solid #ffcc01;
-  background-color: $orangeDefaultTransparent2;
+  background-color: colors.$orangeDefaultTransparent2;
+}
+
+.translation-memory-glossary-tab-active-table {
+  .settings-panel-row {
+    padding-left: 10px;
+    padding-right: 10px;
+
+    &:first-child {
+      padding: 10px !important;
+    }
+
+    &:last-child:not(.settings-panel-row-dragover-half-bottom) {
+      padding-bottom: 10px;
+    }
+
+    &:last-child:not(:nth-child(2)):not(
+        .settings-panel-row-dragover-half-bottom
+      ) {
+      .settings-panel-row-active {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+      }
+    }
+  }
+
+  .tm-prioritization-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 20px;
+    background-color: colors.$grey3;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  .tm-prioritization-text-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    h4 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    span {
+      color: colors.$grey6;
+    }
+  }
+
+  .switch-container-outer {
+    width: 155px;
+  }
+}
+
+.tm-row-penalty {
+  .tm-row-penalty-button,
+  .penalty-numeric-stepper-close-button {
+    border-radius: 2px;
+    font-size: 16px;
+    color: #000 !important;
+    background: colors.$grey4 !important;
+    padding: 4px 8px;
+    text-align: center;
+    border: 1px solid colors.$grey7 !important;
+    font-size: 16px !important;
+
+    &:hover {
+      background-color: colors.$grey5 !important;
+    }
+  }
+
+  .tm-row-penalty-numeric-stepper {
+    display: flex;
+    gap: 5px;
+  }
+
+  .penalty-numeric-stepper-close-button {
+    width: 28px !important;
+    height: 28px !important;
+    color: colors.$grey6 !important;
+  }
+}
+
+.tm-row-delete-remove-from-content {
+  display: flex;
+  flex-direction: column;
+
+  > div {
+    display: flex;
+    gap: 5px;
+  }
 }

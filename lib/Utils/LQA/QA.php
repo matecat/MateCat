@@ -2,9 +2,7 @@
 
 namespace LQA;
 
-use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
-use Chunks_ChunkStruct;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -12,16 +10,12 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
+use Jobs_JobStruct;
 use Log;
 use LogicException;
 use LQA\BxExG\Validator;
-use Projects_MetadataDao;
 use Segments_SegmentMetadataDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class errObject
@@ -138,7 +132,7 @@ class errObject {
 class QA {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -292,8 +286,6 @@ class QA {
 
     const ERR_SIZE_RESTRICTION = 3000;
 
-    const GLOSSARY_BLACKLIST_MATCH = 4000;
-
     /**
      * Human Readable error map.
      * Created accordingly with Error constants
@@ -401,7 +393,6 @@ class QA {
 
             3000 => 'Characters limit exceeded',
 
-            4000 => 'Glossary blacklist match detected',
     ];
 
     protected $_tipMap = [
@@ -414,8 +405,6 @@ class QA {
             29   => "Should be < g ... > ... < /g >",
             1000 => "Press 'alt + t' shortcut to add tags or delete extra tags.",
             3000 => 'Maximum characters limit exceeded.',
-            4000 => 'Glossary blacklist match detected',
-
     ];
 
     const SIZE_RESTRICTION = "sizeRestriction";
@@ -585,14 +574,6 @@ class QA {
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
                         'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
-                ] );
-                break;
-
-            case self::GLOSSARY_BLACKLIST_MATCH:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
-                        'outcome' => $errCode,
-                        'debug'   => $this->_errorMap[ self::GLOSSARY_BLACKLIST_MATCH ],
-                        'tip'     => $this->_getTipValue( self::GLOSSARY_BLACKLIST_MATCH )
                 ] );
                 break;
 
@@ -1088,7 +1069,7 @@ class QA {
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -1594,7 +1575,6 @@ class QA {
         $this->_checkNewLineConsistency();
         $this->_checkSymbolConsistency();
         $this->_checkSizeRestriction();
-        $this->_checkGlossaryBlacklist();
 
         // all checks completed
         return $this->getErrors();
@@ -1904,12 +1884,22 @@ class QA {
         // so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
-            // Append a space to target for normalization
-            // only if target is NOT a CJ language
-            if ( false === CatUtils::isCJ( $this->target_seg_lang ) ) {
-                $this->target_seg = rtrim( $this->target_seg );
-                $this->target_seg .= ' ';
+            // check if source has a trailing space at the end
+            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
 
+            if ( $sourceHasTrailingSpace ) {
+
+                // this means that the source has a trailing space and the target haven't it
+
+                // Append a space to target for normalization
+                // only if target is NOT a CJ language
+                if ( false === CatUtils::isCJ( $this->target_seg_lang ) ) {
+                    $this->addError( self::ERR_BOUNDARY_TAIL );
+                    $this->target_seg = rtrim( $this->target_seg );
+                    $this->target_seg .= ' ';
+                }
+            } else {
+                // this means that the target has a trailing space and the source haven't it
                 $this->addError( self::ERR_BOUNDARY_TAIL );
             }
 
@@ -2617,42 +2607,6 @@ class QA {
         }
 
         return true;
-    }
-
-    /**
-     * Check glossary blacklist
-     *
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
-     */
-    protected
-    function _checkGlossaryBlacklist() {
-        if ( $this->chunk === null or $this->featureSet === null ) {
-            return;
-        }
-
-        // Add blacklist glossary warnings
-        $project = $this->chunk->getProject();
-
-        $dao           = new Projects_MetadataDao();
-        $has_blacklist = $dao->setCacheTTL( 60 * 60 * 24 )->get( $project->id, 'has_blacklist' );
-
-        if ( $has_blacklist ) {
-            $data = [];
-            $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
-                    'src_content' => $this->source_seg,
-                    'trg_content' => $this->target_seg,
-                    'project'     => $this->chunk->getProject(),
-                    'chunk'       => $this->chunk
-            ] );
-
-            if ( isset( $data[ 'blacklist' ] ) and !empty( $data[ 'blacklist' ][ 'matches' ] ) ) {
-                $this->addError( QA::GLOSSARY_BLACKLIST_MATCH );
-            }
-        }
     }
 
     protected

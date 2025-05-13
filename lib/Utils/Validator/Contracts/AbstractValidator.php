@@ -2,7 +2,6 @@
 
 namespace Validator\Contracts;
 
-use Exception;
 use Validator\Errors\JsonValidatorExceptionInterface;
 
 abstract class AbstractValidator {

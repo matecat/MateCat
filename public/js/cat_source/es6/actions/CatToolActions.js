@@ -3,7 +3,6 @@ import React from 'react'
 import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
-import Notifications from '../sse/sse'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
 import CatToolStore from '../stores/CatToolStore'
@@ -16,6 +15,9 @@ import {getDomainsList} from '../api/getDomainsList'
 import {checkJobKeysHaveGlossary} from '../api/checkJobKeysHaveGlossary'
 import {getJobMetadata} from '../api/getJobMetadata'
 import CatToolConstants from '../constants/CatToolConstants'
+import SegmentStore from '../stores/SegmentStore'
+import ManageActions from './ManageActions'
+import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
@@ -85,9 +87,6 @@ let CatToolActions = {
     })
     setTimeout(() => window.dispatchEvent(new Event('resize')))
   },
-  startNotifications: function () {
-    Notifications.start()
-  },
   clientConnected: function (clientId) {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.CLIENT_CONNECT,
@@ -98,18 +97,6 @@ let CatToolActions = {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.CLIENT_RECONNECTION,
     })
-  },
-
-  showHeaderTooltip: function () {
-    var closedPopup = localStorage.getItem(this.popupInfoUserMenu())
-
-    if (config.is_cattool) {
-      UI.showProfilePopUp(!closedPopup)
-    } else if (!closedPopup) {
-      AppDispatcher.dispatch({
-        actionType: CatToolConstants.SHOW_PROFILE_MESSAGE_TOOLTIP,
-      })
-    }
   },
   setPopupUserMenuCookie: function () {
     CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu')
@@ -122,31 +109,6 @@ let CatToolActions = {
 
     config.last_job_segment = lastSegment
     config.firstSegmentOfFiles = files
-  },
-  renderHeader: () => {
-    const mountPoint = createRoot($('header')[0])
-    mountPoint.render(
-      React.createElement(Header, {
-        pid: config.id_project,
-        jid: config.job_id,
-        password: config.password,
-        reviewPassword: config.review_password,
-        source_code: config.source_rfc,
-        target_code: config.target_rfc,
-        isReview: config.isReview,
-        revisionNumber: config.revisionNumber,
-        userLogged: config.isLoggedIn,
-        projectName: config.project_name,
-        projectCompletionEnabled: config.project_completion_feature_enabled,
-        secondRevisionsCount: config.secondRevisionsCount,
-        overallQualityClass: config.overall_quality_class,
-        qualityReportHref: config.quality_report_href,
-        allowLinkToAnalysis: config.allow_link_to_analysis,
-        analysisEnabled: config.analysis_enabled,
-        isGDriveProject: config.isGDriveProject,
-        showReviseLink: config.footer_show_revise_link,
-      }),
-    )
   },
   updateFooterStatistics: function () {
     getJobStatistics(config.id_job, config.password).then(function (data) {
@@ -203,40 +165,42 @@ let CatToolActions = {
     const jobKeys = CatToolStore.getJobTmKeys()
     const domains = CatToolStore.getKeysDomains()
     const haveKeysGlossary = CatToolStore.getHaveKeysGlossary()
-    if ((!jobKeys || forceUpdate) && CatToolStore.isClientConnected()) {
-      getTmKeysJob().then(({tm_keys: tmKeys}) => {
-        // filter not private keys
-        const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
-        getDomainsList({
-          keys: filteredKeys.map(({key}) => key),
+    if (CatToolStore.isClientConnected()) {
+      if (!jobKeys || forceUpdate) {
+        getTmKeysJob().then(({tm_keys: tmKeys}) => {
+          // filter not private keys
+          const filteredKeys = tmKeys.filter(({is_private}) => !is_private)
+          getDomainsList({
+            keys: filteredKeys.map(({key}) => key),
+          })
+          const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.UPDATE_TM_KEYS,
+            keys,
+          })
         })
-        const keys = filteredKeys.map((item) => ({...item, id: item.key}))
+
+        // check job keys have glossary (response sse channel)
+        checkJobKeysHaveGlossary()
+      } else {
         AppDispatcher.dispatch({
           actionType: CatToolConstants.UPDATE_TM_KEYS,
-          keys,
+          keys: jobKeys,
         })
-      })
-
-      // check job keys have glossary (response sse channel)
-      checkJobKeysHaveGlossary()
-    } else {
-      AppDispatcher.dispatch({
-        actionType: CatToolConstants.UPDATE_TM_KEYS,
-        keys: jobKeys,
-      })
-      //From sse channel
-      if (domains) {
-        AppDispatcher.dispatch({
-          actionType: CatToolConstants.UPDATE_DOMAINS,
-          entries: domains,
-        })
-      }
-      if (haveKeysGlossary !== undefined) {
-        AppDispatcher.dispatch({
-          actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
-          value: haveKeysGlossary,
-          wasAlreadyVerified: true,
-        })
+        //From sse channel
+        if (domains) {
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.UPDATE_DOMAINS,
+            entries: domains,
+          })
+        }
+        if (haveKeysGlossary !== undefined) {
+          AppDispatcher.dispatch({
+            actionType: CatToolConstants.HAVE_KEYS_GLOSSARY,
+            value: haveKeysGlossary,
+            wasAlreadyVerified: true,
+          })
+        }
       }
     }
   },
@@ -281,7 +245,7 @@ let CatToolActions = {
     })
   },
   onRender: (props = {}) => {
-    UI.nextUntranslatedSegmentIdByServer = null
+    SegmentStore.nextUntranslatedFromServer = null
 
     const segmentToOpen = props.segmentToOpen || false
 
@@ -305,9 +269,7 @@ let CatToolActions = {
     })
   },
   onTMKeysChangeStatus: () => {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.ON_TM_KEYS_CHANGE_STATUS,
-    })
+    CatToolActions.retrieveJobKeys(true)
   },
   setHaveKeysGlossary: (value) => {
     AppDispatcher.dispatch({
@@ -335,6 +297,39 @@ let CatToolActions = {
         actionType: CatToolConstants.GET_JOB_METADATA,
         jobMetadata: CatToolStore.jobMetadata,
       })
+    }
+  },
+  setSegmentFilterError: function () {
+    AppDispatcher.dispatch({
+      actionType: CatToolConstants.SEGMENT_FILTER_ERROR,
+    })
+  },
+  showLaraQuotaExceeded: () => {
+    const key = 'lara_quote_exceed' + config.id_job
+    if (!sessionStorage.getItem(key)) {
+      const props = {
+        text: config.ownerIsMe
+          ? "You've hit the <strong>monthly limit of 10k characters</strong> available with Lara's free plan.</br>" +
+            'Lara will stop translating until the limit is reset at the end of the billing cycle.<br><br>' +
+            'To enjoy unlimited access to the best machine tranlsation, upgrade your plan.'
+          : "The <strong>10k-character monthly limit</strong> for Lara's free plan has been reached.<br> " +
+            'Translation will pause until the limit resets at the end of the billing cycle or the project owner upgrades the plan.<br>',
+        successText: config.ownerIsMe ? 'Upgrade your plan' : null,
+        cancelText: 'Dismiss',
+        successCallback: config.ownerIsMe
+          ? () => {
+              window.open('https://laratranslate.com/pricing', '_blank')
+            }
+          : null,
+        onCloseCallback: () => {
+          sessionStorage.setItem(key, true)
+        },
+      }
+      ModalsActions.showModalComponent(
+        ConfirmMessageModal,
+        props,
+        'Lara Free Plan Limit Reached',
+      )
     }
   },
 }

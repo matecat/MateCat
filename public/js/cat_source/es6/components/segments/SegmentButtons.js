@@ -13,6 +13,7 @@ import {
   removeTagsFromText,
 } from './utils/DraftMatecatUtils/tagUtils'
 import SegmentActions from '../../actions/SegmentActions'
+import UserStore from '../../stores/UserStore'
 import {isMacOS} from '../../utils/Utils'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Shortcuts} from '../../utils/shortcuts'
@@ -22,18 +23,28 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     Shortcuts.cattol.events.translate_nextUntranslated.keystrokes[
       Shortcuts.shortCutsKeyType
     ],
-    (e) =>
-      config.isReview
-        ? clickOnApprovedButton(e, true)
-        : clickOnTranslatedButton(e, true),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, true)
+            : clickOnTranslatedButton(e, true)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
   useHotkeys(
     Shortcuts.cattol.events.translate.keystrokes[Shortcuts.shortCutsKeyType],
-    (e) =>
-      config.isReview
-        ? clickOnApprovedButton(e, false)
-        : clickOnTranslatedButton(e, false),
+    (e) => {
+      if (!disabled) {
+        setTimeout(() => {
+          config.isReview
+            ? clickOnApprovedButton(e, false)
+            : clickOnTranslatedButton(e, false)
+        }, 150)
+      }
+    },
     {enableOnContentEditable: true},
   )
 
@@ -49,13 +60,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     const idProject = config.id_project
     const key = 'first_segment_confirm' + idProject
     if (!sessionStorage.getItem(key)) {
+      const userInfo = UserStore.getUser()
       const event = {
         event: 'first_segment_confirm',
-        userStatus: APP.USER.isUserLogged() ? 'loggedUser' : 'notLoggedUser',
-        userId:
-          APP.USER.isUserLogged() && APP.USER.STORE.user
-            ? APP.USER.STORE.user.uid
-            : null,
+        userStatus: userInfo ? 'loggedUser' : 'notLoggedUser',
+        userId: userInfo ? userInfo.user.uid : undefined,
         idProject: parseInt(idProject),
       }
       CommonUtils.dispatchAnalyticsEvents(event)
@@ -83,13 +92,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
   }
 
   const goToNextRepetition = (event, status) => {
-    let target = event.currentTarget
-    setTimeout(() => SegmentFilter.goToNextRepetition(target, status))
+    setTimeout(() => SegmentFilter.goToNextRepetition(status))
   }
 
   const goToNextRepetitionGroup = (event, status) => {
-    let target = event.currentTarget
-    setTimeout(() => SegmentFilter.goToNextRepetitionGroup(target, status))
+    setTimeout(() => SegmentFilter.goToNextRepetitionGroup(status))
   }
 
   const clickOnGuessTags = (e) => {
@@ -112,7 +119,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     }
     e.preventDefault()
     $(e.target).addClass('disabled')
-    setTimeout(() => UI.startSegmentTagProjection(segment.sid))
+    setTimeout(() => SegmentActions.startSegmentTagProjection(segment.sid))
     return false
   }
 
@@ -154,8 +161,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
         (SegmentUtils.isIceSegment(nextSegment) && !nextSegment.unlocked) || //Ice
         nextSegment.status === 'NEW' ||
         nextSegment.status === 'DRAFT')
-    const filtering =
-      SegmentFilter.enabled() && SegmentFilter.filtering() && SegmentFilter.open
+    const filtering = SegmentFilter.enabled() && SegmentFilter.filtering()
     const className = config.isReview
       ? 'revise-button-' + config.revisionNumber
       : ''
@@ -358,7 +364,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.TRANSLATED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }
@@ -380,7 +386,7 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
           {' '}
           {config.status_labels.APPROVED}{' '}
         </a>
-        <p>{isMac ? 'CMD' : 'CTRL'} ENTER</p>
+        <p>{isMac ? 'CMD' : 'CTRL'}+ENTER</p>
       </li>
     )
   }

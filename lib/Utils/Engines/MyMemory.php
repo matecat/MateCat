@@ -16,6 +16,17 @@ use TaskRunner\Exceptions\ReQueueException;
 class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
+     * @inheritdoc
+     * @see Engines_AbstractEngine::$_isAdaptiveMT
+     * @var bool
+     */
+    protected bool $_isAdaptiveMT = false;
+
+    public function isTMS(): bool {
+        return true;
+    }
+
+    /**
      * @var string
      */
     protected $content_type = 'json';
@@ -47,8 +58,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "TM" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a TMS engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::TM ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -128,8 +139,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
                 if ( !empty( $decoded[ 'matches' ] ) ) {
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
-                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
-                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );
+                        $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $match[ 'segment' ];
+                        $decoded[ 'matches' ][ $pos ][ 'translation' ] = $match[ 'translation' ];
                     }
                 }
 
@@ -182,7 +193,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function get( $_config ) {
 
-        $_config[ 'segment' ] = $this->_preserveSpecialStrings( $_config[ 'segment' ] );
         if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
             $_config[ 'segment' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
         }
@@ -194,6 +204,23 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]    = $_config[ 'num_result' ];
         $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+
+        // TM prioritization
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true ) ? 1 : 0;
+
+        if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
+            $penalties = [];
+
+            foreach ( $_config[ 'penalty_key' ] as $penalty ) {
+                if ( is_numeric( $penalty ) ) {
+                    $penalties[] = $penalty / 100;
+                }
+            }
+
+            if ( !empty( $penalties ) ) {
+                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
+            }
+        }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
             $parameters[ 'dialect_strict' ] = $_config[ 'dialect_strict' ];
@@ -268,16 +295,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     public function update( $_config ) {
 
-        $parameters                = [];
-        $parameters[ 'seg' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        $parameters[ 'tra' ]       = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
-        $parameters[ 'newseg' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
-        $parameters[ 'newtra' ]    = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'prop' ]      = $_config[ 'prop' ];
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
+        $parameters                 = [];
+        $parameters[ 'seg' ]        = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
+        $parameters[ 'tra' ]        = preg_replace( "/^(-?@-?)/", "", $_config[ 'translation' ] );
+        $parameters[ 'newseg' ]     = preg_replace( "/^(-?@-?)/", "", $_config[ 'newsegment' ] );
+        $parameters[ 'newtra' ]     = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
+        $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'prop' ]       = $_config[ 'prop' ];
+        $parameters[ 'client_id' ]  = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'de' ]         = $_config[ 'email' ];
+        $parameters[ 'mt' ]         = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
+        $parameters[ 'spiceMatch' ] = $_config[ 'spiceMatch' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
             $parameters[ 'context_after' ]  = ( !empty( $_config[ 'context_after' ] ) ) ? preg_replace( "/^(-?@-?)/", "", $_config[ 'context_after' ] ) : null;
@@ -336,6 +364,30 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         }
 
         return true;
+    }
+
+    /**
+     * Check the entry status on myMemory
+     *
+     * @param string $uuid
+     * @return array
+     */
+    public function entryStatus( string $uuid )
+    {
+        $this->call( "entry_status_relative_url", [
+            'uuid' => $uuid
+        ], false );
+
+        // 1 second timeout
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_TIMEOUT => 1
+            ]
+        );
+
+        /**
+         * @var Engines_Results_MyMemory_TmxResponse
+         */
+        return $this->result;
     }
 
     /**
@@ -606,12 +658,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         return $this->result;
     }
 
-    public function import( $file, $key, $name = false ) {
+    /**
+     *
+     * @param string           $filePath
+     * @param string           $memoryKey
+     * @param Users_UserStruct $user * Not used
+     *
+     * @return array|mixed
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
 
         $postFields = [
-                'tmx'  => $this->getCurlFile( $file ),
-                'name' => $name,
-                'key'  => trim( $key )
+                'tmx' => $this->getCurlFile( $filePath ),
+                'key' => trim( $memoryKey )
         ];
 
         $this->call( "tmx_import_relative_url", $postFields, true );
@@ -739,7 +798,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 ]
         );
 
-        $this->engineRecord[ 'base_url' ] = "https://analyze.mymemory.translated.net/api/v1";
+        $this->getEngineRecord()[ 'base_url' ] = "https://analyze.mymemory.translated.net/api/v1";
 
         $this->call( "analyze_url", array_values( $segs_array ), true, true );
 
@@ -798,8 +857,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 CURLOPT_FOLLOWLOCATION => true,
         ] );
 
-        $this->engineRecord->base_url                    = parse_url( $this->engineRecord->base_url, PHP_URL_HOST ) . ":10000";
-        $this->engineRecord->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
+        $this->getEngineRecord()->base_url                    = parse_url( $this->getEngineRecord()->base_url, PHP_URL_HOST ) . ":10000";
+        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
         $this->call( 'tags_projection', $parameters );
 
         if ( !empty( $this->result->responseData ) ) {

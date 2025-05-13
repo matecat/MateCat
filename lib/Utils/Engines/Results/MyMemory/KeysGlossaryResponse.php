@@ -16,14 +16,13 @@ class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_Abst
     /**
      * @return bool
      */
-    public function hasGlossary()
-    {
-        if(empty($this->entries)){
+    public function hasGlossary() {
+        if ( empty( $this->entries ) ) {
             return false;
         }
 
-        foreach($this->entries as $key => $value){
-            if($value === true){
+        foreach ( $this->entries as $key => $value ) {
+            if ( $value === true ) {
                 return true;
             }
         }

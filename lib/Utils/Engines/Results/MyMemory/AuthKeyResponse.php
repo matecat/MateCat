@@ -8,10 +8,10 @@
 
 class Engines_Results_MyMemory_AuthKeyResponse extends Engines_Results_AbstractResponse {
 
-    public function __construct( $response ){
+    public function __construct( $response ) {
 
-        $this->responseData    = isset( $response ) ? $response : '';
-        $this->responseStatus  = 200;
+        $this->responseData   = isset( $response ) ? $response : '';
+        $this->responseStatus = 200;
 
     }
 

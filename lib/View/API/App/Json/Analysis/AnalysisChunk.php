@@ -130,12 +130,21 @@ class AnalysisChunk implements JsonSerializable {
             return [];
         }
 
-        $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
-        $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
+        try {
+            $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
+        } catch (\Exception $exception){
+            $tmEngine = null;
+        }
+
+        try {
+            $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
+        } catch (\Exception $exception){
+            $mtEngine = null;
+        }
 
         return [
-                'tm' => ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRow() ),
-                'mt' => ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRow() )
+                'tm' => $tmEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
+                'mt' => $mtEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
         ];
     }
 

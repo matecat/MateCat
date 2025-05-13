@@ -100,7 +100,6 @@ const SegmentConstants = keyMirror({
   SET_GUESS_TAGS: null,
   HIGHLIGHT_TAGS: null,
   SET_SEGMENT_SAVING: null,
-  TOGGLE_CHARACTER_COUNTER: null,
   HIDE_AI_ASSISTANT: null,
   CHARACTER_COUNTER: null,
   GET_MORE_SEGMENTS: null,
@@ -114,5 +113,6 @@ const SegmentConstants = keyMirror({
   OPEN_GLOSSARY_FORM_PREFILL: null,
   FOCUS_TAGS: null,
   REFRESH_TAG_MAP: null,
+  CHANGE_CHARACTERS_COUNTER_RULES: null,
 })
 export default SegmentConstants

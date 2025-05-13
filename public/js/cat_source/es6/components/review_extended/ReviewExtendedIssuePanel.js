@@ -103,9 +103,9 @@ class ReviewExtendedIssuePanel extends React.Component {
     }
   }
 
-  handleFail({errors}) {
-    if (errors && errors[0].code === -2000) {
-      UI.processErrors(errors, 'createIssue')
+  handleFail(response) {
+    if (response.errors && response.errors[0].code === -2000) {
+      UI.processErrors(response.errors, 'createIssue')
     } else {
       CommonUtils.genericErrorAlertMessage()
     }

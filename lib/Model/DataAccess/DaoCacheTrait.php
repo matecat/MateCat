@@ -12,11 +12,10 @@ namespace DataAccess;
 use Exception;
 use INIT;
 use Log;
-use PDO;
-use PDOStatement;
 use Predis\Client;
 use RedisHandler;
 use ReflectionException;
+use Throwable;
 
 trait DaoCacheTrait {
 
@@ -54,30 +53,6 @@ trait DaoCacheTrait {
     }
 
 
-    /**
-     * @param string $query A query
-     *
-     * @return mixed
-     * @throws ReflectionException
-     */
-    protected function _getFromCache( string $query ): ?array {
-        if ( INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
-            return null;
-        }
-
-        $this->_cacheSetConnection();
-
-        $value = null;
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $key   = md5( $query );
-            $value = unserialize( self::$cache_con->get( $key ) );
-            $this->_logCache( "GET", $key, $value, $query );
-        }
-
-        return $value ?: null;
-
-    }
-
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
         Log::doJsonLog( [
                 "type" => $type,
@@ -85,24 +60,6 @@ trait DaoCacheTrait {
                 "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
             //"result_set" => $value,
         ], "query_cache.log" );
-    }
-
-    /**
-     * @param $query string
-     * @param $value array
-     *
-     * @return void|null
-     */
-    protected function _setInCache( string $query, array $value ) {
-        if ( $this->cacheTTL == 0 ) {
-            return null;
-        }
-
-        if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $key = md5( $query );
-            self::$cache_con->setex( $key, $this->cacheTTL, serialize( $value ) );
-            $this->_logCache( "SET", $key, $value, $query );
-        }
     }
 
     /**
@@ -130,6 +87,9 @@ trait DaoCacheTrait {
     }
 
     /**
+     * This method uses a clean, human-readable key instead of a md5 hash.
+     * It also allows grouping multiple queries under a single namespace (`$keyMap`).
+     *
      * @param string $keyMap
      * @param        $query string
      * @param        $value array
@@ -145,6 +105,7 @@ trait DaoCacheTrait {
             $key = md5( $query );
             self::$cache_con->hset( $keyMap, $key, serialize( $value ) );
             self::$cache_con->expire( $keyMap, $this->cacheTTL );
+            self::$cache_con->setex( $key, $this->cacheTTL, $keyMap );
             $this->_logCache( "SETMAP: " . $keyMap, $key, $value, $query );
         }
     }
@@ -180,17 +141,18 @@ trait DaoCacheTrait {
     /**
      * Destroy a single element in the hash set
      *
-     * @param              $keyMap
-     * @param PDOStatement $stmt
-     * @param array        $bindParams
+     * @param string $reverseKeyMap
+     * @param string $keyElementName
      *
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _destroyObjectCacheMapElement( $keyMap, PDOStatement $stmt, array $bindParams ) {
+    protected function _removeObjectCacheMapElement( string $reverseKeyMap, string $keyElementName ) {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->hdel( $keyMap, [ md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) ] );
+            $keyMap = self::$cache_con->get( $reverseKeyMap );
+
+            return self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] ); // let the hashset expire by himself instead of calling HLEN and DEL
         }
 
         return false;
@@ -198,27 +160,28 @@ trait DaoCacheTrait {
     }
 
     /**
-     * @param PDOStatement $stmt
-     * @param array        $bindParams
+     * Destroy a key directly when it is known
      *
-     * @return bool|int
-     * @throws ReflectionException
-     */
-    protected function _destroyObjectCache( PDOStatement $stmt, array $bindParams ) {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
-    }
-
-    /**
      * @param string $key
-     * @param ?bool  $makeHash
+     * @param ?bool  $isReverseKeyMap
      *
      * @return bool
      * @throws ReflectionException
+     *
      */
-    protected function _destroyCache( string $key, ?bool $makeHash = true ): bool {
+    protected function _deleteCacheByKey( string $key, ?bool $isReverseKeyMap = true ): bool {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            return self::$cache_con->del( $makeHash ? md5( $key ) : $key );
+
+            if ( $isReverseKeyMap ) {
+                $keyMap = self::$cache_con->get( $key );
+                $res    = self::$cache_con->del( $keyMap );
+                self::$cache_con->del( $key );
+
+                return $res;
+            }
+
+            return self::$cache_con->del( $key );
         }
 
         return false;

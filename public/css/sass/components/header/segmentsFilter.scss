@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 body section.muted {
   background: #f2f4f7;
   cursor: not-allowed;
@@ -270,20 +271,20 @@ section.muted .segment-side-buttons {
                   background: #ffffff;
                 }
                 &.draft-color {
-                  background: $grey1;
+                  background: colors.$grey1;
                 }
                 &.translated-color,
                 &.post-edited-color {
-                  background: $translatedBlue;
+                  background: colors.$translatedBlue;
                 }
                 &.approved-color {
-                  background: $approvedGreen;
+                  background: colors.$approvedGreen;
                 }
                 &.approved-2ndpass-color {
-                  background: $approved2Green;
+                  background: colors.$approved2Green;
                 }
                 &.rejected-color {
-                  background: $rebuttedRed;
+                  background: colors.$rebuttedRed;
                 }
               }
             }
@@ -398,7 +399,7 @@ section.muted .segment-side-buttons {
               .loader {
                 width: 20px;
                 height: 20px;
-                background: url(../../img/loading.gif) 0 0 no-repeat !important;
+                background: url(/public/img/loading.gif) 0 0 no-repeat !important;
                 position: absolute;
                 bottom: 0px;
                 display: block;

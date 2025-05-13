@@ -1,7 +1,7 @@
-@import '../../commons/_colors';
+@use '../../commons/_colors';
 
 .job-analyze-header {
-  background-color: $grey2;
+  background-color: colors.$grey2;
   display: flex;
   height: 32px;
   align-items: center;
@@ -32,7 +32,7 @@
   padding-left: 0 !important;
   padding-right: 0 !important;
   width: 100%;
-  background-color: $white;
+  background-color: colors.$white;
 }
 
 .job-table-header {
@@ -43,15 +43,15 @@
     );
   grid-template-rows: 100px;
   padding: 0 !important;
-  border-bottom: 1px solid $grey3;
-  background-color: $grey4;
+  border-bottom: 1px solid colors.$grey3;
+  background-color: colors.$grey4;
   > div {
     display: flex;
     flex-direction: column;
     height: 100%;
     text-align: right;
-    border-left: 1px solid $grey3;
-    min-width: 66px;
+    border-left: 1px solid colors.$grey3;
+    min-width: 46px;
     font-size: 16px;
     &:first-child {
       border-left: none;
@@ -61,7 +61,7 @@
     }
     :first-child {
       height: 60px;
-      border-bottom: 1px solid $grey3;
+      border-bottom: 1px solid colors.$grey3;
       font-weight: bold;
     }
     > div {
@@ -78,8 +78,8 @@
     flex-direction: column;
     height: 100%;
     text-align: right;
-    color: $grey;
-    background-color: $grey5;
+    color: colors.$grey;
+    background-color: colors.$grey5;
     padding-right: 6px;
     font-size: 16px;
     :first-child {
@@ -91,7 +91,7 @@
     }
   }
   .job-table-header-total {
-    width: 100px;
+    min-width: 60px;
     display: flex;
     justify-content: flex-end;
     font-weight: 700;
@@ -115,13 +115,13 @@
         100px
       );
     padding-top: 16px;
-    background-color: $white;
+    background-color: colors.$white;
     position: relative;
     font-size: 16px;
     .chunk-analyze-info-background {
       position: absolute;
       width: 86%;
-      background: $grey;
+      background: colors.$grey;
       height: 24px;
       right: 10px;
       top: 40px;
@@ -140,12 +140,12 @@
         border-radius: 4px 4px 0 0;
       }
       .chunk-analyze-info-index {
-        color: $black !important;
+        color: colors.$black !important;
         font-weight: 700;
         font-size: 14px;
       }
       .chunk-analyze-info-files {
-        color: $black !important;
+        color: colors.$black !important;
         display: flex;
         align-items: center;
         gap: 4px;
@@ -154,13 +154,13 @@
       }
 
       :first-child {
-        color: $grey;
+        color: colors.$grey;
         font-size: 14px;
       }
       > div {
         height: 24px;
         width: 100%;
-        color: $black;
+        color: colors.$black;
         justify-content: space-between;
         display: flex;
         padding: 2px 8px;
@@ -177,7 +177,7 @@
       }
     }
     > div {
-      border-right: 1px solid $grey3;
+      border-right: 1px solid colors.$grey3;
       &:last-child,
       &:first-child {
         border-right: none;
@@ -191,7 +191,7 @@
       }
       :first-child {
         font-size: 14px;
-        color: $grey;
+        color: colors.$grey;
       }
     }
   }
@@ -205,12 +205,12 @@
   grid-template-rows: 24px;
   display: grid;
   padding: 0;
-  color: $grey;
+  color: colors.$grey;
   position: relative;
   .chunk-file-detail-background {
     position: absolute;
     width: 86%;
-    background: $grey;
+    background: colors.$grey;
     height: 24px;
     right: 10px;
     top: 0px;
@@ -224,14 +224,14 @@
     justify-content: left;
   }
   > div {
-    border-right: 1px solid $grey3;
+    border-right: 1px solid colors.$grey3;
     justify-content: right;
     display: flex;
     padding-right: 6px;
     line-height: 24px;
   }
   .chunk-file-detail-filename {
-    background-color: $white;
+    background-color: colors.$white;
     padding-right: 0;
     svg {
       margin-top: 5px;
@@ -252,7 +252,7 @@
       padding: 0 6px;
       width: 100%;
       gap: 4px;
-      background-color: $grey4;
+      background-color: colors.$grey4;
       cursor: default;
     }
   }
@@ -260,4 +260,7 @@
     justify-content: center;
     border-right: none;
   }
+}
+.analyze-page .more-columns {
+  grid-template-columns: minmax(100px, 150px) repeat(12, 1fr) minmax(80px,100px) !important;
 }

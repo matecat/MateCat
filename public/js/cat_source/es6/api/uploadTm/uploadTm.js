@@ -19,8 +19,6 @@ export const uploadTm = async ({
   password = config.password,
 }) => {
   const paramsData = {
-    action: 'loadTMX',
-    exec: 'newTM',
     tm_key: tmKey,
     name: keyName,
     r: '1',
@@ -36,14 +34,11 @@ export const uploadTm = async ({
     formData.append('uploaded_file[]', file, file.name),
   )
 
-  const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
-    {
-      method: 'POST',
-      body: formData,
-      credentials: 'include',
-    },
-  )
+  const response = await fetch(`${getMatecatApiDomain()}api/app/new-tmx`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  })
 
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {

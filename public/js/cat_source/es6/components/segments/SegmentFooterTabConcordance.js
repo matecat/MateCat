@@ -72,7 +72,7 @@ class SegmentFooterTabConcordance extends React.Component {
   getConcordance(query, type) {
     //type 0 = source, 1 = target
     getConcordance(query, type).catch(() => {
-      OfflineUtils.failedConnection(this, 'getConcordance')
+      OfflineUtils.failedConnection()
     })
     this.setState({
       loading: true,
@@ -101,6 +101,19 @@ class SegmentFooterTabConcordance extends React.Component {
       this.getConcordance(this.state.source, 0)
     } else if (this.state.target.length > 0) {
       this.getConcordance(this.state.target, 1)
+    }
+  }
+
+  async copyText(e) {
+    const internalClipboard = document.getSelection()
+    if (internalClipboard) {
+      e.preventDefault()
+      // Get plain text form internalClipboard fragment
+      const plainText = internalClipboard
+        .toString()
+        .replace(new RegExp(String.fromCharCode(parseInt('200B', 16)), 'g'), '')
+        .replace(/·/g, ' ')
+      return await navigator.clipboard.writeText(plainText)
     }
   }
 
@@ -195,10 +208,12 @@ class SegmentFooterTabConcordance extends React.Component {
           this.props.tab_class
         }
         id={'segment-' + this.props.segment.sid + '-' + this.props.tab_class}
+        onCopy={this.copyText}
+        onCut={this.copyText}
       >
         {' '}
         {!clientConnected ? (
-          <SegmentFooterTabError />
+          clientConnected === false && <SegmentFooterTabError />
         ) : (
           <>
             <div className="overflow">

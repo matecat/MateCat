@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              'Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).',
+              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -212,6 +212,96 @@ var spec = {
             default: 0,
           },
           {
+            name: 'dialect_strict',
+            in: 'formData',
+            description:
+              'Specify if you want matches only from dialect (excluding the other language variants)',
+            required: false,
+            type: 'string',
+            example: '{"it-IT": true, "en-US": false, "fr-FR": false}',
+          },
+          {
+            name: 'mmt_glossaries',
+            in: 'formData',
+            description: 'Load specific MMT glossaries',
+            required: false,
+            type: 'string',
+            example:
+              '{"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }',
+          },
+          {
+            name: 'deepl_formality',
+            in: 'formData',
+            description:
+              'DeepL formality (choose between `default`, `prefer_less` or `prefer_more`)',
+            required: false,
+            type: 'string',
+            default: 'default',
+            enum: ['default', 'prefer_less', 'prefer_more'],
+          },
+          {
+            name: 'deepl_id_glossary',
+            in: 'formData',
+            description: 'Specify a DeepL glossary',
+            required: false,
+            type: 'string',
+            example: '34532',
+          },
+          {
+            name: 'filters_extraction_parameters',
+            in: 'formData',
+            description:
+              'Set the filters extraction parameters throught a json string',
+            required: false,
+            type: 'string',
+            example:
+              '{"name": "parameters": {"json": {"extract_arrays": true, "escape_forward_slashes": false, "translate_keys": ["key"], "do_not_translate_keys": [], "context_keys": [], "character_limit": []}}}',
+          },
+          {
+            name: 'xliff_parameters',
+            in: 'formData',
+            description: 'Specific parameters for the analysis of Xliff files',
+            required: false,
+            type: 'string',
+            example:
+              '{"xliff12": [{"analysis": "pre-translated", "states": ["final"], "editor": "new"}], "xliff20": []}',
+          },
+          {
+            name: 'xliff_parameters_template_id',
+            in: 'formData',
+            description:
+              'Load a specific template for the analysis of Xliff files',
+            required: false,
+            type: 'string',
+            example: '3213',
+          },
+          {
+            name: 'filters_extraction_parameters_template_id',
+            in: 'formData',
+            description:
+              'Load a specific template for the analysis of Xliff files and for filters extraction parameters',
+            required: false,
+            type: 'string',
+            example: '3213',
+          },
+          {
+            name: 'id_qa_model',
+            in: 'formData',
+            description: 'Load a specific QA framework (from the ID)',
+            required: false,
+            type: 'string',
+            example: '3213',
+          },
+          {
+            name: 'id_qa_model_template',
+            in: 'formData',
+            description:
+              'Load a previously saved, custom QA framework template',
+            required: false,
+            type: 'string',
+            example: '3213',
+          },
+          {
             name: 'metadata',
             in: 'formData',
             description:
@@ -281,7 +371,7 @@ var spec = {
             name: 'id_project',
             in: 'path',
             description:
-                'The identifier of the project, should be the value returned by the /new method.',
+              'The identifier of the project, should be the value returned by the /new method.',
             required: true,
             type: 'integer',
           },
@@ -289,7 +379,7 @@ var spec = {
             name: 'password',
             in: 'path',
             description:
-                'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
             required: true,
             type: 'string',
           },
@@ -305,7 +395,58 @@ var spec = {
             description: 'Unexpected error',
           },
         },
-      }
+      },
+    },
+    '/api/v2/projects/{id_project}/{password}/change-name': {
+      post: {
+        tags: ['Project'],
+        summary: 'Change the name of a project',
+        description: 'Change the name of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'name',
+            in: 'formData',
+            description: 'The new project name.',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The id and the new project name',
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  example: 123,
+                },
+                name: {
+                  type: 'string',
+                  example: 'the_new_project_name',
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
     },
     '/api/v2/change-password': {
       post: {
@@ -612,14 +753,31 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/reviews': {
+    '/api/v2/projects/{id_project}/{password}/r2': {
       post: {
         tags: ['Project'],
         summary: 'Generate second pass review 2',
         description: 'API to generate a second pass review',
         parameters: [
           {
+            name: 'id_project',
+            in: 'path',
+            description:
+              'The id of the parent project of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+              'The password of parent project of the job you intend to generate the Revise 2 step for',
+            required: true,
+            type: 'string',
+          },
+          {
             name: 'id_job',
+            in: 'formData',
             description:
               'The id of the job you intend to generate the Revise 2 step for',
             required: true,
@@ -627,6 +785,7 @@ var spec = {
           },
           {
             name: 'password',
+            in: 'formData',
             description:
               'The password of the job you intend to generate the Revise 2 step for',
             required: true,
@@ -2193,9 +2352,10 @@ var spec = {
       post: {
         tags: ['Glossary'],
         summary: 'Import Glossary',
-        description: '### Import glossary file (.xlsx) \n' +
-            'If your glossary has **between two and ten locales in it**, you will be able to use it for jobs **in any of the possible combinations of the locales** (e.g. if you have en-US, es-ES and it-IT in a glossary you will be able to use it for en-US <> es-ES, en-US <> it-IT and es-ES <> it-IT jobs).\n' +
-            'If your glossary has **more than 10 locales**, Matecat will only create combinations between **the first locale column from the left and the rest of the locales** (e.g. if in a glossary you have en-US as the first locale from the left, es-ES, it-IT and 10 more locales, you will be able to use it for en-US <> es-ES and en-US <> it-IT, but not for es-ES <> it-IT).',
+        description:
+          '### Import glossary file (.xlsx) \n' +
+          'If your glossary has **between two and ten locales in it**, you will be able to use it for jobs **in any of the possible combinations of the locales** (e.g. if you have en-US, es-ES and it-IT in a glossary you will be able to use it for en-US <> es-ES, en-US <> it-IT and es-ES <> it-IT jobs).\n' +
+          'If your glossary has **more than 10 locales**, Matecat will only create combinations between **the first locale column from the left and the rest of the locales** (e.g. if in a glossary you have en-US as the first locale from the left, es-ES, it-IT and 10 more locales, you will be able to use it for en-US <> es-ES and en-US <> it-IT, but not for es-ES <> it-IT).',
         parameters: [
           {
             name: 'files',

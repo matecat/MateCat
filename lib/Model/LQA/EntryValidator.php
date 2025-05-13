@@ -59,8 +59,9 @@ class EntryValidator {
     public function isValid() {
         $this->flushErrors();
         $this->validate();
-        $errors  = $this->getErrors();
+        $errors          = $this->getErrors();
         $this->validated = true;
+
         return empty( $errors );
     }
 

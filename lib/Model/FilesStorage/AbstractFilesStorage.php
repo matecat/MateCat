@@ -2,12 +2,9 @@
 
 namespace FilesStorage;
 
-use Chunks_ChunkStruct;
 use Database;
 use DirectoryIterator;
 use Exception;
-use Glossary\Blacklist\BlacklistDao;
-use Glossary\Blacklist\BlacklistStruct;
 use INIT;
 use Log;
 use PDO;
@@ -30,6 +27,7 @@ use ReflectionException;
 abstract class AbstractFilesStorage implements IFilesStorage {
 
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
+    const OBJECTS_SAFE_DELIMITER   = '__';
 
     protected $filesDir;
     protected $cacheDir;
@@ -161,14 +159,28 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * Delete a hash from upload directory
+     * // XXX use constructor parameters to define the cache dir and remove the condition
+     * @return string
+     */
+    public static function getStorageCachePath(): string {
+        if ( AbstractFilesStorage::isOnS3() ) {
+            return S3FilesStorage::CACHE_PACKAGE_FOLDER;
+        }
+
+        return INIT::$CACHE_REPOSITORY;
+    }
+
+    /**
+     * Delete a hash from upload directory if the hash is changed
      *
      * @param $uploadDirPath
      * @param $linkFile
+     *
+     * @return bool
      */
-    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ) {
-        list( $shasum, ) = explode( "|", $linkFile );
-        list( $shasum, ) = explode( "_", $shasum ); // remove the segmentation rule from hash to clean all reverse index maps
+    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ): bool {
+        [ $shaSum, ] = explode( "|", $linkFile );
+        [ $shaSum, ] = explode( "_", $shaSum ); // remove the segmentation rule from hash to clean all reverse index maps
 
         $iterator = new DirectoryIterator( $uploadDirPath );
 
@@ -180,28 +192,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             // remove only the wrong languages, the same code|language must be
             // retained because of the file name append
             if ( $fileInfo->getFilename() != $linkFile &&
-                    stripos( $fileInfo->getFilename(), $shasum ) !== false ) {
+                    stripos( $fileInfo->getFilename(), $shaSum ) !== false ) {
 
                 unlink( $fileInfo->getPathname() );
                 Log::doJsonLog( "Deleted Hash " . $fileInfo->getPathname() );
 
+                return true;
             }
         }
-    }
 
-    /**
-     * @param string $haystack
-     * @param string $needle
-     *
-     * @return bool
-     */
-    public static function fileEndsWith( $haystack, $needle ) {
-        $length = strlen( $needle );
-        if ( $length == 0 ) {
-            return true;
-        }
-
-        return ( substr( $haystack, -$length ) === $needle );
+        return false;
     }
 
     /**
@@ -244,28 +244,27 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *
      * @return int
      */
-    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $lang, $uid, $realFileName ) {
+    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
-        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+        return $this->_linkToCache( $dir, $hash, $realFileName );
     }
 
     /**
      * @param $hash
-     * @param $lang
      * @param $uid
      * @param $realFileName
      *
      * @return int
      */
-    public function linkSessionToCacheForOriginalFiles( $hash, $lang, $uid, $realFileName ) {
+    public function linkSessionToCacheForOriginalFiles( $hash, $uid, $realFileName ): int {
         //get upload dir
         $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
-        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+        return $this->_linkToCache( $dir, $hash, $realFileName );
     }
 
     /**
@@ -274,13 +273,50 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *
      * @param $dir
      * @param $hash
-     * @param $lang
      * @param $realFileName
      *
      * @return int
      */
-    protected function _linkToCache( $dir, $hash, $lang, $realFileName ) {
-        return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n", FILE_APPEND | LOCK_EX );
+    protected function _linkToCache( $dir, $hash, $realFileName ): int {
+        $filePath     = $dir . DIRECTORY_SEPARATOR . $hash;
+        $content      = [];
+        $bytesWritten = 0;
+
+        $fp = fopen( $filePath, "c+" );
+
+        if ( flock( $fp, LOCK_EX ) ) {
+
+            $fileRawContent = "";
+            while ( ( $buffer = fgets( $fp, 4096 ) ) !== false ) {
+                $fileRawContent .= $buffer;
+            }
+
+            if ( !empty( $fileRawContent ) ) {
+                $content = explode( "\n", $fileRawContent );
+            }
+
+            ftruncate( $fp, 0 );
+            rewind($fp); // Move the pointer to the beginning
+
+            if ( !in_array( $realFileName, $content ) ) {
+                $content[] = $realFileName;
+            }
+
+            // remove empty lines
+            $content = array_filter($content, function ($filename){
+                return !empty($filename);
+            });
+
+            $contentString = implode( "\n", $content ) . "\n";
+
+            $bytesWritten = fwrite( $fp, $contentString );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );
+            fclose( $fp );
+
+        }
+
+        return $bytesWritten;
     }
 
     /**
@@ -447,77 +483,4 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         return ( INIT::$FILE_STORAGE_METHOD === 's3' );
     }
 
-    /**
-     **********************************************************************************************
-     * 5. BLACKLIST FILES
-     **********************************************************************************************
-     */
-
-    /**
-     * @param $filePath
-     *
-     * @return bool
-     * @throws ConnectionException
-     * @throws ReflectionException
-     */
-    public function deleteBlacklistFile( $filePath ) {
-        $isFsOnS3 = AbstractFilesStorage::isOnS3();
-
-        if ( $isFsOnS3 ) {
-            $s3Client = S3FilesStorage::getStaticS3Client();
-
-            return $s3Client->deleteItem( [
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key'    => $filePath,
-            ] );
-        }
-
-        return unlink( $filePath );
-    }
-
-    /**
-     * @param string              $filePath
-     * @param Chunks_ChunkStruct  $chunkStruct
-     * @param                     $uid
-     *
-     * @return mixed
-     * @throws ConnectionException
-     * @throws ReflectionException
-     */
-    public function saveBlacklistFile( $filePath, Chunks_ChunkStruct $chunkStruct, $uid ) {
-
-        $isFsOnS3 = AbstractFilesStorage::isOnS3();
-        $jid      = $chunkStruct->id;
-        $password = $chunkStruct->password;
-
-        if ( $isFsOnS3 ) {
-            $blacklistPath = 'glossary' . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password . DIRECTORY_SEPARATOR . 'blacklist.txt';
-            $s3Client      = S3FilesStorage::getStaticS3Client();
-            $s3Client->uploadItem( [
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key'    => $blacklistPath,
-                    'source' => $filePath
-            ] );
-        } else {
-            $blacklistPath = INIT::$BLACKLIST_REPOSITORY . DIRECTORY_SEPARATOR . $jid . DIRECTORY_SEPARATOR . $password;
-            if ( !is_dir( $blacklistPath ) ) {
-                mkdir( $blacklistPath, 0755, true );
-            }
-
-            $storedBytes = file_put_contents( $blacklistPath . DIRECTORY_SEPARATOR . "blacklist.txt", file_get_contents( $filePath ) );
-            if ( $storedBytes === false ) {
-                throw new Exception( 'Failed to save blacklist file on disk.', -14 );
-            }
-        }
-
-        $model            = new BlacklistStruct( $chunkStruct );
-        $model->uid       = $uid;
-        $model->target    = $chunkStruct->target;
-        $model->file_name = "blacklist.txt";
-        $model->file_path = $blacklistPath;
-
-        $dao = new BlacklistDao();
-
-        return $dao->save( $model );
-    }
 }

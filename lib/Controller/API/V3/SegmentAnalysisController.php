@@ -2,6 +2,7 @@
 
 namespace API\V3;
 
+use API\App\Json\Analysis\MatchConstants;
 use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
@@ -11,9 +12,11 @@ use Exception;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use LQA\EntryDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentMetadataDao;
 use Segments_SegmentNoteDao;
@@ -26,12 +29,12 @@ class SegmentAnalysisController extends KleinController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project;
+    private Projects_ProjectStruct $project;
 
     /**
      * @var Projects_ProjectDao
      */
-    private $projectDao;
+    private Projects_ProjectDao $projectDao;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -40,6 +43,7 @@ class SegmentAnalysisController extends KleinController {
     /**
      * Segment list
      * from id job/password
+     * @throws ReflectionException
      */
     public function job() {
 
@@ -52,7 +56,7 @@ class SegmentAnalysisController extends KleinController {
 
         $idJob         = $this->request->param( 'id_job' );
         $password      = $this->request->param( 'password' );
-        $segmentsCount = Chunks_ChunkDao::getSegmentsCount( $idJob, $password, 0 );
+        $segmentsCount = Jobs_JobDao::getSegmentsCount( $idJob, $password, 0 );
 
         try {
             $this->response->json( $this->getSegmentsForAJob( $idJob, $password, $page, $perPage, $segmentsCount ) );
@@ -77,23 +81,20 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function getSegmentsForAJob( $idJob, $password, $page, $perPage, $segmentsCount ) {
+    private function getSegmentsForAJob( $idJob, $password, $page, $perPage, $segmentsCount ): array {
         $totalPages = ceil( $segmentsCount / $perPage );
         $isLast     = ( (int)$page === (int)$totalPages );
 
-        if ( $page > $totalPages or $page <= 0 ) {
+        if ( ( $page > $totalPages && $totalPages > 0 ) ||  $page <= 0 ) {
             throw new Exception( 'Page number ' . $page . ' is not valid' );
         }
 
-        $chunk = Chunks_ChunkDao::getByIdAndPassword( $idJob, $password );
-
-        if ( $chunk === null ) {
-            throw new Exception( 'Job not found' );
-        }
+        // raise exception if the job does not exist
+        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $idJob, $password, 60 * 5 );
 
         $prev  = ( $page > 1 ) ? "/api/app/jobs/" . $idJob . "/" . $password . "/segment-analysis?page=" . ( $page - 1 ) . "&per_page=" . $perPage : null;
         $next  = ( !$isLast and $totalPages > 1 ) ? "/api/app/jobs/" . $idJob . "/" . $password . "/segment-analysis?page=" . ( $page + 1 ) . "&per_page=" . $perPage : null;
-        $items = $this->getSegmentsFromIdJobAndPassword( $idJob, $password, $page, $perPage );
+        $items = $this->getSegmentsFromIdJobAndPassword( $jobStruct, $page, $perPage );
 
         return [
                 '_links' => [
@@ -109,34 +110,21 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param $idJob
-     * @param $password
-     * @param $page
-     * @param $perPage
+     * @param Jobs_JobStruct $jobStruct
+     * @param int            $page
+     * @param int            $perPage
      *
      * @return array
      * @throws Exception
      */
-    private function getSegmentsFromIdJobAndPassword( $idJob, $password, $page, $perPage ) {
+    private function getSegmentsFromIdJobAndPassword( Jobs_JobStruct $jobStruct, int $page, int $perPage ): array {
         $segments         = [];
         $limit            = $perPage;
         $offset           = ( $page - 1 ) * $perPage;
         $this->projectDao = new Projects_ProjectDao();
 
-        try {
-            $job = Jobs_JobDao::getByIdAndPassword( $idJob, $password );
-        } catch ( Exception $exception ) {
-            $this->response->code( 404 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => $exception->getMessage()
-                    ]
-            ] );
-            exit();
-        }
-
-        $segmentsForAnalysis      = Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, 0 );
-        $projectPasswordsMap      = $this->projectDao->getPasswordsMap( $job->getProject()->id );
+        $segmentsForAnalysis      = Segments_SegmentDao::getSegmentsForAnalysisFromIdJobAndPassword( $jobStruct->id, $jobStruct->password, $limit, $offset, 0 );
+        $projectPasswordsMap      = $this->projectDao->getPasswordsMap( $jobStruct->id_project );
         $issuesNotesAndIdRequests = $this->getIssuesNotesAndIdRequests( $segmentsForAnalysis );
 
         $notesAggregate      = $issuesNotesAndIdRequests[ 'notesAggregate' ];
@@ -316,7 +304,7 @@ class SegmentAnalysisController extends KleinController {
      */
     private function formatSegment( DataAccess_IDaoStruct $segmentForAnalysis, $projectPasswordsMap, $notesAggregate, $issuesAggregate, $idRequestsAggregate ) {
         // id_request
-        $idRequest = isset( $idRequestsAggregate[ $segmentForAnalysis->id ] ) ? $idRequestsAggregate[ $segmentForAnalysis->id ] : null;
+        $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
@@ -345,7 +333,7 @@ class SegmentAnalysisController extends KleinController {
                 'target_lang'           => $segmentForAnalysis->target,
                 'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
                 'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type'            => $this->humanReadableMatchType( $segmentForAnalysis->match_type ),
+                'match_type'            => MatchConstants::toExternalMatchTypeValue( $segmentForAnalysis->match_type ?? 'NEW' ),
                 'revision_number'       => ( $segmentForAnalysis->source_page ) ? ReviewUtils::sourcePageToRevisionNumber( $segmentForAnalysis->source_page ) : null,
                 'issues'                => $issues,
                 'notes'                 => ( !empty( $notesAggregate[ $segmentForAnalysis->id ] ) ? $notesAggregate[ $segmentForAnalysis->id ] : [] ),
@@ -446,51 +434,4 @@ class SegmentAnalysisController extends KleinController {
         return null;
     }
 
-    /**
-     * @param string $match_type
-     *
-     * @return string
-     */
-    public function humanReadableMatchType( $match_type ) {
-        switch ( $match_type ) {
-            case "INTERNAL":
-                return 'INTERNAL_MATCHES';
-
-            case "MT":
-                return 'MT';
-
-            case "100%":
-                return 'TM_100';
-
-            case "100%_PUBLIC":
-                return 'TM_100_PUBLIC';
-
-            case "75%-99%":
-                return 'TM_75_99';
-
-            case "75%-84%":
-                return 'TM_75_84';
-
-            case "85%-94%":
-                return 'TM_85_94';
-
-            case "95%-99%":
-                return 'TM_95_99';
-
-            case "50%-74%":
-                return 'TM_50_74';
-
-            case "NEW":
-            case "NO_MATCH":
-                return 'NEW';
-
-            case "ICE":
-                return 'ICE';
-
-            case "REPETITIONS":
-                return 'REPETITIONS';
-        }
-
-        return 'NUMBERS_ONLY';
-    }
 }

@@ -79,7 +79,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
 
         $wrapped_result = $this->chunk_Dao->getByIdProjectAndIdJob( $this->project[ 'id' ], $this->job[ 'id' ] );
         $result         = $wrapped_result[ '0' ];
-        $this->assertTrue( $result instanceof Chunks_ChunkStruct );
+        $this->assertTrue( $result instanceof Jobs_JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

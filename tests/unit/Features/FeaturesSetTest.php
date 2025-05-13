@@ -41,7 +41,7 @@ class FeaturesSetTest extends AbstractTest {
 
         for ( $i = 0; $i < 2000; $i++ ) {
 
-            $codes = explode( ",", "qa_check_glossary,airbnb,translation_versions,project_completion,review_extended,translated,qa_check_blacklist" );
+            $codes = explode( ",", "airbnb,translation_versions,project_completion,review_extended,translated" );
             shuffle( $codes );
             shuffle( $codes );
             $code_string = implode( ",", $codes );
@@ -51,8 +51,8 @@ class FeaturesSetTest extends AbstractTest {
 
             $set = array_flip( array_values( $featureSet->getCodes() ) );
 
-            $this->assertEquals( 10, count( $featureSet->getCodes() ) );
-            $this->assertEquals( 10, count( $set ) );
+            $this->assertEquals( 8, count( $featureSet->getCodes() ) );
+            $this->assertEquals( 8, count( $set ) );
 
             $this->assertTrue( $this->_testForDependenciesOrder( $set ) );
 

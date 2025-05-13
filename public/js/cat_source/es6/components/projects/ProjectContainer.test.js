@@ -1,11 +1,14 @@
-import {render, screen, waitFor} from '@testing-library/react'
+import {render, screen} from '@testing-library/react'
 import React from 'react'
 import {createRoot} from 'react-dom/client'
 import ProjectContainer from './ProjectContainer'
-import Immutable from 'immutable'
+import {fromJS} from 'immutable'
 import {http, HttpResponse} from 'msw'
 
 import {mswServer} from '../../../../../mocks/mswServer'
+import userEvent from '@testing-library/user-event'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import userMock from '../../../../../mocks/userMock'
 
 // create modal div
 const modalElement = document.createElement('div')
@@ -14,7 +17,6 @@ document.body.appendChild(modalElement)
 const mountPoint = createRoot(modalElement)
 afterAll(() => mountPoint.unmount())
 
-require('../../../../common')
 global.config = {
   enable_outsource: 1,
   basepath: 'http://localhost/',
@@ -347,9 +349,9 @@ const fakeProjectsData = {
 
 const getFakeProperties = (fakeProperties) => {
   const {data, dataTeam, dataTeams, props} = fakeProperties
-  const project = Immutable.fromJS(data)
-  const team = Immutable.fromJS(dataTeam)
-  const teams = Immutable.fromJS(dataTeams)
+  const project = fromJS(data)
+  const team = fromJS(dataTeam)
+  const teams = fromJS(dataTeams)
 
   return {
     project,
@@ -414,53 +416,72 @@ const createActivityLogUrl = (project) => {
   return getActivityLogUrl(project.get('id'), project.get('password'))
 }
 
+class ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 test('Rendering elements', async () => {
+  window.ResizeObserver = ResizeObserver
+
   executeMswServer()
   const {props, project, teams, team} = getFakeProperties(
     fakeProjectsData.project,
   )
-  render(<ProjectContainer {...props} />)
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <ProjectContainer {...props} />
+    </ApplicationWrapperContext.Provider>,
+  )
 
   expect(screen.getByText(`(${project.get('id')})`)).toBeInTheDocument()
   const projectName = screen.getByTestId('project-name').textContent
   expect(projectName).toBe(project.get('name'))
+  await userEvent.click(screen.getByTestId('project-teams'))
+  expect(screen.getByTestId('last-action-activity')).toBeInTheDocument()
 
-  await waitFor(() => {
-    expect(screen.getByTestId('last-action-activity')).toBeInTheDocument()
+  const {action, event_date, first_name} = apiActivityMockResponse.activity[0]
+  const lastActionContent = `Last action: ${action} on ${new Date(
+    event_date,
+  ).toDateString()}`
+  expect(screen.getByText(lastActionContent)).toBeInTheDocument()
 
-    const {action, event_date, first_name} = apiActivityMockResponse.activity[0]
-    const lastActionContent = `Last action: ${action} on ${new Date(
-      event_date,
-    ).toDateString()}`
-    expect(screen.getByText(lastActionContent)).toBeInTheDocument()
+  expect(screen.getByText(`by ${first_name}`)).toBeInTheDocument()
 
-    expect(screen.getByText(`by ${first_name}`)).toBeInTheDocument()
+  const href = screen.getByTestId('last-action-activity').getAttribute('href')
+  expect(href).toBe(createActivityLogUrl(project))
+  const dropdown = screen.getByTestId('teams-dropdown')
+  expect(dropdown).toBeInTheDocument()
 
-    const href = screen.getByTestId('last-action-activity').getAttribute('href')
-    expect(href).toBe(createActivityLogUrl(project))
+  await userEvent.click(dropdown)
 
-    // check teams menu items
-    teams.map((team) => {
-      const elements = screen.getAllByText(team.get('name'))
-      elements.forEach((element) => expect(element).toBeInTheDocument())
-    })
-    team.get('members').map((member) => {
-      const userInfo = member.get('user')
-      const elements = screen.getAllByText(
-        userInfo.get('first_name') + ' ' + userInfo.get('last_name'),
-      )
-      elements.forEach((element) => expect(element).toBeInTheDocument())
-    })
-
-    // check project menu items
-    expect(screen.getByText('Activity Log')).toBeInTheDocument()
-    expect(screen.getByText('Archive project')).toBeInTheDocument()
-    expect(screen.getByText('Cancel project')).toBeInTheDocument()
-
-    // check items list
-    const jobs = project.get('jobs')
-    jobs.map((job) =>
-      expect(screen.getByTestId(job.get('id'))).toBeInTheDocument(),
-    )
+  // check teams menu items
+  teams.forEach((team) => {
+    const elements = screen.getAllByText(team.get('name'))
+    elements.forEach((element) => expect(element).toBeInTheDocument())
   })
+  team.get('members').map((member) => {
+    const userInfo = member.get('user')
+    const elements = screen.getAllByText(
+      userInfo.get('first_name') + ' ' + userInfo.get('last_name'),
+    )
+    elements.forEach((element) => expect(element).toBeInTheDocument())
+  })
+  const button = screen.getByTestId('project-menu-dropdown')
+  await userEvent.click(button, {
+    pointerEventsCheck: 0,
+  })
+  // check project menu items
+  expect(screen.getByText('Activity Log')).toBeInTheDocument()
+  expect(screen.getByText('Archive project')).toBeInTheDocument()
+  expect(screen.getByText('Cancel project')).toBeInTheDocument()
+
+  // check items list
+  const jobs = project.get('jobs')
+  jobs.map((job) =>
+    expect(screen.getByTestId(job.get('id'))).toBeInTheDocument(),
+  )
 })

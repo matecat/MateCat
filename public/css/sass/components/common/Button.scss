@@ -1,4 +1,4 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 button.button-component-container,
 a.button-component-container {
@@ -102,18 +102,40 @@ a.button-component-container {
       }
     }
   }
+  &.link {
+    color: var(--btnAltTextColor);
+
+    &:not(:disabled):global(.button--active) {
+      color: colors.$grey8;
+    }
+
+    &:not(:disabled):hover,
+    &:not(:disabled):focus {
+      color: colors.$black;
+    }
+
+    &:disabled {
+      color: var(--btnAltTextColorDisabled);
+
+      svg {
+        color: var(--btnAltTextColorDisabled);
+      }
+    }
+  }
 
   // Size modifiers
   &.small {
     height: 28px;
     padding: 0 10px;
     font-size: 12px;
+    font-weight: 500;
   }
   &.standard {
     height: 40px;
     padding: 0 16px;
     line-height: 40px;
     font-size: 14px;
+    font-weight: bold;
   }
   &.medium {
     height: 40px;
@@ -150,6 +172,18 @@ a.button-component-container {
   &.fullWidth {
     width: 100%;
   }
+  &.linkSmall {
+    height: auto;
+    font-size: 14px;
+  }
+  &.linkMedium {
+    height: auto;
+    font-size: 16px;
+  }
+  &.linkBig {
+    height: auto;
+    font-size: 18px;
+  }
 
   // Waiting state
   .hiddenContent {
@@ -167,104 +201,104 @@ a.button-component-container {
 
 // Type modifiers
 .default {
-  --btnTextColor: #{$grey6};
-  --btnTextColorDisabled: #{$grey8};
-  --btnAltTextColor: #{$grey6};
-  --btnAltTextColorHover: #{$grey};
-  --btnAltTextColorDisabled: #{rgba($white, 0.12)};
+  --btnTextColor: #{colors.$grey6};
+  --btnTextColorDisabled: #{colors.$grey8};
+  --btnAltTextColor: #{colors.$grey6};
+  --btnAltTextColorHover: #{colors.$grey};
+  --btnAltTextColorDisabled: #{rgba(colors.$white, 0.12)};
 
-  --btnBorderColor: #{$grey8};
-  --btnBorderColorHover: #{$grey6};
-  --btnBorderColorActive: #{$grey6};
-  --btnBorderColorDisabled: #{rgba($white, 0.12)};
+  --btnBorderColor: #{colors.$grey8};
+  --btnBorderColorHover: #{colors.$grey6};
+  --btnBorderColorActive: #{colors.$grey6};
+  --btnBorderColorDisabled: #{rgba(colors.$white, 0.12)};
 
-  --btnBgColor: #{$white};
-  --btnBgColorAlt: #{$grey9};
-  --btnBgColorSemitrans: #{rgba($white, 0.5)};
-  --btnBgColorSemitransAlt: #{rgba($white, 0.5)};
+  --btnBgColor: #{colors.$white};
+  --btnBgColorAlt: #{colors.$grey9};
+  --btnBgColorSemitrans: #{rgba(colors.$white, 0.5)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$white, 0.5)};
 }
 .primary {
-  --btnTextColor: #{$white};
-  --btnTextColorDisabled: #{$white};
-  --btnAltTextColor: #{$translatedBlue};
-  --btnAltTextColorHover: #{$translatedBlueHover};
-  --btnAltTextColorDisabled: #{rgba($translatedBlue, 0.24)};
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$translatedBlue};
+  --btnAltTextColorHover: #{colors.$translatedBlueHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$translatedBlue, 0.24)};
 
-  --btnBorderColor: #{rgba($translatedBlue, 0.24)};
-  --btnBorderColorHover: #{$translatedBlueHover};
-  --btnBorderColorActive: #{$translatedBlue};
-  --btnBorderColorDisabled: #{rgba($translatedBlue, 0.24)};
+  --btnBorderColor: #{rgba(colors.$translatedBlue, 0.24)};
+  --btnBorderColorHover: #{colors.$translatedBlueHover};
+  --btnBorderColorActive: #{colors.$translatedBlue};
+  --btnBorderColorDisabled: #{rgba(colors.$translatedBlue, 0.24)};
 
-  --btnBgColor: #{$translatedBlue};
-  --btnBgColorAlt: #{$translatedBlueHover};
-  --btnBgColorSemitrans: #{rgba($translatedBlue, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba($translatedBlue, 0.24)};
+  --btnBgColor: #{colors.$translatedBlue};
+  --btnBgColorAlt: #{colors.$translatedBlueHover};
+  --btnBgColorSemitrans: #{rgba(colors.$translatedBlue, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$translatedBlue, 0.24)};
 }
 .info {
-  --btnTextColor: #{$white};
-  --btnTextColorDisabled: #{$white};
-  --btnAltTextColor: #{$linkBlue};
-  --btnAltTextColorHover: #{$linkBlueHover};
-  --btnAltTextColorDisabled: #{rgba($linkBlue, 0.24)};
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$linkBlue};
+  --btnAltTextColorHover: #{colors.$linkBlueHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$linkBlue, 0.24)};
 
-  --btnBorderColor: #{rgba($linkBlue, 0.24)};
-  --btnBorderColorHover: #{$linkBlue};
-  --btnBorderColorActive: #{$linkBlue};
-  --btnBorderColorDisabled: #{rgba($linkBlue, 0.24)};
+  --btnBorderColor: #{rgba(colors.$linkBlue, 0.24)};
+  --btnBorderColorHover: #{colors.$linkBlue};
+  --btnBorderColorActive: #{colors.$linkBlue};
+  --btnBorderColorDisabled: #{rgba(colors.$linkBlue, 0.24)};
 
-  --btnBgColor: #{$linkBlue};
-  --btnBgColorAlt: #{$linkBlueHover};
-  --btnBgColorSemitrans: #{rgba($linkBlue, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba($linkBlue, 0.24)};
+  --btnBgColor: #{colors.$linkBlue};
+  --btnBgColorAlt: #{colors.$linkBlueHover};
+  --btnBgColorSemitrans: #{rgba(colors.$linkBlue, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$linkBlue, 0.24)};
 }
 .success {
-  --btnTextColor: #{$white};
-  --btnTextColorDisabled: #{$white};
-  --btnAltTextColor: #{$greenDefault};
-  --btnAltTextColorHover: #{$greenDefaultHover};
-  --btnAltTextColorDisabled: #{rgba($greenDefault, 0.24)};
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$greenDefault};
+  --btnAltTextColorHover: #{colors.$greenDefaultHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$greenDefault, 0.24)};
 
-  --btnBorderColor: #{rgba($greenDefault, 0.24)};
-  --btnBorderColorHover: #{$greenDefault};
-  --btnBorderColorActive: #{$greenDefault};
-  --btnBorderColorDisabled: #{rgba($greenDefault, 0.24)};
+  --btnBorderColor: #{rgba(colors.$greenDefault, 0.24)};
+  --btnBorderColorHover: #{colors.$greenDefault};
+  --btnBorderColorActive: #{colors.$greenDefault};
+  --btnBorderColorDisabled: #{rgba(colors.$greenDefault, 0.24)};
 
-  --btnBgColor: #{$greenDefault};
-  --btnBgColorAlt: #{$greenDefaultHover};
-  --btnBgColorSemitrans: #{rgba($greenDefault, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba($greenDefault, 0.24)};
+  --btnBgColor: #{colors.$greenDefault};
+  --btnBgColorAlt: #{colors.$greenDefaultHover};
+  --btnBgColorSemitrans: #{rgba(colors.$greenDefault, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$greenDefault, 0.24)};
 }
 .warning {
-  --btnTextColor: #{$white};
-  --btnTextColorDisabled: #{$white};
-  --btnAltTextColor: #{$warning};
-  --btnAltTextColorHover: #{$warningHover};
-  --btnAltTextColorDisabled: #{rgba($warning, 0.24)};
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$warning};
+  --btnAltTextColorHover: #{colors.$warningHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$warning, 0.24)};
 
-  --btnBorderColor: #{rgba($warning, 0.24)};
-  --btnBorderColorHover: #{$warning};
-  --btnBorderColorActive: #{$warning};
-  --btnBorderColorDisabled: #{rgba($warning, 0.24)};
+  --btnBorderColor: #{rgba(colors.$warning, 0.24)};
+  --btnBorderColorHover: #{colors.$warning};
+  --btnBorderColorActive: #{colors.$warning};
+  --btnBorderColorDisabled: #{rgba(colors.$warning, 0.24)};
 
-  --btnBgColor: #{$warning};
-  --btnBgColorAlt: #{$warningHover};
-  --btnBgColorSemitrans: #{rgba($warning, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba($warning, 0.24)};
+  --btnBgColor: #{colors.$warning};
+  --btnBgColorAlt: #{colors.$warningHover};
+  --btnBgColorSemitrans: #{rgba(colors.$warning, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$warning, 0.24)};
 }
 .critical {
-  --btnTextColor: #{$white};
-  --btnTextColorDisabled: #{$white};
-  --btnAltTextColor: #{$redDefault};
-  --btnAltTextColorHover: #{$redDefaultHover};
-  --btnAltTextColorDisabled: #{rgba($redDefault, 0.24)};
+  --btnTextColor: #{colors.$white};
+  --btnTextColorDisabled: #{colors.$white};
+  --btnAltTextColor: #{colors.$redDefault};
+  --btnAltTextColorHover: #{colors.$redDefaultHover};
+  --btnAltTextColorDisabled: #{rgba(colors.$redDefault, 0.24)};
 
-  --btnBorderColor: #{rgba($redDefault, 0.24)};
-  --btnBorderColorHover: #{$redDefault};
-  --btnBorderColorActive: #{$redDefault};
-  --btnBorderColorDisabled: #{rgba($redDefault, 0.24)};
+  --btnBorderColor: #{rgba(colors.$redDefault, 0.24)};
+  --btnBorderColorHover: #{colors.$redDefault};
+  --btnBorderColorActive: #{colors.$redDefault};
+  --btnBorderColorDisabled: #{rgba(colors.$redDefault, 0.24)};
 
-  --btnBgColor: #{$redDefault};
-  --btnBgColorAlt: #{$redDefaultHover};
-  --btnBgColorSemitrans: #{rgba($redDefault, 0.12)};
-  --btnBgColorSemitransAlt: #{rgba($redDefault, 0.24)};
+  --btnBgColor: #{colors.$redDefault};
+  --btnBgColorAlt: #{colors.$redDefaultHover};
+  --btnBgColorSemitrans: #{rgba(colors.$redDefault, 0.12)};
+  --btnBgColorSemitransAlt: #{rgba(colors.$redDefault, 0.24)};
 }

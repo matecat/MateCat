@@ -1,5 +1,7 @@
 <?php
 
+use ConnectedServices\OauthTokenEncryption;
+
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();

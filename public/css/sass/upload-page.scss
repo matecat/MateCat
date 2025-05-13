@@ -1,3 +1,5 @@
+@use "commons/colors";
+
 body {
   margin: 0;
   padding: 0;
@@ -6,1230 +8,6 @@ body {
   min-height: 100%;
 }
 
-/* Interaction states
-----------------------------------*/
-//.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-//    border: 1px solid #d3d3d3;
-//    background: #e6e6e6 url(../images/ui-bg_glass_75_e6e6e6_1x400.png) 50% 50% repeat-x;
-//    font-weight: normal;
-//    color: #555555;
-//}
-
-.ui-state-default a,
-.ui-state-default a:link,
-.ui-state-default a:visited {
-  color: #555555;
-  text-decoration: none;
-}
-
-//.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-//    border: 1px solid #999999;
-//    background: #dadada url(../images/ui-bg_glass_75_dadada_1x400.png) 50% 50% repeat-x;
-//    font-weight: normal;
-//    color: #212121;
-//}
-
-.ui-state-hover a,
-.ui-state-hover a:hover {
-  color: #212121;
-  text-decoration: none;
-}
-
-//.ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
-//    border: 1px solid #aaaaaa;
-//    background: #ffffff url(../images/ui-bg_glass_65_ffffff_1x400.png) 50% 50% repeat-x;
-//    font-weight: normal;
-//    color: #212121;
-//}
-
-.ui-state-active a,
-.ui-state-active a:link,
-.ui-state-active a:visited {
-  color: #212121;
-  text-decoration: none;
-}
-
-.ui-widget :active {
-  outline: none;
-}
-
-/* Interaction Cues
-----------------------------------*/
-//.ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
-//    border: 1px solid #fcefa1;
-//    background: #fbf9ee url(../images/ui-bg_glass_55_fbf9ee_1x400.png) 50% 50% repeat-x;
-//    color: #363636;
-//}
-
-.ui-state-highlight a,
-.ui-widget-content .ui-state-highlight a,
-.ui-widget-header .ui-state-highlight a {
-  color: #363636;
-}
-
-//.ui-state-error, .ui-widget-content .ui-state-error, .ui-widget-header .ui-state-error {
-//    border: 1px solid #cd0a0a;
-//    background: #fef1ec url(../images/ui-bg_glass_95_fef1ec_1x400.png) 50% 50% repeat-x;
-//    color: #cd0a0a;
-//}
-
-.ui-state-error a,
-.ui-widget-content .ui-state-error a,
-.ui-widget-header .ui-state-error a {
-  color: #cd0a0a;
-}
-
-.ui-state-error-text,
-.ui-widget-content .ui-state-error-text,
-.ui-widget-header .ui-state-error-text {
-  color: #cd0a0a;
-}
-
-.ui-priority-primary,
-.ui-widget-content .ui-priority-primary,
-.ui-widget-header .ui-priority-primary {
-  font-weight: bold;
-}
-
-.ui-priority-secondary,
-.ui-widget-content .ui-priority-secondary,
-.ui-widget-header .ui-priority-secondary {
-  opacity: 0.7;
-  filter: Alpha(Opacity=70);
-  font-weight: normal;
-}
-
-.ui-state-disabled,
-.ui-widget-content .ui-state-disabled,
-.ui-widget-header .ui-state-disabled {
-  opacity: 0.35;
-  filter: Alpha(Opacity=35);
-  background-image: none;
-}
-
-/* Icons
-----------------------------------*/
-
-/* Misc visuals
-----------------------------------*/
-
-/* Corner radius */
-.ui-corner-all,
-.ui-corner-top,
-.ui-corner-left,
-.ui-corner-tl {
-  -moz-border-radius-topleft: 4px;
-  -webkit-border-top-left-radius: 4px;
-  -khtml-border-top-left-radius: 4px;
-  border-top-left-radius: 4px;
-}
-
-.ui-corner-all,
-.ui-corner-top,
-.ui-corner-right,
-.ui-corner-tr {
-  -moz-border-radius-topright: 4px;
-  -webkit-border-top-right-radius: 4px;
-  -khtml-border-top-right-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.ui-corner-all,
-.ui-corner-bottom,
-.ui-corner-left,
-.ui-corner-bl {
-  -moz-border-radius-bottomleft: 4px;
-  -webkit-border-bottom-left-radius: 4px;
-  -khtml-border-bottom-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-}
-
-.ui-corner-all,
-.ui-corner-bottom,
-.ui-corner-right,
-.ui-corner-br {
-  -moz-border-radius-bottomright: 4px;
-  -webkit-border-bottom-right-radius: 4px;
-  -khtml-border-bottom-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-/* Overlays */
-//.ui-widget-overlay {
-//    background: #aaaaaa url(../images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x;
-//    opacity: .30;
-//    filter: Alpha(Opacity=30);
-//}
-//
-//.ui-widget-shadow {
-//    margin: -8px 0 0 -8px;
-//    padding: 8px;
-//    background: #aaaaaa url(../images/ui-bg_flat_0_aaaaaa_40x100.png) 50% 50% repeat-x;
-//    opacity: .30;
-//    filter: Alpha(Opacity=30);
-//    -moz-border-radius: 8px;
-//    -khtml-border-radius: 8px;
-//    -webkit-border-radius: 8px;
-//    border-radius: 8px;
-//}
-
-/*!
- * jQuery UI Resizable 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Resizable#theming
- */
-.ui-resizable {
-  position: relative;
-}
-
-.ui-resizable-handle {
-  position: absolute;
-  font-size: 0.1px;
-  display: block;
-}
-
-.ui-resizable-disabled .ui-resizable-handle,
-.ui-resizable-autohide .ui-resizable-handle {
-  display: none;
-}
-
-.ui-resizable-n {
-  cursor: n-resize;
-  height: 7px;
-  width: 100%;
-  top: -5px;
-  left: 0;
-}
-
-.ui-resizable-s {
-  cursor: s-resize;
-  height: 7px;
-  width: 100%;
-  bottom: -5px;
-  left: 0;
-}
-
-.ui-resizable-e {
-  cursor: e-resize;
-  width: 7px;
-  right: -5px;
-  top: 0;
-  height: 100%;
-}
-
-.ui-resizable-w {
-  cursor: w-resize;
-  width: 7px;
-  left: -5px;
-  top: 0;
-  height: 100%;
-}
-
-.ui-resizable-se {
-  cursor: se-resize;
-  width: 12px;
-  height: 12px;
-  right: 1px;
-  bottom: 1px;
-}
-
-.ui-resizable-sw {
-  cursor: sw-resize;
-  width: 9px;
-  height: 9px;
-  left: -5px;
-  bottom: -5px;
-}
-
-.ui-resizable-nw {
-  cursor: nw-resize;
-  width: 9px;
-  height: 9px;
-  left: -5px;
-  top: -5px;
-}
-
-.ui-resizable-ne {
-  cursor: ne-resize;
-  width: 9px;
-  height: 9px;
-  right: -5px;
-  top: -5px;
-}
-
-/*!
- * jQuery UI Selectable 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Selectable#theming
- */
-.ui-selectable-helper {
-  position: absolute;
-  z-index: 100;
-  border: 1px dotted black;
-}
-
-/*!
- * jQuery UI Accordion 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Accordion#theming
- */
-/* IE/Win - Fix animation bug - #4615 */
-.ui-accordion {
-  width: 100%;
-}
-
-.ui-accordion .ui-accordion-header {
-  cursor: pointer;
-  position: relative;
-  margin-top: 1px;
-  zoom: 1;
-}
-
-.ui-accordion .ui-accordion-li-fix {
-  display: inline;
-}
-
-.ui-accordion .ui-accordion-header-active {
-  border-bottom: 0 !important;
-}
-
-.ui-accordion .ui-accordion-header a {
-  display: block;
-  font-size: 1em;
-  padding: 0.5em 0.5em 0.5em 0.7em;
-}
-
-.ui-accordion-icons .ui-accordion-header a {
-  padding-left: 2.2em;
-}
-
-.ui-accordion .ui-accordion-header .ui-icon {
-  position: absolute;
-  left: 0.5em;
-  top: 50%;
-  margin-top: -8px;
-}
-
-.ui-accordion .ui-accordion-content {
-  padding: 1em 2.2em;
-  border-top: 0;
-  margin-top: -2px;
-  position: relative;
-  top: 1px;
-  margin-bottom: 2px;
-  overflow: auto;
-  display: none;
-  zoom: 1;
-}
-
-.ui-accordion .ui-accordion-content-active {
-  display: block;
-}
-
-/*!
- * jQuery UI Autocomplete 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Autocomplete#theming
- */
-.ui-autocomplete {
-  position: absolute;
-  cursor: default;
-}
-
-/* workarounds */
-* html .ui-autocomplete {
-  width: 1px;
-}
-
-/* without this, the menu expands to 100% in IE6 */
-
-/*
- * jQuery UI Menu 1.8.20
- *
- * Copyright 2010, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Menu#theming
- */
-.ui-menu {
-  list-style: none;
-  padding: 2px;
-  margin: 0;
-  display: block;
-  float: left;
-}
-
-.ui-menu .ui-menu {
-  margin-top: -3px;
-}
-
-.ui-menu .ui-menu-item {
-  margin: 0;
-  padding: 0;
-  zoom: 1;
-  float: left;
-  clear: left;
-  width: 100%;
-}
-
-.ui-menu .ui-menu-item a {
-  text-decoration: none;
-  display: block;
-  padding: 0.2em 0.4em;
-  line-height: 1.5;
-  zoom: 1;
-}
-
-.ui-menu .ui-menu-item a.ui-state-hover,
-.ui-menu .ui-menu-item a.ui-state-active {
-  font-weight: normal;
-  margin: -1px;
-}
-
-/*!
- * jQuery UI Button 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Button#theming
- */
-.ui-button {
-  display: inline-block;
-  position: relative;
-  padding: 0;
-  margin-right: 0.1em;
-  text-decoration: none !important;
-  cursor: pointer;
-  text-align: center;
-  zoom: 1;
-  overflow: visible;
-}
-
-/* the overflow property removes extra width in IE */
-.ui-button-icon-only {
-  width: 2.2em;
-}
-
-/* to make room for the icon, a width needs to be set here */
-button.ui-button-icon-only {
-  width: 2.4em;
-}
-
-/* button elements seem to need a little more width */
-.ui-button-icons-only {
-  width: 3.4em;
-}
-
-table .btn {
-  padding: 0px 20px;
-}
-
-button.ui-button-icons-only {
-  width: 3.7em;
-}
-
-/*button text element */
-.ui-button .ui-button-text {
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-}
-
-/*button icon element(s) */
-.ui-button-icon-only .ui-icon,
-.ui-button-text-icon-primary .ui-icon,
-.ui-button-text-icon-secondary .ui-icon,
-.ui-button-text-icons .ui-icon,
-.ui-button-icons-only .ui-icon {
-  position: absolute;
-  top: 50%;
-  margin-top: -8px;
-}
-
-.ui-button-icon-only .ui-icon {
-  left: 50%;
-  margin-left: -8px;
-}
-
-.ui-button-text-icon-primary .ui-button-icon-primary,
-.ui-button-text-icons .ui-button-icon-primary,
-.ui-button-icons-only .ui-button-icon-primary {
-  left: 0.5em;
-}
-
-.ui-button-text-icon-secondary .ui-button-icon-secondary,
-.ui-button-text-icons .ui-button-icon-secondary,
-.ui-button-icons-only .ui-button-icon-secondary {
-  right: 0.5em;
-}
-
-.ui-button-text-icons .ui-button-icon-secondary,
-.ui-button-icons-only .ui-button-icon-secondary {
-  right: 0.5em;
-}
-
-/*button sets*/
-.ui-buttonset {
-  margin-right: 7px;
-}
-
-.ui-buttonset .ui-button {
-  margin-left: 0;
-  margin-right: -0.3em;
-}
-
-/* workarounds */
-button.ui-button::-moz-focus-inner {
-  border: 0;
-  padding: 0;
-}
-
-/* reset extra padding in Firefox */
-/*!
- * jQuery UI Dialog 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Dialog#theming
- */
-.ui-dialog {
-  position: absolute;
-  padding: 0.2em;
-  width: 300px;
-  overflow: hidden;
-}
-
-.ui-dialog .ui-dialog-titlebar {
-  padding: 0.4em 1em;
-  position: relative;
-}
-
-.ui-dialog .ui-dialog-title {
-  float: left;
-  margin: 0.1em 16px 0.1em 0;
-}
-
-.ui-dialog .ui-dialog-titlebar-close {
-  position: absolute;
-  right: 0.3em;
-  top: 50%;
-  width: 19px;
-  margin: -10px 0 0 0;
-  padding: 1px;
-  height: 18px;
-}
-
-.ui-dialog .ui-dialog-titlebar-close span {
-  display: block;
-  margin: 1px;
-}
-
-.ui-dialog .ui-dialog-titlebar-close:hover,
-.ui-dialog .ui-dialog-titlebar-close:focus {
-  padding: 0;
-}
-
-.ui-dialog .ui-dialog-content {
-  position: relative;
-  border: 0;
-  padding: 0.5em 1em;
-  background: none;
-  overflow: auto;
-  zoom: 1;
-}
-
-.ui-dialog .ui-dialog-buttonpane {
-  text-align: left;
-  border-width: 1px 0 0 0;
-  background-image: none;
-  margin: 0.5em 0 0 0;
-  padding: 0.3em 1em 0.5em 0.4em;
-}
-
-.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset {
-  float: right;
-}
-
-.ui-dialog .ui-dialog-buttonpane button {
-  margin: 0.5em 0.4em 0.5em 0;
-  cursor: pointer;
-}
-
-.ui-dialog .ui-resizable-se {
-  width: 14px;
-  height: 14px;
-  right: 3px;
-  bottom: 3px;
-}
-
-.ui-draggable .ui-dialog-titlebar {
-  cursor: move;
-}
-
-/*!
- * jQuery UI Slider 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Slider#theming
- */
-.ui-slider {
-  position: relative;
-  text-align: left;
-}
-
-.ui-slider .ui-slider-handle {
-  position: absolute;
-  z-index: 2;
-  width: 1.2em;
-  height: 1.2em;
-  cursor: default;
-}
-
-.ui-slider .ui-slider-range {
-  position: absolute;
-  z-index: 1;
-  font-size: 0.7em;
-  display: block;
-  border: 0;
-  background-position: 0 0;
-}
-
-.ui-slider-horizontal {
-  height: 0.8em;
-}
-
-.ui-slider-horizontal .ui-slider-handle {
-  top: -0.3em;
-  margin-left: -0.6em;
-}
-
-.ui-slider-horizontal .ui-slider-range {
-  top: 0;
-  height: 100%;
-}
-
-.ui-slider-horizontal .ui-slider-range-min {
-  left: 0;
-}
-
-.ui-slider-horizontal .ui-slider-range-max {
-  right: 0;
-}
-
-.ui-slider-vertical {
-  width: 0.8em;
-  height: 100px;
-}
-
-.ui-slider-vertical .ui-slider-handle {
-  left: -0.3em;
-  margin-left: 0;
-  margin-bottom: -0.6em;
-}
-
-.ui-slider-vertical .ui-slider-range {
-  left: 0;
-  width: 100%;
-}
-
-.ui-slider-vertical .ui-slider-range-min {
-  bottom: 0;
-}
-
-.ui-slider-vertical .ui-slider-range-max {
-  top: 0;
-}
-
-/*!
- * jQuery UI Tabs 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Tabs#theming
- */
-.ui-tabs {
-  position: relative;
-  padding: 0.2em;
-  zoom: 1;
-}
-
-/* position: relative prevents IE scroll bug (element with position: relative inside container with overflow: auto appear as "fixed") */
-.ui-tabs .ui-tabs-nav {
-  margin: 0;
-  padding: 0.2em 0.2em 0;
-}
-
-.ui-tabs .ui-tabs-nav li {
-  list-style: none;
-  float: left;
-  position: relative;
-  top: 1px;
-  margin: 0 0.2em 1px 0;
-  border-bottom: 0 !important;
-  padding: 0;
-  white-space: nowrap;
-}
-
-.ui-tabs .ui-tabs-nav li a {
-  float: left;
-  padding: 0.5em 1em;
-  text-decoration: none;
-}
-
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected {
-  margin-bottom: 0;
-  padding-bottom: 1px;
-}
-
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a,
-.ui-tabs .ui-tabs-nav li.ui-state-disabled a,
-.ui-tabs .ui-tabs-nav li.ui-state-processing a {
-  cursor: text;
-}
-
-.ui-tabs .ui-tabs-nav li a,
-.ui-tabs.ui-tabs-collapsible .ui-tabs-nav li.ui-tabs-selected a {
-  cursor: pointer;
-}
-
-/* first selector in group seems obsolete, but required to overcome bug in Opera applying cursor: text overall if defined elsewhere... */
-.ui-tabs .ui-tabs-panel {
-  display: block;
-  border-width: 0;
-  padding: 1em 1.4em;
-  background: none;
-}
-
-.ui-tabs .ui-tabs-hide {
-  display: none !important;
-}
-
-/*!
- * jQuery UI Datepicker 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Datepicker#theming
- */
-.ui-datepicker {
-  width: 17em;
-  padding: 0.2em 0.2em 0;
-  display: none;
-}
-
-.ui-datepicker .ui-datepicker-header {
-  position: relative;
-  padding: 0.2em 0;
-}
-
-.ui-datepicker .ui-datepicker-prev,
-.ui-datepicker .ui-datepicker-next {
-  position: absolute;
-  top: 2px;
-  width: 1.8em;
-  height: 1.8em;
-}
-
-.ui-datepicker .ui-datepicker-prev-hover,
-.ui-datepicker .ui-datepicker-next-hover {
-  top: 1px;
-}
-
-.ui-datepicker .ui-datepicker-prev {
-  left: 2px;
-}
-
-.ui-datepicker .ui-datepicker-next {
-  right: 2px;
-}
-
-.ui-datepicker .ui-datepicker-prev-hover {
-  left: 1px;
-}
-
-.ui-datepicker .ui-datepicker-next-hover {
-  right: 1px;
-}
-
-.ui-datepicker .ui-datepicker-prev span,
-.ui-datepicker .ui-datepicker-next span {
-  display: block;
-  position: absolute;
-  left: 50%;
-  margin-left: -8px;
-  top: 50%;
-  margin-top: -8px;
-}
-
-.ui-datepicker .ui-datepicker-title {
-  margin: 0 2.3em;
-  line-height: 1.8em;
-  text-align: center;
-}
-
-.ui-datepicker .ui-datepicker-title select {
-  font-size: 1em;
-  margin: 1px 0;
-}
-
-.ui-datepicker select.ui-datepicker-month-year {
-  width: 100%;
-}
-
-.ui-datepicker select.ui-datepicker-month,
-.ui-datepicker select.ui-datepicker-year {
-  width: 49%;
-}
-
-.ui-datepicker table {
-  width: 100%;
-  font-size: 0.9em;
-  border-collapse: collapse;
-  margin: 0 0 0.4em;
-}
-
-.ui-datepicker th {
-  padding: 0.7em 0.3em;
-  text-align: center;
-  font-weight: bold;
-  border: 0;
-}
-
-.ui-datepicker td {
-  border: 0;
-  padding: 1px;
-}
-
-.ui-datepicker td span,
-.ui-datepicker td a {
-  display: block;
-  padding: 0.2em;
-  text-align: right;
-  text-decoration: none;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane {
-  background-image: none;
-  margin: 0.7em 0 0 0;
-  padding: 0 0.2em;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane button {
-  float: right;
-  margin: 0.5em 0.2em 0.4em;
-  cursor: pointer;
-  padding: 0.2em 0.6em 0.3em 0.6em;
-  width: auto;
-  overflow: visible;
-}
-
-.ui-datepicker .ui-datepicker-buttonpane button.ui-datepicker-current {
-  float: left;
-}
-
-/* with multiple calendars */
-.ui-datepicker.ui-datepicker-multi {
-  width: auto;
-}
-
-.ui-datepicker-multi .ui-datepicker-group {
-  float: left;
-}
-
-.ui-datepicker-multi .ui-datepicker-group table {
-  width: 95%;
-  margin: 0 auto 0.4em;
-}
-
-.ui-datepicker-multi-2 .ui-datepicker-group {
-  width: 50%;
-}
-
-.ui-datepicker-multi-3 .ui-datepicker-group {
-  width: 33.3%;
-}
-
-.ui-datepicker-multi-4 .ui-datepicker-group {
-  width: 25%;
-}
-
-.ui-datepicker-multi .ui-datepicker-group-last .ui-datepicker-header {
-  border-left-width: 0;
-}
-
-.ui-datepicker-multi .ui-datepicker-group-middle .ui-datepicker-header {
-  border-left-width: 0;
-}
-
-.ui-datepicker-multi .ui-datepicker-buttonpane {
-  clear: left;
-}
-
-.ui-datepicker-row-break {
-  clear: both;
-  width: 100%;
-  font-size: 0em;
-}
-
-/* RTL support */
-.ui-datepicker-rtl {
-  direction: rtl;
-}
-
-.ui-datepicker-rtl .ui-datepicker-prev {
-  right: 2px;
-  left: auto;
-}
-
-.ui-datepicker-rtl .ui-datepicker-next {
-  left: 2px;
-  right: auto;
-}
-
-.ui-datepicker-rtl .ui-datepicker-prev:hover {
-  right: 1px;
-  left: auto;
-}
-
-.ui-datepicker-rtl .ui-datepicker-next:hover {
-  left: 1px;
-  right: auto;
-}
-
-.ui-datepicker-rtl .ui-datepicker-buttonpane {
-  clear: right;
-}
-
-.ui-datepicker-rtl .ui-datepicker-buttonpane button {
-  float: left;
-}
-
-.ui-datepicker-rtl .ui-datepicker-buttonpane button.ui-datepicker-current {
-  float: right;
-}
-
-.ui-datepicker-rtl .ui-datepicker-group {
-  float: right;
-}
-
-.ui-datepicker-rtl .ui-datepicker-group-last .ui-datepicker-header {
-  border-right-width: 0;
-  border-left-width: 1px;
-}
-
-.ui-datepicker-rtl .ui-datepicker-group-middle .ui-datepicker-header {
-  border-right-width: 0;
-  border-left-width: 1px;
-}
-
-/* IE6 IFRAME FIX (taken from datepicker 1.5.3 */
-.ui-datepicker-cover {
-  display: none; /*sorry for IE5*/
-  display/**/
-    : block; /*sorry for IE5*/
-  position: absolute; /*must have*/
-  z-index: -1; /*must have*/
-  filter: mask(); /*must have*/
-  top: -4px; /*must have*/
-  left: -4px; /*must have*/
-  width: 200px; /*must have*/
-  height: 200px; /*must have*/
-}
-
-/*!
- * jQuery UI Progressbar 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Progressbar#theming
- */
-.ui-progressbar {
-  height: 2em;
-  text-align: left;
-  overflow: hidden;
-}
-
-.ui-progressbar .ui-progressbar-value {
-  height: 100%;
-}
-
-/* files operations */
-
-.operation {
-  color: #666 !important;
-  font-size: 12px !important;
-}
-
-.converting .ui-progressbar-value {
-  background: url(../../img/progressbar-green.gif) !important;
-}
-
-/*jquery.image-gallery.min.css*/
-#gallery-loader {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 128px;
-  height: 128px;
-  margin: -64px 0 0 -64px;
-  background: url(../../img/loading.gif);
-  z-index: 9999;
-}
-
-* html #gallery-loader {
-  position: absolute;
-}
-
-.gallery-dialog .ui-dialog-content {
-  cursor: pointer;
-  text-align: center;
-}
-
-.gallery-dialog .ui-dialog-content:hover:before,
-.gallery-dialog .ui-dialog-content:hover:after {
-  content: '‹';
-  position: absolute;
-  top: 50%;
-  left: 25px;
-  width: 40px;
-  height: 40px;
-  margin-top: -20px;
-  font-size: 60px;
-  font-weight: 100;
-  line-height: 30px;
-  color: #ffffff;
-  text-align: center;
-  background: #222222;
-  border: 3px solid #ffffff;
-  -webkit-border-radius: 23px;
-  -moz-border-radius: 23px;
-  border-radius: 23px;
-  opacity: 0.5;
-  filter: alpha(opacity=50);
-  z-index: 1;
-}
-
-.gallery-dialog .ui-dialog-content:hover:after {
-  content: '›';
-  left: auto;
-  right: 25px;
-}
-
-.gallery-dialog-single .ui-dialog-content:hover:before,
-.gallery-dialog-single .ui-dialog-content:hover:after {
-  display: none;
-}
-
-.gallery-dialog .ui-dialog-content img {
-  border: 0;
-}
-
-.gallery-dialog-fullscreen {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  -webkit-box-shadow: 0 0 20px #000;
-  -moz-box-shadow: 0 0 20px #000;
-  box-shadow: 0 0 20px #000;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-titlebar {
-  display: none;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-content {
-  padding: 0;
-  border: 0;
-  cursor: pointer;
-  text-align: center;
-}
-
-.gallery-dialog-fullscreen .ui-dialog-content img,
-.gallery-dialog-fullscreen .ui-dialog-content canvas {
-  float: left;
-  border: 0;
-}
-
-* html .gallery-dialog-fullscreen .ui-dialog-content img {
-  float: none;
-}
-
-.gallery-body-fullscreen .ui-widget-overlay {
-  opacity: 1;
-  filter: alpha(opacity=100);
-}
-
-.gallery-body .ui-effects-explode,
-.gallery-body .ui-effects-wrapper,
-.gallery-body-fullscreen .ui-effects-wrapper,
-.gallery-body-fullscreen .ui-effects-explode {
-  z-index: 10000 !important;
-}
-
-.gallery-body,
-.gallery-body-fullscreen {
-  overflow: hidden;
-}
-
-* html .gallery-body select,
-* html .gallery-body-fullscreen select {
-  display: none;
-}
-
-.memory-mgmt {
-  padding: 8px 10px 1px 10px;
-  margin-top: 7px;
-  /*
-    color: #333;
-    font-weight: bold;
-    width: 230px;
-    */
-  text-decoration: none;
-}
-
-.memory-mgmt .text {
-  text-decoration: underline;
-}
-
-.memory-mgmt .tm-added {
-  display: none;
-}
-
-.memory-mgmt:hover {
-  /* background:#F7F7F7; */
-}
-
-.memory-mgmt i {
-  margin-right: 10px;
-  margin-top: 2px;
-  float: left;
-}
-
-.tm-mgmt {
-  padding: 0;
-  margin: 0;
-  text-decoration: underline;
-}
-
-.fileinput-button input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  /*width: 100%;*/
-  height: 100%;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  cursor: pointer;
-}
-
-.fileinput-link input {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border: solid transparent;
-  border-width: 0 0 0 0;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  filter: alpha(opacity=0);
-  -moz-transform: translate(-300px, 0) scale(4);
-  direction: ltr;
-  /*cursor: pointer;*/
-}
-
-.fileupload-buttonbar .fileinput-link:before {
-  display: none;
-}
-
-.fileupload-buttonbar .ui-button,
-.fileupload-buttonbar .toggle {
-  margin-bottom: 5px;
-}
-
-.files .progress {
-  background: #fff;
-}
-
-.files .progress,
-.fileupload-buttonbar .progress {
-  height: 15px;
-  border-radius: 10px;
-}
-
-.files .ui-progressbar-value,
-.fileupload-buttonbar .ui-progressbar-value {
-  background: url(../../img/progressbar.gif);
-}
-
-.fileupload-buttonbar .fade,
-.files .fade {
-  display: none;
-}
-
-.fileupload-loading {
-  position: absolute;
-  left: 50%;
-  width: 128px;
-  height: 128px;
-  background: url(../../img/loading.gif) center no-repeat;
-  display: none;
-}
-
-.fileupload-processing .fileupload-loading {
-  display: block;
-}
-
-.name {
-  width: 50% !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 16px;
-}
-
-.cancel-btn {
-  background: $rebuttedRed;
-}
-
-.cancel-btn:hover {
-  background: $rebuttedRedHover;
-}
 
 .translate-box a.tooltip {
   text-align: center;
@@ -1252,47 +30,6 @@ button.ui-button::-moz-focus-inner {
 .translate-box a.tooltip:hover span {
   top: -70px;
 }
-
-.cancel-btn,
-#clear-all-files,
-#clear-all-gdrive,
-#delete-failed-conversions {
-  background: $rebuttedRed;
-}
-
-.cancel-btn:hover,
-#clear-all-files:hover,
-#clear-all-gdrive:hover,
-#delete-failed-conversions:hover {
-  background: $rebuttedRedHover;
-}
-
-/* Fix for IE 6: */
-* html .fileinput-button {
-  margin-right: -2px;
-}
-
-* html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
-/* Fix for IE 7: */
-* + html .fileinput-button {
-  margin-right: 1px;
-}
-
-* + html .fileinput-button .ui-button-text {
-  line-height: 24px;
-}
-
-* + html .fileupload-buttonbar .ui-button {
-  margin-left: 3px;
-}
-
 @media only screen and (max-width: 1320px) {
   .translate-box.tmx-select,
   .translate-box.source,
@@ -1313,25 +50,6 @@ button.ui-button::-moz-focus-inner {
       max-height: none !important;
       overflow: hidden !important;
     }
-    div#add-tmx-option:hover,
-    div#add-multiple-lang:hover {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    div#add-tmx-option,
-    div#add-multiple-lang {
-      cursor: pointer;
-      color: #39699a;
-      font-size: 14px;
-      margin: 0;
-      padding: 15px;
-      .icon {
-        float: right;
-        font-size: 24px;
-        margin-top: -3px;
-        margin-right: 1px;
-        color: #39699a;
-      }
-    }
     div.item {
       width: 100%;
       min-width: 150px;
@@ -1339,10 +57,6 @@ button.ui-button::-moz-focus-inner {
       overflow: hidden;
       text-overflow: ellipsis;
       padding-right: 10px !important;
-      span.item-key-id {
-        color: #757575;
-        clear: both;
-      }
       span {
         line-height: 17px;
       }
@@ -1364,17 +78,6 @@ button.ui-button::-moz-focus-inner {
       text-overflow: ellipsis;
       font-size: 16px;
       white-space: nowrap;
-
-      .item-key-id {
-        margin-top: 0px;
-        float: none;
-      }
-      .item-key-name {
-        color: initial;
-        margin-top: 0px;
-        margin-right: 5px;
-        float: none;
-      }
     }
     .divider {
       margin: 0 !important;
@@ -1410,18 +113,6 @@ button.ui-button::-moz-focus-inner {
     width: 60px;
   }
 }
-
-/* Fix for Webkit (Safari, Chrome) */
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  .fileinput-button {
-    margin-top: 2px;
-  }
-}
-
-.translate-box.manage-link {
-  display: none;
-}
-
 .translate-box {
   float: left;
   margin: 20px 0 0 0;
@@ -1430,9 +121,14 @@ button.ui-button::-moz-focus-inner {
 }
 
 .translate-box {
+  h2 {
+    line-height: 24px;
+  }
+}
+.translate-box {
   h2,
   .select-with-label__wrapper label {
-    color: $grey1;
+    color: colors.$grey1;
     font-size: 18px;
     font-weight: normal;
   }
@@ -1499,7 +195,7 @@ button.ui-button::-moz-focus-inner {
       }
 
       .dropdown__option--is-no-results-found {
-        color: $grey7;
+        color: colors.$grey7;
       }
 
       .dropdown__option--is-no-results-found {
@@ -1508,14 +204,14 @@ button.ui-button::-moz-focus-inner {
 
       .dropdown__option--is-active-option {
         background-color: unset;
-        color: $black;
+        color: colors.$black;
         font-weight: bold;
-        background-color: $grey5;
+        background-color: colors.$grey5;
       }
 
       .dropdown__option--is-highlighted-option,
       .dropdown__option:hover {
-        background-color: $grey4;
+        background-color: colors.$grey4;
       }
     }
 
@@ -1523,12 +219,12 @@ button.ui-button::-moz-focus-inner {
       min-width: 350px;
       border: solid 1px #96c8da;
       border-top: unset;
-      z-index: 1;
+      z-index: 3;
       margin-top: 1px;
 
       input:not([type='radio']),
       textarea {
-        border: 1px solid $grey2;
+        border: 1px solid colors.$grey2;
         border-radius: 4px;
         padding: 4px 8px;
         outline: none;
@@ -1536,7 +232,7 @@ button.ui-button::-moz-focus-inner {
         line-height: 16px;
         &:focus,
         &:focus-visible {
-          border-color: $linkBlueTransparent;
+          border-color: colors.$linkBlueTransparent;
         }
       }
       .dropdown__search-bar {
@@ -1566,7 +262,7 @@ button.ui-button::-moz-focus-inner {
         }
 
         &:hover {
-          background-color: $grey4;
+          background-color: colors.$grey4;
         }
       }
     }
@@ -1578,10 +274,6 @@ button.ui-button::-moz-focus-inner {
         color: black;
       }
     }
-  }
-
-  .history__list {
-    border-bottom: 1px solid rgba(34, 36, 38, 0.1);
   }
 }
 
@@ -1626,27 +318,8 @@ button.ui-button::-moz-focus-inner {
   margin-top: 5px;
 }
 
-.manage-link {
-  margin-left: -14px;
-}
-
 .translate-box.source {
   margin-right: 0px;
-}
-
-.translate-checkbox {
-  float: left;
-}
-
-.tms-checkbox {
-  width: 150px;
-  height: 26px;
-}
-
-.tms-label {
-  float: right;
-  margin-left: 4px;
-  margin-top: 2px;
 }
 
 .wrapper-upload {
@@ -1657,8 +330,9 @@ button.ui-button::-moz-focus-inner {
   max-width: 1600px;
   position: relative;
   padding: 24px;
-  background: $grey5;
+  background: colors.$grey5;
   padding-top: 0px;
+  border-radius: 4px;
 }
 
 .wrapper-upload h1 {
@@ -1682,7 +356,7 @@ button.ui-button::-moz-focus-inner {
   display: grid;
   align-items: center;
   justify-content: center;
-  color: $darkBlue;
+  color: colors.$darkBlue;
   min-width: 992px;
   /*margin: -3px 0 10px 0;*/
   height: 175px;
@@ -1704,7 +378,7 @@ button.ui-button::-moz-focus-inner {
   margin: 0px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
   .highlight {
-    color: $translatedBlue;
+    color: colors.$translatedBlue;
   }
 }
 
@@ -1713,9 +387,11 @@ button.ui-button::-moz-focus-inner {
   width: 94%;
   min-width: 992px;
   position: relative;
-  padding: 24px;
-  height: 200px;
+  padding: 12px 0;
+  display: flex;
+  justify-content: space-between;
   max-width: 1600px;
+  align-items: center;
 }
 
 h2 {
@@ -1724,51 +400,32 @@ h2 {
   font-size: 18px;
 }
 
-h2.payoff {
-  color: #fff !important;
-  font-weight: normal !important;
-  font-size: 24px;
-  font-family: Calibri, Arial, Helvetica, sans-serif;
-}
-
 /*button*/
 
 .uploadbtn {
-  background: $translatedBlue;
-  font-weight: 100;
+  font-weight: 500 !important;
   padding: 8px 16px;
   width: auto !important;
   min-width: 200px;
-  margin: -10px 0px 8px 0px;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
   font-size: 26px !important;
-  cursor: pointer;
-  color: #fff;
-  border: none;
-  border-radius: 2px;
-}
-
-.uploadbtn:hover {
-  background: $translatedBlueHover;
-  color: #ffffff;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.uploadbtn:focus {
-  outline-color: $translatedBlueActive;
-}
-
-.uploadbtn:active {
-  box-shadow: none;
+  &.disabled {
+    background: colors.$grey2 !important;
+  }
+  .uploadloader {
+    background: url(/public/img/loader.gif) center center no-repeat;
+    width: 20px;
+    height: 20px;
+    float: right;
+    margin-top: 3px;
+    position: absolute;
+    right: 233px;
+    background-size: 20px 20px;
+  }
 }
 
 .uploadbtn-box {
-  text-align: center;
-  float: right;
+  display: flex;
+  align-items: center;
 }
 
 .uploadbtn-box p {
@@ -1783,185 +440,6 @@ h2.payoff {
 
 .uploadbtn-box:hover p {
   display: block;
-}
-
-/*upload table*/
-.upload-table,
-.gdrive-upload-table {
-  width: 100%;
-  margin: 0;
-  table-layout: fixed;
-}
-
-.upload-table td,
-.gdrive-upload-table td {
-  height: auto;
-  padding: 5px 10px;
-  text-align: left;
-  border-bottom: 1px dashed #ccc;
-}
-
-.upload-table tr,
-.gdrive-upload-table tr {
-  background: #fff;
-  -webkit-transition: all 100ms ease-in;
-  -moz-transition: all 100ms ease-in;
-  border-bottom: 1px dashed #ccc;
-}
-
-.upload-table tr:hover {
-}
-
-.btncontinue {
-  position: absolute;
-  bottom: 0;
-  display: none;
-  float: left;
-  padding: 0px 0 0 0 !important;
-  font-size: 14px !important;
-  margin: 0px 0 0 10px !important;
-}
-
-.uploaded .btncontinue {
-  display: block;
-}
-
-.btncontinue p {
-  float: left !important;
-  font-size: 14px !important;
-  margin: 0px 0 0 0 !important;
-  padding: 0;
-}
-
-.btncontinue .fileinput-button {
-  float: left;
-  margin: 7px 0 0 10px !important;
-  width: auto;
-  padding: 8px 10px 0px 10px !important;
-  height: 36px;
-}
-
-#add-files,
-#clear-all-files,
-#clear-all-gdrive {
-  padding: 8px 10px 0px 10px !important;
-  height: 36px;
-}
-
-.preview {
-  border-right: none !important;
-  width: 30px;
-  padding: 8px;
-}
-
-.preview img {
-  margin: 5px 0 0 10px;
-}
-
-.delete,
-.cancel {
-  border-right: none !important;
-}
-
-.delete .btn,
-.cancel .btn {
-  float: right;
-  font-weight: bold;
-}
-
-/*UI buttons*/
-.fileinput-button {
-  font-size: 1.1em;
-  overflow: hidden;
-  margin: 0 auto;
-  width: 200px;
-  cursor: pointer;
-  padding: 12px 0px 4px 0;
-  background: $translatedBlue;
-  color: #fff;
-  font-weight: bold;
-  margin-bottom: 30px !important;
-}
-
-/* Ovverride file-input-button to style it as a link */
-.fileinput-link {
-  font-size: 16px;
-  overflow: hidden;
-  margin: 0 auto;
-  cursor: pointer;
-  font-weight: 100;
-  margin-bottom: 30px !important;
-  background: transparent;
-  border: none !important;
-  padding: 0;
-  width: max-content;
-  text-decoration: underline !important;
-  color: $grey1 !important;
-  label {
-    font-size: 24px;
-    &:hover {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  }
-}
-
-.upload-footer .fileinput-button {
-  position: relative;
-}
-
-.fileinput-button:hover {
-  background-color: $translatedBlueHover;
-  box-shadow:
-    0 0 0 #e0e0e0,
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-}
-
-.fileinput-button:active {
-  box-shadow: none !important;
-}
-
-.fileinput-button:focus {
-  box-shadow: none !important;
-}
-
-.fileinput-link:hover,
-.fileinput-link:focus,
-.fileinput-link:active {
-  background-color: transparent;
-  box-shadow: none !important;
-}
-
-.delete .ui-button-text,
-.cancel .ui-button-text,
-.delete span,
-.cancel span {
-  display: none;
-  color: #fff;
-  text-align: left;
-  margin: 0px 0 0 10px !important;
-}
-
-.delete .btn,
-.cancel .btn {
-  height: 35px !important;
-  font-size: 1.1em;
-  border: 0;
-  background: transparent;
-}
-.cancel button:hover,
-.delete button:hover {
-  background: #f26522;
-  color: #fff;
-  border: 1px solid #848689;
-}
-
-.cancel .ui-button-text span,
-.delete .ui-button-text span {
-  margin: -3px 0 0 15px !important;
-  display: block;
-  float: left;
 }
 
 a {
@@ -1996,382 +474,21 @@ body {
   border-radius: 2px;
 }
 
-.mgmt-table-mt select {
-  font-size: 14px;
-}
-
-.upload-input {
-  padding: 3px 5px 3px 9px;
-  font-size: 16px !important;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  border: 1px solid rgba(34, 36, 38, 0.15);
-  height: 37px;
-  box-shadow: inset 0 1px 3px #ddd;
-}
-
-.upload-input:hover {
-  border-color: rgba(34, 36, 38, 0.35);
-  box-shadow: none;
-}
-
-#private-tm-key {
-  width: 220px;
-  height: 28px;
-  margin: 0 0 5px 0;
-}
-
-/* upload footer */
-.upload-footer {
-  width: 100%;
-  background: #ebebec;
-  padding: 10px 0;
-  border-top: 1px dashed #ccc;
-  margin-top: -1px;
-}
-
-.upload-footer .btn {
-  float: left;
-  padding: 5px 10px 0 30px;
-  width: auto;
-  margin-bottom: 0px !important;
-}
-
-.upload-footer p {
-  text-align: left !important;
-  float: left;
-  margin: 5px 10px 0px 20px !important;
-  font-size: 18px !important;
-  line-height: 20px !important;
-}
-
-.ui-progressbar-value {
-  display: none !important;
-}
-
-table .ui-progressbar-value {
-  display: block !important;
-}
-
 a {
-  color: $linkBlue;
+  color: colors.$linkBlue;
   &:hover {
-    color: $linkBlueHover;
+    color: colors.$linkBlueHover;
   }
-}
-
-.cl {
-  clear: both;
-  visibility: hidden;
-}
-
-.uploadtext {
-  float: left;
-  width: 55%;
-}
-
-.uploadtext h2 {
-  margin: 15px 0 0 0;
-}
-
-.linkupload {
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.upload-analysis {
-  border: 1px solid #ccc;
-  float: left;
-  font-size: 16px;
-  -moz-box-shadow: 0 1px 3px #ccc;
-  -webkit-box-shadow: 0 1px 3px #ccc;
-  float: left;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  width: 80%;
-}
-
-.upload-analysis th {
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  text-align: left;
-  background: #e2e4e5;
-}
-
-.upload-analysis td {
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  text-align: left;
-  background: #efefef;
 }
 
 .supported-files {
   float: left;
   font-weight: bold;
   font-size: 16px;
-  color: $grey1;
-  margin-top: 48px;
+  color: colors.$grey1;
+  margin: 0px;
   .supported-file-formats {
     cursor: pointer;
-  }
-}
-
-/*upload table*/
-
-.dragging .file-drop {
-  display: block !important;
-}
-
-.uploaded.dragging .file-drop {
-  display: none !important;
-}
-
-.uploaded .upload-footer {
-  display: block !important;
-}
-
-.file-drop {
-  margin: 40px 0 50px 0 !important;
-}
-
-#fileupload {
-  margin: 0 !important; /* padding:0 !important */
-}
-
-.upload-files,
-.gdrive-upload-files {
-  position: relative;
-  border: 1px dashed #ccc;
-  margin: 18px 0 0;
-  min-height: 200px;
-  /*min-height: 270px;*/
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  background: #fff;
-  -webkit-transition: all 50ms ease-in;
-  -moz-transition: all 50ms ease-in;
-}
-
-.upload-files.uploaded,
-.gdrive-upload-files.uploaded {
-  padding-bottom: 50px !important;
-  min-height: 220px;
-}
-
-span.gdrive-icon {
-  background: url(../../img/logo-drive-16.png);
-  background-size: 100%;
-  width: 16px;
-  height: 14px;
-  display: block;
-  float: right;
-  margin-top: 2px;
-  margin-left: 3px;
-}
-
-.dragging {
-  background: #e2e2e3 !important;
-  border: 1px dashed #000 !important;
-  -moz-box-shadow: 0 1px 2px #ccc;
-  -webkit-box-shadow: 0 1px 2px #ccc;
-}
-
-.uploaded .upload-files,
-.uploaded .gdrive-upload-files {
-  height: auto !important;
-}
-
-.drag {
-  text-align: center;
-  overflow: hidden;
-}
-
-.drag p {
-  text-align: center;
-  margin: 2px 0 0 0;
-  font-size: 35px;
-  line-height: 50px;
-}
-
-.drag span.min {
-  font-size: 24px;
-}
-
-#overlay {
-  display: none;
-  z-index: 2;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.dnd-hover {
-  /*
-        border: 4px solid #97e800 !important;
-    */
-}
-
-.upload-files.uploaded .upload-footer,
-.gdrive-upload-files.uploaded .upload-footer {
-  display: none !important;
-}
-
-.error-content {
-  padding-left: 45px;
-  padding-right: 10px;
-  float: left;
-}
-
-.error-content a {
-  color: white;
-}
-
-.error-message,
-.warning-message {
-  background: #d65757;
-  color: #fff;
-  padding: 10px 0 10px 16px;
-  margin: 10px 0;
-  float: left;
-  font-weight: bold;
-  width: 100%;
-  -moz-border-radius: 2px;
-  border-radius: 2px;
-  border: 1px solid #c45f5f;
-  .icon {
-    float: left;
-    font-size: 25px;
-  }
-  p {
-    line-height: 25px;
-    font-size: 16px;
-    float: left;
-    margin-left: 12px;
-  }
-}
-
-.error-message {
-  a {
-    color: #fff;
-  }
-}
-
-.warning-message {
-  background: rgba(255, 250, 139, 0.38) !important;
-  border-color: #6d6e71;
-  color: #000;
-}
-
-.warning-message span {
-  /*margin-left: 15px;*/
-}
-
-.file-drag {
-  transition: width 2s;
-  -moz-transition: width 2s; /* Firefox 4 */
-  -webkit-transition: width 2s; /* Safari and Chrome */
-  -o-transition: width 2s; /* Opera */
-}
-
-.file-drag {
-  overflow: hidden;
-  /*height:100px;*/
-  margin: 10px auto;
-  /*cursor: pointer;*/
-  position: relative;
-  transition: all 0.1s linear;
-  -webkit-transition: all 0.1s linear;
-  -moz-transition: all 0.1s linear;
-  -o-transition: all 0.1s linear;
-  -ms-transition: all 0.1s linear;
-}
-
-/*.dragging .file-drag,*/
-.uploaded .file-drag,
-.uploaded .min {
-  display: none;
-}
-
-.file-drop,
-.upload-footer,
-.uploaded .btn-success,
-.dragging .btn-success,
-.uploaded .fileinput-link,
-.dragging .fileinput-link,
-.uploaded .upload-icon,
-.dragging .upload-icon {
-  display: none !important;
-}
-
-.progress-extended {
-  display: none;
-}
-
-.dragging .file-drag,
-.uploaded .file-drop,
-.uploaded .fileupload-buttonbar {
-  height: 0;
-}
-
-.dragging .min {
-  display: none;
-}
-
-.name {
-  width: 230px;
-}
-
-.size {
-  width: 100px;
-  text-align: right !important;
-  padding-right: 20px;
-}
-
-.size span {
-  visibility: hidden;
-}
-
-tr.ready .size span {
-  visibility: visible;
-}
-
-.advanced-box {
-  margin: 0px 0 10px 0;
-  float: left;
-  width: 96%;
-  padding: 20px;
-}
-
-.advanced-box h2 {
-  font-size: 30px;
-  text-align: left;
-}
-
-.more {
-  margin-bottom: 5px;
-  float: left;
-  text-decoration: none;
-}
-
-.more span {
-  text-decoration: underline;
-}
-
-.more:hover span {
-  text-decoration: none;
-}
-
-.translate-box .fileinput-button {
-  margin-top: 8px;
-  text-align: center;
-  padding: 4px 0px;
-}
-
-@-moz-document url-prefix() {
-  .translate-box .fileinput-button {
-    margin-top: 7px;
   }
 }
 
@@ -2384,14 +501,6 @@ tr.ready .size span {
   border-radius: 2px;
 }
 
-.tm-button {
-  width: 20px;
-  display: none;
-  float: left;
-  margin-left: -10px;
-  margin-top: 35px;
-}
-
 .disabled,
 .disabled:hover,
 .disabled:active {
@@ -2399,13 +508,8 @@ tr.ready .size span {
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
   border: none;
-  background: $grey2;
+  background: colors.$grey2;
   box-shadow: none !important;
-}
-
-header {
-  position: relative;
-  min-width: 992px;
 }
 
 .wrapper {
@@ -2466,7 +570,7 @@ header {
 }
 
 .close {
-  background: url(../../img/x.png) center 1px no-repeat;
+  background: url(/public/img/x.png) center 1px no-repeat;
   width: 22px;
   height: 20px;
   display: block;
@@ -2477,45 +581,13 @@ header {
 
 .close:hover,
 .close:focus {
-  background: url(../../img/x.png) center -30px no-repeat;
-}
-
-.listlang {
-  float: left;
-  padding: 0 0 0 0;
-  margin: 0 10px 50px 5px;
-  width: 220px;
-  font-size: 100%;
-}
-
-.listlang li {
-  width: 200px;
-  padding: 1px 0 1px 0;
-  overflow: hidden !important;
-  border-bottom: 1px dotted #ccc;
-  line-height: 22px;
-  text-align: left;
-}
-
-.listlang li.on {
-  font-weight: bold;
-}
-
-.listlang label {
-  display: inline-block;
-  cursor: pointer;
-  padding-left: 0%;
-  padding-top: 4px;
-}
-
-.listlang input {
-  margin-top: 8px;
+  background: url(/public/img/x.png) center -30px no-repeat;
 }
 
 .popup .header input {
   float: right;
   margin: 1px 0px 0px 15px !important;
-  background: $translatedBlue;
+  background: colors.$translatedBlue;
   font-weight: bold;
   float: right;
   font-size: 14px;
@@ -2533,8 +605,8 @@ header {
     from(rgb(245, 245, 245)),
     to(rgb(211, 212, 213))
   );
-  background: -moz-linear-gradient(top, $translatedBlue, #119ec4);
-  background: linear-gradient(top, $translatedBlue, #119ec4);
+  background: -moz-linear-gradient(top, colors.$translatedBlue, #119ec4);
+  background: linear-gradient(top, colors.$translatedBlue, #119ec4);
 }
 
 .translate-box h2 span.extra {
@@ -2600,71 +672,6 @@ ul.test li {
   background: yellow;
 }
 
-//footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
-//footer a {color:#fff;text-shadow:none;}
-//footer a:hover{text-decoration:none}
-
-/*footer {
-    height: 28px;
-    z-index: 4;
-    position: fixed;
-    .wrapper {
-        margin: 0px auto 0 auto;
-        padding: 5px 0 0 0;
-
-        ul {
-            margin: 0px 0 0 0;
-            padding: 0;
-            li {
-                height: 18px;
-                padding-top: 0px;
-                border-right: 1px solid #fff;
-                margin-top: 0px;
-                a {
-                    &:hover {
-                        color: #ffffff;
-                    }
-                }
-            }
-        }
-        #welcomebox {
-            color: #ffffff;
-            &:hover {
-                color: #ffffff;
-                text-decoration: none;
-            }
-            a {
-                color: #fff;
-            }
-
-        }
-
-    }
-}*/
-
-.fb-like.fb_iframe_widget {
-  float: left;
-  margin-top: -1px;
-}
-
-#authentication {
-  float: right;
-  margin-left: 50px;
-}
-
-/*#mt_engine
-	{
-	width: 240px;
-	}
-*/
-#create_private_tm_btn {
-  background-image: none;
-  width: 70px;
-  margin-left: -22px;
-  padding: 8px 0 1px 0;
-  margin-top: 7px;
-}
-
 #swaplang {
   float: left;
   display: block;
@@ -2681,52 +688,6 @@ ul.test li {
 
 #swaplang:hover {
   color: #ddd;
-}
-
-/* job list table when analyze page is not available */
-.tablestats {
-  display: none;
-  border-right: 1px solid #ccc;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-  margin-bottom: 4px !important;
-  margin-top: 20px !important;
-  float: right;
-}
-
-.tablestats th {
-  background-color: #efefef;
-  font-size: 16px;
-  border-top: 1px solid #ccc;
-}
-
-.tablestats th,
-.tablestats td {
-  border-bottom: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  padding: 8px;
-  margin: 1px 0;
-  text-align: left;
-}
-
-.tablestats td {
-  font-size: 14px;
-}
-
-.newProject {
-  right: 20px;
-  float: right;
-}
-
-.tablestats a.url {
-  font-size: 14px;
-}
-
-.disabledLink {
-  color: gray;
-  text-decoration: none;
-  background: none;
-  cursor: default;
 }
 
 .name {
@@ -2746,115 +707,6 @@ ul.test li {
   cursor: pointer;
 }
 
-header .open-more {
-  color: #fff;
-  padding: 10px 5px;
-  font-size: 16px;
-}
-
-.open-more {
-  cursor: pointer;
-  text-decoration: underline;
-  color: #fff;
-}
-
-.learnmore {
-  background-color: #fff;
-  padding: 20px 40px 30px 40px;
-  margin: 0 auto;
-  margin-top: -20px;
-  overflow: hidden;
-  color: #333;
-  font-size: 20px;
-}
-
-.learnmore h1 {
-  color: #19bdea;
-  font-size: 40px;
-  font-weight: 800;
-  margin: 0px 0 10px 0;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e9e9e9;
-}
-
-.col-3 {
-  width: 25%;
-  float: left;
-  padding: 0 4%;
-}
-
-.learnmore h2 {
-  color: #333;
-  margin-top: 10px;
-  font-weight: 800;
-  font-size: 25px;
-}
-
-.learnmore .open-more {
-  font-size: 20px;
-  text-decoration: none;
-  font-weight: bold;
-  color: #333;
-}
-
-.learnmore .open-more:hover {
-  color: #19bdea;
-}
-
-.learnmore img {
-  width: 250px;
-}
-
-.more,
-.more.minus {
-  color: #333;
-}
-
-.bottom-lm {
-  margin-top: 20px;
-  float: left;
-  width: 100%;
-}
-
-.nobrowser {
-  display: none;
-}
-
-.cat-appear-div {
-  position: absolute;
-  right: 0;
-  z-index: -1000;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.zip_internal_file /*:before*/ {
-  /*content: "\ea58";*/
-  /* margin-left: 15px;*/
-  /*color: #555;*/
-}
-
-span.load-gdrive {
-  display: inline-block;
-  vertical-align: top;
-  width: 200px;
-  font-family: calibri, Arial, Helvetica, sans-serif;
-  font-size: 1.1em;
-  margin: 0;
-  padding: 0.6rem 0.25rem 0.4rem 2.2rem;
-  border: 0.1rem solid #b7b9bc;
-  background: url(../../img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-span.load-gdrive:hover,
-.continue-gdrive span.load-gdrive:hover {
-  background-color: #efefef;
-}
-
 .modal-gdrive {
   position: fixed;
   top: 0;
@@ -2865,87 +717,12 @@ span.load-gdrive:hover,
   background: rgba(255, 255, 255, 0.5);
 }
 
-.fileupload-buttonbar span.min {
-  font-size: 24px;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 42px;
-  margin: 0 1.5rem;
-}
-
-span.fileinput-button {
-  display: inline-block;
-  vertical-align: top;
-  margin: 0;
-}
-
-div.continue-gdrive {
-  margin: 0 0 10px 10px !important;
-  display: block;
-}
-
-.continue-gdrive span.load-gdrive {
-  width: auto;
-  padding: 0.5rem 0.7rem 0rem 2.3rem;
-  background: url(../../img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
-  margin-right: 10px;
-  background-size: 20px;
-  height: 36px;
-}
-
-.continue-gdrive span.clear-gdrive {
-  float: none;
-  margin: 0 !important;
-}
-
-#upload-files-list {
-  display: block;
-  padding: 24px;
-}
-
-#gdrive-files-list {
-  display: none;
-}
-
-.wrapper-dropdown-5 {
-  padding: 4px 16px !important;
-}
-.google-login-button {
-  box-sizing: content-box;
-}
-
-#sign-in-o-mt {
-  width: 300px !important;
-}
-
-.btn-confirm-small {
-  //height: 35px;
-}
-
-header .nav-mc-bar .dropdown.select-org span.text {
+header .nav-bar .dropdown.select-org span.text {
   line-height: 32px;
 }
 
 .ui.user.label {
   top: 0px !important;
-}
-
-header .nav-mc-bar .dropdown.select-org span.text {
-  text-align: right;
-  line-height: 32px;
-  text-decoration: underline;
-  min-width: 0px;
-  padding-right: 12px;
-  max-width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  top: -1px;
-}
-
-header .nav-mc-bar .dropdown.select-org i.dropdown.icon {
-  top: 12px;
-  margin-left: -25px !important;
 }
 
 .translate-box input:focus {
@@ -2969,15 +746,6 @@ select:focus {
 .ui.input input {
   box-shadow: inset 0 1px 3px #ddd;
 }
-
-a.pull-left.btn-grey.canceladdtmx {
-  margin-left: 4px;
-}
-
-a.pull-right.confirmDelete {
-  margin-right: 3px;
-}
-
 /* Header restyling */
 
 .action-submenu {
@@ -3004,7 +772,7 @@ a.pull-right.confirmDelete {
     flex-grow: 1;
     align-items: center;
     justify-content: space-between;
-    color: $black;
+    color: colors.$black;
 
     .select-item-default-label {
       display: block;
@@ -3022,7 +790,7 @@ a.pull-right.confirmDelete {
   .dropdown__option--is-active-option {
     .select-item-default {
       margin-right: 4px;
-      color: $white;
+      color: colors.$white;
     }
   }
 }
@@ -3031,7 +799,7 @@ a.pull-right.confirmDelete {
   .project-template-select {
     .dropdown__option--is-active-option {
       .select-item-default {
-        color: $black;
+        color: colors.$black;
       }
     }
   }
@@ -3039,7 +807,7 @@ a.pull-right.confirmDelete {
 
 .project-template-select-unsaved {
   .select {
-    color: $translatedBlue !important;
+    color: colors.$translatedBlue !important;
   }
 }
 
@@ -3052,33 +820,9 @@ a.pull-right.confirmDelete {
   background-color: rgba(255, 255, 255, 0.9);
 
   .project-template-select-loading-icon {
-    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background: url(/public/img/loading.gif) 47% 6px no-repeat !important;
     background-size: 24px !important;
     height: 100%;
-  }
-}
-
-.language-dropdown-item-container {
-  display: grid;
-  grid-template-columns: 70px auto;
-  gap: 10px;
-  align-items: center;
-  overflow: hidden;
-
-  .code-badge {
-    min-width: 60px;
-    font-weight: normal;
-
-    > span {
-      display: block;
-      text-align: center;
-      background-color: $grey7;
-      border-radius: 4px;
-      padding: 2px 4px;
-      color: $white;
-      font-size: 14px;
-      white-space: nowrap;
-    }
   }
 }
 
@@ -3088,7 +832,7 @@ a.pull-right.confirmDelete {
     flex-grow: 1;
     align-items: center;
     justify-content: space-between;
-    color: $black;
+    color: colors.$black;
 
     .select-item-default-label {
       display: block;
@@ -3106,7 +850,7 @@ a.pull-right.confirmDelete {
   .dropdown__option--is-active-option {
     .select-item-default {
       margin-right: 4px;
-      color: $white;
+      color: colors.$white;
     }
   }
 }
@@ -3115,7 +859,7 @@ a.pull-right.confirmDelete {
   .project-template-select {
     .dropdown__option--is-active-option {
       .select-item-default {
-        color: $black;
+        color: colors.$black;
       }
     }
   }
@@ -3123,7 +867,7 @@ a.pull-right.confirmDelete {
 
 .project-template-select-unsaved {
   .select {
-    color: $translatedBlue !important;
+    color: colors.$translatedBlue !important;
   }
 }
 
@@ -3136,8 +880,63 @@ a.pull-right.confirmDelete {
   background-color: rgba(255, 255, 255, 0.9);
 
   .project-template-select-loading-icon {
-    background: url(../../img/loading.gif) 47% 6px no-repeat !important;
+    background: url(/public/img/loading.gif) 47% 6px no-repeat !important;
     background-size: 24px !important;
     height: 100%;
   }
+}
+
+/* XLIFF TO TARGET */
+// wrapper container page xliff to target
+.xliff_to_target__page {
+  .wrapper-upload {
+    padding-top: 24px;
+  }
+  .upload-files-container {
+    margin-top: 0;
+    &.add-files {
+      align-items: center;
+      gap: 40px;
+    }
+  }
+  footer {
+    position: absolute;
+    bottom: 0;
+  }
+
+}
+
+.error-message,
+.warning-message {
+  background: #d65757;
+  color: #fff;
+  padding: 10px 0 10px 16px;
+  margin: 10px 0;
+  font-weight: bold;
+  width: 100%;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  border: 1px solid #c45f5f;
+  display: flex;
+  .icon {
+    float: left;
+    font-size: 25px;
+  }
+  p {
+    line-height: 25px;
+    font-size: 16px;
+    float: left;
+    margin-left: 12px;
+  }
+}
+.error-message {
+  a {
+    color: #fff;
+  }
+}
+
+.warning-message {
+  background: rgba(255, 250, 139, 0.38) !important;
+  border-color: #6d6e71;
+  color: #000;
 }

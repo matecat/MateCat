@@ -1,0 +1,19 @@
+@use "../../common-main";
+@use '../../commons/filter-teams';
+@use '../../commons/icons';
+@use '../../commons/project';
+@use '../../commons/shadows';
+@use '../../commons/divider';
+@use '../../commons/progress-mc-bar';
+@use '../../commons/buttons';
+
+@use '../../modals/split_modal';
+@use '../../commons/sub-header';
+@use '../../commons/team-member';
+@use '../../commons/manage';
+@use '../../commons/outsource';
+@use '../../commons/date-picker-translator';
+@use '../common/TeamModal';
+@use '../header/TeamDropdown';
+@use '../UserProjectDropdown';
+@use '../signin/OnBoarding';

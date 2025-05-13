@@ -1,4 +1,4 @@
-import {render, screen, waitFor} from '@testing-library/react'
+import {act, render, screen, waitFor} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
 import {http, HttpResponse} from 'msw'
@@ -6,6 +6,8 @@ import {createRoot} from 'react-dom/client'
 
 import {mswServer} from '../../../../../mocks/mswServer'
 import Header from './Header'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import userMock from '../../../../../mocks/userMock'
 
 // create modal div
 const modalElement = document.createElement('div')
@@ -20,13 +22,9 @@ window.config = {
   basepath: '/',
   hostpath: 'https://dev.matecat.com',
 }
-require('../../../../common')
-require('../../../../user_store')
-
 const props = {
   fromLanguage: true,
   languagesList: true,
-  loggedUser: true,
   onClose: true,
   onConfirm: true,
   selectedLanguagesFromDropdown: false,
@@ -98,7 +96,7 @@ const apiUserMockResponse = {
           projects: 1,
         },
       ],
-      pending_invitations: ['federico@translated.net'],
+      pending_invitations: ['fede@translated.net'],
     },
     {
       id: 4,
@@ -146,27 +144,42 @@ const executeMswServer = () => {
 }
 
 test('Rendering elements', async () => {
+  const user = userEvent.setup()
+
   executeMswServer()
-  render(<Header {...props} />)
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <Header {...props} />
+    </ApplicationWrapperContext.Provider>,
+  )
 
   expect(screen.getByTestId('logo')).toBeInTheDocument()
 
   await waitFor(() => {
     expect(screen.getByTestId('user-menu-metadata')).toBeInTheDocument()
-    expect(screen.getByText('Profile')).toBeInTheDocument()
-    expect(screen.getByText('Logout')).toBeInTheDocument()
-    expect(screen.getByText('Logout')).toBeEnabled()
-    expect(screen.getByTestId('team-select')).toBeInTheDocument()
   })
+  await act(async () => user.click(screen.getByTestId('user-menu-metadata')))
+  expect(screen.getByText('Profile')).toBeInTheDocument()
+  expect(screen.getByText('Logout')).toBeInTheDocument()
+  expect(screen.getByText('Logout')).toBeEnabled()
+  expect(screen.getByTestId('team-select')).toBeInTheDocument()
 })
 
 xtest('Click profile from user menu', async () => {
+  const user = userEvent.setup()
   executeMswServer()
 
-  render(<Header {...props} />)
+  render(
+    <ApplicationWrapperContext.Provider
+      value={{isUserLogged: true, userInfo: userMock}}
+    >
+      <Header {...props} />
+    </ApplicationWrapperContext.Provider>,
+  )
+  await act(async () => user.click(screen.getByTestId('user-menu-metadata')))
 
-  // await waitFor(() => {
-  userEvent.click(screen.getByTestId('profile-item'))
+  await act(async () => user.click(screen.getByText('Profile')))
   expect(screen.getByTestId('preferences-modal')).toBeInTheDocument()
-  // })
 })

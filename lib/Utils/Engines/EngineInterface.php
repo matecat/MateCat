@@ -4,7 +4,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 27/02/15
  * Time: 11.55
- * 
+ *
  */
 
 interface Engines_EngineInterface {
@@ -45,11 +45,67 @@ interface Engines_EngineInterface {
     /**
      * @return Engines_EngineInterface
      */
-    public function setAnalysis();
+    public function setAnalysis(): Engines_EngineInterface;
 
     /**
      * @return EnginesModel_EngineStruct
      */
-    public function getEngineRow();
+    public function getEngineRecord(): EnginesModel_EngineStruct;
 
+    /**
+     * @return bool
+     */
+    public function isAdaptiveMT(): bool;
+
+    public function isTMS(): bool;
+
+    /**
+     * @return void
+     */
+    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+
+    /**
+     * @param array      $projectRow
+     * @param array|null $segments
+     *
+     * @return void
+     */
+    public function syncMemories( array $projectRow, ?array $segments = [] );
+
+    /**
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @throws Exception
+     * @return ?array
+     */
+    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+
+    /**
+     * Deletes a specific memory key.
+     *
+     * @param array $memoryKey
+     *
+     * @return array
+     * @throws Exception
+     */
+
+    public function deleteMemory( array $memoryKey ): array;
+
+    /**
+     * Determines if the provided memory belongs to the caller.
+     *
+     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     *
+     * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
+ * @throws Exception
+     */
+    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+
+    /**
+     * @param $source
+     * @param $target
+     * @param $sentence
+     * @param $translation
+     * @return float|null
+     */
+    public function getQualityEstimation($source, $target, $sentence, $translation) : ?float;
 }

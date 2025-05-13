@@ -8,6 +8,7 @@ import {getInfoTmKey} from '../../../../api/getInfoTmKey'
 import ModalsActions from '../../../../actions/ModalsActions'
 import ShareTmModal from '../../../modals/ShareTmModal'
 import CatToolActions from '../../../../actions/CatToolActions'
+import UserStore from '../../../../stores/UserStore'
 
 export const ShareResource = ({row, onClose}) => {
   const [emails, setEmails] = useState('')
@@ -15,6 +16,7 @@ export const ShareResource = ({row, onClose}) => {
   const [sharedUsers, setSharedUsers] = useState()
 
   const formRef = useRef()
+  const userInfo = UserStore.getUser()
 
   const onChange = (e) => {
     setStatus(undefined)
@@ -40,6 +42,7 @@ export const ShareResource = ({row, onClose}) => {
     } else {
       shareTmKey({
         key: row.key,
+        description: row.name,
         emails: emails,
       })
         .then(() => {
@@ -88,7 +91,7 @@ export const ShareResource = ({row, onClose}) => {
     const props = {
       description: row.description,
       tmKey: row.key,
-      user: APP.USER.STORE.user,
+      user: userInfo.user,
       users: sharedUsers,
       callback: onClose,
     }
@@ -96,13 +99,11 @@ export const ShareResource = ({row, onClose}) => {
   }
 
   useEffect(() => {
-    getInfoTmKey({key: row.key}).then((response) => {
+    getInfoTmKey({key: row.key, description: row.name}).then((response) => {
       const users = response.data
       if (users.length > 1)
         setSharedUsers(
-          users.filter(
-            (user) => parseInt(user.uid) !== APP.USER.STORE.user.uid,
-          ),
+          users.filter((user) => parseInt(user.uid) !== userInfo.user.uid),
         )
     })
   }, [])

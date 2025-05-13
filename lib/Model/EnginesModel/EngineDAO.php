@@ -12,8 +12,8 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
 
     const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     /**
      * Build the query,
@@ -137,7 +137,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             return []; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
-        list( $query, $bind_values ) = $query_and_bindValues;
+        [ $query, $bind_values ] = $query_and_bindValues;
 
 
         $stmt      = $this->database->getConnection()->prepare( $query );
@@ -168,10 +168,10 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             return true; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
-        list( $query, $bind_values ) = $query_and_bindValues;
+        [ $query, $bind_values ] = $query_and_bindValues;
         $stmt = $this->database->getConnection()->prepare( $query );
 
-        return $this->_destroyObjectCache( $stmt, $bind_values );
+        return $this->_destroyObjectCache( $stmt, EnginesModel_EngineStruct::class, $bind_values );
 
     }
 
@@ -286,7 +286,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      *
      * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {
@@ -336,16 +336,16 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     public function sanitize( DataAccess_IDaoStruct $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
-        $input->description             = ( $input->description !== null ) ?  $input->description  : null;
-        $input->base_url                = ( $input->base_url !== null ) ?  $input->base_url  : null;
-        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ?  $input->translate_relative_url  : null;
-        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ?  $input->contribute_relative_url  : null;
-        $input->update_relative_url     = ( $input->update_relative_url !== null ) ?  $input->update_relative_url  : null;
-        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ?  $input->delete_relative_url  : null;
-        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ?  json_encode( $input->others )  : '{}';
-        $input->class_load              = ( $input->class_load !== null ) ?  $input->class_load  : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ?  json_encode( $input->extra_parameters ) : '{}';
+        $input->name                    = ( $input->name !== null ) ? $input->name : null;
+        $input->description             = ( $input->description !== null ) ? $input->description : null;
+        $input->base_url                = ( $input->base_url !== null ) ? $input->base_url : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $input->translate_relative_url : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $input->contribute_relative_url : null;
+        $input->update_relative_url     = ( $input->update_relative_url !== null ) ? $input->update_relative_url : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $input->delete_relative_url : null;
+        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ? json_encode( $input->others ) : '{}';
+        $input->class_load              = ( $input->class_load !== null ) ? $input->class_load : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ? json_encode( $input->extra_parameters ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
@@ -389,19 +389,18 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
     }
 
-    public function validateForUser( EnginesModel_EngineStruct $obj )
-    {
+    public function validateForUser( EnginesModel_EngineStruct $obj ) {
         $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid and active = :active";
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-            'engine_name'  => $obj->name,
-            'uid' => $obj->uid,
-            'active' => 1
+                'engine_name' => $obj->name,
+                'uid'         => $obj->uid,
+                'active'      => 1
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
-            throw new Exception("A user can have only one $obj->name engine");
+            throw new Exception( "A user can have only one $obj->name engine" );
         }
     }
 }

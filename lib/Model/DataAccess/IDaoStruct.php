@@ -10,11 +10,12 @@
  * Interface IDaoStruct A generic interface that will be used by any DataAccess_AbstractDao extended object
  * @see DataAccess_AbstractDao
  */
-
 interface DataAccess_IDaoStruct {
 
     public function getArrayCopy();
+
     public function count();
-    public function toArray( $mask = null );
+
+    public function toArray( array $mask = null ): array;
 
 }

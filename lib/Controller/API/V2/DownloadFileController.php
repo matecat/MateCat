@@ -7,8 +7,9 @@ use ActivityLog\ActivityLogStruct;
 use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
+use ConnectedServices\Google\GDrive\RemoteFileService;
+use ConnectedServices\Google\GoogleProvider;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -22,7 +23,7 @@ use Filters;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Jobs_JobDao;
-use Langs_Languages;
+use Langs\Languages;
 use Log;
 use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
@@ -51,7 +52,7 @@ class DownloadFileController extends AbstractDownloadController {
     protected $downloadToken;
 
     /**
-     * @var GDrive\RemoteFileService
+     * @var RemoteFileService
      */
     protected $remoteFileService;
 
@@ -291,7 +292,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                     if ( $fileType[ 'proprietary_short_name' ] === 'matecat_converter' ) {
                         // Set the XLIFF extension to .xlf
-                        // Internally, MateCat continues using .sdlxliff as default
+                        // Internally, Matecat continues using .sdlxliff as default
                         // extension for the XLIFF behind the projects.
                         // Changing this behavior requires a huge refactoring that
                         // it's scheduled for future versions.
@@ -369,7 +370,7 @@ class DownloadFileController extends AbstractDownloadController {
                  */
                 $output_content[ $fileID ][ 'document_content' ] = $this->featureSet->filter( 'overrideConversionResult',
                         $output_content[ $fileID ][ 'document_content' ],
-                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
                 );
 
                 //in case of .strings, they are required to be in UTF-16
@@ -405,12 +406,9 @@ class DownloadFileController extends AbstractDownloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $this->sessionStart();
-            $this->setUserCredentials();
             $OtDownloadDecorator = new DownloadOmegaTDecorator( $this );
             $output_content      = array_merge( $output_content, $OtDownloadDecorator->decorate() );
             $OtDownloadDecorator->createOmegaTZip( $output_content );
-            $this->disableSessions();
 
         } else {
             try {
@@ -517,11 +515,6 @@ class DownloadFileController extends AbstractDownloadController {
         } else {
             $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
         }
-
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
@@ -702,8 +695,10 @@ class DownloadFileController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        if ( $verifier->validOrRefreshed() ) {
-            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token );
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+
+        if ( $verifier->validOrRefreshed( $client ) ) {
+            $this->remoteFileService = new RemoteFileService( $raw_token, $client );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
@@ -755,7 +750,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @throws Exception
      */
-    private function updateRemoteFiles( $output_content ) {
+    private function updateRemoteFiles( array $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
             $remoteFile                           = RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );

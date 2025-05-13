@@ -125,11 +125,6 @@ class DownloadOriginalController extends AbstractDownloadController {
             $this->setMimeType();
         }
 
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
         $activity->id_project = $id_project;

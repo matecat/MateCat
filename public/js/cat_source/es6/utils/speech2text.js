@@ -1,32 +1,37 @@
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
+import CatToolActions from '../actions/CatToolActions'
+import $ from 'jquery'
+import UserStore from '../stores/UserStore'
 
 const Speech2Text = {
-  enabled: function () {
-    return !!(
-      'webkitSpeechRecognition' in window && !!config.speech2text_enabled
+  enabled: function ({dictation} = {}) {
+    return (
+      'webkitSpeechRecognition' in window &&
+      (dictation === 1 || UserStore.getUserMetadata()?.dictation === 1)
     )
   },
   disable: function () {
-    if (config.speech2text_enabled) {
-      config.speech2text_enabled = 0
-      Speech2Text.initialized = false
-      $(document).off('contribution:copied')
-    }
+    Speech2Text.initialized = false
+    document.removeEventListener(
+      'contribution:copied',
+      Speech2Text.contributionCopied,
+    )
   },
-  enable: function () {
-    if (!config.speech2text_enabled) {
-      config.speech2text_enabled = 1
-    }
-  },
+  enable: function () {},
   init: function () {
     Speech2Text.initialized = true
     Speech2Text.loadRecognition()
-    $(document).on('contribution:copied', function (ev, data) {
-      if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
-        Speech2Text.finalTranscript = data.translation + ' '
-      }
-    })
+    document.addEventListener(
+      'contribution:copied',
+      Speech2Text.contributionCopied,
+    )
+  },
+  contributionCopied: function (event) {
+    const data = event.detail
+    if (Speech2Text.microphone && Speech2Text.sid == data.segment.sid) {
+      Speech2Text.finalTranscript = data.translation + ' '
+    }
   },
   recognition: null,
   recognizing: false,
@@ -49,23 +54,26 @@ const Speech2Text = {
   },
   enableMicrophone: function (segment) {
     Speech2Text.microphone = segment.find('.micSpeech')
-    const segmentObj = SegmentStore.getCurrentSegment()
     if (Speech2Text.recognition) {
-      Speech2Text.targetElement = segmentObj.translation
-      Speech2Text.sid = segmentObj.sid
+      const segmentObj = SegmentStore.getCurrentSegment()
+      if (segmentObj) {
+        Speech2Text.targetElement = segmentObj.translation
+        Speech2Text.sid = segmentObj.sid
 
-      Speech2Text.microphone.on('click', Speech2Text.clickMicrophone)
+        Speech2Text.microphone.on('click', Speech2Text.clickMicrophone)
 
-      if (Speech2Text.recognizing) {
-        Speech2Text.startSpeechRecognition(Speech2Text.microphone)
+        if (Speech2Text.recognizing) {
+          Speech2Text.startSpeechRecognition(Speech2Text.microphone)
+        }
       }
     } else {
       Speech2Text.microphone.hide()
-
-      //TODO: Display a user-friendly error message
-      console.error(
-        'Web Speech API is not supported by this browser. Upgrade to Chrome version 25 or later.',
-      )
+      const notification = {
+        title: 'Dictation not supported',
+        text: 'Web Speech API is not supported by this browser. Update Chrome to the latest version.',
+        type: 'error',
+      }
+      CatToolActions.addNotification(notification)
     }
   },
   clickMicrophone: function (event) {
@@ -83,7 +91,7 @@ const Speech2Text = {
   },
   startSpeechRecognition: function (microphone) {
     const segment = SegmentStore.getCurrentSegment()
-
+    if (!segment) return
     if (!microphone.hasClass('micSpeechActive')) {
       microphone.addClass('micSpeechActive')
       Speech2Text.animateSpeechActive()
@@ -163,10 +171,13 @@ const Speech2Text = {
     return s.replace(two_line, '<p/>').replace(one_line, '<br>')
   },
   shouldEmptyTargetElement: function (segment) {
-    return !(
-      (segment.autopropagated_from && segment.autopropagated_from != '0') ||
-      segment.suggestion_match === '100' ||
-      segment.status !== 'NEW'
+    return (
+      segment &&
+      !(
+        (segment.autopropagated_from && segment.autopropagated_from != '0') ||
+        segment.suggestion_match === '100' ||
+        segment.status !== 'NEW'
+      )
     )
   },
   enableContinuousRecognizing: function () {
@@ -196,10 +207,5 @@ const Speech2Text = {
     return !Speech2Text.recognizing || match == '100%'
   },
 }
-document.addEventListener('DOMContentLoaded', function (event) {
-  if (Speech2Text.enabled()) {
-    Speech2Text.init()
-  }
-})
 
 export default Speech2Text

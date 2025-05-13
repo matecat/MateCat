@@ -8,12 +8,12 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
 use Exception;
 use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;
+use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryCommentStruct;
 use LQA\EntryDao;
@@ -35,9 +35,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     protected TranslationEvent $_event;
 
     /**
-     * @var ?Chunks_ChunkStruct
+     * @var ?Jobs_JobStruct
      */
-    protected ?Chunks_ChunkStruct $_chunk;
+    protected ?Jobs_JobStruct $_chunk;
 
     /**
      * @var Projects_ProjectStruct
@@ -309,10 +309,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         }
 
         $segmentInfo = [
-                'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
-                'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
-                'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
-                'issues'          => $serialized_issues
+            'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
+            'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
+            'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
+            'old_status'      => $this->_event->getOldTranslation()->status,
+            'new_status'      => $this->_event->getWantedTranslation()->status,
+            'issues'          => $serialized_issues
         ];
 
         foreach ( $finalRevisions as $finalRevision ) {
@@ -346,11 +348,30 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         }
 
         $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
-        $url    = Routes::revise( $this->_chunk->getProject()->name, $revision->id_job, $revision->review_password,
-                $this->_chunk->source, $this->_chunk->target, [
-                        'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
-                        'id_segment'      => $this->_event->getSegmentStruct()->id
-                ] );
+
+        if( !empty( $revision ) ){
+            $url = Routes::revise(
+                    $this->_chunk->getProject()->name,
+                    $revision->id_job,
+                    $revision->review_password,
+                    $this->_chunk->source,
+                    $this->_chunk->target,
+                    [
+                            'revision_number' => ReviewUtils::sourcePageToRevisionNumber( $revision->source_page ),
+                            'id_segment'      => $this->_event->getSegmentStruct()->id
+                    ]
+            );
+        } else {
+            // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
+            // use the event chunk to generate the link.
+            $url = Routes::translate(
+                    $this->_chunk->getProject()->name,
+                    $this->_chunk->id,
+                    $this->_chunk->password,
+                    $this->_chunk->source,
+                    $this->_chunk->target
+            );
+        }
 
 
         $notifiedEmails = [];

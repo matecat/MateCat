@@ -1,3 +1,5 @@
+@use "../commons/colors";
+
 /*Split modal*/
 .popup-split {
   box-sizing: content-box;
@@ -19,7 +21,7 @@
     .popup-split-job-id {
       font-weight: 100;
       font-size: 16px;
-      color: $grey1;
+      color: colors.$grey1;
       margin-right: 5px;
     }
   }
@@ -43,7 +45,7 @@
   .splitbtn-cont {
     overflow: hidden;
     font-size: 18px;
-    color: $grey1;
+    color: colors.$grey1;
     font-weight: bold;
     display: flex;
     flex-direction: column;
@@ -69,7 +71,7 @@
   .nosplit {
     float: right;
     font-size: 20px;
-    color: $grey1;
+    color: colors.$grey1;
     display: none;
     margin: 45px 140px 0 0;
   }
@@ -112,9 +114,9 @@
       width: auto;
       height: 37px;
       padding: 4px;
-      color: $grey1;
+      color: colors.$grey1;
       font-size: 18px;
-      border: 1px solid $grey1;
+      border: 1px solid colors.$grey1;
       box-sizing: border-box;
       display: inline-block;
       background: white;
@@ -151,12 +153,8 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid $grey1;
+    border: 1px solid colors.$grey1;
     background: #ccc;
-  }
-
-  .uploadbtn {
-    float: right;
   }
 
   .split-box2 {
@@ -174,7 +172,7 @@
     border-radius: 2px;
     text-align: left;
     font-size: 18px;
-    border: 1px solid $grey1;
+    border: 1px solid colors.$grey1;
   }
   .split-box3 .input,
   .split-box2 .input {
@@ -250,6 +248,11 @@
     margin-top: 10px;
   }
 
+  .error {
+    margin-right: auto;
+    color: #ff0000;;
+  }
+
   .jobcontainer {
     padding-bottom: 50px;
     border-bottom: 1px dashed #ccc;
@@ -304,7 +307,7 @@
 
   .total .wordsum {
     font-size: 20px;
-    color: $grey1;
+    color: colors.$grey1;
     text-align: right;
     margin-right: 15px;
     margin-top: 10px;
@@ -323,19 +326,8 @@
     cursor: default;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    border: 1px solid $grey1;
+    border: 1px solid colors.$grey1;
     background: #ccc !important;
-  }
-
-  .uploadloader {
-    background: url(../../img/loader.gif) center center no-repeat;
-    width: 20px;
-    height: 20px;
-    float: right;
-    margin-top: 11px;
-    position: absolute;
-    right: 86px;
-    background-size: 20px 20px;
   }
 
   .btn-cancel {

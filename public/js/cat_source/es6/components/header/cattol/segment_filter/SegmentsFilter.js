@@ -5,10 +5,7 @@ import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'
 import SegmentFilterUtils from './segment_filter'
 import SegmentActions from '../../../../actions/SegmentActions'
-import {
-  JOB_WORD_CONT_TYPE,
-  SEGMENTS_STATUS,
-} from '../../../../constants/Constants'
+import {SEGMENTS_STATUS} from '../../../../constants/Constants'
 
 class SegmentsFilter extends React.Component {
   constructor(props) {
@@ -196,18 +193,6 @@ class SegmentsFilter extends React.Component {
     setTimeout(this.doSubmitFilter, 100)
   }
 
-  // humanSampleType() {
-  //     let map = {
-  //         'segment_length_high_to_low': 'Segment length (high to low)',
-  //         'segment_length_low_to_high': 'Segment length (low to high)',
-  //         'regular_intervals': 'Regular intervals',
-  //         'edit_distance_high_to_low': 'Edit distance (high to low)',
-  //         'edit_distance_low_to_high': 'Edit distance (low to high)'
-  //     };
-  //
-  //     return map[this.state.samplingType];
-  // }
-
   samplingSizeChanged() {
     let value = parseInt(this.sampleSizeInput.value)
     if (value > 100 || value < 1) return false
@@ -256,6 +241,12 @@ class SegmentsFilter extends React.Component {
       this.setState(state)
       setTimeout(this.updateObjects.bind(this))
     }
+  }
+
+  filterSegmentsError = () => {
+    this.setState({
+      filterSubmitted: false,
+    })
   }
 
   initDropDown() {
@@ -323,9 +314,20 @@ class SegmentsFilter extends React.Component {
   }
 
   componentDidMount() {
+    const segmentFilterData = SegmentFilterUtils.getStoredState()
+    if (
+      SegmentFilterUtils.enabled() &&
+      segmentFilterData.reactState &&
+      segmentFilterData.open
+    )
+      SegmentFilterUtils.openFilter()
     CatToolStore.addListener(
       CatToolConstants.SET_SEGMENT_FILTER,
       this.setFilter,
+    )
+    CatToolStore.addListener(
+      CatToolConstants.SEGMENT_FILTER_ERROR,
+      this.filterSegmentsError,
     )
     CatToolStore.addListener(
       CatToolConstants.RELOAD_SEGMENT_FILTER,
@@ -347,6 +349,10 @@ class SegmentsFilter extends React.Component {
     CatToolStore.removeListener(
       CatToolConstants.SET_SEGMENT_FILTER,
       this.setFilter,
+    )
+    CatToolStore.removeListener(
+      CatToolConstants.SEGMENT_FILTER_ERROR,
+      this.filterSegmentsError,
     )
     CatToolStore.removeListener(
       CatToolConstants.RELOAD_SEGMENT_FILTER,

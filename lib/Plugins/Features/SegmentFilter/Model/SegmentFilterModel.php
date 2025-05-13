@@ -8,14 +8,14 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Chunks_ChunkStruct;
 use Exception;
+use Jobs_JobStruct;
 use Translations_SegmentTranslationStruct;
 
 class SegmentFilterModel {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -27,12 +27,12 @@ class SegmentFilterModel {
     /**
      * SegmentFilterModel constructor.
      *
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param FilterDefinition    $filter
      *
      * @throws Exception
      */
-    public function __construct( Chunks_ChunkStruct $chunk, FilterDefinition $filter ) {
+    public function __construct( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
         $this->filter = $filter;
     }

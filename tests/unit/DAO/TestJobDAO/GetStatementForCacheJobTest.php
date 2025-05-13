@@ -18,9 +18,9 @@ class GetStatementForCacheJobTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->jobDao    = new Jobs_JobDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $this->reflector = new ReflectionClass( $this->jobDao );
-        $this->method    = $this->reflector->getMethod( "_getStatementForQuery" );
+        $this->databaseInstance = new Jobs_JobDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->reflector        = new ReflectionClass( $this->databaseInstance );
+        $this->method           = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method->setAccessible( true );
 
 
@@ -31,7 +31,7 @@ class GetStatementForCacheJobTest extends AbstractTest {
         $propReflection = $this->reflector->getProperty( '_query_cache' );
         $propReflection->setAccessible( true );
 
-        $result = $this->method->invoke( $this->jobDao, $propReflection->getValue( $this->jobDao ) );
+        $result = $this->method->invoke( $this->databaseInstance, $propReflection->getValue( $this->databaseInstance ) );
         $this->assertTrue( $result instanceof PDOStatement );
         $this->assertEquals( "SELECT * FROM jobs WHERE " . " id = :id_job AND password = :password ", $result->queryString );
 

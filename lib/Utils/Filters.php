@@ -1,6 +1,8 @@
 <?php
 
 use FilesStorage\AbstractFilesStorage;
+use Filters\DTO\IDto;
+use Langs\Languages;
 
 class Filters {
 
@@ -14,7 +16,7 @@ class Filters {
      *
      * @return array
      */
-    private static function sendToFilters( $dataGroups, $endpoint ) {
+    private static function sendToFilters( array $dataGroups, string $endpoint ): array {
         $multiCurl = new MultiCurlHandler();
 
         // Each group is a POST request
@@ -41,14 +43,6 @@ class Filters {
                 ];
             }
 
-            if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-                /**
-                 * Added in PHP 5.5.0 with FALSE as the default value.
-                 * PHP 5.6.0 changes the default value to TRUE.
-                 */
-                $options[ CURLOPT_SAFE_UPLOAD ] = false;
-            }
-
             $url = rtrim( INIT::$FILTERS_ADDRESS, '/' ) . $endpoint;
             Log::doJsonLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
@@ -63,16 +57,16 @@ class Filters {
 
         // Compute results
         foreach ( $responses as $id => &$response ) {
-            $info = $infos[ $id ];
-            $originalResponse = json_decode($response);
+            $info             = $infos[ $id ];
+            $originalResponse = json_decode( $response );
 
             // Compute response
             if ( $info[ 'http_code' ] != 200 || $response === false ) {
                 $errResponse = [ "isSuccess" => false, "curlInfo" => $info ];
                 if ( $response === '{"message":"Invalid RapidAPI Key"}' ) {
                     $errResponse[ 'errorMessage' ] = "Failed RapidAPI authentication. Check FILTERS_RAPIDAPI_KEY in config.ini";
-                } elseif (isset($originalResponse->errorMessage)) {
-                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage($originalResponse->errorMessage);
+                } elseif ( isset( $originalResponse->errorMessage ) ) {
+                    $errResponse[ 'errorMessage' ] = self::formatErrorMessage( $originalResponse->errorMessage );
                 } else {
                     if ( $info[ 'errno' ] ) {
                         $errResponse[ 'errorMessage' ] = "Curl error $info[errno]: $info[error]";
@@ -95,7 +89,7 @@ class Filters {
 
             // Compute headers
             $instanceInfo = self::extractInstanceInfoFromHeaders( $headers[ $id ] );
-            if ( $instanceInfo !== false ) {
+            if ( isset( $instanceInfo ) ) {
                 $response = array_merge( $response, $instanceInfo );
             }
 
@@ -108,25 +102,24 @@ class Filters {
 
     /**
      * @param string $error
+     *
      * @return string
      */
-    private static function formatErrorMessage($error){
+    private static function formatErrorMessage( string $error ): string {
 
         // Error from Excel files
-        $error = str_replace("net.translated.matecat.filters.ExtendedExcelException: ", "", $error);
-
-        return $error;
+        return str_replace( "net.translated.matecat.filters.ExtendedExcelException: ", "", $error );
     }
 
     /**
      * Looks for the Filters-Instance header and returns the information in it.
      *
-     * @param $headers
+     * @param array $headers
      *
-     * @return array|bool an array with the address and version of the
+     * @return array|null an array with the address and version of the
      *                    respondent instance; false if the header was not found
      */
-    private static function extractInstanceInfoFromHeaders( $headers ) {
+    private static function extractInstanceInfoFromHeaders( array $headers ): ?array {
         foreach ( $headers as $header ) {
             if ( preg_match( "|^Filters-Instance: address=([^;]+); version=(.+)$|", $header, $matches ) ) {
                 return [
@@ -136,87 +129,35 @@ class Filters {
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
-     * Convert source file to XLIFF
+     * Convert the source file to XLIFF
      *
-     * @param $filePath
-     * @param $sourceLang
-     * @param $targetLang
-     * @param $segmentation
-     * @param null $extractionParams
+     * @param string    $filePath
+     * @param string    $sourceLang
+     * @param string    $targetLang
+     * @param ?string   $segmentation
+     * @param IDto|null $extractionParams
+     *
      * @return mixed
      */
-    public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation, $extractionParams = null ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
 
         $data = [
-            'document'        => Utils::curlFile( $filePath ),
-            'sourceLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
-            'targetLocale'    => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
-            'segmentation'    => $segmentation,
-            'utf8FileName'    => $filename
+                'document'     => new CURLFile( $filePath ),
+                'sourceLocale' => Languages::getInstance()->getLangRegionCode( $sourceLang ),
+                'targetLocale' => Languages::getInstance()->getLangRegionCode( $targetLang ),
+                'segmentation' => $segmentation,
+                'utf8FileName' => $filename
         ];
 
-        if($extractionParams !== null){
-
-            $params = null;
-
-            // send extraction params based on file extension
-            switch ($extension){
-                case "json":
-                    if(isset($extractionParams->json)){
-                        $params = $extractionParams->json;
-                    }
-
-                    break;
-
-                case "xml":
-                    if(isset($extractionParams->xml)){
-                        $params = $extractionParams->xml;
-                    }
-
-                    break;
-
-                case "yaml":
-                    if(isset($extractionParams->yaml)){
-                        $params = $extractionParams->yaml;
-                    }
-
-                    break;
-
-                case "doc":
-                case "docx":
-                    if(isset($extractionParams->ms_word)){
-                        $params = $extractionParams->ms_word;
-                    }
-
-                    break;
-
-                case "xls":
-                case "xlsx":
-                    if(isset($extractionParams->ms_excel)){
-                        $params = $extractionParams->ms_excel;
-                    }
-
-                    break;
-
-                case "ppt":
-                case "pptx":
-                    if(isset($extractionParams->ms_powerpoint)){
-                        $params = $extractionParams->ms_powerpoint;
-                    }
-
-                    break;
-            }
-
-            if($params !== null){
-                $data['extractionParams'] = json_encode($params);
-            }
+        if ( $extractionParams !== null ) {
+            $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
@@ -225,10 +166,11 @@ class Filters {
     }
 
     /**
-     * @param $xliffsData
+     * @param array $xliffsData
+     *
      * @return array
      */
-    public static function xliffToTarget( $xliffsData ) {
+    public static function xliffToTarget( array $xliffsData ): array {
         $dataGroups = [];
         $tmpFiles   = [];
 
@@ -242,7 +184,7 @@ class Filters {
             $tmpFiles[ $id ] = $tmpXliffFile;
             file_put_contents( $tmpXliffFile, $xliffData[ 'document_content' ] );
 
-            $dataGroups[ $id ] = [ 'xliff' => Utils::curlFile( $tmpXliffFile ) ];
+            $dataGroups[ $id ] = [ 'xliff' => new CURLFile( $tmpXliffFile ) ];
         }
 
         $responses = self::sendToFilters( $dataGroups, self::XLIFF_TO_TARGET_ENDPOINT );
@@ -258,15 +200,16 @@ class Filters {
     /**
      * Logs a conversion to xliff, doing also file backup in case of failure.
      *
-     * @param $response
-     * @param $sentFile
-     * @param $sourceLang
-     * @param $targetLang
-     * @param $segmentation
+     * @param             $response
+     * @param string      $sentFile
+     * @param string      $sourceLang
+     * @param string      $targetLang
+     * @param string|null $segmentation
+     * @param             $extractionParameters
      *
      * @throws Exception
      */
-    public static function logConversionToXliff( $response, $sentFile, $sourceLang, $targetLang, $segmentation, $extractionParameters ) {
+    public static function logConversionToXliff( $response, string $sentFile, string $sourceLang, string $targetLang, ?string $segmentation, $extractionParameters ) {
 
         // @TODO $extractionParameters to MySQL table?
         self::logConversion( $response, true, $sentFile, [ 'source' => $sourceLang, 'target' => $targetLang ], [ 'segmentation_rule' => $segmentation ] );
@@ -275,15 +218,15 @@ class Filters {
     /**
      * Logs a conversion to target, doing also file backup in case of failure.
      *
-     * @param $response
-     * @param $sentFile
-     * @param $jobData
-     * @param $sourceFileData
+     * @param                $response
+     * @param string         $sentFile
+     * @param Jobs_JobStruct $jobData
+     * @param array          $sourceFileData
      *
      * @throws Exception
      */
-    public static function logConversionToTarget( $response, $sentFile, $jobData, $sourceFileData ) {
-        self::logConversion( $response, false, $sentFile, $jobData, $sourceFileData );
+    public static function logConversionToTarget( $response, string $sentFile, Jobs_JobStruct $jobData, array $sourceFileData ) {
+        self::logConversion( $response, false, $sentFile, $jobData->toArray(), $sourceFileData );
     }
 
     /**
@@ -291,15 +234,15 @@ class Filters {
      * you have the matecat_conversions_log database properly configured.
      * See /lib/Model/matecat_conversions_log.sql
      *
-     * @param $response
-     * @param $toXliff
-     * @param $sentFile
-     * @param $jobData
-     * @param $sourceFileData
+     * @param array  $response
+     * @param bool   $toXliff
+     * @param string $sentFile
+     * @param array  $jobData
+     * @param array  $sourceFileData
      *
      * @throws Exception
      */
-    private static function logConversion( $response, $toXliff, $sentFile, $jobData, $sourceFileData ) {
+    private static function logConversion( array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData ) {
         try {
             $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER,
                     INIT::$DB_USER, INIT::$DB_PASS, [
@@ -315,24 +258,24 @@ class Filters {
         }
 
         $info = [
-                'filters_address'  => @$response[ 'instanceAddress' ],
-                'filters_version'  => @$response[ 'instanceVersion' ],
+                'filters_address'  => $response[ 'instanceAddress' ] ?? null,
+                'filters_version'  => $response[ 'instanceVersion' ] ?? null,
                 'client_ip'        => Utils::getRealIpAddr(),
                 'to_xliff'         => $toXliff,
                 'success'          => ( $response[ 'successful' ] === true ),
-                'error_message'    => @$response[ 'errorMessage' ],
+                'error_message'    => $response[ 'errorMessage' ] ?? null,
                 'conversion_time'  => $response[ 'time' ],
                 'sent_file_size'   => filesize( $sentFile ),
                 'source_lang'      => $jobData[ 'source' ],
                 'target_lang'      => $jobData[ 'target' ],
-                'job_id'           => isset( $jobData[ 'id' ] ) ? $jobData[ 'id' ] : null,
-                'job_pwd'          => isset( $jobData[ 'password' ] ) ? $jobData[ 'password' ] : null,
-                'job_owner'        => isset( $jobData[ 'owner' ] ) ? $jobData[ 'owner' ] : null,
+                'job_id'           => $jobData[ 'id' ] ?? null,
+                'job_pwd'          => $jobData[ 'password' ] ?? null,
+                'job_owner'        => $jobData[ 'owner' ] ?? null,
                 'source_file_id'   => ( $toXliff ? null : $sourceFileData[ 'id_file' ] ),
                 'source_file_name' => ( $toXliff ? AbstractFilesStorage::basename_fix( $sentFile ) : $sourceFileData[ 'filename' ] ),
                 'source_file_ext'  => ( $toXliff ? AbstractFilesStorage::pathinfo_fix( $sentFile, PATHINFO_EXTENSION ) : $sourceFileData[ 'mime_type' ] ),
                 'source_file_sha1' => ( $toXliff ? sha1_file( $sentFile ) : $sourceFileData[ 'sha1_original_file' ] ),
-                'segmentation'     => isset($sourceFileData['segmentation_rule']) ? $sourceFileData['segmentation_rule'] : null,
+                'segmentation'     => $sourceFileData[ 'segmentation_rule' ] ?? null,
         ];
 
         $query = 'INSERT INTO conversions_log ('
@@ -352,7 +295,7 @@ class Filters {
         if ( $response[ 'successful' ] !== true ) {
 
             if ( INIT::$FILTERS_EMAIL_FAILURES ) {
-                Utils::sendErrMailReport( "MateCat: conversion failed.\n\n" . print_r( $info, true ) );
+                Utils::sendErrMailReport( "Matecat: conversion failed.\n\n" . print_r( $info, true ) );
             }
 
             self::backupFailedConversion( $sentFile );
@@ -362,8 +305,9 @@ class Filters {
     /**
      * Moves $sentFile to the backup folder, that is like
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
+     * @param string $sentFile
      */
-    private static function backupFailedConversion( &$sentFile ) {
+    private static function backupFailedConversion( string &$sentFile ) {
 
         $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
                 . 'conversion_errors' . DIRECTORY_SEPARATOR

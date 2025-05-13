@@ -88,9 +88,7 @@ class MyMemory {
             $result -= 0.01;
         }
 
-        $result = min( 1, max( 0, $result ) );
-
-        return $result;
+        return min( 1, max( 0, $result ) );
     }
 
     public static function TMS_ARRAY_MATCH( $array1, $array2 ) {
@@ -105,7 +103,7 @@ class MyMemory {
         $aliases = array_flip( array_values( array_unique( array_merge( $array1, $array2 ) ) ) );
 
         // Is the string is longer than 254 words (does not make sense) I cannot use levenshtein of oliver.
-        if ( ( count( $aliases ) > 254 ) OR ( count( $aliases ) > 254 ) ) {
+        if ( count( $aliases ) > 254 ) {
             return -1;
         }
 

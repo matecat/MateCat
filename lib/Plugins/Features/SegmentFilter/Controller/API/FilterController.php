@@ -6,10 +6,10 @@ namespace Features\SegmentFilter\Controller\API;
 use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use Chunks_ChunkStruct;
 use Exception;
 use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
+use Jobs_JobStruct;
 
 
 class FilterController extends BaseChunkController {
@@ -25,7 +25,7 @@ class FilterController extends BaseChunkController {
     private $filter;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */

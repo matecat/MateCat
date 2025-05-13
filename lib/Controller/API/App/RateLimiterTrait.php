@@ -6,33 +6,29 @@ use DateTime;
 use Exception;
 use Klein\Response;
 use Predis\Client;
-use Predis\PredisException;
 use RedisHandler;
 
-trait RateLimiterTrait
-{
+trait RateLimiterTrait {
     /**
      * @param Response $response
-     * @param          $identifier
-     * @param          $route
+     * @param string   $identifier
+     * @param string   $route
      * @param int      $maxRetries
      *
      * @return Response
-     * @throws PredisException
      * @throws Exception
      */
-    public function checkRateLimitResponse(Response $response, $identifier, $route, $maxRetries = 10)
-    {
+    public function checkRateLimitResponse( Response $response, string $identifier, string $route, int $maxRetries = 10 ): ?Response {
 
-        $key = $this->getKey($identifier, $route);
+        $key   = $this->getKey( $identifier, $route );
         $redis = $this->getRedis();
 
-        if($redis->get($key) and $redis->get($key) > $maxRetries){
-            $response->code(429);
-            $response->header("Retry-After", $redis->ttl($key));
+        if ( $redis->get( $key ) and $redis->get( $key ) > $maxRetries ) {
+            $response->code( 429 );
+            $response->header( "Retry-After", $redis->ttl( $key ) );
 
             // PENALTY: reset ttl
-            $redis->expire($key, $this->getTtl());
+            $redis->expire( $key, $this->getTtl() );
 
             return $response;
         }
@@ -41,20 +37,20 @@ trait RateLimiterTrait
     }
 
     /**
-     * @param $identifier
-     * @param $route
+     * @param string $identifier
+     * @param string $route
+     *
      * @throws Exception
      */
-    public function incrementRateLimitCounter($identifier, $route)
-    {
-        $key = $this->getKey($identifier, $route);
+    public function incrementRateLimitCounter( string $identifier, string $route ) {
+        $key   = $this->getKey( $identifier, $route );
         $redis = $this->getRedis();
 
-        if(!$redis->get($key)){
-            $redis->set($key, 1);
-            $redis->expire($key, $this->getTtl());
+        if ( !$redis->get( $key ) ) {
+            $redis->set( $key, 1 );
+            $redis->expire( $key, $this->getTtl() );
         } else {
-            $redis->incr($key);
+            $redis->incr( $key );
         }
     }
 
@@ -63,8 +59,7 @@ trait RateLimiterTrait
      *
      * @throws Exception
      */
-    private function getRedis()
-    {
+    private function getRedis(): Client {
         $redisHandler = new RedisHandler();
 
         return $redisHandler->getConnection();
@@ -73,26 +68,25 @@ trait RateLimiterTrait
     /**
      * @param string $identifier
      * @param string $route
+     *
      * @return string
      */
-    private function getKey($identifier, $route)
-    {
-        return md5($identifier.$route);
+    private function getKey( string $identifier, string $route ): string {
+        return md5( $identifier . $route );
     }
 
     /**
-     * This function returns the end of current minute + 1 minute (in seconds).
+     * This function returns the end of the current minute + 1 minute (in seconds).
      *
      * Example:
      *
      * 12:30:46 ---> returns 14 + 60
      *
-     * @return int|string
+     * @return int
      */
-    private function getTtl()
-    {
+    private function getTtl(): int {
         $date = new DateTime();
-        $ttl = 60 - $date->format("s");
+        $ttl  = 60 - $date->format( "s" );
 
         return 60 + $ttl;
     }

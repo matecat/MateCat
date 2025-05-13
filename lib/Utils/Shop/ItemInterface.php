@@ -6,12 +6,12 @@
 /**
  * Interface implemented in abstract class Shop_AbstractItem
  *
- * @see Shop_AbstractItem
+ * @see    Shop_AbstractItem
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 23/04/14
  * Time: 10.34
- * 
+ *
  */
 interface Shop_ItemInterface {
 
@@ -25,11 +25,11 @@ interface Shop_ItemInterface {
      * Workaround: declare this method into an interface, don't implement it in the abstract class
      * and declare real method every time in the same manner into the children
      *
-     * @see Shop_ItemJob::getInflate
-     *
      * @param $storage
      *
      * @return mixed
+     * @see Shop_ItemJob::getInflate
+     *
      */
     public static function getInflate( $storage );
 

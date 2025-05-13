@@ -21,7 +21,7 @@ class ProjectAnonymous extends Project {
      * @param Projects_ProjectStruct[] $data
      */
     public function __construct( array $data = null ) {
-        $this->data = $data;
+        $this->data      = $data;
         $this->jRenderer = new JobAnonymous();
     }
 

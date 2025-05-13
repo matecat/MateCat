@@ -1,11 +1,14 @@
-import React, {useCallback, useState} from 'react'
+import React, {useCallback, useContext, useState} from 'react'
 import {EmailsBadge} from '../common/EmailsBadge/EmailsBadge'
 import CommonUtils from '../../utils/commonUtils'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
 import ModalsActions from '../../actions/ModalsActions'
+import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 
 export const CreateTeam = () => {
+  const {userInfo} = useContext(ApplicationWrapperContext)
+
   const [teamName, setTeamName] = useState('')
   const [emailsCollection, setEmailsCollection] = useState([])
 
@@ -19,7 +22,7 @@ export const CreateTeam = () => {
     ModalsActions.onCloseModal()
   }
 
-  const {user, metadata} = APP.USER.STORE
+  const {user, metadata} = userInfo
 
   const isDisabledCreation =
     !teamName ||
@@ -55,10 +58,7 @@ export const CreateTeam = () => {
       <div>
         <div className="member-item">
           {metadata ? (
-            <img
-              className="member-avatar"
-              src={metadata.gplus_picture + '?sz=80'}
-            />
+            <img className="member-avatar" src={metadata.gplus_picture} />
           ) : (
             <span>{CommonUtils.getUserShortName(user)}</span>
           )}

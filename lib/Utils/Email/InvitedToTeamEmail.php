@@ -9,6 +9,8 @@
 namespace Email;
 
 
+use Exception;
+use Routes;
 use Teams\TeamStruct;
 
 class InvitedToTeamEmail extends AbstractEmail {
@@ -22,27 +24,30 @@ class InvitedToTeamEmail extends AbstractEmail {
         $this->user          = $user;
         $this->invited_email = $invited_email;
         $this->team          = $team;
-        $this->title         = "You've been invited to MateCat";
+        $this->title         = "You've been invited to Matecat";
 
         $this->_setLayout( 'skeleton.html' );
         $this->_setTemplate( 'Team/email_invited_to_team.html' );
     }
 
-    protected function _getTemplateVariables() {
-        return array(
+    /**
+     * @throws Exception
+     */
+    protected function _getTemplateVariables(): array {
+        return [
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),
-                'signup_url' => \Routes::inviteToTeamConfirm( [
+                'signup_url' => Routes::inviteToTeamConfirm( [
                         'invited_by_uid' => $this->user->uid,
                         'email'          => $this->invited_email,
                         'team_id'        => $this->team->id
                 ] )
-        );
+        ];
     }
 
     public function send() {
-        $recipient = array( $this->invited_email );
+        $recipient = [ $this->invited_email ];
 
         //we need to get the bodyHtmlMessage only once because JWT changes if called more than once
         // otherwise html message will differ from the alternative text message

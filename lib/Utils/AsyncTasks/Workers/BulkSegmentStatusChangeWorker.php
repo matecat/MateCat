@@ -9,7 +9,6 @@
 namespace AsyncTasks\Workers;
 
 
-use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features;
@@ -17,6 +16,7 @@ use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
+use Jobs_JobStruct;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -52,7 +52,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new Chunks_ChunkStruct( $params[ 'chunk' ]->toArray() );
+        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ] );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
         $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );
@@ -66,26 +66,38 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        foreach ( $params[ 'segment_ids' ] as $segment_id ) {
+        $old_translations = Translations_SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk->id );
+        $new_translations = [];
 
-            if ( empty( $old_translation ) ) {
-                //no segment found
-                continue;
-            }
+        if ( empty( $old_translations ) ) {
+            //no segment found
+            return;
+        }
+
+        foreach ( $old_translations as $old_translation ) {
 
             $new_translation                   = clone $old_translation;
             $new_translation->status           = $status;
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
-            Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+            $new_translations[] = $new_translation;
 
             if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
+
+                try {
+                    $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
+                } catch ( Exception $e ) {
+                    // job archived or deleted, runtime exception on TranslationEvent creation
+                    throw new EndQueueException( $e->getMessage(), $e->getCode(), $e );
+                }
+
                 $batchEventCreator->addEvent( $segmentTranslationEvent );
             }
+
         }
+
+        Translations_SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
 
         $batchEventCreator->save( new BatchReviewProcessor() );
 
@@ -94,7 +106,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $database->commit();
 
         if ( $client_id ) {
-            $segment_ids = $params[ 'segment_ids' ]->toArray();
+            $segment_ids = $params[ 'segment_ids' ];
             $payload     = [
                     'segment_ids' => array_values( $segment_ids ),
                     'status'      => $status
@@ -110,9 +122,13 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
                     ]
             ];
 
-            $this->publishToSseTopic( $message );
+            $this->publishToNodeJsClients( $message );
 
         }
+    }
+
+    private function getAllSegmentsByJobAndIdList( array $id_list, int $jobId ) {
+        $sql = "";
     }
 
 }

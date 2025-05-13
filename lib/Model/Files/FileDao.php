@@ -3,78 +3,72 @@
 class Files_FileDao extends DataAccess_AbstractDao {
     const TABLE = "files";
 
-    protected static $auto_increment_field = ['id'] ;
+    protected static array $auto_increment_field = [ 'id' ];
 
     /**
      * @param     $id_job
      *
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
+     * @return Files_FileStruct[]
+     * @throws ReflectionException
      */
-    public static function getByJobId( $id_job, $ttl = 60 ) {
+    public static function getByJobId( $id_job, int $ttl = 60 ): array {
 
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare(
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare(
                 "SELECT * FROM files " .
                 " INNER JOIN files_job ON files_job.id_file = files.id " .
                 " AND id_job = :id_job "
         );
 
+        /** @var Files_FileStruct[] */
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job ] );
 
     }
 
     /**
-     * @param     $id_project
+     * @param int $id_project
      *
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|Files_FileStruct[]
+     * @return Files_FileStruct[]
+     * @throws ReflectionException
      */
-    public static function getByProjectId( $id_project, $ttl = 600 ) {
+    public static function getByProjectId( int $id_project, int $ttl = 600 ): array {
         $thisDao = new self();
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project ");
+        $conn    = Database::obtain()->getConnection();
+        $stmt    = $conn->prepare( "SELECT * FROM files where id_project = :id_project " );
+
+        /** @var Files_FileStruct[] */
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_project' => $id_project ] );
     }
 
-    public static function getByRemoteId( $remote_id ) {
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(
-        "  SELECT f.* "
-        . "  FROM files f "
-        . " INNER JOIN remote_files r "
-        . "    ON f.id = r.id_file "
-        . " WHERE r.remote_id = :remote_id "
-        . "   AND r.is_original = 1 "
-        . " ORDER BY f.id DESC "
-        . " LIMIT 1 "
-      );
-
-      $stmt->execute( array( 'remote_id' => $remote_id ) );
-      $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
-      return $stmt->fetch();
-    }
-
-    public static function updateField( $file, $field, $value ) {
+    public static function updateField( $file, $field, $value ): bool {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-            "UPDATE files SET $field = :value " .
-            " WHERE id = :id "
+                "UPDATE files SET $field = :value " .
+                " WHERE id = :id "
         );
 
-        return $stmt->execute( array(
-            'value' => $value,
-            'id' => $file->id
-        ));
+        return $stmt->execute( [
+                'value' => $value,
+                'id'    => $file->id
+        ] );
     }
 
-    public static function isFileInProject($id_file, $id_project) {
+    /**
+     * @param int $id_file
+     * @param int $id_project
+     *
+     * @return int
+     */
+    public static function isFileInProject( int $id_file, int $id_project ): int {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project and id = :id_file ");
+        $stmt = $conn->prepare( "SELECT * FROM files where id_project = :id_project and id = :id_file " );
         $stmt->execute( [ 'id_project' => $id_project, 'id_file' => $id_file ] );
+
         return $stmt->rowCount();
     }
 
@@ -83,26 +77,38 @@ class Files_FileDao extends DataAccess_AbstractDao {
      *
      * @return Files_FileStruct
      */
-    public static function getById( $id ) {
+    public static function getById( $id ): Files_FileStruct {
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM files where id = :id ");
-        $stmt->execute( array( 'id' => $id ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Files_FileStruct');
+        $stmt = $conn->prepare( "SELECT * FROM files where id = :id " );
+        $stmt->execute( [ 'id' => $id ] );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Files_FileStruct' );
+
         return $stmt->fetch();
     }
 
-    public function deleteFailedProjectFiles( $idFiles = [] ){
+    /**
+     * @param array $idFiles
+     *
+     * @return int
+     */
+    public function deleteFailedProjectFiles( array $idFiles = [] ): int {
 
-        if ( empty( $idFiles ) ) return 0;
+        if ( empty( $idFiles ) ) {
+            return 0;
+        }
 
-        $sql = "DELETE FROM files WHERE id IN ( " . str_repeat( '?,', count( $idFiles ) - 1) . '?' . " ) ";
+        $sql  = "DELETE FROM files WHERE id IN ( " . str_repeat( '?,', count( $idFiles ) - 1 ) . '?' . " ) ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $success = $stmt->execute( $idFiles );
+        $stmt->execute( $idFiles );
+
         return $stmt->rowCount();
 
     }
 
+    /**
+     * @throws Exception
+     */
     public static function insertFilesJob( $id_job, $id_file ) {
 
         $data              = [];

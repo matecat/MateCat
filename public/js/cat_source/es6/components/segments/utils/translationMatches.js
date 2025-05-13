@@ -28,7 +28,7 @@ let TranslationMatches = {
         matchToUse.created_by,
       )
       UI.registerQACheck()
-      $(document).trigger('contribution:copied', {
+      CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
       })
@@ -62,7 +62,7 @@ let TranslationMatches = {
       matches &&
       matches.length > 0 &&
       isUndefined(matches[0].error) &&
-      (parseInt(match) > 70 || match === 'MT')
+      (parseInt(match) > 70 || match === 'MT' || match === 'ICE_MT')
     ) {
       var editareaLength = segmentObj.translation.length
       var translation = matches[0].translation
@@ -107,10 +107,9 @@ let TranslationMatches = {
     if (!config.translation_matches_enabled) {
       SegmentActions.addClassToSegment(segment.sid, 'loaded')
       SegmentActions.getSegmentsQa(segment)
-      var deferred = new jQuery.Deferred()
-      return deferred.resolve()
+      return Promise.resolve()
     }
-    var currentSegment =
+    const currentSegment =
       next === 0
         ? segment
         : next == 1
@@ -121,27 +120,35 @@ let TranslationMatches = {
             })
 
     if (!currentSegment) return
-
+    //If segment locked or ICE
     if (SegmentUtils.isIceSegment(currentSegment) && !currentSegment.unlocked) {
       SegmentActions.addClassToSegment(currentSegment.sid, 'loaded')
-      const deferred = new jQuery.Deferred()
-      return deferred.resolve()
+      return Promise.resolve()
     }
+    let callNewContributions = force
+    //Check similar segments
+    if (
+      SegmentStore.lastTranslatedSegmentId &&
+      SegmentStore.getSegmentByIdToJS(SegmentStore.lastTranslatedSegmentId)
+    ) {
+      /* If the segment just translated is equal or similar (Levenshtein distance) to the
+       * current segment force to reload the matches
+       **/
+      const lastTranslatedSegment = SegmentStore.getSegmentByIdToJS(
+        SegmentStore.lastTranslatedSegmentId,
+      )
+      const s1 = lastTranslatedSegment.segment
+      const s2 = currentSegment.segment
+      const areSimilar =
+        (CommonUtils.levenshteinDistance(s1, s2) /
+          Math.max(s1.length, s2.length)) *
+          100 <
+        50
+      const isEqual = s1 === s2 && s1 !== ''
 
-    /* If the segment just translated is equal or similar (Levenshtein distance) to the
-     * current segment force to reload the matches
-     **/
-    var s1 = $('#segment-' + UI.lastTranslatedSegmentId + ' .source').text()
-    var s2 = currentSegment.segment
-    var areSimilar =
-      (CommonUtils.levenshteinDistance(s1, s2) /
-        Math.max(s1.length, s2.length)) *
-        100 <
-      50
-    var isEqual = s1 == s2 && s1 !== ''
-
-    var callNewContributions = areSimilar || isEqual || force
-
+      callNewContributions = areSimilar || isEqual || force
+    }
+    //If the segment already has contributions and is not similar to the last translated
     if (
       currentSegment.contributions &&
       currentSegment.contributions.matches.length > 0 &&
@@ -154,36 +161,49 @@ let TranslationMatches = {
       ) {
         setTimeout(() => this.useSuggestionInEditArea(currentSegment.sid))
       }
-      return $.Deferred().resolve()
+      return Promise.resolve()
     }
     if (!currentSegment && next) {
-      return $.Deferred().resolve()
+      return Promise.resolve()
     }
-    var id = currentSegment.original_sid
-    var id_segment_original = id.split('-')[0]
-
+    const id_segment_original = currentSegment.original_sid
+    const nextSegment = SegmentStore.getNextSegment({
+      current_sid: segmentSid,
+    })
     // `next` and `untranslated next` are the same
-    if (next === 2 && UI.nextSegmentId === UI.nextUntranslatedSegmentId) {
-      return $.Deferred().resolve()
+    if (
+      next === 2 &&
+      currentSegment &&
+      nextSegment &&
+      id_segment_original === nextSegment.sid
+    ) {
+      return Promise.resolve()
     }
 
     if (isUndefined(config.id_client)) {
       setTimeout(function () {
-        TranslationMatches.getContribution(segmentSid, next)
+        TranslationMatches.getContribution(
+          segmentSid,
+          next,
+          crossLanguageSettings,
+        )
       }, 3000)
-      console.log('SSE: ID_CLIENT not found')
-      return $.Deferred().resolve()
+      // console.log('SSE: ID_CLIENT not found')
+      return Promise.resolve()
     }
-
+    const {contextListBefore, contextListAfter} =
+      SegmentUtils.getSegmentContext(id_segment_original)
     return getContributions({
       idSegment: id_segment_original,
       target: currentSegment.segment,
       crossLanguages: crossLanguageSettings
         ? [crossLanguageSettings.primary, crossLanguageSettings.secondary]
         : [],
+      contextListBefore,
+      contextListAfter,
     }).catch((errors) => {
       UI.processErrors(errors, 'getContribution')
-      TranslationMatches.renderContributionErrors(errors, $('#segment-' + id))
+      TranslationMatches.renderContributionErrors(errors, id_segment_original)
     })
   },
 
@@ -201,8 +221,8 @@ let TranslationMatches = {
     return !!config.translation_matches_enabled
   },
 
-  renderContributionErrors: function (errors, segment) {
-    SegmentActions.setSegmentContributions(UI.getSegmentId(segment), [], errors)
+  renderContributionErrors: function (errors, segmentId) {
+    SegmentActions.setSegmentContributions(segmentId, [], errors)
   },
 
   setDeleteSuggestion: function (source, target, id, sid) {
@@ -212,11 +232,8 @@ let TranslationMatches = {
       id,
       sid,
     }).catch(() => {
-      OfflineUtils.failedConnection(0, 'deleteContribution')
+      OfflineUtils.failedConnection()
     })
-  },
-  setDeleteSuggestion_success: function (d) {
-    if (d.errors.length) UI.processErrors(d.errors, 'setDeleteSuggestion')
   },
   getPercentuageClass: function (match) {
     var percentageClass = ''
@@ -236,8 +253,11 @@ let TranslationMatches = {
       case match > 0 && match <= 99:
         percentageClass = 'per-orange'
         break
-      case match == 'MT':
+      case match === 'MT':
         percentageClass = 'per-yellow'
+        break
+      case match === 'ICE_MT':
+        percentageClass = 'per-green'
         break
       default:
         percentageClass = ''

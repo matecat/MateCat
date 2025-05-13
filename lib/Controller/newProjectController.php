@@ -3,6 +3,8 @@
 
 use ConnectedServices\GDrive\GDriveController;
 use Engines_Intento as Intento;
+use Langs\LanguageDomains;
+use Langs\Languages;
 use LexiQA\LexiQADecorator;
 
 class newProjectController extends viewController {
@@ -27,14 +29,14 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = [
-            'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
+                'project_name' => [ 'filter' => FILTER_SANITIZE_STRING ]
         ];
 
         $__postInput        = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name = $__postInput[ "project_name" ];
 
-        $this->lang_handler    = Langs_Languages::getInstance();
-        $this->subject_handler = Langs_LanguageDomains::getInstance();
+        $this->lang_handler    = Languages::getInstance();
+        $this->subject_handler = LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 
@@ -44,29 +46,20 @@ class newProjectController extends viewController {
 
         $this->setOrGetGuid();
 
-        try {
-            $this->evalSourceLangHistory();
-        } catch ( Lang_InvalidLanguageException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-        }
-
-        try {
-            $this->evalTargetLangHistory();
-        } catch ( Lang_InvalidLanguageException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-        }
+        $this->evalSourceLangHistory();
+        $this->evalTargetLangHistory();
 
         $this->initUploadDir();
 
         $engine            = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery       = new EnginesModel_EngineStruct();
-        $engineQuery->type = 'MT';
+        $engineQuery->type = Constants_Engines::MT;
 
         $engineQuery->uid = ( $this->user->uid == null ? -1 : $this->user->uid );
 
         $engineQuery->active = 1;
         $this->mt_engines    = $engine->read( $engineQuery );
-        $this->mt_engines    = $this->removeMMTFromEngines($this->mt_engines);
+        $this->mt_engines    = $this->removeMMTFromEngines( $this->mt_engines );
 
         if ( $this->isLoggedIn() ) {
             $this->featureSet->loadFromUserEmail( $this->user->email );
@@ -127,14 +120,14 @@ class newProjectController extends viewController {
 
         if ( !isset( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
             CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, Constants::EMPTY_VAL,
-                [
-                    'expires'  => time() + ( 86400 * 365 ),
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => true,
-                    'samesite' => 'None',
-                ]
+                    [
+                            'expires'  => time() + ( 86400 * 365 ),
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
             );
         }
     }
@@ -142,23 +135,23 @@ class newProjectController extends viewController {
     private function setOrGetGuid() {
 
         // If isset the GDRIVE_LIST_COOKIE_NAME cookie, do nothing
-        if(!isset($_COOKIE[GDriveController::GDRIVE_LIST_COOKIE_NAME])){
+        if ( !isset( $_COOKIE[ GDriveController::GDRIVE_LIST_COOKIE_NAME ] ) ) {
 
             // Get the guid from the guid if it exists, otherwise set the guid into the cookie
-            if ( !empty( $_COOKIE[ 'upload_session' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_session' ] ) ) {
-                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
+            if ( !empty( $_COOKIE[ 'upload_token' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_token' ] ) ) {
+                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_token' ] . '/' );
             }
 
             $this->guid = Utils::uuid4();
-            CookieManager::setCookie( "upload_session", $this->guid,
-                [
-                    'expires'  => time() + 86400,
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
+            CookieManager::setCookie( "upload_token", $this->guid,
+                    [
+                            'expires'  => time() + 86400,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'Strict',
+                    ]
             );
         }
     }
@@ -218,17 +211,17 @@ class newProjectController extends viewController {
     }
 
     public function setTemplateVars() {
-        $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-        $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
+        $source_languages = $this->lang_handler->getEnabledLanguages();
+        $target_languages = $this->lang_handler->getEnabledLanguages();
 
-        $this->template->subject_array       = $this->subjectArray;
+        $this->template->subject_array = $this->subjectArray;
 
         $this->template->project_name = $this->project_name;
 
         $this->template->page             = 'home';
-        $this->template->source_languages = $source_languages;
-        $this->template->target_languages = $target_languages;
-        $this->template->subjects         = json_encode($this->subjectArray);
+        $this->template->source_languages = array_values( $source_languages );
+        $this->template->target_languages = array_values( $target_languages );
+        $this->template->subjects         = json_encode( $this->subjectArray );
 
         $this->template->mt_engines         = $this->mt_engines;
         $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );
@@ -241,11 +234,9 @@ class newProjectController extends viewController {
         $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
         $this->template->formats_number                        = $this->countExtensions();
         $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->extended_user                         = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user                           = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
         $this->template->userMail                              = $this->user->email;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = str_replace("\\\"","\\\\\\\"", json_encode(Intento::getProviderList())); // needed by JSON.parse() function
+        $this->template->translation_engines_intento_prov_json = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function
 
         $this->template->build_number   = INIT::$BUILD_NUMBER;
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
@@ -260,8 +251,8 @@ class newProjectController extends viewController {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
-        $this->template->clientId     = INIT::$OAUTH_CLIENT_ID;
+        $this->template->developerKey = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
+        $this->template->clientId     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
 
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
@@ -270,15 +261,9 @@ class newProjectController extends viewController {
 
         //Enable tag projection at instance level
         $this->template->show_tag_projection    = true;
-        $this->template->tag_projection_enabled = true;
         $this->template->tag_projection_default = true;
 
-        $this->featureSet->appendDecorators( 'NewProjectDecorator', $this, $this->template );
-
-        $this->template->globalMessage = Utils::getGlobalMessage()[ 'messages' ];
-        if ( $this->isLoggedIn() ) {
-            $this->template->teams = ( new \Teams\MembershipDao() )->findUserTeams( $this->user );
-        }
+        $this->intOauthClients();
 
     }
 
@@ -303,14 +288,14 @@ class newProjectController extends viewController {
 
         if ( !isset( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
             CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, Constants::EMPTY_VAL,
-                [
-                    'expires'  => time() + ( 86400 * 365 ),
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => true,
-                    'samesite' => 'None',
-                ]
+                    [
+                            'expires'  => time() + ( 86400 * 365 ),
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => true,
+                            'samesite' => 'None',
+                    ]
             );
         }
     }
