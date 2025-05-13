@@ -7,6 +7,8 @@ use API\Commons\AbstractStatefulKleinController;
 use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
 use CatUtils;
+use CustomPage;
+use CustomPageView;
 use Exception;
 use FlashMessage;
 use INIT;
@@ -147,9 +149,13 @@ class SignupController extends AbstractStatefulKleinController {
             FlashMessage::set( 'popup', 'profile', FlashMessage::SERVICE );
         } catch ( Exception $e ) {
             FlashMessage::set( 'confirmToken', $e->getMessage(), FlashMessage::ERROR );
-            $this->response->redirect( $signupModel->flushWantedURL() );
-        }
 
+            // return a 410 status code
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( '410.html', [], 410 );
+            $controllerInstance->renderAndClose();
+
+        }
     }
 
     /**
