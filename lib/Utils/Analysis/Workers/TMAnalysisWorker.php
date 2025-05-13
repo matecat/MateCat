@@ -357,7 +357,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 }
 
             } elseif ( $queueElementParams->pretranslate_100 ) {
-                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
                 $tm_data[ 'locked' ] = false;
             }
 
