@@ -8,10 +8,10 @@ use API\Commons\Authentication\AuthCookie;
 use API\Commons\Authentication\AuthenticationHelper;
 use CatUtils;
 use CustomPage;
+use CustomPageView;
 use Exception;
 use FlashMessage;
 use INIT;
-use Klein\Exceptions\HttpException;
 use Klein\Response;
 use Teams\InvitedUser;
 use Users\Authentication\SignupModel;
@@ -151,10 +151,10 @@ class SignupController extends AbstractStatefulKleinController {
             FlashMessage::set( 'confirmToken', $e->getMessage(), FlashMessage::ERROR );
 
             // return a 410 status code
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( "410.html" );
-            $controllerInstance->setCode( 410 );
-            $controllerInstance->doAction();
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( '410.html', [], 410 );
+            $controllerInstance->renderAndClose();
+
         }
     }
 
