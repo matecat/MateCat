@@ -389,11 +389,15 @@ class GDriveController extends AbstractStatefulKleinController {
     public function deleteImportedFile() {
 
         $fileId = $this->request->param( 'fileId' );
+        $segmentationRule = $this->request->param( 'segmentation_rule' );
+        $source = $this->request->param( 'source' );
+        $filtersTemplate = $this->request->param( 'filters_template' );
+
         if ( $fileId === 'all' ) {
-            $this->gdriveUserSession->removeAllFiles();
+            $this->gdriveUserSession->removeAllFiles($source, $segmentationRule, $filtersTemplate);
             $success = true;
         } else {
-            $success = $this->gdriveUserSession->removeFile( $fileId );
+            $success = $this->gdriveUserSession->removeFile($fileId, $source, $segmentationRule, $filtersTemplate);
         }
 
         $this->response->json( [

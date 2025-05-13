@@ -1,6 +1,10 @@
 <?php
 
 use Exceptions\ControllerReturnException;
+use FilesStorage\AbstractFilesStorage;
+use Filters\DTO\IDto;
+use Filters\FiltersConfigTemplateDao;
+use Filters\FiltersConfigTemplateStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
@@ -897,6 +901,154 @@ class CatUtils {
         $string = mb_substr( $string, 0, 50 ); // max allowed characters are 50
 
         return trim( $string );
+    }
+
+    /**
+     * Avoid race conditions by javascript multiple calls
+     *
+     * @param $file_path
+     * @param $source
+     * @param null $segmentationRule
+     * @param int $filtersTemplateId
+     * @throws Exception
+     */
+    public static function deleteSha( $file_path, $source, $segmentationRule = null, $filtersTemplateId = 0 ) {
+
+        $extraction_parameters = null;
+
+        if($filtersTemplateId > 0){
+            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+
+            if($filtersTemplateStruct !== null){
+                $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
+            }
+        }
+
+        $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
+
+        $hash_name_for_disk =
+            sha1_file( $file_path )
+            . "_" .
+            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+            . "|" .
+            $source;
+
+        if ( !$hash_name_for_disk ) {
+            return;
+        }
+
+        $path_parts = pathinfo($file_path);
+        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+
+        if(!file_exists($hash_file_path)){
+            return;
+        }
+
+        //can be present more than one file with the same sha
+        //so in the sha1 file there could be more than one row
+        //  $file_sha = glob( $hash_name_for_disk . "*" ); //delete sha1 also
+
+        $fp = fopen( $hash_file_path, "r+" );
+
+        // no file found
+        if ( !$fp ) {
+            return;
+        }
+
+        $i = 0;
+        while ( !flock( $fp, LOCK_EX | LOCK_NB ) ) {  // acquire an exclusive lock
+            $i++;
+            if ( $i == 40 ) {
+                return;
+            } //exit the loop after 2 seconds, can not acquire the lock
+            usleep( 50000 );
+            continue;
+        }
+
+        $file_content       = fread( $fp, filesize( $hash_file_path ) );
+        $file_content_array = explode( "\n", $file_content );
+
+        //remove the last line ( is an empty string )
+        array_pop( $file_content_array );
+
+        $fileName = AbstractFilesStorage::basename_fix( $file_path );
+
+        $key = array_search( $fileName, $file_content_array );
+        unset( $file_content_array[ $key ] );
+
+        if ( !empty( $file_content_array ) ) {
+            fseek( $fp, 0 ); //rewind
+            ftruncate( $fp, 0 ); //truncate to zero bytes length
+            fwrite( $fp, implode( "\n", $file_content_array ) . "\n" );
+            fflush( $fp );
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+        } else {
+            flock( $fp, LOCK_UN );    // release the lock
+            fclose( $fp );
+            @unlink( @$hash_file_path );
+        }
+
+    }
+
+    /**
+     * @param string $filePath
+     * @param FiltersConfigTemplateStruct $filters_extraction_parameters
+     * @return IDto|null
+     */
+    private static function getRightExtractionParameter( string $filePath, FiltersConfigTemplateStruct $filters_extraction_parameters ): ?IDto {
+
+        $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $params = null;
+
+        if ( $filters_extraction_parameters !== null ) {
+
+            // send extraction params based on the file extension
+            switch ( $extension ) {
+                case "json":
+                    if ( isset( $filters_extraction_parameters->json ) ) {
+                        $params = $filters_extraction_parameters->json;
+                    }
+                    break;
+                case "xml":
+                    if ( isset( $filters_extraction_parameters->xml ) ) {
+                        $params = $filters_extraction_parameters->xml;
+                    }
+                    break;
+                case "yml":
+                case "yaml":
+                    if ( isset( $filters_extraction_parameters->yaml ) ) {
+                        $params = $filters_extraction_parameters->yaml;
+                    }
+                    break;
+                case "doc":
+                case "docx":
+                    if ( isset( $filters_extraction_parameters->ms_word ) ) {
+                        $params = $filters_extraction_parameters->ms_word;
+                    }
+                    break;
+                case "xls":
+                case "xlsx":
+                    if ( isset( $filters_extraction_parameters->ms_excel ) ) {
+                        $params = $filters_extraction_parameters->ms_excel;
+                    }
+                    break;
+                case "ppt":
+                case "pptx":
+                    if ( isset( $filters_extraction_parameters->ms_powerpoint ) ) {
+                        $params = $filters_extraction_parameters->ms_powerpoint;
+                    }
+                    break;
+                case "dita":
+                case "ditamap":
+                    if ( isset( $filters_extraction_parameters->dita ) ) {
+                        $params = $filters_extraction_parameters->dita;
+                    }
+                    break;
+            }
+        }
+
+        return $params;
     }
 }
 
