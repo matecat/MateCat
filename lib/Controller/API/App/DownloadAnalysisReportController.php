@@ -46,7 +46,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
             $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
             $outputContent  = $analysisStatus->fetchData()->getResult();
 
-            // cast $output_content elements to ZipContentObject
+            // cast $outputContent elements to ZipContentObject
             foreach ( $outputContent as $key => $__output_content_elem ) {
                 $outputContent[ $key ] = new ZipContentObject( [
                         'output_filename'  => $key,
