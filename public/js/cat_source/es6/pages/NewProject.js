@@ -72,7 +72,6 @@ const subjectsArray = config.subject_array.map((item) => {
 })
 const conversionEnabled = Boolean(config.conversionEnabled)
 const formatsNumber = config.formats_number
-const googleDriveEnabled = Boolean(config.googleDriveEnabled)
 
 const headerMountPoint = document.querySelector('header.upload-page-header')
 
@@ -92,6 +91,9 @@ const NewProject = () => {
   const [supportedFiles, setSupportedFiles] = useState()
   const [supportedLanguages, setSupportedLanguages] = useState()
   const [openGDrive, setOpenGDrive] = useState(false)
+  const [isGDriveEnabled, setIsGDriveEnabled] = useState(
+    config.googleDriveEnabled,
+  )
   const [uploadedFilesNames, setUploadedFilesNames] = useState([])
 
   const {
@@ -805,6 +807,7 @@ const NewProject = () => {
         setSubject,
         openGDrive,
         setOpenGDrive,
+        setIsGDriveEnabled,
         currentProjectTemplate,
         uploadedFilesNames,
         setUploadedFilesNames,
@@ -959,7 +962,7 @@ const NewProject = () => {
               {formatsNumber} file formats{' '}
             </a>
             <span style={{float: 'right'}}>.</span>
-            {googleDriveEnabled &&
+            {isGDriveEnabled &&
               currentProjectTemplate &&
               uploadedFilesNames.length === 0 && (
                 <span className="gdrive-addlink-container">
