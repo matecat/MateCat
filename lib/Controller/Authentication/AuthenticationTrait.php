@@ -1,6 +1,6 @@
 <?php
 
-namespace API\Commons\Authentication;
+namespace Controller\Authentication;
 
 use AMQHandler;
 use ApiKeys_ApiKeyStruct;

@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;

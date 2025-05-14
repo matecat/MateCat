@@ -2,7 +2,7 @@
 
 namespace API\Commons\Validators;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use Exception;
 
 class JSONRequestValidator extends Base {

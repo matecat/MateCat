@@ -11,7 +11,7 @@ namespace API\Commons\Validators;
 
 
 use AbstractControllers\IController;
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use DomainException;
 use Utils;
 

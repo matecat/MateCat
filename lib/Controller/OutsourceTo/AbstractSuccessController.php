@@ -163,7 +163,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController { //
         foreach( array( $this->shop_cart->getItem( $this->data_key_content ) ) as $item ){
             $item_list[ ] = $item;
 
-            list( $id_job, $password,  ) = explode( "-", $item[ 'id' ] );
+            [ $id_job, $password,  ] = explode( "-", $item[ 'id' ] );
 
             $payload                    = [];
             $payload[ 'id_vendor' ]     = $this->id_vendor;

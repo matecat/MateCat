@@ -9,7 +9,7 @@
 namespace API\Commons\Validators;
 
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use Exceptions\NotFoundException;
 
 class TeamProjectValidator extends Base {

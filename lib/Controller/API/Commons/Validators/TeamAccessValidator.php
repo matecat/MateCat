@@ -10,8 +10,8 @@
 namespace API\Commons\Validators;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\KleinController;
 use Teams\MembershipDao;
 
 class TeamAccessValidator extends Base {

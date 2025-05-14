@@ -6,8 +6,8 @@ namespace API\Commons\Validators;
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 

@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use Files\FilesPartsDao;

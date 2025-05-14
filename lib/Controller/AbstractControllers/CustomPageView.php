@@ -1,6 +1,6 @@
 <?php
 
-use API\Commons\BaseKleinViewController;
+use AbstractControllers\BaseKleinViewController;
 use Klein\Request;
 use Klein\Response;
 
@@ -30,6 +30,7 @@ class CustomPageView {
      * @param int   $code
      *
      * @return void
+     * @throws Exception
      */
     public function setView( $template_name, array $params = [], int $code = 200 ) {
         $this->handler->setView( $template_name, $params, $code );
@@ -39,7 +40,7 @@ class CustomPageView {
         $this->handler->setCode( $httpCode );
     }
 
-    public function renderAndClose( ?int $code = null ) {
+    public function renderAndQuit( ?int $code = null ) {
         $this->handler->render( $code );
     }
 

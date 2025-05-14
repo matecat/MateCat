@@ -9,8 +9,8 @@
 namespace API\V3;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Project;

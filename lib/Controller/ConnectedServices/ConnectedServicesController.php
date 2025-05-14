@@ -9,8 +9,8 @@
 namespace ConnectedServices;
 
 
+use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
-use API\Commons\AbstractStatefulKleinController;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;

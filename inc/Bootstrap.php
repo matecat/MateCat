@@ -63,12 +63,14 @@ class Bootstrap {
         }
 
         ini_set( 'display_errors', false );
-        if ( INIT::$PRINT_ERRORS ) {
-            ini_set( 'display_errors', true );
-        }
 
         if ( empty( INIT::$STORAGE_DIR ) ) {
             INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage";
+        }
+
+        if ( INIT::$PRINT_ERRORS || stripos( INIT::$ENV, 'develop' ) !== false ) {
+            ini_set( 'error_log', INIT::$STORAGE_DIR . "/log_archive/php_errors.txt" );
+            ini_set( 'error_reporting', E_ALL );
         }
 
         date_default_timezone_set( INIT::$TIME_ZONE );
@@ -164,75 +166,47 @@ class Bootstrap {
             $code    = 400;
             $message = "Bad Request";
         } catch ( Exceptions\NotFoundException $e ) {
-            $code    = 404;
-            $message = "Not Found";
+            $code = 404;
             Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( Exceptions\AuthorizationError $e ) {
-            $code    = 403;
-            $message = "Forbidden";
+            $code = 403;
             Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( Exceptions\ValidationError $e ) {
-            $code             = 409;
-            $message          = "Conflict";
-            $response_message = $exception->getMessage();
+            $code = 409;
             Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( PDOException $e ) {
-            $code    = 503;
-            $message = "Service Unavailable";
+            $code = 503;
             Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         } catch ( Throwable $e ) {
-            $code    = 500;
-            $message = "Internal Server Error";
+            $code = 500;
             Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
         }
 
-        self::formatOutputErrors( $code, $message, $exception );
+        self::formatOutputExceptions( $code, $exception );
         die(); // do not complete the response and set the header
 
     }
 
-    private static function formatOutputErrors( int $httpStatusCode, string $httpStatusMessage, Throwable $exception ) {
-
-        $response_message = "Oops... We got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>";
+    private static function formatOutputExceptions( int $httpStatusCode, Throwable $exception ) {
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
-            $isAPI = preg_match( '#/api/*#', $_SERVER[ 'REQUEST_URI' ] ?? "" );
+            if ( INIT::$PRINT_ERRORS ) {
+                $report = [
+                        'message' => $exception->getMessage(),
+                        'trace'   => $exception->getTraceAsString(),
+                ];
+            }
 
-            if ( strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ?? null ) == 'xmlhttprequest' || $isAPI ) {
-
-                header( "HTTP/1.1 " . $httpStatusCode . " " . $httpStatusMessage );
-
-                //json_rersponse
-                if ( INIT::$PRINT_ERRORS ) {
-                    echo json_encode( [
-                            "errors" => [ [ "code" => -1000, "message" => $exception->getMessage(), "trace" => $exception->getTrace() ] ], "data" => []
-                    ] );
-                } else {
-                    echo json_encode( [
-                            "errors"  => [
-                                    [
-                                            "code"    => -1000,
-                                            "message" => $response_message
-                                    ]
-                            ], "data" => []
-                    ] );
-                }
-
-            } else {
-
-                if ( INIT::$PRINT_ERRORS  ) {
-                    $report = [
-                            'message' => $exception->getMessage(),
-                            'trace'   => $exception->getTraceAsString(),
-                    ];
-                }
-
-                $controllerInstance = new CustomPageView();
+            $controllerInstance = new CustomPageView();
+            try {
                 $controllerInstance->setView( $httpStatusCode . '.html', $report ?? [], $httpStatusCode );
-                $controllerInstance->renderAndClose();
+            } catch ( Exception $ignore ) {
 
             }
+
+            $controllerInstance->renderAndQuit();
+
         } else {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
@@ -264,21 +238,21 @@ class Bootstrap {
                 case E_RECOVERABLE_ERROR:
 
                     Log::$fileName = 'fatal_errors.txt';
-                    $backtrace     = debug_backtrace();
-
-                    $exception = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
+                    $exception     = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
                     try {
                         $reflector = new ReflectionProperty( $exception, 'trace' );
                         $reflector->setAccessible( true );
-                        $reflector->setValue( $exception, $backtrace );
+                        $error[ 'type' ] = $errorType[ $error[ 'type' ] ];
+                        $reflector->setValue( $exception, [ $error ] );
                     } catch ( ReflectionException $e ) {
 
                     }
 
-                    Log::doJsonLog( $exception );
-                    self::formatOutputErrors( 500, "Internal Server Error", $exception );
+                    Log::doJsonLog( $exception->getTrace() );
+                    self::formatOutputExceptions( 500, $exception );
                     die();
+
             }
 
     }
@@ -371,11 +345,12 @@ class Bootstrap {
      * @param $key
      *
      * @return mixed
+     * @noinspection PhpUnused
      */
     public static function getEnvConfigKey( $key ) {
         $config = self::getEnvConfig();
 
-        return @$config[ $key ];
+        return $config[ $key ] ?? null;
     }
 
     /**

@@ -9,8 +9,8 @@
 
 namespace API\Commons\Validators;
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use Segments_SegmentDao;
 
 class SegmentValidator extends Base {

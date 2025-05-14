@@ -10,8 +10,8 @@
 namespace API\Commons\Validators;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\KleinController;
 
 class LoginValidator extends Base {
 

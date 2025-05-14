@@ -6,7 +6,7 @@
  * Time: 12:15
  */
 
-namespace API\Commons;
+namespace AbstractControllers;
 
 
 use FilesStorage\AbstractFilesStorage;

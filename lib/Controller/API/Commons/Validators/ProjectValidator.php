@@ -2,9 +2,9 @@
 
 namespace API\Commons\Validators;
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use Log;
 use Projects_ProjectStruct;
 use Users_UserStruct;

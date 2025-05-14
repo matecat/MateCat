@@ -2,8 +2,8 @@
 
 namespace API\Commons\Validators;
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\KleinController;
 use Projects_ProjectStruct;
 use Teams\MembershipDao;
 use Teams\TeamStruct;

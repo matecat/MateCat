@@ -1,16 +1,14 @@
 <?php
 
-namespace API\Commons;
+namespace AbstractControllers;
 
-use AbstractControllers\IController;
-use AbstractControllers\TimeLogger;
-use API\Commons\Authentication\AuthenticationHelper;
-use API\Commons\Authentication\AuthenticationTrait;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
 use CatUtils;
+use Controller\Authentication\AuthenticationHelper;
+use Controller\Authentication\AuthenticationTrait;
 use DomainException;
 use Exception;
 use Exceptions\NotFoundException;
@@ -23,6 +21,7 @@ use ReflectionException;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use Swaggest\JsonSchema\InvalidValue;
+use Traits\TimeLogger;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
 
@@ -282,7 +281,7 @@ abstract class KleinController implements IController {
 
         return [
                 'id_segment' => $parsedSegment[ 0 ],
-                'split_num'  => $parsedSegment[ 1 ],
+                'split_num'  => $parsedSegment[ 1 ] ?? null,
         ];
     }
 

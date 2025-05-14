@@ -6,11 +6,11 @@
  * Time: 18:13
  */
 
-namespace API\Commons;
+namespace AbstractControllers;
 
 use Exception;
 
-abstract class AbstractStatefulKleinController extends KleinController {
+abstract class AbstractStatefulKleinController extends KleinController implements IController {
 
     protected bool $useSession = true;
 

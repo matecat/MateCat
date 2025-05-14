@@ -21,6 +21,7 @@ use OutsourceTo_OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Routes;
 use Users_UserStruct;
 
@@ -102,6 +103,7 @@ abstract class AbstractStatus {
     /**
      * Fetch data for the project
      *
+     * @throws ReflectionException
      */
     protected function _fetchProjectData() {
 
@@ -131,9 +133,9 @@ abstract class AbstractStatus {
      * Perform the computation
      *
      * @return $this
-     * @throws NotFoundException
+     * @throws Exception
      */
-    public function fetchData() {
+    public function fetchData(): AbstractStatus {
 
         $this->_fetchProjectData();
 
@@ -163,10 +165,9 @@ abstract class AbstractStatus {
     }
 
     /**
-     * @throws NotFoundException
      * @throws Exception
      */
-    protected function loadObjects() {
+    protected function loadObjects(): AbstractStatus {
 
         $target                 = null;
         $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;

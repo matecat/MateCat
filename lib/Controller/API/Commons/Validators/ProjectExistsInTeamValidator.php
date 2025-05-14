@@ -10,8 +10,8 @@
 namespace API\Commons\Validators;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 
 class ProjectExistsInTeamValidator extends Base {
 

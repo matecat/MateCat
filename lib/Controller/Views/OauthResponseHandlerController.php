@@ -1,10 +1,16 @@
 <?php
 
-use API\Commons\BaseKleinViewController;
+namespace Views;
+
+use AbstractControllers\BaseKleinViewController;
 use ConnectedServices\ConnectedServiceUserModel;
 use ConnectedServices\OauthClient;
+use Exception;
+use INIT;
+use OAuthSignInModel;
+use ReflectionException;
 
-class oauthResponseHandlerController extends BaseKleinViewController {
+class OauthResponseHandlerController extends BaseKleinViewController {
 
     /**
      * @var ConnectedServiceUserModel
@@ -37,6 +43,7 @@ class oauthResponseHandlerController extends BaseKleinViewController {
 
     /**
      * @return void
+     * @throws Exception
      */
     protected function afterConstruct() {
         $this->setView( 'oauth_response_handler.html', [ 'wanted_url' => $_SESSION[ 'wanted_url' ] ?? null ] ); //https://dev.matecat.com/translate/205-txt/en-GB-it-IT/25-8a4ee829fb52
