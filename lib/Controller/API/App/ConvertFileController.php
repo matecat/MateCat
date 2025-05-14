@@ -60,7 +60,7 @@ class ConvertFileController extends KleinController {
             $conversionHandler->setFiltersExtractionParameters( $this->data['filters_extraction_parameters'] );
             $conversionHandler->setReconversion( $this->data['restarted_conversion'] );
 
-            if ( $ext == "zip" and $this->convertZipFile ) {
+            if ( $ext == "zip" ) {
                 $result = $this->handleZip( $conversionHandler, $intDir, $errDir, $cookieDir );
             } else {
                 $conversionHandler->processConversion();
@@ -230,7 +230,7 @@ class ConvertFileController extends KleinController {
         /* Do conversions here */
         foreach ($stdFileObjects as $stdFileObject){
             $convertFile = new ConvertFile(
-                $stdFileObject->name,
+                [$stdFileObject->name],
                 $this->data['source_lang'],
                 $this->data['target_lang'],
                 $intDir,
@@ -239,7 +239,7 @@ class ConvertFileController extends KleinController {
                 $this->data['segmentation_rule'],
                 $this->featureSet,
                 $this->data['filters_extraction_parameters'],
-                false
+                true
             );
 
             $convertFile->convertFiles();
