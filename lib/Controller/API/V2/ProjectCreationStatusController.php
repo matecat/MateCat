@@ -10,8 +10,8 @@
 namespace API\V2;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\KleinController;
 use API\V2\Json\CreationStatus;
 use API\V2\Json\WaitCreation;
 use Exception;

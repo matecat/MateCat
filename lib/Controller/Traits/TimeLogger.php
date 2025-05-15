@@ -7,9 +7,10 @@
  *
  */
 
-namespace AbstractControllers;
+namespace Traits;
 
 
+use AbstractControllers\IController;
 use Log;
 use Utils;
 

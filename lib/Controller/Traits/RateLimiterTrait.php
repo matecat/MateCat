@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Traits;
 
 use DateTime;
 use Exception;

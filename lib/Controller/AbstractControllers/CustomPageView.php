@@ -1,6 +1,6 @@
 <?php
 
-use API\Commons\BaseKleinViewController;
+use AbstractControllers\BaseKleinViewController;
 use Klein\Request;
 use Klein\Response;
 
@@ -11,36 +11,10 @@ use Klein\Response;
  * Time: 12.08
  *
  */
-class CustomPageView {
+class CustomPageView extends BaseKleinViewController {
 
-    private BaseKleinViewController $handler;
-
-    /**
-     * BaseKleinViewController constructor.
-     *
-     * @throws Exception
-     */
     public function __construct() {
-        $this->handler = new BaseKleinViewController( Request::createFromGlobals(), new Response(), null, null );
-    }
-
-    /**
-     * @param       $template_name
-     * @param array $params
-     * @param int   $code
-     *
-     * @return void
-     */
-    public function setView( $template_name, array $params = [], int $code = 200 ) {
-        $this->handler->setView( $template_name, $params, $code );
-    }
-
-    public function setCode( int $httpCode ) {
-        $this->handler->setCode( $httpCode );
-    }
-
-    public function renderAndClose( ?int $code = null ) {
-        $this->handler->render( $code );
+        parent::__construct( Request::createFromGlobals(), new Response() );
     }
 
 }

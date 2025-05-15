@@ -7,8 +7,8 @@
  */
 
 use AbstractControllers\IController;
-use AbstractControllers\TimeLogger;
-use API\Commons\Authentication\AuthenticationTrait;
+use Controller\Authentication\AuthenticationTrait;
+use Traits\TimeLogger;
 
 /**
  * Abstract Class controller

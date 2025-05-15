@@ -22,7 +22,7 @@ abstract class viewController extends controller {
      */
     protected ProviderInterface $client;
 
-    private ?Projects_ProjectStruct $project = null;
+    protected $project = null;
 
     /**
      * Class constructor
@@ -37,7 +37,7 @@ abstract class viewController extends controller {
         if ( !Bootstrap::areMandatoryKeysPresent() ) {
             $controllerInstance = new CustomPageView();
             $controllerInstance->setView( 'badConfiguration.html', [], 503 );
-            $controllerInstance->renderAndClose();
+            $controllerInstance->render();
         }
 
         // SESSION ENABLED
@@ -180,7 +180,7 @@ abstract class viewController extends controller {
     protected function render404() {
         $controllerInstance = new CustomPageView();
         $controllerInstance->setView( '404.html', [], 404 );
-        $controllerInstance->renderAndClose();
+        $controllerInstance->render();
     }
 
     /**

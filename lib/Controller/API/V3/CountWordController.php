@@ -8,8 +8,8 @@
 
 namespace API\V3;
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\ValidationError;
-use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Langs\Languages;

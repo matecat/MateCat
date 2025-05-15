@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use CookieManager;
 use Exception;
 use Files_FileDao;

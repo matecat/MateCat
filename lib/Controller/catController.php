@@ -49,7 +49,7 @@ class catController extends viewController {
     private $chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ?Projects_ProjectStruct
      */
     public $project;
 
@@ -69,7 +69,6 @@ class catController extends viewController {
 
         parent::__construct();
         $this->checkLoginRequiredAndRedirect();
-
         parent::makeTemplate( $this->templateName );
 
         $filterArgs = [
@@ -315,7 +314,7 @@ class catController extends viewController {
         if ( $this->job_not_found ) {
             $controllerInstance = new CustomPageView();
             $controllerInstance->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
-            $controllerInstance->renderAndClose();
+            $controllerInstance->render();
         }
 
         if ( $this->job_cancelled ) {
@@ -324,7 +323,7 @@ class catController extends viewController {
                     "support_mail" => INIT::$SUPPORT_MAIL,
                     "owner_email"  => $ownerMail
             ] );
-            $controllerInstance->renderAndClose();
+            $controllerInstance->render();
         }
 
         if ( $this->job_archived ) {
@@ -336,7 +335,7 @@ class catController extends viewController {
                     'password'     => $this->password,
                     'jobOwnerIsMe' => $jobOwnerIsMe
             ] );
-            $controllerInstance->renderAndClose();
+            $controllerInstance->render();
         }
 
         $this->template->jid             = $this->jid;

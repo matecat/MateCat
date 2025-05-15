@@ -9,8 +9,8 @@
 namespace ConnectedServices;
 
 
+use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
-use API\Commons\AbstractStatefulKleinController;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
@@ -21,7 +21,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     /**
      * @var ConnectedServiceStruct
      */
-    protected $service;
+    protected \Klein\ServiceProvider $service;
 
     /**
      * @throws NotFoundException

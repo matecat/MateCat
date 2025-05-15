@@ -2,9 +2,9 @@
 
 namespace API\App;
 
+use AbstractControllers\KleinController;
 use AjaxPasswordCheck;
 use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;

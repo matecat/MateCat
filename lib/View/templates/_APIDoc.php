@@ -48,7 +48,7 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
     <script src='/public/api/swagger-source.js' type='text/javascript'></script>
     <?php
 
-    $reflect  = new ReflectionClass( 'CustomPage' );
+    $reflect  = new ReflectionClass( 'CustomPageView' );
     $instance = $reflect->newInstanceArgs( [] );
 
     $featureSet = new FeatureSet();
