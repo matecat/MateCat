@@ -6,6 +6,7 @@ use AbstractControllers\BaseKleinViewController;
 use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use API\Commons\ViewValidators\LoginRedirectValidator;
 use CatUtils;
 use Constants_TranslationStatus;
 use Exception;
@@ -22,12 +23,14 @@ use Utils;
  */
 class QualityReportController extends BaseKleinViewController implements IController {
 
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginRedirectValidator( $this ) );
+    }
+
     /**
      * @throws Exception
      */
     public function renderView() {
-
-        $this->checkLoginRequiredAndRedirect();
 
         $request = $this->validateTheRequest();
 

@@ -27,8 +27,6 @@ RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ inde
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
 RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$5&password=$6&revision=$2 [L]
 
-RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activityLog&id_project=$1&password=$2&download=$3 [QSA,L]
-
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
@@ -38,6 +36,7 @@ RewriteRule ^analyze/(.*)$ router.php [L]
 RewriteRule ^jobanalysis/(.*)$ router.php [L]
 RewriteRule ^signin$ router.php [L]
 RewriteRule ^revise-summary/(.*)$ router.php [QSA,L]
+RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
 RewriteRule ^views/(.*)$ router.php [QSA,L]
 
 

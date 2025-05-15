@@ -2,6 +2,7 @@
 
 namespace AbstractControllers;
 
+use API\Commons\ViewValidators\MandatoryKeysValidator;
 use Bootstrap;
 use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\Github\GithubProvider;
@@ -12,6 +13,10 @@ use ConnectedServices\OauthClient;
 use Exception;
 use FlashMessage;
 use INIT;
+use Klein\App;
+use Klein\Request;
+use Klein\Response;
+use Klein\ServiceProvider;
 use PHPTAL;
 use PHPTALWithAppend;
 use Utils;
@@ -22,7 +27,7 @@ use Utils;
  * Date: 06/10/16
  * Time: 10:24
  */
-class BaseKleinViewController extends AbstractStatefulKleinController implements IController {
+abstract class BaseKleinViewController extends AbstractStatefulKleinController implements IController {
 
     /**
      * @var PHPTALWithAppend
@@ -35,16 +40,17 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
     protected int $httpCode;
 
     /**
-     * @param $request
-     * @param $response
-     * @param $service
-     * @param $app
+     * @param Request              $request
+     * @param Response             $response
+     * @param ServiceProvider|null $service
+     * @param App|null             $app
      *
      * @throws Exception
      */
-    public function __construct( $request, $response, $service, $app ) {
+    public function __construct( Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null ) {
         parent::__construct( $request, $response, $service, $app );
         $this->timingLogFileName = 'view_controller_calls_time.log';
+        $this->appendValidator( new MandatoryKeysValidator( $this ) );
     }
 
     /**
@@ -148,24 +154,7 @@ class BaseKleinViewController extends AbstractStatefulKleinController implements
         die();
     }
 
-    /**
-     * Perform Authentication Requests and set incoming url
-     */
-    protected function checkLoginRequiredAndRedirect() {
-
-        //if no login set and login is required
-        if ( !$this->isLoggedIn() ) {
-            $_SESSION[ 'wanted_url' ] = ltrim( $_SERVER[ 'REQUEST_URI' ], '/' );
-            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false );
-            exit;
-        } elseif ( isset( $_SESSION[ 'wanted_url' ] ) ) {
-            // handle redirect after login
-            $this->redirectToWantedUrl();
-        }
-
-    }
-
-    protected function redirectToWantedUrl() {
+    public function redirectToWantedUrl() {
         header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
         unset( $_SESSION[ 'wanted_url' ] );
         exit;

@@ -10,21 +10,19 @@
 namespace API\Commons\Validators;
 
 
-use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthorizationError;
 use Teams\MembershipDao;
+use Teams\TeamStruct;
 
 class TeamAccessValidator extends Base {
 
-    public    $team;
-    protected $controller;
+    /**
+     * @var TeamStruct|null
+     */
+    public ?TeamStruct $team = null;
 
-    public function __construct( KleinController $controller ) {
-        $this->controller = $controller;
-        parent::__construct( $controller->getRequest() );
-    }
 
-    public function _validate() {
+    public function _validate(): void {
 
         $id_team = $this->request->id_team;
         $name    = ( !empty( $this->request->team_name ) ) ? base64_decode( $this->request->team_name ) : null;

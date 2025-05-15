@@ -2,37 +2,38 @@
 
 namespace API\Commons\Validators;
 
-use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use Log;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Users_UserStruct;
 
 /**
  * @daprecated this should extend Base
  *
  * Class ProjectValidator
- * @package API\V2\Validators
+ * @package    API\V2\Validators
  */
 class ProjectValidator extends Base {
 
     /**
-     * @var Users_UserStruct
+     * @var ?Users_UserStruct
      */
-    private $user;
+    private ?Users_UserStruct $user = null;
 
     /**
      * @var int
      */
-    private $id_project;
+    private int $id_project;
 
     /**
      * @param Users_UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser( Users_UserStruct $user ): ProjectValidator {
         $this->user = $user;
 
         return $this;
@@ -43,26 +44,26 @@ class ProjectValidator extends Base {
      *
      * @return $this
      */
-    public function setIdProject( $id_project ) {
+    public function setIdProject( $id_project ): ProjectValidator {
         $this->id_project = $id_project;
 
         return $this;
     }
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ?Projects_ProjectStruct
      */
-    private $project;
-    private $feature;
+    private ?Projects_ProjectStruct $project = null;
+    private ?string                $feature = null;
 
     /**
      * @param Projects_ProjectStruct $project
      */
-    public function setProject(Projects_ProjectStruct $project) {
+    public function setProject( Projects_ProjectStruct $project ) {
         $this->project = $project;
     }
 
-    public function getProject() {
+    public function getProject(): Projects_ProjectStruct {
         return $this->project;
     }
 
@@ -70,20 +71,19 @@ class ProjectValidator extends Base {
         $this->feature = $feature;
     }
 
-    public function __construct( KleinController $controller ) {}
-
     /**
      * @return mixed|void
      * @throws AuthenticationError
      * @throws NotFoundException
+     * @throws ReflectionException
      */
-    protected function _validate() {
+    protected function _validate(): void {
 
-        if(!$this->project){
-            $this->project = \Projects_ProjectDao::findById( $this->id_project );
+        if ( !$this->project ) {
+            $this->project = Projects_ProjectDao::findById( $this->id_project );
         }
 
-        if ( $this->project == false ) {
+        if ( empty( $this->project ) ) {
             throw new NotFoundException( "Project not found.", 404 );
         }
 
@@ -91,13 +91,13 @@ class ProjectValidator extends Base {
             throw new NotFoundException( "Feature not enabled on this project.", 404 );
         }
 
-        if( !$this->inProjectScope() ){
+        if ( !$this->inProjectScope() ) {
             throw new NotFoundException( "You are not allowed to access to this project", 403 );
         }
 
     }
 
-    private function validateFeatureEnabled() {
+    private function validateFeatureEnabled(): bool {
         return $this->feature == null || $this->project->isFeatureEnabled( $this->feature );
     }
 
@@ -105,9 +105,9 @@ class ProjectValidator extends Base {
      * @return bool
      * @throws AuthenticationError
      */
-    private function inProjectScope() {
+    private function inProjectScope(): bool {
 
-        if( !$this->user ){
+        if ( !$this->user ) {
             throw new AuthenticationError( "Invalid API key", 401 );
         }
 

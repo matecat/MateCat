@@ -152,7 +152,7 @@ class SignupController extends AbstractStatefulKleinController {
             // return a 410 status code
             $controllerInstance = new CustomPageView();
             $controllerInstance->setView( '410.html', [], 410 );
-            $controllerInstance->renderAndQuit();
+            $controllerInstance->render();
 
         }
     }

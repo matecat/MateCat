@@ -3,25 +3,23 @@
 namespace Views;
 
 use AbstractControllers\BaseKleinViewController;
-use Klein\Request;
-use Klein\Response;
+use API\Commons\ViewValidators\LoginRedirectValidator;
+use Exception;
 
 class SignInController extends BaseKleinViewController {
 
-    public function __construct() {
-        parent::__construct( Request::createFromGlobals(), new Response(), null, null );
-        $this->setView( "signin.html" );
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginRedirectValidator( $this ) );
     }
 
     /**
      * Renders the appropriate view based on the user's session and login status.
      *
      * @return void
+     * @throws Exception
      */
-    function renderView() {
-        if ( $this->isLoggedIn() && isset( $_SESSION[ 'wanted_url' ] ) ) {
-            $this->redirectToWantedUrl();
-        }
+    public function renderView() {
+        $this->setView( "signin.html" );
         $this->render();
     }
 

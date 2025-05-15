@@ -21,7 +21,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     /**
      * @var ConnectedServiceStruct
      */
-    protected $service;
+    protected \Klein\ServiceProvider $service;
 
     /**
      * @throws NotFoundException

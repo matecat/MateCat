@@ -1,5 +1,8 @@
 <?php
 
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\ValidationError;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -162,16 +165,19 @@ class Bootstrap {
              * @var $exception Exception
              */
             throw $exception;
+        } catch ( AuthenticationError $e ) {
+            $code = 401;
+            Log::doJsonLog( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( InvalidArgumentException $e ) {
-            $code    = 400;
-            $message = "Bad Request";
-        } catch ( Exceptions\NotFoundException $e ) {
+            $code = 400;
+            Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+        } catch ( Exceptions\NotFoundException|API\Commons\Exceptions\NotFoundException $e ) {
             $code = 404;
             Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\AuthorizationError $e ) {
+        } catch ( Exceptions\AuthorizationError|API\Commons\Exceptions\AuthorizationError $e ) {
             $code = 403;
             Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\ValidationError $e ) {
+        } catch ( ValidationError|Exceptions\ValidationError $e ) {
             $code = 409;
             Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
         } catch ( PDOException $e ) {
@@ -205,7 +211,7 @@ class Bootstrap {
 
             }
 
-            $controllerInstance->renderAndQuit();
+            $controllerInstance->render();
 
         } else {
             echo $exception->getMessage() . "\n";

@@ -314,7 +314,7 @@ class catController extends viewController {
         if ( $this->job_not_found ) {
             $controllerInstance = new CustomPageView();
             $controllerInstance->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
-            $controllerInstance->renderAndQuit();
+            $controllerInstance->render();
         }
 
         if ( $this->job_cancelled ) {
@@ -323,7 +323,7 @@ class catController extends viewController {
                     "support_mail" => INIT::$SUPPORT_MAIL,
                     "owner_email"  => $ownerMail
             ] );
-            $controllerInstance->renderAndQuit();
+            $controllerInstance->render();
         }
 
         if ( $this->job_archived ) {
@@ -335,7 +335,7 @@ class catController extends viewController {
                     'password'     => $this->password,
                     'jobOwnerIsMe' => $jobOwnerIsMe
             ] );
-            $controllerInstance->renderAndQuit();
+            $controllerInstance->render();
         }
 
         $this->template->jid             = $this->jid;

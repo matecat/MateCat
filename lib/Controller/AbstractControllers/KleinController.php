@@ -14,8 +14,10 @@ use Exception;
 use Exceptions\NotFoundException;
 use FeatureSet;
 use InvalidArgumentException;
+use Klein\App;
 use Klein\Request;
 use Klein\Response;
+use Klein\ServiceProvider;
 use Log;
 use ReflectionException;
 use RuntimeException;
@@ -40,9 +42,9 @@ abstract class KleinController implements IController {
     /**
      * @var Response
      */
-    protected Response $response;
-    protected          $service;
-    protected          $app;
+    protected Response         $response;
+    protected ?ServiceProvider $service = null;
+    protected ?App             $app     = null;
 
     /**
      * @var Base[]
@@ -83,23 +85,21 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function getParams() {
+    public function getParams(): array {
         return $this->params;
     }
 
     /**
-     * KleinController constructor.
+     * @param Request          $request
+     * @param Response         $response
+     * @param ?ServiceProvider $service
+     * @param ?App             $app
      *
-     * @param $request
-     * @param $response
-     * @param $service
-     * @param $app
-     *
-     * @throws ReflectionException
+     * @throws Exception
      */
-    public function __construct( $request, $response, $service, $app ) {
+    public function __construct( Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null ) {
 
         $this->startTimer();
         $this->timingLogFileName = 'api_calls_time.log';

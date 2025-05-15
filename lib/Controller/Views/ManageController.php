@@ -13,6 +13,7 @@ use AbstractControllers\BaseKleinViewController;
 use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use API\Commons\ViewValidators\LoginRedirectValidator;
 use Exception;
 use Utils;
 
@@ -20,12 +21,14 @@ class ManageController extends BaseKleinViewController implements IController {
 
     protected string $_outsource_login_API = '//signin.translated.net/';
 
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginRedirectValidator( $this ) );
+    }
+
     /**
      * @throws Exception
      */
     public function renderView() {
-
-        $this->checkLoginRequiredAndRedirect();
 
         $this->setView( "manage.html", [
                 'outsource_service_login' => $this->_outsource_login_API,

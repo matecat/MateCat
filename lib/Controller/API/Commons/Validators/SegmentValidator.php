@@ -9,26 +9,16 @@
 
 namespace API\Commons\Validators;
 
-use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
 use Segments_SegmentDao;
 
 class SegmentValidator extends Base {
 
-    protected $controller;
-
-    public function __construct( KleinController $controller ) {
-
-        parent::__construct( $controller->getRequest() );
-        $this->controller = $controller;
-
-    }
-
     /**
      * @return mixed|void
      * @throws NotFoundException
      */
-    protected function _validate() {
+    protected function _validate(): void {
 
         // JobPasswordValidator is actually useless
         // in this case since we need to check for the segment

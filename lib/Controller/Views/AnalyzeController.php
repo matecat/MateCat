@@ -15,7 +15,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
-use Bootstrap;
+use API\Commons\ViewValidators\LoginRedirectValidator;
 use Chunks_ChunkDao;
 use Exception;
 use INIT;
@@ -26,6 +26,10 @@ use Projects_ProjectDao;
 use Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginRedirectValidator( $this ) );
+    }
 
     /**
      * External EndPoint for outsourcing Login Service or for all in one-login and Confirm Order
@@ -61,13 +65,6 @@ class AnalyzeController extends BaseKleinViewController implements IController {
      * @throws Exception
      */
     public function renderView() {
-
-        if ( !Bootstrap::areMandatoryKeysPresent() ) {
-            $this->setView( 'badConfiguration.html', [], 503 );
-            $this->render();
-        }
-
-        $this->checkLoginRequiredAndRedirect();
 
         $postInput = $this->validateTheRequest();
 

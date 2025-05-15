@@ -210,6 +210,12 @@ route( '/api/v3/user/[:user_api_key]', 'GET', [ '\API\V2\KeyCheckController', 'g
 route( '/api/v3/keys/list', 'GET', [ '\API\V2\MemoryKeysController', 'listKeys' ] );
 route( '/api/v3/engines/list', 'GET', [ '\API\V2\EnginesController', 'listEngines' ] );
 
+// Download files
+route( '/api/v3/original/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadOriginalController', 'index' ] );
+route( '/api/v3/translation/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadFileController', 'index' ] );
+route( '/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
+route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\ExportTMXController', 'index' ] );
+
 $klein->with( '/api/v3/teams', function () {
 
     route( '', 'GET', [ '\API\V2\TeamsController', 'getTeamList' ] );

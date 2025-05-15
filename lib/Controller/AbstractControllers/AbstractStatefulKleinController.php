@@ -9,22 +9,24 @@
 namespace AbstractControllers;
 
 use Exception;
+use Klein\App;
+use Klein\Request;
+use Klein\Response;
+use Klein\ServiceProvider;
 
 abstract class AbstractStatefulKleinController extends KleinController implements IController {
 
     protected bool $useSession = true;
 
     /**
-     * AbstractStatefulKleinController constructor.
-     *
-     * @param $request
-     * @param $response
-     * @param $service
-     * @param $app
+     * @param Request              $request
+     * @param Response             $response
+     * @param ServiceProvider|null $service
+     * @param App|null             $app
      *
      * @throws Exception
      */
-    public function __construct( $request, $response, $service, $app ) {
+    public function __construct( Request $request, Response $response, ?ServiceProvider $service = null, ?App $app = null ) {
         parent::__construct( $request, $response, $service, $app );
     }
 

@@ -133,6 +133,7 @@ route( '/manage', 'GET', [ 'Views\ManageController', 'renderView' ] );
 route( '/analyze/[:project_name]/[i:pid]-[:password]', 'GET', [ 'Views\AnalyzeController', 'renderView' ] );
 route( '/jobanalysis/[i:pid]-[i:jid]-[:password]', 'GET', [ 'Views\AnalyzeController', 'renderView' ] );
 route( '/revise-summary/[i:jid]-[:password]', 'GET', [ 'Views\QualityReportController', 'renderView' ] );
+route( '/activityLog/[i:id_project]/[:password]', 'GET', [ 'Views\ActivityLogController', 'renderView' ] );
 
 // MISC (OLD AJAX ROUTES)
 route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
