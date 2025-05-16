@@ -31,9 +31,9 @@ class AnalysisJob implements JsonSerializable {
      */
     protected int $total_raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected int $total_equivalent = 0;
+    protected float $total_equivalent = 0;
     /**
      * @var int
      */
@@ -80,8 +80,8 @@ class AnalysisJob implements JsonSerializable {
                 'target_name'         => $this->targetName,
                 'chunks'              => array_values( $this->chunks ),
                 'total_raw'           => $this->total_raw,
-                'total_equivalent'    => round( $this->total_equivalent ),
-                'total_industry'      => round( $this->total_industry ),
+                'total_equivalent'    => (int)$this->total_equivalent,
+                'total_industry'      => $this->total_industry,
                 'outsource_available' => $this->outsourceAvailable,
                 'payable_rates'       => $this->payable_rates,
                 'count_unit'          => $this->getCountUnit( $this->source ),
@@ -124,11 +124,11 @@ class AnalysisJob implements JsonSerializable {
     }
 
     /**
-     * @param $password
+     * @param string $password
      *
      * @return bool
      */
-    public function hasChunk( $password ): bool {
+    public function hasChunk( string $password ): bool {
         return array_key_exists( $password, $this->chunks );
     }
 
@@ -140,29 +140,29 @@ class AnalysisJob implements JsonSerializable {
     }
 
     /**
-     * @param $raw
+     * @param int $raw
      *
      * @return void
      */
-    public function incrementRaw( $raw ) {
-        $this->total_raw += (int)$raw;
+    public function incrementRaw( int $raw ) {
+        $this->total_raw += $raw;
     }
 
     /**
-     * @param $equivalent
+     * @param float $equivalent
      *
      * @return void
      */
-    public function incrementEquivalent( $equivalent ) {
+    public function incrementEquivalent( float $equivalent ) {
         $this->total_equivalent += $equivalent;
     }
 
     /**
-     * @param $industry
+     * @param int $industry
      *
      * @return void
      */
-    public function incrementIndustry( $industry ) {
+    public function incrementIndustry( int $industry ) {
         $this->total_industry += $industry;
     }
 

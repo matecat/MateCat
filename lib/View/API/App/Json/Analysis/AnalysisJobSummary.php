@@ -17,7 +17,7 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
     /**
      * @var AnalysisMatch[]
      */
-    protected $matches = [];
+    protected array $matches = [];
 
     public function __construct( ConstantsInterface $matchConstantsClass ) {
         foreach ( $matchConstantsClass::forValue() as $matchType ) {
@@ -30,11 +30,11 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
     }
 
     /**
-     * @param $matchName
+     * @param string $matchName
      *
      * @return AnalysisMatch
      */
-    public function getMatch( $matchName ): AnalysisMatch {
+    public function getMatch( string $matchName ): AnalysisMatch {
         return $this->matches[ $matchName ];
     }
 

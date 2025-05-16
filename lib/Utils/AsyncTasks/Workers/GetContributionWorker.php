@@ -19,7 +19,6 @@ use INIT;
 use Jobs_JobStruct;
 use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PostProcess;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;

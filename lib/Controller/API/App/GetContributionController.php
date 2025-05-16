@@ -83,7 +83,6 @@ class GetContributionController extends KleinController {
             $file = (new FilesPartsDao())->getBySegmentId($id_segment);
             $owner = (new Users_UserDao())->getProjectOwner( $id_job );
 
-            $contributionRequest                    = new ContributionRequestStruct();
             $contributionRequest->id_file           = $file->id_file;
             $contributionRequest->id_job            = $id_job;
             $contributionRequest->password          = $received_password;
