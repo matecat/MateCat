@@ -39,6 +39,8 @@ RewriteRule ^revise-summary/(.*)$ router.php [QSA,L]
 RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
 RewriteRule ^views/(.*)$ router.php [QSA,L]
 
+# maintain old route (restored)
+RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
