@@ -39,11 +39,14 @@ export const submitComment = async ({
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}api/app/comment/create`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/comment/create`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

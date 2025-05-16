@@ -2,11 +2,11 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 import {flattenObject} from '../../utils/queryString'
 
 export const checkSplitRequest = async (
-    job,
-    project,
-    numsplit,
-    arrayValues,
-    splitRawWords,
+  job,
+  project,
+  numsplit,
+  arrayValues,
+  splitRawWords,
 ) => {
   const params = flattenObject({
     project_id: project.id,
@@ -22,11 +22,14 @@ export const checkSplitRequest = async (
   Object.keys(params).forEach((key) => {
     formData.append(key, params[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}api/app/split-job-check`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/split-job-check`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

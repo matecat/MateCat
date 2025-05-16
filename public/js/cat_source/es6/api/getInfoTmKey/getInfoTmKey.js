@@ -10,7 +10,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getInfoTmKey = async ({key, description}) => {
   const paramsData = {
     key,
-    description
+    description,
   }
   const formData = new FormData()
 

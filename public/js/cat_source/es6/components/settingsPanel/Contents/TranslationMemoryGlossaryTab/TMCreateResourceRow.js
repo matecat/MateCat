@@ -192,7 +192,7 @@ export const TMCreateResourceRow = ({row}) => {
     const getInfoTmKeyCallback = () => {
       getInfoTmKey({
         key: key,
-        description: name
+        description: name,
       }).then((response) => {
         const users = response.data
         if (users.length > 1)

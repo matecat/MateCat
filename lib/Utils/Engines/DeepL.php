@@ -1,9 +1,13 @@
 <?php
 
 use Engines\DeepL\DeepLApiClient;
+use Engines\DeepL\DeepLApiException;
 
-class Engines_DeepL extends Engines_AbstractEngine {
-    private $apiKey;
+class Engines_DeepL extends Engines_AbstractEngine
+{
+    private ?string $apiKey;
+
+    protected $_skipAnalysis = true;
 
     public function setApiKey( $apiKey ) {
         $this->apiKey = $apiKey;
