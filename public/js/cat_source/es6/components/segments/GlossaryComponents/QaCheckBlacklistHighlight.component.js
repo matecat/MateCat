@@ -9,8 +9,32 @@ class QaCheckBlacklistHighlight extends Component {
     this.contentRef = createRef()
   }
   getTermDetails = () => {
-    const {contentState, blackListedTerms, start, end, children} = this.props
+    const {contentState, blackListedTerms, start, end, blockKey, children} =
+      this.props
     if (tagSignatures.space) {
+      const getBlocksBefore = (key) => {
+        const blocks = []
+
+        const iterate = (key) => {
+          const block = contentState.getBlockBefore(key)
+          if (block) {
+            blocks.unshift(block)
+            iterate(block.getKey())
+          }
+        }
+
+        iterate(key)
+
+        return blocks
+      }
+
+      const differenceIndex = getBlocksBefore(blockKey).reduce((acc, cur) => {
+        return acc + cur.getLength() + 1
+      }, 0)
+
+      const startAbsolute = start + differenceIndex
+      const endAbsolute = end + differenceIndex
+
       const fakeContentBlock = {
         getText: () => contentState.getPlainText(),
         getEntityAt: () => false,
@@ -45,7 +69,7 @@ class QaCheckBlacklistHighlight extends Component {
               ' ',
             )
 
-          if (startB === start || endB === end) {
+          if (startB === startAbsolute || endB === endAbsolute) {
             result = blackListedTerms.find(({matching_words: matchingWords}) =>
               matchingWords.find(
                 (value) => value.toLowerCase() === words.toLowerCase(),
@@ -71,23 +95,21 @@ class QaCheckBlacklistHighlight extends Component {
 
     const term = this.getTermDetails()
 
-    const {source, target} = term || {}
+    const {source, target} = term
 
     return (
-      term && (
-        <Tooltip
-          stylePointerElement={{display: 'inline-block', position: 'relative'}}
-          content={
-            source.term
-              ? `${target.term} is flagged as a forbidden translation for ${source.term}`
-              : `${target.term} is flagged as a forbidden word`
-          }
-        >
-          <div ref={this.contentRef} className="blacklistItem">
-            <span>{children}</span>
-          </div>
-        </Tooltip>
-      )
+      <Tooltip
+        stylePointerElement={{display: 'inline-block', position: 'relative'}}
+        content={
+          source.term
+            ? `${target.term} is flagged as a forbidden translation for ${source.term}`
+            : `${target.term} is flagged as a forbidden word`
+        }
+      >
+        <div ref={this.contentRef} className="blacklistItem">
+          <span>{children}</span>
+        </div>
+      </Tooltip>
     )
   }
 }
