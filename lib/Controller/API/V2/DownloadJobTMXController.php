@@ -10,7 +10,7 @@ use SplTempFileObject;
 use TMS\TMSService;
 use Utils;
 
-class ExportTMXController extends AbstractDownloadController {
+class DownloadJobTMXController extends AbstractDownloadController {
 
     private $jobID;
     private $jobPass;

@@ -19,9 +19,9 @@ class AnalysisMatch implements JsonSerializable {
      */
     protected int $raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected int $equivalent = 0;
+    protected float $equivalent = 0;
 
     /**
      * @var string
@@ -40,7 +40,7 @@ class AnalysisMatch implements JsonSerializable {
         $this->type = $matchConstantsClass::validate( $name );
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'raw'        => $this->raw,
                 'equivalent' => round( $this->equivalent ),

@@ -12,7 +12,7 @@ use RuntimeException;
 use TMS\TMSService;
 use Utils;
 
-class DownloadTMXController extends KleinController {
+class RequestExportTMXController extends KleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

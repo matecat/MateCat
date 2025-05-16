@@ -10,7 +10,7 @@ use WordCount\WordCountStruct;
  * @see https://dev.matecat.com/revise-summary/9763519-772d1081eef6
  *
  * Quality Report Controller
- *
+ * @deprecated and no more used
  */
 class reviseSummaryController extends viewController {
 

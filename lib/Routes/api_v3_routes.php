@@ -213,8 +213,8 @@ route( '/api/v3/engines/list', 'GET', [ '\API\V2\EnginesController', 'listEngine
 // Download files
 route( '/api/v3/original/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadOriginalController', 'index' ] );
 route( '/api/v3/translation/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadFileController', 'index' ] );
-route( '/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
-route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\ExportTMXController', 'index' ] );
+route( '/api/v3/xliff/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
+route( '/api/v3/tmx/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadJobTMXController', 'index' ] );
 
 $klein->with( '/api/v3/teams', function () {
 
@@ -247,7 +247,7 @@ route( '/api/v3/change-password', 'POST', [ 'API\V2\ChangePasswordController', '
 route( '/api/v3/original/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadOriginalController', 'index' ] );
 route( '/api/v3/translation/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadFileController', 'index' ] );
 route( '/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
-route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\ExportTMXController', 'index' ] );
+route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadJobTMXController', 'index' ] );
 
 // User
 route('/api/v3/user', 'PUT',  ['API\V2\UserController', 'edit']);
