@@ -481,7 +481,7 @@ export const TranslationMemoryGlossaryTab = () => {
             <h2>Inactive Resources</h2>
             <input
               className="translation-memory-glossary-tab-input-text"
-              placeholder="Search resources"
+              placeholder="Search resources by name or key"
               value={filterInactiveKeys}
               onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
               data-testid="search-inactive-tmkeys"
