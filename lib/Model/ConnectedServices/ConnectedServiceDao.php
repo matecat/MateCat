@@ -82,7 +82,13 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         $stmt->execute( [ 'uid' => $service->uid, 'service' => $service->service, 'id' => $service->id ] );
     }
 
-    public function findServiceByUserAndId( Users_UserStruct $user, $id_service ) {
+    /**
+     * @param Users_UserStruct $user
+     * @param                  $id_service
+     *
+     * @return ?ConnectedServiceStruct
+     */
+    public function findServiceByUserAndId( Users_UserStruct $user, $id_service ): ?ConnectedServiceStruct {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(

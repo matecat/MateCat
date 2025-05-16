@@ -8,10 +8,6 @@ use Exception;
 
 class SignInController extends BaseKleinViewController {
 
-    protected function afterConstruct() {
-        $this->appendValidator( new LoginRedirectValidator( $this ) );
-    }
-
     /**
      * Renders the appropriate view based on the user's session and login status.
      *
@@ -19,6 +15,11 @@ class SignInController extends BaseKleinViewController {
      * @throws Exception
      */
     public function renderView() {
+
+        if ( $this->isLoggedIn() && isset( $_SESSION[ 'wanted_url' ] ) ) {
+            $this->redirectToWantedUrl();
+        }
+
         $this->setView( "signin.html" );
         $this->render();
     }
