@@ -8,7 +8,7 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\LoginValidator;
 use Bootstrap;

@@ -147,7 +147,7 @@ class CatUtils {
                 $separator     = $separateWithChar;
 
                 //if the last char of the last chunk AND the first of the next are spaces, don't add another one
-                if ( substr( $chunk, -1 ) == $separateWithChar || @substr( $split_chunks[ $pos + 1 ], 0, 1 ) == $separateWithChar ) {
+                if ( substr( $chunk, -1 ) == $separateWithChar || substr( $split_chunks[ $pos + 1 ] ?? "", 0, 1 ) == $separateWithChar ) {
                     $separator_len = 0;
                     $separator     = '';
                 }

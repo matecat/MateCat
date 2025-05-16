@@ -2,8 +2,8 @@
 
 namespace API\App;
 
+use AbstractControllers\KleinController;
 use AMQHandler;
-use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Comments_CommentDao;
 use Comments_CommentStruct;

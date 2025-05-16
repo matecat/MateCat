@@ -16,5 +16,3 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
     }
 
 }
-    
-

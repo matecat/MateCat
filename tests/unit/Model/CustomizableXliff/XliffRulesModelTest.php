@@ -24,8 +24,8 @@ class XliffRulesModelTest extends AbstractTest {
 
         $rulesModel = new XliffRulesModel();
 
-        $rule1 = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated', 'translated', '100' );
-        $rule2 = new Xliff12Rule( [ 'exact-match', 'needs-l10n' ], 'pre-translated', 'translated', '100' );
+        $rule1 = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated', 'translated', 'tm_100' );
+        $rule2 = new Xliff12Rule( [ 'exact-match', 'needs-l10n' ], 'pre-translated', 'translated', 'tm_100' );
 
         $this->expectException( DomainException::class );
         $this->expectExceptionMessage( "The same state/state-qualifier cannot be used in two different rules: " . implode( "", [ 'needs-l10n' ] ) );
@@ -46,7 +46,7 @@ class XliffRulesModelTest extends AbstractTest {
 
         $defaultRule = new DefaultRule( [ 'translated' ], AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED, null, null );
 
-        $rule1 = new Xliff12Rule( [ 'needs-l10n', 'translated' ], 'pre-translated', 'translated', '100' );
+        $rule1 = new Xliff12Rule( [ 'needs-l10n', 'translated' ], 'pre-translated', 'translated', 'tm_100' );
         $rule2 = new Xliff12Rule( [ 'exact-match', 'needs-adaptation' ], 'new' );
 
         $rulesModel->addRule( $rule1 );
@@ -83,7 +83,7 @@ class XliffRulesModelTest extends AbstractTest {
                                 ],
                                 "analysis"       => "pre-translated",
                                 "editor"         => "translated",
-                                "match_category" => "50_74"
+                                "match_category" => "tm_50_74"
                         ],
                         [
                                 "states"         => [

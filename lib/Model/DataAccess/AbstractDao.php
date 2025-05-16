@@ -199,11 +199,9 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $keyMap = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
-                "::" .
-                debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
-                "-" .
-                implode( ":", $bindParams );
+        $trace = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
+
+        $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
 
         return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
     }
@@ -232,12 +230,8 @@ abstract class DataAccess_AbstractDao {
     protected function _fetchObjectMap( PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null ): array {
 
         if ( empty( $keyMap ) ) {
-            $keyMap =
-                    debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'class' ] .
-                    "::" .
-                    debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[ 1 ][ 'function' ] .
-                    "-" .
-                    implode( ":", $bindParams );
+            $trace = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
+            $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
         }
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );

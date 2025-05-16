@@ -1,0 +1,56 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ice",
+    "tm_100",
+    "tm_100_public",
+    "repetitions",
+    "ice_mt",
+    "top_quality_mt",
+    "higher_quality_mt",
+    "standard_quality_mt"
+  ],
+  "properties": {
+    "ice": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "tm_100": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "tm_100_public": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "repetitions": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "ice_mt": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "top_quality_mt": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "higher_quality_mt": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    },
+    "standard_quality_mt": {
+      "type": "integer",
+      "maximum": 100,
+      "minimum": 0
+    }
+  }
+}

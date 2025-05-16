@@ -421,10 +421,6 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        if ( $contributionStruct->mt_evaluation !== null ) {
-            $_config[ 'mt_evaluation' ] = $contributionStruct->mt_evaluation;
-        }
-
         if ( $contributionStruct->dialect_strict !== null ) {
             $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
         }
@@ -499,6 +495,7 @@ class GetContributionWorker extends AbstractWorker {
             $temp_matches = [];
 
             if ( $this->issetSourceAndTarget( $config ) ) {
+                $tmEngine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
                 $temp_matches = $tmEngine->get( $config );
             }
 
@@ -523,7 +520,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config    = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
-                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
+                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct ); //MMT
 
                 $config[ 'pid' ]                 = $jobStruct->id_project;
                 $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
@@ -539,7 +536,12 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
-                $config[ 'mt_evaluation' ]       = $contributionStruct->mt_evaluation;
+
+                if ( $contributionStruct->mt_evaluation ) {
+                    $config[ 'include_score' ]   = $contributionStruct->mt_evaluation;
+                }
+
+                $mt_engine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 $mt_result = $mt_engine->get( $config );
             }

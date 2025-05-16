@@ -8,15 +8,15 @@
 
 namespace API\App\Authentication;
 
-use API\App\RateLimiterTrait;
-use API\Commons\AbstractStatefulKleinController;
-use API\Commons\Authentication\AuthCookie;
-use API\Commons\Authentication\AuthenticationHelper;
+use AbstractControllers\AbstractStatefulKleinController;
+use Controller\Authentication\AuthCookie;
+use Controller\Authentication\AuthenticationHelper;
 use CookieManager;
 use Exception;
 use INIT;
 use Klein\Response;
 use SimpleJWT;
+use Traits\RateLimiterTrait;
 use Users\RedeemableProject;
 use Users_UserDao;
 use Utils;

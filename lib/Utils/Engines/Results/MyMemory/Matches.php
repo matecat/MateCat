@@ -85,7 +85,7 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      * @throws Exception
      */
-    public function getMatches( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
+    public function getMatches( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ): array {
 
         if ( $source and $target ) {
             $this->source = $source;

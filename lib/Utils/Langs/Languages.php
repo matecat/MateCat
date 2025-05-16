@@ -140,7 +140,7 @@ class Languages {
      *
      * @param string $code
      *
-     * @return mixed
+     * @return bool
      */
     public static function isRTL( string $code ): bool {
         //convert ISO code in RFC

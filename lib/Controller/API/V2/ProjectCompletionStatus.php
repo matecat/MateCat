@@ -2,7 +2,7 @@
 
 namespace API\V2 ;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\Commons\Validators\ProjectValidator;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;

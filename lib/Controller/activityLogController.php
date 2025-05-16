@@ -7,9 +7,8 @@ use ActivityLog\ActivityLogStruct;
  * User: gremorian
  * Date: 11/05/15
  * Time: 20.37
- *
+ * @deprecated
  */
-
 class activityLogController extends viewController {
 
     /**

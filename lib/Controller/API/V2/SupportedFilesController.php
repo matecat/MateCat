@@ -4,7 +4,7 @@
 namespace API\V2;
 
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use INIT;
 
 class SupportedFilesController extends KleinController {

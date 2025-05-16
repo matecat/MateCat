@@ -105,4 +105,8 @@ class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct impl
         return (array) $this;
     }
 
+    public function __toString(): string {
+        return json_encode( $this->jsonSerialize() );
+    }
+
 }

@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
@@ -36,7 +36,7 @@ class SplitSegmentController extends KleinController {
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $request['jobStruct']->source, $request['jobStruct']->target, [] );
-            list( $request['segment'], $translationStruct->source_chunk_lengths ) = CatUtils::parseSegmentSplit( $request['segment'], '', $Filter );
+            [ $request['segment'], $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request['segment'], '', $Filter );
 
             /* Fill the statuses with DEFAULT DRAFT VALUES */
             $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );
