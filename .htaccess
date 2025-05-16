@@ -27,7 +27,7 @@ RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ inde
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
 RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$5&password=$6&revision=$2 [L]
 
-RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
+#RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
 # Page Views (replacing old viewController until we can definitely remove it by routing everything through the router)
@@ -38,13 +38,12 @@ RewriteRule ^signin$ router.php [L]
 RewriteRule ^revise-summary/(.*)$ router.php [QSA,L]
 RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
 RewriteRule ^views/(.*)$ router.php [QSA,L]
+RewriteRule ^utils/(.*)$ router.php [QSA,L]
 
 
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
 RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
-
-RewriteRule ^utils/pee$ router.php [L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
