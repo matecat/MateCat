@@ -14,7 +14,7 @@ use AbstractControllers\BaseKleinViewController;
 use API\Commons\Validators\Base;
 use INIT;
 
-class LoginRedirectValidator extends Base {
+class ViewLoginRedirectValidator extends Base {
 
     /**
      * @param BaseKleinViewController $controller

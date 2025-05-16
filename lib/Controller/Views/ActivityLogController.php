@@ -7,7 +7,7 @@ use AbstractControllers\IController;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\ViewValidators\LoginRedirectValidator;
+use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use ReflectionException;
 
@@ -20,7 +20,7 @@ use ReflectionException;
 class ActivityLogController extends BaseKleinViewController implements IController {
 
     protected function afterConstruct() {
-        $this->appendValidator( new LoginRedirectValidator( $this ) );
+        $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
         $this->appendValidator(
                 ( new ProjectPasswordValidator( $this ) )->onFailure( function () {
                     $this->setView( "project_not_found.html", [], 404 );

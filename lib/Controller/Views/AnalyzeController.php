@@ -15,7 +15,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
 use API\App\Json\Analysis\AnalysisProject;
-use API\Commons\ViewValidators\LoginRedirectValidator;
+use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Chunks_ChunkDao;
 use Exception;
 use INIT;
@@ -28,7 +28,7 @@ use Utils;
 class AnalyzeController extends BaseKleinViewController implements IController {
 
     protected function afterConstruct() {
-        $this->appendValidator( new LoginRedirectValidator( $this ) );
+        $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
     }
 
     /**
