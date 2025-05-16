@@ -19,9 +19,9 @@ class AnalysisMatch implements JsonSerializable {
      */
     protected int $raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected int $equivalent = 0;
+    protected float $equivalent = 0;
 
     /**
      * @var string
