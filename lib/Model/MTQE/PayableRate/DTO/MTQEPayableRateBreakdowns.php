@@ -34,14 +34,14 @@ class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoSilentStruct imple
     /** @var int $ice_mt The rate for ICE matches with MT. Default is 0. */
     public int $ice_mt = 0;
 
-    /** @var int $top_quality_mt The rate for top-quality MT matches. Default is 10. */
-    public int $top_quality_mt = 10;
+    /** @var int $top_quality_mt The rate for top-quality MT matches. Default is 9. */
+    public int $top_quality_mt = 9;
 
     /** @var int $higher_quality_mt The rate for higher-quality MT matches. Default is 30. */
-    public int $higher_quality_mt = 30;
+    public int $higher_quality_mt = 27;
 
     /** @var int $standard_quality_mt The rate for standard-quality MT matches. Default is 62. */
-    public int $standard_quality_mt = 62;
+    public int $standard_quality_mt = 75;
 
     /**
      * Serializes the object to a JSON-compatible array.
