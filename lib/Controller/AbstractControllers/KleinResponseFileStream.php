@@ -17,7 +17,7 @@ class KleinResponseFileStream {
     /**
      * @var Response
      */
-    protected $response;
+    protected Response $response;
 
     /**
      * KleinResponseFileStream constructor.
@@ -36,25 +36,23 @@ class KleinResponseFileStream {
      * files responses are usually downloads of some type
      * and rarely make sense to be HTTP cached
      *
-     * Also, this method removes any data/content that is
+     * Also, this method removes any data/content
      * currently in the response body and replaces it with
      * the file's data
      *
      * @param resource $filePointer The pointer to the file to send
-     * @param string   $filename    The file's name
+     * @param string  $filename    The file's name
      * @param string   $mimeType
      * @param string   $disposition
      *
      * @internal param KleinController $controller The MIME type of the file
      */
-    public function streamFileFromPointer( $filePointer, $mimeType, $disposition, $filename = 'downloaded_file.docx' ) {
+    public function streamFileFromPointer( $filePointer, string $mimeType, string $disposition, string $filename ) {
 
         $this->response->body( '' );
         $this->response->noCache();
 
-        if ( null !== $filename ) {
-            $filename = AbstractFilesStorage::basename_fix( $filename );
-        }
+        $filename = AbstractFilesStorage::basename_fix( $filename );
 
         $this->response->header( 'Content-type', $mimeType );
         $this->response->header( 'Content-Disposition', $disposition . '; filename="' . $filename . '"' );
@@ -71,7 +69,7 @@ class KleinResponseFileStream {
 
     }
 
-    public function streamFileDownloadFromPointer( $filePointer, $filename = null ) {
+    public function streamFileDownloadFromPointer( $filePointer, $filename ) {
         $this->streamFileFromPointer( $filePointer, "application/download", 'attachment', $filename );
     }
 

@@ -81,6 +81,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
 
 } );
 
+require './lib/Routes/view_routes.php';
 require './lib/Routes/api_v1_routes.php';
 require './lib/Routes/api_v2_routes.php';
 require './lib/Routes/api_v3_routes.php';

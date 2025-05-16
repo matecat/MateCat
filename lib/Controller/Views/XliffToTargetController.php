@@ -5,7 +5,7 @@ namespace Views;
 use AbstractControllers\BaseKleinViewController;
 use Exception;
 
-class XliffToTargetViewController extends BaseKleinViewController {
+class XliffToTargetController extends BaseKleinViewController {
 
     /**
      * @throws Exception
