@@ -10,6 +10,7 @@ namespace ConnectedServices\Google\GDrive;
 
 use API\Commons\Exceptions\AuthenticationError;
 use ArrayObject;
+use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
@@ -377,12 +378,15 @@ class Session {
 
     /**
      * @param string $fileId
+     * @param string $source
+     * @param string $segmentationRule
+     * @param int $filtersTemplate
      *
      * @return bool
      * @throws ConnectionException
      * @throws ReflectionException
      */
-    public function removeFile( string $fileId ): bool {
+    public function removeFile( string $fileId, $source, $segmentationRule = null, $filtersTemplate = 0 ): bool {
         $success = false;
 
         if ( isset( $this->session[ self::FILE_LIST ][ $fileId ] ) ) {
@@ -413,6 +417,7 @@ class Session {
                 $hashFile = $file[ 'fileHash' ] . "|" . end( $target );
 
                 if ( $item->getFilename() === $file[ 'fileName' ] or $item->getFilename() === $hashFile ) {
+                    CatUtils::deleteSha($tempUploadedFileDir."/". $file[ 'fileName' ], $source, $segmentationRule, $filtersTemplate);
                     unlink( $item );
                 }
             }
@@ -428,11 +433,15 @@ class Session {
     }
 
     /**
-     * @throws Exception
+     * @param $source
+     * @param null $segmentationRule
+     * @param int $filtersTemplate
+     * @throws ConnectionException
+     * @throws ReflectionException
      */
-    public function removeAllFiles() {
+    public function removeAllFiles($source, $segmentationRule = null, $filtersTemplate = 0) {
         foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
-            $this->removeFile( $singleFileId );
+            $this->removeFile( $singleFileId, $source, $segmentationRule, $filtersTemplate );
         }
 
         unset( $this->session[ self::FILE_LIST ] );
