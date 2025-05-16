@@ -40,7 +40,7 @@ class AnalysisMatch implements JsonSerializable {
         $this->type = $matchConstantsClass::validate( $name );
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'raw'        => $this->raw,
                 'equivalent' => round( $this->equivalent ),

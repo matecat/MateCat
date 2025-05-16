@@ -32,4 +32,12 @@ class InternalMatchesConstants {
     const HIGHER_QUALITY_MT   = 'HIGHER_QUALITY_MT';
     const STANDARD_QUALITY_MT = 'STANDARD_QUALITY_MT';
 
+    /**
+     * These values are not inserted in the database, they are needed to maintain the cross-correlation between the new and the old field names
+     * @see MTQEMatchTypeNamesConstants
+     * @see StandardMatchTypeNamesConstants
+     */
+    const TM_100_PUBLIC_MT_QE = 'TM_100_PUBLIC';
+    const TM_100_MT_QE        = 'TM_100';
+
 }

@@ -177,7 +177,7 @@ route( '/api/app/split-segment', 'POST', ['API\App\SplitSegmentController', 'spl
 route( '/api/app/new-tmx', 'POST', ['API\App\LoadTMXController', 'newTM' ] );
 route( '/api/app/upload-tmx-status', 'POST', ['API\App\LoadTMXController', 'uploadStatus' ] );
 route( '/api/app/change-job-status', 'POST', ['API\App\ChangeJobsStatusController', 'changeStatus' ] );
-route( '/api/app/download-tmx', 'POST', ['API\App\DownloadTMXController', 'download' ] );
+route( '/api/app/download-tmx', 'POST', [ 'API\App\RequestExportTMXController', 'download' ] );
 route( '/api/app/new-project', 'POST', ['API\App\CreateProjectController', 'create' ] );
 route( '/api/app/convert-file', 'POST', ['API\App\ConvertFileController', 'handle' ] );
 route( '/api/app/set-chunk-completed', 'POST', ['API\App\SetChunkCompletedController', 'complete' ] );
