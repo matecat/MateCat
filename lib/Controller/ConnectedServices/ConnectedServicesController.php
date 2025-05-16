@@ -11,7 +11,7 @@ namespace ConnectedServices;
 
 use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
-use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Validators\LoginValidator;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
@@ -24,6 +24,14 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
      * @var ?ConnectedServiceStruct
      */
     protected ?ConnectedServiceStruct $connectedServiceStruct = null;
+
+    /**
+     * @return void
+     */
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
 
     /**
      * @throws NotFoundException
@@ -54,7 +62,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
             $this->connectedServiceStruct->disabled_at = null;
         }
 
-        ConnectedServiceDao::updateStruct( $this->connectedServiceStruct, [ 'fields'=> [ 'disabled_at' ] ] );
+        ConnectedServiceDao::updateStruct( $this->connectedServiceStruct, [ 'fields' => [ 'disabled_at' ] ] );
 
         $this->refreshClientSessionIfNotApi();
 
@@ -81,17 +89,11 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @throws AuthenticationError
      * @throws NotFoundException
      */
     private function __validateOwnership() {
 
-        // check for the user to be logged
-        if ( !$this->user ) {
-            throw new AuthenticationError( 'user not found' );
-        }
-
-        $serviceDao    = new ConnectedServiceDao();
+        $serviceDao                   = new ConnectedServiceDao();
         $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId( $this->user, $this->request->param( 'id_service' ) );
 
         if ( !$this->connectedServiceStruct ) {

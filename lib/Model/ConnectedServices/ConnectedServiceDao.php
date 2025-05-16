@@ -3,12 +3,14 @@
 
 namespace ConnectedServices;
 
+use DataAccess_AbstractDao;
+use Exception;
 use Exceptions\ValidationError;
 use PDO;
 use Users_UserStruct;
 use Utils;
 
-class ConnectedServiceDao extends \DataAccess_AbstractDao {
+class ConnectedServiceDao extends DataAccess_AbstractDao {
 
     const TABLE          = 'connected_services';
     const GDRIVE_SERVICE = 'gdrive';
@@ -37,9 +39,9 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param ConnectedServiceStruct $service
      *
      * @return ConnectedServiceStruct
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateOauthToken( $token, ConnectedServiceStruct $service ) {
+    public function updateOauthToken( $token, ConnectedServiceStruct $service ): ConnectedServiceStruct {
         $service->updated_at = Utils::mysqlTimestamp( time() );
         $service->setEncryptedAccessToken( $token );
 
@@ -52,10 +54,10 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param                        $time
      * @param ConnectedServiceStruct $service
      *
-     * @return bool
-     * @throws \Exception
+     * @return int
+     * @throws Exception
      */
-    public function setServiceExpired( $time, ConnectedServiceStruct $service ) {
+    public function setServiceExpired( $time, ConnectedServiceStruct $service ): int {
         $service->expired_at = Utils::mysqlTimestamp( $time );
 
         return $this->updateStruct( $service, [ 'fields' => [ 'expired_at' ] ] );
@@ -110,7 +112,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      *
      * @return ConnectedServiceStruct[]
      */
-    public function findServicesByUser( Users_UserStruct $user ) {
+    public function findServicesByUser( Users_UserStruct $user ): array {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -130,7 +132,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param Users_UserStruct $user
      * @param                  $name
      *
-     * @return \ConnectedServices\ConnectedServiceStruct[]
+     * @return ConnectedServiceStruct[]
      *
      */
     public function findServicesByUserAndName( Users_UserStruct $user, $name ) {
@@ -185,9 +187,9 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param                  $service
      * @param                  $email
      *
-     * @return mixed
+     * @return ?ConnectedServiceStruct
      */
-    public function findUserServicesByNameAndEmail( Users_UserStruct $user, $service, $email ) {
+    public function findUserServicesByNameAndEmail( Users_UserStruct $user, $service, $email ): ?ConnectedServiceStruct {
         $stmt = $this->database->getConnection()->prepare(
                 " SELECT * FROM connected_services WHERE " .
                 " uid = :uid AND service = :service AND email = :email "
