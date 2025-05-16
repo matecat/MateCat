@@ -134,6 +134,7 @@ route( '/analyze/[:project_name]/[i:pid]-[:password]', 'GET', [ 'Views\AnalyzeCo
 route( '/jobanalysis/[i:pid]-[i:jid]-[:password]', 'GET', [ 'Views\AnalyzeController', 'renderView' ] );
 route( '/revise-summary/[i:jid]-[:password]', 'GET', [ 'Views\QualityReportController', 'renderView' ] );
 route( '/activityLog/[i:id_project]/[:password]', 'GET', [ 'Views\ActivityLogController', 'renderView' ] );
+route( '/utils/xliff-to-target', 'GET', [ 'Views\XliffToTargetViewController', 'renderView' ] );
 
 // MISC (OLD AJAX ROUTES)
 route( '/api/app/fetch-change-rates', 'POST', [ 'API\App\FetchChangeRatesController', 'fetch' ] );
