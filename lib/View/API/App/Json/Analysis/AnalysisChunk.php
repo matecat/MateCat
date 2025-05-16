@@ -47,9 +47,9 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected int $total_raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected int $total_equivalent = 0;
+    protected float $total_equivalent = 0;
     /**
      * @var int
      */
@@ -86,8 +86,8 @@ class AnalysisChunk implements JsonSerializable {
                 'files'            => array_values( $this->files ),
                 'summary'          => $this->summary,
                 'total_raw'        => $this->total_raw,
-                'total_equivalent' => round( $this->total_equivalent ),
-                'total_industry'   => round( $this->total_industry ),
+                'total_equivalent' => (int)$this->total_equivalent,
+                'total_industry'   => $this->total_industry,
         ];
     }
 
@@ -178,20 +178,20 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
-     * @param $raw
+     * @param int $raw
      *
      * @return void
      */
-    public function incrementRaw( $raw ) {
-        $this->total_raw += (int)$raw;
+    public function incrementRaw( int $raw ) {
+        $this->total_raw += $raw;
     }
 
     /**
-     * @param $equivalent
+     * @param float $equivalent
      *
      * @return void
      */
-    public function incrementEquivalent( $equivalent ) {
+    public function incrementEquivalent( float $equivalent ) {
         $this->total_equivalent += $equivalent;
     }
 
