@@ -13,7 +13,7 @@ use AbstractControllers\BaseKleinViewController;
 use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\LoginRedirectValidator;
+use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Utils;
 
@@ -22,7 +22,7 @@ class ManageController extends BaseKleinViewController implements IController {
     protected string $_outsource_login_API = '//signin.translated.net/';
 
     protected function afterConstruct() {
-        $this->appendValidator( new LoginRedirectValidator( $this ) );
+        $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
     }
 
     /**
