@@ -8,6 +8,7 @@ use FilesStorage\AbstractFilesStorage;
  * Date: 27/01/14
  * Time: 18.57
  *
+ * @deprecated
  */
 abstract class downloadController extends controller {
 
