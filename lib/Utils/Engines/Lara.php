@@ -169,6 +169,7 @@ class Lara extends Engines_AbstractEngine {
      *
      * @return array|Engines_Results_AbstractResponse
      * @throws ReflectionException
+     * @throws LaraException
      * @throws Exception
      */
     public function get( $_config ) {

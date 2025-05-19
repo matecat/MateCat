@@ -160,32 +160,35 @@ class Bootstrap {
 
         Log::$fileName = 'fatal_errors.txt';
 
-        try {
-            /**
-             * @var $exception Exception
-             */
-            throw $exception;
-        } catch ( AuthenticationError $e ) {
-            $code = 401;
-            Log::doJsonLog( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( InvalidArgumentException $e ) {
-            $code = 400;
-            Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\NotFoundException|API\Commons\Exceptions\NotFoundException $e ) {
-            $code = 404;
-            Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\AuthorizationError|API\Commons\Exceptions\AuthorizationError $e ) {
-            $code = 403;
-            Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( ValidationError|Exceptions\ValidationError $e ) {
-            $code = 409;
-            Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( PDOException $e ) {
-            $code = 503;
-            Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
-        } catch ( Throwable $e ) {
-            $code = 500;
-            Log::doJsonLog( [ "ExceptionType" => get_class( $e ), "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        switch ( get_class( $exception ) ) {
+            case AuthenticationError::class: // authentication requested
+                $code = 401;
+                Log::doJsonLog( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case InvalidArgumentException::class:
+            case ValidationError:: class:
+            case Exceptions\ValidationError::class:
+                $code = 400;
+                Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case Exceptions\NotFoundException:: class:
+            case API\Commons\Exceptions\NotFoundException::class:
+                $code = 404;
+                Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case Exceptions\AuthorizationError::class:
+            case API\Commons\Exceptions\AuthorizationError::class:
+                $code = 403;
+                Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case PDOException::class:
+                $code = 503;
+                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                break;
+            default:
+                $code = 500;
+                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                break;
         }
 
         self::formatOutputExceptions( $code, $exception );

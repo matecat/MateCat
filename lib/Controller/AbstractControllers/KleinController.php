@@ -173,7 +173,7 @@ abstract class KleinController implements IController {
         $this->afterValidate();
     }
 
-    protected function appendValidator( Base $validator ) {
+    protected function appendValidator( Base $validator ): KleinController {
         $this->validators[] = $validator;
 
         return $this;
@@ -218,58 +218,6 @@ abstract class KleinController implements IController {
         return CatUtils::getIsRevisionFromReferer();
     }
 
-    /**
-     * @param Exception $exception
-     *
-     * @return Response
-     */
-    protected function returnException( Exception $exception ): Response {
-        // determine http code
-        switch ( get_class( $exception ) ) {
-
-            case InvalidValue::class:
-            case JSONValidatorException::class:
-            case JsonValidatorGenericException::class:
-            case InvalidArgumentException::class:
-            case DomainException::class:
-                $httpCode = 400;
-                break;
-
-            case AuthenticationError::class:
-                $httpCode = 401;
-                break;
-
-            case NotFoundException::class:
-                $httpCode = 404;
-                break;
-
-            case RuntimeException::class:
-                $httpCode = 500;
-                break;
-
-            case TimeoutException::class:
-                $httpCode = 504;
-                break;
-
-            default:
-                $httpCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
-                break;
-        }
-
-        $this->response->code( $httpCode );
-
-        return $this->response->json( [
-                'errors' => [
-                        "code"    => $exception->getCode(),
-                        "message" => $exception->getMessage(),
-                        "debug"   => [
-                                "trace" => $exception->getTrace(),
-                                "file"  => $exception->getFile(),
-                                "line"  => $exception->getLine(),
-                        ]
-                ]
-        ] );
-    }
 
     /**
      * @param $id_segment

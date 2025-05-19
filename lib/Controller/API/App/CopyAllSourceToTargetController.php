@@ -15,7 +15,7 @@ use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
-use Klein\Response;
+use ReflectionException;
 use RuntimeException;
 use Translations_SegmentTranslationDao;
 use WordCount\CounterModel;
@@ -27,140 +27,135 @@ class CopyAllSourceToTargetController extends KleinController {
     }
 
     /**
-     * @return Response
+     * @throws Exception
      */
-    public function copy(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $revision_number = $request['revision_number'];
-            $job_data = $request['job_data'];
+    public function copy(): void {
 
-            return $this->saveEventsAndUpdateTranslations( $job_data, $revision_number);
-        } catch (Exception $exception){
-            $this->returnException($exception);
-        }
+        $request         = $this->validateTheRequest();
+        $revision_number = $request[ 'revision_number' ];
+        $job_data        = $request[ 'job_data' ];
+
+        $data = $this->saveEventsAndUpdateTranslations( $job_data, $revision_number );
+        $this->response->json( $data );
+
     }
 
     /**
      * @return array
+     * @throws InvalidArgumentException
      * @throws Exception
      */
-    private function validateTheRequest(): array
-    {
-        $pass = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+    private function validateTheRequest(): array {
+        $pass   = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
 
         $this->log( "Requested massive copy-source-to-target for job $id_job." );
 
         if ( empty( $id_job ) ) {
-            throw new InvalidArgumentException("Empty id job", -1);
+            throw new InvalidArgumentException( "Empty id job", -1 );
 
         }
         if ( empty( $pass ) ) {
-            throw new InvalidArgumentException("Empty job password", -2);
+            throw new InvalidArgumentException( "Empty job password", -2 );
         }
 
         $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $pass );
 
         if ( empty( $job_data ) ) {
-            throw new InvalidArgumentException("Wrong id_job-password couple. Job not found", -3);
+            throw new InvalidArgumentException( "Wrong id_job-password couple. Job not found", -3 );
         }
 
         return [
-            'id_job' => $id_job,
-            'pass' => $pass,
-            'revision_number' => $revision_number,
-            'job_data' => $job_data,
+                'id_job'          => $id_job,
+                'pass'            => $pass,
+                'revision_number' => $revision_number,
+                'job_data'        => $job_data,
         ];
     }
 
     /**
      * @param Jobs_JobStruct $chunk
-     * @param $revision_number
-     * @return Response
+     * @param                $revision_number
+     *
+     * @return array
+     * @throws ReflectionException
      * @throws Exception
      */
-    private function saveEventsAndUpdateTranslations(Jobs_JobStruct $chunk, $revision_number): Response
-    {
-        try {
-            // BEGIN TRANSACTION
-            $database = Database::obtain();
-            $database->begin();
+    private function saveEventsAndUpdateTranslations( Jobs_JobStruct $chunk, $revision_number ): array {
 
-            $features = $chunk->getProject()->getFeaturesSet();
+        // BEGIN TRANSACTION
+        $database = Database::obtain();
+        $database->begin();
 
-            $batchEventCreator = new TranslationEventsHandler( $chunk );
-            $batchEventCreator->setFeatureSet( $features );
-            $batchEventCreator->setProject( $chunk->getProject() );
+        $features = $chunk->getProject()->getFeaturesSet();
 
-            $source_page = ReviewUtils::revisionNumberToSourcePage( (int)$revision_number );
-            $segments    = $chunk->getSegments();
+        $batchEventCreator = new TranslationEventsHandler( $chunk );
+        $batchEventCreator->setFeatureSet( $features );
+        $batchEventCreator->setProject( $chunk->getProject() );
 
-            $affected_rows = 0;
+        $source_page = ReviewUtils::revisionNumberToSourcePage( (int)$revision_number );
+        $segments    = $chunk->getSegments();
 
-            foreach ( $segments as $segment ) {
+        $affected_rows = 0;
 
-                $segment_id = (int)$segment->id;
-                $chunk_id   = (int)$chunk->id;
+        foreach ( $segments as $segment ) {
 
-                $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
+            $segment_id = (int)$segment->id;
+            $chunk_id   = (int)$chunk->id;
 
-                if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
-                    //no segment found
-                    continue;
-                }
+            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-                $new_translation                   = clone $old_translation;
-                $new_translation->translation      = $segment->segment;
-                $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
-                $new_translation->translation_date = date( "Y-m-d H:i:s" );
+            if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
+                //no segment found
+                continue;
+            }
 
+            $new_translation                   = clone $old_translation;
+            $new_translation->translation      = $segment->segment;
+            $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
+            $new_translation->translation_date = date( "Y-m-d H:i:s" );
+
+            try {
+                $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+            } catch ( Exception $e ) {
+                $database->rollback();
+
+                throw new RuntimeException( $e->getMessage(), -4 );
+            }
+
+            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
                 try {
-                    $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+                    $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
+                    $batchEventCreator->addEvent( $segmentTranslationEventModel );
                 } catch ( Exception $e ) {
                     $database->rollback();
 
-                    throw new RuntimeException($e->getMessage(), -4);
-                }
-
-                if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
-                    try {
-                        $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
-                        $batchEventCreator->addEvent( $segmentTranslationEventModel );
-                    } catch ( Exception $e ) {
-                        $database->rollback();
-
-                        throw new RuntimeException("Job archived or deleted", -5);
-                    }
+                    throw new RuntimeException( "Job archived or deleted", -5 );
                 }
             }
+        }
 
-            // save all events
-            $batchEventCreator->save( new BatchReviewProcessor() );
+        // save all events
+        $batchEventCreator->save( new BatchReviewProcessor() );
 
-            if ( !empty( $params[ 'segment_ids' ] ) ) {
-                $counter = new CounterModel();
-                $counter->initializeJobWordCount( $chunk->id, $chunk->password );
-            }
+        if ( !empty( $params[ 'segment_ids' ] ) ) {
+            $counter = new CounterModel();
+            $counter->initializeJobWordCount( $chunk->id, $chunk->password );
+        }
 
-            $data = [
+        $data = [
                 'code'              => 1,
                 'segments_modified' => $affected_rows
-            ];;
+        ];
 
-            $this->log( 'Segment Translation events saved completed' );
-            $this->log( $data );
+        $this->log( 'Segment Translation events saved completed' );
+        $this->log( $data );
 
-            $database->commit(); // COMMIT TRANSACTION
+        $database->commit(); // COMMIT TRANSACTION
 
-            return $this->response->json([
-                'data' => $data
-            ]);
-        } catch (Exception $exception){
-            $this->returnException($exception);
-        }
+        return $data;
+
     }
 }
 
