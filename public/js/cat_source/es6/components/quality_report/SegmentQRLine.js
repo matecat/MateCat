@@ -120,6 +120,7 @@ const SegmentQRLine = ({
 
       {showSuggestionSource ? (
         <div className="segment-content qr-spec">
+          <div>Match:</div>
           <div className={'tm-percent ' + suggestionMatchClass}>
             {segment.get('suggestion_source') !== 'MT' ? (
               <b>
@@ -134,13 +135,6 @@ const SegmentQRLine = ({
 
       {showIceMatchInfo && segment.get('ice_locked') === '1' ? (
         <div className="segment-content qr-spec">
-          {segment.get('ice_locked') === '1' ? (
-            <div>
-              <b>ICE Match</b>
-              {segment.get('ice_modified') ? <div>(Modified)</div> : null}
-            </div>
-          ) : null}
-
           {tte ? (
             <div className={'tte-container'}>
               <b>TTE:</b>
