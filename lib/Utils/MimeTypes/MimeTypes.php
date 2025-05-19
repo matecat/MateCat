@@ -158,6 +158,10 @@ class MimeTypes {
                 continue;
             }
 
+            if ( !file_exists( $path ) ) {
+                throw new LogicException( 'Unable to guess the MIME type. File not found.' );
+            }
+
             $mimeType = $guesser->guessMimeType( $path );
 
             // if $mimeType is 'application/octet-stream', try with another guesser until the last one
