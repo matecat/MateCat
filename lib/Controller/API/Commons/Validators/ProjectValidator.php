@@ -5,7 +5,6 @@ namespace API\Commons\Validators;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
 use API\Commons\KleinController;
-use ApiKeys_ApiKeyStruct;
 use Log;
 use Projects_ProjectStruct;
 use Users_UserStruct;

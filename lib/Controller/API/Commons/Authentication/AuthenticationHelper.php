@@ -10,6 +10,7 @@ use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
+use Throwable;
 use Users_UserDao;
 use Users_UserStruct;
 
@@ -47,52 +48,51 @@ class AuthenticationHelper {
      * @param string|null $api_key
      * @param string|null $api_secret
      *
-     * @throws ReflectionException
      */
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
         $this->session =& $session;
         $this->user    = new Users_UserStruct();
 
-        if ( $this->validKeys( $api_key, $api_secret ) ) {
-            $this->user = $this->api_record->getUser();
-        } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) {
-            $this->user = $this->session[ 'user' ]; // php deserialize this from session string
-            AuthCookie::setCredentials( $this->user ); //realign and revamp cookie
-        } else {
-            // Credentials from AuthCookie
-            /**
-             * @var $user Users_UserStruct
-             */
-            $user_cookie_credentials = AuthCookie::getCredentials();
-            if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
-                $userDao = new Users_UserDao();
-                $userDao->setCacheTTL( 60 * 60 * 24 );
-                $this->user = $userDao->getByUid( $user_cookie_credentials[ 'user' ][ 'uid' ] );
-                $this->setUserSession();
+        try {
+
+            if ( $this->validKeys( $api_key, $api_secret ) ) {
+                $this->user = $this->api_record->getUser();
+            } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) {
+                $this->user = $this->session[ 'user' ]; // php deserialize this from session string
+                AuthCookie::setCredentials( $this->user ); //realign and revamp cookie
+            } else {
+                // Credentials from AuthCookie
+                /**
+                 * @var $user Users_UserStruct
+                 */
+                $user_cookie_credentials = AuthCookie::getCredentials();
+                if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
+                    $userDao = new Users_UserDao();
+                    $userDao->setCacheTTL( 60 * 60 * 24 );
+                    $this->user = $userDao->getByUid( $user_cookie_credentials[ 'user' ][ 'uid' ] );
+                    $this->setUserSession();
+                }
+
             }
+        } catch ( Throwable $ignore ) {
 
+        } finally {
+            $this->logged = $this->user->isLogged();
         }
-
-        $this->logged = (
-                !empty( $this->user->uid ) &&
-                !empty( $this->user->email ) &&
-                !empty( $this->user->first_name ) &&
-                !empty( $this->user->last_name )
-        );
 
     }
 
     /**
      * @throws ReflectionException
      */
-    public static function refreshSession( array &$session ){
+    public static function refreshSession( array &$session ) {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
         self::$instance = new AuthenticationHelper( $session );
     }
 
-    public static function destroyAuthentication( array &$session ){
+    public static function destroyAuthentication( array &$session ) {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
         AuthCookie::destroyAuthentication();

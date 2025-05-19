@@ -1,13 +1,7 @@
 <?php
 
 
-use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\GDrive\GDriveController;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use Langs\LanguageDomains;
 use Langs\Languages;

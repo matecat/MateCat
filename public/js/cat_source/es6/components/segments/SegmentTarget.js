@@ -210,8 +210,8 @@ class SegmentTarget extends React.Component {
               className="removeAllTags"
               size={BUTTON_SIZE.ICON_SMALL}
               mode={BUTTON_MODE.OUTLINE}
-              alt="Remove all tags"
-              title="Remove all tags"
+              alt={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+              title={`Remove all tags (${Shortcuts.cattol.events.removeTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
               onClick={this.removeTagsFromText.bind(this)}
             >
               <RemoveTagsIcon />
@@ -237,8 +237,8 @@ class SegmentTarget extends React.Component {
             <Button
               size={BUTTON_SIZE.ICON_SMALL}
               mode={BUTTON_MODE.OUTLINE}
-              alt="Copy missing tags from source to target"
-              title="Copy missing tags from source to target"
+              alt={`Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
+              title={`Copy missing tags from source to target (${Shortcuts.cattol.events.addTags.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
               onClick={this.editArea.addMissingSourceTagsToTarget}
             >
               <AddTagsIcon />

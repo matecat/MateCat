@@ -3,7 +3,9 @@
 namespace API\V3;
 
 use API\V2\BaseChunkController;
+use Exception;
 use QualityReport\QualityReportSegmentModel;
+use ZipArchive;
 
 
 class DownloadQRController extends BaseChunkController {
@@ -64,9 +66,9 @@ class DownloadQRController extends BaseChunkController {
             $prefix = "QR_".$this->idJob. "_". $this->password. "_";
             $filePath = tempnam("/tmp", $prefix);
 
-            $files = $this->composeFilesContentArray($chunk);
-            $this->composeZipFile($filePath, $files);
-            $this->downloadFile('application/zip', $prefix.date('YmdHis').'.zip', $filePath);
+            $fileContent = $this->composeFileContent($chunk);
+            file_put_contents($filePath, $fileContent);
+            $this->downloadFile($this->fileMimeType(), $prefix.date('YmdHis').'.'.$this->format, $filePath);
 
         } catch ( \Exceptions\NotFoundException $e ) {
             $this->response->status()->setCode( 404 );
@@ -90,12 +92,31 @@ class DownloadQRController extends BaseChunkController {
     }
 
     /**
+     * @return string
+     */
+    private function fileMimeType()
+    {
+        if($this->format === 'json'){
+            return 'application/json';
+        }
+
+        if($this->format === 'csv'){
+            return 'text/csv';
+        }
+
+        if($this->format === 'xml'){
+            return 'text/xml';
+        }
+
+        return 'application/octet-stream';
+    }
+
+    /**
      * @param \Jobs_JobStruct $chunk
-     *
-     * @return array
+     * @return bool|false|string
      * @throws \Exception
      */
-    private function composeFilesContentArray( \Jobs_JobStruct $chunk) {
+    private function composeFileContent(\Jobs_JobStruct $chunk) {
 
         $data = [];
 
@@ -136,10 +157,10 @@ class DownloadQRController extends BaseChunkController {
         }
 
         if(!isset($uniqueFile)){
-            throw new \Exception('Merging files for download failed.');
+            throw new Exception('Merging files for download failed.');
         }
 
-        return [$uniqueFile];
+        return $uniqueFile;
     }
 
     /**
@@ -502,9 +523,9 @@ class DownloadQRController extends BaseChunkController {
      * @param array  $files
      */
     private function composeZipFile($filename, array $files) {
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive;
 
-        if ($zip->open($filename, \ZipArchive::CREATE)) {
+        if ($zip->open($filename, ZipArchive::CREATE)) {
             foreach ($files as $index => $fileContent){
                 $zip->addFromString( "qr_file__".($index+1)."." . $this->format, $fileContent);
             }
