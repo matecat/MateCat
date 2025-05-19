@@ -39,7 +39,6 @@ RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
 RewriteRule ^views/(.*)$ router.php [QSA,L]
 RewriteRule ^utils/(.*)$ router.php [QSA,L]
 
-
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
 RewriteRule ^gdrive/(.*)$ router.php [QSA,L]

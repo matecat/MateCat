@@ -188,7 +188,7 @@ class ConvertFile
                 throw new RuntimeException("Nested zip files are not allowed.", ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED);
             }
         } else {
-            $conversionHandler->doAction();
+            $conversionHandler->processConversion();
             $result = $conversionHandler->getResult();
         }
 
