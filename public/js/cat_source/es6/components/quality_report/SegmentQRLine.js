@@ -50,7 +50,7 @@ const SegmentQRLine = ({
   let suggestionMatch, suggestionMatchClass
   if (showSuggestionSource) {
     suggestionMatch =
-      segment.get('match_type') === 'ICE'
+      segment.get('match_type').toUpperCase() === 'ICE'
         ? 101
         : parseInt(segment.get('suggestion_match'))
     suggestionMatchClass =
