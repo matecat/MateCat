@@ -27,6 +27,8 @@ $klein->with( '/api/v3/jobs/[i:id_job]/[:password]', function () {
     route( '/file/[i:id_file]/instructions', 'POST', [ '\API\V3\FileInfoController', 'setInstructions' ] );
     route( '/metadata', 'GET', [ '\API\V3\MetaDataController', 'index' ] );
 
+    route( '/warnings', 'GET', [ 'API\App\GetWarningController', 'global' ] );
+
     route( '/delete', 'POST', [ 'API\V3\ChangeJobStatusController', 'delete' ] );
     route( '/cancel', 'POST', [ 'API\V3\ChangeJobStatusController', 'cancel' ] );
     route( '/archive', 'POST', [ 'API\V3\ChangeJobStatusController', 'archive' ] );
