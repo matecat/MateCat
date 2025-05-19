@@ -49,6 +49,7 @@ RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activi
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
+RewriteRule ^api/new$ router.php [QSA,L]   #TODO We give to this rule priority, to not instradate the requests to the older controller. Remove this backward compatibility after the deprecation time.
 RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
