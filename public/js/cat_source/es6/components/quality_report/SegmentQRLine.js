@@ -133,18 +133,7 @@ const SegmentQRLine = ({
         </div>
       ) : null}
 
-      {showIceMatchInfo && segment.get('ice_locked') === '1' ? (
-        <div className="segment-content qr-spec">
-          {tte ? (
-            <div className={'tte-container'}>
-              <b>TTE:</b>
-              <div>
-                <div>{getTimeToEdit(tte)}</div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : tte ? (
+      {tte ? (
         <div className="segment-content qr-spec tte">
           <b>TTE:</b>
           <div>
