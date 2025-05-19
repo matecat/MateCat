@@ -3,6 +3,7 @@
 namespace API\V1;
 
 use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use Constants;
@@ -16,6 +17,8 @@ use Database;
 use Engine;
 use Engines_DeepL;
 use Exception;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use Filters\FiltersConfigTemplateDao;
@@ -43,6 +46,8 @@ use QAModelTemplate\QAModelTemplateStruct;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use stdClass;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
 use TmKeyManagement_MemoryKeyDao;
@@ -67,365 +72,362 @@ class NewController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function create() {
-        try {
-            $this->featureSet->loadFromUserEmail( $this->user->email );
-            $request    = $this->validateTheRequest();
-            $fs         = FilesStorageFactory::create();
-            $uploadFile = new Upload();
+    /**
+     * @throws AuthenticationError
+     * @throws ReQueueException
+     * @throws ValidationError
+     * @throws NotFoundException
+     * @throws EndQueueException
+     * @throws Exception
+     */
+    public function create(): void {
 
-            try {
-                $stdResult = $uploadFile->uploadFiles( $_FILES );
-            } catch ( Exception $e ) {
-                throw new RuntimeException( $e->getMessage(), -1 );
-            }
+        $this->featureSet->loadFromUserEmail( $this->user->email );
+        $request    = $this->validateTheRequest();
+        $fs         = FilesStorageFactory::create();
+        $uploadFile = new Upload();
 
-            $arFiles = [];
+        $stdResult = $uploadFile->uploadFiles( $_FILES );
 
-            foreach ( $stdResult as $input_value ) {
-                $arFiles[] = $input_value->name;
-            }
+        $arFiles = [];
 
-            // if fileupload was failed this index ( 0 = does not exists )
-            $default_project_name = @$arFiles[ 0 ];
-            if ( count( $arFiles ) > 1 ) {
-                $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-            }
+        foreach ( $stdResult as $input_value ) {
+            $arFiles[] = $input_value->name;
+        }
 
-            if ( empty( $request[ 'project_name' ] ) ) {
-                $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
-            }
+        // if fileupload was failed this index ( 0 = does not exists )
+        $default_project_name = @$arFiles[ 0 ];
+        if ( count( $arFiles ) > 1 ) {
+            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
+        }
 
-            $cookieDir = $uploadFile->getDirUploadToken();
-            $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-            $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        if ( empty( $request[ 'project_name' ] ) ) {
+            $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
+        }
 
-            $status = [];
+        $cookieDir = $uploadFile->getDirUploadToken();
+        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
+        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
 
-            foreach ( $arFiles as $file_name ) {
-                $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+        $status = [];
 
-                $conversionHandler = new ConversionHandler();
-                $conversionHandler->setFileName( $file_name );
-                $conversionHandler->setSourceLang( $request[ 'source_lang' ] );
-                $conversionHandler->setTargetLang( $request[ 'target_lang' ] );
-                $conversionHandler->setSegmentationRule( $request[ 'segmentation_rule' ] );
-                $conversionHandler->setCookieDir( $cookieDir );
-                $conversionHandler->setIntDir( $intDir );
-                $conversionHandler->setErrDir( $errDir );
-                $conversionHandler->setFeatures( $this->featureSet );
-                $conversionHandler->setUserIsLogged( $this->userIsLogged );
-                $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
+        foreach ( $arFiles as $file_name ) {
+            $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
 
-                if ( $ext == "zip" ) {
-                    // this makes the conversionhandler accumulate eventual errors on files and continue
-                    $conversionHandler->setStopOnFileException( false );
-                    $fileObjects = $conversionHandler->extractZipFile();
-                    Log::doJsonLog( 'fileObjets', $fileObjects );
+            $conversionHandler = new ConversionHandler();
+            $conversionHandler->setFileName( $file_name );
+            $conversionHandler->setSourceLang( $request[ 'source_lang' ] );
+            $conversionHandler->setTargetLang( $request[ 'target_lang' ] );
+            $conversionHandler->setSegmentationRule( $request[ 'segmentation_rule' ] );
+            $conversionHandler->setCookieDir( $cookieDir );
+            $conversionHandler->setIntDir( $intDir );
+            $conversionHandler->setErrDir( $errDir );
+            $conversionHandler->setFeatures( $this->featureSet );
+            $conversionHandler->setUserIsLogged( $this->userIsLogged );
+            $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
 
-                    // call convertFileWrapper and start conversions for each file
-                    if ( $conversionHandler->uploadError ) {
-                        $fileErrors = $conversionHandler->getUploadedFiles();
+            if ( $ext == "zip" ) {
+                // this makes the conversionhandler accumulate eventual errors on files and continue
+                $conversionHandler->setStopOnFileException( false );
+                $fileObjects = $conversionHandler->extractZipFile();
+                Log::doJsonLog( 'fileObjets', $fileObjects );
 
-                        foreach ( $fileErrors as $fileError ) {
-                            if ( count( $fileError->error ) == 0 ) {
+                // call convertFileWrapper and start conversions for each file
+                if ( $conversionHandler->uploadError ) {
+                    $fileErrors = $conversionHandler->getUploadedFiles();
+
+                    foreach ( $fileErrors as $fileError ) {
+                        if ( count( $fileError->error ) == 0 ) {
+                            continue;
+                        }
+
+                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
+                        $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
+                        $result->addError( $fileError->error[ 'message' ], $brokenFileName );
+                    }
+
+                    $realFileObjectInfo  = $fileObjects;
+                    $realFileObjectNames = array_map(
+                            [ 'ZipArchiveExtended', 'getFileName' ],
+                            $fileObjects
+                    );
+
+                    foreach ( $realFileObjectNames as $i => &$fileObject ) {
+                        $__fileName     = $fileObject;
+                        $__realFileName = $realFileObjectInfo[ $i ];
+                        $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
+
+                        $fileObject               = [
+                                'name' => $__fileName,
+                                'size' => $filesize
+                        ];
+                        $realFileObjectInfo[ $i ] = $fileObject;
+                    }
+
+                    $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
+                    $stdFileObjects                 = [];
+
+                    if ( $fileObjects !== null ) {
+                        foreach ( $fileObjects as $fName ) {
+
+                            if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
                                 continue;
                             }
 
-                            $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-                            $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
-                            $result->addError( $fileError->error[ 'message' ], $brokenFileName );
+                            $newStdFile       = new stdClass();
+                            $newStdFile->name = $fName;
+                            $stdFileObjects[] = $newStdFile;
+
                         }
+                    } else {
+                        $errors             = $conversionHandler->getResult();
+                        $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
+                        $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
+                        Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
 
-                        $realFileObjectInfo  = $fileObjects;
-                        $realFileObjectNames = array_map(
-                                [ 'ZipArchiveExtended', 'getFileName' ],
-                                $fileObjects
-                        );
-
-                        foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                            $__fileName     = $fileObject;
-                            $__realFileName = $realFileObjectInfo[ $i ];
-                            $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
-
-                            $fileObject               = [
-                                    'name' => $__fileName,
-                                    'size' => $filesize
-                            ];
-                            $realFileObjectInfo[ $i ] = $fileObject;
-                        }
-
-                        $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                        $stdFileObjects                 = [];
-
-                        if ( $fileObjects !== null ) {
-                            foreach ( $fileObjects as $fName ) {
-
-                                if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                                    continue;
-                                }
-
-                                $newStdFile       = new stdClass();
-                                $newStdFile->name = $fName;
-                                $stdFileObjects[] = $newStdFile;
-
-                            }
-                        } else {
-                            $errors             = $conversionHandler->getResult();
-                            $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                            $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                            Log::doJsonLog( "Zip error:" . $result[ 'errors' ] );
-
-                            throw new RuntimeException( "Zip Error" );
-                        }
-
-                        /* Do conversions here */
-                        $converter = new ConvertFile(
-                                $stdFileObjects,
-                                $request[ 'source_lang' ],
-                                $request[ 'target_lang' ],
-                                $intDir,
-                                $errDir,
-                                $cookieDir,
-                                $request[ 'segmentation_rule' ],
-                                $this->featureSet,
-                                $request[ 'filters_extraction_parameters' ],
-                                false );
-
-                        $converter->setUser( $this->user );
-                        $converter->convertFiles();
-
-                        $status = $errors = $converter->getErrors();
-
-                        if ( !empty( $errors ) ) {
-
-                            $result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                            $result->changeCode( 500 );
-                            $savedErrors    = $result->getErrors();
-                            $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $errors )[ 0 ] );
-
-                            if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
-                                $result->addError( $errors[ 0 ][ 'message' ], $brokenFileName );
-                            }
-
-                            $result = $status = [
-                                    'code'   => 500,
-                                    'data'   => [], // Is it correct????
-                                    'errors' => $errors,
-                            ];
-                        }
+                        throw new RuntimeException( "Zip Error" );
                     }
 
-                } else {
-                    $conversionHandler->processConversion();
-                    $res = $conversionHandler->getResult();
-                    if ( $res->getCode() < 0 ) {
-                        $status[] = [
-                                'code'     => $res->getCode(),
-                                'data'     => $res->getData(), // Is it correct????
-                                'errors'   => $res->getErrors(),
-                                'warnings' => $res->getWarnings(),
+                    /* Do conversions here */
+                    $converter = new ConvertFile(
+                            $stdFileObjects,
+                            $request[ 'source_lang' ],
+                            $request[ 'target_lang' ],
+                            $intDir,
+                            $errDir,
+                            $cookieDir,
+                            $request[ 'segmentation_rule' ],
+                            $this->featureSet,
+                            $request[ 'filters_extraction_parameters' ],
+                            false );
+
+                    $converter->setUser( $this->user );
+                    $converter->convertFiles();
+
+                    $status = $errors = $converter->getErrors();
+
+                    if ( !empty( $errors ) ) {
+
+                        $result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
+                        $result->changeCode( 500 );
+                        $savedErrors    = $result->getErrors();
+                        $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $errors )[ 0 ] );
+
+                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
+                            $result->addError( $errors[ 0 ][ 'message' ], $brokenFileName );
+                        }
+
+                        $result = $status = [
+                                'code'   => 500,
+                                'data'   => [], // Is it correct????
+                                'errors' => $errors,
                         ];
                     }
                 }
-            }
 
-            $status = array_values( $status );
-
-            // Upload errors handling
-            if ( !empty( $status ) ) {
-                throw new RuntimeException( 'Project Conversion Failure' );
-            }
-
-            /* Do conversions here */
-            if ( !empty( $result[ 'data' ] ) ) {
-                foreach ( $result[ 'data' ] as $zipFiles ) {
-                    $zipFiles  = json_decode( $zipFiles, true );
-                    $fileNames = array_column( $zipFiles, 'name' );
-                    $arFiles   = array_merge( $arFiles, $fileNames );
+            } else {
+                $conversionHandler->processConversion();
+                $res = $conversionHandler->getResult();
+                if ( $res->getCode() < 0 ) {
+                    $status[] = [
+                            'code'     => $res->getCode(),
+                            'data'     => $res->getData(), // Is it correct????
+                            'errors'   => $res->getErrors(),
+                            'warnings' => $res->getWarnings(),
+                    ];
                 }
             }
-
-            $newArFiles = [];
-
-            foreach ( $arFiles as $__fName ) {
-                if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-
-                    $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
-
-                    $linkFiles = scandir( $intDir );
-
-                    //fetch cache links, created by converter, from upload directory
-                    foreach ( $linkFiles as $storedFileName ) {
-                        //check if file begins with the name of the zip file.
-                        // If so, then it was stored in the zip file.
-                        if ( strpos( $storedFileName, $__fName ) !== false &&
-                                substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
-                        ) {
-                            //add file name to the files array
-                            $newArFiles[] = $storedFileName;
-                        }
-                    }
-
-                } else { //this file was not in a zip. Add it normally
-                    if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                        $newArFiles[] = $__fName;
-                    }
-                }
-            }
-
-            $arFiles = $newArFiles;
-            $arMeta  = [];
-
-            // create array_files_meta
-            foreach ( $arFiles as $arFile ) {
-                $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
-            }
-
-            $projectManager                                 = new ProjectManager();
-            $projectStructure                               = $projectManager->getProjectStructure();
-            $projectStructure[ 'sanitize_project_options' ] = false;
-            $projectStructure[ 'project_name' ]             = $request[ 'project_name' ];
-            $projectStructure[ 'job_subject' ]              = $request[ 'subject' ];
-            $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
-            $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
-            $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
-                $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
-            $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
-            $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
-            $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
-            $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
-            $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
-            $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
-            $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
-            $projectStructure[ 'status' ]                   = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-            $projectStructure[ 'owner' ]                    = $this->user->email;
-            $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
-            $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
-            $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
-
-            //default get all public matches from TM
-            $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
-
-            $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-            $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-            $projectStructure[ 'due_date' ]                              = ( empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
-            $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
-            $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
-
-            $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->user->getUid();
-            $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
-            $projectManager->setTeam( $request[ 'team' ] );
-
-            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
-            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter' ]            = (!empty($request[ 'character_counter' ])) ? $request[ 'character_counter' ] : null;
-            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
-
-            // mmtGlossaries
-            if ( $request[ 'mmt_glossaries' ] ) {
-                $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
-            }
-
-            // DeepL
-            $engine = Engine::getInstance( $request[ 'mt_engine' ] );
-            if ( $engine instanceof Engines_DeepL and $request[ 'deepl_formality' ] !== null ) {
-                $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
-            }
-
-            if ( $engine instanceof Engines_DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
-                $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
-            }
-
-            // with the qa template id
-            if ( $request[ 'qaModelTemplate' ] ) {
-                $projectStructure[ 'qa_model_template' ] = $request[ 'qaModelTemplate' ]->getDecodedModel();
-            }
-
-            if ( $request[ 'qaModel' ] ) {
-                $projectStructure[ 'qa_model' ] = $request[ 'qaModel' ]->getDecodedModel();
-            }
-
-            if ( $request[ 'mt_qe_workflow_payable_rate' ] ) {
-                $projectStructure[ 'mt_qe_workflow_payable_rate' ] = $request[ 'mt_qe_workflow_payable_rate' ];
-            }
-
-            if ( $request[ 'payableRateModelTemplate' ] ) {
-                $projectStructure[ 'payable_rate_model_id' ] = $request[ 'payableRateModelTemplate' ]->id;
-            }
-
-            if ( $request[ 'dialect_strict' ] ) {
-                $projectStructure[ 'dialect_strict' ] = $request[ 'dialect_strict' ];
-            }
-
-            if ( $request[ 'filters_extraction_parameters' ] ) {
-                $projectStructure[ 'filters_extraction_parameters' ] = $request[ 'filters_extraction_parameters' ];
-            }
-
-            if ( $request[ 'xliff_parameters' ] ) {
-                $projectStructure[ 'xliff_parameters' ] = $request[ 'xliff_parameters' ];
-            }
-
-            if ( $request[ 'mt_evaluation' ] ) {
-                $projectStructure[ 'mt_evaluation' ] = true;
-            }
-
-            //set features override
-            $projectStructure[ 'project_features' ] = $request[ 'project_features' ];
-
-            try {
-                $projectManager->sanitizeProjectStructure();
-            } catch ( Exception $e ) {
-                throw new RuntimeException( $e->getMessage(), -1 );
-            }
-
-            $fs::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
-
-            //reserve a project id from the sequence
-            $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
-            $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
-
-            $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $_POST );
-
-            // flag to mark the project "from API"
-            $projectStructure[ 'from_api' ] = true;
-
-            Queue::sendProject( $projectStructure );
-
-            $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
-
-            if ( $result == null ) {
-                throw new TimeoutException( 'Project Creation Failure' );
-            }
-
-            if ( !empty( $result[ 'errors' ] ) ) {
-                throw new RuntimeException( 'Project Creation Failure' );
-            }
-
-            return $this->response->json( [
-                    'status'       => 'OK',
-                    'message'      => 'Success',
-                    'id_project'   => $projectStructure[ 'id_project' ],
-                    'project_pass' => $projectStructure[ 'ppassword' ],
-                    'new_keys'     => $request[ 'new_keys' ],
-                    'analyze_url'  => $projectManager->getAnalyzeURL()
-            ] );
-
-        } catch ( Exception $exception ) {
-            return $this->returnException( $exception );
         }
+
+        $status = array_values( $status );
+
+        // Upload errors handling
+        if ( !empty( $status ) ) {
+            throw new RuntimeException( 'Project Conversion Failure' );
+        }
+
+        /* Do conversions here */
+        if ( !empty( $result[ 'data' ] ) ) {
+            foreach ( $result[ 'data' ] as $zipFiles ) {
+                $zipFiles  = json_decode( $zipFiles, true );
+                $fileNames = array_column( $zipFiles, 'name' );
+                $arFiles   = array_merge( $arFiles, $fileNames );
+            }
+        }
+
+        $newArFiles = [];
+
+        foreach ( $arFiles as $__fName ) {
+            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+
+
+                $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
+
+                $linkFiles = scandir( $intDir );
+
+                //fetch cache links, created by converter, from upload directory
+                foreach ( $linkFiles as $storedFileName ) {
+                    //check if file begins with the name of the zip file.
+                    // If so, then it was stored in the zip file.
+                    if ( strpos( $storedFileName, $__fName ) !== false &&
+                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
+                    ) {
+                        //add file name to the files array
+                        $newArFiles[] = $storedFileName;
+                    }
+                }
+
+            } else { //this file was not in a zip. Add it normally
+                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
+                    $newArFiles[] = $__fName;
+                }
+            }
+        }
+
+        $arFiles = $newArFiles;
+        $arMeta  = [];
+
+        // create array_files_meta
+        foreach ( $arFiles as $arFile ) {
+            $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
+        }
+
+        $projectManager                                 = new ProjectManager();
+        $projectStructure                               = $projectManager->getProjectStructure();
+        $projectStructure[ 'sanitize_project_options' ] = false;
+        $projectStructure[ 'project_name' ]             = $request[ 'project_name' ];
+        $projectStructure[ 'job_subject' ]              = $request[ 'subject' ];
+        $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
+        $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
+        $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
+        $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
+        $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
+        $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
+        $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
+        $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
+        $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
+        $projectStructure[ 'status' ]                   = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'owner' ]                    = $this->user->email;
+        $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
+        $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
+        $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
+
+        //default get all public matches from TM
+        $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
+
+        $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'due_date' ]                              = ( empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
+        $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
+        $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
+
+        $projectStructure[ 'userIsLogged' ] = true;
+        $projectStructure[ 'uid' ]          = $this->user->getUid();
+        $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
+        $projectManager->setTeam( $request[ 'team' ] );
+
+        $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
+        $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
+        $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
+        $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
+        $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
+        $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
+
+        // mmtGlossaries
+        if ( $request[ 'mmt_glossaries' ] ) {
+            $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
+        }
+
+        // DeepL
+        $engine = Engine::getInstance( $request[ 'mt_engine' ] );
+        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_formality' ] !== null ) {
+            $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
+        }
+
+        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
+            $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
+        }
+
+        // with the qa template id
+        if ( $request[ 'qaModelTemplate' ] ) {
+            $projectStructure[ 'qa_model_template' ] = $request[ 'qaModelTemplate' ]->getDecodedModel();
+        }
+
+        if ( $request[ 'qaModel' ] ) {
+            $projectStructure[ 'qa_model' ] = $request[ 'qaModel' ]->getDecodedModel();
+        }
+
+        if ( $request[ 'mt_qe_workflow_payable_rate' ] ) {
+            $projectStructure[ 'mt_qe_workflow_payable_rate' ] = $request[ 'mt_qe_workflow_payable_rate' ];
+        }
+
+        if ( $request[ 'payableRateModelTemplate' ] ) {
+            $projectStructure[ 'payable_rate_model_id' ] = $request[ 'payableRateModelTemplate' ]->id;
+        }
+
+        if ( $request[ 'dialect_strict' ] ) {
+            $projectStructure[ 'dialect_strict' ] = $request[ 'dialect_strict' ];
+        }
+
+        if ( $request[ 'filters_extraction_parameters' ] ) {
+            $projectStructure[ 'filters_extraction_parameters' ] = $request[ 'filters_extraction_parameters' ];
+        }
+
+        if ( $request[ 'xliff_parameters' ] ) {
+            $projectStructure[ 'xliff_parameters' ] = $request[ 'xliff_parameters' ];
+        }
+
+        if ( $request[ 'mt_evaluation' ] ) {
+            $projectStructure[ 'mt_evaluation' ] = true;
+        }
+
+        //set features override
+        $projectStructure[ 'project_features' ] = $request[ 'project_features' ];
+
+        $projectManager->sanitizeProjectStructure();
+
+        $fs::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
+
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
+
+        $projectStructure = $this->featureSet->filter( 'addNewProjectStructureAttributes', $projectStructure, $_POST );
+
+        // flag to mark the project "from API"
+        $projectStructure[ 'from_api' ] = true;
+
+        Queue::sendProject( $projectStructure );
+
+        $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
+
+        if ( $result == null ) {
+            throw new TimeoutException( 'Project Creation Failure' );
+        }
+
+        if ( !empty( $result[ 'errors' ] ) ) {
+            throw new RuntimeException( 'Project Creation Failure' );
+        }
+
+        $this->response->json( [
+                'status'       => 'OK',
+                'message'      => 'Success',
+                'id_project'   => $projectStructure[ 'id_project' ],
+                'project_pass' => $projectStructure[ 'ppassword' ],
+                'new_keys'     => $request[ 'new_keys' ],
+                'analyze_url'  => $projectManager->getAnalyzeURL()
+        ] );
+
     }
 
     /**
      * @param $projectStructure
      *
-     * @return mixed
+     * @return array
      */
-    private function pollForCreationResult( $projectStructure ) {
+    private function pollForCreationResult( $projectStructure ): array {
         return $projectStructure[ 'result' ][ 'errors' ]->getArrayCopy();
     }
 
@@ -685,6 +687,7 @@ class NewController extends KleinController {
      * @param $subject
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     private function validateSubject( $subject ): string {
         $langDomains = LanguageDomains::getInstance();
@@ -704,6 +707,7 @@ class NewController extends KleinController {
      * @param           $source_lang
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     private function validateSourceLang( Languages $lang_handler, $source_lang ): string {
         try {
@@ -720,6 +724,7 @@ class NewController extends KleinController {
      * @param           $target_lang
      *
      * @return string
+     * @throws InvalidArgumentException
      */
     private function validateTargetLangs( Languages $lang_handler, $target_lang ): string {
         $targets = explode( ',', $target_lang );
@@ -888,14 +893,14 @@ class NewController extends KleinController {
                     $private_tm_pass = $newUser->pass;
 
                     $private_tm_key[ $__key_idx ] =
-                        [
-                            'key'     => $newUser->key,
-                            'name'    => 'New resource created for project {{pid}}',
-                            'penalty' => $tm_key[ 'penalty' ] ?? null,
-                            'r'       => $tm_key[ 'r' ],
-                            'w'       => $tm_key[ 'w' ]
-                        ];
-                    $new_keys[] = $newUser->key;
+                            [
+                                    'key'     => $newUser->key,
+                                    'name'    => 'New resource created for project {{pid}}',
+                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'r'       => $tm_key[ 'r' ],
+                                    'w'       => $tm_key[ 'w' ]
+                            ];
+                    $new_keys[]                   = $newUser->key;
 
                 } catch ( Exception $e ) {
                     throw new Exception( $e->getMessage(), -1 );

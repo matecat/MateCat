@@ -8,8 +8,6 @@ use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
-use Klein\Response;
-use Log;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -24,120 +22,115 @@ class UserKeysController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function delete(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
-            $mkDao = $this->getMkDao();
-            $userMemoryKeys = $mkDao->disable( $memoryKeyToUpdate );
-            $this->featureSet->run('postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
+    /**
+     * @throws Exception
+     */
+    public function delete(): void {
 
-            return $this->response->json([
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->disable( $memoryKeyToUpdate );
+        $this->featureSet->run( 'postUserKeyDelete', $userMemoryKeys->tm_key->key, $this->user->uid );
+
+        $this->response->json( [
                 'errors'  => [],
-                'data' => $userMemoryKeys,
+                'data'    => $userMemoryKeys,
                 "success" => true
-            ]);
+        ] );
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
+
     }
 
-    public function update(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
-            $mkDao = $this->getMkDao();
-            $userMemoryKeys = $mkDao->atomicUpdate( $memoryKeyToUpdate );
+    /**
+     * @throws Exception
+     */
+    public function update(): void {
 
-            return $this->response->json([
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->atomicUpdate( $memoryKeyToUpdate );
+
+        $this->response->json( [
                 'errors'  => [],
-                'data' => $userMemoryKeys,
+                'data'    => $userMemoryKeys,
                 "success" => true
-            ]);
+        ] );
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
     }
 
-    public function newKey(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
-            $mkDao = $this->getMkDao();
-            $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
-            $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
+    /**
+     * @throws Exception
+     */
+    public function newKey(): void {
 
-            return $this->response->json([
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+        $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
+
+        $this->response->json( [
                 'errors'  => [],
-                'data' => $userMemoryKeys,
+                'data'    => $userMemoryKeys,
                 "success" => true
-            ]);
+        ] );
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
     }
 
-    public function info(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
-            $mkDao = $this->getMkDao();
-            $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
+    public function info(): void {
 
-            return $this->response->json($this->getKeyUsersInfo( $userMemoryKeys ));
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->read( $memoryKeyToUpdate );
+
+        $this->response->json( $this->getKeyUsersInfo( $userMemoryKeys ) );
+
     }
 
-    public function share(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate($request['key'], $request['description']);
-            $emailList = Utils::validateEmailList($request['emails']);
-            $mkDao = $this->getMkDao();
-            $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
+    /**
+     * @throws NotFoundException
+     * @throws Exception
+     */
+    public function share(): void {
 
-            if(empty($userMemoryKeys)){
-                throw new NotFoundException("No user memory keys found");
-            }
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $emailList         = Utils::validateEmailList( $request[ 'emails' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->read( $memoryKeyToUpdate );
 
-            (new TmKeyManagement_TmKeyManagement())->shareKey($emailList, $userMemoryKeys[0], $this->user);
-
-            return $this->response->json([
-                'errors'  => [],
-                'data' => $userMemoryKeys,
-                "success" => true
-            ]);
-
-        } catch (Exception $exception){
-            return $this->returnException($exception);
+        if ( empty( $userMemoryKeys ) ) {
+            throw new NotFoundException( "No user memory keys found" );
         }
+
+        ( new TmKeyManagement_TmKeyManagement() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
+
+        $this->response->json( [
+                'errors'  => [],
+                'data'    => $userMemoryKeys,
+                "success" => true
+        ] );
+
     }
 
     /**
      * @param array $userMemoryKeys
+     *
      * @return array
      */
-    protected function getKeyUsersInfo( array $userMemoryKeys ): array
-    {
+    protected function getKeyUsersInfo( array $userMemoryKeys ): array {
         $_userStructs = [];
-        foreach( $userMemoryKeys[0]->tm_key->getInUsers() as $userStruct ){
+        foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
             $_userStructs[] = new Users_ClientUserFacade( $userStruct );
         }
 
         return [
-            'errors'  => [],
-            "data"    => $_userStructs,
-            "success" => true
+                'errors'  => [],
+                "data"    => $_userStructs,
+                "success" => true
         ];
     }
 
@@ -145,15 +138,14 @@ class UserKeysController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array
-    {
-        $key = filter_var( $this->request->param( 'key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $emails = filter_var( $this->request->param( 'emails' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $description = filter_var( $this->request->param( 'description' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW ] );
+    private function validateTheRequest(): array {
+        $key         = filter_var( $this->request->param( 'key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $emails      = filter_var( $this->request->param( 'emails' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $description = filter_var( $this->request->param( 'description' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
         // check for eventual errors on the input passed
         if ( empty( $key ) ) {
-            throw new InvalidArgumentException("Key missing", -2);
+            throw new InvalidArgumentException( "Key missing", -2 );
         }
 
         // Prevent XSS attack
@@ -161,47 +153,36 @@ class UserKeysController extends KleinController {
         // POC. Try to add this string in the input:
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
-        if($_POST['description'] and $_POST['description'] !== $description){
-            throw new InvalidArgumentException("Invalid key description", -3);
+        if ( $_POST[ 'description' ] and $_POST[ 'description' ] !== $description ) {
+            throw new InvalidArgumentException( "Invalid key description", -3 );
         }
 
         return [
-            'key' => $key,
-            'emails' => $emails,
-            'description' => (!empty($description)) ? $description : null,
+                'key'         => $key,
+                'emails'      => $emails,
+                'description' => ( !empty( $description ) ) ? $description : null,
         ];
     }
 
     /**
      * @return TmKeyManagement_MemoryKeyDao
      */
-    private function getMkDao()
-    {
+    private function getMkDao(): TmKeyManagement_MemoryKeyDao {
         return new TmKeyManagement_MemoryKeyDao( Database::obtain() );
     }
 
     /**
-     * @param $key
+     * @param      $key
      * @param null $description
+     *
      * @return TmKeyManagement_MemoryKeyStruct
      * @throws Exception
      */
-    private function getMemoryToUpdate($key, $description = null)
-    {
+    private function getMemoryToUpdate( $key, $description = null ): TmKeyManagement_MemoryKeyStruct {
         $tmService = new TMSService();
 
         //validate the key
-        try {
-            $keyExists = $tmService->checkCorrectKey( $key );
-        } catch ( Exception $e ) {
-            /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
-            Log::doJsonLog( $e->getMessage() );
-        }
-
-        if ( !isset( $keyExists ) || $keyExists === false ) {
-            Log::doJsonLog( __METHOD__ . " -> TM key is not valid." );
-            throw new InvalidArgumentException( "TM key is not valid.", -4 );
-        }
+        $tmService->checkCorrectKey( $key );
 
         $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
         $tmKeyStruct->key  = $key;

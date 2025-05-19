@@ -10,42 +10,50 @@
 namespace API\Commons;
 
 
-use Exception;
 use INIT;
+use JsonSerializable;
 use Throwable;
 
-class Error {
+class Error implements JsonSerializable {
 
-    private array $data;
+    private Throwable $data;
 
     /**
      * Error constructor.
      *
-     * @param Exception[] $exceptions
+     * @param Throwable $exceptions
      */
-    public function __construct( array $exceptions = [] ) {
+    public function __construct( Throwable $exceptions ) {
         $this->data = $exceptions;
     }
 
-    public function render( $data = null ) {
+    public function render( bool $force_print_errors = false ): array {
 
         $row = [
                 "errors" => [],
                 "data"   => []
         ];
 
-        if ( empty( $data ) ) {
-            $data = $this->data;
-        }
-
-        foreach ( $data as $error ) {
+        foreach ( $this->data as $error ) {
 
             if ( $error instanceof Throwable ) {
+
                 $code   = $error->getCode();
                 $output = $error->getMessage();
-                if ( INIT::$PRINT_ERRORS ) {
+
+                if ( INIT::$PRINT_ERRORS || $force_print_errors ) {
+                    $row[ 'errors' ][ 0 ][ 'file' ] = $error->getFile();
+                    $row[ 'errors' ][ 0 ][ 'line' ] = $error->getLine();
                     $row[ 'errors' ][ 0 ][ 'trace' ] = $error->getTrace();
+                    if ( $error->getPrevious() ) {
+                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'message' ] = $error->getPrevious()->getMessage();
+                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'code' ]    = $error->getPrevious()->getCode();
+                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'file' ]    = $error->getPrevious()->getFile();
+                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'line' ]    = $error->getPrevious()->getLine();
+                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'trace' ]   = $error->getPrevious()->getTrace();
+                    }
                 }
+
             } else {
                 $code   = -1000;
                 $output = $error;
@@ -58,5 +66,10 @@ class Error {
 
         return $row;
     }
+
+    public function jsonSerialize(): array {
+        return $this->render();
+    }
+
 
 }

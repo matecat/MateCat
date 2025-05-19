@@ -62,7 +62,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      * @return null|TranslationsSplit_SplitStruct
      * @throws Exception
      */
-    public function atomicUpdate( TranslationsSplit_SplitStruct $obj ) {
+    public function atomicUpdate( TranslationsSplit_SplitStruct $obj ): ?TranslationsSplit_SplitStruct {
 
         $obj = $this->sanitize( $obj );
 

@@ -9,7 +9,6 @@ use Exception;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use InvalidArgumentException;
-use Klein\Response;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
@@ -22,101 +21,98 @@ class LoadTMXController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function newTM(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $TMService = new TMSService();
-            $file = $TMService->uploadFile();
+    /**
+     * @throws Exception
+     */
+    public function newTM(): void {
 
-            $uuids = [];
+        $request   = $this->validateTheRequest();
+        $TMService = new TMSService();
+        $file      = $TMService->uploadFile();
 
-            foreach ( $file as $fileInfo ) {
+        $uuids = [];
 
-                if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
-                    throw new Exception( "Please upload a TMX.", -8 );
-                }
+        foreach ( $file as $fileInfo ) {
 
-                $file = new TMSFile(
-                    $fileInfo->file_path,
-                    $request['tm_key'],
-                    $fileInfo->name
-                );
-
-                $TMService->addTmxInMyMemory( $file, $this->user );
-                $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
-
-                $this->featureSet->run( 'postPushTMX', $file, $this->user );
-
-                /*
-                 * We update the KeyRing only if this is NOT the Default MyMemory Key
-                 *
-                 * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
-                 */
-                if ( $request['tm_key'] != INIT::$DEFAULT_TM_KEY ) {
-
-                    /*
-                     * Update a memory key with the name of th TMX if the key name is empty
-                     */
-                    $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                    $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
-                    $key             = new TmKeyManagement_TmKeyStruct();
-                    $key->key        = $data['tm_key'];
-
-                    $searchMemoryKey->uid    = $this->user->uid;
-                    $searchMemoryKey->tm_key = $key;
-                    $userMemoryKey           = $mkDao->read( $searchMemoryKey );
-
-                    if ( empty( $userMemoryKey[ 0 ]->tm_key->name ) && !empty( $userMemoryKey ) ) {
-                        $userMemoryKey[ 0 ]->tm_key->name = $fileInfo->name;
-                        $mkDao->atomicUpdate( $userMemoryKey[ 0 ] );
-                    }
-                }
+            if ( AbstractFilesStorage::pathinfo_fix( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
+                throw new Exception( "Please upload a TMX.", -8 );
             }
 
-            return $this->response->json([
-                'errors' => [],
-                'data' => [
-                    'uuids' => $uuids
-                ]
-            ]);
+            $file = new TMSFile(
+                    $fileInfo->file_path,
+                    $request[ 'tm_key' ],
+                    $fileInfo->name
+            );
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
+            $TMService->addTmxInMyMemory( $file, $this->user );
+            $uuids[] = [ "uuid" => $file->getUuid(), "name" => $file->getName() ];
+
+            $this->featureSet->run( 'postPushTMX', $file, $this->user );
+
+            /*
+             * We update the KeyRing only if this is NOT the Default MyMemory Key
+             *
+             * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
+             */
+            if ( $request[ 'tm_key' ] != INIT::$DEFAULT_TM_KEY ) {
+
+                /*
+                 * Update a memory key with the name of th TMX if the key name is empty
+                 */
+                $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
+                $key             = new TmKeyManagement_TmKeyStruct();
+                $key->key        = $request[ 'tm_key' ];
+
+                $searchMemoryKey->uid    = $this->user->uid;
+                $searchMemoryKey->tm_key = $key;
+                $userMemoryKey           = $mkDao->read( $searchMemoryKey );
+
+                if ( empty( $userMemoryKey[ 0 ]->tm_key->name ) && !empty( $userMemoryKey ) ) {
+                    $userMemoryKey[ 0 ]->tm_key->name = $fileInfo->name;
+                    $mkDao->atomicUpdate( $userMemoryKey[ 0 ] );
+                }
+            }
         }
+
+        $this->response->json( [
+                'errors' => [],
+                'data'   => [
+                        'uuids' => $uuids
+                ]
+        ] );
+
     }
 
-    public function uploadStatus(): Response
-    {
-        try {
-            $request = $this->validateTheRequest();
-            $TMService = new TMSService();
-            $status    = $TMService->tmxUploadStatus( $request['uuid'] );
+    /**
+     * @throws Exception
+     */
+    public function uploadStatus(): void {
 
-            return $this->response->json([
+        $request   = $this->validateTheRequest();
+        $TMService = new TMSService();
+        $status    = $TMService->tmxUploadStatus( $request[ 'uuid' ] );
+
+        $this->response->json( [
                 'errors' => [],
-                'data' => $status[ 'data' ],
-            ]);
+                'data'   => $status[ 'data' ],
+        ] );
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
     }
 
     /**
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array
-    {
-        $name = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_LOW  ] );
-        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
-        $uuid = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' =>  FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW  ] );
+    private function validateTheRequest(): array {
+        $name   = filter_var( $this->request->param( 'name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $tm_key = filter_var( $this->request->param( 'tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
+        $uuid   = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
         if ( empty( $tm_key ) ) {
 
             if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
-                throw new InvalidArgumentException("Please specify a TM key.", -2);
+                throw new InvalidArgumentException( "Please specify a TM key.", -2 );
             }
 
             /*
@@ -128,9 +124,9 @@ class LoadTMXController extends KleinController {
         }
 
         return [
-            'name' => $name,
-            'tm_key' => $tm_key,
-            'uuid' => $uuid,
+                'name'   => $name,
+                'tm_key' => $tm_key,
+                'uuid'   => $uuid,
         ];
     }
 }

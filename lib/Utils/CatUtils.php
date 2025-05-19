@@ -198,16 +198,10 @@ class CatUtils {
      * @param bool                                  $is_revision
      *
      * @return void
-     * @throws ControllerReturnException
+     * @throws Exception
      */
     public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, bool $is_revision ) {
-
-        try {
-            Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
-        } catch ( Exception $e ) {
-            throw  new ControllerReturnException( $e->getMessage(), $e->getCode(), $e );
-        }
-
+        Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
     }
 
     /**
@@ -563,16 +557,15 @@ class CatUtils {
      *
      * @return string
      */
-    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string
-    {
+    public static function trimAndStripFromAnHtmlEntityDecoded( string $str ): string {
         $entityDecoded = html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
         // parse and extract CDATA
-        preg_match_all('/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches);
+        preg_match_all( '/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches );
 
-        if(isset($cdataMatches[1]) and !empty($cdataMatches[1])){
-            foreach($cdataMatches[1] as $k => $m){
-                $entityDecoded = str_replace($cdataMatches[0][$k], $m, $entityDecoded);
+        if ( isset( $cdataMatches[ 1 ] ) and !empty( $cdataMatches[ 1 ] ) ) {
+            foreach ( $cdataMatches[ 1 ] as $k => $m ) {
+                $entityDecoded = str_replace( $cdataMatches[ 0 ][ $k ], $m, $entityDecoded );
             }
         }
 

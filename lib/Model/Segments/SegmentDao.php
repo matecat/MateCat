@@ -554,9 +554,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param                $where
      * @param array          $options
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return SegmentUIStruct[]
+     * @throws ReflectionException
      */
-    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ) {
+    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ): array {
 
         switch ( $where ) {
             case 'after':
@@ -623,7 +624,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
         $optional_fields = "";
-        if ( isset( $options[ 'optional_fields' ] ) && !empty( $options[ 'optional_fields' ] ) ) {
+        if ( !empty( $options[ 'optional_fields' ] ) ) {
             $optional_fields = ', ' . implode( ', ', $options[ 'optional_fields' ] );
         }
 
@@ -678,7 +679,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
 
-        return $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+        /** @var SegmentUIStruct[] $r */
+        $r = $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+        return $r;
 
     }
 
