@@ -57,9 +57,9 @@ export const ANALYSIS_BUCKETS_LABELS = {
   tm_100: 'TM 100%',
   tm_100_public: 'Public TM 100%',
   ice: 'TM 100% in context',
-  ice_mt: 'Top Quality Machine Translation',
+  ice_mt: 'Top-Quality Machine Translation',
   top_quality_mt: 'Premium Machine Translation',
-  higher_quality_mt: 'Enhanced Machine Translation',
+  higher_quality_mt: 'High-Quality Machine Translation',
   standard_quality_mt: 'Baseline Machine Translation',
   numbers_only: 'Numbers Only',
 }
