@@ -26,13 +26,11 @@ const LXQ = {
       } else {
         SegmentActions.qaComponentsetLxqIssues(LXQ.lexiqaData.segments)
       }
-      CatToolActions.onRender()
       SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
     })
   },
   disable: function () {
     toggleTagLexica({enabled: false}).then(() => {
-      CatToolActions.onRender()
       SegmentActions.qaComponentsetLxqIssues([])
     })
   },
