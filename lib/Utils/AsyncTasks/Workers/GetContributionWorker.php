@@ -477,8 +477,16 @@ class GetContributionWorker extends AbstractWorker {
                 !$isCrossLang
         ) {
 
-            if ( $contributionStruct->mt_qe_workflow_enabled || ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) ) {
+            if ( ( $contributionStruct->mt_quality_value_in_editor ?? 0 ) > 99 || empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
+                /**
+                 * Call The MT Engine IF
+                 * - The user has set an MT Quality value in the editor > 99
+                 * OR
+                 * - The TM Engine has not returned any match
+                 * OR
+                 * - The TM Engine has returned a match with a score < 100
+                 */
                 $mt_engine = $contributionStruct->getMTEngine( $featureSet );
                 $config    = $mt_engine->getConfigStruct();
 
