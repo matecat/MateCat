@@ -40,6 +40,7 @@ use Translators\TranslatorsModel;
 use WordCount\CounterModel;
 use Xliff\DTO\XliffRulesModel;
 use Xliff\XliffConfigTemplateStruct;
+use Files\FileDao;
 
 class ProjectManager {
 
@@ -1083,7 +1084,7 @@ class ProjectManager {
         $this->_log( $e->getTraceAsString() );
         $this->_log( "Deleting Records." );
         ( new Projects_ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
-        ( new Files_FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
+        ( new FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
         $this->_log( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
         $this->_log( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
     }
@@ -1450,7 +1451,7 @@ class ProjectManager {
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
-                Files_FileDao::insertFilesJob( $newJob->id, $fid );
+                FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );

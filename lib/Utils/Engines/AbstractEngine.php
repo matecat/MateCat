@@ -428,7 +428,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * @return array
      * @throws Exception
      */
-    protected function _composeResponseAsMatch( string $raw_segment, $decoded, int $layerNum = 1 ): array {
+    protected function _composeMTResponseAsMatch( string $raw_segment, $decoded, int $layerNum = 1 ): array {
 
         $mt_result = new Engines_Results_MT( $decoded );
 

@@ -9,8 +9,8 @@
 
 namespace MTQE\PayableRate;
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
@@ -20,7 +20,7 @@ use PDO;
 use ReflectionException;
 use Utils;
 
-class MTQEPayableRateTemplateDao extends DataAccess_AbstractDao {
+class MTQEPayableRateTemplateDao extends AbstractDao {
 
     const TABLE = 'mt_qe_payable_rate_templates';
 

@@ -2,7 +2,7 @@
 /**
  * Created by PhpStorm.
  * This class represents the breakdown of payable rates in the MTQE system.
- * It extends the DataAccess_AbstractDaoObjectStruct and implements JsonSerializable for JSON serialization.
+ * It extends the \DataAccess\AbstractDaoObjectStruct and implements JsonSerializable for JSON serialization.
  *
  *  JSON Object @see https://jsongrid.com?data=9bd1dfea-8a98-4acc-b943-0897d8f51cdb
  *
@@ -14,10 +14,10 @@
 
 namespace MTQE\PayableRate\DTO;
 
-use DataAccess_AbstractDaoSilentStruct;
+use \DataAccess\AbstractDaoSilentStruct;
 use JsonSerializable;
 
-class MTQEPayableRateBreakdowns extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateBreakdowns extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
 
     /** @var int $ice The rate for ICE matches. Default is 0. */
     public int $ice = 0;

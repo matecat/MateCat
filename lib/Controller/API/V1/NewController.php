@@ -95,7 +95,7 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        // if fileupload was failed this index ( 0 = does not exists )
+        // if fileupload was failed, this index (0 = does not exist)
         $default_project_name = @$arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
@@ -127,7 +127,7 @@ class NewController extends KleinController {
             $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
 
             if ( $ext == "zip" ) {
-                // this makes the conversionhandler accumulate eventual errors on files and continue
+                // this makes the ConversionHandler accumulate eventual errors on files and continue
                 $conversionHandler->setStopOnFileException( false );
                 $fileObjects = $conversionHandler->extractZipFile();
                 Log::doJsonLog( 'fileObjets', $fileObjects );
@@ -265,19 +265,19 @@ class NewController extends KleinController {
 
                 $linkFiles = scandir( $intDir );
 
-                //fetch cache links, created by converter, from upload directory
+                //fetch cache links, created by converter, from the upload directory
                 foreach ( $linkFiles as $storedFileName ) {
-                    //check if file begins with the name of the zip file.
-                    // If so, then it was stored in the zip file.
+                    //Check if the file begins with the name of the zip file.
+                    //If so, then it was stored in the zip file.
                     if ( strpos( $storedFileName, $__fName ) !== false &&
                             substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
                     ) {
-                        //add file name to the files array
+                        //add the file name to the file's array
                         $newArFiles[] = $storedFileName;
                     }
                 }
 
-            } else { //this file was not in a zip. Add it normally
+            } else { //This file was not in a zip. Add it normally
                 if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
                     $newArFiles[] = $__fName;
                 }
@@ -314,7 +314,7 @@ class NewController extends KleinController {
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
 
-        //default get all public matches from TM
+        //default gets all public matches from TM
         $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
 
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
@@ -517,8 +517,8 @@ class NewController extends KleinController {
         if ( $mt_qe_workflow_enable ) {
 
             // engines restrictions
-            if ( $mt_engine == 1 ) {
-                throw new InvalidArgumentException( 'MT Engine 1 is not supported for QE Workflows' );
+            if ( $mt_engine <= 1 ) {
+                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
             }
 
             $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
@@ -556,9 +556,7 @@ class NewController extends KleinController {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
         }
 
-        if ( $mt_quality_value_in_editor ) {
-            $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
-        }
+        $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
 
         if ( $mt_evaluation ) {
             $metadata[ Projects_MetadataDao::MT_EVALUATION ] = true;
@@ -618,9 +616,9 @@ class NewController extends KleinController {
     }
 
     /**
-     * Expects the metadata param to be a json formatted string and tries to convert it
-     * in array.
-     * Json string is expected to be flat key value, this is enforced padding 1 to json
+     * Expects the metadata param to be a JSON formatted string and tries to convert it
+     * in an array.
+     * JSON string is expected to be a flat key value, this is enforced padding 1 to JSON
      * conversion depth param.
      *
      *
@@ -1362,7 +1360,7 @@ class NewController extends KleinController {
 
         $permissionString = $tmKeyInfo[ 1 ] ?? null;
 
-        //if the key is not set, return null. It will be filtered in the next lines.
+        //If the key is not set, return null. It will be filtered in the next lines.
         if ( empty( $tmKeyInfo[ 0 ] ) ) {
             return null;
         } //if permissions are set, check if they are allowed or not and eventually set permissions
@@ -1379,7 +1377,7 @@ class NewController extends KleinController {
             case ''  :
             case null:
                 break;
-            //permission string not allowed
+            //permission string value is not allowed
             default:
                 $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
                 throw new Exception( "Invalid permission modifier string. Allowed: <empty>, $allowed_permissions" );

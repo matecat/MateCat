@@ -1,12 +1,15 @@
 <?php
 
-class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
+
+class Segments_SegmentNoteDao extends AbstractDao {
 
     /**
      * @param     $id_segment
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|Segments_SegmentNoteStruct[]
+     * @return IDaoStruct[]|Segments_SegmentNoteStruct[]
      */
     public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
 
@@ -90,7 +93,7 @@ class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
      * @param     $id_segment_stop
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|Segments_SegmentNoteStruct[]
+     * @return IDaoStruct[]|Segments_SegmentNoteStruct[]
      */
     public static function getJsonNotesByRange( $id_segment_start, $id_segment_stop, $ttl = 0 ) {
 

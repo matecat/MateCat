@@ -34,35 +34,24 @@ class Error implements JsonSerializable {
                 "data"   => []
         ];
 
-        foreach ( $this->data as $error ) {
+        $code   = $this->data->getCode();
+        $output = $this->data->getMessage();
 
-            if ( $error instanceof Throwable ) {
-
-                $code   = $error->getCode();
-                $output = $error->getMessage();
-
-                if ( INIT::$PRINT_ERRORS || $force_print_errors ) {
-                    $row[ 'errors' ][ 0 ][ 'file' ] = $error->getFile();
-                    $row[ 'errors' ][ 0 ][ 'line' ] = $error->getLine();
-                    $row[ 'errors' ][ 0 ][ 'trace' ] = $error->getTrace();
-                    if ( $error->getPrevious() ) {
-                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'message' ] = $error->getPrevious()->getMessage();
-                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'code' ]    = $error->getPrevious()->getCode();
-                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'file' ]    = $error->getPrevious()->getFile();
-                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'line' ]    = $error->getPrevious()->getLine();
-                        $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'trace' ]   = $error->getPrevious()->getTrace();
-                    }
-                }
-
-            } else {
-                $code   = -1000;
-                $output = $error;
+        if ( INIT::$PRINT_ERRORS || $force_print_errors ) {
+            $row[ 'errors' ][ 0 ][ 'file' ]  = $this->data->getFile();
+            $row[ 'errors' ][ 0 ][ 'line' ]  = $this->data->getLine();
+            $row[ 'errors' ][ 0 ][ 'trace' ] = $this->data->getTrace();
+            if ( $this->data->getPrevious() ) {
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'message' ] = $this->data->getPrevious()->getMessage();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'code' ]    = $this->data->getPrevious()->getCode();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'file' ]    = $this->data->getPrevious()->getFile();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'line' ]    = $this->data->getPrevious()->getLine();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'trace' ]   = $this->data->getPrevious()->getTrace();
             }
-
-            $row[ 'errors' ][ 0 ][ 'code' ] = $code;
-            $row[ 'errors' ][ 0 ][ 'message' ] = $output;
-
         }
+
+        $row[ 'errors' ][ 0 ][ 'code' ]    = $code;
+        $row[ 'errors' ][ 0 ][ 'message' ] = $output;
 
         return $row;
     }

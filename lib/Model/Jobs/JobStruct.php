@@ -1,7 +1,11 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
 use DataAccess\ArrayAccessTrait;
+use DataAccess\IDaoStruct;
 use Exceptions\NotFoundException;
+use Files\FileDao;
+use Files\FileStruct;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
@@ -11,7 +15,7 @@ use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
 use WordCount\WordCountStruct;
 
-class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -164,7 +168,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
             $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $jobStruct->id_project ] ); //ten minutes cache
             foreach ( $openThreads as $openThread ) {
                 if ( $openThread->id_job == $jobStruct->id && $openThread->password == $jobStruct->password ) {
-                    return (int)$openThread->count;
+                    return $openThread->count;
                 }
             }
 
@@ -211,11 +215,11 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @return Files_FileStruct[]
+     * @return FileStruct[]
      * @throws ReflectionException
      */
     public function getFiles(): array {
-        return Files_FileDao::getByJobId( $this->id );
+        return FileDao::getByJobId( $this->id );
     }
 
     /**

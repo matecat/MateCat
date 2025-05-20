@@ -153,7 +153,7 @@ TAG;
 
         }
 
-        return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
@@ -203,7 +203,7 @@ TAG;
 
     protected function _formatRecursionError() {
 
-        return $this->_composeResponseAsMatch(
+        return $this->_composeMTResponseAsMatch(
                 '',
                 [
                         'error'          => [

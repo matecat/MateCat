@@ -3,14 +3,14 @@
 
 namespace ConnectedServices;
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Exception;
 use Exceptions\ValidationError;
 use PDO;
 use Users_UserStruct;
 use Utils;
 
-class ConnectedServiceDao extends DataAccess_AbstractDao {
+class ConnectedServiceDao extends AbstractDao {
 
     const TABLE          = 'connected_services';
     const GDRIVE_SERVICE = 'gdrive';

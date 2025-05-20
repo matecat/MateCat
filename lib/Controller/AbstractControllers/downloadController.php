@@ -1,5 +1,6 @@
 <?php
 
+use Files\FileDao;
 use FilesStorage\AbstractFilesStorage;
 
 /**
@@ -175,7 +176,7 @@ abstract class downloadController extends controller {
      * @return string
      */
     public function getDefaultFileName( Projects_ProjectStruct $project ) {
-        $files = Files_FileDao::getByProjectId( $project->id );
+        $files = FileDao::getByProjectId( $project->id );
 
         if ( count( $files ) > 1 ) {
             return $this->project->name . ".zip";

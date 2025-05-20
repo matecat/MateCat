@@ -118,7 +118,7 @@ class DownloadJobTMXController extends AbstractDownloadController {
     /**
      * @Override
      */
-    public function finalize($forceXliff = false) {
+    public function finalize( bool $forceXliff = false) {
 
         $buffer = ob_get_contents();
         ob_get_clean();

@@ -15,7 +15,6 @@ use Log;
 use Predis\Client;
 use RedisHandler;
 use ReflectionException;
-use Throwable;
 
 trait DaoCacheTrait {
 

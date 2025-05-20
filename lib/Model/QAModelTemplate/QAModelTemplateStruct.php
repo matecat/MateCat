@@ -2,13 +2,14 @@
 
 namespace QAModelTemplate;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use Exception;
+use JsonSerializable;
 use LQA\QAModelInterface;
 
-class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable, QAModelInterface {
+class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable, QAModelInterface {
     public int     $id          = 0;
     public int     $uid         = 0;
     public string  $label       = "";
@@ -46,7 +47,6 @@ class QAModelTemplateStruct extends DataAccess_AbstractDaoSilentStruct implement
         $QAModelTemplateStruct             = $this;
         $QAModelTemplateStruct->version    = $jsonModel->version;
         $QAModelTemplateStruct->label      = $jsonModel->label;
-        $QAModelTemplateStruct->passfail   = null;
         $QAModelTemplateStruct->categories = [];
 
         // QAModelTemplatePassfailStruct

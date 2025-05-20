@@ -1,9 +1,10 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Predis\Client;
 use Search\ReplaceEventStruct;
 
-class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Search_ReplaceEventDAOInterface {
+class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceEventDAOInterface {
 
     const TABLE = 'replace_events';
 

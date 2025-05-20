@@ -6,7 +6,7 @@ use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
-use DataAccess_IDaoStruct;
+use \DataAccess\IDaoStruct;
 use Exception;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
@@ -287,7 +287,7 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param DataAccess_IDaoStruct $segmentForAnalysis
+     * @param \DataAccess\IDaoStruct $segmentForAnalysis
      * @param array                 $projectPasswordsMap
      * @param array                 $notesAggregate
      * @param array                 $issuesAggregate
@@ -297,7 +297,7 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function formatSegment( DataAccess_IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
+    private function formatSegment( \DataAccess\IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
         // id_request
         $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 

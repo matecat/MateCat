@@ -60,7 +60,7 @@ class Engines_Apertium extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeResponseAsMatch($original[ "text" ], $decoded);
+        return $this->_composeMTResponseAsMatch($original[ "text" ], $decoded);
     }
 
     public function get( $_config ) {

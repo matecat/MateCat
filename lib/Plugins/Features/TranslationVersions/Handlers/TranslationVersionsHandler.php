@@ -16,6 +16,7 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 use Utils;
@@ -29,43 +30,45 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * @var TranslationVersionDao
      */
-    private $dao;
+    private TranslationVersionDao $dao;
 
     /**
      * @var int
      */
-    private $id_job;
+    private int $id_job;
 
     /**
      * @var Jobs_JobStruct
      */
-    private $chunkStruct;
+    private Jobs_JobStruct $chunkStruct;
 
     /**
      * @var int
      */
-    private $id_segment;
+    private int $id_segment;
 
     /**
      * @var int
      */
-    private $uid;
+    private int                    $uid;
+    private Projects_ProjectStruct $projectStruct;
 
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param Jobs_JobStruct     $chunkStruct
-     * @param                        $id_segment
+     * @param Jobs_JobStruct         $chunkStruct
+     * @param int                    $id_segment
      * @param Users_UserStruct       $userStruct
      * @param Projects_ProjectStruct $projectStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct, $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public function __construct( Jobs_JobStruct $chunkStruct, int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;
         $this->id_segment  = $id_segment;
         $this->uid         = $userStruct->uid;
         $this->dao         = new TranslationVersionDao();
+        $this->projectStruct = $projectStruct;
 
     }
 
@@ -90,6 +93,18 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         }
 
         return $version_saved;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array {
+        return Translations_SegmentTranslationDao::propagateTranslation(
+                $translationStruct,
+                $this->chunkStruct,
+                $this->id_segment,
+                $this->projectStruct,
+        );
     }
 
     /**
@@ -156,7 +171,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     public function storeTranslationEvent( $params ) {
 
         // evaluate if the record is to be created, either the
-        // status changed or the translation changed
+        // status changed, or the translation changed
         $user = $params[ 'user' ];
 
         /** @var Translations_SegmentTranslationStruct $translation */

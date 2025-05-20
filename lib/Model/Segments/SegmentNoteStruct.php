@@ -1,6 +1,6 @@
 <?php
 
-class Segments_SegmentNoteStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Segments_SegmentNoteStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id;
     public $id_segment;
