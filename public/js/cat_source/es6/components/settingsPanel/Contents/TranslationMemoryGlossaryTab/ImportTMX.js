@@ -51,7 +51,7 @@ export const ImportTMX = ({row, onClose}) => {
           )
         ) : (
           <div className="message-error">
-            <span>{errors[0].message}</span>
+            <span>{errors.message}</span>
             <button
               className="ui button red"
               onClick={() => formRef.current.reset()}
