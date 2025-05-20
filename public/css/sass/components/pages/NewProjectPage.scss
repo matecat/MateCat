@@ -100,6 +100,11 @@
   align-items: stretch;
   text-align: center;
   gap: 12px;
+  .upload-loading {
+    background: url(/public/img/loading.gif) 47% 50% no-repeat !important;
+    background-size: 24px !important;
+    height: 100%;
+  }
   h2 {
     font-size: 35px;
     line-height: 50px;
@@ -112,6 +117,9 @@
     font-size: 24px;
     line-height: 20px;
   }
+}
+.upload-waiting-logged {
+  height: 200px;
 }
 
 .translate-box.target,
