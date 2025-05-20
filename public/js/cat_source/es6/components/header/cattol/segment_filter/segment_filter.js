@@ -244,12 +244,14 @@ let SegmentFilterUtils = {
     const hash = segment.segment_hash
     const segmentFilterData = SegmentFilterUtils.getStoredState()
     const groupArray = segmentFilterData.serverData.grouping[hash]
-    const index = groupArray.indexOf(UI.currentSegmentId)
+    const index = groupArray ? groupArray.indexOf(UI.currentSegmentId) : -1
     let nextItem
     if (index >= 0 && index < groupArray.length - 1) {
       nextItem = groupArray[index + 1]
-    } else {
+    } else if (groupArray) {
       nextItem = groupArray[0]
+    } else {
+      return
     }
     UI.changeStatus(segment, status, function () {
       SegmentActions.openSegment(nextItem)
