@@ -103,7 +103,7 @@ class Segment extends React.Component {
         this.alertNotTranslatedYet(this.props.segment.sid)
       }
     } else {
-      if (this.props.segment.translation.length !== 0) {
+      if (this.props.segment.translation?.length !== 0) {
         SegmentActions.getSegmentsQa(this.props.segment)
       }
 

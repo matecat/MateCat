@@ -117,7 +117,7 @@ export const ActionMenu = ({
               className={`item${isExportXMLDisabled ? ' disabled' : ''}`}
               title="Export XML"
             >
-              Download QA Report JSON
+              Download QA Report XML
             </span>
           </>
         ),
