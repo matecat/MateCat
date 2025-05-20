@@ -2,11 +2,13 @@
 
 namespace Files;
 
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
+use ReflectionException;
 
-class FilesPartsDao extends DataAccess_AbstractDao {
+class FilesPartsDao extends AbstractDao {
 
     /**
      * @param FilesPartsStruct $filesPartsStruct
@@ -38,7 +40,8 @@ class FilesPartsDao extends DataAccess_AbstractDao {
      * @param array $ids
      * @param int   $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
+     * @throws ReflectionException
      */
     public function getFirstAndLastSegmentForArrayOfFilePartsIds( array $ids, $ttl = 86400 ) {
         $return  = [];
@@ -75,7 +78,8 @@ class FilesPartsDao extends DataAccess_AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return IDaoStruct
+     * @throws ReflectionException
      */
     public function getFirstAndLastSegment( $id, $ttl = 86400 ) {
         $thisDao = new self();
@@ -100,7 +104,8 @@ class FilesPartsDao extends DataAccess_AbstractDao {
      * @param int $id
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return IDaoStruct
+     * @throws ReflectionException
      */
     public function getById( $id, $ttl = 0 ) {
         $thisDao = new self();
@@ -115,7 +120,7 @@ class FilesPartsDao extends DataAccess_AbstractDao {
      * @param     $fileId
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
      */
     public function getByFileId( $fileId, $ttl = 86400 ) {
         $thisDao = new self();
@@ -130,7 +135,8 @@ class FilesPartsDao extends DataAccess_AbstractDao {
      * @param     $segmentId
      * @param int $ttl
      *
-     * @return \DataAccess_IDaoStruct
+     * @return IDaoStruct
+     * @throws ReflectionException
      */
     public function getBySegmentId( $segmentId, $ttl = 86400 ) {
         $thisDao = new self();

@@ -31,6 +31,7 @@ use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Projects_MetadataDao;
 use RedisHandler;
+use ReflectionException;
 use RuntimeException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
@@ -87,7 +88,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws ValidationError
      * @throws NotFoundException
      * @throws EndQueueException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      * @throws ControllerReturnException
      */
     public function translate(): void {
@@ -102,7 +103,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $this->getContexts();
 
             //check tag mismatch
-            //get original source segment, first
+            //get an original source segment, first
             $this->data[ 'segment' ] = $this->segment;
 
             $segment     = $this->filter->fromLayer0ToLayer2( $this->data[ 'segment' ][ 'segment' ] );
@@ -134,9 +135,9 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $translation = Utils::stripBOM( $translation );
 
             /*
-         * begin stats counter
+         * begin stat counter
          *
-         * It works good with default InnoDB Isolation level
+         * It works well with default InnoDB Isolation level
          *
          * REPEATABLE-READ offering a row level lock for this id_segment
          *
@@ -192,18 +193,16 @@ class SetTranslationController extends AbstractStatefulKleinController {
              * - get suggestion
              * - evaluate $_seg_oldPEE and normalize it on the number of words for this segment
              *
-             * - get new translation
-             * - evaluate $_seg_newPEE and normalize it on the number of words for this segment
+             * - Get a new translation
+             * - Evaluate $_seg_newPEE and normalize it on the number of words for this segment
              *
-             * - get $_jobTotalPEE
-             * - evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
+             * - Get $_jobTotalPEE
+             * - Evaluate $_jobTotalPEE - $_seg_oldPEE + $_seg_newPEE and save it into the job's row
              */
             $this->updateJobPEE( $old_translation->toArray(), $new_translation->toArray() );
 
             // if saveVersionAndIncrement() return true it means that it was persisted a new version of the parent segment
-            if ( $this->VersionsHandler !== null ) {
-                $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
-            }
+            $this->VersionsHandler->saveVersionAndIncrement( $new_translation, $old_translation );
 
             /**
              * when the status of the translation changes, the auto propagation flag
@@ -257,15 +256,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
                 $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
-
-                if ( $this->VersionsHandler !== null ) {
-                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
-                            $TPropagation,
-                            $this->data[ 'chunk' ],
-                            $this->data[ 'id_segment' ],
-                            $this->data[ 'project' ],
-                    );
-                }
+                $this->VersionsHandler->propagateTranslation( $TPropagation );
 
             }
 
@@ -286,24 +277,22 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             //COMMIT THE TRANSACTION
             /*
-             * Hooked by TranslationVersions which manage translation versions
+             * Hooked by TranslationVersions, which manage translation versions
              *
              * This is also the init handler of all R1/R2 handling and Qr score calculation by
              * by TranslationEventsHandler and BatchReviewProcessor
              */
-            if ( $this->VersionsHandler !== null ) {
-                $this->VersionsHandler->storeTranslationEvent( [
-                        'translation'      => $new_translation,
-                        'old_translation'  => $old_translation,
-                        'propagation'      => $propagationTotal,
-                        'chunk'            => $this->data[ 'chunk' ],
-                        'segment'          => $this->data[ 'segment' ],
-                        'user'             => $this->user,
-                        'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->data[ 'revisionNumber' ] ),
-                        'features'         => $this->featureSet,
-                        'project'          => $this->data[ 'project' ]
-                ] );
-            }
+            $this->VersionsHandler->storeTranslationEvent( [
+                    'translation'      => $new_translation,
+                    'old_translation'  => $old_translation,
+                    'propagation'      => $propagationTotal,
+                    'chunk'            => $this->data[ 'chunk' ],
+                    'segment'          => $this->data[ 'segment' ],
+                    'user'             => $this->user,
+                    'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $this->data[ 'revisionNumber' ] ),
+                    'features'         => $this->featureSet,
+                    'project'          => $this->data[ 'project' ]
+            ] );
 
             //COMMIT THE TRANSACTION
             $db->commit();
@@ -357,7 +346,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             ] );
 
 
-            //EVERY time an user changes a row in his job when the job is completed,
+            //EVERY time a user changes a row in his job when the job is completed,
             // a query to do the update is executed...
             // Avoid this by setting a key on redis with a reasonable TTL
             $redisHandler = new RedisHandler();
@@ -423,8 +412,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $characters_counter      = filter_var( $this->request->param( 'characters_counter' ), FILTER_SANITIZE_NUMBER_INT );
 
         /*
-         * set by the client, mandatory
-         * check propagation flag, if it is null the client not sent it, leave default true, otherwise set the value
+         * set by the client, mandatorily
+         * check the propagation flag if it is null the client not sent it, leave default true, otherwise set the value
          */
         $propagate             = $propagate ?? null; /* do nothing */
         $client_target_version = $version ?? 0;
@@ -439,13 +428,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
             throw new InvalidArgumentException( "Missing password", -3 );
         }
 
-        //get Job Info, we need only a row of jobs ( split )
+        if ( empty( $id_segment ) ) {
+            throw new InvalidArgumentException( "Missing id segment", -4 );
+        }
+
+        //to get Job Info, we need only a row of jobs (split)
         $chunk       = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
         $this->chunk = $chunk;
-
-        if ( empty( $chunk ) ) {
-            throw new NotFoundException( "Wrong password", -3 );
-        }
 
         //add check for job status archived.
         if ( strtolower( $chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
@@ -453,7 +442,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         }
 
         //check tag mismatch
-        //get original source segment, first
+        //get the original source segment, first
         $dao           = new Segments_SegmentDao( Database::obtain() );
         $this->segment = $dao->getById( (int)$id_segment ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
@@ -486,6 +475,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'status'                  => $status,
                 'split_statuses'          => $split_statuses,
                 'chunk'                   => $chunk,
+                'project'                 => $chunk->getProject()
         ];
 
         $this->log( $data );
@@ -503,7 +493,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
     /**
      * setStatusForSplittedSegment
      *
-     * If splitted segments have different statuses, we reset status
+     * If split segments have different statuses, we reset the status
      * to draft.
      */
     private function setStatusForSplittedSegment(): void {
@@ -520,7 +510,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     protected function checkData(): void {
-        $this->data[ 'project' ] = $this->data[ 'chunk' ]->getProject();
 
         $featureSet = $this->getFeatureSet();
         $featureSet->loadForProject( $this->data[ 'project' ] );
@@ -573,7 +562,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
             default:
                 $msg = "Error Hack Status \n\n " . var_export( $_POST, true );
                 throw new Exception( $msg, -1 );
-                break;
         }
     }
 
@@ -605,15 +593,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * init VersionHandler
      */
     private function initVersionHandler(): void {
-        // fix null pointer error
-        if (
-                $this->data[ 'chunk' ] !== null and
-                $this->data[ 'id_segment' ] !== null and
-                $this->user !== null and
-                $this->data[ 'project' ] !== null
-        ) {
-            $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->data[ 'chunk' ], $this->data[ 'id_segment' ], $this->user, $this->data[ 'project' ] );
-        }
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->data[ 'chunk' ], $this->data[ 'id_segment' ], $this->user, $this->data[ 'project' ] );
     }
 
     /**
@@ -628,7 +608,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         } // $old_translation if `false` sometimes
 
 
-        // If volume analysis is not enabled and no translation rows exists, create the row
+        // If volume analysis is not enabled and no translation rows exist, create the row
         if ( !INIT::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
             $translation             = new Translations_SegmentTranslationStruct();
             $translation->id_segment = (int)$this->data[ 'id_segment' ];
@@ -758,7 +738,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                             'password' => $this->password
                     ] );
 
-        } //segment was valid but now it is no more valid
+        } //the segment was valid, but now it is no more valid
         elseif ( $oldSegmentStatus->isValidForEditLog() ) {
             $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
@@ -811,15 +791,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
             return;
         }
 
-        $skip_set_contribution = false;
-        $skip_set_contribution = $this->featureSet->filter( 'filter_skip_set_contribution',
-                false, $_Translation, $old_translation
-        );
-
-        if ( $skip_set_contribution ) {
-            return;
-        }
-
         $ownerUid   = Jobs_JobDao::getOwnerUid( (int)$this->data[ 'id_job' ], $this->data[ 'password' ] );
         $filesParts = ( new FilesPartsDao() )->getBySegmentId( (int)$this->data[ 'id_segment' ] ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
@@ -846,13 +817,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
          * User choice for propagation.
          *
          * Propagate is false IF:
-         * - the segment has not repetitions
-         * - the segment has some one or more repetitions and the user choose to not propagate it
+         * - the segment has no repetitions
+         * - the segment has one or more repetitions and the user choose to not propagate it
          * - the segment is already autopropagated ( marked as autopropagated_from ) and it hasn't been changed
          *
          * Propagate is true ( vice versa ) IF:
-         * - the segment has one or more repetitions and it's status is NEW/DRAFT
-         * - the segment has one or more repetitions and the user choose to propagate it
+         * - the segment has one or more repetitions, and its status is NEW/DRAFT
+         * - the segment has one or more repetitions and the user chooses to propagate it
          * - the segment has one or more repetitions, it is not modified, it doesn't have translation conflicts and a change status is requested
          */
         $contributionStruct->propagationRequest = $this->data[ 'propagate' ];

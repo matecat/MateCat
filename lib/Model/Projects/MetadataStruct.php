@@ -1,6 +1,6 @@
 <?php
 
-class Projects_MetadataStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Projects_MetadataStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id;
     public $id_project;

@@ -38,7 +38,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
             if ( isset( $decoded[ "data" ] ) ) {
-                return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+                return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
             } else {
                 $decoded = [
                         'error' => [

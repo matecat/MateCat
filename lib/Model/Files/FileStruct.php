@@ -1,8 +1,13 @@
 <?php
+namespace Files;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+use Jobs_JobStruct;
+use Segments_SegmentDao;
+use Translations_SegmentTranslationDao;
+use Translations_SegmentTranslationStruct;
 
-use Files\FilesJobDao;
-
-class Files_FileStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class FileStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public $id;
     public $id_project;
     public $filename;

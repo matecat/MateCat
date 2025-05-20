@@ -9,19 +9,19 @@
 namespace Features\SegmentFilter\Model;
 
 use Constants_TranslationStatus;
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use Jobs_JobStruct;
 use Model\Analysis\Constants\InternalMatchesConstants;
 
-class SegmentFilterDao extends DataAccess_AbstractDao {
+class SegmentFilterDao extends AbstractDao {
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param Jobs_JobStruct   $chunk
+     * @param FilterDefinition $filter
      *
      * @return array
      */
@@ -67,7 +67,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
             $where_data = [ 'status' => $filter->getSegmentStatus() ];
         }
 
-        return (object) [ 'sql' => $where, 'data' => $where_data ];
+        return (object)[ 'sql' => $where, 'data' => $where_data ];
     }
 
 
@@ -132,13 +132,13 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
 
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                                'status_approved' => Constants_TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
 
@@ -151,8 +151,8 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param Jobs_JobStruct   $chunk
+     * @param FilterDefinition $filter
      *
      * @return object
      */
@@ -197,10 +197,10 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param Jobs_JobStruct   $chunk
+     * @param FilterDefinition $filter
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
      * @throws Exception
      */
     public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
@@ -453,7 +453,6 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     }
 
 
-
     public static function getSqlForRepetition( $where ) {
 
         $sql = "
@@ -504,13 +503,13 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
     public static function getSqlForToDo( $where, $data ) {
 
         $sql_condition = "";
-        $sql_sp = "";
+        $sql_sp        = "";
 
-        if(array_key_exists("status_translated", $data)) {
+        if ( array_key_exists( "status_translated", $data ) ) {
             $sql_condition = " OR st.status = :status_translated ";
         }
 
-        if(array_key_exists("status_approved", $data)) {
+        if ( array_key_exists( "status_approved", $data ) ) {
             $sql_condition = " OR st.status = :status_approved ";
         }
 
@@ -524,10 +523,10 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft ".$sql_condition.")
+           OR st.status = :status_draft " . $sql_condition . ")
            WHERE 1
-           ".$where->sql."
-           ".$sql_sp."
+           " . $where->sql . "
+           " . $sql_sp . "
            ORDER BY st.id_segment
         ";
 

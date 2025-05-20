@@ -1,9 +1,11 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
 use DataAccess\ArrayAccessTrait;
+use DataAccess\IDaoStruct;
 use Model\Analysis\Constants\InternalMatchesConstants;
 
-class Translations_SegmentTranslationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 

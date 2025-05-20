@@ -1,5 +1,7 @@
 <?php
 
+use DataAccess\AbstractDao;
+
 
 /**
  * Created by PhpStorm.
@@ -7,7 +9,7 @@
  * Date: 24/03/15
  * Time: 13.21
  */
-class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
+class TranslationsSplit_SplitDAO extends AbstractDao {
 
     const TABLE = "segment_translations_splits";
 
@@ -16,7 +18,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
     /**
      * @param TranslationsSplit_SplitStruct $obj
      *
-     * @return DataAccess_IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
      * @throws Exception
      */
     public function read( TranslationsSplit_SplitStruct $obj ) {
@@ -92,7 +94,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      * @return TranslationsSplit_SplitStruct
      * @throws Exception
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( \DataAccess\IDaoStruct $input ) {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
@@ -111,7 +113,7 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
      * @return bool|void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( \DataAccess\IDaoStruct $obj ) {
 
         /**
          * @var $obj TranslationsSplit_SplitStruct
@@ -127,9 +129,9 @@ class TranslationsSplit_SplitDAO extends DataAccess_AbstractDao {
 
 
     /**
-     * @param $array_result DataAccess_IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @param $array_result \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
      *
-     * @return DataAccess_IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
      */
     protected function _buildResult( array $array_result ) {
         foreach ( $array_result as $item ) {

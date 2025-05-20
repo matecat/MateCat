@@ -9,8 +9,8 @@
 
 namespace MTQE\Templates;
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
@@ -21,7 +21,7 @@ use PDO;
 use ReflectionException;
 use Utils;
 
-class MTQEWorkflowTemplateDao extends DataAccess_AbstractDao {
+class MTQEWorkflowTemplateDao extends AbstractDao {
 
     const TABLE = 'mt_qe_templates';
 
@@ -259,13 +259,13 @@ class MTQEWorkflowTemplateDao extends DataAccess_AbstractDao {
      * @return MTQEWorkflowTemplateStruct
      */
     public static function getDefaultTemplate( int $uid ): MTQEWorkflowTemplateStruct {
-        return new MTQEWorkflowTemplateStruct([
-                'params' => new MTQEWorkflowParams(),
-                'name'   => "Matecat default settings",
-                'uid'    => $uid,
-                'id'     => 0,
-                'created_at'  => date( "Y-m-d H:i:s" )
-        ]);
+        return new MTQEWorkflowTemplateStruct( [
+                'params'     => new MTQEWorkflowParams(),
+                'name'       => "Matecat default settings",
+                'uid'        => $uid,
+                'id'         => 0,
+                'created_at' => date( "Y-m-d H:i:s" )
+        ] );
     }
 
 }

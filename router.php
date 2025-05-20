@@ -92,7 +92,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
         }
 
     } else {
-        // if the error is in a view, we need to render the exception through the Bootstrap exception handler
+        // if the error is in a view, we must render the exception through the Bootstrap exception handler
         throw $exception;
     }
 

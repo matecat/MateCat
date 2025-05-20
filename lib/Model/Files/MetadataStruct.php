@@ -8,9 +8,10 @@
 
 namespace Files;
 
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
-class MetadataStruct extends \DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $id_project;

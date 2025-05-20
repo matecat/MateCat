@@ -9,11 +9,11 @@
 
 namespace Segments;
 
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDao;
+use \DataAccess\IDaoStruct;
 use Projects_ProjectStruct;
 
-class ContextGroupDao extends DataAccess_AbstractDao {
+class ContextGroupDao extends AbstractDao {
 
     const TABLE       = 'context_groups';
     const STRUCT_TYPE = "ContextStruct";
@@ -28,7 +28,7 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     /**
      * @param Projects_ProjectStruct $project
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
      */
     public function getAllByProject( Projects_ProjectStruct $project ) {
         $stmt = $this->_getStatementForQuery( self::$query_get_all_by_project );

@@ -89,10 +89,9 @@ class GetContributionController extends KleinController {
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
         $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
 
-        $contributionRequest->id_file    = $file->id_file;
-        $contributionRequest->id_job     = $id_job;
-        $contributionRequest->password   = $received_password;
-        $contributionRequest->user       = $owner;
+        $contributionRequest->id_file  = $file->id_file;
+        $contributionRequest->id_job   = $id_job;
+        $contributionRequest->password = $received_password;
         $contributionRequest->dataRefMap = $dataRefMap;
         $contributionRequest->contexts   = [
                 'context_before' => $context_before,
@@ -103,15 +102,17 @@ class GetContributionController extends KleinController {
         $contributionRequest->context_list_before = $context_list_before;
         $contributionRequest->context_list_after  = $context_list_after;
 
-        $contributionRequest->jobStruct                  = $jobStruct;
-        $contributionRequest->projectStruct              = $projectStruct;
+        $contributionRequest->setUser( $owner );
+        $contributionRequest->setJobStruct( $jobStruct );
+        $contributionRequest->setProjectStruct( $projectStruct );
         $contributionRequest->segmentId                  = $id_segment;
         $contributionRequest->id_client                  = $id_client;
         $contributionRequest->concordanceSearch          = $concordance_search;
         $contributionRequest->fromTarget                 = $switch_languages;
         $contributionRequest->resultNum                  = $num_results;
         $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? false;
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
 
         if ( $this->isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;

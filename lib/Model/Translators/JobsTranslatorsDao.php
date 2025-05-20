@@ -10,10 +10,11 @@
 namespace Translators;
 
 
+use DataAccess\AbstractDao;
 use Jobs_JobStruct;
 use ReflectionException;
 
-class JobsTranslatorsDao extends \DataAccess_AbstractDao {
+class JobsTranslatorsDao extends AbstractDao {
 
     const TABLE       = "jobs_translators";
     const STRUCT_TYPE = "JobsTranslatorsStruct";

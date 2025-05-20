@@ -9,12 +9,12 @@
 
 namespace MTQE\PayableRate;
 
-use DataAccess_AbstractDaoSilentStruct;
+use \DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 
-class MTQEPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";

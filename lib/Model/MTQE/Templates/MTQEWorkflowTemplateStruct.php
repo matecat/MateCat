@@ -9,12 +9,12 @@
 
 namespace MTQE\Templates;
 
-use DataAccess_AbstractDaoSilentStruct;
+use \DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 
-class MTQEWorkflowTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEWorkflowTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";

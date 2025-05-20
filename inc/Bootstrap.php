@@ -123,22 +123,22 @@ class Bootstrap {
 
         //auth sections
         INIT::$AUTHSECRET_PATH = INIT::$ROOT . '/inc/login_secret.dat';
-        //if secret is set in file
+        //if a secret is set in file
         if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
             //fetch it
             INIT::$AUTHSECRET = file_get_contents( INIT::$AUTHSECRET_PATH );
         } else {
             //try creating the file and the fetch it
-            //generate pass
+            //generates pass
             $secret = Utils::randomString( 512, true );
-            //put file
+            //put the file
             file_put_contents( INIT::$AUTHSECRET_PATH, $secret );
-            //if put succeed
+            //if put succeeds
             if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
                 chmod( INIT::$AUTHSECRET_PATH, 0400 );
             } else {
-                //if couldn't create due to permissions, use default secret
+                //if we couldn't create due to permissions, use default secret
                 INIT::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
         }
@@ -325,8 +325,8 @@ class Bootstrap {
     }
 
     /**
-     * Returns an array of configuration params as parsed from config.ini file.
-     * The returned array only return entries that match the current environment.
+     * Returns an array of configuration params as parsed from the config.ini file.
+     * The returned array only returns entries that match the current environment.
      *
      */
     public static function getEnvConfig() {
@@ -349,7 +349,7 @@ class Bootstrap {
     }
 
     /**
-     * Returns a specific key from parsed coniguration file
+     * Returns a specific key from a parsed configuration file
      *
      * @param $key
      *
@@ -365,8 +365,8 @@ class Bootstrap {
     /**
      * TODO: move this to a private instance method on a singleton of this class.
      *
-     * This function initializes the configuration peforming all required checks to be sure
-     * that configuraiton is safe.
+     * This function initializes the configuration performing all required checks to be sure
+     * that configuration is safe.
      *
      * If any sanity check is to be done, this is the right place to do it.
      */
@@ -388,7 +388,7 @@ class Bootstrap {
             register_shutdown_function( 'Bootstrap::sessionClose' );
 
             // Get HTTPS server status
-            // Override if header is set from load balancer
+            // Override if the header is set from load balancer
             $localProto = 'http';
             foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
                 if ( isset( $_SERVER[ $_key ] ) ) {
@@ -408,18 +408,6 @@ class Bootstrap {
         INIT::$HTTPHOST = INIT::$CLI_HTTP_HOST;
 
         INIT::obtain(); //load configurations
-
-//        $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
-//
-//        if ( self::$CONFIG['ENV'] == 'production' ) {
-//            if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
-//                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
-//            }
-//        } else {
-//            if( stripos( $fileSystem, 'nfs' ) !== false && self::$CONFIG['CHECK_FS'] ){
-//                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
-//            }
-//        }
 
         Features::setIncludePath();
 

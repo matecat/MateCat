@@ -1,12 +1,14 @@
 <?php
 
+use DataAccess\AbstractDao;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserDao extends DataAccess_AbstractDao {
+class Users_UserDao extends AbstractDao {
 
     const TABLE       = "users";
     const STRUCT_TYPE = "Users_UserStruct";
@@ -259,7 +261,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct[]
      * @throws Exception
      */
-    public function read( DataAccess_IDaoStruct $UserQuery ): array {
+    public function read( \DataAccess\IDaoStruct $UserQuery ): array {
 
         [ $query, $where_parameters ] = $this->_buildReadQuery( $UserQuery );
         $stmt = $this->_getStatementForQuery( $query );
@@ -275,7 +277,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     /**
      * @throws Exception
      */
-    protected function _buildReadQuery( DataAccess_IDaoStruct $UserQuery ): array {
+    protected function _buildReadQuery( \DataAccess\IDaoStruct $UserQuery ): array {
         $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = [];
@@ -371,7 +373,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      * @throws Exception
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( \DataAccess\IDaoStruct $input ) {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

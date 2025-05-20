@@ -19,12 +19,4 @@ class Engines_Results_MMT_ExceptionError extends Engines_Results_AbstractRespons
 
     }
 
-    public function get_as_array() {
-        if ( $this->error != "" ) {
-            $this->error = $this->error->get_as_array();
-        }
-
-        return $this->toArray();
-    }
-
 }

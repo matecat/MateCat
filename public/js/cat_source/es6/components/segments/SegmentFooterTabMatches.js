@@ -59,8 +59,8 @@ class SegmentFooterTabMatches extends React.Component {
         item.suggestion_info = ''
       }
 
-      item.percentClass = TranslationMatches.getPercentuageClass(this.match)
-      item.percentText = this.match === 'ICE_MT' ? 'TQMT' : this.match
+      item.percentText = TranslationMatches.getPercentTextForMatch(this);
+      item.percentClass = TranslationMatches.getPercentageClass(this);
       item.penalty = this.penalty
 
       // Attention Bug: We are mixing the view mode and the raw data mode.

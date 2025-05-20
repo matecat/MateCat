@@ -1,9 +1,10 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Exceptions\NotFoundException;
 use Projects\ChunkOptionsModel;
 
-class Projects_MetadataDao extends DataAccess_AbstractDao {
+class Projects_MetadataDao extends AbstractDao {
     const FEATURES_KEY = 'features';
     const TABLE        = 'project_metadata';
 

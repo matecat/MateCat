@@ -3,15 +3,15 @@
 namespace PayableRates;
 
 use Analysis\PayableRates;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use Langs\Languages;
 
-class CustomPayableRateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
+class CustomPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
 
     public $id;

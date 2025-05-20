@@ -10,10 +10,10 @@
 namespace MTQE\Templates\DTO;
 
 use Constants_TranslationStatus;
-use DataAccess_AbstractDaoSilentStruct;
+use \DataAccess\AbstractDaoSilentStruct;
 use JsonSerializable;
 
-class MTQEWorkflowParams extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEWorkflowParams extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
 
     public bool   $analysis_ignore_100             = false;
     public bool   $analysis_ignore_101             = false;

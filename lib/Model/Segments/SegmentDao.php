@@ -1,9 +1,11 @@
 <?php
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
+use Files\FileStruct;
 use Segments\SegmentUIStruct;
 
-class Segments_SegmentDao extends DataAccess_AbstractDao {
+class Segments_SegmentDao extends AbstractDao {
     const TABLE = 'segments';
     protected static array $auto_increment_field = [ 'id' ];
 
@@ -37,7 +39,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     GROUP BY translation, id_job
             ";
 
-    public function countByFile( Files_FileStruct $file ) {
+    public function countByFile( FileStruct $file ) {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
 
@@ -981,7 +983,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $limit
      * @param $offset
      * @param int $ttl
-     * @return array|DataAccess_IDaoStruct[]
+     * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0 ) {
@@ -1075,7 +1077,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $limit
      * @param $offset
      * @param int $ttl
-     * @return array|DataAccess_IDaoStruct[]
+     * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdProjectAndPassword( $idProject, $password, $limit, $offset, $ttl = 0 ) {

@@ -1,12 +1,16 @@
 <?php
 
-class Segments_SegmentOriginalDataDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
+
+class Segments_SegmentOriginalDataDao extends AbstractDao {
 
     /**
      * @param int $id_segment
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct
+     * @return IDaoStruct
+     * @throws ReflectionException
      */
     public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
 

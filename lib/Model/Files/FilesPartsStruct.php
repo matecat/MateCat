@@ -2,10 +2,10 @@
 
 namespace Files;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class FilesPartsStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class FilesPartsStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $id_file;

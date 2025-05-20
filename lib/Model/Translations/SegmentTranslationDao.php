@@ -2,10 +2,12 @@
 
 use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
+use Files\FileStruct;
 use Search\ReplaceEventStruct;
 
-class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
+class Translations_SegmentTranslationDao extends AbstractDao {
 
     const TABLE = "segment_translations";
 
@@ -167,11 +169,11 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Files_FileStruct $file
+     * @param FileStruct $file
      *
      * @return Translations_SegmentTranslationStruct[]
      */
-    public function getByFile( Files_FileStruct $file ) {
+    public function getByFile( FileStruct $file ) {
 
         $sql = "SELECT * FROM segment_translations st " .
                 " JOIN segments s on s.id  = st.id_segment AND s.id_file = :id_file " .
@@ -303,9 +305,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
     public static function addTranslation( Translations_SegmentTranslationStruct $translation_struct, bool $is_revision ): int {
 
         // avoid version_number null error
-        if ( $translation_struct->version_number === null ) {
-            $translation_struct->version_number = 0;
-        }
+        $translation_struct->version_number = $translation_struct->version_number ?? 0;
 
         $keys_to_insert = [
                 'id_segment',
@@ -422,7 +422,7 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
      * @param $password
      * @param $source_page
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      */
     public
     function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
