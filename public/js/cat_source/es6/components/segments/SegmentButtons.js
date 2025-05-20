@@ -103,7 +103,11 @@ export const SegmentButton = ({segment, disabled, isReview}) => {
     const contribution = segment.contributions?.matches
       ? segment.contributions.matches[0]
       : undefined
-    if (contribution && contribution.match === 'MT') {
+    if (
+      contribution &&
+      contribution.translation &&
+      contribution.match === 'MT'
+    ) {
       const currentTranslation = segment.decodedTranslation
       const contributionText = removeTagsFromText(
         decodePlaceholdersToPlainText(contribution.translation),

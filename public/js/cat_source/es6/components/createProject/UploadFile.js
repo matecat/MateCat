@@ -17,7 +17,7 @@ export const getPrintableFileSize = (filesizeInBytes) => {
   return Math.round(filesizeInBytes * 100, 2) / 100 + ext
 }
 export const UploadFile = ({...props}) => {
-  const {openGDrive} = useContext(CreateProjectContext)
+  const {openGDrive, currentProjectTemplate} = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export const UploadFile = ({...props}) => {
       window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [])
-  return typeof isUserLogged === 'boolean' ? (
+  return typeof isUserLogged === 'boolean' && currentProjectTemplate ? (
     isUserLogged ? (
       <>
         {!openGDrive && <UploadFileLocal {...props} />}
@@ -50,6 +50,8 @@ export const UploadFile = ({...props}) => {
       </div>
     )
   ) : (
-    <div className="upload-waiting-logged"></div>
+    <div className="upload-waiting-logged">
+      <div className="upload-loading" />
+    </div>
   )
 }
