@@ -95,11 +95,13 @@ class QaCheckGlossaryHighlight extends Component {
     const {sid} = this.props
     const glossaryTerm = this.getTermDetails()
     //Call Segment footer Action
-    SegmentActions.highlightGlossaryTerm({
-      sid,
-      termId: glossaryTerm.term_id,
-      type: 'check',
-    })
+    if (glossaryTerm) {
+      SegmentActions.highlightGlossaryTerm({
+        sid,
+        termId: glossaryTerm.term_id,
+        type: 'check',
+      })
+    }
   }
   render() {
     const {children} = this.props
