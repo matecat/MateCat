@@ -40,18 +40,18 @@ class GetContributionController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-            $id_client = $request['id_client'];
-            $id_job = $request['id_job'];
-            $id_segment = $request['id_segment'];
-            $num_results = $request['num_results'];
-            $id_translator = $request['id_translator'];
-            $password = $request['password'];
-            $received_password = $request['received_password'];
-            $concordance_search = $request['concordance_search'];
-            $switch_languages = $request['switch_languages'];
-            $context_list_before = $request['context_list_before'];
-            $context_list_after = $request['context_list_after'];
-            $cross_language = $request['cross_language'];
+        $id_client           = $request[ 'id_client' ];
+        $id_job              = $request[ 'id_job' ];
+        $id_segment          = $request[ 'id_segment' ];
+        $num_results         = $request[ 'num_results' ];
+        $id_translator       = $request[ 'id_translator' ];
+        $password            = $request[ 'password' ];
+        $received_password   = $request[ 'received_password' ];
+        $concordance_search  = $request[ 'concordance_search' ];
+        $switch_languages    = $request[ 'switch_languages' ];
+        $context_list_before = $request[ 'context_list_before' ];
+        $context_list_after  = $request[ 'context_list_after' ];
+        $cross_language      = $request[ 'cross_language' ];
 
         if ( $id_translator == 'unknown_translator' ) {
             $id_translator = "";
@@ -84,14 +84,14 @@ class GetContributionController extends KleinController {
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
         $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
 
-        $contributionRequest->id_file  = $file->id_file;
-        $contributionRequest->id_job   = $id_job;
-        $contributionRequest->password = $received_password;
+        $contributionRequest->id_file    = $file->id_file;
+        $contributionRequest->id_job     = $id_job;
+        $contributionRequest->password   = $received_password;
         $contributionRequest->dataRefMap = $dataRefMap;
         $contributionRequest->contexts   = [
-                'context_before' => $request['context_before'],
-                'segment'        => $request['text'],
-                'context_after'  => $request['context_after']
+                'context_before' => $request[ 'context_before' ],
+                'segment'        => $request[ 'text' ],
+                'context_after'  => $request[ 'context_after' ]
         ];
 
         $contributionRequest->context_list_before = $context_list_before;
