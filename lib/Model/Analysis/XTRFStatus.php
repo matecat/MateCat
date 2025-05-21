@@ -16,14 +16,9 @@ use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 class XTRFStatus extends AbstractStatus {
 
     /**
-     * @var AnalysisProject $result
-     */
-    protected $result;
-
-    /**
      * @return array
      */
-    public function getResult() {
+    public function getResultArray(): array {
 
         $outputContent = [];
 
@@ -65,7 +60,7 @@ class XTRFStatus extends AbstractStatus {
 
     }
 
-    protected function formatFile( MatchContainerInterface $values, $vector ) {
+    protected function formatFile( MatchContainerInterface $values, $vector ): string {
 
 
         $_TOTAL_RAW_SUM = (

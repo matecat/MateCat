@@ -10,9 +10,11 @@ use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
 use Constants_JobStatus;
 use Exception;
+use Exceptions\NotFoundException;
 use Jobs_JobDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Utils;
 
@@ -27,13 +29,14 @@ class ProjectsController extends KleinController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project;
+    private Projects_ProjectStruct $project;
 
     /**
-     * @var ProjectPasswordValidator
+     * @return void
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private $projectValidator;
-
     public function get() {
 
         if ( empty( $this->user ) ) {
@@ -52,10 +55,18 @@ class ProjectsController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function setDueDate() {
         $this->updateDueDate();
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function updateDueDate() {
         if (
                 array_key_exists( "due_date", $this->params )
@@ -79,6 +90,10 @@ class ProjectsController extends KleinController {
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function deleteDueDate() {
         $project_dao = new Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );

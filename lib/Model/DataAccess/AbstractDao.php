@@ -162,11 +162,10 @@ abstract class AbstractDao {
      *
      * @param $obj IDaoStruct The input object
      *
-     * @return bool True if object is valid, false otherwise
+     * @return void
      */
-    protected function _validatePrimaryKey( IDaoStruct $obj ) {
-        //to be overridden in sub-classes
-        return true;
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
+        //to be overridden in subclasses
     }
 
     /**
@@ -174,11 +173,10 @@ abstract class AbstractDao {
      *
      * @param $obj IDaoStruct The input object
      *
-     * @return bool True if object is valid, false otherwise
+     * @return void
      */
-    protected function _validateNotNullFields( IDaoStruct $obj ) {
-        //to be overridden in sub-classes
-        return true;
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
+        //to be overridden in subclasses
     }
 
     /**

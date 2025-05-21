@@ -352,7 +352,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
      * @see AbstractDao::_validatePrimaryKey
      *
      */
-    protected function _validatePrimaryKey( IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
@@ -377,7 +377,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
      * @see AbstractDao::_validateNotNullFields
      *
      */
-    protected function _validateNotNullFields( IDaoStruct $obj ) {
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */

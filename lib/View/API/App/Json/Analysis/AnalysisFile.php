@@ -41,9 +41,9 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      */
     protected int $total_raw = 0;
     /**
-     * @var float
+     * @var int
      */
-    protected float $total_equivalent = 0;
+    protected int $total_equivalent = 0;
 
     public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass ) {
         $this->id            = (int)$id;
@@ -63,7 +63,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
                 'name'             => $this->name,
                 'original_name'    => $this->original_name,
                 'total_raw'        => $this->total_raw,
-                'total_equivalent' => (int)$this->total_equivalent,
+                'total_equivalent' => $this->total_equivalent,
                 'matches'          => array_values( $this->matches )
         ];
     }
@@ -106,7 +106,7 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      * @return void
      */
     public function incrementEquivalent( float $equivalent ) {
-        $this->total_equivalent += $equivalent;
+        $this->total_equivalent += round( $equivalent );
     }
 
 }

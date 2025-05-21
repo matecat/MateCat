@@ -10,6 +10,7 @@ use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use ManageUtils;
+use ReflectionException;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamStruct;
@@ -22,8 +23,7 @@ class GetProjectsController extends KleinController {
     }
 
     /**
-     * @throws NotFoundException
-     * @throws Exception
+     * @throws ReflectionException
      */
     public function fetch(): void {
 

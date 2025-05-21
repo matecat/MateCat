@@ -267,6 +267,9 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
         return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getPeeForTranslatedSegments(): ?float {
         $pee = round( ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee, 2 );
         if ( $pee >= 100 ) {

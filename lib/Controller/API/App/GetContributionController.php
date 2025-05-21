@@ -24,8 +24,8 @@ use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    protected $id_job;
-    protected $received_password;
+    protected int $id_job;
+    protected string $received_password;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -41,10 +41,9 @@ class GetContributionController extends KleinController {
         $request = $this->validateTheRequest();
 
         $id_client           = $request[ 'id_client' ];
-        $id_job              = $request[ 'id_job' ];
+        $id_job              = (int)$request[ 'id_job' ];
         $id_segment          = $request[ 'id_segment' ];
         $num_results         = $request[ 'num_results' ];
-        $id_translator       = $request[ 'id_translator' ];
         $password            = $request[ 'password' ];
         $received_password   = $request[ 'received_password' ];
         $concordance_search  = $request[ 'concordance_search' ];
@@ -52,10 +51,6 @@ class GetContributionController extends KleinController {
         $context_list_before = $request[ 'context_list_before' ];
         $context_list_after  = $request[ 'context_list_after' ];
         $cross_language      = $request[ 'cross_language' ];
-
-        if ( $id_translator == 'unknown_translator' ) {
-            $id_translator = "";
-        }
 
         if ( empty( $num_results ) ) {
             $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -84,7 +79,7 @@ class GetContributionController extends KleinController {
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
         $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
 
-        $contributionRequest->id_file    = $file->id_file;
+        $contributionRequest->id_file    = $file->id_file ?? null;
         $contributionRequest->id_job     = $id_job;
         $contributionRequest->password   = $received_password;
         $contributionRequest->dataRefMap = $dataRefMap;
@@ -188,11 +183,10 @@ class GetContributionController extends KleinController {
      */
     private function validateTheRequest(): array {
         $id_client           = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $id_job              = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_segment          = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_job              = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ] );
+        $id_segment          = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );  // FILTER_SANITIZE_NUMBER_INT leaves untouched segments id with the split flag. Ex: 123-1
         $num_results         = filter_var( $this->request->param( 'num_results' ), FILTER_SANITIZE_NUMBER_INT );
         $text                = filter_var( $this->request->param( 'text' ), FILTER_UNSAFE_RAW );
-        $id_translator       = filter_var( $this->request->param( 'id_translator' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $password            = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $received_password   = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $concordance_search  = filter_var( $this->request->param( 'is_concordance' ), FILTER_VALIDATE_BOOLEAN );
@@ -215,7 +209,7 @@ class GetContributionController extends KleinController {
             }
         }
 
-        if ( is_null( $text ) or $text === '' ) {
+        if ( empty( $text ) ) {
             throw new InvalidArgumentException( "missing text", -2 );
         }
 
@@ -236,11 +230,10 @@ class GetContributionController extends KleinController {
 
         return [
                 'id_client'           => $id_client,
-                'id_job'              => $id_job,
+                'id_job'              => (int)$id_job,
                 'id_segment'          => $id_segment,
                 'num_results'         => $num_results,
                 'text'                => $text,
-                'id_translator'       => $id_translator,
                 'password'            => $password,
                 'received_password'   => $received_password,
                 'concordance_search'  => $concordance_search,
@@ -276,7 +269,7 @@ class GetContributionController extends KleinController {
 
         $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $request );
 
-        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target, [] );
+        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target );
 
         if ( $segmentsList->id_before ) {
             $request[ 'context_before' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
