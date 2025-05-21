@@ -158,12 +158,12 @@ class AnalysisJob implements JsonSerializable {
     }
 
     /**
-     * @param int $industry
+     * @param float $industry
      *
      * @return void
      */
-    public function incrementIndustry( int $industry ) {
-        $this->total_industry += $industry;
+    public function incrementIndustry( float $industry ) {
+        $this->total_industry += round( $industry );
     }
 
     /**

@@ -196,12 +196,12 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
-     * @param $industry
+     * @param float $industry
      *
      * @return void
      */
-    public function incrementIndustry( $industry ) {
-        $this->total_industry += $industry;
+    public function incrementIndustry( float $industry ) {
+        $this->total_industry += round( $industry );
     }
 
 }
