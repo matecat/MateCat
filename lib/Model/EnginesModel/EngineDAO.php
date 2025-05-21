@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -335,7 +336,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
      * @return EnginesModel_EngineStruct
      * @throws Exception
      */
-    public function sanitize( \DataAccess\IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
         $input->name                    = ( $input->name !== null ) ? $input->name : null;
@@ -356,12 +357,12 @@ class EnginesModel_EngineDAO extends AbstractDao {
     }
 
     /**
-     * @param \DataAccess\IDaoStruct $obj
+     * @param IDaoStruct $obj
      *
-     * @return bool|void
+     * @return void
      * @throws Exception
      */
-    protected function _validateNotNullFields( \DataAccess\IDaoStruct $obj ) {
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
          * @var $obj EnginesModel_EngineStruct
          */
@@ -376,12 +377,12 @@ class EnginesModel_EngineDAO extends AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct|\DataAccess\IDaoStruct $obj
+     * @param EnginesModel_EngineStruct|IDaoStruct $obj
      *
      * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( \DataAccess\IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
         if ( $obj->id === null ) {
             throw new Exception( "Engine ID required" );
         }

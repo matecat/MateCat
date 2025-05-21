@@ -10,6 +10,7 @@ use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use ReflectionException;
 
 class JobPasswordValidator extends Base {
     /**
@@ -17,6 +18,9 @@ class JobPasswordValidator extends Base {
      */
     private Jobs_JobStruct $jStruct;
 
+    /**
+     * @throws ReflectionException
+     */
     public function __construct( KleinController $controller ) {
 
         parent::__construct( $controller );
@@ -45,7 +49,7 @@ class JobPasswordValidator extends Base {
     /**
      * @return Jobs_JobStruct
      */
-    public function getJob() {
+    public function getJob(): Jobs_JobStruct {
         return $this->jStruct;
     }
 

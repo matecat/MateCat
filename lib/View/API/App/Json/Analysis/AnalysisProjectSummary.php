@@ -32,9 +32,9 @@ class AnalysisProjectSummary implements JsonSerializable {
      */
     protected string $analysis_status = Constants_ProjectStatus::STATUS_NEW;
     /**
-     * @var float
+     * @var int
      */
-    protected float $total_equivalent = 0;
+    protected int $total_equivalent = 0;
     /**
      * @var int
      */
@@ -71,7 +71,7 @@ class AnalysisProjectSummary implements JsonSerializable {
                 'status'            => $this->analysis_status,
                 'total_raw'         => $this->total_raw,
                 'total_industry'    => $this->total_industry,
-                'total_equivalent'  => (int)$this->total_equivalent,
+                'total_equivalent'  => $this->total_equivalent,
                 'discount'          => $this->getDiscount()
         ];
     }
@@ -139,7 +139,7 @@ class AnalysisProjectSummary implements JsonSerializable {
      * @return void
      */
     public function incrementEquivalent( float $equivalent ) {
-        $this->total_equivalent += $equivalent;
+        $this->total_equivalent += round( $equivalent );
     }
 
     /**
@@ -150,10 +150,12 @@ class AnalysisProjectSummary implements JsonSerializable {
     }
 
     /**
+     * @param float $industry
+     *
      * @return void
      */
-    public function incrementIndustry( $industry ) {
-        $this->total_industry += $industry;
+    public function incrementIndustry( float $industry ) {
+        $this->total_industry += round( $industry );
     }
 
     /**

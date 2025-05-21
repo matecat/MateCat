@@ -40,42 +40,38 @@ abstract class AbstractStatus {
     /**
      * Carry the result from Executed Controller Action and returned in json format to the Client
      *
-     * @var array
+     * @var ?AnalysisProject
      */
-    protected $result = [ "errors" => [], "data" => [] ];
+    protected ?AnalysisProject $result = null;
 
-    protected $_globals = [];
+    protected int   $total_segments = 0;
+    protected array $_resultSet     = [];
+    protected int   $_others_in_queue = 0;
+    protected array $_project_data    = [];
+    protected string $status_project   = "";
 
-    protected $total_segments   = 0;
-    protected $_resultSet       = [];
-    protected $_others_in_queue = 0;
-    protected $_project_data    = [];
-    protected $status_project   = "";
-
-    protected $_total_init_struct = [
-            "TOTAL_PAYABLE" => [ 0, "0" ], "REPETITIONS" => [ 0, "0" ], "MT" => [ 0, "0" ],
-            "NEW"           => [ 0, "0" ], "TM_100" => [ 0, "0" ], "TM_100_PUBLIC" => [ 0, "0" ],
-            "TM_75_99"      => [ 0, "0" ],
-            "TM_75_84"      => [ 0, "0" ], "TM_85_94" => [ 0, "0" ], "TM_95_99" => [ 0, "0" ],
-            "TM_50_74"      => [ 0, "0" ], "INTERNAL_MATCHES" => [ 0, "0" ], "ICE" => [ 0, "0" ],
-            "NUMBERS_ONLY"  => [ 0, "0" ]
-    ];
-
-    protected $featureSet;
+    protected FeatureSet $featureSet;
     /**
      * @var Projects_ProjectStruct
      */
-    protected $project;
+    protected Projects_ProjectStruct $project;
     /**
      * @var Users_UserStruct|null
      */
-    protected $user;
+    protected ?Users_UserStruct $user;
     /**
      * @var mixed
      */
     protected $subject;
 
-    public function __construct( $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
+    /**
+     * @param array                 $_project_data
+     * @param FeatureSet            $features
+     * @param Users_UserStruct|null $user
+     *
+     * @throws ReflectionException
+     */
+    public function __construct( array $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
             $user      = new Users_UserStruct();
             $user->uid = -1;
@@ -87,17 +83,10 @@ abstract class AbstractStatus {
     }
 
     /**
-     * @return array
+     * @return AnalysisProject
      */
-    public function getResult() {
+    public function getResult(): AnalysisProject {
         return $this->result;
-    }
-
-    /**
-     * @return array
-     */
-    public function getGlobals() {
-        return $this->_globals;
     }
 
     /**
@@ -105,7 +94,7 @@ abstract class AbstractStatus {
      *
      * @throws ReflectionException
      */
-    protected function _fetchProjectData() {
+    protected function _fetchProjectData(): AbstractStatus {
 
         $this->_resultSet = AnalysisDao::getProjectStatsVolumeAnalysis( $this->project->id );
 
@@ -127,6 +116,7 @@ abstract class AbstractStatus {
         $subjects        = $subject_handler->getEnabledHashMap();
         $this->subject   = $subjects[ $this->_project_data[ 0 ][ 'subject' ] ];
 
+        return $this;
     }
 
     /**
@@ -136,11 +126,7 @@ abstract class AbstractStatus {
      * @throws Exception
      */
     public function fetchData(): AbstractStatus {
-
-        $this->_fetchProjectData();
-
-        return $this->loadObjects();
-
+        return $this->_fetchProjectData()->loadObjects();
     }
 
     /**

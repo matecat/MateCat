@@ -19,9 +19,9 @@ class AnalysisMatch implements JsonSerializable {
      */
     protected int $raw = 0;
     /**
-     * @var float
+     * @var int
      */
-    protected float $equivalent = 0;
+    protected int $equivalent = 0;
 
     /**
      * @var string
@@ -43,7 +43,7 @@ class AnalysisMatch implements JsonSerializable {
     public function jsonSerialize(): array {
         return [
                 'raw'        => $this->raw,
-                'equivalent' => round( $this->equivalent ),
+                'equivalent' => $this->equivalent,
                 'type'       => $this->type
         ];
     }
@@ -89,7 +89,7 @@ class AnalysisMatch implements JsonSerializable {
      * @return void
      */
     public function incrementEquivalent( float $equivalent ) {
-        $this->equivalent += $equivalent;
+        $this->equivalent += round( $equivalent );
     }
 
     /**

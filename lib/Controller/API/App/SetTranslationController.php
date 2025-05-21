@@ -799,7 +799,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
          */
         $contributionStruct                       = new ContributionSetStruct();
         $contributionStruct->fromRevision         = $this->isRevision();
-        $contributionStruct->id_file              = ( $filesParts !== null ) ? $filesParts->id_file : null;
+        $contributionStruct->id_file              = $filesParts->id_file ?? null;
         $contributionStruct->id_job               = $this->data[ 'id_job' ];
         $contributionStruct->job_password         = $this->data[ 'password' ];
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];

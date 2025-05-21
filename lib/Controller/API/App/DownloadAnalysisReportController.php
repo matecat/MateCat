@@ -7,10 +7,12 @@ use ActivityLog\ActivityLogStruct;
 use AjaxPasswordCheck;
 use API\Commons\Validators\LoginValidator;
 use API\V2\AbstractDownloadController;
+use Exception;
 use FeatureSet;
 use InvalidArgumentException;
 use Model\Analysis\XTRFStatus;
 use Projects_ProjectDao;
+use ReflectionException;
 use RuntimeException;
 use Utils;
 use ZipContentObject;
@@ -21,6 +23,10 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function download(): void {
 
         $this->featureSet = new FeatureSet();
@@ -43,7 +49,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
         $this->featureSet->loadForProject( Projects_ProjectDao::findById( $request[ 'id_project' ], 60 * 60 * 24 ) );
 
         $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
-        $outputContent  = $analysisStatus->fetchData()->getResult();
+        $outputContent  = $analysisStatus->fetchData()->getResultArray();
 
         // cast $outputContent elements to ZipContentObject
         foreach ( $outputContent as $key => $__output_content_elem ) {
@@ -71,8 +77,8 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
     }
 
     /**
-     * @return array|\Klein\Response
-     * @throws \ReflectionException
+     * @return array
+     * @throws ReflectionException
      */
     private function validateTheRequest(): array {
         $id_project    = filter_var( $this->request->param( 'id_project' ), FILTER_SANITIZE_NUMBER_INT );

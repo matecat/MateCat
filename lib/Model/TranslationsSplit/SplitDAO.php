@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 
 
 /**
@@ -18,7 +19,7 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
     /**
      * @param TranslationsSplit_SplitStruct $obj
      *
-     * @return \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
      * @throws Exception
      */
     public function read( TranslationsSplit_SplitStruct $obj ) {
@@ -94,7 +95,7 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
      * @return TranslationsSplit_SplitStruct
      * @throws Exception
      */
-    public function sanitize( \DataAccess\IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
@@ -110,10 +111,10 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
     /**
      * @param TranslationsSplit_SplitStruct $obj
      *
-     * @return bool|void
+     * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( \DataAccess\IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
         /**
          * @var $obj TranslationsSplit_SplitStruct
@@ -129,9 +130,9 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
 
 
     /**
-     * @param $array_result \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @param $array_result IDaoStruct[]|TranslationsSplit_SplitStruct[]
      *
-     * @return \DataAccess\IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
      */
     protected function _buildResult( array $array_result ) {
         foreach ( $array_result as $item ) {
