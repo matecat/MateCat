@@ -95,9 +95,9 @@ class QaCheckBlacklistHighlight extends Component {
 
     const term = this.getTermDetails()
 
-    const {source, target} = term
+    const {source, target} = term || {}
 
-    return (
+    return term ? (
       <Tooltip
         stylePointerElement={{display: 'inline-block', position: 'relative'}}
         content={
@@ -110,7 +110,7 @@ class QaCheckBlacklistHighlight extends Component {
           <span>{children}</span>
         </div>
       </Tooltip>
-    )
+    ) : null
   }
 }
 

@@ -54,7 +54,7 @@ const OnBoarding = ({
     }
     CommonUtils.dispatchAnalyticsEvents(data)
     const newWindow = window.open(url, 'name', 'height=600,width=900')
-    if (window.focus) {
+    if (newWindow.focus) {
       newWindow.focus()
     }
     const interval = setInterval(function () {
