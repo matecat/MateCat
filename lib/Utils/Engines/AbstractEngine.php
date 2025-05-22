@@ -16,7 +16,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected string $className;
     protected array  $_config = [];
-    protected $result  = [];
+    protected        $result  = []; // this cannot be forced to be an array, engines may use different types
     protected array  $error   = [];
 
     protected array $curl_additional_params = [];
@@ -267,12 +267,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     public function _setAdditionalCurlParams( array $curlOptParams = [] ) {
 
         /*
-         * Append array elements from the second array
-         * to the first array while not overwriting the elements from
-         * the first array and not re-indexing
+         * Append array elements from the second array to the first array while not
+         * overwriting the elements from the first array and not re-indexing.
          *
-         * In this case, we CANNOT use the + array union operator because if there is a file handler in the $curlOptParams
-         * the resource is duplicated and the reference to the first one is lost with + operator, in this way the CURLOPT_FILE does not work
+         * In this case, we cannot use the + array union operator because if there is
+         * a file handler in the $curlOptParams, the resource is duplicated, and the
+         * reference to the first one is lost.
+         * In this way, the CURLOPT_FILE does not work.
          */
         foreach ( $curlOptParams as $key => $value ) {
             $this->curl_additional_params[ $key ] = $value;
@@ -285,14 +286,14 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     public function getMtPenalty(): int {
-        return $this->mt_penalty ?? $this->engineRecord->penalty ?: 14;
+        return $this->mt_penalty ?? ( $this->engineRecord->penalty ?: 14 );
     }
 
     /**
      * @return string
      */
     public function getStandardPenaltyString(): string { //YYY check all engines to honor this new feature (variable penalty)
-         return 100 - $this->getMtPenalty() . "%";
+        return 100 - $this->getMtPenalty() . "%";
     }
 
     public function getName(): string {
