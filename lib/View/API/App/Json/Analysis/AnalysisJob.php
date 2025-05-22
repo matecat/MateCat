@@ -35,9 +35,9 @@ class AnalysisJob implements JsonSerializable {
      */
     protected int $total_equivalent = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected int $total_industry = 0;
+    protected float $total_industry = 0;
     /**
      * @var string
      */
@@ -81,7 +81,7 @@ class AnalysisJob implements JsonSerializable {
                 'chunks'              => array_values( $this->chunks ),
                 'total_raw'           => $this->total_raw,
                 'total_equivalent'    => $this->total_equivalent,
-                'total_industry'      => $this->total_industry,
+                'total_industry'      => round( $this->total_industry ),
                 'outsource_available' => $this->outsourceAvailable,
                 'payable_rates'       => $this->payable_rates,
                 'count_unit'          => $this->getCountUnit( $this->source ),
@@ -163,7 +163,7 @@ class AnalysisJob implements JsonSerializable {
      * @return void
      */
     public function incrementIndustry( float $industry ) {
-        $this->total_industry += round( $industry );
+        $this->total_industry += $industry;
     }
 
     /**
