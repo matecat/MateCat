@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react'
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import PropTypes from 'prop-types'
 import {
   Button,
@@ -17,11 +23,45 @@ import {cloneDeep, isEqual} from 'lodash'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
+  const {languages: originalLanguages} = useContext(CreateProjectContext)
+
   const {templates, currentTemplate} = analysisTemplates
 
   const [exceptions, setExceptions] = useState([])
 
   const [addExceptionCounter, setAddExceptionCounter] = useState(0)
+
+  const languages = useMemo(
+    () =>
+      originalLanguages.reduce((acc, cur) => {
+        const code = getLanguageCode(cur.code)
+
+        if (acc.some((lang) => lang.code === code)) return acc
+
+        const regions = acc.filter(
+          (lang) => getLanguageCode(lang.code) === code,
+        )
+        const accFiltered = acc.filter(
+          (lang) => !regions.some(({code}) => lang.code === code),
+        )
+
+        const result =
+          regions.length > 1
+            ? [
+                {
+                  ...cur,
+                  code,
+                  name: `${cur.name.split('(')[0]} (All variants)`,
+                  id: code,
+                },
+                ...regions,
+              ]
+            : [cur]
+
+        return [...accFiltered, ...result]
+      }, originalLanguages),
+    [originalLanguages],
+  )
 
   const originalCurrentTemplate = templates?.find(
     ({id, isTemporary}) => id === currentTemplate.id && !isTemporary,
@@ -105,6 +145,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
         return (
           <LanguageException
             exception={item}
+            languages={languages}
             addException={(newException) => modifyException(item, newException)}
             removeException={() => removeException(item)}
             key={item.source + '-' + item.target}
@@ -115,6 +156,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       })}
       {[...Array(addExceptionCounter)].map((e, i) => (
         <LanguageException
+          languages={languages}
           addException={addException}
           key={'newExc' + i}
           removeException={() => {
@@ -145,39 +187,12 @@ const getLanguageCode = (code) => code.split('-')[0]
 
 const LanguageException = ({
   exception,
+  languages,
   confirmed = false,
   addException,
   removeException,
   isExceptionSaved,
 }) => {
-  const {languages: originalLanguages} = useContext(CreateProjectContext)
-
-  const languages = originalLanguages.reduce((acc, cur) => {
-    const code = getLanguageCode(cur.code)
-
-    if (acc.some((lang) => lang.code === code)) return acc
-
-    const regions = acc.filter((lang) => getLanguageCode(lang.code) === code)
-    const accFiltered = acc.filter(
-      (lang) => !regions.some(({code}) => lang.code === code),
-    )
-
-    const result =
-      regions.length > 1
-        ? [
-            {
-              ...cur,
-              code,
-              name: `${cur.name.split('(')[0]} (All variants)`,
-              id: code,
-            },
-            ...regions,
-          ]
-        : [cur]
-
-    return [...accFiltered, ...result]
-  }, originalLanguages)
-
   const [source, setSource] = useState(
     exception
       ? (languages.find((l) => exception.source === l.id) ??
@@ -304,6 +319,7 @@ const LanguageException = ({
 
 LanguageException.propTypes = {
   exception: PropTypes.object,
+  languages: PropTypes.array,
   confirmed: PropTypes.bool,
   addException: PropTypes.func,
   removeException: PropTypes.func,
