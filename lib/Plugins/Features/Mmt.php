@@ -165,12 +165,6 @@ class Mmt extends BaseFeature {
                 $config[ 'mt_context' ] = $mt_context->value;
             }
 
-            // mt evaluation => ice_mt
-            $mt_evaluation = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 )->value ?? null;
-            if ( $mt_evaluation ) {
-                $config[ 'include_score' ] = true;
-            }
-
             $config[ 'job_id' ]     = $jobStruct->id;
             $config[ 'secret_key' ] = self::getG2FallbackSecretKey();
             $config[ 'priority' ]   = 'normal';

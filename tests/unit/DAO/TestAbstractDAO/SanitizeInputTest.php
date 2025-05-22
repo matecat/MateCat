@@ -5,7 +5,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers DataAccess_AbstractDao::_sanitizeInput
+ * @covers DataAccess\AbstractDao::_sanitizeInput
  * User: dinies
  * Date: 19/04/16
  * Time: 16.07
@@ -33,7 +33,7 @@ class SanitizeInputTest extends AbstractTest {
      * It sanitizes a struct with correct type and particular name with critical characters ( " , ' ).
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_sanitizeInput
+     * @covers DataAccess\AbstractDao::_sanitizeInput
      */
     public function test__sanitizeInput_with_correct_type_and_param() {
 
@@ -52,7 +52,7 @@ LABEL;
      * It trows an exception because the struct isn't an instnce of  'EnginesModel_EngineStruct' .
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_sanitizeInput
+     * @covers DataAccess\AbstractDao::_sanitizeInput
      */
     public function test__sanitizeInput_with_wrong_param_not_instance_of_type() {
 

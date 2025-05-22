@@ -4,12 +4,13 @@
 namespace Translations;
 
 use Constants_TranslationStatus;
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Jobs\WarningsCountStruct;
 use Jobs_JobStruct;
 use ReflectionException;
 
-class WarningDao extends \DataAccess_AbstractDao {
+class WarningDao extends AbstractDao {
 
     protected string $_query_warnings_by_chunk = "
           SELECT count(1) AS count, jobs.id AS id_job, jobs.password

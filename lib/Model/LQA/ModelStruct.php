@@ -2,11 +2,11 @@
 
 namespace LQA;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Exception;
 
-class ModelStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, QAModelInterface {
+class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface {
 
     public $id;
     public $label;

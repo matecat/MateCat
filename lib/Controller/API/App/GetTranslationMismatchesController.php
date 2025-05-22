@@ -2,13 +2,13 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationMismatches;
 use Exception;
 use InvalidArgumentException;
-use Klein\Response;
 use Projects_ProjectDao;
+use ReflectionException;
 use Segments_SegmentDao;
 
 class GetTranslationMismatchesController extends KleinController {
@@ -17,9 +17,13 @@ class GetTranslationMismatchesController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function get(): Response
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function get(): void
     {
-        try {
+
             $request = $this->validateTheRequest();
 
             $id_job = $request['id_job'];
@@ -36,15 +40,12 @@ class GetTranslationMismatchesController extends KleinController {
             $sDao                   = new Segments_SegmentDao();
             $Translation_mismatches = $sDao->setCacheTTL( 1 * 60 /* 1 minutes cache */ )->getTranslationsMismatches( $id_job, $password, $parsedIdSegment['id_segment'] );
 
-            return $this->response->json([
+            $this->response->json([
                 'errors' => [],
                 'code' => 1,
                 'data' => ( new SegmentTranslationMismatches( $Translation_mismatches, count( $Translation_mismatches ), $this->featureSet ) )->render()
             ]);
 
-        } catch (Exception $exception){
-            return $this->returnException($exception);
-        }
     }
 
     /**

@@ -2,8 +2,8 @@
 
 namespace EditLog;
 
-use DataAccess_AbstractDaoObjectStruct;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 use MyMemory;
 
 /**
@@ -12,7 +12,7 @@ use MyMemory;
  * Date: 05/10/15
  * Time: 11.33
  */
-class EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     const EDIT_TIME_SLOW_CUT = 30;
     const EDIT_TIME_FAST_CUT = 0.25;

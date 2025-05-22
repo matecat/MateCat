@@ -12,6 +12,6 @@ namespace Constants;
 
 class Ices {
 
-    public static $iceLockDisabledForTargetLangs = [];
+    public static array $iceLockDisabledForTargetLangs = [];
 
 }

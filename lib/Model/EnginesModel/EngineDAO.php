@@ -1,12 +1,15 @@
 <?php
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 23/02/15
  * Time: 14.55
  */
-class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
+class EnginesModel_EngineDAO extends AbstractDao {
 
     const TABLE = "engines";
 
@@ -333,7 +336,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return EnginesModel_EngineStruct
      * @throws Exception
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
         $input->name                    = ( $input->name !== null ) ? $input->name : null;
@@ -354,12 +357,12 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param DataAccess_IDaoStruct $obj
+     * @param IDaoStruct $obj
      *
-     * @return bool|void
+     * @return void
      * @throws Exception
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
          * @var $obj EnginesModel_EngineStruct
          */
@@ -374,12 +377,12 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct|DataAccess_IDaoStruct $obj
+     * @param EnginesModel_EngineStruct|IDaoStruct $obj
      *
      * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
         if ( $obj->id === null ) {
             throw new Exception( "Engine ID required" );
         }

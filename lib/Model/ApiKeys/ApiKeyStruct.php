@@ -1,6 +1,9 @@
 <?php
 
-class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
+
+class ApiKeys_ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     public ?int    $id = null;
     public int    $uid;

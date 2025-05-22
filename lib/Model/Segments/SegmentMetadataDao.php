@@ -1,6 +1,8 @@
 <?php
 
-class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class Segments_SegmentMetadataDao extends AbstractDao {
 
     /**
      * get all meta
@@ -10,7 +12,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      *
      * NOTE: 604800 sec = 1 week
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      */
     public static function getAll( $id_segment, $ttl = 604800 ) {
 
@@ -29,7 +31,7 @@ class Segments_SegmentMetadataDao extends DataAccess_AbstractDao {
      * @param       $key
      * @param int   $ttl
      *
-     * @return array|DataAccess_IDaoStruct[]
+     * @return array|\DataAccess\IDaoStruct[]
      */
     public static function getBySegmentIds( array $ids, $key, $ttl = 604800 ) {
 

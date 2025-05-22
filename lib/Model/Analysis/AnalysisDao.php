@@ -10,13 +10,13 @@
 namespace Model\Analysis;
 
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
 use Database;
 use Log;
 use ReflectionException;
 
-class AnalysisDao extends DataAccess_AbstractDao {
+class AnalysisDao extends AbstractDao {
 
 
     protected static $_sql_get_project_Stats_volume_analysis = "
@@ -103,6 +103,7 @@ class AnalysisDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_project_Stats_volume_analysis );
         $thisDao = new static();
+
         return $thisDao->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [ 'pid' => $project_id ] );
     }
 

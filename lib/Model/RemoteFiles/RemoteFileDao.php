@@ -1,6 +1,8 @@
 <?php
 
-class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class RemoteFiles_RemoteFileDao extends AbstractDao {
     /**
      * @param int    $id_file
      * @param int    $id_job

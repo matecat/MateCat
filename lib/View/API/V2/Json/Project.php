@@ -10,10 +10,14 @@
 namespace API\V2\Json;
 
 use Constants_JobStatus;
+use Exception;
 use Jobs_JobStruct;
 use Model\Analysis\Status;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
+use Users_UserStruct;
 use Utils;
 
 class Project {
@@ -21,34 +25,34 @@ class Project {
     /**
      * @var Job
      */
-    protected $jRenderer;
+    protected Job $jRenderer;
 
     /**
      * @var Projects_ProjectStruct[]
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $status;
+    protected ?string $status = null;
 
     /**
      * @var bool
      */
-    protected $called_from_api = false;
+    protected bool $called_from_api = false;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
     /**
-     * @param \Users_UserStruct $user
+     * @param Users_UserStruct $user
      *
      * @return $this
      */
-    public function setUser( $user ) {
+    public function setUser( Users_UserStruct $user ): Project {
         $this->user = $user;
 
         return $this;
@@ -59,8 +63,8 @@ class Project {
      *
      * @return $this
      */
-    public function setCalledFromApi( $called_from_api ) {
-        $this->called_from_api = (bool)$called_from_api;
+    public function setCalledFromApi( bool $called_from_api ): Project {
+        $this->called_from_api = $called_from_api;
 
         return $this;
     }
@@ -69,9 +73,9 @@ class Project {
      * Project constructor.
      *
      * @param Projects_ProjectStruct[] $data
-     * @param string                   $search_status
+     * @param string|null              $search_status
      */
-    public function __construct( array $data = [], $search_status = null ) {
+    public function __construct( array $data = [], ?string $search_status = null ) {
 
         $this->data   = $data;
         $this->status = $search_status;
@@ -88,10 +92,10 @@ class Project {
      * @param       $project Projects_ProjectStruct
      *
      * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
+     * @throws Exception
      */
-    public function renderItem( Projects_ProjectStruct $project ) {
+    public function renderItem( Projects_ProjectStruct $project ): array {
 
         $featureSet = $project->getFeaturesSet();
         $jobs       = $project->getJobs( 60 * 10 ); //cached
@@ -134,7 +138,7 @@ class Project {
             }
         }
 
-        $metadataDao = new \Projects_MetadataDao();
+        $metadataDao = new Projects_MetadataDao();
         $projectInfo = $metadataDao->get( (int)$project->id, 'project_info' );
         $fromApi     = $metadataDao->get( (int)$project->id, 'from_api' );
 
@@ -147,7 +151,7 @@ class Project {
                 'name'                 => $project->name,
                 'id_team'              => (int)$project->id_team,
                 'id_assignee'          => (int)$project->id_assignee,
-                'from_api'             => ( $fromApi !== null && $fromApi->value == 1 ? true : false ),
+                'from_api'             => ( $fromApi->value ?? 0 ) == 1,
                 'analysis'             => $analysisStatus->fetchData()->getResult(),
                 'create_date'          => $project->create_date,
                 'fast_analysis_wc'     => (int)$project->fast_analysis_wc,
@@ -166,10 +170,9 @@ class Project {
 
     /**
      * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
      */
-    public function render() {
+    public function render(): array {
 
         $out = [];
         foreach ( $this->data as $project ) {

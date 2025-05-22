@@ -1,5 +1,8 @@
 <?php
 
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -7,8 +10,8 @@
  * Time: 14.54
  */
 class EnginesModel_EngineStruct
-        extends DataAccess_AbstractDaoObjectStruct
-        implements DataAccess_IDaoStruct, ArrayAccess {
+        extends AbstractDaoObjectStruct
+        implements IDaoStruct, ArrayAccess {
 
     /**
      * @var int

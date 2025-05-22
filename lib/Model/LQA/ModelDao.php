@@ -2,11 +2,11 @@
 
 namespace LQA;
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use ReflectionException;
 
-class ModelDao extends DataAccess_AbstractDao {
+class ModelDao extends AbstractDao {
     const TABLE = "qa_models";
 
     protected static array $auto_increment_field = [ 'id' ];

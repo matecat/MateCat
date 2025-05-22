@@ -9,7 +9,7 @@
 namespace Teams;
 
 use Constants_Teams;
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use Exception;
 use PDO;
@@ -17,7 +17,7 @@ use ReflectionException;
 use Users_UserStruct;
 use Utils;
 
-class TeamDao extends DataAccess_AbstractDao {
+class TeamDao extends AbstractDao {
 
     const TABLE       = "teams";
     const STRUCT_TYPE = "TeamStruct";

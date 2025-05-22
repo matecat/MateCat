@@ -2,10 +2,10 @@
 
 namespace LQA;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class EntryCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class EntryCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $uid;

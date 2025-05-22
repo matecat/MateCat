@@ -1,6 +1,8 @@
 <?php
 
-class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class ApiKeys_ApiKeyDao extends AbstractDao {
 
     /**
      * @param       $key

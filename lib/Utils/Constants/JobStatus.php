@@ -22,14 +22,14 @@ class Constants_JobStatus {
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_DELETED   = 'deleted';
 
-    public static $ALLOWED_STATUSES = [
+    public static array $ALLOWED_STATUSES = [
             self::STATUS_ACTIVE,
             self::STATUS_ARCHIVED,
             self::STATUS_CANCELLED,
             self::STATUS_DELETED
     ];
 
-    public static function isAllowedStatus( $status ) {
+    public static function isAllowedStatus( string $status ): bool {
         return in_array( strtolower( $status ), self::$ALLOWED_STATUSES );
     }
 

@@ -1,13 +1,15 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
 use DataAccess\ArrayAccessTrait;
+use DataAccess\IDaoStruct;
 use LQA\ModelDao;
 use LQA\ModelStruct;
 use RemoteFiles\RemoteFileServiceNameStruct;
 use Teams\TeamDao;
 use Teams\TeamStruct;
 
-class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -29,10 +31,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public ?int    $id_team              = null;
     public ?int    $id_assignee          = null;
     public ?string $due_date             = null;
-
-    public function isAnonymous(): bool {
-        return $this->id_customer == 'translated_user';
-    }
 
     /**
      * @return bool

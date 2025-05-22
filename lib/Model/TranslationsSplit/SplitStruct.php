@@ -1,12 +1,15 @@
 <?php
 
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 23/02/15
  * Time: 14.54
  */
-class TranslationsSplit_SplitStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class TranslationsSplit_SplitStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     public $id_segment;
 

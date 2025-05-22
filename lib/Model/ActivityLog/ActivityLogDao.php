@@ -8,30 +8,30 @@
 
 namespace ActivityLog;
 
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDao;
 use Database;
 use PDO;
 use ReflectionException;
 
-class ActivityLogDao extends DataAccess_AbstractDao {
+class ActivityLogDao extends AbstractDao {
 
     public $epilogueString  = "";
     public $whereConditions = " id_project = :id_project ";
 
-    public function getAllForProject($id_project){
+    public function getAllForProject( $id_project ) {
         $conn = Database::obtain()->getConnection();
-        $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
-          JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC " ;
+        $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
+          JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
 
-        $stmt = $conn->prepare( $sql ) ;
+        $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
 
-        $stmt->execute( array( 'id_project' =>  $id_project ) ) ;
-        return $stmt->fetchAll() ;
+        $stmt->execute( [ 'id_project' => $id_project ] );
+
+        return $stmt->fetchAll();
     }
 
-    public function getLastActionInProject( $id_project) {
+    public function getLastActionInProject( $id_project ) {
         $conn = Database::obtain()->getConnection();
         $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
@@ -80,15 +80,15 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * @param array                 $whereKeys
+     * @param array $whereKeys
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      * @throws ReflectionException
      * @see      \AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
      *
      */
-    public function read( DataAccess_IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
+    public function read( \DataAccess\IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
 
         $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM activity_log " .
@@ -108,7 +108,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
     /**
      * @param array $array_result
      *
-     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
+     * @return \DataAccess\IDaoStruct|\DataAccess\IDaoStruct[]|void
      */
     protected function _buildResult( array $array_result ) {
     }

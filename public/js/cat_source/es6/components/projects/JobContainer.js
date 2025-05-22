@@ -380,7 +380,7 @@ class JobContainer extends React.Component {
       '/' +
       this.props.job.get('password')
     let exportXliffUrl =
-      '/api/v2/SDLXLIFF/' +
+      '/api/v2/xliff/' +
       this.props.job.get('id') +
       '/' +
       this.props.job.get('password') +

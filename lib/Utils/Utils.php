@@ -651,9 +651,9 @@ class Utils {
     }
 
     /**
-     * @param array  $match
-     * @param string $job_tm_keys
-     * @param int    $uid
+     * @param array    $match
+     * @param string   $job_tm_keys
+     * @param int|null $uid
      *
      * @return null|string
      * @throws Exception

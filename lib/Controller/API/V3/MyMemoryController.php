@@ -2,7 +2,7 @@
 
 namespace API\V3;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Engine;
 use Exception;

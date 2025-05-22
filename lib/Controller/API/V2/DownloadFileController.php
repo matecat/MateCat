@@ -46,9 +46,9 @@ set_time_limit( 180 );
 
 class DownloadFileController extends AbstractDownloadController {
 
-    protected $download_type;
-    protected $job;
-    protected $forceXliff;
+    protected                 $download_type;
+    protected \Jobs_JobStruct $job;
+    protected                 $forceXliff;
     protected $downloadToken;
 
     /**

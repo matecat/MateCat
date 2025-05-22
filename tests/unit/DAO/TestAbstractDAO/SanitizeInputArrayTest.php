@@ -5,7 +5,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers DataAccess_AbstractDao::_sanitizeInputArray
+ * @covers DataAccess\AbstractDao::_sanitizeInputArray
  * User: dinies
  * Date: 19/04/16
  * Time: 16.06
@@ -30,7 +30,7 @@ class SanitizeInputArrayTest extends AbstractTest {
      * It sanitizes an array of EnginesModel_EngineStruct with structs of the correct type of instance.
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_sanitizeInputArray
+     * @covers DataAccess\AbstractDao::_sanitizeInputArray
      */
     public function test__sanitizeInputArray_with_correct_structs_that_match_with_the_given_type() {
         $first_struct  = new EnginesModel_EngineStruct();
@@ -54,7 +54,7 @@ class SanitizeInputArrayTest extends AbstractTest {
      * It throws an exception because the second element is of the wrong instance type.
      *
      * @group  regression
-     * @covers DataAccess_AbstractDao::_sanitizeInputArray
+     * @covers DataAccess\AbstractDao::_sanitizeInputArray
      */
     public function test__sanitizeInputArray_with_wrong_struct_that_dont_match_with_the_given_type() {
         $first_struct  = new EnginesModel_EngineStruct();

@@ -7,10 +7,12 @@
  */
 
 use API\V2\Json\QALocalWarning;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 use LQA\QA;
 
 
-class QualityReport_QualityReportSegmentStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class QualityReport_QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
 
     public $sid;

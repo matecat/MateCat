@@ -6,11 +6,14 @@
  * Time: 18.07
  */
 
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Class MemoryKeyStruct<br>
  * This class represents a row in the table memory_keys.
  */
-class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class TmKeyManagement_MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     /**
      * @var integer The user's ID
@@ -28,7 +31,7 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
      * @param $mask array|null
      *
      * @return array
-     * @see DataAccess_AbstractDaoObjectStruct::toArray
+     * @see \DataAccess\AbstractDaoObjectStruct::toArray
      */
     public function toArray( array $mask = null ): array {
         $result = (array)$this;

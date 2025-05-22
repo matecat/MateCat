@@ -22,8 +22,8 @@ class JSONValidator extends AbstractValidator {
      *
      * @var SchemaContract
      */
-    private      $schemaContract;
-    private bool $throwExceptions;
+    private SchemaContract $schemaContract;
+    private bool           $throwExceptions;
 
     /**
      * JSONSchemaValidator constructor.

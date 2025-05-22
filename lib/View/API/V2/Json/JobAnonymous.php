@@ -29,7 +29,7 @@ class JobAnonymous extends Job {
      *
      * @return $this
      */
-    public function setCalledFromApi( $called_from_api ) {
+    public function setCalledFromApi( bool $called_from_api ) {
         return $this;
     }
 

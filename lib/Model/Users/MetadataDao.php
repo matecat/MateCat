@@ -2,11 +2,12 @@
 
 namespace Users;
 
+use DataAccess\AbstractDao;
 use Database;
 use PDO;
 use ReflectionException;
 
-class MetadataDao extends \DataAccess_AbstractDao {
+class MetadataDao extends AbstractDao {
 
     const TABLE = 'user_metadata';
 

@@ -64,8 +64,8 @@ class MetaDataController extends BaseChunkController {
         $jobMetaDataDao = new MetadataDao();
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
-            $key            = $metadatum->key;
-            $metadata->$key = is_numeric($metadatum->value) ? (int)$metadatum->value : $metadatum->value;
+            $key            = $metadatum->tag_key;
+            $metadata->$key = is_numeric($metadatum->tag_value) ? (int)$metadatum->tag_value : $metadatum->tag_value;
         }
 
         return $metadata;

@@ -3,9 +3,8 @@
 namespace Features\TranslationVersions\Model;
 
 use Constants;
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
 use Database;
 use Jobs_JobStruct;
 use PDO;
@@ -13,7 +12,7 @@ use QualityReport\SegmentEventsStruct;
 use Translations_SegmentTranslationStruct;
 use Utils;
 
-class TranslationVersionDao extends DataAccess_AbstractDao {
+class TranslationVersionDao extends AbstractDao {
 
     const TABLE = 'segment_translation_versions';
 
@@ -134,7 +133,7 @@ class TranslationVersionDao extends DataAccess_AbstractDao {
      * @param $id_job
      * @param $id_segment
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      */
     public function getVersionsForRevision( $id_job, $id_segment ) {
 

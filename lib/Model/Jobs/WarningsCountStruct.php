@@ -10,10 +10,10 @@
 namespace Jobs;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class WarningsCountStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class WarningsCountStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $count;
     public $id_job;

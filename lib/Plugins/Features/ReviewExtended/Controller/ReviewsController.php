@@ -8,8 +8,8 @@
 
 namespace Features\ReviewExtended\Controller;
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\ValidationError;
-use API\Commons\KleinController;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\Commons\Validators\TeamProjectValidator;

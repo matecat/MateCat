@@ -3,8 +3,8 @@
 namespace LQA;
 
 use Constants;
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
@@ -12,7 +12,7 @@ use Jobs_JobStruct;
 use PDO;
 use ReflectionException;
 
-class ChunkReviewDao extends \DataAccess_AbstractDao {
+class ChunkReviewDao extends AbstractDao {
 
     const TABLE = "qa_chunk_reviews";
 
@@ -317,7 +317,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @param     $password
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct
+     * @return \DataAccess\IDaoStruct
      */
     public function isTOrR1OrR2( $jid, $password, $ttl = 3600 ) {
 

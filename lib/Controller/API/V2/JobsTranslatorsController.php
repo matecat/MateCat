@@ -10,8 +10,8 @@
 namespace API\V2;
 
 
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use API\Commons\Validators\JobPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\JobTranslator;

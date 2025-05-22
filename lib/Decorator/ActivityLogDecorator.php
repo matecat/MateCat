@@ -2,6 +2,9 @@
 
 use ActivityLog\ActivityLogStruct;
 
+/**
+ * @deprecated
+ */
 class ActivityLogDecorator {
 
     protected $controller;

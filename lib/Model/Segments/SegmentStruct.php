@@ -2,7 +2,7 @@
 
 use DataAccess\ArrayAccessTrait;
 
-class Segments_SegmentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class Segments_SegmentStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 

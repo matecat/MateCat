@@ -10,7 +10,7 @@
 namespace API\App;
 
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use Routes;
 use Teams\InvitedUser;
 
