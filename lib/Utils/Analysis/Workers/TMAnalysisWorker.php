@@ -184,7 +184,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 InternalMatchesConstants::STANDARD_QUALITY_MT
         ] ) ) {
 
-            //Reset the standard word count to be equals to other cat tools which do not have the MT in analysis
+            //Reset the standard word count to be equal to other cat tools which do not have the MT in analysis
             $standard_words = ( $equivalentWordMapping[ InternalMatchesConstants::NO_MATCH ] ?? 100 ) * $queueElement->params->raw_word_count / 100;
 
             // realign MT Spaces
@@ -402,8 +402,6 @@ class TMAnalysisWorker extends AbstractWorker {
         /* is Public TM */
         $publicTM = empty( $bestMatch[ 'memory_key' ] );
         $isICE    = isset( $bestMatch[ InternalMatchesConstants::TM_ICE ] ) && $bestMatch[ InternalMatchesConstants::TM_ICE ];
-
-        $fast_match_type = strtoupper( $fast_match_type );
 
         // When MTQE is enabled, the NO_MATCH and INTERNAL types are not defined in the payable rates. So fall back to the 100% rate, since it is overwritten by design.
         $fast_rate_paid = $equivalentWordMapping[ $fast_match_type ] ?? 100;

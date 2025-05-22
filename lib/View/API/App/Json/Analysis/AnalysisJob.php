@@ -81,7 +81,7 @@ class AnalysisJob implements JsonSerializable {
                 'chunks'              => array_values( $this->chunks ),
                 'total_raw'           => $this->total_raw,
                 'total_equivalent'    => $this->total_equivalent,
-                'total_industry'      => round( $this->total_industry ),
+                'total_industry'      => max( round( $this->total_industry ), $this->total_equivalent ),
                 'outsource_available' => $this->outsourceAvailable,
                 'payable_rates'       => $this->payable_rates,
                 'count_unit'          => $this->getCountUnit( $this->source ),

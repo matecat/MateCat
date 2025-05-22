@@ -20,8 +20,14 @@ class RequestExportTMXController extends KleinController {
     public function download(): void {
 
         $request = $this->validateTheRequest();
-        $res     = $request[ 'tmxHandler' ]->requestTMXEmailDownload(
-                ( $request[ 'download_to_email' ] ?: $this->user->email ),
+
+        /**
+         * @var TMSService $tmxHandler
+         */
+        $tmxHandler = $request[ 'tmxHandler' ];
+
+        $res     = $tmxHandler->requestTMXEmailDownload(
+                $this->user->email,
                 $this->user->first_name,
                 $this->user->last_name,
                 $request[ 'tm_key' ],

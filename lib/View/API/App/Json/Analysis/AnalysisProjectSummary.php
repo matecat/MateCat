@@ -70,7 +70,7 @@ class AnalysisProjectSummary implements JsonSerializable {
                 'segments_analyzed' => $this->segments_analyzed,
                 'status'            => $this->analysis_status,
                 'total_raw'         => $this->total_raw,
-                'total_industry'    => round( $this->total_industry ),
+                'total_industry'    => max( round( $this->total_industry ), $this->total_equivalent ),
                 'total_equivalent'  => $this->total_equivalent,
                 'discount'          => $this->getDiscount()
         ];

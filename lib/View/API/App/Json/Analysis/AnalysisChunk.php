@@ -87,7 +87,7 @@ class AnalysisChunk implements JsonSerializable {
                 'summary'          => $this->summary,
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => $this->total_equivalent,
-                'total_industry'   => round( $this->total_industry ),
+                'total_industry'   => max( round( $this->total_industry ), $this->total_equivalent ),
         ];
     }
 
