@@ -28,20 +28,21 @@ class TeamMembersController extends KleinController {
     }
 
     /**
-     * Get team members list
+     * Get the team members list
+     * @throws ReflectionException
      */
     public function index(){
 
         $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
 
-        $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->id_team );
+        $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->param( 'id_team' ) );
         $teamModel = new TeamModel( $team );
         $teamModel->updateMembersProjectsCount();
 
         $formatter = new Membership( $team->getMembers() ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $this->request->id_team )
+                'pending_invitations' => $pendingInvitation->hasPengingInvitation( $this->request->param( 'id_team' ) )
         ] );
 
     }
@@ -61,7 +62,7 @@ class TeamMembersController extends KleinController {
         ], true ) ;
 
         $teamStruct = ( new TeamDao() )
-            ->findById( $this->request->id_team );
+            ->findById( $this->request->param( 'id_team' ) );
 
         $model = new TeamModel( $teamStruct ) ;
         $model->setUser( $this->user ) ;
@@ -88,10 +89,10 @@ class TeamMembersController extends KleinController {
         \Database::obtain()->begin();
 
         $teamStruct = ( new TeamDao() )
-            ->findById( $this->request->id_team );
+            ->findById( $this->request->param( 'id_team' ) );
 
         $model = new TeamModel( $teamStruct ) ;
-        $model->removeMemberUids( array( $this->request->uid_member ) );
+        $model->removeMemberUids( array( $this->request->param( 'uid_member' ) ) );
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
 

@@ -11,6 +11,7 @@
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
 use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
 
@@ -112,7 +113,7 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->props                = new TaskRunner\Commons\Params();
 
         $queueElement            = new QueueElement();
-        $queueElement->params    = $contributionStruct;
+        $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
@@ -152,7 +153,7 @@ class SetContributionTest extends AbstractTest {
         $stub = @$this->getMockBuilder( '\AMQHandler' )->getMock();
 
         $queueElement            = new QueueElement();
-        $queueElement->params    = $contributionStruct;
+        $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $stub->expects( $this->once() )

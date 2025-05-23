@@ -2,12 +2,13 @@
 
 namespace Features;
 
+use API\App\CreateProjectController;
 use API\Commons\Exceptions\ValidationError;
+use API\V1\NewController;
 use ArrayObject;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Constants;
-use createProjectController;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
@@ -32,7 +33,6 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
-use NewController;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -57,7 +57,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      * @param array $projectFeatures
-     * @param       $controller NewController|createProjectController
+     * @param       $controller NewController|CreateProjectController
      *
      * @return array
      * @throws Exception

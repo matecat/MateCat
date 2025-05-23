@@ -59,7 +59,7 @@ class ConstructorTest extends AbstractTest {
         $constCache          = $mirror_word_counter->getProperty( 'constCache' );
         $constCache->setAccessible( true );
 
-        $this->assertCount( 8, $constCache->getValue( $word_counter ) );
+        $this->assertCount( 7, $constCache->getValue( $word_counter ) );
         $this->assertEquals( "STATUS_NEW", $constCache->getValue( $word_counter )[ 'NEW' ] );
         $this->assertEquals( "STATUS_DRAFT", $constCache->getValue( $word_counter )[ 'DRAFT' ] );
         $this->assertEquals( "STATUS_TRANSLATED", $constCache->getValue( $word_counter )[ 'TRANSLATED' ] );
@@ -67,7 +67,6 @@ class ConstructorTest extends AbstractTest {
         $this->assertEquals( "STATUS_APPROVED2", $constCache->getValue( $word_counter )[ 'APPROVED2' ] );
         $this->assertEquals( "STATUS_REJECTED", $constCache->getValue( $word_counter )[ 'REJECTED' ] );
         $this->assertEquals( "STATUS_FIXED", $constCache->getValue( $word_counter )[ 'FIXED' ] );
-        $this->assertEquals( "STATUS_REBUTTED", $constCache->getValue( $word_counter )[ 'REBUTTED' ] );
 
 
         $old_w_count = $mirror_word_counter->getProperty( 'oldWCount' );

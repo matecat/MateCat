@@ -24,7 +24,7 @@ class TMSServiceDao {
      *
      * @return array
      */
-    public static function getTranslationsForTMXExport( $jid, $jPassword ) {
+    public static function getTranslationsForTMXExport( $jid, $jPassword ): array {
 
         $db = Database::obtain();
 
@@ -45,21 +45,14 @@ class TMSServiceDao {
             AND show_in_cattool = 1
 ";
 
-        try {
-            $stmt = $db->getConnection()->prepare( $sql );
-            $stmt->setFetchMode( PDO::FETCH_ASSOC );
-            $stmt->execute( [
-                    'id_job'   => $jid,
-                    'password' => $jPassword
-            ] );
-            $results = $stmt->fetchAll();
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+        $stmt = $db->getConnection()->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+        $stmt->execute( [
+                'id_job'   => $jid,
+                'password' => $jPassword
+        ] );
 
-            return $e->getCode() * -1;
-        }
-
-        return $results;
+        return $stmt->fetchAll();
 
     }
 

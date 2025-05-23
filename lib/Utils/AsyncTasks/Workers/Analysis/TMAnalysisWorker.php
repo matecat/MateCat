@@ -7,10 +7,11 @@
  *
  */
 
-namespace Analysis\Workers;
+namespace AsyncTasks\Workers\Analysis;
 
-use Analysis\Queue\RedisKeys;
 use API\Commons\Exceptions\AuthenticationError;
+use AsyncTasks\Workers\Traits\ProjectWordCount;
+use AsyncTasks\Workers\Traits\SortMatchesTrait;
 use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
@@ -32,7 +33,6 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PDOException;
 use PostProcess;
-use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
@@ -52,11 +52,12 @@ use WordCount\CounterModel;
  * @package Analysis\Workers
  *
  * Concrete worker.
- * This worker handle a queue element ( a segment ) and perform the analysis on it
+ * This worker handles a queue element (a segment) and performs the analysis on it
  */
 class TMAnalysisWorker extends AbstractWorker {
 
     use ProjectWordCount;
+    use SortMatchesTrait;
 
     /**
      * Matches vector
@@ -89,9 +90,10 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_checkDatabaseConnection();
 
         /**
-         * Ensure we have fresh data from master node
+         * Ensure we have fresh data from the master node
          */
         $this->featureSet = new FeatureSet();
+        /** @var $queueElement QueueElement */
         $this->featureSet->loadFromString( $queueElement->params->features );
 
         //reset matches vector
@@ -139,7 +141,6 @@ class TMAnalysisWorker extends AbstractWorker {
      * @param QueueElement $queueElement
      *
      * @throws EndQueueException
-     * @throws ReQueueException
      * @throws ReflectionException
      */
     protected function _endQueueCallback( QueueElement $queueElement ) {
@@ -157,7 +158,8 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $bestMatch  = $this->getHighestNotMT_OrPickTheFirstOne();
+        $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
+        /** @var MatecatFilter $filter */
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
         $suggestion = $bestMatch[ 'raw_translation' ]; //No layering needed
 
@@ -427,8 +429,8 @@ class TMAnalysisWorker extends AbstractWorker {
                         $tm_match_fuzzy_band = InternalMatchesConstants::TOP_QUALITY_MT;
                         $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::TOP_QUALITY_MT ];
                     } elseif ( $bestMatch[ 'score' ] >= 0.5 ) {
-                        $tm_match_fuzzy_band = InternalMatchesConstants::HIGHER_QUALITY_MT;;
-                        $tm_discount = $equivalentWordMapping[ InternalMatchesConstants::HIGHER_QUALITY_MT ];
+                        $tm_match_fuzzy_band = InternalMatchesConstants::HIGHER_QUALITY_MT;
+                        $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::HIGHER_QUALITY_MT ];
                     } else {
                         $tm_match_fuzzy_band = InternalMatchesConstants::STANDARD_QUALITY_MT;
                         $tm_discount         = $equivalentWordMapping[ InternalMatchesConstants::STANDARD_QUALITY_MT ];
@@ -461,7 +463,7 @@ class TMAnalysisWorker extends AbstractWorker {
             }
 
             /**
-             * MyMemory never returns matches below 50%, it sends them as NO_MATCH
+             * MyMemory never returns matches below 50%, it sends them as NO_MATCH,
              * So this block of code results unused
              */
             if ( $ind < 50 ) {
@@ -558,7 +560,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // penalty_key
         $penalty_key = [];
-        $tm_keys     = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r', 'tm' );
+        $tm_keys     = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
 
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
@@ -597,7 +599,7 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'onlyprivate' ] = true; // MyMemory configuration, get matches only from private memories
         }
 
-        // if we want only private tm with no keys mymemory should not be called
+        // if we want only private tm with no keys, mymemory should not be called
         if ( $queueElement->params->only_private && empty( $_config[ 'id_user' ] ) && !$_config[ 'get_mt' ] ) {
             $tmsEngine = Engine::getInstance( 0 );
         }
@@ -631,13 +633,13 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw $rEx;  // just to make code more readable, re-throw exception
         } catch ( NotSupportedMTException $nMTEx ) {
-            // Do nothing, skip frame
+            // Do nothing, skip the frame
         }
 
         $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_qe_config );
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
-            usort( $matches, "self::_compareScore" );
+            usort( $matches, "self::compareScoreDesc" );
         }
 
         /**
@@ -699,11 +701,11 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
-     * @param Engines_AbstractEngine $mtEngine
-     * @param array                  $_config
+     * @param Engines_AbstractEngine  $mtEngine
+     * @param array                   $_config
      *
-     * @param QueueElement           $queueElement
-     * @param MTQEWorkflowParams     $mt_qe_config
+     * @param QueueElement            $queueElement
+     * @param MTQEWorkflowParams|null $mt_qe_config
      *
      * @return bool|Engines_Results_AbstractResponse
      */
@@ -718,7 +720,7 @@ class TMAnalysisWorker extends AbstractWorker {
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis to false to allow the Lara engine to perform the analysis.
+            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis false to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
                 $mtEngine->setSkipAnalysis( false );
                 $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_type;
@@ -729,7 +731,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $mtEngine->setMTPenalty( $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
 
-            // set for lara engine in case, this is needed to catch all owner keys
+            // set for lara engine in case this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
 
@@ -737,7 +739,7 @@ class TMAnalysisWorker extends AbstractWorker {
                 $config[ 'job_id' ] = $queueElement->params->id_job;
             }
 
-            // if a callback is not set only the first argument is returned, get the config params from the callback
+            // if a callback is not set, only the first argument is returned, get the config params from the callback
             $config = $this->featureSet->filter( 'analysisBeforeMTGetContribution', $config, $mtEngine, $queueElement ); //YYY verify airbnb plugin and MMT engine, such plugin force to use MMT, but MMT now is enabled by default
 
             $mt_result = $mtEngine->get( $config );
@@ -766,13 +768,14 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @param Engines_AbstractEngine $tmsEngine
      * @param                        $_config
+     * @param QueueElement           $queueElement
      *
      * @return array|Engines_Results_MyMemory_TMS|null
+     * @throws AuthenticationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws NotSupportedMTException
      * @throws ReQueueException
-     * @throws AuthenticationError
-     * @throws NotFoundException
      * @throws ValidationError
      * @throws Exception
      */
@@ -794,7 +797,7 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * If No results found. Re-Queue
          *
-         * MyMemory can return null if an error occurs (e.g http response code is 404, 410, 500, 503, etc... )
+         * MyMemory can return null if an error occurs (e.g., http response code is 404, 410, 500, 503, etc...)
          */
         if ( !empty( $tms_match->error ) ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. NULL received." );
@@ -806,7 +809,7 @@ class TMAnalysisWorker extends AbstractWorker {
             throw new NotSupportedMTException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. MT not supported.", self::ERR_EMPTY_ELEMENT );
         }
 
-        // strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT ( the returned record can NOT be empty ). Try again
+        // Strict check for MT engine == 1, this means we requested MyMemory explicitly to get MT (the returned record cannot be empty). Try again
         if ( empty( $tms_match ) && $_config[ 'get_mt' ] ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested." );
             throw new ReQueueException( "--- (Worker " . $this->_workerPid . ") : Error from MyMemory. Empty field received even if MT was requested.", self::ERR_REQUEUE );
@@ -818,23 +821,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         return $tms_match;
 
-    }
-
-    /**
-     * Compare match scores between TM records and MT records when they are external to MyMemory
-     *
-     * @param $a
-     * @param $b
-     *
-     * @return int
-     */
-    protected static function _compareScore( $a, $b ): int {
-        if ( floatval( $a[ 'match' ] ) == floatval( $b[ 'match' ] ) ) {
-            return 0;
-        }
-
-        return ( floatval( $a[ 'match' ] ) < floatval( $b[ 'match' ] ) ? 1 : -1 ); //SORT DESC !!!!!!! INVERT MINUS SIGN
-        //this is necessary since usort sorts is ascending order, thus inverting the ranking
     }
 
     /**
@@ -860,20 +846,20 @@ class TMAnalysisWorker extends AbstractWorker {
      * Take the info from the project and initialize it.
      * There is a lock for every project on redis, so only one worker can initialize the counter
      *
-     *  - Set project total segments to analyze, and count the analyzed as segments done
+     *  - Set the project total segments to analyze and count the analyzed as segments done
      *
-     * @param $queueElement QueueElement
-     * @param $process_pid  int
+     * @param QueueElement $queueElement
+     * @param string       $process_pid
      *
      * @throws ReflectionException
      */
-    protected function _initializeTMAnalysis( QueueElement $queueElement, $process_pid ) {
+    protected function _initializeTMAnalysis( QueueElement $queueElement, string $process_pid ) {
 
         $sid = $queueElement->params->id_segment;
         $jid = $queueElement->params->id_job;
         $pid = $queueElement->params->pid;
 
-        //get the number of segments in job
+        //get the number of segments in a job
         $_acquiredLock = $this->_queueHandler->getRedisClient()->setnx( RedisKeys::PROJECT_INIT_SEMAPHORE . $pid, true ); // lock for 24 hours
         if ( !empty( $_acquiredLock ) ) {
 
@@ -882,21 +868,21 @@ class TMAnalysisWorker extends AbstractWorker {
             // Get those data from the master database to avoid delayed replication issues
             $db = Database::obtain();
             $db->begin();
-            $total_segs = $this->getProjectSegmentsTranslationSummary( $pid );
+            $total_segments = $this->getProjectSegmentsTranslationSummary( $pid );
             $db->commit();
 
-            $total_segs = array_pop( $total_segs ); // get the Rollup Value
-            $this->_doLog( $total_segs );
+            $total_segments = array_pop( $total_segments ); // get the Rollup Value
+            $this->_doLog( $total_segments );
 
-            $this->_queueHandler->getRedisClient()->setex( RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segs[ 'project_segments' ] );
-            $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segs[ 'num_analyzed' ] );
+            $this->_queueHandler->getRedisClient()->setex( RedisKeys::PROJECT_TOT_SEGMENTS . $pid, 60 * 60 * 24 /* 24 hours TTL */, $total_segments[ 'project_segments' ] );
+            $this->_queueHandler->getRedisClient()->incrby( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, $total_segments[ 'num_analyzed' ] );
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid, 60 * 60 * 24 /* 24 hours TTL */ );
-            $this->_doLog( "--- (Worker $process_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid" );
+            $this->_doLog( "--- (Worker $process_pid) : found " . $total_segments[ 'project_segments' ] . " segments for PID $pid" );
 
         } else {
-            $_projectTotSegs = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
-            $_analyzed       = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
-            $this->_doLog( "--- (Worker $process_pid) : found $_projectTotSegs, analyzed $_analyzed segments for PID $pid in Redis" );
+            $_projectTotSegments = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_TOT_SEGMENTS . $pid );
+            $_analyzed           = $this->_queueHandler->getRedisClient()->get( RedisKeys::PROJECT_NUM_SEGMENTS_DONE . $pid );
+            $this->_doLog( "--- (Worker $process_pid) : found $_projectTotSegments, analyzed $_analyzed segments for PID $pid in Redis" );
         }
 
         $this->_doLog( "--- (Worker $process_pid) : fetched data for segment $sid-$jid. Project ID is $pid" );
@@ -923,7 +909,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
     /**
      * Decrement the number of segments that we must wait before that this project starts.
-     * There is a list of project ids from witch the interface will read the remaining segments.
+     * There is a list of project ids from which the interface will read the remaining segments.
      *
      * @param int $project_id
      *
@@ -940,9 +926,9 @@ class TMAnalysisWorker extends AbstractWorker {
         /**
          * We have an unordered list of numeric keys [1,3,2,5,4]
          *
-         * I want to decrement the key that are positioned in the list after my key.
+         * I want to decrement the key positioned in the list after my key.
          *
-         * So, if my key is 2, i want not decrement the key 3 in the example because my key is positioned after "3" in the list
+         * So, if my key is 2, I want to not decrement key 3 in the example because my key is positioned after "3" in the list
          *
          */
         $found = false;
@@ -960,8 +946,6 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * @param $_params
      *
-     * @throws ConnectionException
-     * @throws ReQueueException
      * @throws ReflectionException
      */
     protected function _tryToCloseProject( $_params ) {
@@ -1048,11 +1032,10 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * When a segment has an error or was re-queued too much times we want to force it as analyzed
+     * When a segment has an error or was re-queued too many times, we want to force it as analyzed
      *
      * @param $elementQueue QueueElement
      *
-     * @throws ReQueueException
      * @throws ReflectionException
      * @throws Exception
      */

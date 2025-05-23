@@ -825,8 +825,10 @@ class NewController extends KleinController {
                 $validator  = new JSONValidator( $schema );
                 $jsonObject = $validator->validate( $validatorObject );
 
+                /** @noinspection PhpUndefinedFieldInspection */
                 $tm_prioritization = $jsonObject->tm_prioritization;
 
+                /** @noinspection PhpUndefinedFieldInspection */
                 $private_tm_key = array_map(
                         function ( $item ) {
                             return [

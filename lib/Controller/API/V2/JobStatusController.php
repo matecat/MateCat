@@ -40,19 +40,19 @@ class JobStatusController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $segments_id = $this->sanitizeSegmentIDs( $this->request->segments_id );
-        $status      = strtoupper( $this->request->status );
+        $segments_id = $this->sanitizeSegmentIDs( $this->request->param( 'segments_id' ) );
+        $status      = strtoupper( $this->request->param( 'status' ) );
         $source_page = null;
 
-        if ( $this->request->revision_number ) {
+        if ( $this->request->param( 'revision_number' ) ) {
             $validRevisions = ReviewUtils::validRevisionNumbers( $this->chunk );
-            if ( !in_array( $this->request->revision_number, $validRevisions ) ) {
+            if ( !in_array( $this->request->param( 'revision_number' ), $validRevisions ) ) {
                 $this->response->code( 400 );
                 $this->response->json( [ 'error' => 'Invalid revision number' ] );
 
                 return;
             }
-            $source_page = ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number );
+            $source_page = ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) );
         }
 
         if ( in_array( $status, [
@@ -69,12 +69,12 @@ class JobStatusController extends BaseChunkController {
                     WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
                             [
                                     'segment_ids'        => $segments_id,
-                                    'client_id'          => $this->request->client_id,
+                                    'client_id'          => $this->request->param( 'client_id' ),
                                     'chunk'              => $this->chunk,
                                     'destination_status' => $status,
                                     'id_user'            => ( $this->isLoggedIn() ? $this->getUser()->uid : null ),
                                     'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),
-                                    'revision_number'    => $this->request->revision_number
+                                    'revision_number'    => $this->request->param( 'revision_number' )
                             ], [ 'persistent' => true ]
                     );
                 } catch ( Exception $e ) {

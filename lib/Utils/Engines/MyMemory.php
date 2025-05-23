@@ -398,18 +398,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @param string $uuid
      *
-     * @return array
+     * @return Engines_Results_MyMemory_TmxResponse
      */
     public function entryStatus( string $uuid ) {
-        $this->call( "entry_status_relative_url", [
-                'uuid' => $uuid
-        ], false );
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
                         CURLOPT_TIMEOUT => 1
                 ]
         );
+
+        $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
 
         /**
          * @var Engines_Results_MyMemory_TmxResponse
@@ -866,7 +865,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 //        }
 
         //formatting strip
-        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
         preg_match( "/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE );
         preg_match( "/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE );

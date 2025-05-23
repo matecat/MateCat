@@ -182,11 +182,11 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController { //
 
         }
 
-        $this->template->tokenAuth = $this->tokenAuth;
-        $this->template->data = json_encode( $item_list );
-        $this->template->redirect_url = $this->review_order_page;
-        $this->template->data_key = $this->data_key_content;
-        $this->template->confirm_tokens = $confirm_tokens;
+        $this->template->{'tokenAuth'} = $this->tokenAuth;
+        $this->template->{'data'} = json_encode( $item_list );
+        $this->template->{'redirect_url'} = $this->review_order_page;
+        $this->template->{'data_key'} = $this->data_key_content;
+        $this->template->{'confirm_tokens'} = $confirm_tokens;
 
         //clear the cart after redirection
         //$shop_cart->emptyCart();

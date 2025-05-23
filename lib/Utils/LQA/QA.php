@@ -61,8 +61,7 @@ class errObject {
         $errObj->outcome    = $errors[ 'outcome' ];
         $errObj->orig_debug = $errors[ 'debug' ];
         $errObj->debug      = $errors[ 'debug' ];
-
-        ( !empty( $errors[ 'tip' ] ) ) ? $errObj->tip = $errors[ 'tip' ] : null;
+        $errObj->tip        = $errors[ 'tip' ] ?? null;
 
         return $errObj;
     }
@@ -1473,16 +1472,16 @@ class QA {
      */
     protected function _getTagDiff() {
 
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
         //this is for </g>
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->source_seg, $matches );
         $_closingSrcTag = $matches[ 1 ];
 
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->target_seg, $matches );
         $_closingTrgTag = $matches[ 1 ];
 
         $clonedSrc = $malformedXmlSrcStruct;
@@ -1885,7 +1884,7 @@ class QA {
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // check if source has a trailing space at the end
-            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
+            $sourceHasTrailingSpace = ( strlen( $this->source_seg ) !== strlen( rtrim( $this->source_seg ) ) );
 
             if ( $sourceHasTrailingSpace ) {
 

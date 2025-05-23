@@ -76,6 +76,9 @@ class SearchModel {
             case 'status_only':
                 $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
                 break;
+            default:
+                $results = [];
+                break;
         }
 
         $vector = [

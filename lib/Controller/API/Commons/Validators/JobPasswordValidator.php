@@ -8,7 +8,7 @@ namespace API\Commons\Validators;
 
 use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use Jobs_JobDao;
+use Chunks_ChunkDao;
 use Jobs_JobStruct;
 use ReflectionException;
 
@@ -20,15 +20,12 @@ class JobPasswordValidator extends Base {
 
     /**
      * @throws ReflectionException
+     * @throws \Exceptions\NotFoundException
      */
     public function __construct( KleinController $controller ) {
 
         parent::__construct( $controller );
-
-        $this->jStruct           = new Jobs_JobStruct();
-        $this->jStruct->id       = $this->controller->params[ 'id_job' ];
-        $this->jStruct->password = $this->controller->params[ 'password' ];
-        $this->jStruct           = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
+        $this->jStruct = Chunks_ChunkDao::getByIdAndPassword( $this->controller->params[ 'id_job' ], $this->controller->params[ 'password' ] );
 
         $this->controller->setChunk( $this->jStruct );
 

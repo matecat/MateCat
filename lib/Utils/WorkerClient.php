@@ -9,6 +9,7 @@
 
 use Stomp\Transport\Message;
 use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 
 class WorkerClient {
@@ -44,34 +45,31 @@ class WorkerClient {
     /**
      * WARNING this method should never be used in a daemon context
      *
-     * @param $queue
-     * @param $class_name
-     * @param $data
-     * @param $options
-     *
-     * @throws Exception
+     * @param string $queue
+     * @param string $class_name
+     * @param array  $data
+     * @param array  $options
      *
      */
-    public static function enqueue( $queue, $class_name, $data, $options = [] ) {
+    public static function enqueue( string $queue, string $class_name, array $data, array $options = [] ) {
         static::enqueueWithClient( self::$_HANDLER, $queue, $class_name, $data, $options );
     }
 
     /**
      * @param AMQHandler $handler
-     * @param            $queue
-     * @param            $class_name
-     * @param            $data
+     * @param string     $queue
+     * @param string     $class_name
+     * @param array      $data
      * @param array      $options
-     *
      */
-    public static function enqueueWithClient( AMQHandler $handler, $queue, $class_name, $data, $options = [] ) {
+    public static function enqueueWithClient( AMQHandler $handler, string $queue, string $class_name, array $data, array $options = [] ) {
 
         if ( !isset( $options[ 'persistent' ] ) ) {
             $options[ 'persistent' ] = $handler->persistent;
         }
 
         $element            = new QueueElement();
-        $element->params    = $data;
+        $element->params    = new Params( $data );
         $element->classLoad = $class_name;
 
         $queue_name = self::$_QUEUES[ $queue ]->queue_name;
@@ -81,7 +79,7 @@ class WorkerClient {
         }
 
         $handler->publishToQueues( $queue_name, new Message( strval( $element ), $options ) );
-        $handler->__destruct();
+        $handler->close();
 
     }
 

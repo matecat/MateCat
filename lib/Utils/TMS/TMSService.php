@@ -319,10 +319,12 @@ class TMSService {
     }
 
     /**
+     * @param $uuid
+     *
      * @return array
      * @throws Exception
      */
-    public function tmxUploadStatus( $uuid ) {
+    public function tmxUploadStatus( $uuid ): array {
 
         $allMemories = $this->mymemory_engine->getStatus( $uuid );
 

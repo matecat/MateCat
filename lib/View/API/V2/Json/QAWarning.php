@@ -27,13 +27,6 @@ class QAWarning {
                 $category = self::SIZE_CATEGORY;
                 break;
 
-            case QA::ERR_TAG_MISMATCH:
-            case QA::ERR_TAG_ID:
-            case QA::ERR_UNCLOSED_X_TAG:
-            case QA::ERR_TAG_ORDER:
-            case QA::ERR_UNCLOSED_G_TAG:
-                $category = self::TAGS_CATEGORY;
-                break;
             case QA::ERR_SPACE_MISMATCH_TEXT:
             case QA::ERR_TAB_MISMATCH:
             case QA::ERR_SPACE_MISMATCH:
@@ -45,6 +38,11 @@ class QAWarning {
             case QA::ERR_NEWLINE_MISMATCH:
                 $category = self::MISMATCH_CATEGORY;
                 break;
+            case QA::ERR_UNCLOSED_G_TAG:
+            case QA::ERR_TAG_ORDER:
+            case QA::ERR_UNCLOSED_X_TAG:
+            case QA::ERR_TAG_ID:
+            case QA::ERR_TAG_MISMATCH:
             default:
                 $category = self::TAGS_CATEGORY;
                 break;

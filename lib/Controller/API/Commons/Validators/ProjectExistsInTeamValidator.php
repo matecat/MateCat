@@ -22,7 +22,7 @@ class ProjectExistsInTeamValidator extends Base {
 
     public function _validate(): void {
 
-        if ( $this->request->id_team != $this->project->id_team ) {
+        if ( $this->request->param( 'id_team' ) != $this->project->id_team ) {
             throw new NotFoundException( "Project not found", 404 );
         }
 

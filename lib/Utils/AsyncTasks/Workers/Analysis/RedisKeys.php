@@ -7,7 +7,7 @@
  *
  */
 
-namespace Analysis\Queue;
+namespace AsyncTasks\Workers\Analysis;
 
 /**
  * Class RedisKeys
@@ -55,13 +55,13 @@ class RedisKeys {
 
     /**
      * Key that holds the lock for the first analysis demon child
-     * that start the analysis ( semaphore )
+     * that start the analysis (semaphore)
      */
     const PROJECT_INIT_SEMAPHORE = 'proj_init_lock:';
 
     /**
      * Key that holds the lock for the first analysis demon child
-     * that reach the end of analysis( semaphore )
+     * that reach the end of analysis (semaphore)
      */
     const PROJECT_ENDING_SEMAPHORE = 'proj_end_lock:';
 

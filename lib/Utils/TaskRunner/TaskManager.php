@@ -16,7 +16,6 @@ use Log;
 use ReflectionException;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
-use TaskRunner\Commons\RedisKeys;
 
 /**
  * Class Analysis_Manager
@@ -25,6 +24,14 @@ use TaskRunner\Commons\RedisKeys;
  *
  */
 class TaskManager extends AbstractDaemon {
+
+    /**
+     * Key Set that holds the main process of Task Manager
+     *
+     * Every Task Manager must have its pid registered to distribute the across multiple servers
+     *
+     */
+    const TASK_RUNNER_PID = 'task_manager_pid_set';
 
     /**
      * Number of running processes
@@ -91,7 +98,7 @@ class TaskManager extends AbstractDaemon {
          * Kill all managers. "There can be only one."
          * Register My Host address (and also overwrite the old one)
          */
-        if ( !$this->queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+        if ( !$this->queueHandler->getRedisClient()->sadd( self::TASK_RUNNER_PID, [ gethostname() . ":" . INIT::$INSTANCE_ID ] ) ) {
             //kill all it's children
             $this->_killPids();
         }
@@ -101,7 +108,7 @@ class TaskManager extends AbstractDaemon {
 
             try {
 
-                if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+                if ( !$this->queueHandler->getRedisClient()->sismember( self::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
                     $this->_logTimeStampedMsg( "(parent " . $this->myProcessPid . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
                     self::cleanShutDown();
                     die();
@@ -267,7 +274,7 @@ class TaskManager extends AbstractDaemon {
         $msg = str_pad( " SHUTDOWN slow children." . gethostname() . ":" . INIT::$INSTANCE_ID, 50, "-", STR_PAD_BOTH );
         $this->_logTimeStampedMsg( $msg );
         $this->_killPids();
-        $this->queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID );
+        $this->queueHandler->getRedisClient()->srem( self::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID );
         $msg = str_pad( " TASK RUNNER " . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         $this->_logTimeStampedMsg( $msg );
 

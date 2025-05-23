@@ -7,6 +7,6 @@ if ( INIT::$FAST_ANALYSIS_MEMORY_LIMIT != null ) {
     ini_set( "memory_limit", INIT::$FAST_ANALYSIS_MEMORY_LIMIT );
 }
 
-use Analysis\Workers\FastAnalysis;
+use AsyncTasks\Workers\Analysis\FastAnalysis;
 
 FastAnalysis::getInstance( @$argv[ 1 ] )->main();

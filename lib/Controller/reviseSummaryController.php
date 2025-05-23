@@ -83,24 +83,24 @@ class reviseSummaryController extends viewController {
      */
     public function setTemplateVars() {
 
-        $this->template->job_archived = ( $this->job_archived ) ? 1 : '';
-        $this->template->owner_email  = $this->job_owner_email;
+        $this->template->{'job_archived'} = ( $this->job_archived ) ? 1 : '';
+        $this->template->{'owner_email'}  = $this->job_owner_email;
 
-        $this->template->jid      = $this->jid;
-        $this->template->password = $this->password;
-        $this->template->pid      = $this->data[ 'id_project' ];
+        $this->template->{'jid'}      = $this->jid;
+        $this->template->{'password'} = $this->password;
+        $this->template->{'pid'}      = $this->data[ 'id_project' ];
 
-        $this->template->pname       = $this->project_status[ 'name' ];
-        $this->template->source_code = $this->data[ 'source' ];
-        $this->template->target_code = $this->data[ 'target' ];
+        $this->template->{'pname'}       = $this->project_status[ 'name' ];
+        $this->template->{'source_code'} = $this->data[ 'source' ];
+        $this->template->{'target_code'} = $this->data[ 'target' ];
 
-        $this->template->creation_date = $this->data[ 'create_date' ];
+        $this->template->{'creation_date'} = $this->data[ 'create_date' ];
 
-        $this->template->word_count_type        = $this->data->getProject()->getWordCountType();
+        $this->template->{'word_count_type'}        = $this->data->getProject()->getWordCountType();
         $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
-        $this->template->job_stats              = $this->job_stats;
+        $this->template->{'job_stats'}              = $this->job_stats;
 
-        $this->template->build_number = INIT::$BUILD_NUMBER;
+        $this->template->{'build_number'} = INIT::$BUILD_NUMBER;
 
         $projectMetaDataDao = new Projects_MetadataDao();
         $projectMetaData    = null;
@@ -109,40 +109,40 @@ class reviseSummaryController extends viewController {
             $projectMetaData = $projectMetaDataDao->get( $this->getProject()->id, Projects_MetadataDao::FEATURES_KEY );
         }
 
-        $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
+        $this->template->{'project_plugins'} = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
         /*
          * Line Feed PlaceHolding System
          */
-        $this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
+        $this->template->{'brPlaceholdEnabled'} = $placeHoldingEnabled = true;
 
         if ( $placeHoldingEnabled ) {
 
-            $this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
-            $this->template->crPlaceholder        = CatUtils::crPlaceholder;
-            $this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
-            $this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
-            $this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
-            $this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
-            $this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
-            $this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
-            $this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+            $this->template->{'lfPlaceholder'}        = CatUtils::lfPlaceholder;
+            $this->template->{'crPlaceholder'}        = CatUtils::crPlaceholder;
+            $this->template->{'crlfPlaceholder'}      = CatUtils::crlfPlaceholder;
+            $this->template->{'lfPlaceholderClass'}   = CatUtils::lfPlaceholderClass;
+            $this->template->{'crPlaceholderClass'}   = CatUtils::crPlaceholderClass;
+            $this->template->{'crlfPlaceholderClass'} = CatUtils::crlfPlaceholderClass;
+            $this->template->{'lfPlaceholderRegex'}   = CatUtils::lfPlaceholderRegex;
+            $this->template->{'crPlaceholderRegex'}   = CatUtils::crPlaceholderRegex;
+            $this->template->{'crlfPlaceholderRegex'} = CatUtils::crlfPlaceholderRegex;
 
-            $this->template->tabPlaceholder      = CatUtils::tabPlaceholder;
-            $this->template->tabPlaceholderClass = CatUtils::tabPlaceholderClass;
-            $this->template->tabPlaceholderRegex = CatUtils::tabPlaceholderRegex;
+            $this->template->{'tabPlaceholder'}      = CatUtils::tabPlaceholder;
+            $this->template->{'tabPlaceholderClass'} = CatUtils::tabPlaceholderClass;
+            $this->template->{'tabPlaceholderRegex'} = CatUtils::tabPlaceholderRegex;
 
-            $this->template->nbspPlaceholder      = CatUtils::nbspPlaceholder;
-            $this->template->nbspPlaceholderClass = CatUtils::nbspPlaceholderClass;
-            $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
+            $this->template->{'nbspPlaceholder'}      = CatUtils::nbspPlaceholder;
+            $this->template->{'nbspPlaceholderClass'} = CatUtils::nbspPlaceholderClass;
+            $this->template->{'nbspPlaceholderRegex'} = CatUtils::nbspPlaceholderRegex;
         }
 
         $lang_handler               = Languages::getInstance();
-        $this->template->source_rtl = (bool)$lang_handler->isRTL( $this->data[ 'source' ] );
-        $this->template->target_rtl = (bool)$lang_handler->isRTL( $this->data[ 'target' ] );
+        $this->template->{'source_rtl'} = (bool)$lang_handler->isRTL( $this->data[ 'source' ] );
+        $this->template->{'target_rtl'} = (bool)$lang_handler->isRTL( $this->data[ 'target' ] );
 
-        $this->template->searchable_statuses = $this->searchableStatuses();
-        $this->template->first_job_segment   = $this->data->job_first_segment;
+        $this->template->{'searchable_statuses'} = $this->searchableStatuses();
+        $this->template->{'first_job_segment'}   = $this->data->job_first_segment;
 
         $this->intOauthClients();
 

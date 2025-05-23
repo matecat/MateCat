@@ -150,7 +150,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     /**
      * @param TmKeyManagement_MemoryKeyStruct $obj
      *
-     * @return bool|void
+     * @return TmKeyManagement_MemoryKeyStruct|null
      * @throws Exception
      */
     public function atomicUpdate( TmKeyManagement_MemoryKeyStruct $obj ) {
@@ -183,7 +183,6 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
 
         $where_string = implode( " AND ", $where_conditions );
 
-        $set_string = null;
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
         } else {

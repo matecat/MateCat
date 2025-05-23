@@ -6,6 +6,7 @@ use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Stomp\Transport\Frame;
 use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TestHelpers\AbstractTest;
@@ -95,7 +96,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
 
         $this->queueElement            = new QueueElement();
-        $this->queueElement->params    = $this->contributionStruct;
+        $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
         $this->queueElement->classLoad = '\AsyncTasks\Workers\SetContributionMTWorker';
 
         $this->contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );

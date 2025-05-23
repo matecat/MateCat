@@ -44,25 +44,25 @@ abstract class AbstractDecorator {
     }
 
     protected function decorateForRevision() {
-        $this->template->footer_show_revise_link    = false;
-        $this->template->footer_show_translate_link = true;
-        $this->template->footer_show_editlog_link = false;
+        $this->template->{'footer_show_revise_link'}    = false;
+        $this->template->{'footer_show_translate_link'} = true;
+        $this->template->{'footer_show_editlog_link'} = false;
 
-        $this->template->password        = $this->controller->getPassword();
-        $this->template->review_password = $this->controller->getReviewPassword();
-        $this->template->job_is_splitted = var_export($this->controller->isJobSplitted(), true);
+        $this->template->{'password'}        = $this->controller->getPassword();
+        $this->template->{'review_password'} = $this->controller->getReviewPassword();
+        $this->template->{'job_is_splitted'} = var_export($this->controller->isJobSplitted(), true);
 
     }
 
     protected function decorateForTranslate() {
 
-        $this->template->footer_show_revise_link    = true;
-        $this->template->footer_show_translate_link = false;
-        $this->template->footer_show_editlog_link = false;
+        $this->template->{'footer_show_revise_link'}    = true;
+        $this->template->{'footer_show_translate_link'} = false;
+        $this->template->{'footer_show_editlog_link'} = false;
 
-        $this->template->password        = $this->controller->getPassword();
-        $this->template->review_password = $this->controller->getPassword();
-        $this->template->job_is_splitted = var_export($this->controller->isJobSplitted(), true);
+        $this->template->{'password'}        = $this->controller->getPassword();
+        $this->template->{'review_password'} = $this->controller->getPassword();
+        $this->template->{'job_is_splitted'} = var_export($this->controller->isJobSplitted(), true);
     }
 
     public abstract function decorate();

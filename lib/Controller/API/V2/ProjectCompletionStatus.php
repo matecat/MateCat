@@ -33,7 +33,7 @@ class ProjectCompletionStatus extends KleinController {
             $projectValidator->setUser( $this->getUser() );
         }
 
-        $projectValidator->setIdProject( $this->request->id_project );
+        $projectValidator->setIdProject( $this->request->param( 'id_project' ) );
         $projectValidator->setFeature( 'project_completion' );
 
         $projectValidator->onSuccess( function () use ( $projectValidator ) {

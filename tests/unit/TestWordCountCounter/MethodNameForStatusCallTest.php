@@ -83,28 +83,6 @@ class MethodNameForStatusCallTest extends AbstractTest {
      * @group  regression
      * @covers CounterModel::methodNameForStatusCall
      *
-     * @param "FIXED"
-     */
-    public function test_methodNameForStatusCall_FIXED() {
-
-        $this->assertEquals( "TranslatedWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "FIXED" ) );
-    }
-
-    /**
-     * @group     regression
-     * @covers    CounterModel::methodNameForStatusCall
-     *
-     * @param "REBUTTED"
-     */
-    public function test_methodNameForStatusCall_REBUTTED() {
-
-        $this->assertEquals( "TranslatedWords", $this->method_methodNameForStatusCall->invoke( $this->word_counter, "REBUTTED" ) );
-    }
-
-    /**
-     * @group  regression
-     * @covers CounterModel::methodNameForStatusCall
-     *
      * @param "BARANDFOO"
      */
     public function test_methodNameForStatusCall_BARANDFOO() {

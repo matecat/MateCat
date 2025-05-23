@@ -1,6 +1,10 @@
 <?php
 
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\SegmentTranslationIssueValidator;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
@@ -8,6 +12,8 @@ use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use WordCount\CounterModel;
 
 /**
@@ -64,15 +70,19 @@ class RevisionFactory {
     }
 
     /**
-     * This method use a filter because of external plugins
+     * This method uses a filter because of external plugins
      *
-     * @param Request $request
+     * @param KleinController $controller
      *
      * @return SegmentTranslationIssueValidator
-     * @throws Exception
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    public function getTranslationIssuesValidator( Request $request ) {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $request ) );
+    public function getTranslationIssuesValidator( KleinController $controller ): SegmentTranslationIssueValidator {
+        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $controller ) );
     }
 
     /**

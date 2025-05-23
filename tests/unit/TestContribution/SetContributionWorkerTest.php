@@ -4,6 +4,7 @@ use AsyncTasks\Workers\SetContributionWorker;
 use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
@@ -88,7 +89,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->contributionStruct->oldTranslation       = $this->contributionStruct->translation . " TEST";
 
         $this->queueElement            = new QueueElement();
-        $this->queueElement->params    = $this->contributionStruct;
+        $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
         $this->queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $this->contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );

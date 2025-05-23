@@ -36,15 +36,14 @@ class EquivalentStatusesTest extends AbstractTest {
         $this->assertTrue( $this->method_equivalentStatuses->invoke( $this->word_counter ) );
     }
 
-
     /**
      * @group  regression
      * @covers CounterModel::equivalentStatuses
      * @return boolean
      */
-    public function test_equivalentStatuses_true_2() {
-        $this->word_counter->setOldStatus( "REJECTED" );
-        $this->word_counter->setNewStatus( "REBUTTED" );
+    public function test_equivalentStatuses_false() {
+        $this->word_counter->setOldStatus( "TRANSLATED" );
+        $this->word_counter->setNewStatus( "APPROVED" );
         $this->assertFalse( $this->method_equivalentStatuses->invoke( $this->word_counter ) );
 
     }
@@ -54,10 +53,11 @@ class EquivalentStatusesTest extends AbstractTest {
      * @covers CounterModel::equivalentStatuses
      * @return boolean
      */
-    public function test_equivalentStatuses_false() {
-        $this->word_counter->setOldStatus( "FIXED" );
-        $this->word_counter->setNewStatus( "REBUTTED" );
-        $this->assertTrue( $this->method_equivalentStatuses->invoke( $this->word_counter ) );
+    public function test_equivalentStatuses_false2() {
+        $this->word_counter->setOldStatus( "APPROVED2" );
+        $this->word_counter->setNewStatus( "APPROVED" );
+        $this->assertFalse( $this->method_equivalentStatuses->invoke( $this->word_counter ) );
 
     }
+
 }

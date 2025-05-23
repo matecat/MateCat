@@ -22,6 +22,7 @@ use Exceptions\ValidationError;
 use ManageUtils;
 use Projects\ProjectModel;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use ReflectionException;
 use Teams\TeamStruct;
 
@@ -30,14 +31,12 @@ class TeamsProjectsController extends KleinController {
     protected $project;
 
     /** @var TeamStruct */
-    protected $team;
+    protected TeamStruct $team;
 
     /**
-     * @throws \Exceptions\NotFoundException
      * @throws AuthorizationError
      * @throws ReflectionException
      * @throws ValidationError
-     * @throws Exception
      */
     public function update() {
 
@@ -72,8 +71,8 @@ class TeamsProjectsController extends KleinController {
     /**
      * @return $this
      */
-    protected function _appendSingleProjectTeamValidators() {
-        $this->project = Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
+    protected function _appendSingleProjectTeamValidators(): TeamsProjectsController {
+        $this->project = Projects_ProjectDao::findById( $this->request->param( 'id_project' ) ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
 
@@ -81,8 +80,7 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
-     * @throws Exception
+     * @throws ReflectionException
      */
     public function get() {
         $this->_appendSingleProjectTeamValidators()->validateRequest();
@@ -93,11 +91,12 @@ class TeamsProjectsController extends KleinController {
     /**
      * @throws \Exceptions\NotFoundException
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function getByName() {
         $start                 = 0;
         $step                  = 25;
-        $search_in_pname       = $this->request->project_name;
+        $search_in_pname       = $this->request->param( 'project_name' );
         $search_source         = null;
         $search_target         = null;
         $search_status         = "active";
@@ -121,13 +120,14 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
      * @throws Exception
      */
     public function getAll() {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 
+        /** @var Projects_ProjectStruct[] $projectsList */
         $projectsList = Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
 
         $projectsList = ( new Project( $projectsList ) )->render();

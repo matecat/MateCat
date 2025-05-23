@@ -11,6 +11,7 @@ namespace API\App;
 
 
 use AbstractControllers\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
 use Routes;
 use Teams\InvitedUser;
 
@@ -20,13 +21,16 @@ use Teams\InvitedUser;
  * Class TeamsInvitationsController
  * @package API\App
  */
-class TeamsInvitationsController  extends AbstractStatefulKleinController {
+class TeamsInvitationsController extends AbstractStatefulKleinController {
 
-    public function collectBackInvitation(){
+    /**
+     * @throws ValidationError
+     */
+    public function collectBackInvitation() {
 
-        $invite = new InvitedUser( $this->request->jwt, $this->response );
+        $invite = new InvitedUser( $this->request->param( 'jwt' ), $this->response );
         $invite->prepareUserInvitedSignUpRedirect();
-        $this->response->redirect( Routes::appRoot() ) ;
+        $this->response->redirect( Routes::appRoot() );
 
     }
 

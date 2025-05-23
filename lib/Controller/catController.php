@@ -190,7 +190,7 @@ class catController extends viewController {
             ];
         }
 
-        $this->template->active_engine = $active_mt_engine_array;
+        $this->template->{'active_engine'} = $active_mt_engine_array;
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -338,108 +338,108 @@ class catController extends viewController {
             $controllerInstance->render();
         }
 
-        $this->template->jid             = $this->jid;
-        $this->template->currentPassword = $this->currentPassword;
+        $this->template->{'jid'}             = $this->jid;
+        $this->template->{'currentPassword'} = $this->currentPassword;
 
-        $this->template->id_team = null;
+        $this->template->{'id_team'} = null;
 
-        $this->template->pid         = $this->pid;
-        $this->template->source_code = $this->source_code;
-        $this->template->target_code = $this->target_code;
+        $this->template->{'pid'}         = $this->pid;
+        $this->template->{'source_code'} = $this->source_code;
+        $this->template->{'target_code'} = $this->target_code;
 
         if ( !empty( $this->project->id_team ) ) {
-            $this->template->id_team = $this->project->id_team;
+            $this->template->{'id_team'} = $this->project->id_team;
 
             if ( !isset( $team ) ) {
                 $team = $this->project->getTeam();
             }
 
-            $this->template->team_name = $team->name;
+            $this->template->{'team_name'} = $team->name;
         }
 
-        $this->template->owner_email        = $this->job_owner;
-        $this->template->jobOwnerIsMe       = ( $this->user->email == $this->job_owner );
-        $this->template->get_public_matches = ( !$this->chunk->only_private_tm );
-        $this->template->job_not_found      = $this->job_not_found;
-        $this->template->job_archived       = ( $this->job_archived ) ? 1 : '';
-        $this->template->job_cancelled      = $this->job_cancelled;
+        $this->template->{'owner_email'}        = $this->job_owner;
+        $this->template->{'jobOwnerIsMe'}       = ( $this->user->email == $this->job_owner );
+        $this->template->{'get_public_matches'} = ( !$this->chunk->only_private_tm );
+        $this->template->{'job_not_found'}      = $this->job_not_found;
+        $this->template->{'job_archived'}       = ( $this->job_archived ) ? 1 : '';
+        $this->template->{'job_cancelled'}      = $this->job_cancelled;
 
-        $this->template->cid         = $this->cid;
-        $this->template->create_date = $this->create_date;
-        $this->template->pname       = $this->project->name;
+        $this->template->{'cid'}         = $this->cid;
+        $this->template->{'create_date'} = $this->create_date;
+        $this->template->{'pname'}       = $this->project->name;
 
-        $this->template->mt_engines                            = $this->translation_engines;
-        $this->template->translation_engines_intento_providers = Intento::getProviderList();
+        $this->template->{'mt_engines'}                            = $this->translation_engines;
+        $this->template->{'translation_engines_intento_providers'} = Intento::getProviderList();
 
-        $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
+        $this->template->{'not_empty_default_tm_key'} = !empty( INIT::$DEFAULT_TM_KEY );
 
-        $this->template->word_count_type        = $this->project->getWordCountType();
+        $this->template->{'word_count_type'}        = $this->project->getWordCountType();
         $this->job_stats[ 'analysis_complete' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->stat_quality = $this->qa_data;
+        $this->template->{'stat_quality'} = $this->qa_data;
 
-        $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
+        $this->template->{'overall_quality_class'} = strtolower( $this->getQaOverall() );
 
         $end_time                  = microtime( true ) * 1000;
         $load_time                 = $end_time - $this->start_time;
-        $this->template->load_time = $load_time;
+        $this->template->{'load_time'} = $load_time;
 
-        $this->template->first_job_segment = $this->chunk->job_first_segment;
-        $this->template->tms_enabled       = var_export( (bool)$this->chunk->id_tms, true );
-        $this->template->mt_enabled        = var_export( (bool)$this->chunk->id_mt_engine, true );
+        $this->template->{'first_job_segment'} = $this->chunk->job_first_segment;
+        $this->template->{'tms_enabled'}       = var_export( (bool)$this->chunk->id_tms, true );
+        $this->template->{'mt_enabled'}        = var_export( (bool)$this->chunk->id_mt_engine, true );
 
-        $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
+        $this->template->{'warningPollingInterval'} = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
 
         if ( array_key_exists( explode( '-', $this->target_code )[ 0 ], CatUtils::$cjk ) ) {
-            $this->template->segmentQACheckInterval = 3000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+            $this->template->{'segmentQACheckInterval'} = 3000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         } else {
-            $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+            $this->template->{'segmentQACheckInterval'} = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         }
 
 
-        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->template->{'maxFileSize'}    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->{'maxTMXFileSize'} = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
+        $this->template->{'tagLockCustomizable'} = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
+        $this->template->{'copySourceInterval'}  = INIT::$COPY_SOURCE_INTERVAL;
 
         /*
          * Line Feed PlaceHolding System
          */
-        $this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
+        $this->template->{'brPlaceholdEnabled'} = $placeHoldingEnabled = true;
 
         if ( $placeHoldingEnabled ) {
 
-            $this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
-            $this->template->crPlaceholder        = CatUtils::crPlaceholder;
-            $this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
-            $this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
-            $this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
-            $this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
-            $this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
-            $this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
-            $this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+            $this->template->{'lfPlaceholder'}        = CatUtils::lfPlaceholder;
+            $this->template->{'crPlaceholder'}        = CatUtils::crPlaceholder;
+            $this->template->{'crlfPlaceholder'}      = CatUtils::crlfPlaceholder;
+            $this->template->{'lfPlaceholderClass'}   = CatUtils::lfPlaceholderClass;
+            $this->template->{'crPlaceholderClass'}   = CatUtils::crPlaceholderClass;
+            $this->template->{'crlfPlaceholderClass'} = CatUtils::crlfPlaceholderClass;
+            $this->template->{'lfPlaceholderRegex'}   = CatUtils::lfPlaceholderRegex;
+            $this->template->{'crPlaceholderRegex'}   = CatUtils::crPlaceholderRegex;
+            $this->template->{'crlfPlaceholderRegex'} = CatUtils::crlfPlaceholderRegex;
 
-            $this->template->tabPlaceholder      = CatUtils::tabPlaceholder;
-            $this->template->tabPlaceholderClass = CatUtils::tabPlaceholderClass;
-            $this->template->tabPlaceholderRegex = CatUtils::tabPlaceholderRegex;
+            $this->template->{'tabPlaceholder'}      = CatUtils::tabPlaceholder;
+            $this->template->{'tabPlaceholderClass'} = CatUtils::tabPlaceholderClass;
+            $this->template->{'tabPlaceholderRegex'} = CatUtils::tabPlaceholderRegex;
 
-            $this->template->nbspPlaceholder      = CatUtils::nbspPlaceholder;
-            $this->template->nbspPlaceholderClass = CatUtils::nbspPlaceholderClass;
-            $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
+            $this->template->{'nbspPlaceholder'}      = CatUtils::nbspPlaceholder;
+            $this->template->{'nbspPlaceholderClass'} = CatUtils::nbspPlaceholderClass;
+            $this->template->{'nbspPlaceholderRegex'} = CatUtils::nbspPlaceholderRegex;
         }
 
         if ( INIT::$COMMENTS_ENABLED ) {
-            $this->template->comments_enabled = true;
-            $this->template->socket_base_url  = INIT::$SOCKET_BASE_URL;
+            $this->template->{'comments_enabled'} = true;
+            $this->template->{'socket_base_url'}  = INIT::$SOCKET_BASE_URL;
         }
 
         $projectMetaDataDao              = new Projects_MetadataDao();
         $projectMetaData                 = $projectMetaDataDao->get( $this->project->id, Projects_MetadataDao::FEATURES_KEY );
-        $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
+        $this->template->{'project_plugins'} = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
         //Maybe some plugin want to disable the Split from the config
-        $this->template->splitSegmentEnabled = 'true';
+        $this->template->{'splitSegmentEnabled'} = 'true';
 
         $this->intOauthClients();
 

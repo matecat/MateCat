@@ -159,7 +159,7 @@ class PropagationWorker extends AbstractWorker {
                         . "\n"
                         . $propagationSql
                         . "\n"
-                        . $increaseVersionSql
+                        . ( $increaseVersionSql ?? '' )
                         . "\n"
                         . var_export( $propagatorSegment, true )
                         . "\n"

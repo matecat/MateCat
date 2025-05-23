@@ -67,7 +67,7 @@ class Executor implements SplObserver {
     protected int $_frameID = 0;
 
     /**
-     * Flag for control the instance running status. Setting to false cause the Executor process to stop.
+     * Flag for control the instance running status. Setting to false causes the Executor process to stop.
      *
      * @var bool
      */
@@ -122,7 +122,7 @@ class Executor implements SplObserver {
 
             $this->_queueHandler = AMQHandler::getNewInstanceForDaemons();
 
-            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executor_instance_id ) ) {
+            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, [ $this->_executor_instance_id ] ) ) {
                 throw new Exception( "(Executor " . $this->_executor_instance_id . ") : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
                 $this->_logMsg( "(Executor " . $this->_executor_instance_id . ") : spawned !!!" );
@@ -187,7 +187,7 @@ class Executor implements SplObserver {
 
             } catch ( Exception $e ) {
 
-//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
+//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
 //                $this->_logMsg( $e->getMessage() );
                 continue;
 
@@ -276,7 +276,7 @@ class Executor implements SplObserver {
             if ( $msgFrame instanceof Frame && ( $msgFrame->getCommand() == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->getHeaders() ) ) ) {
 
                 $this->_frameID++;
-                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame {$this->_frameID}" );
+                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame $this->_frameID" );
 
                 $queueElement = json_decode( $msgFrame->body, true );
 

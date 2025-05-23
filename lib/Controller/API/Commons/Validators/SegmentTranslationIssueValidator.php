@@ -44,19 +44,19 @@ class SegmentTranslationIssueValidator extends Base {
      * @throws ValidationError
      * @throws Exception
      */
-    public function _validate() {
+    public function _validate(): void {
 
         //load validator for the segment translation
-        $validator = ( new SegmentTranslation( $this->request ) );
+        $validator = ( new SegmentTranslation( $this->controller ) );
         $validator->validate();
 
         $this->translation = $validator->translation;
 
-        if ( $this->request->id_issue ) {
+        if ( $this->request->param( 'id_issue' ) ) {
             $this->__ensureIssueIsInScope();
         }
 
-        if ( $this->request->method( 'post' ) && $this->request->revision_number ) {
+        if ( $this->request->method( 'post' ) && $this->request->param( 'revision_number' ) ) {
             $this->__ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber();
         } elseif ( $this->request->method( 'delete' ) ) {
             $this->__ensureRevisionPasswordAllowsDeleteForIssue();
@@ -88,13 +88,13 @@ class SegmentTranslationIssueValidator extends Base {
 
         if ( !$latestSegmentEvent && ( $this->translation->isICE() || $this->translation->isPreTranslated()) ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
-        } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ) ) {
+        } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ) ) {
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on
             // a locked ice match, which never received a submit from the UI. How do we handle that case?
             // No reviewed words yet an issue. That's not possible, we need to ensure the reviewed words
             // are set, and reviewed words are set during setTranslation triggered callbacks.
             throw new ValidationError( "Trying access segment issue for revision number " .
-                    $this->request->revision_number . " but segment is not in same revision state." );
+                    $this->request->param( 'revision_number' ) . " but segment is not in same revision state." );
         } elseif ( !$latestSegmentEvent ) {
             throw new Exception( 'Unable to find the current state of this segment. Please report this issue to support.' );
         }
@@ -104,7 +104,7 @@ class SegmentTranslationIssueValidator extends Base {
      * @throws ValidationError
      */
     protected function __ensureIssueIsInScope() {
-        $this->issue = EntryDao::findById( $this->request->id_issue );
+        $this->issue = EntryDao::findById( $this->request->param( 'id_issue' ) );
 
         if ( !$this->issue ) {
             throw new ValidationError( 'issue not found' );

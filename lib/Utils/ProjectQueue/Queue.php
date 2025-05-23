@@ -34,7 +34,7 @@ class Queue {
     public static function sendProject( ArrayObject $projectStructure ) {
 
         try {
-            WorkerClient::enqueue( 'PROJECT_QUEUE', 'AsyncTasks\Workers\ProjectCreationWorker', json_encode( $projectStructure ), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( 'PROJECT_QUEUE', 'AsyncTasks\Workers\ProjectCreationWorker', $projectStructure->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
 
             # Handle the error, logging, ...
