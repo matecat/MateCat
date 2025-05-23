@@ -31,7 +31,7 @@ class ModernMTController extends BaseChunkController {
         }
 
         try {
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $params    = $this->request->params();
             $MMTClient = $this->getModernMTClient( $engineId );
             $memories  = $MMTClient->getAllMemories();
@@ -62,8 +62,8 @@ class ModernMTController extends BaseChunkController {
      */
     public function importStatus() {
         try {
-            $uuid      = filter_var( $this->request->uuid, FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $uuid      = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_STRIP_HIGH );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $this->response->status()->setCode( 200 );
@@ -106,7 +106,7 @@ class ModernMTController extends BaseChunkController {
             }
 
             $this->validateCSVContent( $csv );
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $this->response->status()->setCode( 200 );
@@ -139,7 +139,7 @@ class ModernMTController extends BaseChunkController {
             $terms    = $this->params[ 'terms' ];
             $type     = filter_var( $this->params[ 'type' ], FILTER_SANITIZE_STRING );
 
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $payload = [
@@ -178,7 +178,7 @@ class ModernMTController extends BaseChunkController {
             $description = isset( $_POST[ 'description' ] ) ? filter_var( $_POST[ 'description' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
             $externalId  = isset( $_POST[ 'external_id' ] ) ? filter_var( $_POST[ 'external_id' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW ) : null;
 
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $this->response->status()->setCode( 200 );
@@ -208,7 +208,7 @@ class ModernMTController extends BaseChunkController {
 
             $name = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
 
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             // create a new memory
@@ -260,8 +260,8 @@ class ModernMTController extends BaseChunkController {
             }
 
             $name      = filter_var( $_POST[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_ENCODE_LOW );
-            $memoryId  = filter_var( $this->request->memoryId, FILTER_SANITIZE_NUMBER_INT );
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $memoryId  = filter_var( $this->request->param( 'memoryId' ), FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $this->response->status()->setCode( 200 );
@@ -284,8 +284,8 @@ class ModernMTController extends BaseChunkController {
      */
     public function deleteMemory() {
         try {
-            $memoryId  = filter_var( $this->request->memoryId, FILTER_SANITIZE_NUMBER_INT );
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $memoryId  = filter_var( $this->request->param( 'memoryId' ), FILTER_SANITIZE_NUMBER_INT );
+            $engineId  = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $MMTClient = $this->getModernMTClient( $engineId );
 
             $response = $MMTClient->deleteMemory( [ 'id' => $memoryId ] );

@@ -45,6 +45,7 @@ class UpdateJobKeysController extends KleinController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
+        $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
             $userRole = TmKeyManagement_Filter::OWNER;
         } elseif ( $this->isRevision() ) {

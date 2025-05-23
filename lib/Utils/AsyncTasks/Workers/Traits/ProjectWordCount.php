@@ -7,7 +7,7 @@
  *
  */
 
-namespace Analysis\Workers;
+namespace AsyncTasks\Workers\Traits;
 
 use Database;
 use Log;
@@ -18,7 +18,7 @@ use RuntimeException;
 trait ProjectWordCount {
 
     /**
-     * This function is heavy, use but only if it is necessary
+     * This function is heavy, use, but only if it is necessary
      *
      * (Used in TMAnalysisWorker and FastAnalysis)
      *

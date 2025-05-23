@@ -226,7 +226,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
@@ -347,7 +347,8 @@ class ConversionHandler {
 
             //get system temporary folder
             $tmpFolder = ini_get( 'upload_tmp_dir' );
-            ( empty( $tmpFolder ) ) ? $tmpFolder = "/tmp" : null;
+            $tmpFolder = $tmpFolder ?: "/tmp";
+
             $tmpFolder .= "/" . uniqid() . "/";
 
             mkdir( $tmpFolder, 0777, true );
@@ -374,9 +375,6 @@ class ConversionHandler {
 
                 $this->result->changeCode( ConversionHandlerStatus::INVALID_FILE );
                 $this->result->addError( $e->getMessage() );
-
-                // ???
-                $this->api_output[ 'message' ] = $e->getMessage();
 
                 return null;
             }

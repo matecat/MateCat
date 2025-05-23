@@ -14,7 +14,7 @@ use DomainException;
 use JsonSerializable;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
 
-class MTQEWorkflowTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEWorkflowTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";
@@ -102,7 +102,7 @@ class MTQEWorkflowTemplateStruct extends \DataAccess\AbstractDaoSilentStruct imp
      * @inheritDoc
      */
     public function jsonSerialize() {
-        return (array) $this;
+        return $this->getArrayCopy();
     }
 
     public function __toString(): string {

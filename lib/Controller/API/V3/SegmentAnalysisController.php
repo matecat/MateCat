@@ -287,17 +287,17 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param \DataAccess\IDaoStruct $segmentForAnalysis
-     * @param array                 $projectPasswordsMap
-     * @param array                 $notesAggregate
-     * @param array                 $issuesAggregate
-     * @param array                 $idRequestsAggregate
-     * @param ConstantsInterface    $matchConstants
+     * @param IDaoStruct         $segmentForAnalysis
+     * @param array              $projectPasswordsMap
+     * @param array              $notesAggregate
+     * @param array              $issuesAggregate
+     * @param array              $idRequestsAggregate
+     * @param ConstantsInterface $matchConstants
      *
      * @return array
      * @throws Exception
      */
-    private function formatSegment( \DataAccess\IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
+    private function formatSegment( IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
         // id_request
         $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 

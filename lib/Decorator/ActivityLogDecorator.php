@@ -122,12 +122,12 @@ class ActivityLogDecorator {
 
         }
 
-        $this->template->isLoggedIn    = $this->controller->isLoggedIn();
-        $this->template->outputContent = $outputContent;
-        $this->template->projectID     = $this->controller->project_data[ 0 ][ 'pid' ];
-        $this->template->projectName   = $this->controller->project_data[ 0 ][ 'pname' ];
+        $this->template->{'isLoggedIn'}    = $this->controller->isLoggedIn();
+        $this->template->{'outputContent'} = $outputContent;
+        $this->template->{'projectID'}     = $this->controller->project_data[ 0 ][ 'pid' ];
+        $this->template->{'projectName'}   = $this->controller->project_data[ 0 ][ 'pname' ];
 
-        $this->template->projectUrl = Routes::analyze( array(
+        $this->template->{'projectUrl'} = Routes::analyze( array(
             'project_name' => $this->controller->project_data[0][ 'pname' ],
             'id_project' => $this->controller->project_data[ 0 ][ 'pid' ],
             'password' => $this->controller->project_data[ 0 ][ 'ppassword' ]

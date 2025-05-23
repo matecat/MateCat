@@ -596,6 +596,7 @@ class Segments_SegmentDao extends AbstractDao {
                 ";
                 break;
             case 'center':
+            default:
                 $subQuery = "
                   SELECT * FROM ( 
                         SELECT segments.id AS __sid

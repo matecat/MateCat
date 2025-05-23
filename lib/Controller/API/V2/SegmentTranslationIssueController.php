@@ -48,20 +48,20 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      */
     public function create() {
         $data = [
-                'id_segment'          => $this->request->id_segment,
-                'id_job'              => $this->request->id_job,
-                'id_category'         => $this->request->id_category,
-                'severity'            => $this->request->severity,
+                'id_segment'          => $this->request->param( 'id_segment' ),
+                'id_job'              => $this->request->param( 'id_job' ),
+                'id_category'         => $this->request->param( 'id_category' ),
+                'severity'            => $this->request->param( 'severity' ),
                 'translation_version' => $this->validator->translation->version_number,
-                'target_text'         => $this->request->target_text,
-                'start_node'          => $this->request->start_node,
-                'start_offset'        => $this->request->start_offset,
-                'end_node'            => $this->request->end_node,
-                'end_offset'          => $this->request->end_offset,
+                'target_text'         => $this->request->param( 'target_text' ),
+                'start_node'          => $this->request->param( 'start_node' ),
+                'start_offset'        => $this->request->param( 'start_offset' ),
+                'end_node'            => $this->request->param( 'end_node' ),
+                'end_offset'          => $this->request->param( 'end_offset' ),
                 'is_full_segment'     => false,
-                'comment'             => $this->request->comment,
-                'uid'                 => (($this->user !== null and $this->user instanceof \Users_UserStruct) ? $this->user->uid : null),
-                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->revision_number ),
+                'comment'             => $this->request->param( 'comment' ),
+                'uid'                 => $this->user->uid ?? null,
+                'source_page'         => ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ),
         ];
 
         Database::obtain()->begin();
@@ -69,13 +69,13 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $struct = new EntryStruct( $data );
 
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->id_job,
-                $this->request->password,
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'password' ),
                 $struct
         );
 
-        if ( $this->request->diff ) {
-            $model->setDiff( $this->request->diff );
+        if ( $this->request->param( 'diff' ) ) {
+            $model->setDiff( $this->request->param( 'diff' ) );
         }
 
         $struct = $model->save();
@@ -88,30 +88,21 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $this->response->json( [ 'issue' => $rendered ] );
     }
 
+    /**
+     * This method does nothing
+     * @return void
+     */
     public function update() {
         $issue = null;
-
-        $postParams = $this->request->paramsPost();
-
-        if ( $postParams[ 'rebutted_at' ] == null ) {
-            $entryDao = new EntryDao( Database::obtain() );
-            $issue    = $entryDao->updateRebutted(
-                    $this->validator->issue->id, false
-            );
-        }
-
-        $json     = new TranslationIssueFormatter();
-        $rendered = $json->renderItem( $issue );
-
-        $this->response->json( [ 'issue' => $rendered ] );
+        $this->response->json( [ 'issue' => 'ok' ] );
     }
 
     public function delete() {
 
         Database::obtain()->begin();
         $model = $this->_getSegmentTranslationIssueModel(
-                $this->request->id_job,
-                $this->request->password,
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'password' ),
                 $this->validator->issue
         );
         $model->delete();
@@ -138,9 +129,9 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     public function createComment() {
 
         $data = [
-                'comment'     => $this->request->message,
+                'comment'     => $this->request->param( 'message' ),
                 'id_qa_entry' => $this->validator->issue->id,
-                'source_page' => $this->request->source_page,
+                'source_page' => $this->request->param( 'source_page' ),
                 'uid'         => ( $this->user ) ? $this->user->uid : null
         ];
 
@@ -153,16 +144,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $rendered = $json->renderItem( $entry );
 
         $response = [ 'comment' => $rendered ];
-
-        $postParams = $this->request->paramsPost();
-
-        if ( $postParams[ 'rebutted' ] === 'true' ) {
-            $issue = $this->updateIssueWithRebutted();
-            if ( $issue ) {
-                $formatter           = new  TranslationIssueFormatter();
-                $response[ 'issue' ] = $formatter->renderItem( $issue );
-            }
-        }
 
         $this->response->json( $response );
 
@@ -185,7 +166,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             $this->revisionFactory = RevisionFactory::initFromProject( $jobValidator->getChunk()->getProject() );
             //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this->request )->setChunkReview( $jobValidator->getChunkReview() );
+            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this )->setChunkReview( $jobValidator->getChunkReview() );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
@@ -199,17 +180,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         }
 
         return $this->validator->translation->version_number;
-    }
-
-    /**
-     * @return EntryStruct
-     */
-    private function updateIssueWithRebutted() {
-        $entryDao = new EntryDao( Database::obtain() );
-
-        return $entryDao->updateRebutted(
-                $this->validator->issue->id, true
-        );
     }
 
 }

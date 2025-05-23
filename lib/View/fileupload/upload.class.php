@@ -296,7 +296,7 @@ class UploadHandler {
                         $file->error = "File upload failed. Refresh the page using CTRL+R (or CMD+R) and try again.";
                         break;
                     default:
-                        null;
+                        break;
                 }
             }
 

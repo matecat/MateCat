@@ -214,54 +214,54 @@ class newProjectController extends viewController {
         $source_languages = $this->lang_handler->getEnabledLanguages();
         $target_languages = $this->lang_handler->getEnabledLanguages();
 
-        $this->template->subject_array = $this->subjectArray;
+        $this->template->{'subject_array'} = $this->subjectArray;
 
-        $this->template->project_name = $this->project_name;
+        $this->template->{'project_name'} = $this->project_name;
 
-        $this->template->page             = 'home';
-        $this->template->source_languages = array_values( $source_languages );
-        $this->template->target_languages = array_values( $target_languages );
-        $this->template->subjects         = json_encode( $this->subjectArray );
+        $this->template->{'page'}             = 'home';
+        $this->template->{'source_languages'} = array_values( $source_languages );
+        $this->template->{'target_languages'} = array_values( $target_languages );
+        $this->template->{'subjects'}         = json_encode( $this->subjectArray );
 
-        $this->template->mt_engines         = $this->mt_engines;
-        $this->template->conversion_enabled = !empty( INIT::$FILTERS_ADDRESS );
+        $this->template->{'mt_engines'}         = $this->mt_engines;
+        $this->template->{'conversion_enabled'} = !empty( INIT::$FILTERS_ADDRESS );
 
-        $this->template->isUploadTMXAllowed = false;
+        $this->template->{'isUploadTMXAllowed'} = false;
         if ( !empty( INIT::$FILTERS_ADDRESS ) ) {
-            $this->template->isUploadTMXAllowed = $this->isUploadTMXAllowed();
+            $this->template->{'isUploadTMXAllowed'} = $this->isUploadTMXAllowed();
         }
 
-        $this->template->unsupported_file_types                = $this->getExtensionsUnsupported();
-        $this->template->formats_number                        = $this->countExtensions();
-        $this->template->volume_analysis_enabled               = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->userMail                              = $this->user->email;
-        $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function
+        $this->template->{'unsupported_file_types'}                = $this->getExtensionsUnsupported();
+        $this->template->{'formats_number'}                        = $this->countExtensions();
+        $this->template->{'volume_analysis_enabled'}               = INIT::$VOLUME_ANALYSIS_ENABLED;
+        $this->template->{'userMail'}                              = $this->user->email;
+        $this->template->{'translation_engines_intento_providers'} = Intento::getProviderList();
+        $this->template->{'translation_engines_intento_prov_json'} = str_replace( "\\\"", "\\\\\\\"", json_encode( Intento::getProviderList() ) ); // needed by JSON.parse() function
 
-        $this->template->build_number   = INIT::$BUILD_NUMBER;
-        $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-        $this->template->maxNumberFiles = INIT::$MAX_NUM_FILES;
+        $this->template->{'build_number'}   = INIT::$BUILD_NUMBER;
+        $this->template->{'maxFileSize'}    = INIT::$MAX_UPLOAD_FILE_SIZE;
+        $this->template->{'maxTMXFileSize'} = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->template->{'maxNumberFiles'} = INIT::$MAX_NUM_FILES;
 
         //this can be overridden by plugins to enable/disable the default flag on MyMemory lookup
-        $this->template->get_public_matches = true;
+        $this->template->{'get_public_matches'} = true;
 
-        $this->template->user_keys     = $this->keyList;
-        $this->template->user_keys_obj = json_encode( array_map( function ( $tmKeyStruct ) {
+        $this->template->{'user_keys'}     = $this->keyList;
+        $this->template->{'user_keys_obj'} = json_encode( array_map( function ( $tmKeyStruct ) {
             return [ 'name' => $tmKeyStruct->name, 'key' => $tmKeyStruct->key ];
         }, $this->keyList ) );
 
-        $this->template->developerKey = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
-        $this->template->clientId     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
+        $this->template->{'developerKey'} = INIT::$GOOGLE_OAUTH_BROWSER_API_KEY;
+        $this->template->{'clientId'}     = INIT::$GOOGLE_OAUTH_CLIENT_ID;
 
-        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
+        $this->template->{'tag_projection_languages'} = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
-        $this->template->additional_input_params_base_path = INIT::$TEMPLATE_ROOT;
+        $this->template->{'additional_input_params_base_path'} = INIT::$TEMPLATE_ROOT;
 
         //Enable tag projection at instance level
-        $this->template->show_tag_projection    = true;
-        $this->template->tag_projection_default = true;
+        $this->template->{'show_tag_projection'}    = true;
+        $this->template->{'tag_projection_default'} = true;
 
         $this->intOauthClients();
 
