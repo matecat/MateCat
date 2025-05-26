@@ -33,7 +33,7 @@ export const UploadFile = ({...props}) => {
       window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [])
-  return isUserLogged === true ? (
+  return isUserLogged === true && currentProjectTemplate ? (
     <>
       {!openGDrive && <UploadFileLocal {...props} />}
 
