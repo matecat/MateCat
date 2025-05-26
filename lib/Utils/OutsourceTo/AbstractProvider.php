@@ -3,6 +3,12 @@
  * Created by PhpStorm.
  */
 
+namespace OutsourceTo;
+
+use FeatureSet;
+use Shop_AbstractItem;
+use Users_UserStruct;
+
 /**
  * Abstract class of a Provider to extend to implement a login/review/confirm communication
  *
@@ -12,7 +18,7 @@
  * Time: 10.54
  *
  */
-abstract class OutsourceTo_AbstractProvider {
+abstract class AbstractProvider {
 
     /**
      * These are the url where the user will be redirected after
@@ -20,11 +26,11 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * Set them appropriately in the constructor.
      *
-     * They can be null if an all in one login/review/confirm is implemented on the external provider system
+     * They can be null if an all-in-one login/review/confirm is implemented on the external provider system
      *
      * @var string
      */
-    protected $_outsource_login_url_ok = "";
+    protected string $_outsource_login_url_ok = "";
 
     /**
      * These are the url where the user will be redirected after
@@ -32,30 +38,30 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * Set them appropriately in the constructor.
      *
-     * They can be null if an all in one login/review/confirm is implemented on the external provider system
+     * They can be null if an all-in-one login/review/confirm is implemented on the external provider system
      *
      * @var string
      */
-    protected $_outsource_login_url_ko = "";
+    protected string $_outsource_login_url_ko = "";
 
     /**
-     * These are the url that the vendor system must call in order to confirm the outsource to Matecat
+     * These are the url that the vendor system must call to confirm the outsourcing to Matecat
      *
      * Set them appropriately in the constructor.
      *
-     * @var string
+     * @var string[]
      */
-    protected $_outsource_url_confirm = "";
+    protected array $_outsource_url_confirm = [];
 
 
     /**
      * Class constructor
      *
-     * Here will be defined the callback urls for success or failure on login system
+     * Here will be defined the callback urls for success or failure on a login system
      *
-     * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
+     * @see AbstractProvider::$_outsource_login_url_ok
      *
-     * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ko
+     * @see AbstractProvider::$_outsource_login_url_ko
      *
      */
     public function __construct() {
@@ -66,27 +72,27 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @var Shop_AbstractItem[]
      */
-    protected $_quote_result;
+    protected array $_quote_result;
 
     /**
      * @var int Project ID
      */
-    protected $pid = 0;
+    protected int $pid = 0;
 
     /**
      * @var string Project Password
      */
-    protected $ppassword = '';
+    protected string $ppassword = '';
 
     /**
      * @var string currency
      */
-    protected $currency = "EUR";
+    protected string $currency = "EUR";
 
     /**
      * @var string timezone
      */
-    protected $timezone = "0";
+    protected string $timezone = "0";
 
     protected ?FeatureSet $features = null;
 
@@ -107,23 +113,21 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @var array List of job ids and relative passwords
      */
-    protected $jobList = [];
+    protected array $jobList = [];
 
     /**
      * Perform Quotes to the selected Provider
      *
-     * @param array|null $volAnalysis
-     *
      * @return void
      */
-    abstract public function performQuote( $volAnalysis = null );
+    abstract public function performQuote();
 
     /**
      * Get quotes Result after Provider Interrogation
      *
      * @return Shop_AbstractItem[]
      */
-    public function getQuotesResult() {
+    public function getQuotesResult(): array {
         return $this->_quote_result;
     }
 
@@ -144,7 +148,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return $this
      */
-    public function setJobList( $jobList ) {
+    public function setJobList( array $jobList ): AbstractProvider {
         $this->jobList = $jobList;
 
         return $this;
@@ -157,7 +161,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return $this
      */
-    public function setPid( $pid ) {
+    public function setPid( int $pid ): AbstractProvider {
         $this->pid = $pid;
 
         return $this;
@@ -170,7 +174,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return $this
      */
-    public function setPpassword( $ppassword ) {
+    public function setPpassword( string $ppassword ): AbstractProvider {
         $this->ppassword = $ppassword;
 
         return $this;
@@ -178,10 +182,10 @@ abstract class OutsourceTo_AbstractProvider {
 
     /**
      * @param FeatureSet|null $features
+     *
      * @return $this
      */
-    public function setFeatures(?FeatureSet $features)
-    {
+    public function setFeatures( ?FeatureSet $features ): AbstractProvider {
         if ( !empty( $features ) ) {
             $this->features = $features;
         }
@@ -191,10 +195,10 @@ abstract class OutsourceTo_AbstractProvider {
 
     /**
      * @param Users_UserStruct|null $user
+     *
      * @return $this
      */
-    public function setUser(?Users_UserStruct $user)
-    {
+    public function setUser( ?Users_UserStruct $user ): AbstractProvider {
         if ( !empty( $user ) ) {
             $this->user = $user;
         }
@@ -209,7 +213,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return $this
      */
-    public function setCurrency( $currency ) {
+    public function setCurrency( string $currency ): AbstractProvider {
         if ( !empty( $currency ) ) {
             $this->currency = $currency;
         }
@@ -224,7 +228,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return $this
      */
-    public function setTimezone( $timezone ) {
+    public function setTimezone( string $timezone ): AbstractProvider {
         if ( !empty( $timezone ) || $timezone === "0" ) {
             $this->timezone = $timezone;
         }
@@ -233,24 +237,24 @@ abstract class OutsourceTo_AbstractProvider {
     }
 
     /**
-     * Get the url for return callback on failed login
+     * Get the url for the return callback on failed login
      *
      * @return string
      */
-    public function getOutsourceLoginUrlKo() {
+    public function getOutsourceLoginUrlKo(): string {
         return $this->_outsource_login_url_ko;
     }
 
     /**
-     * Get the url for return callback on success login
+     * Get the url for the return callback on success login
      *
      * @return string
      */
-    public function getOutsourceLoginUrlOk() {
+    public function getOutsourceLoginUrlOk(): string {
         return $this->_outsource_login_url_ok;
     }
 
-    public function getOutsourceConfirm() {
+    public function getOutsourceConfirmUrl(): array {
         return $this->_outsource_url_confirm;
     }
 

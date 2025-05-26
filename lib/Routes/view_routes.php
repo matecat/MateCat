@@ -17,3 +17,7 @@ route( '/jobanalysis/[i:pid]-[i:jid]-[:password]', 'GET', [ 'Views\AnalyzeContro
 route( '/revise-summary/[i:jid]-[:password]', 'GET', [ 'Views\QualityReportController', 'renderView' ] );
 route( '/activityLog/[i:id_project]/[:password]', 'GET', [ 'Views\ActivityLogController', 'renderView' ] );
 route( '/utils/xliff-to-target', 'GET', [ 'Views\XliffToTargetController', 'renderView' ] );
+
+// outsource authentication callbacks
+route( '/webhooks/outsource/success', 'GET', [ 'Views\OutsourceTo\TranslatedCallbackController', 'renderView' ] );
+route( '/webhooks/outsource/failure', 'GET', [ 'Views\OutsourceTo\TranslatedCallbackController', 'renderView' ] );

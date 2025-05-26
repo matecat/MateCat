@@ -21,7 +21,7 @@ use Langs\LanguageDomains;
 use Langs\Languages;
 use LQA\ChunkReviewDao;
 use ManageUtils;
-use OutsourceTo_OutsourceAvailable;
+use OutsourceTo\OutsourceAvailable;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use TmKeyManagement_ClientTmKeyStruct;
@@ -147,7 +147,7 @@ class Job {
             ];
         }
 
-        $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+        $outsourceAvailable = OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
 
         $result = [
                 'id'                    => (int)$chunk->id,

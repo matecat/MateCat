@@ -1,7 +1,20 @@
 <?php
 
+namespace OutsourceTo;
+
+use Bootstrap;
+use Exception;
+use INIT;
+use Jobs_JobDao;
+use Jobs_JobStruct;
 use Langs\LanguageDomains;
+use Log;
 use Model\Analysis\Status;
+use MultiCurlHandler;
+use Projects_ProjectDao;
+use ReflectionException;
+use Shop_Cart;
+use Shop_ItemHTSQuoteJob;
 
 /**
  * Concrete Class to negotiate a Quote/Login/Review/Confirm communication
@@ -18,50 +31,50 @@ use Model\Analysis\Status;
  *
  ********************************** HOW IT WORKS (in short) *****************************************************
  *  For each job, check if it has already been outsourced. If not, ask for a quote and put the result in a
- *  Shop_ItemHTSQuoteJob object. Put all the Shop_ItemHTSQuoteJob in a Shop_Cart object, and cache it in session.
+ *  Shop_ItemHTSQuoteJob object. Put all the Shop_ItemHTSQuoteJob in a Shop_Cart object and cache it in session.
  *
  ********************************** HOW IT WORKS (long version) *************************************************
  *  PROCEDURE
  *      the main function is "performQuote", which makes 3 main things:
- *          1-  first of all retrieves, calling "OutsourceTo_Translated::__getProjectData", the general information
- *              about the project, which are common to all jobs: subject and volume analysis. These information, the
- *              first time, are retrieved via API status, and then stored in a Shop_ItemHTSQuoteJob (yes, as if it was
- *              a real quote. This is an hack for caching the volume analysis and not calling API again).
- * @see    OutsourceTo_Translated::__getProjectData for further information.
+ *          1- first of all retrieves, calling "Translated::__getProjectData", the general information
+ *              about the project, which is common to all jobs: subject and volume analysis. This information, for the
+ *              first time, is retrieved via API status and then stored in a Shop_ItemHTSQuoteJob (yes, as if it was
+ *              a real quote. This is a hack for caching the volume analysis and not calling API again).
+ * @see    Translated::__getProjectData for further information.
  *
- *          2-  All the jobs we have to ask a quote for are stored in $this->jobList variable.
- *              The function "OutsourceTo_Translated::__processOutsourcedJobs" iterates over them and asks to
- *              vendor API which of them have already been outsourced.
+ *          2- All the jobs we have to ask a quote for are stored in $this->jobList variable.
+ *              The function "Translated::__processOutsourcedJobs" iterates over them and asks
+ *               the vendor API which of them have already been outsourced.
  *              In case the vendor replies positively, the result is stored in a Shop_ItemHTSQuoteJob,
  *              so it will be in session for the next time.
- * @see    OutsourceTo_Translated::__processOutsourcedJobs for further information.
+ * @see    Translated::__processOutsourcedJobs for further information.
  *
- *          3-  Finally, "OutsourceTo_Translated::__processNormalJobs" is invoked, and all the other jobs are sent
- *              to the vendor for receiving a quote. Again, quotes are stored in an Shop_ItemHTSQuoteJob object.
- * @see    OutsourceTo_Translated::__processNormalJobs for further information.
+ *          3- Finally, "Translated::__processNormalJobs" is invoked, and all the other jobs are sent
+ *              to the vendor for receiving a quote. Again, quotes are stored in a Shop_ItemHTSQuoteJob object.
+ * @see    Translated::__processNormalJobs for further information.
  *
  *
  *  OBJECTS INVOLVED AND SESSION STORAGE
  *      Each reply the vendor returns is stored in a Shop_ItemHTSQuoteJob object.
  *      All the Shop_ItemHTSQuoteJob are stored in a Shop_Cart.
- *      The Shop_Cart object is stored in session, and provides functions for retrieving Shop_ItemHTSQuoteJob(s).
+ *      The Shop_Cart object is stored in session and provides functions for retrieving Shop_ItemHTSQuoteJob(s).
  *      Depending on the HTS reply, only some fields of a Shop_ItemHTSQuoteJob are filled
- *      (@see OutsourceTo_Translated::__prepareOutsourcedJobCart and OutsourceTo_Translated::__prepareQuotedJobCart
+ *      (@see Translated::__prepareOutsourcedJobCart and Translated::__prepareQuotedJobCart
  *      for details about which fields are filled in case of "job already outsourced" and "quote for a job"
- *      replies respectively). Project information (as volume analysis and subject) are stored in a
- *      Shop_ItemHTSQuoteJob too (in order to take advantage of the caching system).
- * @see    OutsourceTo_Translated::__getProjectData for details.
+ *      replies respectively). Project information (as volume analysis and subject) is stored in a
+ *      Shop_ItemHTSQuoteJob too (to take advantage of the caching system).
+ * @see    Translated::__getProjectData for details.
  *
  *
- *  NORMAL QUOTES vs OUTSOURCED QUOTES
+ *  NORMAL QUOTES vs. OUTSOURCED QUOTES
  *      Each Shop_ItemHTSQuoteJob is assigned with an id, which, by convention, is composed by 3 elements:
  *      id and pass of the job it wraps the data about, and the delivery date (in millis) the user chose (if any).
  *      The pattern is: JOBID-JOBPASSWORD-DELIVERYDATE
  *      Examples are:
- *          12345-qwerty-624475440000  -> user chose 624475440000 as delivery date (timestamp)
- *          12345-qwerty-0              -> user did not provide a delivery date, vendor is choosing
+ *          12345-qwerty-624475440000 -> user chose 624475440000 as delivery date (timestamp)
+ *          12345-qwerty-0            -> user did not provide a delivery date, vendor is choosing
  *      Therefore, in cache there might be many entries for the same job, one for each delivery date the user tried.
- *      For an outsourced job instead, key "outsourced" is used: 12345-qwerty-outsourced
+ *      For an outsourced job instead, the key "outsourced" is used: 12345-qwerty-outsourced
  *
  *
  *  NAMING AND Shop_Cart USAGE
@@ -70,58 +83,62 @@ use Model\Analysis\Status;
  *      The former is a cache object of all the replies (Shop_ItemHTSQuoteJob(s)) the vendor returns to Matecat.
  *      The latter is an array containing all the replies (Shop_ItemHTSQuoteJob(s)) related to the current execution.
  *      EXAMPLE:
- *          The user clicks on button "Translate" for JOB_1. The procedure, as described above is executed.
+ *          The user clicks on the button "Translate" for JOB_1. The procedure, as described above, is executed.
  *          In the end, Shop_Cart outsource_to_external_cache and $this->_quote_result will both
  *          contain the Shop_ItemHTSQuoteJob object storing the reply (whichever it will be).
- *          Now, the user closes the outsource popup and clicks on the button "Translate" for JOB_2.
- *          Again the procedure is executed and in the end, the Shop_Cart outsource_to_external_cache will contain
+ *          Now, the user closes the 'outsource' popup and clicks on the button "Translate" for JOB_2.
+ *          Again, the procedure is executed, and in the end, the Shop_Cart outsource_to_external_cache will contain
  *          2 Shop_ItemHTSQuoteJob, one for each of the 2 quotes, while $this->_quote_result will only
  *          contain data about the second job (that is, each click on a Translate button is a different execution).
  *
  *
- *  TWO TYPES OF Shop_Cart: "outsource_to_external_cache" vs "outsource_to_external"
- *      In case the user clicks on "Order" for a job, he is redirected on vendor website, and login is handled
- *      via OpenID flow. The flow is as follow:
+ *  TWO TYPES OF Shop_Cart: "outsource_to_external_cache" vs. "outsource_to_external"
+ *      In case the user clicks on "Order" for a job, he is redirected on the vendor website, and login is handled
+ *      via OpenID flow. The flow is as follows:
  *          1. Matecat redirects the user to the vendor website passing an ID
  *          2. User logins in vendor website
  *          3. Vendor sends a success callback to Matecat, returning the ID Matecat itself passed before
- *          4. Matecat returns to vendor all the data associated to that ID
- *      The crucial point is the 4th: Matecat needs to "remember" which quotes are associated to a certain ID.
- *      Current data structures are not enough because
+ *          4. Matecat returns to the vendor all the data associated with that ID
+ *      The crucial point is the 4th: Matecat needs to "remember" which quotes are associated with a certain ID.
+ *      Current data structures are not enough because:
  *          - Shop_Cart is persistent but contains all quotes, not only those related to current execution
- *          - $this->_quote_result contains quotes related to current execution but is not persistent
- *      Therefore we need a further data structure for persistently handling quotes related to the current execution.
- *      In order to do this, a second Shop_Cart is used: Shop_Cart "outsource_to_external". This will behave
+ *          - $this->_quote_result contains quotes related to current execution but is not persistent.
+ *      Therefore, we need a further data structure for persistently handling quotes related to the current execution.
+ *      To do this, a second Shop_Cart is used: Shop_Cart "outsource_to_external". This will behave
  *      exactly as Shop_Cart "outsource_to_external_cache", but only contains quotes related to the current execution.
  *
  *
  */
-class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
+class Translated extends AbstractProvider {
 
-    private $fixedDelivery;
-    private $typeOfService;
-    private $_curlOptions;
+    private string $fixedDelivery;
+    private string $typeOfService;
+    private array  $_curlOptions;
+
+    private static string $OUTSOURCE_URL_CONFIRM = '';
 
     /**
      * Class constructor
      *
-     * There will be defined the callback urls for success or failure on login system,
+     * There will be defined the callback urls for success or failure on the login system,
      * default localization values (currency and timezone)
      * and default connection parameters for curls
      *
-     * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
-     * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ko
+     * @throws Exception
+     * @see AbstractProvider::$_outsource_login_url_ko
+     * @see AbstractProvider::$_outsource_login_url_ok
      */
     public function __construct() {
 
+        parent::__construct();
+
         Bootstrap::sessionStart();
 
-        $this->currency    = "EUR";
-        $this->change_rate = 1;
+        $this->currency = "EUR";
 
-        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
-        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
-        $this->_outsource_url_confirm  = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
+        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "webhooks/outsource/success";
+        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "webhooks/outsource/failure";
+        static::$OUTSOURCE_URL_CONFIRM = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = [
                 CURLOPT_HEADER         => 0,
@@ -138,13 +155,13 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
 
     /**
-     * Perform a quote on the remote Provider server (@param array|null $volAnalysis
-     * @see OutsourceTo_AbstractProvider::performQuote
+     * Perform a quote on the remote Provider server (
      *
+     * @throws ReflectionException
+     * @see AbstractProvider::performQuote
      * @see GUIDE->"PROCEDURE")
-     *
      */
-    public function performQuote( $volAnalysis = null ) {
+    public function performQuote() {
 
         [ $subject, $volAnalysis ] = $this->__getProjectData();
 
@@ -155,29 +172,31 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     /**
      * Retrieve data about the whole project (information common to all jobs): subject and volume analysis
-     *  These info are retrieved from API status and Database and cached in session, as if they were a real quote.
-     *  The workflow is as follow:
-     *      -   if the data is not in a Shop_ItemHTSQuoteJob cached in session
+     *  This info is retrieved from API status and Database and cached in session, as if they were a real quote.
+     *  The workflow is as follows:
+     *      - If the data is not in a Shop_ItemHTSQuoteJob cached in session,
      *              retrieve them from API and DB and put them in session.
-     *      -   retrieve project information from session and return them to caller
+     *      - Retrieve project information from session and return them to the caller
      * @return array
+     * @throws ReflectionException
+     * @throws Exception
      * @see GUIDE->"PROCEDURE"->POINT 1 for details
      *
      */
-    private function __getProjectData() {
+    private function __getProjectData(): array {
 
         /**
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
 
-        $_project_data = Projects_ProjectDao::getProjectAndJobData( $this->pid );
+        $_project_data  = Projects_ProjectDao::getProjectAndJobData( $this->pid );
         $analysisStatus = new Status( $_project_data, $this->features, $this->user );
         $volAnalysis = json_encode($analysisStatus->fetchData()->getResult());
 
         /**
          *************************** GET SUBJECT **************************************
          */
-        // subject is retrieved from database: get first job of the project and get its subject
+        // `subject` is retrieved from the database: get the first job of the project and get its subject
         $jStruct           = new Jobs_JobStruct();
         $jStruct->id       = $this->jobList[ 0 ][ 'jid' ];
         $jStruct->password = $this->jobList[ 0 ][ 'jpassword' ];
@@ -192,12 +211,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * Check which jobs, among those the user asked a quote for, have already been outsourced
      * At the end of this function, all jobs already outsourced will be in cache
      *
-     *  The whole flow is composed by 2 phases:
-     *      1-  during the first one all jobs are iterated, and for each one of them:
-     *              if there already is something in cache telling that it has been outsourced, then skip it.
+     *  The whole flow is composed of 2 phases:
+     *      1- during the first one all jobs are iterated, and for each one of them:
+     *              if there already is something in the cache telling that it has been outsourced, then skip it.
      *              Otherwise, add it to the list of the jobs we have to ask the vendor about
      *
-     *      2-  In the second phase, call the vendor with the above jobs and cache al the replies in session
+     *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
      * @param string $subject
      * @param array  $volAnalysis
@@ -205,7 +224,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * @see GUIDE->"PROCEDURE"->POINT 2 for details
      *
      */
-    private function __processOutsourcedJobs( $subject, $volAnalysis ) {
+    private function __processOutsourcedJobs( string $subject, array $volAnalysis ) {
         $mh = new MultiCurlHandler();
 
         /**
@@ -213,7 +232,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
          */
         foreach ( $this->jobList as $job ) {
 
-            // Is there in cache something that tells this job has already been outsourced?
+            // Is there in the cache anything that tells this job has already been outsourced?
             if ( Shop_Cart::getInstance( 'outsource_to_external_cache' )->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced" ) ) {
                 // if so, then update the job localization info (currency and timezone), according to user preferences
                 $this->__updateCartElements( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced", $this->currency, $this->timezone );
@@ -258,10 +277,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             // job has been outsourced, create a proper Shop_ItemHTSQuoteJob to hold it, and add it to the Shop_Cart
             $itemCart = $this->__prepareOutsourcedJobCart( $jobCredentials, $volAnalysis, $subject, $result_outsource );
 
-            // NOTE: if we are here it means this is the first time (unless the cache is expired) we realize this
-            // job has been outsourced. In cache there still might be many entries about old quotes for this job.
-            // We need to delete them all, that is, delete the JID-JPSW-* pattern. The "true" parameter forces the
-            // delete function to only check the prefix (job id and password ) for matching condition.
+            // NOTE: if we are here, it means this is the first time (unless the cache is expired) we realize this
+            // job has been outsourced.
+            // In the cache, there still might be many entries about old quotes for this job.
+            // We need to delete them all, that is, delete the JID-JPSW-* pattern.
+            //The "true" parameter forces the
+            // delete function to only check the prefix (job id and password) for matching condition.
             // See GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES" for details
             $this->__addCartElement( $itemCart, true );
         }
@@ -269,15 +290,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
 
     /**
-     * Retrieve a quote for all the jobs the user ask for, and which have not been outsourced yet
-     * At the end of this function, there will be in cache a quote for each one of these jobs
+     * Retrieve a quote for all the jobs the user asks for, and which have not been outsourced yet
+     * At the end of this function; there will be in cache a quote for each one of these jobs
      *
-     *  The whole flow is composed by 2 phases:
-     *      1-  during the first one all jobs are iterated, and for each one of them:
-     *              if there already is something in cache telling that it has been outsourced or we have a quote, then skip it.
+     *  The whole flow is composed of 2 phases:
+     *      1- during the first one all jobs are iterated, and for each one of them:
+     *              if there already is something in the cache telling that it has been outsourced, or we have a quote, then skip it.
      *              Otherwise, add it to the list of the jobs we have to ask the vendor for a quote
      *
-     *      2-  In the second phase, call the vendor with the above jobs and cache al the replies in session
+     *      2- In the second phase, call the vendor with the above jobs and cache al the replies in session
      *
      * @param string $subject
      * @param array  $volAnalysis
@@ -285,7 +306,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * @see GUIDE->"PROCEDURE"->POINT 3 for details
      *
      */
-    private function __processNormalJobs( $subject, $volAnalysis ) {
+    private function __processNormalJobs( string $subject, array $volAnalysis ) {
         $mh = new MultiCurlHandler();
 
         /**
@@ -293,16 +314,18 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
          */
         foreach ( $this->jobList as $job ) {
 
-            // has the job already been outsourced? If so, it has been fully prepared in
-            //  OutsourceTo_Translated::__processOutsourcedJobs" function. Just skip it
-            // NOTE:    this "if" is necessary in order to not process again a job already outsourced.
+            // Has the job already been outsourced?
+            // If so, it has been fully prepared in
+            //   the "Translated::__processOutsourcedJobs" function.
+            // Just skip it
+            // NOTE:    this "if" is necessary to not process again a job already outsourced.
             //          A possible alternative is to unset from the $this->jobList array all the jobs detected as
-            //          outsourced during OutsourceTo_Translated::__processOutsourcedJobs function
+            //          outsourced during Translated::__processOutsourcedJobs function
             if ( Shop_Cart::getInstance( 'outsource_to_external_cache' )->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced" ) ) {
                 continue;
             }
 
-            // in case we have a quote in cache, we are done with this job anyway
+            // in case we have a quote in the cache, we are done with this job anyway
             if ( Shop_Cart::getInstance( 'outsource_to_external_cache' )->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery ) ) {
                 // update the job localization info (currency and timezone), according to user preferences
                 $this->__updateCartElements( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery, $this->currency, $this->timezone, $this->typeOfService );
@@ -312,10 +335,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $langPairs = $this->getLangPairs( $job[ 'jid' ], $job[ 'jpassword' ], $volAnalysis );
 
             if ( !empty( $langPairs ) ) {
-                // get delivery date chosen by the user (if any), otherwise set it to 0 to tell the vendor no date has been specified
-                // NOTE: UI returns a timestamp in millis. Despite we use the one in millis for the caching ID
+                // Get the delivery date chosen by the user (if any), otherwise set it to 0 to tell the vendor no date has been specified
+                // NOTE: UI returns a timestamp in millis.
+                // Despite using the one in millis for the caching ID
                 // (See: GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES"), we here need to convert it in seconds
-                // and provide a MySQL -like date format. E.g. "1989-10-15 18:24:00"
+                // and provide a MySQL-like date format.
+                // E.g. "1989-10-15 18:24:00"
                 $fixedDeliveryDateForQuote = ( $this->fixedDelivery > 0 ) ? date( "Y-m-d H:i:s", $this->fixedDelivery / 1000 ) : "0";
 
                 $url = "https://www.translated.net/hts/matecat-endpoint.php?" . http_build_query( [
@@ -345,7 +370,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         /**
          ************************** SECOND PART: CALL VENDOR *****************************
          */
-        // execute call and retrieve the result
+        // execute the call and retrieve the result
         $mh->multiExec();
         $res = $mh->getAllContents();
 
@@ -360,19 +385,19 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
             Log::doJsonLog( $quote );
 
-            // parse the result and check if the vendor returned some error. In case, skip the quote
+            // Parse the result and check if the vendor returned some error. In case, skip the quote
             $result_quote = json_decode( $quote, true );
             if ( $result_quote[ 'code' ] != 1 ) {
                 Log::doJsonLog( "HTS returned an error. Skip quote" );
                 continue;
             }
 
-            // quote received correctly. Create a proper Shop_ItemHTSQuoteJob to hold it, and add it to the Shop_Cart
+            // Quote received correctly. Create a proper Shop_ItemHTSQuoteJob to hold it and add it to the Shop_Cart
             $itemCart = $this->__prepareQuotedJobCart( $jpid, $volAnalysis, $subject, $result_quote );
 
-            // NOTE: In this case we only have to delete the single quote, and replace it with the new one,
+            // NOTE: In this case, we only have to delete the single quote and replace it with the new one,
             // but all the other quotes the user might have asked must remain in cache,
-            // so do not pass the "true" parameter, as done before in "OutsourceTo_Translated::__processOutsourcedJobs".
+            // so do not pass the "true" parameter, as done before in "Translated::__processOutsourcedJobs".
             // See GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES" for details
             $this->__addCartElement( $itemCart );
 
@@ -382,7 +407,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
 
     /**
-     * Create a Shop_ItemHTSQuoteJob which wraps a "job already outsourced" vendor reply
+     * Create a Shop_ItemHTSQuoteJob, which wraps a "job already outsourced" vendor reply
      *
      * @param string $jpid
      * @param array  $volAnalysis
@@ -391,7 +416,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      *
      * @return Shop_ItemHTSQuoteJob
      */
-    private function __prepareOutsourcedJobCart( $jpid, $volAnalysis, $subject, $apiCallResult ) {
+    private function __prepareOutsourcedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): ?Shop_ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
         [ $jid, $jpsw, ] = explode( "-", $jpid );
 
@@ -428,7 +453,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
             // NOTE:
             //  vendor returns an error in case words = 0, therefore, during functions
-            //  OutsourceTo_Translated::__processOutsourcedJobs and OutsourceTo_Translated::__processNormalJobs, they
+            //  Translated::__processOutsourcedJobs and Translated::__processNormalJobs, they
             //  are rounded to the nearest int and set at minimum to 1. Here, since they are recomputed,
             //  we need to do the same trick again. Alternatively, they might be passed as parameter
 
@@ -449,7 +474,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      *
      * @return Shop_ItemHTSQuoteJob
      */
-    private function __prepareQuotedJobCart( $jpid, $volAnalysis, $subject, $apiCallResult ) {
+    private function __prepareQuotedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): Shop_ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
         [ $jid, $jpsw, ] = explode( "-", $jpid );
         $subject_handler = LanguageDomains::getInstance();
@@ -459,7 +484,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $source    = $langPairs[ 'source' ];
         $target    = $langPairs[ 'target' ];
 
-        // instantiate the Shop_ItemHTSQuoteJob and fill it
+        // Instantiate the Shop_ItemHTSQuoteJob and fill it
         // SAMPLE VENDOR REPLY:
         //  {
         //      "code": 1,
@@ -487,7 +512,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         //      "revision": {
         //          "price": FLOAT,                         <- the price surplus (to be added to translation price)
         //          "delivery": "YYYY-MM-DD HH:MM:SS",
-        //          "revisor_vote": FLOAT                   <- the delta improvement. To be added to translator vote
+        //          "revisor_vote": FLOAT                   <- the delta improvement. To be added to the translator vote
         //      }
         //  }
 
@@ -517,7 +542,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'show_info' ]            = $apiCallResult[ 'showquote' ];
             $itemCart[ 'show_translator_data' ] = $apiCallResult[ 'show_translator_data' ];
 
-            // if the vendor provided data about translator, then get it
+            // if the vendor provided data about the translator, then get it
             if ( $itemCart[ 'show_translator_data' ] == 1 ) {
                 $itemCart[ 't_name' ]               = $apiCallResult[ 'translation' ][ 'translator_name' ];
                 $itemCart[ 't_native_lang' ]        = $apiCallResult[ 'translation' ][ 'translator_native_lang' ];
@@ -541,7 +566,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         // NOTE:
         //  vendor returns an error in case words = 0, therefore, during functions
-        //  OutsourceTo_Translated::__processOutsourcedJobs and OutsourceTo_Translated::__processNormalJobs, they
+        //  Translated::__processOutsourcedJobs and Translated::__processNormalJobs, they
         //  are rounded to the nearest int and set at minimum to 1. Here, since they are recomputed,
         //  we need to do the same trick again. Alternatively, they might be passed as parameter
 
@@ -551,20 +576,19 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     /**
      * Update localization info of a Shop_ItemHTSQuoteJob stored in cache.
-     *  A proper update function does not exists, therefore the procedure is:
+     *  A proper update function does not exist; therefore, the procedure is:
      *      - get the current element from cache
      *      - update the parameters
      *      - re-add it to the cache
      *
-     * @param string $cartId
-     * @param string $newCurrency
-     * @param int    $newTimezone
-     * @param string $newTypeOfService
+     * @param string      $cartId
+     * @param string      $newCurrency
+     * @param int         $newTimezone
+     * @param string|null $newTypeOfService
      *
-     * @see OutsourceTo_Translated::__addCartElement
-     *
+     * @see Translated::__addCartElement
      */
-    private function __updateCartElements( $cartId, $newCurrency, $newTimezone, $newTypeOfService = null ) {
+    private function __updateCartElements( string $cartId, string $newCurrency, int $newTimezone, string $newTypeOfService = null ) {
         $cartElem                    = Shop_Cart::getInstance( 'outsource_to_external_cache' )->getItem( $cartId );
         $cartElem[ "currency" ]      = !empty( $newCurrency ) ? $newCurrency : $cartElem[ "currency" ];
         $cartElem[ "timezone" ]      = !empty( $newTimezone ) ? $newTimezone : $cartElem[ "timezone" ];
@@ -575,19 +599,19 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
 
     /**
-     * Add a cart element in all the data-structures it needs to be added, in order to ensure consistency.
+     * Add a cart element in all the data-structures it needs to be added to ensure consistency.
      *  As described in GUIDE->"TWO TYPES OF Shop_Cart", there are 2 carts Matecat relies on.
-     *  This function adds the cart element in both of them, by calling twice the
-     *  OutsourceTo_Translated::__addCartElementToCart function.
+     *  This function adds the cart element in both of them by calling twice the
+     *  Translated::__addCartElementToCart function.
      *  Moreover, the cart element is added to the array of results, $this->_quote_result
      *
      * @param Shop_ItemHTSQuoteJob $cartElem
      * @param bool                 $deleteOnPartialMatch
      *
-     * @see OutsourceTo_Translated::__addCartElementToCart
+     * @see Translated::__addCartElementToCart
      *
      */
-    private function __addCartElement( $cartElem, $deleteOnPartialMatch = false ) {
+    private function __addCartElement( Shop_ItemHTSQuoteJob $cartElem, bool $deleteOnPartialMatch = false ) {
         $this->__addCartElementToCart( $cartElem, 'outsource_to_external', $deleteOnPartialMatch );
         $this->__addCartElementToCart( $cartElem, 'outsource_to_external_cache', $deleteOnPartialMatch );
 
@@ -597,7 +621,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     /**
      * Add a cart element in the specified Shop_Cart.
-     *  In order to add an element, it is necessary to delete it first. Therefore "delItem" function is called first.
+     *  To add an element, it is necessary to delete it first.
+     *  Therefore, the "delItem" function is called first.
      *
      *  IMPORTANT: how deletion works.
      *      "delItem" function deletes ALL the carts starting with $idToUse.
@@ -607,9 +632,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      *          JOBID-JOBPASSWORD-outsourced        <- when caching outsourced jobs
      *          JOBID-JOBPASSWORD-INTEGER           <- when caching normal quotes
      *
-     *      In case delItem is called with the full $cartElem ID (when parameter $deleteOnPartialMatch is false)
-     *      only one element (at most) in the cart will match the whole id, therefore a single deletion is made.
-     *      In case delItem is called with only job id and password as ID (when parameter $deleteOnPartialMatch is true)
+     *      In case delItem is called with the full $cartElem ID (when parameter $deleteOnPartialMatch is false),
+     *      only one element (at most) in the cart will match the whole id; therefore, a single deletion is made.
+     *
+     *      In case delItem is called with only the job id and the password as ID (when parameter $deleteOnPartialMatch is true),
      *      all the data about that job (regardless of the delivery date or whether it was outsourced or not) is deleted.
      *
      *
@@ -617,10 +643,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * @param string               $cartName
      * @param bool                 $deleteOnPartialMatch
      *
-     * @see OutsourceTo_Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
+     * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *
      */
-    private function __addCartElementToCart( $cartElem, $cartName, $deleteOnPartialMatch ) {
+    private function __addCartElementToCart( Shop_ItemHTSQuoteJob $cartElem, string $cartName, bool $deleteOnPartialMatch ) {
         $idToUse = ( $deleteOnPartialMatch ) ? substr( $cartElem[ "id" ], 0, strrpos( $cartElem[ "id" ], "-" ) ) : $cartElem[ "id" ];
         Shop_Cart::getInstance( $cartName )->delItem( $idToUse );
         Shop_Cart::getInstance( $cartName )->addItem( $cartElem );
@@ -633,13 +659,13 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     /**
      * Set the fixed (desidered) delivery date of the translation.
-     * This parameters will be set only when the customer uses "need it faster" feature
+     * This parameter will be set only when the customer uses the "need it faster" feature
      *
      * @param string $fixedDelivery
      *
      * @return $this
      */
-    public function setFixedDelivery( $fixedDelivery ) {
+    public function setFixedDelivery( string $fixedDelivery ): Translated {
         $this->fixedDelivery = $fixedDelivery;
 
         return $this;
@@ -648,33 +674,33 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
     /**
      * Set the chosen type of service.
-     * This parameters, for the moment can be only: "premium" or "professional"
+     * These parameters, for the moment, can be only: "premium" or "professional"
      *
      * @param string $typeOfService
      *
      * @return $this
      */
-    public function setTypeOfService( $typeOfService ) {
+    public function setTypeOfService( string $typeOfService ): Translated {
         $this->typeOfService = $typeOfService;
 
         return $this;
     }
 
-    public function getOutsourceConfirm() {
+    public function getOutsourceConfirmUrl(): array {
         $urls = [];
         foreach ( $this->jobList as $job ) {
-            $urls[] = sprintf( $this->_outsource_url_confirm, $job[ 'jid' ], $job[ 'jpassword' ] );
+            $urls[] = sprintf( static::$OUTSOURCE_URL_CONFIRM, $job[ 'jid' ], $job[ 'jpassword' ] );
         }
 
         return $urls;
     }
 
     /**
-     * @param $volAnalysis
+     * @param array $volAnalysis
      *
-     * @return int|mixed
+     * @return int
      */
-    private function getTotalPayableWords( $volAnalysis ) {
+    private function getTotalPayableWords( array $volAnalysis ): int {
         $total   = 0;
         $jobList = $this->jobList;
 
@@ -700,13 +726,13 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
     }
 
     /**
-     * @param $jid
-     * @param $password
-     * @param $volAnalysis
+     * @param int    $jid
+     * @param string $password
+     * @param array  $volAnalysis
      *
      * @return array
      */
-    private function getLangPairs( $jid, $password, $volAnalysis ) {
+    private function getLangPairs( int $jid, string $password, array $volAnalysis ): array {
         foreach ( $volAnalysis[ 'jobs' ] as $job ) {
             foreach ( $job[ 'chunks' ] as $chunk ) {
                 if ( $job[ 'id' ] == $jid and $chunk[ 'password' ] === $password ) {
