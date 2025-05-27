@@ -32,9 +32,9 @@ class AnalysisProjectSummary implements JsonSerializable {
      */
     protected string $analysis_status = Constants_ProjectStatus::STATUS_NEW;
     /**
-     * @var int
+     * @var float
      */
-    protected int $total_equivalent = 0;
+    protected float $total_equivalent = 0;
     /**
      * @var int
      */
@@ -70,8 +70,8 @@ class AnalysisProjectSummary implements JsonSerializable {
                 'segments_analyzed' => $this->segments_analyzed,
                 'status'            => $this->analysis_status,
                 'total_raw'         => $this->total_raw,
-                'total_industry'    => max( round( $this->total_industry ), $this->total_equivalent ),
-                'total_equivalent'  => $this->total_equivalent,
+                'total_industry'    => max( round( $this->total_industry ), round( $this->total_equivalent ) ),
+                'total_equivalent'  => round( $this->total_equivalent ),
                 'discount'          => $this->getDiscount()
         ];
     }
@@ -139,7 +139,7 @@ class AnalysisProjectSummary implements JsonSerializable {
      * @return void
      */
     public function incrementEquivalent( float $equivalent ) {
-        $this->total_equivalent += round( $equivalent );
+        $this->total_equivalent += $equivalent;
     }
 
     /**
@@ -155,14 +155,14 @@ class AnalysisProjectSummary implements JsonSerializable {
      * @return void
      */
     public function incrementIndustry( float $industry ) {
-        $this->total_industry += round( $industry );
+        $this->total_industry += $industry;
     }
 
     /**
-     * @return int
+     * @return float
      */
     public function getTotalIndustry(): int {
-        return $this->total_industry;
+        return round( $this->total_industry );
     }
 
     /**
@@ -173,10 +173,10 @@ class AnalysisProjectSummary implements JsonSerializable {
     }
 
     /**
-     * @return int
+     * @return float
      */
     public function getTotalEquivalent(): int {
-        return $this->total_equivalent;
+        return round( $this->total_equivalent );
     }
 
     /**
