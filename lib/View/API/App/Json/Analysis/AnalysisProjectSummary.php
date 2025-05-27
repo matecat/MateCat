@@ -155,7 +155,7 @@ class AnalysisProjectSummary implements JsonSerializable {
      * @return void
      */
     public function incrementIndustry( float $industry ) {
-        $this->total_industry += $industry;
+        $this->total_industry += round( $industry );
     }
 
     /**
