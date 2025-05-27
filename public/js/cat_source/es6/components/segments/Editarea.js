@@ -446,11 +446,6 @@ class Editarea extends React.Component {
         this.addSearchDecorator()
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true
-        console.log(
-          'Adding Search Decorator',
-          this.props.segment,
-          this.props.segment.searchParams,
-        )
       }
     }
 
