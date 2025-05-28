@@ -26,7 +26,7 @@ class FileDao extends AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare(
                 "SELECT * FROM files " .
-                " INNER JOIN job ON job.id_file = files.id " .
+                " INNER JOIN files_job ON files_job.id_file = files.id " .
                 " AND id_job = :id_job "
         );
 
