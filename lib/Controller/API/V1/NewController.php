@@ -709,9 +709,7 @@ class NewController extends KleinController {
      */
     private function validateSourceLang( Languages $lang_handler, $source_lang ): string {
         try {
-            $lang_handler->validateLanguage( $source_lang );
-
-            return $source_lang;
+            return $lang_handler->validateLanguage( $source_lang );
         } catch ( Exception $e ) {
             throw new InvalidArgumentException( "Missing source language." );
         }
@@ -734,14 +732,17 @@ class NewController extends KleinController {
         }
 
         try {
-            foreach ( $targets as $target ) {
-                $lang_handler->validateLanguage( $target );
-            }
+            $normalizedTargets = array_map(
+                    function ( $lang ) use ( $lang_handler ) {
+                        return $lang_handler->validateLanguage( $lang );
+                    },
+                    $targets
+            );
         } catch ( Exception $e ) {
             throw new InvalidArgumentException( $e->getMessage() );
         }
 
-        return implode( ',', $targets );
+        return implode( ',', $normalizedTargets );
     }
 
     /**
