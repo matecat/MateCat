@@ -10,6 +10,7 @@
 global $klein;
 
 // Page Views (replacing old viewController)
+route( '/', 'GET', [ 'Views\UploadPageController', 'renderView' ] );
 route( '/signin', 'GET', [ 'Views\SignInController', 'renderView' ] );
 route( '/manage', 'GET', [ 'Views\ManageController', 'renderView' ] );
 route( '/analyze/[:project_name]/[i:pid]-[:password]', 'GET', [ 'Views\AnalyzeController', 'renderView' ] );

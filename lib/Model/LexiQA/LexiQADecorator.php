@@ -11,7 +11,6 @@ namespace LexiQA;
 
 
 use Exception;
-use FeatureSet;
 use INIT;
 use PHPTAL;
 use ProjectOptionsSanitizer;
@@ -79,11 +78,9 @@ class LexiQADecorator {
      * Check if the feature is enabled in the matecat installation according to the
      * given preloaded featureSet. In fact, some Features exclude LexiQA.
      *
-     * @param FeatureSet $featureSet
-     *
      * @return $this
      */
-    public function featureEnabled( FeatureSet $featureSet ): LexiQADecorator {
+    public function featureEnabled(): LexiQADecorator {
 
         if ( !INIT::$LXQ_LICENSE ) {
             $this->lexiqa_enabled = false;
