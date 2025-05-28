@@ -130,7 +130,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'glossaries' ] ?? null,
                     $_config[ 'ignore_glossary_case' ] ?? null,
                     $_config[ 'include_score' ] ?? null,
-                    $_config[ 'mt_qe_engine_id' ] ?? 'default'
+                    $_config[ 'mt_qe_engine_id' ] ?? '2'
             );
 
             return ( new Engines_Results_MyMemory_Matches( [
@@ -616,7 +616,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @return float|null
      * @throws MMTServiceApiException
      */
-    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float {
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = '2' ): ?float {
         $client            = $this->_getClient();
         $qualityEstimation = $client->qualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
 
