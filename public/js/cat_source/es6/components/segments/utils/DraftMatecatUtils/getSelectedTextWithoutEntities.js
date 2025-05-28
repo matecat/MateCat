@@ -13,9 +13,13 @@ const getSelectedTextWithoutEntities = (editorState) => {
       .fill({})
       .map((item, index) => start + index)
       .reduce((acc, cur) => {
-        const isEntity = !!currentContentBlock.getEntityAt(cur)
+        const entityKey = currentContentBlock.getEntityAt(cur)
+        const isEntity = !!entityKey
         const updateAccumulator = [...acc]
 
+        const entityType = isEntity
+          ? currentContent.getEntity(entityKey).get('type')
+          : null
         const lastItem =
           updateAccumulator.length &&
           (!isEntity || (isEntity && !updateAccumulator.slice(-1)[0]?.value))
@@ -31,15 +35,19 @@ const getSelectedTextWithoutEntities = (editorState) => {
               .substring(cur, cur + 1)}`,
             end: cur + 1,
           }),
+          ...(entityType === 'space' && {
+            ...(lastItem.start === undefined && {start: cur}),
+            value: ' ',
+            end: cur + 1,
+          }),
         }
-
         return [...updateAccumulator, item]
       }, [])
       .filter((item) => item.value)
   } catch (e) {
     console.log(e)
   }
-
+  console.log('getSelectedTextWithoutEntities', result)
   return result
 }
 
