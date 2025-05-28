@@ -30,6 +30,7 @@ use Jobs_JobStruct;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use Projects_MetadataDao;
+use Projects_ProjectStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
@@ -170,15 +171,20 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
                 // update suggestion match
                 if ( $old_suggestion->match == "MT" ) {
+
+                    /**
+                     * @var $project Projects_ProjectStruct
+                     */
+                    $project = $this->data[ 'project' ];
                     // case 1. is MT
-                    $new_translation->suggestion_match  = $old_suggestion->match;
+                    $new_translation->suggestion_match  = $project->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
                     $new_translation->suggestion_source = Constants_Engines::MT;
                 } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
                     $new_translation->suggestion_source = 'NO_MATCH';
                 } else {
                     // case 3. otherwise is TM
-                    $new_translation->suggestion_match  = $old_suggestion->match;
+                    $new_translation->suggestion_match  = (int)$old_suggestion->match; // cast '71%' to int 71
                     $new_translation->suggestion_source = Constants_Engines::TM;
                 }
             }
