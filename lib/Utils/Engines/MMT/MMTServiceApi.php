@@ -125,11 +125,11 @@ class MMTServiceApi {
      */
     public function qualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ) {
         return $this->send( 'GET', "$this->baseUrl/translate/qe", [
-                "source"            => $source,
-                "target"            => $target,
-                "sentence"          => $sentence,
-                "translation"       => $translation,
-                'purfect_engine_id' => $mt_qe_engine_id
+                "source"          => $source,
+                "target"          => $target,
+                "sentence"        => $sentence,
+                "translation"     => $translation,
+                'purfect_version' => $mt_qe_engine_id
         ] );
     }
 
@@ -407,7 +407,7 @@ class MMTServiceApi {
             $glossaries = null,
             $ignoreGlossaryCase = null,
             $include_score = null,
-            string $mt_qe_engine_id = 'default'
+            string $mt_qe_engine_id = '2'
     ) {
 
         if ( empty( $text ) ) {

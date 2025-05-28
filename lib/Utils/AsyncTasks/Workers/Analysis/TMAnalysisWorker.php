@@ -720,10 +720,10 @@ class TMAnalysisWorker extends AbstractWorker {
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis false to allow the Lara engine to perform the analysis.
+            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
                 $mtEngine->setSkipAnalysis( false );
-                $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_type;
+                $_config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_version;
             }
 
             $config = $mtEngine->getConfigStruct();
