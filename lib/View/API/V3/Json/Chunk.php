@@ -10,7 +10,6 @@ namespace API\V3\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
-use API\V2\Json\ProjectUrls;
 use Constants;
 use Exception;
 use Exceptions\NotFoundException;
@@ -22,7 +21,6 @@ use Langs\LanguageDomains;
 use Langs\Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
-use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Utils;
@@ -131,7 +129,19 @@ class Chunk extends \API\V2\Json\Chunk {
         if ( empty( $this->chunk_reviews ) ) {
             $this->chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
         }
+
         return $this->chunk_reviews;
+    }
+
+    /**
+     * @param ChunkReviewStruct[] $chunk_reviews
+     *
+     * @return void
+     */
+    public function setChunkReviews( array $chunk_reviews ): Chunk {
+        $this->chunk_reviews = $chunk_reviews;
+
+        return $this;
     }
 
     /**

@@ -193,7 +193,7 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
 
     }
 
-    public function getWarningsCount() {
+    public function getWarningsCount(): object {
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
             $dao                     = new WarningDao();
