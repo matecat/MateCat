@@ -44,10 +44,10 @@ class MetadataDao extends AbstractDao {
      * @param $password
      * @param int $ttl
      *
-     * @return array|IDaoStruct[]
+     * @return ?array|?MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ) {
+    public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ): ?array {
 
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
@@ -56,7 +56,7 @@ class MetadataDao extends AbstractDao {
                 'password' => $password,
         ] );
 
-        return @$result;
+        return $result ?? null;
     }
 
     public function destroyCacheByJobAndPassword( $id_job, $password ) {
