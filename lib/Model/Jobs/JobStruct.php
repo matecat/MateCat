@@ -197,7 +197,7 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
             $dao                     = new WarningDao();
-            $warningsCount           = @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] );
+            $warningsCount           = $dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] ) ?? [];
             $ret                     = [];
             $ret[ 'warnings_count' ] = 0;
             foreach ( $warningsCount as $count ) {

@@ -64,15 +64,15 @@ class ChunkController extends BaseChunkController {
     }
 
     protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+
         $Validator = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );
             $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
-
         $this->appendValidator( $Validator );
-        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

@@ -125,8 +125,12 @@ class Chunk extends \API\V2\Json\Chunk {
 
     /**
      * @return array
+     * @throws ReflectionException
      */
     protected function getChunkReviews(): array {
+        if ( empty( $this->chunk_reviews ) ) {
+            $this->chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
+        }
         return $this->chunk_reviews;
     }
 
