@@ -23,7 +23,7 @@ let TranslationMatches = {
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
-        matchToUse.match,
+        matchToUse,
         percentageClass,
         matchToUse.created_by,
       )
@@ -238,7 +238,7 @@ let TranslationMatches = {
   getPercentageClass: function (matchArray) {
     let percentageClass
 
-    const match = this.getNumericMatchBaseOrMTString(matchArray.match);
+    const match = this.getNumericMatchBaseOrMTString(matchArray.match)
 
     switch (true) {
       case match === 100 && !matchArray.ICE: //'100%'
@@ -276,7 +276,7 @@ let TranslationMatches = {
       matchValue = m_parse
     }
 
-    return matchValue;
+    return matchValue
   },
 
   /**
@@ -285,13 +285,16 @@ let TranslationMatches = {
    * @returns {string}
    */
   getPercentTextForMatch: function (matchArray) {
-    if(TranslationMatches.getNumericMatchBaseOrMTString(matchArray.match) === 100 && matchArray.ICE){
+    if (
+      TranslationMatches.getNumericMatchBaseOrMTString(matchArray.match) ===
+        100 &&
+      matchArray.ICE
+    ) {
       return '101%'
-    } else{
+    } else {
       return matchArray.match === 'ICE_MT' ? 'TQMT' : matchArray.match
     }
   },
-
 }
 
 export default TranslationMatches
