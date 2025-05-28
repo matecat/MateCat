@@ -27,10 +27,11 @@
       ],
       "default": "approved"
     },
-    "qe_model_type": {
-      "type": "string",
-      "minLength": 3,
-      "default": "default"
+    "qe_model_version": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 3,
+      "default": 2
     }
   },
   "additionalProperties": false
