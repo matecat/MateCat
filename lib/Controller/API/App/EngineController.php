@@ -4,6 +4,7 @@ namespace API\App;
 
 use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthorizationError;
 use API\Commons\Validators\LoginValidator;
 use Constants_Engines;
 use Database;
@@ -70,10 +71,7 @@ class EngineController extends KleinController {
             throw new InvalidArgumentException( "Engine provider required", -8 );
         }
 
-        $newEngineStruct = null;
-        $validEngine     = true;
-
-
+        $validEngine = true;
         switch ( strtolower( $provider ) ) {
 
             case strtolower( Constants_Engines::DEEPL ):
@@ -219,7 +217,7 @@ class EngineController extends KleinController {
             throw new DomainException( "Engine not allowed", -4 );
         }
 
-        $engineList      = $this->featureSet->filter( 'getAvailableEnginesListForUser', Constants_Engines::getAvailableEnginesList(), $this->user );
+        $engineList      = Constants_Engines::getAvailableEnginesList();
         $UserMetadataDao = new MetadataDao();
         $engineEnabled   = $UserMetadataDao->get( $this->user->uid, $newEngineStruct->class_load );
 
@@ -241,7 +239,7 @@ class EngineController extends KleinController {
             $engine_type = explode( "\\", $newEngineStruct->class_load );
             $engine_type = array_pop( $engine_type );
 
-            throw new Exception( "Creation failed. Only one $engine_type engine is allowed.", 403 );
+            throw new AuthorizationError( "Creation failed. Only one $engine_type engine is allowed.", 403 );
         }
 
         if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
@@ -296,7 +294,7 @@ class EngineController extends KleinController {
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
-                throw new Exception( $message, $code );
+                throw new DomainException( $message, $code );
             }
 
         } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
@@ -306,7 +304,7 @@ class EngineController extends KleinController {
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
             $config[ 'target' ]  = "fr-FR";
-            $config[ 'key' ]     = $this->engineData[ 'secret' ] ?? null;
+            $config[ 'key' ]     = $newTestCreatedMT->client_secret ?? null;
 
             $mt_result = $newTestCreatedMT->get( $config );
 
@@ -314,7 +312,7 @@ class EngineController extends KleinController {
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
-                throw new DomainException( $mt_result[ 'error' ] );
+                throw new DomainException( $mt_result[ 'error' ][ 'message' ] );
             }
         } elseif ( $newEngineStruct instanceof LaraStruct ) {
 
@@ -335,7 +333,7 @@ class EngineController extends KleinController {
                 $engineDAO->delete( $newCreatedDbRowStruct );
                 $this->destroyUserEnginesCache();
 
-                throw new Exception( $message, $code );
+                throw new DomainException( $message, $code );
             }
 
             // Check MMT License
@@ -354,7 +352,7 @@ class EngineController extends KleinController {
                     $engineDAO->delete( $newCreatedDbRowStruct );
                     $this->destroyUserEnginesCache();
 
-                    throw new Exception( $message, $code );
+                    throw new DomainException( $message, $code );
                 }
             }
 
@@ -392,38 +390,38 @@ class EngineController extends KleinController {
      */
     public function disable(): void {
 
-            $request = $this->validateTheRequest();
-            $id      = $request[ 'id' ];
+        $request = $this->validateTheRequest();
+        $id      = $request[ 'id' ];
 
-            if ( empty( $id ) ) {
-                throw new InvalidArgumentException( "Engine id required", -5 );
-            }
+        if ( empty( $id ) ) {
+            throw new InvalidArgumentException( "Engine id required", -5 );
+        }
 
-            $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
-            $engineToBeDeleted->id  = $id;
-            $engineToBeDeleted->uid = $this->user->uid;
+        $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
+        $engineToBeDeleted->id  = $id;
+        $engineToBeDeleted->uid = $this->user->uid;
 
-            $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
-            $result    = $engineDAO->disable( $engineToBeDeleted );
-            $this->destroyUserEnginesCache();
+        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $result    = $engineDAO->disable( $engineToBeDeleted );
+        $this->destroyUserEnginesCache();
 
-            if ( !$result instanceof EnginesModel_EngineStruct ) {
-                throw new RuntimeException( "Deletion failed. Generic error", -9 );
-            }
+        if ( !$result instanceof EnginesModel_EngineStruct ) {
+            throw new RuntimeException( "Deletion failed. Generic error", -9 );
+        }
 
-            $engine = Engine::createTempInstance( $result );
+        $engine = Engine::createTempInstance( $result );
 
-            if ( $engine->isAdaptiveMT() ) {
-                //retrieve OWNER Engine License
-                ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
-            }
+        if ( $engine->isAdaptiveMT() ) {
+            //retrieve OWNER Engine License
+            ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
+        }
 
-            $this->response->json( [
-                    'data'   => [
-                            'id' => $result->id
-                    ],
-                    'errors' => []
-            ] );
+        $this->response->json( [
+                'data'   => [
+                        'id' => $result->id
+                ],
+                'errors' => []
+        ] );
 
     }
 

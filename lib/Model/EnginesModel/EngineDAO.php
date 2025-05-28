@@ -117,6 +117,10 @@ class EnginesModel_EngineDAO extends AbstractDao {
         //return the inserted object on success
         $obj->id = $this->database->last_insert();
 
+        // revert internal JSON fields to arrays
+        $obj->others           = json_decode( $obj->others, true );
+        $obj->extra_parameters = json_decode( $obj->extra_parameters, true );
+
         return $obj;
 
     }
