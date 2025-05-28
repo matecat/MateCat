@@ -65,6 +65,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
             case AuthorizationError::class: // invalid permissions to access the resource
+            case \Exceptions\AuthorizationError::class:
                 $klein->response()->code( 403 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
