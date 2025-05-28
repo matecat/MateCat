@@ -58,14 +58,14 @@ class MetaDataController extends BaseChunkController {
      *
      * @return stdClass
      */
-    private function getJobMetaData( Jobs_JobStruct $job ) {
+    private function getJobMetaData( Jobs_JobStruct $job ): object {
 
         $metadata       = new stdClass();
         $jobMetaDataDao = new MetadataDao();
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
-            $key            = $metadatum->tag_key;
-            $metadata->$key = is_numeric($metadatum->tag_value) ? (int)$metadatum->tag_value : $metadatum->tag_value;
+            $key            = $metadatum->key;
+            $metadata->$key = is_numeric($metadatum->value) ? (int)$metadatum->value : $metadatum->value;
         }
 
         return $metadata;
