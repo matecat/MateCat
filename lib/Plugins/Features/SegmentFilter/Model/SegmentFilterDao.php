@@ -20,8 +20,8 @@ use Model\Analysis\Constants\InternalMatchesConstants;
 class SegmentFilterDao extends AbstractDao {
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
      * @return array
      */
@@ -67,7 +67,7 @@ class SegmentFilterDao extends AbstractDao {
             $where_data = [ 'status' => $filter->getSegmentStatus() ];
         }
 
-        return (object)[ 'sql' => $where, 'data' => $where_data ];
+        return (object) [ 'sql' => $where, 'data' => $where_data ];
     }
 
 
@@ -132,13 +132,14 @@ class SegmentFilterDao extends AbstractDao {
 
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_approved' => Constants_TranslationStatus::STATUS_APPROVED,
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
 
@@ -151,8 +152,8 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
      * @return object
      */
@@ -197,8 +198,8 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
      * @return IDaoStruct[]
      * @throws Exception
@@ -265,7 +266,7 @@ class SegmentFilterDao extends AbstractDao {
                 break;
 
             case 'todo':
-                $sql = self::getSqlForTodo( $where, $data );
+                $sql = self::getSqlForTodo( $where, $chunk->getIsReview(), $chunk->isSecondPassReview() );
                 break;
 
             default:
@@ -453,6 +454,7 @@ class SegmentFilterDao extends AbstractDao {
     }
 
 
+
     public static function getSqlForRepetition( $where ) {
 
         $sql = "
@@ -500,24 +502,17 @@ class SegmentFilterDao extends AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForToDo( $where, &$data ) {
+    public static function getSqlForToDo( $where, $isReview = false, $isSecondPassReview = false ) {
 
         $sql_condition = "";
-        $sql_sp        = "";
+        $sql_sp = "";
 
-        if ( array_key_exists( "status_translated", $data ) ) {
+        if($isReview) {
             $sql_condition = " OR st.status = :status_translated ";
         }
 
-        if ( array_key_exists( "status_approved", $data ) ) {
-            $sql_condition = " OR st.status = :status_approved ";
-        }
-
-        // Unset unneeded params for the query
-        if (strpos($sql_condition, "status_approved") !== false) {
-            unset($data['status_translated']);
-        } elseif (strpos($sql_condition, "status_translated") !== false) {
-            unset($data['status_approved']);
+        if($isSecondPassReview) {
+            $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
         }
 
         $sql = "
@@ -530,10 +525,10 @@ class SegmentFilterDao extends AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft " . $sql_condition . ")
+           OR st.status = :status_draft ".$sql_condition.")
            WHERE 1
-           " . $where->sql . "
-           " . $sql_sp . "
+           ".$where->sql."
+           ".$sql_sp."
            ORDER BY st.id_segment
         ";
 
