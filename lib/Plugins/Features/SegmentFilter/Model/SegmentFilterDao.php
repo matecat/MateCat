@@ -8,20 +8,20 @@
 
 namespace Features\SegmentFilter\Model;
 
+use Constants_SegmentTranslationsMatchType;
 use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
+use DataAccess_AbstractDao;
+use DataAccess_IDaoStruct;
 use Database;
 use Exception;
 use Jobs_JobStruct;
-use Model\Analysis\Constants\InternalMatchesConstants;
 
-class SegmentFilterDao extends AbstractDao {
+class SegmentFilterDao extends DataAccess_AbstractDao {
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
      * @return array
      */
@@ -67,7 +67,7 @@ class SegmentFilterDao extends AbstractDao {
             $where_data = [ 'status' => $filter->getSegmentStatus() ];
         }
 
-        return (object)[ 'sql' => $where, 'data' => $where_data ];
+        return (object) [ 'sql' => $where, 'data' => $where_data ];
     }
 
 
@@ -89,38 +89,38 @@ class SegmentFilterDao extends AbstractDao {
             switch ( $filter->sampleType() ) {
                 case 'mt':
                     $data = array_merge( $data, [
-                            'match_type' => InternalMatchesConstants::MT,
+                            'match_type' => Constants_SegmentTranslationsMatchType::MT,
                     ] );
                     break;
 
                 case 'matches':
                     $data = array_merge( $data, [
-                            'match_type_100_public' => InternalMatchesConstants::TM_100_PUBLIC,
-                            'match_type_100'        => InternalMatchesConstants::TM_100,
+                            'match_type_100_public' => Constants_SegmentTranslationsMatchType::_100_PUBLIC,
+                            'match_type_100'        => Constants_SegmentTranslationsMatchType::_100,
                     ] );
                     break;
 
                 case 'fuzzies_50_74':
                     $data = array_merge( $data, [
-                            'match_type' => InternalMatchesConstants::TM_50_74,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_50_74,
                     ] );
                     break;
 
                 case 'fuzzies_75_84':
                     $data = array_merge( $data, [
-                            'match_type' => InternalMatchesConstants::TM_75_84,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_75_84,
                     ] );
                     break;
 
                 case 'fuzzies_85_94':
                     $data = array_merge( $data, [
-                            'match_type' => InternalMatchesConstants::TM_85_94,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_85_94,
                     ] );
                     break;
 
                 case 'fuzzies_95_99':
                     $data = array_merge( $data, [
-                            'match_type' => InternalMatchesConstants::TM_95_99,
+                            'match_type' => Constants_SegmentTranslationsMatchType::_95_99,
                     ] );
                     break;
 
@@ -132,13 +132,14 @@ class SegmentFilterDao extends AbstractDao {
 
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_approved' => Constants_TranslationStatus::STATUS_APPROVED,
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
 
@@ -151,8 +152,8 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
      * @return object
      */
@@ -197,10 +198,10 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct   $chunk
-     * @param FilterDefinition $filter
+     * @param Jobs_JobStruct $chunk
+     * @param FilterDefinition   $filter
      *
-     * @return IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      * @throws Exception
      */
     public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
@@ -265,7 +266,7 @@ class SegmentFilterDao extends AbstractDao {
                 break;
 
             case 'todo':
-                $sql = self::getSqlForTodo( $where, $data );
+                $sql = self::getSqlForTodo( $where, $chunk->getIsReview(), $chunk->isSecondPassReview() );
                 break;
 
             default:
@@ -453,6 +454,7 @@ class SegmentFilterDao extends AbstractDao {
     }
 
 
+
     public static function getSqlForRepetition( $where ) {
 
         $sql = "
@@ -500,24 +502,17 @@ class SegmentFilterDao extends AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForToDo( $where, &$data ) {
+    public static function getSqlForToDo( $where, $isReview = false, $isSecondPassReview = false ) {
 
         $sql_condition = "";
-        $sql_sp        = "";
+        $sql_sp = "";
 
-        if ( array_key_exists( "status_translated", $data ) ) {
+        if($isReview) {
             $sql_condition = " OR st.status = :status_translated ";
         }
 
-        if ( array_key_exists( "status_approved", $data ) ) {
-            $sql_condition = " OR st.status = :status_approved ";
-        }
-
-        // Unset unneeded params for the query
-        if (strpos($sql_condition, "status_approved") !== false) {
-            unset($data['status_translated']);
-        } elseif (strpos($sql_condition, "status_translated") !== false) {
-            unset($data['status_approved']);
+        if($isSecondPassReview) {
+            $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
         }
 
         $sql = "
@@ -530,10 +525,10 @@ class SegmentFilterDao extends AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft " . $sql_condition . ")
+           OR st.status = :status_draft ".$sql_condition.")
            WHERE 1
-           " . $where->sql . "
-           " . $sql_sp . "
+           ".$where->sql."
+           ".$sql_sp."
            ORDER BY st.id_segment
         ";
 
