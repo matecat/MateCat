@@ -138,6 +138,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
+                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
                                 'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
@@ -265,7 +266,7 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
                 break;
 
             case 'todo':
-                $sql = self::getSqlForTodo( $where, $data );
+                $sql = self::getSqlForTodo( $where, $chunk->getIsReview(), $chunk->isSecondPassReview() );
                 break;
 
             default:
@@ -501,17 +502,17 @@ class SegmentFilterDao extends DataAccess_AbstractDao {
         return $sql;
     }
 
-    public static function getSqlForToDo( $where, $data ) {
+    public static function getSqlForToDo( $where, $isReview = false, $isSecondPassReview = false ) {
 
         $sql_condition = "";
         $sql_sp = "";
 
-        if(array_key_exists("status_translated", $data)) {
+        if($isReview) {
             $sql_condition = " OR st.status = :status_translated ";
         }
 
-        if(array_key_exists("status_approved", $data)) {
-            $sql_condition = " OR st.status = :status_approved ";
+        if($isSecondPassReview) {
+            $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
         }
 
         $sql = "
