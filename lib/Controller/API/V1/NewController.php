@@ -116,7 +116,7 @@ class NewController extends KleinController {
                 $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
 
                 if ( $ext == "zip" ) {
-                    // this makes the conversionhandler accumulate eventual errors on files and continue
+                    // this makes the ConversionHandler accumulate eventual errors on files and continue
                     $conversionHandler->setStopOnFileException( false );
                     $fileObjects = $conversionHandler->extractZipFile();
                     Log::doJsonLog( 'fileObjets', $fileObjects );
@@ -134,52 +134,55 @@ class NewController extends KleinController {
                             $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
                             $result->addError( $fileError->error[ 'message' ], $brokenFileName );
                         }
+                    }
 
-                        $realFileObjectInfo  = $fileObjects;
-                        $realFileObjectNames = array_map(
-                                [ 'ZipArchiveExtended', 'getFileName' ],
-                                $fileObjects
-                        );
+                    $realFileObjectInfo  = $fileObjects;
+                    $realFileObjectNames = array_map(
+                            [ 'ZipArchiveExtended', 'getFileName' ],
+                            $fileObjects
+                    );
 
-                        foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                            $__fileName     = $fileObject;
-                            $__realFileName = $realFileObjectInfo[ $i ];
-                            $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
+                    foreach ( $realFileObjectNames as $i => &$fileObject ) {
+                        $__fileName     = $fileObject;
+                        $__realFileName = $realFileObjectInfo[ $i ];
+                        $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
 
-                            $fileObject               = [
-                                    'name' => $__fileName,
-                                    'size' => $filesize
-                            ];
-                            $realFileObjectInfo[ $i ] = $fileObject;
-                        }
+                        $fileObject               = [
+                                'name' => $__fileName,
+                                'size' => $filesize
+                        ];
+                        $realFileObjectInfo[ $i ] = $fileObject;
+                    }
 
-                        $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                        $stdFileObjects                 = [];
+                    $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
+                    $stdFileObjects                 = [];
 
-                        if ( $fileObjects !== null ) {
-                            foreach ( $fileObjects as $fName ) {
+                    if ( $fileObjects !== null ) {
+                        foreach ( $fileObjects as $fName ) {
 
-                                if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                                    continue;
-                                }
-
-                                $newStdFile       = new stdClass();
-                                $newStdFile->name = $fName;
-                                $stdFileObjects[] = $newStdFile;
-
+                            if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
+                                continue;
                             }
-                        } else {
-                            $errors             = $conversionHandler->getResult();
-                            $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                            $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                            Log::doJsonLog( "Zip error:" . $result[ 'errors' ] );
 
-                            throw new RuntimeException( "Zip Error" );
+                            $newStdFile       = new stdClass();
+                            $newStdFile->name = $fName;
+                            $stdFileObjects[] = $newStdFile;
+
                         }
+                    } else {
+                        $errors             = $conversionHandler->getResult();
+                        $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
+                        $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
+                        Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
 
-                        /* Do conversions here */
+                        throw new RuntimeException( "Zip Error" );
+                    }
+
+                    /* Do conversions here */
+                    foreach ( $stdFileObjects as $stdFileObject ) {
+
                         $converter = new ConvertFile(
-                                $stdFileObjects,
+                                [ $stdFileObject->name ],
                                 $request[ 'source_lang' ],
                                 $request[ 'target_lang' ],
                                 $intDir,
@@ -212,8 +215,8 @@ class NewController extends KleinController {
                                     'errors' => $errors,
                             ];
                         }
-                    }
 
+                    }
                 } else {
                     $conversionHandler->processConversion();
                     $res = $conversionHandler->getResult();
@@ -289,7 +292,7 @@ class NewController extends KleinController {
             $projectStructure[ 'private_tm_key' ]           = $request[ 'private_tm_key' ];
             $projectStructure[ 'private_tm_user' ]          = $request[ 'private_tm_user' ];
             $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
-                $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
+            $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
             $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
             $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
             $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
@@ -317,12 +320,12 @@ class NewController extends KleinController {
             $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
             $projectManager->setTeam( $request[ 'team' ] );
 
-            $projectStructure[ 'ai_assistant' ]                 = (!empty($request[ 'ai_assistant' ])) ? $request[ 'ai_assistant' ] : null;
-            $projectStructure[ 'dictation' ]                    = (!empty($request[ 'dictation' ])) ? $request[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]              = (!empty($request[ 'show_whitespace' ])) ? $request[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter' ]            = (!empty($request[ 'character_counter' ])) ? $request[ 'character_counter' ] : null;
-            $projectStructure[ 'character_counter_mode' ]       = (!empty($request[ 'character_counter_mode' ])) ? $request[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ] = (!empty($request[ 'character_counter_count_tags' ])) ? $request[ 'character_counter_count_tags' ] : null;
+            $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
+            $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
+            $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
+            $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
+            $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
+            $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
             // mmtGlossaries
             if ( $request[ 'mmt_glossaries' ] ) {
@@ -802,11 +805,11 @@ class NewController extends KleinController {
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $json;
 
-                $validator  = new JSONValidator( $schema );
+                $validator = new JSONValidator( $schema );
                 $validator->validate( $validatorObject );
 
-                $privateTmKeyJsonObject = json_decode($json);
-                $tm_prioritization = $privateTmKeyJsonObject->tm_prioritization;
+                $privateTmKeyJsonObject = json_decode( $json );
+                $tm_prioritization      = $privateTmKeyJsonObject->tm_prioritization;
 
                 $private_tm_key = array_map(
                         function ( $item ) {
@@ -872,14 +875,14 @@ class NewController extends KleinController {
                     $private_tm_pass = $newUser->pass;
 
                     $private_tm_key[ $__key_idx ] =
-                        [
-                            'key'     => $newUser->key,
-                            'name'    => 'New resource created for project {{pid}}',
-                            'penalty' => $tm_key[ 'penalty' ] ?? null,
-                            'r'       => $tm_key[ 'r' ],
-                            'w'       => $tm_key[ 'w' ]
-                        ];
-                    $new_keys[] = $newUser->key;
+                            [
+                                    'key'     => $newUser->key,
+                                    'name'    => 'New resource created for project {{pid}}',
+                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'r'       => $tm_key[ 'r' ],
+                                    'w'       => $tm_key[ 'w' ]
+                            ];
+                    $new_keys[]                   = $newUser->key;
 
                 } catch ( Exception $e ) {
                     throw new Exception( $e->getMessage(), -1 );
