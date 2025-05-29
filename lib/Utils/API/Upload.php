@@ -58,12 +58,12 @@ class Upload {
     /**
      * Start loading instance
      *
-     * @param $filesToUpload
+     * @param array $filesToUpload
      *
      * @return stdClass
      * @throws Exception
      */
-    public function uploadFiles( $filesToUpload ) {
+    public function uploadFiles( array $filesToUpload ): stdClass {
 
         $result = new stdClass();
 
@@ -75,6 +75,17 @@ class Upload {
             throw new Exception ( "Too much files uploaded. Maximum value is " . INIT::$MAX_NUM_FILES );
         }
 
+        $uploadStruct = static::getUniformGlobalFilesStructure( $filesToUpload );
+        foreach ( $uploadStruct as $inputName => $file ) {
+            $result->{$inputName} = $this->_uploadFile( $file );
+        }
+
+        return $result;
+    }
+
+    public static function getUniformGlobalFilesStructure( array $filesToUpload ): stdClass {
+
+        $result = new stdClass();
         foreach ( $filesToUpload as $inputName => $file ) {
 
             if ( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ) {
@@ -86,16 +97,17 @@ class Upload {
                     $_file[ 'size' ]                = $file[ 'size' ][ $index ];
                     $_file[ 'type' ]                = $file[ 'type' ][ $index ];
                     $_file[ 'error' ]               = $file[ 'error' ][ $index ];
-                    $result->{$_file[ 'tmp_name' ]} = $this->_uploadFile( $_file );
+                    $result->{$_file[ 'tmp_name' ]} = $_file;
                 }
 
             } else {
-                $result->$inputName = $this->_uploadFile( $file );
+                $result->$inputName = $file;
             }
 
         }
 
         return $result;
+
     }
 
     /**
@@ -122,7 +134,7 @@ class Upload {
         $fileError   = $fileUp[ 'error' ];
         $fileSize    = $fileUp[ 'size' ];
 
-        if($fileSize == 0){
+        if ( $fileSize == 0 ) {
             throw new Exception ( __METHOD__ . " -> The file '$fileName' is empty." );
         }
 

@@ -153,22 +153,8 @@ function UploadFileLocal() {
               extractionParameterTemplateId,
             restarted_conversion: false,
           })
-            .then(({data, errors, warnings}) => {
+            .then(({data, warnings}) => {
               clearInterval(interval)
-              if (errors?.length > 0 && errors[0].code <= -14) {
-                setFiles((prevFiles) =>
-                  prevFiles.map((f) =>
-                    f.file === file
-                      ? {
-                          ...f,
-                          uploaded: false,
-                          error: errors[0].message,
-                        }
-                      : f,
-                  ),
-                )
-                return
-              }
               setUploadedFilesNames((prev) => prev.concat([name]))
               if (data.data.zipFiles) {
                 const zipFiles = JSON.parse(data.data.zipFiles)
@@ -207,8 +193,21 @@ function UploadFileLocal() {
               }
               CreateProjectActions.enableAnalyzeButton(true)
             })
-            .catch((e) => {
-              console.log(e)
+            .catch(({errors}) => {
+              if (errors?.length > 0 && errors[0].code <= -14) {
+                setFiles((prevFiles) =>
+                  prevFiles.map((f) =>
+                    f.file === file
+                      ? {
+                          ...f,
+                          uploaded: false,
+                          error: errors[0].message,
+                        }
+                      : f,
+                  ),
+                )
+                return
+              }
               setFiles((prevFiles) =>
                 prevFiles.map((f) =>
                   f.file === file
