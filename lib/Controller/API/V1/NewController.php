@@ -145,52 +145,55 @@ class NewController extends KleinController {
                         $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
                         $result->addError( $fileError->error[ 'message' ], $brokenFileName );
                     }
+                }
 
-                    $realFileObjectInfo  = $fileObjects;
-                    $realFileObjectNames = array_map(
-                            [ 'ZipArchiveExtended', 'getFileName' ],
-                            $fileObjects
-                    );
+                $realFileObjectInfo  = $fileObjects;
+                $realFileObjectNames = array_map(
+                        [ 'ZipArchiveExtended', 'getFileName' ],
+                        $fileObjects
+                );
 
-                    foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                        $__fileName     = $fileObject;
-                        $__realFileName = $realFileObjectInfo[ $i ];
-                        $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
+                foreach ( $realFileObjectNames as $i => &$fileObject ) {
+                    $__fileName     = $fileObject;
+                    $__realFileName = $realFileObjectInfo[ $i ];
+                    $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
 
-                        $fileObject               = [
-                                'name' => $__fileName,
-                                'size' => $filesize
-                        ];
-                        $realFileObjectInfo[ $i ] = $fileObject;
-                    }
+                    $fileObject               = [
+                            'name' => $__fileName,
+                            'size' => $filesize
+                    ];
+                    $realFileObjectInfo[ $i ] = $fileObject;
+                }
 
-                    $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                    $stdFileObjects                 = [];
+                $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
+                $stdFileObjects                 = [];
 
-                    if ( $fileObjects !== null ) {
-                        foreach ( $fileObjects as $fName ) {
+                if ( $fileObjects !== null ) {
+                    foreach ( $fileObjects as $fName ) {
 
-                            if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                                continue;
-                            }
-
-                            $newStdFile       = new stdClass();
-                            $newStdFile->name = $fName;
-                            $stdFileObjects[] = $newStdFile;
-
+                        if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
+                            continue;
                         }
-                    } else {
-                        $errors             = $conversionHandler->getResult();
-                        $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                        $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                        Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
 
-                        throw new RuntimeException( "Zip Error" );
+                        $newStdFile       = new stdClass();
+                        $newStdFile->name = $fName;
+                        $stdFileObjects[] = $newStdFile;
+
                     }
+                } else {
+                    $errors             = $conversionHandler->getResult();
+                    $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
+                    $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
+                    Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
 
-                    /* Do conversions here */
+                    throw new RuntimeException( "Zip Error" );
+                }
+
+                /* Do conversions here */
+                foreach ( $stdFileObjects as $stdFileObject ) {
+
                     $converter = new ConvertFile(
-                            $stdFileObjects,
+                            [ $stdFileObject->name ],
                             $request[ 'source_lang' ],
                             $request[ 'target_lang' ],
                             $intDir,
@@ -223,8 +226,8 @@ class NewController extends KleinController {
                                 'errors' => $errors,
                         ];
                     }
-                }
 
+                }
             } else {
                 $conversionHandler->processConversion();
                 $res = $conversionHandler->getResult();
@@ -872,7 +875,8 @@ class NewController extends KleinController {
 
         //If a TMX file has been uploaded and no key was provided, create a new key.
         if ( empty( $private_tm_key ) ) {
-            foreach ( $_FILES as $_fileinfo ) {
+            $uniformedFileObject = Upload::getUniformGlobalFilesStructure( $_FILES );
+            foreach ( $uniformedFileObject as $_fileinfo ) {
                 $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $private_tm_key[] = [ 'key' => 'new' ];

@@ -376,7 +376,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::INVALID_FILE );
                 $this->result->addError( $e->getMessage() );
 
-                return null;
+                return [];
             }
 
             return array_map( function ( $fileName ) use ( $uploadFile ) {
@@ -390,7 +390,7 @@ class ConversionHandler {
             $this->result->changeCode( $e->getCode() );
             $this->result->addError( "Zip error: " . $e->getMessage(), $this->file_name );
 
-            return null;
+            return [];
         }
 
     }

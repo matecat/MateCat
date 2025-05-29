@@ -251,7 +251,7 @@ class ConvertFileController extends KleinController {
                     $this->data[ 'segmentation_rule' ],
                     $this->featureSet,
                     $this->data[ 'filters_extraction_parameters' ],
-                    true
+                    false
             );
 
             $convertFile->convertFiles();
