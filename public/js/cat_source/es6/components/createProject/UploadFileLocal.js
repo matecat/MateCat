@@ -194,7 +194,7 @@ function UploadFileLocal() {
               CreateProjectActions.enableAnalyzeButton(true)
             })
             .catch(({errors}) => {
-              if (errors?.length > 0 && errors[0].code <= -14) {
+              if (errors?.length > 0) {
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
                     f.file === file
