@@ -1221,7 +1221,10 @@ class NewController extends KleinController {
             $validator = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            return json_decode( $json );
+            $config = new FiltersConfigTemplateStruct();
+            $config->hydrateAllDto( json_decode( $json, true ) );
+
+            return $config;
 
         }
 
