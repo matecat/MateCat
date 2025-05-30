@@ -1,11 +1,10 @@
 <?php
 
-namespace Analysis\Workers;
+namespace AsyncTasks\Workers\Analysis;
 
 use AMQHandler;
 use Analysis\PayableRates as PayableRates;
-use Analysis\Queue\RedisKeys;
-use Constants_ProjectStatus;
+use AsyncTasks\Workers\Traits\ProjectWordCount;
 use Constants_ProjectStatus as ProjectStatus;
 use Database;
 use Engine;
@@ -31,6 +30,7 @@ use ReflectionException;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
 use TaskRunner\Commons\Context;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
@@ -117,7 +117,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             $this->queueHandler = new AMQHandler();
-            $this->queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+            $this->queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, [ $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID ] );
 
             $this->_updateConfiguration();
 
@@ -715,15 +715,15 @@ class FastAnalysis extends AbstractDaemon {
                             $queue_element[ 'dialect_strict' ] = $dialect_strict->value == 1;
                         }
 
-                        $queue_element[ 'mt_qe_workflow_enabled' ]    = $mt_qe_workflow_enabled ?? false;
+                        $queue_element[ 'mt_qe_workflow_enabled' ] = $mt_qe_workflow_enabled ?? false;
                         if ( $mt_qe_workflow_enabled ) {
                             $queue_element[ 'mt_qe_workflow_parameters' ] = $mt_qe_workflow_parameters;
                         }
                         $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor ?? false;
 
                         $element            = new QueueElement();
-                        $element->params    = $queue_element;
-                        $element->classLoad = '\Analysis\Workers\TMAnalysisWorker';
+                        $element->params    = new Params( $queue_element );
+                        $element->classLoad = '\AsyncTasks\Workers\Analysis\TMAnalysisWorker';
 
                         $this->queueHandler->publishToQueues( $queueInfo->queue_name, new Message( $element, [ 'persistent' => $this->queueHandler->persistent ] ) );
                         $this->_logTimeStampedMsg( "AMQ Set Executed " . ( $k + 1 ) . " Language: $language" );
@@ -914,7 +914,7 @@ HD;
      */
     protected function _getLockProjectForVolumeAnalysis( int $limit = 1 ) {
 
-        $bindParams = [ 'project_status' => Constants_ProjectStatus::STATUS_NEW ];
+        $bindParams = [ 'project_status' => ProjectStatus::STATUS_NEW ];
 
         $and_InstanceId = null;
         if ( !is_null( INIT::$INSTANCE_ID ) ) {
@@ -949,7 +949,7 @@ HD;
                 $this->queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );
 
                 try {
-                    $this->_updateProject( $project[ 'id' ], Constants_ProjectStatus::STATUS_BUSY );
+                    $this->_updateProject( $project[ 'id' ], ProjectStatus::STATUS_BUSY );
                 } catch ( PDOException $ex ) {
                     $this->queueHandler->getRedisClient()->del( '_fPid:' . $project[ 'id' ] );
                 }

@@ -11,6 +11,7 @@ namespace Translators;
 
 
 use DataAccess\AbstractDao;
+use ReflectionException;
 
 class TranslatorsProfilesDao extends AbstractDao {
 
@@ -33,15 +34,16 @@ class TranslatorsProfilesDao extends AbstractDao {
      * @param TranslatorProfilesStruct $profile
      *
      * @return TranslatorProfilesStruct
+     * @throws ReflectionException
      * @internal param $id
      *
      */
-    public function getByProfile( TranslatorProfilesStruct $profile ) {
+    public function getByProfile( TranslatorProfilesStruct $profile ): ?TranslatorProfilesStruct {
 
         $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
 
-        return @$this->_fetchObject( $stmt,
-                $profile,
+        $result = $this->_fetchObjectMap( $stmt,
+                get_class( $profile ),
                 [
                         'uid_translator' => $profile->uid_translator,
                         'source'         => $profile->source,
@@ -49,7 +51,10 @@ class TranslatorsProfilesDao extends AbstractDao {
                         'is_revision'    => $profile->is_revision,
 
                 ]
-        )[ 0 ];
+        )[ 0 ] ?? null;
+
+        /** @var TranslatorProfilesStruct $result */
+        return $result;
     }
 
 }

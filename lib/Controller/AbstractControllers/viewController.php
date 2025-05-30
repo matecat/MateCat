@@ -8,6 +8,9 @@ use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
 use ConnectedServices\ProviderInterface;
 
+/**
+ * @deprecated
+ */
 abstract class viewController extends controller {
 
     /**

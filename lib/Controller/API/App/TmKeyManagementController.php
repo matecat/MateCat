@@ -34,8 +34,8 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      */
     public function getByJob() {
 
-        $idJob    = $this->request->id_job;
-        $password = $this->request->password;
+        $idJob    = $this->request->param( 'id_job' );
+        $password = $this->request->param( 'password' );
 
         $chunk = CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 

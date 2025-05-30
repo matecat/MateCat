@@ -10,6 +10,7 @@
 namespace API\V2\Json;
 
 use Projects_ProjectStruct;
+use ReflectionException;
 
 class ProjectAnonymous extends Project {
 
@@ -30,7 +31,7 @@ class ProjectAnonymous extends Project {
      *
      * @return $this
      */
-    public function setCalledFromApi( $called_from_api ) {
+    public function setCalledFromApi( bool $called_from_api ): Project {
         return $this;
     }
 
@@ -38,10 +39,9 @@ class ProjectAnonymous extends Project {
      * @param $project Projects_ProjectStruct
      *
      * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
      */
-    public function renderItem( Projects_ProjectStruct $project ) {
+    public function renderItem( Projects_ProjectStruct $project ): array {
 
         $projectOutputFields = parent::renderItem( $project );
         unset( $projectOutputFields[ 'id_team' ] );

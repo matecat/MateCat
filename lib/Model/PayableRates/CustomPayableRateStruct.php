@@ -11,7 +11,7 @@ use Exception;
 use JsonSerializable;
 use Langs\Languages;
 
-class CustomPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
+class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
 
     public $id;

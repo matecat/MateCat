@@ -11,7 +11,6 @@ namespace LexiQA;
 
 
 use Exception;
-use FeatureSet;
 use INIT;
 use PHPTAL;
 use ProjectOptionsSanitizer;
@@ -52,12 +51,12 @@ class LexiQADecorator {
 
         if ( INIT::$LXQ_LICENSE ) {
             //LEXIQA license key
-            $this->template->lxq_license      = INIT::$LXQ_LICENSE;
-            $this->template->lxq_partnerid    = INIT::$LXQ_PARTNERID;
-            $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
+            $this->template->{'lxq_license'}      = INIT::$LXQ_LICENSE;
+            $this->template->{'lxq_partnerid'}    = INIT::$LXQ_PARTNERID;
+            $this->template->{'lexiqa_languages'} = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 
-        $this->template->lexiqaServer = $this->lexiqa_server;
+        $this->template->{'lexiqaServer'} = $this->lexiqa_server;
 
     }
 
@@ -79,11 +78,9 @@ class LexiQADecorator {
      * Check if the feature is enabled in the matecat installation according to the
      * given preloaded featureSet. In fact, some Features exclude LexiQA.
      *
-     * @param FeatureSet $featureSet
-     *
      * @return $this
      */
-    public function featureEnabled( FeatureSet $featureSet ): LexiQADecorator {
+    public function featureEnabled(): LexiQADecorator {
 
         if ( !INIT::$LXQ_LICENSE ) {
             $this->lexiqa_enabled = false;

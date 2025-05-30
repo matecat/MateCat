@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+namespace Views\OutsourceTo;
 
 use Outsource\TranslatedConfirmationStruct;
 
@@ -16,23 +17,23 @@ use Outsource\TranslatedConfirmationStruct;
  * Time: 12.23
  *
  */
-class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSuccessController {
+class TranslatedCallbackController extends AbstractController {
 
     /**
      * Redirect page to review the order
      *
-     * @see OutsourceTo_AbstractSuccessController::$review_order_page
+     * @see AbstractController::$review_order_page
      * @var string
      */
-    protected $review_order_page = 'https://signin.translated.net/review.php';
+    protected string $review_order_page = 'https://signin.translated.net/review.php';
 
     /**
      * Token key name for the authentication return
      *
-     * @see OutsourceTo_AbstractSuccessController::$tokenName
+     * @see AbstractController::$tokenName
      * @var string
      */
-    protected $tokenName = 'tk';
+    protected string $tokenName = 'tk';
 
     /**
      * Key that holds extra info
@@ -40,16 +41,16 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      * @see extraInfoName::$extra_info
      * @var string
      */
-    protected $dataKeyName = 'data_key';
+    protected string $dataKeyName = 'data_key';
 
     /**
-     * @var int
+     * @var int|null
      */
-    protected $id_vendor = TranslatedConfirmationStruct::VENDOR_ID;
+    protected ?int $id_vendor = TranslatedConfirmationStruct::VENDOR_ID;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $vendor_name = TranslatedConfirmationStruct::VENDOR_NAME;
+    protected ?string $vendor_name = TranslatedConfirmationStruct::VENDOR_NAME;
 
 }

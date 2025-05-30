@@ -10,7 +10,10 @@
 namespace API\V2\Json;
 
 
+use Exception;
+use FeatureSet;
 use Jobs_JobStruct;
+use Projects_ProjectStruct;
 use Users_UserStruct;
 
 class JobAnonymous extends Job {
@@ -20,7 +23,7 @@ class JobAnonymous extends Job {
      *
      * @return $this|Job
      */
-    public function setUser( Users_UserStruct $user = null ) {
+    public function setUser( Users_UserStruct $user = null ): Job {
         return $this;
     }
 
@@ -29,20 +32,20 @@ class JobAnonymous extends Job {
      *
      * @return $this
      */
-    public function setCalledFromApi( bool $called_from_api ) {
+    public function setCalledFromApi( bool $called_from_api ): Job {
         return $this;
     }
 
     /**
      * @param                         $chunk Jobs_JobStruct
      *
-     * @param \Projects_ProjectStruct $project
-     * @param \FeatureSet             $featureSet
+     * @param Projects_ProjectStruct $project
+     * @param FeatureSet             $featureSet
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, \Projects_ProjectStruct $project, \FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $jobJson = parent::renderItem( $chunk, $project, $featureSet );
 

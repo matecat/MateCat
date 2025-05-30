@@ -54,7 +54,7 @@ class DownloadQRController extends BaseChunkController {
             $this->response->json( [
                     'errors' => [
                             'code' => 0,
-                            'message' => 'Invalid format. Allowed formats are ['.implode($this->allowedFormats, ', ').']'
+                            'message' => 'Invalid format. Allowed formats are ['.implode( ', ', $this->allowedFormats ).']'
                     ]
             ] );
             exit();

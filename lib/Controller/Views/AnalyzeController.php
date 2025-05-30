@@ -38,8 +38,8 @@ class AnalyzeController extends BaseKleinViewController implements IController {
      *
      * That token will be sent back to the review/confirm page on the provider website to grant it logged
      *
-     * The success Page must be set in the concrete subclass of "OutsourceTo_AbstractProvider"
-     *  Ex: "OutsourceTo_Translated"
+     * The success Page must be set in the concrete subclass of "AbstractProvider"
+     *  Ex: "OutsourceTo\Translated"
      *
      *
      * Values from the quote result will be posted there anyway.

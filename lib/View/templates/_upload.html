@@ -26,37 +26,23 @@
       var config = {
         basepath: '${basepath | string:/}',
         hostpath: '${hostpath | string:/}',
-        unsupportedFileTypes: '${unsupported_file_types}',
-        isOpenAiEnabled: ${isOpenAiEnabled},
         conversionEnabled: ${conversion_enabled},
         analysisEnabled: ${volume_analysis_enabled},
         maxFileSize: ${maxFileSize},
         maxTMXFileSize: ${maxTMXFileSize},
         maxNumberFiles: ${maxNumberFiles},
         ownerIsMe: true,
-        blueimp_dataType: 'json',
-        defaults : {
-          tag_projection : ${tag_projection_default},
-          speech2text : false,
-          lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
-        },
         lxq_license: '${lxq_license | string:}',
         lexiqa_languages: ${lexiqa_languages| string:[]},
         tag_projection_languages: ${tag_projection_languages},
         user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-        private_keys: ${user_keys_obj | string: []},
-        currentTargetLang: '${currentTargetLang | string: []}',
-        currentSourceLang: '${currentSourceLang | string: []}',
         enableMultiDomainApi: ${enableMultiDomainApi | string:false},
         ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-        subject_array: ${subjects | string:[]]},
+        subject_array: ${subjects | string:[]},
         formats_number: ${formats_number},
         isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-        not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
         intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
-        show_tag_projection: ${show_tag_projection | string: false},
-        get_public_matches: ${get_public_matches | string: false}
-      };
+      }
       /*]]>*/
     </script>
 </head>

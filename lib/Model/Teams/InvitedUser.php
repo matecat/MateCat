@@ -26,6 +26,9 @@ class InvitedUser {
 
     protected $response;
 
+    /**
+     * @throws ValidationError
+     */
     public function __construct( $jwt, Response $response ) {
 
         try {

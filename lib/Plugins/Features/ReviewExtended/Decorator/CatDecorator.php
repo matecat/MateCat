@@ -34,25 +34,25 @@ class CatDecorator extends \AbstractDecorator {
          * TODO: remove this lqa_categories here, this serialization work should be done
          * on the client starting from raw category records.
          */
-        $this->template->lqa_categories = (null !== $model ) ? $model->getSerializedCategories() : null;
-        $this->template->lqa_flat_categories  = (null !== $model ) ? $this->getCategoriesAsJson( $model ) : '';
+        $this->template->{'lqa_categories'} = (null !== $model ) ? $model->getSerializedCategories() : null;
+        $this->template->{'lqa_flat_categories'}  = (null !== $model ) ? $this->getCategoriesAsJson( $model ) : '';
 
-        $this->template->review_type          = 'extended';
-        $this->template->review_extended      = true;
-        $this->template->segmentFilterEnabled = true;
+        $this->template->{'review_type'}          = 'extended';
+        $this->template->{'review_extended'}      = true;
+        $this->template->{'segmentFilterEnabled'} = true;
 
-        $this->template->quality_report_href = INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
+        $this->template->{'quality_report_href'} = INIT::$BASEURL . "revise-summary/{$this->controller->getChunk()->id}-{$this->controller->getChunk()->password}";
 
-        $this->template->showReplaceOptionsInSearch = true;
+        $this->template->{'showReplaceOptionsInSearch'} = true;
 
-        $this->template->overall_quality_class = $this->getOverallQualityClass();
+        $this->template->{'overall_quality_class'} = $this->getOverallQualityClass();
 
         $secondRevisions = ChunkReviewDao::findSecondRevisionsChunkReviewsByChunkIds( [ [
                 $this->controller->getChunk()->id,
                 $this->controller->getChunk()->password
         ] ]  ) ;
 
-        $this->template->secondRevisionsCount = count( $secondRevisions );
+        $this->template->{'secondRevisionsCount'} = count( $secondRevisions );
 
         $this->assignCatDecorator();
     }
@@ -68,7 +68,7 @@ class CatDecorator extends \AbstractDecorator {
          * override review_password
          */
         $chunk_review                    = ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $this->controller->getChunk() )[ 0 ];
-        $this->template->review_password = $chunk_review->review_password;
+        $this->template->{'review_password'} = $chunk_review->review_password;
 
     }
 

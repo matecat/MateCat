@@ -22,7 +22,7 @@ trait AuthenticationTrait {
 
     protected ?ApiKeys_ApiKeyStruct $api_record = null;
     protected bool                  $userIsLogged;
-    protected ?Users_UserStruct     $user       = null;
+    protected Users_UserStruct      $user;
 
     /**
      * @var ?string
@@ -88,7 +88,7 @@ trait AuthenticationTrait {
     /**
      * @return ?Users_UserStruct
      */
-    public function getUser(): ?Users_UserStruct {
+    public function getUser(): Users_UserStruct {
         return $this->user;
     }
 
