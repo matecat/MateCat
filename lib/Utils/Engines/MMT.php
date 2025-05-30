@@ -5,7 +5,6 @@ use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
 use Features\Mmt;
 use Jobs\MetadataDao;
-use TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.
@@ -24,7 +23,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      */
     protected bool $_isAdaptiveMT = true;
 
-    protected $_config = [
+    protected array $_config = [
             'segment'        => null,
             'translation'    => null,
             'newsegment'     => null,
@@ -39,14 +38,9 @@ class Engines_MMT extends Engines_AbstractEngine {
     ];
 
     /**
-     * @var array
-     */
-    protected $_head_parameters = [];
-
-    /**
      * @var bool
      */
-    protected $_skipAnalysis = true;
+    protected bool $_skipAnalysis = true;
 
     public function __construct( $engineRecord ) {
 
@@ -63,21 +57,11 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * MMT exception name from tag_projection call
-     * @see Engines_MMT::_decode
-     */
-    const LanguagePairNotSupportedException = 1;
-
-    protected static $_supportedExceptions = [
-            'LanguagePairNotSupportedException' => self::LanguagePairNotSupportedException
-    ];
-
-    /**
      * Get MMTServiceApi client
      *
      * @return MMTServiceApi
      */
-    protected function _getClient() {
+    protected function _getClient(): MMTServiceApi {
 
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $license     = $extraParams[ 'MMT-License' ];
@@ -104,6 +88,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      *
      * @return array|Engines_Results_AbstractResponse
      * @throws ReflectionException
+     * @throws Exception
      */
     public function get( $_config ) {
 
@@ -129,7 +114,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
         }
 
-        $_config = $this->configureAnalysisContribution($_config);
+        $_config = $this->configureAnalysisContribution( $_config );
 
         try {
             $translation = $client->translate(
@@ -144,18 +129,19 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $_config[ 'session' ] ?? null,
                     $_config[ 'glossaries' ] ?? null,
                     $_config[ 'ignore_glossary_case' ] ?? null,
-                    $_config[ 'include_score' ] ?? null
+                    $_config[ 'include_score' ] ?? null,
+                    $_config[ 'mt_qe_engine_id' ] ?? '2'
             );
 
-            return ( new Engines_Results_MyMemory_Matches([
-                'source' => $_config[ 'source' ],
-                'target' => $_config[ 'target' ],
-                'raw_segment' => $_config[ 'segment' ],
-                'raw_translation' => $translation[ 'translation' ],
-                'match' => $this->getStandardPenalty(),
-                'created-by' => $this->getMTName(),
-                'create-date' => date( "Y-m-d" ),
-                'score' => $translation[ 'score' ] ?? null
+            return ( new Engines_Results_MyMemory_Matches( [
+                    'source'          => $_config[ 'source' ],
+                    'target'          => $_config[ 'target' ],
+                    'raw_segment'     => $_config[ 'segment' ],
+                    'raw_translation' => $translation[ 'translation' ],
+                    'match'           => $this->getStandardPenaltyString(),
+                    'created-by'      => $this->getMTName(),
+                    'create-date'     => date( "Y-m-d" ),
+                    'score'           => $translation[ 'score' ] ?? null
             ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
 
         } catch ( Exception $e ) {
@@ -415,7 +401,7 @@ class Engines_MMT extends Engines_AbstractEngine {
      * @internal param array $langPairs
      *
      */
-    protected function getContext( SplFileObject $file, $source, $targets ) {
+    protected function getContext( SplFileObject $file, string $source, array $targets ): ?array {
 
         $fileName = $file->getRealPath();
         $file->rewind();
@@ -488,50 +474,14 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $rawValue
+     * @param       $rawValue
+     * @param array $parameters
+     * @param null  $function
      *
-     * @return Engines_Results_AbstractResponse
+     * @return void
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
-
-        $args         = func_get_args();
-        $functionName = $args[ 2 ];
-
-        if ( is_string( $rawValue ) ) {
-            $decoded = json_decode( $rawValue, true );
-        } else {
-
-            if ( $rawValue[ 'responseStatus' ] >= 400 ) {
-                $_rawValue = json_decode( $rawValue[ 'error' ][ 'response' ], true );
-                foreach ( self::$_supportedExceptions as $exception => $code ) {
-                    if ( stripos( $rawValue[ 'error' ][ 'response' ], $exception ) !== false ) {
-                        $_rawValue[ 'error' ][ 'code' ] = @constant( 'self::' . $rawValue[ 'error' ][ 'type' ] );
-                        break;
-                    }
-                }
-                $rawValue = $_rawValue;
-            }
-
-            $decoded = $rawValue; // already decoded in case of error
-
-        }
-
-        switch ( $functionName ) {
-            default:
-                //this case should not be reached
-                $result_object = Engines_Results_MMT_ExceptionError::getInstance( [
-                        'error'          => [
-                                'code'     => -1100,
-                                'message'  => " Unknown Error.",
-                                'response' => " Unknown Error." // Some useful info might still be contained in the response body
-                        ],
-                        'responseStatus' => 400
-                ] ); //return generic error
-                break;
-        }
-
-        return $result_object;
-
+        // Not used since MMT works with an external client
     }
 
     /**
@@ -652,48 +602,41 @@ class Engines_MMT extends Engines_AbstractEngine {
         if ( !empty( $memory ) && $memory[ 'owner' ][ 'user' ] == $me[ 'id' ] ) {
             return $memory;
         }
+
         return null;
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
+     *
      * @return float|null
      * @throws MMTServiceApiException
      */
-    public function getQualityEstimation($source, $target, $sentence, $translation): ?float
-    {
-        $client = $this->_getClient();
-        $qualityEstimation = $client->qualityEstimation($source, $target, $sentence, $translation);
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = '2' ): ?float {
+        $client            = $this->_getClient();
+        $qualityEstimation = $client->qualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
 
-        return $qualityEstimation['score'];
+        return $qualityEstimation[ 'score' ];
     }
 
     /**
      * @param $config
+     *
      * @return mixed
      */
-    private function configureAnalysisContribution($config)
-    {
-        $id_job        = $config[ 'job_id' ] ?? null;
-        $mt_evaluation = $config[ 'mt_evaluation' ] ?? null;
+    private function configureAnalysisContribution( $config ) {
+        $id_job = $config[ 'job_id' ] ?? null;
 
-        if($id_job and $this->_isAnalysis){
+        if ( $id_job and $this->_isAnalysis ) {
             $contextRs  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_context' );
             $mt_context = @array_pop( $contextRs );
 
             if ( !empty( $mt_context ) ) {
                 $config[ 'mt_context' ] = $mt_context->value;
-            }
-
-            if ( empty( $mt_evaluation ) ) {
-                $mt_evaluation  = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $id_job, 'mt_evaluation' );
-            }
-
-            if ( $mt_evaluation ) {
-                $config[ 'include_score' ] = true;
             }
 
             $config[ 'secret_key' ] = Mmt::getG2FallbackSecretKey();

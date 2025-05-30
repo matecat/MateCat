@@ -29,7 +29,7 @@ export const addMTEngine = async ({name, provider, dataMt}) => {
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {
       const data = await response.json()
-      return Promise.reject({response, errors: data.errors ?? data})
+      return Promise.reject({response, errors: data.errors[0] ?? data})
     } else {
       return Promise.reject({response})
     }

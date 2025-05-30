@@ -9,19 +9,29 @@
 namespace ConnectedServices;
 
 
+use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
-use API\Commons\AbstractStatefulKleinController;
+use API\Commons\Validators\LoginValidator;
 use ConnectedServices\Google\GoogleProvider;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;
+use Utils;
 
 class ConnectedServicesController extends AbstractStatefulKleinController {
 
     /**
-     * @var ConnectedServiceStruct
+     * @var ?ConnectedServiceStruct
      */
-    protected $service;
+    protected ?ConnectedServiceStruct $connectedServiceStruct = null;
+
+    /**
+     * @return void
+     */
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
 
     /**
      * @throws NotFoundException
@@ -30,7 +40,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     public function verify() {
         $this->__validateOwnership();
 
-        if ( $this->service->service == ConnectedServiceDao::GDRIVE_SERVICE ) {
+        if ( $this->connectedServiceStruct->service == ConnectedServiceDao::GDRIVE_SERVICE ) {
             $this->__handleGDrive();
         }
     }
@@ -47,24 +57,24 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
         ] );
 
         if ( $params[ 'disabled' ] ) {
-            $this->service->disabled_at = \Utils::mysqlTimestamp( time() );
+            $this->connectedServiceStruct->disabled_at = Utils::mysqlTimestamp( time() );
         } else {
-            $this->service->disabled_at = null;
+            $this->connectedServiceStruct->disabled_at = null;
         }
 
-        ConnectedServiceDao::updateStruct( $this->service, [ 'fields'=> [ 'disabled_at' ] ] );
+        ConnectedServiceDao::updateStruct( $this->connectedServiceStruct, [ 'fields' => [ 'disabled_at' ] ] );
 
         $this->refreshClientSessionIfNotApi();
 
         $formatter = new ConnectedService( [] );
-        $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->service ) ] );
+        $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->connectedServiceStruct ) ] );
     }
 
     /**
      * @throws Exception
      */
     private function __handleGDrive() {
-        $verifier = new GDriveTokenVerifyModel( $this->service );
+        $verifier = new GDriveTokenVerifyModel( $this->connectedServiceStruct );
 
         $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
@@ -83,16 +93,11 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
      */
     private function __validateOwnership() {
 
-        // check for the user to be logged
-        if ( !$this->user ) {
-            throw new NotFoundException( 'user not found' );
-        }
+        $serviceDao                   = new ConnectedServiceDao();
+        $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId( $this->user, $this->request->param( 'id_service' ) );
 
-        $serviceDao    = new ConnectedServiceDao();
-        $this->service = $serviceDao->findServiceByUserAndId( $this->user, $this->request->param( 'id_service' ) );
-
-        if ( !$this->service ) {
-            throw new NotFoundException( 'service not found' );
+        if ( !$this->connectedServiceStruct ) {
+            throw new NotFoundException( 'connectedServiceStruct not found' );
         }
     }
 }

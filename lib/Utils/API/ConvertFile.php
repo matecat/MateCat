@@ -5,8 +5,7 @@ use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use Langs\Languages;
 
-class ConvertFile
-{
+class ConvertFile {
     private $file_name;
     private $source_lang;
     private $target_lang;
@@ -44,75 +43,72 @@ class ConvertFile
 
     /**
      * ConvertFile constructor.
-     * @param $files
-     * @param $source_lang
-     * @param $target_lang
-     * @param $intDir
-     * @param $errDir
-     * @param $cookieDir
-     * @param $segmentation_rule
+     *
+     * @param            $files
+     * @param            $source_lang
+     * @param            $target_lang
+     * @param            $intDir
+     * @param            $errDir
+     * @param            $cookieDir
+     * @param            $segmentation_rule
      * @param FeatureSet $featureSet
-     * @param $filters_extraction_parameters
-     * @param bool $convertZipFile
+     * @param            $filters_extraction_parameters
+     * @param bool       $convertZipFile
      */
     public function __construct(
-        $files,
-        $source_lang,
-        $target_lang,
-        $intDir,
-        $errDir,
-        $cookieDir,
-        $segmentation_rule,
-        FeatureSet $featureSet,
-        $filters_extraction_parameters = null,
-        $convertZipFile = true
-    )
-    {
-        $this->lang_handler = Languages::getInstance();
-        $this->files = $files;
+            $files,
+            $source_lang,
+            $target_lang,
+            $intDir,
+            $errDir,
+            $cookieDir,
+            $segmentation_rule,
+            FeatureSet $featureSet,
+            $filters_extraction_parameters = null,
+            $convertZipFile = true
+    ) {
+        $this->lang_handler   = Languages::getInstance();
+        $this->files          = $files;
         $this->convertZipFile = $convertZipFile;
-        $this->setSourceLang($source_lang);
-        $this->setTargetLangs($target_lang);
-        $this->intDir = $intDir;
-        $this->errDir = $errDir;
-        $this->cookieDir = $cookieDir;
-        $this->segmentation_rule = $segmentation_rule;
-        $this->featureSet = $featureSet;
+        $this->setSourceLang( $source_lang );
+        $this->setTargetLangs( $target_lang );
+        $this->intDir                        = $intDir;
+        $this->errDir                        = $errDir;
+        $this->cookieDir                     = $cookieDir;
+        $this->segmentation_rule             = $segmentation_rule;
+        $this->featureSet                    = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
     /**
      * @param Users_UserStruct $user
      */
-    public function setUser( Users_UserStruct $user )
-    {
+    public function setUser( Users_UserStruct $user ) {
         $this->user = $user;
     }
 
     /**
      * @param $source_lang
      */
-    private function setSourceLang($source_lang): void
-    {
+    private function setSourceLang( $source_lang ): void {
         try {
             $this->lang_handler->validateLanguage( $source_lang );
             $this->source_lang = $source_lang;
         } catch ( Exception $e ) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::SOURCE_ERROR);
+            throw new InvalidArgumentException( $e->getMessage(), ConversionHandlerStatus::SOURCE_ERROR );
         }
     }
 
     /**
      * @param $target_lang
      */
-    private function setTargetLangs($target_lang): void
-    {
+    private function setTargetLangs( $target_lang ): void {
         $targets = explode( ',', $target_lang );
         $targets = array_map( 'trim', $targets );
         $targets = array_unique( $targets );
 
         if ( empty( $targets ) ) {
-            throw new InvalidArgumentException("Missing target language.");
+            throw new InvalidArgumentException( "Missing target language." );
         }
 
         try {
@@ -121,7 +117,7 @@ class ConvertFile
             }
 
         } catch ( Exception $e ) {
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::TARGET_ERROR);
+            throw new InvalidArgumentException( $e->getMessage(), ConversionHandlerStatus::TARGET_ERROR );
         }
 
         $this->target_lang = implode( ',', $targets );
@@ -131,10 +127,9 @@ class ConvertFile
      * @return array
      * @throws Exception
      */
-    public function convertFiles(): array
-    {
-        foreach ($this->files as $fileName ) {
-            $this->file_name = $fileName;
+    public function convertFiles(): array {
+        foreach ( $this->files as $fileName ) {
+            $this->file_name     = $fileName;
             $this->resultStack[] = $this->convertFile();
         }
 
@@ -145,22 +140,21 @@ class ConvertFile
      * @return ConvertedFileModel
      * @throws Exception
      */
-    private function convertFile(): ?ConvertedFileModel
-    {
+    private function convertFile(): ?ConvertedFileModel {
         $result = new ConvertedFileModel();
 
         try {
             $this->segmentation_rule = Constants::validateSegmentationRules( $this->segmentation_rule );
-        } catch ( Exception $e ){
-            throw new InvalidArgumentException($e->getMessage(), ConversionHandlerStatus::INVALID_SEGMENTATION_RULE);
+        } catch ( Exception $e ) {
+            throw new InvalidArgumentException( $e->getMessage(), ConversionHandlerStatus::INVALID_SEGMENTATION_RULE );
         }
 
         if ( !Utils::isTokenValid( $this->cookieDir ) ) {
-            throw new InvalidArgumentException("Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN);
+            throw new InvalidArgumentException( "Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN );
         }
 
         if ( !Utils::isValidFileName( $this->file_name ) || empty( $this->file_name ) ) {
-            throw new InvalidArgumentException("Invalid File.", ConversionHandlerStatus::INVALID_FILE);
+            throw new InvalidArgumentException( "Invalid File.", ConversionHandlerStatus::INVALID_FILE );
         }
 
         $ext = AbstractFilesStorage::pathinfo_fix( $this->file_name, PATHINFO_EXTENSION );
@@ -179,13 +173,13 @@ class ConvertFile
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {
-               try {
-                   $this->handleZip( $conversionHandler );
-               } catch (Exception $exception){
-                   throw new RuntimeException("Handling of zip files failed.", ConversionHandlerStatus::ZIP_HANDLING);
-               }
+                try {
+                    $this->handleZip( $conversionHandler );
+                } catch ( Exception $exception ) {
+                    throw new DomainException( $exception->getMessage(), ConversionHandlerStatus::ZIP_HANDLING, $exception );
+                }
             } else {
-                throw new RuntimeException("Nested zip files are not allowed.", ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED);
+                throw new DomainException( "Nested zip files are not allowed.", ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED );
             }
         } else {
             $conversionHandler->processConversion();
@@ -201,8 +195,7 @@ class ConvertFile
      * @return bool
      * @throws Exception
      */
-    private function handleZip( ConversionHandler $conversionHandler ): bool
-    {
+    private function handleZip( ConversionHandler $conversionHandler ): bool {
         // this makes the conversionhandler accumulate eventual errors on files and continue
         $conversionHandler->setStopOnFileException( false );
 
@@ -219,35 +212,35 @@ class ConvertFile
 
                 $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
 
-                throw new RuntimeException($fileError->error[ 'message' ], $fileError->error[ 'code' ]); //@TODO usare $brokenFileName
+                throw new RuntimeException( $fileError->error[ 'message' ], $fileError->error[ 'code' ] ); //@TODO usare $brokenFileName
             }
         }
 
         $realFileNames = array_map(
-            [ 'ZipArchiveExtended', 'getFileName' ],
-            $internalZipFileNames
+                [ 'ZipArchiveExtended', 'getFileName' ],
+                $internalZipFileNames
         );
 
         foreach ( $realFileNames as $i => &$fileObject ) {
             $fileObject = [
-                'name' => $fileObject,
-                'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
+                    'name' => $fileObject,
+                    'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
             ];
         }
 
-        $zipFiles = json_encode( $realFileNames );
+        $zipFiles       = json_encode( $realFileNames );
         $stdFileObjects = [];
 
-        if ( $internalZipFileNames !== null ) {
+        if ( !empty( $internalZipFileNames ) ) {
             foreach ( $internalZipFileNames as $fName ) {
                 $stdFileObjects[] = $fName;
             }
         } else {
             $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors[ 'errors' ] );
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
 
-            foreach ($errors as $error){
-                throw new Exception($error);
+            foreach ( $errors as $error ) {
+                throw new DomainException( $error[ 'message' ], $error[ 'code' ] );
             }
 
             return false;
@@ -255,16 +248,16 @@ class ConvertFile
 
         /* Do conversions here */
         $converter = new ConvertFile(
-            $stdFileObjects,
-            $this->source_lang,
-            $this->target_lang,
-            $this->intDir,
-            $this->errDir,
-            $this->cookieDir,
-            $this->segmentation_rule,
-            $this->featureSet,
-            $this->filters_extraction_parameters,
-            false
+                $stdFileObjects,
+                $this->source_lang,
+                $this->target_lang,
+                $this->intDir,
+                $this->errDir,
+                $this->cookieDir,
+                $this->segmentation_rule,
+                $this->featureSet,
+                $this->filters_extraction_parameters,
+                false
         );
 
         $converter->convertFiles();
@@ -289,17 +282,15 @@ class ConvertFile
     /**
      * @return bool
      */
-    public function hasErrors(): bool
-    {
-        return count($this->getErrors()) > 0;
+    public function hasErrors(): bool {
+        return count( $this->getErrors() ) > 0;
     }
 
     /**
      * Check on executed conversion results
      * @return array
      */
-    public function getErrors(): array
-    {
+    public function getErrors(): array {
         $errors = [];
 
         /** @var ConvertedFileModel $res */

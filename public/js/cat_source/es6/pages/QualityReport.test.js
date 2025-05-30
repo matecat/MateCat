@@ -1299,7 +1299,7 @@ test('renders properly', async () => {
                 translation_download_url:
                   'https://dev.matecat.com/?action=downloadFile&id_job=3&id_file=&password=21c3582cae45&download_type=all',
                 xliff_download_url:
-                  'https://dev.matecat.com/SDLXLIFF/3/21c3582cae45/3.zip',
+                  'https://dev.matecat.com/xliff/3/21c3582cae45/3.zip',
               },
             },
           ],

@@ -42,9 +42,10 @@ class Engines_Results_MyMemory_Matches {
 
     /**
      * Engines_Results_MyMemory_Matches constructor.
+     *
      * @param array $data
      */
-    public function __construct($data = []) {
+    public function __construct( $data = [] ) {
         $this->id               = array_key_exists( 'id', $data ) ? $data[ 'id' ] : '0';
         $this->create_date      = array_key_exists( 'create-date', $data ) ? $data[ 'create-date' ] : '1970-01-01 00:00:00';
         $this->segment          = array_key_exists( 'segment', $data ) ? $data[ 'segment' ] : '';
@@ -85,14 +86,14 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      * @throws Exception
      */
-    public function getMatches( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
+    public function getMatches( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ): array {
 
         if ( $source and $target ) {
             $this->source = $source;
             $this->target = $target;
         }
 
-        $this->segment = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
+        $this->segment     = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
         $this->translation = $this->getLayer( $this->raw_translation, $layerNum, $dataRefMap );
 
         return $this->toArray();
@@ -110,17 +111,15 @@ class Engines_Results_MyMemory_Matches {
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $filter     = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
+        /** @var MateCatFilter $filter */
+        $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
         switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string );
-                break;
             case 1:
                 return $string;
-                break;
             case 2:
                 return $filter->fromLayer1ToLayer2( $string );
-                break;
         }
     }
 
@@ -135,7 +134,7 @@ class Engines_Results_MyMemory_Matches {
      * @return array
      *
      */
-    protected function toArray() {
+    protected function toArray(): array {
 
         $attributes       = [];
         $reflectionClass  = new ReflectionObject( $this );

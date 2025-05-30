@@ -27,4 +27,6 @@ interface VersionHandlerInterface {
 
     public function storeTranslationEvent( $params );
 
+    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array;
+
 }

@@ -10,8 +10,8 @@
 namespace Contribution;
 
 use Constants_TranslationStatus;
-use DataAccess_AbstractDaoObjectStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoObjectStruct;
+use \DataAccess\IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
 use Jobs_JobDao;
@@ -24,7 +24,7 @@ use TaskRunner\Commons\Params;
  * Class ContributionSetStruct
  * @package Contribution
  */
-class ContributionSetStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     protected array $cached_results = [];
 

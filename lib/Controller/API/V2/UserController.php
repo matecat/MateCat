@@ -2,11 +2,11 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
-use API\Commons\Authentication\AuthenticationHelper;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Validators\JSONRequestValidator;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
+use Controller\Authentication\AuthenticationHelper;
 use InvalidArgumentException;
 use Users\MetadataDao;
 use Users_UserDao;

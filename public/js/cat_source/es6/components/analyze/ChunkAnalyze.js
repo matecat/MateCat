@@ -3,7 +3,15 @@ import React, {useState} from 'react'
 import ChunkAnalyzeHeader from './ChunkAnalyzeHeader'
 import ChunkAnalyzeFile from './ChunkAnalyzeFile'
 
-const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize, rates}) => {
+const ChunkAnalyze = ({
+  files,
+  chunkInfo,
+  index,
+  total,
+  chunksSize,
+  rates,
+  workflowType,
+}) => {
   const [showFilesInfo, setShowFilesInfo] = useState(false)
 
   const getFiles = () => {
@@ -15,6 +23,7 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize, rates}) => {
           index={i + 1}
           size={files.length}
           rates={rates}
+          workflowType={workflowType}
         />
       )
     })
@@ -35,6 +44,7 @@ const ChunkAnalyze = ({files, chunkInfo, index, total, chunksSize, rates}) => {
         showFiles={showFilesInfo}
         chunksSize={chunksSize}
         rates={rates}
+        workflowType={workflowType}
       />
       {showFilesInfo ? <div>{getFiles()}</div> : null}
     </div>

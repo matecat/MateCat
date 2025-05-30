@@ -9,9 +9,9 @@
 namespace Features\ProjectCompletion;
 
 
-use DataAccess_AbstractDaoObjectStruct;
+use DataAccess\AbstractDaoObjectStruct;
 
-class CompletionEventStruct extends DataAccess_AbstractDaoObjectStruct {
+class CompletionEventStruct extends AbstractDaoObjectStruct {
 
     public $uid ;
     public $remote_ip_address ;

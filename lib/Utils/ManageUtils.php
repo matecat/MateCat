@@ -99,13 +99,12 @@ class ManageUtils {
      * @param                        $search_status
      * @param                        $search_only_completed
      * @param                        $project_id
-     * @param TeamStruct|null $team
+     * @param TeamStruct|null        $team
      * @param Users_UserStruct|null  $assignee
      * @param bool                   $no_assignee
      *
      * @return array
-     * @throws NotFoundException
-     * @throws Exception
+     * @throws ReflectionException
      */
     public static function getProjects(
             Users_UserStruct  $user,
@@ -120,7 +119,7 @@ class ManageUtils {
             TeamStruct $team = null,
             Users_UserStruct  $assignee = null,
                               $no_assignee = false
-    ) {
+    ): array {
         $id_list = static::_getProjects(
                 $user,
                 $start,

@@ -12,6 +12,7 @@ namespace API\V2\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use CatUtils;
+use Constants;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
@@ -32,29 +33,29 @@ use WordCount\WordCountStruct;
 class Job {
 
     /**
-     * @var string
+     * @var ?string
      */
-    protected $status;
+    protected ?string $status = null;
 
     /**
      * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
     /**
      * @var bool
      */
-    protected $called_from_api = false;
+    protected bool $called_from_api = false;
 
     /**
      * @var TmKeyManagement_ClientTmKeyStruct[]
      */
-    protected $keyList = [];
+    protected array $keyList = [];
 
     /**
-     * @param mixed $status
+     * @param string $status
      */
-    public function setStatus( $status ) {
+    public function setStatus( string $status ) {
         $this->status = $status;
     }
 
@@ -63,7 +64,7 @@ class Job {
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user = null ) {
+    public function setUser( Users_UserStruct $user ): Job {
         $this->user = $user;
 
         return $this;
@@ -74,8 +75,8 @@ class Job {
      *
      * @return $this
      */
-    public function setCalledFromApi( $called_from_api ) {
-        $this->called_from_api = (bool)$called_from_api;
+    public function setCalledFromApi( bool $called_from_api ): Job {
+        $this->called_from_api = $called_from_api;
 
         return $this;
     }
@@ -85,7 +86,7 @@ class Job {
      *
      * @return array
      */
-    protected function getKeyList( Jobs_JobStruct $jStruct ) {
+    protected function getKeyList( Jobs_JobStruct $jStruct ): array {
 
         if ( empty( $this->user ) ) {
             return [];
@@ -110,7 +111,7 @@ class Job {
      * @return array
      * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $outsourceInfo = $chunk->getOutsource();
         $tStruct       = $chunk->getTranslator();
@@ -167,21 +168,21 @@ class Job {
                 'formatted_create_date' => ManageUtils::formatJobDate( $chunk->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $chunk, $chunkReviews ),
                 'pee'                   => $chunk->getPeeForTranslatedSegments(),
-                'tte'                   => (int)( (int)$chunk->total_time_to_edit / 1000 ),
+                'tte'                   => (int)( $chunk->total_time_to_edit / 1000 ),
                 'private_tm_key'        => $this->getKeyList( $chunk ),
                 'warnings_count'        => $warningsCount->warnings_count,
-                'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
+                'warning_segments'      => ( $warningsCount->warning_segments ?? [] ),
                 'word_count_type'       => $chunk->getProject()->getWordCountType(),
                 'stats'                 => $jobStats,
                 'outsource'             => $outsource,
                 'outsource_available'   => $outsourceAvailable,
                 'outsource_info'        => $outsourceAvailableInfo,
                 'translator'            => $translator,
-                'total_raw_wc'          => (int)$chunk->total_raw_wc,
+                'total_raw_wc'          => $chunk->total_raw_wc,
                 'standard_wc'           => (float)$chunk->standard_analysis_wc,
                 'quality_summary'       => [
                         'quality_overall' => $chunk->getQualityOverall( $chunkReviews ),
-                        'errors_count'    => (int)$chunk->getErrorsCount()
+                        'errors_count'    => $chunk->getErrorsCount()
                 ],
 
         ];
@@ -189,7 +190,7 @@ class Job {
         // add revise_passwords to stats
         foreach ( $chunkReviews as $chunk_review ) {
 
-            if ( $chunk_review->source_page <= \Constants::SOURCE_PAGE_REVISION ) {
+            if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
                 $result[ 'revise_passwords' ][] = [
                         'revision_number' => 1,
                         'password'        => $chunk_review->review_password
@@ -203,7 +204,12 @@ class Job {
 
         }
 
-        $project = $chunk->getProject();
+        return $this->fillUrls( $result, $chunk, $project, $featureSet );
+
+    }
+
+
+    protected function fillUrls( array $result, Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 

@@ -4,6 +4,9 @@ use MimeTypes\MimeTypes;
 
 set_time_limit( 180 );
 
+/**
+ * @deprecated
+ */
 class xliffToTargetController extends downloadController {
 
     protected $error;

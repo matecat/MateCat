@@ -6,7 +6,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers DataAccess_AbstractDao::_cacheSetConnection
+ * @covers DataAccess\AbstractDao::_cacheSetConnection
  * User: dinies
  * Date: 15/04/16
  * Time: 19.17
@@ -39,7 +39,7 @@ class CacheSetConnectionTest extends AbstractTest {
     /**
      * It sets the connection to the DB after the creation of a new EnginesModel_EngineDAO .
      * @group  regression
-     * @covers DataAccess_AbstractDao::_cacheSetConnection
+     * @covers DataAccess\AbstractDao::_cacheSetConnection
      */
     public function test_set_connection_after_creation_of_engine() {
 
@@ -51,7 +51,7 @@ class CacheSetConnectionTest extends AbstractTest {
     /**
      * It trows an exception because it is unable to set the connection with wrong global constant value.
      * @group  regression
-     * @covers DataAccess_AbstractDao::_cacheSetConnection
+     * @covers DataAccess\AbstractDao::_cacheSetConnection
      */
     public function test_set_connection_with_wrong_global_constant() {
 

@@ -9,8 +9,8 @@
 
 namespace QualityReport;
 
-use DataAccess_AbstractDaoObjectStruct;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 
 /**
  * @property int    $id_segment
@@ -18,7 +18,7 @@ use DataAccess_IDaoStruct;
  * @property int    $version_number
  * @property int    $source_page
  */
-class SegmentEventsStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class SegmentEventsStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     /**
      * @var int

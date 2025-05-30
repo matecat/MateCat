@@ -1,6 +1,6 @@
 <?php
 
-class Chunks_ChunkCompletionEventStruct extends DataAccess_AbstractDaoSilentStruct {
+class Chunks_ChunkCompletionEventStruct extends \DataAccess\AbstractDaoSilentStruct {
 
     const SOURCE_MERGE = 'merge';
     const SOURCE_USER  = 'user';

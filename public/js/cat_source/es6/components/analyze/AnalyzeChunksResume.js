@@ -9,7 +9,11 @@ import ModalsActions from '../../actions/ModalsActions'
 import TranslatedIcon from '../../../../../img/icons/TranslatedIcon'
 import Tooltip from '../common/Tooltip'
 import CommonUtils from '../../utils/commonUtils'
-import {ANALYSIS_STATUS, UNIT_COUNT} from '../../constants/Constants'
+import {
+  ANALYSIS_STATUS,
+  ANALYSIS_WORKFLOW_TYPES,
+  UNIT_COUNT,
+} from '../../constants/Constants'
 import UserStore from '../../stores/UserStore'
 import LabelWithTooltip from '../common/LabelWithTooltip'
 
@@ -241,9 +245,12 @@ class AnalyzeChunksResume extends React.Component {
                   <div className="title-total-words ttw">
                     <div>{chunkAnalysis.total_raw}</div>
                   </div>
-                  <div className="title-standard-words tsw">
-                    <div>{chunkAnalysis.total_industry}</div>
-                  </div>
+                  {this.props.project.get('analysis').get('workflow_type') ===
+                    ANALYSIS_WORKFLOW_TYPES.STANDARD && (
+                    <div className="title-standard-words tsw">
+                      <div>{chunkAnalysis.total_industry}</div>
+                    </div>
+                  )}
                   <div
                     className="title-matecat-words tmw"
                     ref={(container) =>
@@ -403,10 +410,13 @@ class AnalyzeChunksResume extends React.Component {
                       {/*<div className="cell-label">Total words:</div>*/}
                       <div>{total_raw}</div>
                     </div>
-                    <div className="title-standard-words tsw">
-                      {/*<div className="cell-label">Other CAT tool</div>*/}
-                      <div>{total_standard}</div>
-                    </div>
+                    {this.props.project.get('analysis').get('workflow_type') ===
+                      ANALYSIS_WORKFLOW_TYPES.STANDARD && (
+                      <div className="title-standard-words tsw">
+                        {/*<div className="cell-label">Other CAT tool</div>*/}
+                        <div>{total_standard}</div>
+                      </div>
+                    )}
                     <div
                       className="title-matecat-words tmw"
                       ref={(container) =>
@@ -536,7 +546,9 @@ class AnalyzeChunksResume extends React.Component {
     let iconClass = this.props.showAnalysis ? 'open' : ''
     let html = this.getResumeJobs()
     return (
-      <div className="project-top ui grid">
+      <div
+        className={`project-top ui grid type-${this.props.project.get('analysis').get('workflow_type')}`}
+      >
         <div className="compare-table sixteen wide column">
           <div className="header-compare-table ui grid shadow-1">
             <div className="title-job">
@@ -554,14 +566,17 @@ class AnalyzeChunksResume extends React.Component {
                   <h5>Total character count</h5>
                 </div>
               )}
-              <div className="title-standard-words">
-                <h5>
-                  Industry weighted
-                  <span data-tooltip="As counted by other CAT tools">
-                    <i className="icon-info icon" />
-                  </span>
-                </h5>
-              </div>
+              {this.props.project.get('analysis').get('workflow_type') ===
+                ANALYSIS_WORKFLOW_TYPES.STANDARD && (
+                <div className="title-standard-words">
+                  <h5>
+                    Industry weighted
+                    <span data-tooltip="As counted by other CAT tools">
+                      <i className="icon-info icon" />
+                    </span>
+                  </h5>
+                </div>
+              )}
               <div className="title-matecat-words">
                 <h5>Matecat weighted</h5>
               </div>

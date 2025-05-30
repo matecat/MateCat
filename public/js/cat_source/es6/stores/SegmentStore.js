@@ -1365,7 +1365,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS)
       break
     case SegmentConstants.SET_SEGMENT_HEADER:
-      SegmentStore.setSuggestionMatch(action.id, action.fid, action.perc)
+      SegmentStore.setSuggestionMatch(action.id, action.fid, action.match.match)
       SegmentStore.emitChange(
         SegmentConstants.SET_SEGMENT_PROPAGATION,
         action.id,
@@ -1374,7 +1374,7 @@ AppDispatcher.register(function (action) {
       SegmentStore.emitChange(
         action.actionType,
         action.id,
-        action.perc,
+        action.match,
         action.className,
         action.createdBy,
       )

@@ -6,6 +6,7 @@ import React from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import TranslationMatches from './utils/translationMatches'
 
 class SegmentHeader extends React.PureComponent {
   static contextType = ApplicationWrapperContext
@@ -25,10 +26,10 @@ class SegmentHeader extends React.PureComponent {
     this.hideHeader = this.hideHeader.bind(this)
   }
 
-  changePercentuage(sid, perc, className, createdBy) {
+  changePercentuage(sid, segmentMatch, className, createdBy) {
     if (this.props.sid == sid) {
       this.setState({
-        percentage: perc === 'ICE_MT' ? 'TQMT' : perc,
+        percentage: TranslationMatches.getPercentTextForMatch(segmentMatch),
         classname: className,
         createdBy: createdBy,
         visible: true,

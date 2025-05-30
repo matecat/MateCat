@@ -22,18 +22,7 @@
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
-            unsupportedFileTypes: '${unsupported_file_types}',
-            conversionEnabled: true,
-            analysisEnabled: ${volume_analysis_enabled},
-            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-            maxFileSize: ${maxFileSize},
-            maxTMXFileSize: ${maxTMXFileSize},
-            maxNumberFiles: ${maxNumberFiles},
-            ownerIsMe: true,
-            blueimp_dataType: 'text'
-        };
-        var conversionFailed = false;
-        var conversionInfo = {};
+        }
     </script>
 </head>
 <body>

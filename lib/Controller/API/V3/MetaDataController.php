@@ -58,7 +58,7 @@ class MetaDataController extends BaseChunkController {
      *
      * @return stdClass
      */
-    private function getJobMetaData( Jobs_JobStruct $job ) {
+    private function getJobMetaData( Jobs_JobStruct $job ): object {
 
         $metadata       = new stdClass();
         $jobMetaDataDao = new MetadataDao();

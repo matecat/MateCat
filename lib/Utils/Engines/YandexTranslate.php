@@ -2,7 +2,7 @@
 
 class Engines_YandexTranslate extends Engines_AbstractEngine {
 
-    protected $_config = [
+    protected array $_config = [
             'segment' => null,
             'source'  => null,
             'target'  => null,
@@ -65,7 +65,7 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
     }
 
     public function get( $_config ) {

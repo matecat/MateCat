@@ -2,10 +2,10 @@
 
 namespace QAModelTemplate;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class QAModelTemplatePassfailStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \JsonSerializable {
+class QAModelTemplatePassfailStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \JsonSerializable {
     public $id;
     public $id_template;
     public $passfail_type;

@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;

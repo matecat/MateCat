@@ -2,7 +2,7 @@
 
 namespace Projects;
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use DateTime;
 use Engine;
@@ -25,7 +25,7 @@ use Users_UserStruct;
 use Utils;
 use Xliff\XliffConfigTemplateDao;
 
-class ProjectTemplateDao extends DataAccess_AbstractDao {
+class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
 
     const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id";
@@ -176,7 +176,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
             try {
                 $languages->validateLanguage( $language );
-            } catch( Exception $e ){
+            } catch ( Exception $e ) {
                 throw new $e( $e->getMessage(), 403 );
             }
 
@@ -195,7 +195,7 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
 
             try {
                 $languages->validateLanguageList( $targetLanguages );
-            } catch( Exception $e ){
+            } catch ( Exception $e ) {
                 throw new $e( $e->getMessage(), 403 );
             }
 
@@ -392,28 +392,28 @@ class ProjectTemplateDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
-                "name"                          => $projectTemplateStruct->name,
-                "is_default"                    => $projectTemplateStruct->is_default,
-                "uid"                           => $projectTemplateStruct->uid,
-                "id_team"                       => $projectTemplateStruct->id_team,
-                "segmentation_rule"             => $projectTemplateStruct->segmentation_rule,
-                "mt"                            => $projectTemplateStruct->mt,
-                "tm"                            => $projectTemplateStruct->tm,
-                "pretranslate_100"              => $projectTemplateStruct->pretranslate_100,
-                "pretranslate_101"              => $projectTemplateStruct->pretranslate_101,
-                "tm_prioritization"             => $projectTemplateStruct->tm_prioritization,
-                "dialect_strict"                => $projectTemplateStruct->dialect_strict,
-                "get_public_matches"            => $projectTemplateStruct->get_public_matches,
-                "payable_rate_template_id"      => $projectTemplateStruct->payable_rate_template_id,
-                "qa_model_template_id"          => $projectTemplateStruct->qa_model_template_id,
-                "filters_template_id"           => $projectTemplateStruct->filters_template_id,
-                "xliff_config_template_id"      => $projectTemplateStruct->xliff_config_template_id,
-                "subject"                       => $projectTemplateStruct->subject,
-                "source_language"               => $projectTemplateStruct->source_language,
-                "target_language"               => $projectTemplateStruct->target_language,
-                "character_counter_count_tags"  => $projectTemplateStruct->character_counter_count_tags,
-                "character_counter_mode"        => $projectTemplateStruct->character_counter_mode,
-                'now'                           => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
+                "name"                         => $projectTemplateStruct->name,
+                "is_default"                   => $projectTemplateStruct->is_default,
+                "uid"                          => $projectTemplateStruct->uid,
+                "id_team"                      => $projectTemplateStruct->id_team,
+                "segmentation_rule"            => $projectTemplateStruct->segmentation_rule,
+                "mt"                           => $projectTemplateStruct->mt,
+                "tm"                           => $projectTemplateStruct->tm,
+                "pretranslate_100"             => $projectTemplateStruct->pretranslate_100,
+                "pretranslate_101"             => $projectTemplateStruct->pretranslate_101,
+                "tm_prioritization"            => $projectTemplateStruct->tm_prioritization,
+                "dialect_strict"               => $projectTemplateStruct->dialect_strict,
+                "get_public_matches"           => $projectTemplateStruct->get_public_matches,
+                "payable_rate_template_id"     => $projectTemplateStruct->payable_rate_template_id,
+                "qa_model_template_id"         => $projectTemplateStruct->qa_model_template_id,
+                "filters_template_id"          => $projectTemplateStruct->filters_template_id,
+                "xliff_config_template_id"     => $projectTemplateStruct->xliff_config_template_id,
+                "subject"                      => $projectTemplateStruct->subject,
+                "source_language"              => $projectTemplateStruct->source_language,
+                "target_language"              => $projectTemplateStruct->target_language,
+                "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
+                "character_counter_mode"       => $projectTemplateStruct->character_counter_mode,
+                'now'                          => ( new DateTime() )->format( 'Y-m-d H:i:s' ),
         ] );
 
         $projectTemplateStruct->id          = $conn->lastInsertId();

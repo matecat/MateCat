@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;

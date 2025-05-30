@@ -1,10 +1,11 @@
 <?php
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use EditLog\EditLogSegmentStruct;
 use Exceptions\ValidationError;
 
-class Jobs_JobDao extends DataAccess_AbstractDao {
+class Jobs_JobDao extends AbstractDao {
 
     const TABLE       = "jobs";
     const STRUCT_TYPE = "Jobs_JobStruct";

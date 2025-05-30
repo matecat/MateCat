@@ -1,9 +1,11 @@
 <?php
 
+use DataAccess\IDaoStruct;
+
 /**
  * This is NOT a database Entity, this is a utility vector to transport info.
  */
-class Comments_CommentStruct extends Comments_BaseCommentStruct implements DataAccess_IDaoStruct, JsonSerializable {
+class Comments_CommentStruct extends Comments_BaseCommentStruct implements IDaoStruct, JsonSerializable {
 
     // database fields
     public int     $id;

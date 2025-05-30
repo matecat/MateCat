@@ -19,6 +19,7 @@ use LQA\ChunkReviewDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
+use Utils;
 
 
 class QualityReportModel {
@@ -156,7 +157,7 @@ class QualityReportModel {
                         'target' => $this->chunk->target,
                 ],
                 'project' => [
-                        'metadata'   => $this->getProject()->getMetadataAsKeyValue(),
+                        'metadata'   => $this->getAndDecodePossiblyProjectMetadataJson(),
                         'id'         => $this->getProject()->id,
                         'created_at' => $this->filterDate(
                                 $this->getProject()->create_date
@@ -168,6 +169,16 @@ class QualityReportModel {
         $this->_attachReviewsData();
 
         return $this->quality_report_structure;
+    }
+
+    protected function getAndDecodePossiblyProjectMetadataJson(): array {
+        $metadata = $this->getProject()->getMetadataAsKeyValue();
+        foreach ( $metadata as $key => $value ) {
+            if ( Utils::isJson( $value ) ) {
+                $metadata[ $key ] = json_decode( $value, true );
+            }
+        }
+        return $metadata;
     }
 
     /**
@@ -189,7 +200,7 @@ class QualityReportModel {
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
                     'revision_number' => $revisionNumber,
                     'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                    'is_pass'         => ($chunk_review->is_pass !== null ? !!$chunk_review->is_pass : null),
+                    'is_pass'         => ( $chunk_review->is_pass !== null ? !!$chunk_review->is_pass : null ),
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()
             ];

@@ -244,8 +244,7 @@ class ZipArchiveExtended extends ZipArchive {
             $tmpFp = fopen( $tmp_folder . $filePath, "w" );
 
             if ( !$fp ) {
-                $fileErrors[ $filePath ] = "Unable to extract the file.";
-                break;
+                throw new RuntimeException( "Unable to extract the file." );
             }
 
             $sizeExceeded = false;
@@ -256,7 +255,6 @@ class ZipArchiveExtended extends ZipArchive {
 
                 if ( $fileSize > INIT::$MAX_UPLOAD_FILE_SIZE ) {
                     $sizeExceeded = true;
-                    continue;
                 }
             }
 

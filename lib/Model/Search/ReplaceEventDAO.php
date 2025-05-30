@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Search\ReplaceEventStruct;
 
-class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
+class Search_ReplaceEventDAO extends AbstractDao {
 
     const STRUCT_TYPE = ReplaceEventStruct::class;
     const TABLE       = 'replace_events';

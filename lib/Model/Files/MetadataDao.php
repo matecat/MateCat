@@ -8,11 +8,12 @@
 
 namespace Files;
 
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDao;
+use \DataAccess\IDaoStruct;
 use Database;
+use ReflectionException;
 
-class MetadataDao extends DataAccess_AbstractDao {
+class MetadataDao extends AbstractDao {
 
     const TABLE = 'file_metadata';
 
@@ -21,7 +22,8 @@ class MetadataDao extends DataAccess_AbstractDao {
      * @param     $id_file
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
+     * @throws ReflectionException
      */
     public function getByJobIdProjectAndIdFile( $id_project, $id_file, $ttl = 0 ) {
         $stmt = $this->_getStatementForQuery(

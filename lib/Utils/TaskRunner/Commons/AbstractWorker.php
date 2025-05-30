@@ -11,6 +11,7 @@ namespace TaskRunner\Commons;
 
 use AMQHandler;
 use Database;
+use Exception;
 use INIT;
 use PDOException;
 use SplObserver;
@@ -234,7 +235,7 @@ abstract class AbstractWorker implements SplSubject {
 
     /**
      * @param $_object
-     *
+     * @throws Exception
      */
     protected function publishToNodeJsClients( $_object ) {
 

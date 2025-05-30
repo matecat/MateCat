@@ -9,10 +9,10 @@
 namespace Teams;
 
 use Constants_Teams;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $name;
@@ -30,7 +30,7 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
      *
      * @return $this
      */
-    public function setMembers( $list ) {
+    public function setMembers( $list ): TeamStruct {
         $this->members = $list;
 
         return $this;

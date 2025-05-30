@@ -10,13 +10,13 @@
 namespace WordCount;
 
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use Log;
 use PDO;
 use PDOException;
 
-class WordCounterDao extends DataAccess_AbstractDao {
+class WordCounterDao extends AbstractDao {
 
     /**
      * Update the word count for the job

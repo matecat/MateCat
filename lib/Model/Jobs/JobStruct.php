@@ -1,7 +1,11 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
 use DataAccess\ArrayAccessTrait;
+use DataAccess\IDaoStruct;
 use Exceptions\NotFoundException;
+use Files\FileDao;
+use Files\FileStruct;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
@@ -11,7 +15,7 @@ use Translators\JobsTranslatorsDao;
 use Translators\JobsTranslatorsStruct;
 use WordCount\WordCountStruct;
 
-class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -164,7 +168,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
             $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $jobStruct->id_project ] ); //ten minutes cache
             foreach ( $openThreads as $openThread ) {
                 if ( $openThread->id_job == $jobStruct->id && $openThread->password == $jobStruct->password ) {
-                    return (int)$openThread->count;
+                    return $openThread->count;
                 }
             }
 
@@ -189,11 +193,11 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
     }
 
-    public function getWarningsCount() {
+    public function getWarningsCount(): object {
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
             $dao                     = new WarningDao();
-            $warningsCount           = @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] );
+            $warningsCount           = $dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] ) ?? [];
             $ret                     = [];
             $ret[ 'warnings_count' ] = 0;
             foreach ( $warningsCount as $count ) {
@@ -211,11 +215,11 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @return Files_FileStruct[]
+     * @return FileStruct[]
      * @throws ReflectionException
      */
     public function getFiles(): array {
-        return Files_FileDao::getByJobId( $this->id );
+        return FileDao::getByJobId( $this->id );
     }
 
     /**
@@ -263,6 +267,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getPeeForTranslatedSegments(): ?float {
         $pee = round( ( new Jobs_JobDao() )->setCacheTTL( 60 * 15 )->getPeeStats( $this->id, $this->password )->avg_pee, 2 );
         if ( $pee >= 100 ) {

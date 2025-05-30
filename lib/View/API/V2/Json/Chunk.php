@@ -21,7 +21,7 @@ class Chunk extends Job {
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ) {
+    public function renderOne( Jobs_JobStruct $chunk ): array {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 

@@ -10,7 +10,7 @@
 namespace API\App;
 
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Exceptions\AuthorizationError;
 use Jobs_JobDao;
 use Outsource\ConfirmationDao;

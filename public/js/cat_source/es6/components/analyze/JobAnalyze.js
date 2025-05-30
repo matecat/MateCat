@@ -13,14 +13,13 @@ class JobAnalyze extends React.Component {
   }
 
   getChunks() {
-    let self = this
     if (this.props.chunks) {
-      return map(this.props.jobInfo.chunks, function (item, index) {
-        let chunk = self.props.chunks.find(
+      return map(this.props.jobInfo.chunks, (item, index) => {
+        let chunk = this.props.chunks.find(
           (c) => c.get('password') === item.password,
         )
         index++
-        let job = self.props.project.get('jobs').find(function (jobElem) {
+        let job = this.props.project.get('jobs').find(function (jobElem) {
           return jobElem.get('password') === item.password
         })
 
@@ -29,12 +28,15 @@ class JobAnalyze extends React.Component {
             key={item.password}
             files={chunk.get('files').toJS()}
             job={job}
-            project={self.props.project}
+            project={this.props.project}
             total={item.summary}
             index={index}
             chunkInfo={item}
-            chunksSize={self.props.jobInfo.chunks.length}
-            rates={self.props.jobInfo.payable_rates}
+            chunksSize={this.props.jobInfo.chunks.length}
+            rates={this.props.jobInfo.payable_rates}
+            workflowType={this.props.project
+              .get('analysis')
+              .get('workflow_type')}
           />
         )
       })
@@ -82,7 +84,7 @@ class JobAnalyze extends React.Component {
   }
   render() {
     const iceMTRawWords = this.props.jobInfo.chunks.reduce((total, item) => {
-      const iceMT = item.summary.find((t) => t.type === 'ice_MT')
+      const iceMT = item.summary.find((t) => t.type === 'ice_mt')
       if (iceMT) return total + iceMT.raw
       else total
     }, 0)
@@ -103,6 +105,9 @@ class JobAnalyze extends React.Component {
                 <JobTableHeader
                   rates={this.props.jobInfo.payable_rates}
                   iceMTRawWords={iceMTRawWords}
+                  workflowType={this.props.project
+                    .get('analysis')
+                    .get('workflow_type')}
                 />
                 <div className="chunks-analyze">{this.getChunks()}</div>
               </div>

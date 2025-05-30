@@ -7,9 +7,17 @@
  *
  */
 
-abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements DataAccess_IDaoStruct, Countable {
+namespace DataAccess;
 
-    use \DataAccess\RecursiveArrayCopy;
+use stdClass;
+use Countable;
+use DomainException;
+use ReflectionObject;
+use ReflectionProperty;
+
+abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
+
+    use RecursiveArrayCopy;
 
     protected array $cached_results = [];
 
@@ -48,7 +56,7 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * $model->clear()->foo(); // clears the cache and returns fresh data
      *
      */
-    public function clear(): DataAccess_AbstractDaoObjectStruct {
+    public function clear(): AbstractDaoObjectStruct {
         $this->cached_results = [];
 
         return $this;

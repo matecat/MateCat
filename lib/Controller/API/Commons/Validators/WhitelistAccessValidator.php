@@ -10,32 +10,12 @@
 namespace API\Commons\Validators;
 
 
-use AbstractControllers\IController;
-use API\Commons\KleinController;
 use DomainException;
 use Utils;
 
 class WhitelistAccessValidator extends Base {
 
-    /**
-     * @var KleinController
-     */
-    protected $controller;
-
-    public function __construct( IController $controller ) {
-
-        if( method_exists( $controller, 'getRequest' ) ){
-            /**
-             * @var $controller KleinController
-             */
-            parent::__construct( $controller->getRequest() );
-        }
-
-        $this->controller = $controller;
-
-    }
-
-    public function _validate() {
+    public function _validate(): void {
 
         #Block all not whitelisted IPs
         $ipWhiteList = [
@@ -51,7 +31,7 @@ class WhitelistAccessValidator extends Base {
                 "/^93\.43\.95\.1(?:29|3[0-4])/",
         ];
 
-        if( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ){
+        if ( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ) {
             throw new DomainException( "Invalid Request: not authorized domain: " . Utils::getRealIpAddr(), 403 );
         }
 

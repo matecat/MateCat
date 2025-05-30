@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Exceptions\NotFoundException;
 
-class Chunks_ChunkDao extends DataAccess_AbstractDao {
+class Chunks_ChunkDao extends AbstractDao {
 
     /**
      * @param int    $id_job
