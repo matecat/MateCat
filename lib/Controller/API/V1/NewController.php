@@ -448,9 +448,9 @@ class NewController extends KleinController {
         $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING );
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
         $dictation                                 = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
-        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING );
+        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $get_public_matches                        = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
+        $get_public_matches                        = (bool)filter_var( $this->request->param( 'get_public_matches' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] ); // used to set the default value of get_public_matches to 1
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
@@ -463,7 +463,7 @@ class NewController extends KleinController {
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
-        $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
+        $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
         $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $payable_rate_template_id                  = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
@@ -472,7 +472,7 @@ class NewController extends KleinController {
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
         $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $project_completion                        = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $qa_model_template_id                      = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
@@ -483,7 +483,7 @@ class NewController extends KleinController {
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $tag_projection                            = filter_var( $this->request->param( 'tag_projection' ), FILTER_VALIDATE_BOOLEAN );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
-        $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING );
+        $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
         /**
@@ -814,25 +814,22 @@ class NewController extends KleinController {
 
         try {
             if ( !empty( $private_tm_key_json ) ) {
-                $json = html_entity_decode( $private_tm_key_json );
 
-                // first check if `filters_extraction_parameters` is a valid JSON
-                if ( !Utils::isJson( $json ) ) {
+                // first check if `private_tm_key_json` is a valid JSON
+                if ( !Utils::isJson( $private_tm_key_json ) ) {
                     throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
                 $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
 
                 $validatorObject       = new JSONValidatorObject();
-                $validatorObject->json = $json;
+                $validatorObject->json = $private_tm_key_json;
 
                 $validator  = new JSONValidator( $schema );
                 $jsonObject = $validator->validate( $validatorObject );
 
-                /** @noinspection PhpUndefinedFieldInspection */
-                $tm_prioritization = $jsonObject->tm_prioritization;
+                $tm_prioritization = $jsonObject->decoded->tm_prioritization;
 
-                /** @noinspection PhpUndefinedFieldInspection */
                 $private_tm_key = array_map(
                         function ( $item ) {
                             return [
@@ -842,7 +839,7 @@ class NewController extends KleinController {
                                     'penalty' => $item->penalty,
                             ];
                         },
-                        $jsonObject->keys
+                        $jsonObject->decoded->keys
                 );
 
             } else {
@@ -1208,22 +1205,23 @@ class NewController extends KleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ) {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            $json = html_entity_decode( $filters_extraction_parameters );
-
             // first check if `filters_extraction_parameters` is a valid JSON
-            if ( !Utils::isJson( $json ) ) {
+            if ( !Utils::isJson( $filters_extraction_parameters ) ) {
                 throw new InvalidArgumentException( "filters_extraction_parameters is not a valid JSON" );
             }
 
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
+            $validatorObject->json = $filters_extraction_parameters;
 
             $validator = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            return json_decode( $json );
+            $config = new FiltersConfigTemplateStruct();
+            $config->hydrateAllDto( json_decode( $filters_extraction_parameters, true ) );
+
+            return $config;
 
         }
 
@@ -1254,17 +1252,15 @@ class NewController extends KleinController {
 
         if ( !empty( $mt_qe_workflow_template_raw_parameters ) ) {
 
-            $json = html_entity_decode( $mt_qe_workflow_template_raw_parameters );
-
             // first check if `mt_qe_workflow_template_raw_parameters` is a valid JSON
-            if ( !Utils::isJson( $json ) ) {
+            if ( !Utils::isJson( $mt_qe_workflow_template_raw_parameters ) ) {
                 throw new InvalidArgumentException( "mt_qe_workflow_template_raw_parameters is not a valid JSON" );
             }
 
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
 
             $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
+            $validatorObject->json = $mt_qe_workflow_template_raw_parameters;
 
             $validator  = new JSONValidator( $schema, true );
             $jsonObject = $validator->validate( $validatorObject );
@@ -1321,22 +1317,20 @@ class NewController extends KleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ) {
         if ( !empty( $xliff_parameters ) ) {
 
-            $json = html_entity_decode( $xliff_parameters );
-
             // first check if `xliff_parameters` is a valid JSON
-            if ( !Utils::isJson( $json ) ) {
+            if ( !Utils::isJson( $xliff_parameters ) ) {
                 throw new InvalidArgumentException( "xliff_parameters is not a valid JSON" );
             }
 
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
+            $validatorObject->json = $xliff_parameters;
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            return json_decode( $json, true ); // decode again because we need an associative array and not stdClass
+            return json_decode( $xliff_parameters, true ); // decode again because we need an associative array and not stdClass
         }
 
         if ( !empty( $xliff_parameters_template_id ) ) {
