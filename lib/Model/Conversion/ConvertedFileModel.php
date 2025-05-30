@@ -4,45 +4,45 @@ namespace Conversion;
 
 use Constants\ConversionHandlerStatus;
 use Exception;
+use JsonSerializable;
 
-class ConvertedFileModel implements \JsonSerializable {
+class ConvertedFileModel implements JsonSerializable {
     /**
      * @var int
      */
-    private $code;
+    private int $code = ConversionHandlerStatus::NOT_CONVERTED;
+
+    /**
+     * @var ?string
+     */
+    private ?string $error = null;
+
+    /**
+     * @var ?string
+     */
+    private ?string $warning = null;
+
+    /**
+     * @var ?string
+     */
+    private ?string $debug = null;
 
     /**
      * @var array
      */
-    private $errors;
-
-    /**
-     * @var array
-     */
-    private $warnings;
-
-    /**
-     * @var array
-     */
-    private $data;
+    private array $internal_path_data = [ 'cacheHash' => null, 'diskHash' => null ];
 
     /**
      * ConvertFileModel constructor.
      *
-     * @param null $code
+     * @param ?int $code
      *
      * @throws Exception
      */
-    public function __construct( $code = null ) {
-        if ( empty( $code ) ) {
-            $this->code = ConversionHandlerStatus::NOT_CONVERTED;
-        } else {
+    public function __construct( ?int $code = null ) {
+        if ( !empty( $code ) ) {
             $this->changeCode( $code );
         }
-
-        $this->warnings = [];
-        $this->errors   = [];
-        $this->data     = [];
     }
 
     /**
@@ -50,7 +50,7 @@ class ConvertedFileModel implements \JsonSerializable {
      *
      * @return bool
      */
-    private function validateCode( $code ) {
+    private function validateCode( $code ): bool {
         $allowed = [
                 ConversionHandlerStatus::ZIP_HANDLING,
                 ConversionHandlerStatus::OK,
@@ -89,91 +89,85 @@ class ConvertedFileModel implements \JsonSerializable {
     /**
      * @return int
      */
-    public function getCode() {
+    public function getCode(): int {
         return $this->code;
     }
 
     /**
      * @return bool
      */
-    public function hasAnErrorCode() {
+    public function hasAnErrorCode(): bool {
         return $this->code <= 0;
     }
 
     /**
-     * @param string $messageError
-     * @param null   $debug
+     * @param string  $messageError
+     * @param ?string $debug
      */
-    public function addError( $messageError, $debug = null ) {
-        $this->errors[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-                'debug'   => $debug,
-        ];
+    public function addError( string $messageError, ?string $debug = null ) {
+        $this->error = $messageError;
+        $this->debug = $debug;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getErrors() {
-        return $this->errors;
+    public function getError(): ?string {
+        return $this->error;
     }
 
     /**
      * @return bool
      */
-    public function hasErrors() {
-        return !empty( $this->errors );
+    public function hasErrors(): bool {
+        return !empty( $this->error );
     }
 
     /**
-     * @param string $messageError
+     * @param string      $warningMessage
+     * @param string|null $debug
      */
-    public function addWarning( $messageError ) {
-        $this->warnings[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-        ];
+    public function addWarning( string $warningMessage, ?string $debug = null ) {
+        $this->warning = $warningMessage;
+        $this->debug   = $debug;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getWarnings() {
-        return $this->warnings;
+    public function getWarning(): ?string {
+        return $this->warning;
     }
 
     /**
      * @return bool
      */
     public function hasWarnings() {
-        return !empty( $this->warnings );
+        return !empty( $this->warning );
+    }
+
+    public function getDebug(): ?string {
+        return $this->debug;
+    }
+
+    /**
+     * @param array $data
+     *
+     * @return void
+     */
+    public function addData( array $data ) {
+        $this->internal_path_data = $data;
     }
 
     /**
      * @return array
      */
-    public function getData() {
-        return $this->data;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     */
-    public function addData( $key, $value ) {
-        $this->data[ $key ] = $value;
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
-                'code'     => $this->getCode(),
-                'errors'   => $this->getErrors(),
-                'warnings' => $this->getWarnings(),
-                'data'     => $this->getData(),
+                'code'    => $this->getCode(),
+                'error'   => $this->getError(),
+                'warning' => $this->getWarning(),
+                'debug'   => $this->getDebug(),
         ];
     }
 }

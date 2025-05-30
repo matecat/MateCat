@@ -30,16 +30,15 @@ class ConversionHandler {
     protected string                       $errDir;
     protected string                       $cookieDir;
     protected bool                         $stopOnFileException           = true;
-    protected ?object                      $uploadedFiles                 = null;
-    public bool                            $uploadError                   = false;
-    protected bool                         $_userIsLogged;
+    protected array                        $zipExtractionErrorFiles       = [];
+    public bool                            $zipExtractionErrorFlag        = false;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
      * @var FeatureSet
      */
-    public         $features;
-    protected bool $isReconversion = false;
+    public FeatureSet $features;
+    protected bool    $isReconversion = false;
 
     /**
      * ConversionHandler constructor.
@@ -146,7 +145,7 @@ class ConversionHandler {
             }
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
-                $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
+                $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental.", AbstractFilesStorage::basename_fix( $this->file_name ) );
             }
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
@@ -226,7 +225,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
@@ -241,6 +240,8 @@ class ConversionHandler {
             }
 
         }
+
+        $this->result->addData( [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ] );
 
         return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
     }
@@ -324,6 +325,10 @@ class ConversionHandler {
             return 'File conversion issue, please contact us at support@matecat.com';
         }
 
+        if ( strpos( $message, 'java.lang.' ) !== false ) {
+            return 'File conversion issue, please contact us at support@matecat.com';
+        }
+
         return $message;
     }
 
@@ -365,9 +370,9 @@ class ConversionHandler {
             try {
                 $stdResult = $uploadFile->uploadFiles( $filesArray );
 
-                if ( $this->uploadFailed( $stdResult ) ) {
-                    $this->uploadError   = true;
-                    $this->uploadedFiles = $stdResult;
+                if ( $this->zipExtractionFailed( $stdResult ) ) {
+                    $this->zipExtractionErrorFlag    = true;
+                    $this->zipExtractionErrorFiles[] = $stdResult;
                 }
 
             } catch ( Exception $e ) {
@@ -399,7 +404,7 @@ class ConversionHandler {
      *
      * @return bool
      */
-    public function uploadFailed( $stdResult ) {
+    public function zipExtractionFailed( $stdResult ): bool {
 
         $error = false;
 
@@ -420,8 +425,8 @@ class ConversionHandler {
     /**
      * @return mixed
      */
-    public function getUploadedFiles() {
-        return $this->uploadedFiles;
+    public function getZipExtractionErrorFiles(): array {
+        return $this->zipExtractionErrorFiles;
     }
 
 
@@ -544,17 +549,6 @@ class ConversionHandler {
      */
     public function setFeatures( FeatureSet $features ) {
         $this->features = $features;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $_userIsLogged
-     *
-     * @return $this
-     */
-    public function setUserIsLogged( $_userIsLogged ) {
-        $this->_userIsLogged = $_userIsLogged;
 
         return $this;
     }

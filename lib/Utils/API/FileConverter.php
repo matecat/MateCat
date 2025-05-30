@@ -5,7 +5,7 @@ use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
 use Langs\Languages;
 
-class ConvertFile {
+class FileConverter {
     private $file_name;
     private $source_lang;
     private $target_lang;
@@ -36,13 +36,9 @@ class ConvertFile {
      * @var bool
      */
     private bool $convertZipFile;
-    /**
-     * @var Users_UserStruct
-     */
-    private ?Users_UserStruct $user = null;
 
     /**
-     * ConvertFile constructor.
+     * FileConverter constructor.
      *
      * @param            $files
      * @param            $source_lang
@@ -65,7 +61,7 @@ class ConvertFile {
             $segmentation_rule,
             FeatureSet $featureSet,
             $filters_extraction_parameters = null,
-            $convertZipFile = true
+            bool $convertZipFile = true
     ) {
         $this->lang_handler   = Languages::getInstance();
         $this->files          = $files;
@@ -78,13 +74,6 @@ class ConvertFile {
         $this->segmentation_rule             = $segmentation_rule;
         $this->featureSet                    = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
-    }
-
-    /**
-     * @param Users_UserStruct $user
-     */
-    public function setUser( Users_UserStruct $user ) {
-        $this->user = $user;
     }
 
     /**
@@ -168,13 +157,12 @@ class ConvertFile {
         $conversionHandler->setIntDir( $this->intDir );
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setUserIsLogged( true );
         $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
 
         if ( $ext == "zip" ) {
             if ( $this->convertZipFile ) {
                 try {
-                    $this->handleZip( $conversionHandler );
+                    $this->handleZip( $conversionHandler ); //XXX zip files must be handled
                 } catch ( Exception $exception ) {
                     throw new DomainException( $exception->getMessage(), ConversionHandlerStatus::ZIP_HANDLING, $exception );
                 }
@@ -182,7 +170,7 @@ class ConvertFile {
                 throw new DomainException( "Nested zip files are not allowed.", ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED );
             }
         } else {
-            $conversionHandler->processConversion();
+            $x = $conversionHandler->processConversion();
             $result = $conversionHandler->getResult();
         }
 
@@ -202,8 +190,8 @@ class ConvertFile {
         $internalZipFileNames = $conversionHandler->extractZipFile();
         //call convertFileWrapper and start conversions for each file
 
-        if ( $conversionHandler->uploadError ) {
-            $fileErrors = $conversionHandler->getUploadedFiles();
+        if ( $conversionHandler->zipExtractionErrorFlag ) {
+            $fileErrors = $conversionHandler->getZipExtractionErrorFiles();
 
             foreach ( $fileErrors as $fileError ) {
                 if ( count( $fileError->error ) == 0 ) {
@@ -237,7 +225,7 @@ class ConvertFile {
             }
         } else {
             $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getError() );
 
             foreach ( $errors as $error ) {
                 throw new DomainException( $error[ 'message' ], $error[ 'code' ] );
@@ -247,7 +235,7 @@ class ConvertFile {
         }
 
         /* Do conversions here */
-        $converter = new ConvertFile(
+        $converter = new FileConverter(
                 $stdFileObjects,
                 $this->source_lang,
                 $this->target_lang,
@@ -261,7 +249,7 @@ class ConvertFile {
         );
 
         $converter->convertFiles();
-        $error = $converter->getErrors();
+        $error = $converter->getErroredFileNames();
 
         //$this->result->changeCode(ConversionHandlerStatus::ZIP_HANDLING);
 
@@ -283,20 +271,25 @@ class ConvertFile {
      * @return bool
      */
     public function hasErrors(): bool {
-        return count( $this->getErrors() ) > 0;
+        foreach ( $this->resultStack as $res ) {
+            if ( $res->hasAnErrorCode() ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
-     * Check on executed conversion results
+     * Check on executed conversion results and filter the stack to get errors only.
      * @return array
      */
-    public function getErrors(): array {
+    public function getErroredFileNames(): array {
         $errors = [];
 
-        /** @var ConvertedFileModel $res */
         foreach ( $this->resultStack as $res ) {
             if ( $res->hasAnErrorCode() ) {
-                $errors[] = $res->getErrors();
+                $errors[] = $res;
             }
         }
 

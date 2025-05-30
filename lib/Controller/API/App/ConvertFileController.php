@@ -7,7 +7,7 @@ use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use Constants;
 use ConversionHandler;
-use ConvertFile;
+use FileConverter;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -65,7 +65,6 @@ class ConvertFileController extends KleinController {
         $conversionHandler->setIntDir( $intDir );
         $conversionHandler->setErrDir( $errDir );
         $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setUserIsLogged( true );
         $conversionHandler->setFiltersExtractionParameters( $this->data[ 'filters_extraction_parameters' ] );
         $conversionHandler->setReconversion( $this->data[ 'restarted_conversion' ] );
 
@@ -74,6 +73,13 @@ class ConvertFileController extends KleinController {
         } else {
             $conversionHandler->processConversion();
             $result = $conversionHandler->getResult();
+
+            if ( $result->hasErrors() ) {
+                foreach ( $result->getError() as $error ) {
+                    throw new RuntimeException( $error[ 'message' ], $error[ 'code' ] );
+                }
+            }
+
         }
 
         $this->response->json( $result );
@@ -85,13 +91,13 @@ class ConvertFileController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $segmentation_rule             = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $filters_extraction_parameters = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $file_name                                 = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $restarted_conversion          = filter_var( $this->request->param( 'restarted_conversion' ), FILTER_VALIDATE_BOOLEAN );
+        $restarted_conversion                      = filter_var( $this->request->param( 'restarted_conversion' ), FILTER_VALIDATE_BOOLEAN );
 
         if ( empty( $file_name ) ) {
             throw new InvalidArgumentException( "Missing file name." );
@@ -192,8 +198,8 @@ class ConvertFileController extends KleinController {
         $internalZipFileNames = $conversionHandler->extractZipFile();
         //call convertFileWrapper and start conversions for each file
 
-        if ( $conversionHandler->uploadError ) {
-            $fileErrors = $conversionHandler->getUploadedFiles();
+        if ( $conversionHandler->zipExtractionErrorFlag ) {
+            $fileErrors = $conversionHandler->getZipExtractionErrorFiles();
 
             foreach ( $fileErrors as $fileError ) {
                 if ( count( $fileError->error ) == 0 ) {
@@ -232,7 +238,7 @@ class ConvertFileController extends KleinController {
             }
         } else {
             $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getError() );
 
             foreach ( $errors as $error ) {
                 throw new RuntimeException( $error );
@@ -241,7 +247,7 @@ class ConvertFileController extends KleinController {
 
         /* Do conversions here */
         foreach ( $stdFileObjects as $stdFileObject ) {
-            $convertFile = new ConvertFile(
+            $convertFile = new FileConverter(
                     [ $stdFileObject->name ],
                     $this->data[ 'source_lang' ],
                     $this->data[ 'target_lang' ],
@@ -257,7 +263,7 @@ class ConvertFileController extends KleinController {
             $convertFile->convertFiles();
 
             if ( $convertFile->hasErrors() ) {
-                foreach ( $convertFile->getErrors() as $error ) {
+                foreach ( $convertFile->getErroredFileNames() as $error ) {
                     throw new RuntimeException( $error );
                 }
             }

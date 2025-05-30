@@ -713,7 +713,6 @@ class Session {
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->session[ 'user' ]->email );
         $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setUserIsLogged( true );
 
         return $conversionHandler->processConversion();
 
