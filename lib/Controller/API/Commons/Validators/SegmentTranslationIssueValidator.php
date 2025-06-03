@@ -44,10 +44,10 @@ class SegmentTranslationIssueValidator extends Base {
      * @throws ValidationError
      * @throws Exception
      */
-    public function _validate() {
+    public function _validate(): void {
 
         //load validator for the segment translation
-        $validator = ( new SegmentTranslation( $this->request ) );
+        $validator = ( new SegmentTranslation( $this->controller ) );
         $validator->validate();
 
         $this->translation = $validator->translation;

@@ -3,6 +3,7 @@
 namespace API\Commons\Validators;
 
 use Exceptions\NotFoundException;
+use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 
@@ -17,13 +18,14 @@ class SegmentTranslation extends Base {
      * @return void
      * @throws NotFoundException
      */
-    protected function _validate() {
+    protected function _validate(): void {
         $this->ensureTranslationExists();
     }
 
     /**
      *
      * @throws NotFoundException
+     * @throws ReflectionException
      */
 
     private function ensureTranslationExists() {

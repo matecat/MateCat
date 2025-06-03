@@ -230,12 +230,12 @@ abstract class AbstractStatus {
             // increment job totals
             $job->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $job->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
-            $job->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+            $job->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
             // increment chunk totals
             $chunk->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $chunk->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
-            $chunk->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+            $chunk->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
             // increment project summary
             if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
@@ -243,7 +243,7 @@ abstract class AbstractStatus {
             }
             $project->getSummary()->incrementRaw( $segInfo[ 'raw_word_count' ] );
             $project->getSummary()->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
-            $project->getSummary()->incrementIndustry( $segInfo[ 'standard_word_count' ] );
+            $project->getSummary()->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
         }
 
@@ -266,7 +266,7 @@ abstract class AbstractStatus {
 
                 $project->setJob( $job );
                 $job->incrementIndustry( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
-                $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
+                $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ?? 0 ) );  //backward compatibility, some old projects may have this field set as null
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
 
                 $chunkStruct                = new Jobs_JobStruct();
@@ -283,7 +283,7 @@ abstract class AbstractStatus {
             }
 
             $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
-            $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0 );  //backward compatibility, some old projects may have this field set as null
             $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
 
             return $this;
