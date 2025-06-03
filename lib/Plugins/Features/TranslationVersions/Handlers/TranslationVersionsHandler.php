@@ -57,11 +57,11 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
      * TranslationVersionsHandler constructor.
      *
      * @param Jobs_JobStruct         $chunkStruct
-     * @param int                    $id_segment
+     * @param int|null               $id_segment
      * @param Users_UserStruct       $userStruct
      * @param Projects_ProjectStruct $projectStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct, int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public function __construct( Jobs_JobStruct $chunkStruct, ?int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;
@@ -224,7 +224,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
                 $propagatedSegmentAfterChange->translation         = $translation->translation;
                 $propagatedSegmentAfterChange->status              = $translation->status;
-                $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment;
+                $propagatedSegmentAfterChange->autopropagated_from = $translation->id_segment; // nullable
                 $propagatedSegmentAfterChange->time_to_edit        = 0;
 
                 $propagatedEvent = new TranslationEvent(

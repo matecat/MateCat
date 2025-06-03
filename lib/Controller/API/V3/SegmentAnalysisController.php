@@ -6,6 +6,7 @@ use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
+use DataAccess\IDaoStruct;
 use Exception;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
@@ -286,7 +287,7 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param \DataAccess\IDaoStruct $segmentForAnalysis
+     * @param IDaoStruct $segmentForAnalysis
      * @param array                 $projectPasswordsMap
      * @param array                 $notesAggregate
      * @param array                 $issuesAggregate
@@ -296,7 +297,7 @@ class SegmentAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function formatSegment( \DataAccess\IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
+    private function formatSegment( IDaoStruct $segmentForAnalysis, array $projectPasswordsMap, array $notesAggregate, array $issuesAggregate, array $idRequestsAggregate, ConstantsInterface $matchConstants ): array {
         // id_request
         $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 
@@ -327,7 +328,7 @@ class SegmentAnalysisController extends KleinController {
                 'target_lang'           => $segmentForAnalysis->target,
                 'source_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->segment, $segmentForAnalysis->source ),
                 'target_raw_word_count' => CatUtils::segment_raw_word_count( $segmentForAnalysis->translation, $segmentForAnalysis->target ),
-                'match_type'            => $matchConstants::toExternalMatchTypeName( $segmentForAnalysis->match_type ),
+                'match_type'            => $matchConstants::toExternalMatchTypeName( $segmentForAnalysis->match_type ?? 'default' ),
                 'revision_number'       => ( $segmentForAnalysis->source_page ) ? ReviewUtils::sourcePageToRevisionNumber( $segmentForAnalysis->source_page ) : null,
                 'issues'                => $issues,
                 'notes'                 => ( !empty( $notesAggregate[ $segmentForAnalysis->id ] ) ? $notesAggregate[ $segmentForAnalysis->id ] : [] ),
