@@ -28,7 +28,7 @@ class ConnectedServiceDao extends AbstractDao {
         $stmt = $conn->prepare(
                 "SELECT * FROM connected_services WHERE id = :id"
         );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute( [ 'id' => $id ] );
 
         return $stmt->fetch();
@@ -98,7 +98,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :uid AND id = :id "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'id' => $id_service ]
         );
@@ -120,7 +120,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :uid "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid ]
         );
@@ -143,7 +143,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :uid AND service = :service "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
@@ -166,7 +166,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :uid AND service = :service AND is_default LIMIT 1"
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
@@ -195,7 +195,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :uid AND service = :service AND email = :email "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ConnectedServiceStruct::class );
         $stmt->execute( [
                 'uid'     => $user->uid,
                 'service' => $service,
@@ -211,7 +211,7 @@ class ConnectedServiceDao extends AbstractDao {
                 " uid = :remote_id AND service = :service "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute( [
                 'service'   => $service,
                 'remote_id' => $remote_id
