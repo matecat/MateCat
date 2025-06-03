@@ -1,8 +1,9 @@
 <?php
 
 use Comments\OpenThreadsStruct;
+use DataAccess\AbstractDao;
 
-class Comments_CommentDao extends DataAccess_AbstractDao {
+class Comments_CommentDao extends AbstractDao {
 
     const TABLE       = "comments";
     const STRUCT_TYPE = "Comments_CommentStruct";

@@ -10,9 +10,8 @@
 namespace DataAccess;
 
 use ArrayAccess;
-use DataAccess_AbstractDaoObjectStruct;
 
-class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct implements ArrayAccess {
+class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess {
 
     use ArrayAccessTrait;
 

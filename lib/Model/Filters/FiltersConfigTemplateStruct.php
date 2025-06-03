@@ -2,7 +2,7 @@
 
 namespace Filters;
 
-use DataAccess_AbstractDaoSilentStruct;
+use DataAccess\AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
@@ -15,11 +15,11 @@ use Filters\DTO\Xml;
 use Filters\DTO\Yaml;
 use JsonSerializable;
 
-class FiltersConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 
     public ?int          $id            = null;
-    public string        $name;
-    public int           $uid;
+    public ?string       $name          = null;
+    public ?int          $uid           = null;
     public ?string       $created_at    = null;
     public ?string       $modified_at   = null;
     public ?string       $deleted_at    = null;

@@ -24,7 +24,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             'scope'         => "translate"
     ];
 
-    protected $_config = [
+    protected array $_config = [
             'segment'     => null,
             'translation' => null,
             'source'      => null,
@@ -51,6 +51,9 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();
@@ -73,7 +76,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
@@ -124,7 +127,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
     }
 
     protected function _formatRecursionError() {
-        return $this->_composeResponseAsMatch(
+        return $this->_composeMTResponseAsMatch(
                 '',
                 [
                         'error'          => [

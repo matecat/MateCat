@@ -9,12 +9,14 @@
 
 use ActivityLog\ActivityLogStruct;
 use Analysis\PayableRates;
+use API\Commons\Error;
 use API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
+use Files\FileDao;
 use Files\FilesPartsDao;
 use Files\FilesPartsStruct;
 use Files\MetadataDao;
@@ -203,8 +205,8 @@ class ProjectManager {
                             'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'mt_evaluation'                           => false,
-                            'tm_prioritization'                       => null
+                            'tm_prioritization'                       => null,
+                            'mt_qe_workflow_payable_rate'             => null
                     ] );
         }
 
@@ -246,8 +248,11 @@ class ProjectManager {
         $this->metadataDao = new MetadataDao();
     }
 
-    protected function _log( $_msg ) {
+    protected function _log( $_msg, ?Throwable $exception = null ) {
         Log::doJsonLog( $_msg );
+        if ( $exception ) {
+            Log::doJsonLog( ( new Error( $exception ) )->render( true ) );
+        }
     }
 
     /**
@@ -423,6 +428,12 @@ class ProjectManager {
         // pretranslate_101
         if ( isset( $this->projectStructure[ 'pretranslate_101' ] ) ) {
             $options[ 'pretranslate_101' ] = $this->projectStructure[ 'pretranslate_101' ];
+        }
+
+        // mt evaluation => ice_mt already in metadata
+        // add json parameters to the project metadata as json string
+        if ( $options[ 'mt_qe_workflow_enabled' ] ) {
+            $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
         }
 
         /**
@@ -658,7 +669,7 @@ class ProjectManager {
         try {
             $this->_pushTMXToMyMemory();
         } catch ( Exception $e ) {
-            $this->_log( $e->getMessage() );
+            $this->_log( $e->getMessage(), $e );
 
             //exit project creation
             return false;
@@ -732,7 +743,7 @@ class ProjectManager {
         try {
             $this->_zipFileHandling( $linkFiles );
         } catch ( Exception $e ) {
-            $this->_log( $e );
+            $this->_log( $e->getMessage(), $e );
             //Zip file Handling
             $this->projectStructure[ 'result' ][ 'errors' ][] = [
                     "code"    => $e->getCode(),
@@ -874,10 +885,9 @@ class ProjectManager {
                 } catch ( Exception $e ) {
 
                     $this->_log( $totalFilesStructure );
-                    $this->_log( "Code: " . $e->getCode() );
                     $this->_log( "Count fileSt.: " . count( $totalFilesStructure ) );
                     $this->_log( "Exceptions: " . $exceptionsFound );
-                    $this->_log( "Failed to parse " . $file_info[ 'original_filename' ] . " " . ( empty( $e->getPrevious() ) ? "" : $e->getPrevious()->getMessage() ) );
+                    $this->_log( "Failed to parse " . $file_info[ 'original_filename' ], $e );
 
                     if ( $e->getCode() == -1 && count( $totalFilesStructure ) > 1 && $exceptionsFound < count( $totalFilesStructure ) ) {
                         $this->_log( "No text to translate in the file {$e->getMessage()}." );
@@ -945,7 +955,7 @@ class ProjectManager {
                 ];
             }
 
-            $this->_log( $this->projectStructure[ 'result' ][ 'errors' ] );
+            $this->_log( "Exception", $e );
 
             //EXIT
             return false;
@@ -1044,7 +1054,7 @@ class ProjectManager {
             $output .= "Aborting...\n";
             $output .= "</pre>";
 
-            $this->_log( $output );
+            $this->_log( $output, $e );
 
             Utils::sendErrMailReport( $output, $e->getMessage() );
 
@@ -1074,11 +1084,10 @@ class ProjectManager {
     }
 
     private function __clearFailedProject( Exception $e ) {
-        $this->_log( $e->getMessage() );
-        $this->_log( $e->getTraceAsString() );
+        $this->_log( $e->getMessage(), $e );
         $this->_log( "Deleting Records." );
         ( new Projects_ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
-        ( new Files_FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
+        ( new FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
         $this->_log( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
         $this->_log( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
     }
@@ -1141,9 +1150,8 @@ class ProjectManager {
 
             # Handle the error, logging, ...
             $output = "**** Activity Log failed. AMQ Connection Error. **** ";
-            $output .= "{$e->getMessage()}";
             $output .= var_export( $activity, true );
-            $this->_log( $output );
+            $this->_log( $output, $e );
 
         }
 
@@ -1267,7 +1275,7 @@ class ProjectManager {
                             "code" => $e->getCode(), "message" => $e->getMessage()
                     ];
 
-                    $this->_log( $e->getMessage() . "\n" . $e->getTraceAsString() );
+                    $this->_log( $e->getMessage(), $e );
 
                     //exit project creation
                     throw new Exception( $e );
@@ -1320,8 +1328,12 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            // get payable rates
-            if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+            // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
+            if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
+                $payableRatesTemplate = null;
+                $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
+                // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $payableRates );
@@ -1363,7 +1375,7 @@ class ProjectManager {
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
             // Replace {{pid}} with project ID for new keys created with empty name
-            $projectStructure[ 'tm_keys' ] = str_replace("{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ]);
+            $projectStructure[ 'tm_keys' ] = str_replace( "{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ] );
 
             $newJob                    = new Jobs_JobStruct();
             $newJob->password          = $password;
@@ -1420,11 +1432,6 @@ class ProjectManager {
                 }
             }
 
-            // mt evaluation => ice_mt
-            if ( $this->projectStructure[ 'mt_evaluation' ] ) {
-                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'mt_evaluation', true );
-            }
-
             try {
                 if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) and $payableRatesTemplate !== null ) {
                     CustomPayableRateDao::assocModelToJob(
@@ -1446,7 +1453,7 @@ class ProjectManager {
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
-                Files_FileDao::insertFilesJob( $newJob->id, $fid );
+                FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
@@ -1708,7 +1715,7 @@ class ProjectManager {
                 $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
                 $output .= "{$e->getMessage()}";
                 $output .= var_export( $job, true );
-                $this->_log( $output );
+                $this->_log( $output, $e );
             }
         }
 
@@ -1785,7 +1792,7 @@ class ProjectManager {
 
             $first_job[ 'tm_keys' ] = json_encode( $owner_tm_keys );
         } catch ( Exception $e ) {
-            $this->_log( __METHOD__ . " -> Merge Jobs error - TM key problem: " . $e->getMessage() );
+            $this->_log( __METHOD__ . " -> Merge Jobs error - TM key problem", $e );
         }
 
         $totalAvgPee     = 0;
@@ -1891,10 +1898,10 @@ class ProjectManager {
 
             // files-part
             if ( isset( $xliff_file[ 'attr' ][ 'original' ] ) ) {
-                $filesPartsStruct          = new FilesPartsStruct();
-                $filesPartsStruct->id_file = $fid;
-                $filesPartsStruct->key     = 'original';
-                $filesPartsStruct->value   = $xliff_file[ 'attr' ][ 'original' ];
+                $filesPartsStruct            = new FilesPartsStruct();
+                $filesPartsStruct->id_file   = $fid;
+                $filesPartsStruct->tag_key   = 'original';
+                $filesPartsStruct->tag_value = $xliff_file[ 'attr' ][ 'original' ];
 
                 $filePartsId = ( new FilesPartsDao() )->insert( $filesPartsStruct );
 
@@ -3077,7 +3084,7 @@ class ProjectManager {
                     // assign TMX name to the key
 
                     // NOTE 2025-05-08: Replace {{pid}} with project ID for new keys created with empty name
-                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? str_replace("{{pid}}", $this->projectStructure[ 'id_project' ], $_tmKey[ 'name' ]) : $firstTMXFileName );
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? str_replace( "{{pid}}", $this->projectStructure[ 'id_project' ], $_tmKey[ 'name' ] ) : $firstTMXFileName );
 
                     $newMemoryKey->tm_key = $newTmKey;
                     $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
@@ -3095,7 +3102,7 @@ class ProjectManager {
                 $featuresSet->run( 'postTMKeyCreation', $memoryKeysToBeInserted, $this->projectStructure[ 'uid' ] );
 
             } catch ( Exception $e ) {
-                $this->_log( $e->getMessage() );
+                $this->_log( $e->getMessage(), $e );
 
                 # Here we handle the error, displaying HTML, logging, ...
                 $output = "<pre>\n";

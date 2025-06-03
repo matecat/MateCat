@@ -10,10 +10,10 @@
 namespace Comments;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class OpenThreadsStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class OpenThreadsStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public int $id_project;
     public string $password;

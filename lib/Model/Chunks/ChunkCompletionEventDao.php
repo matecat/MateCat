@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Features\ProjectCompletion\CompletionEventStruct;
 
-class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
+class Chunks_ChunkCompletionEventDao extends AbstractDao {
 
     const REVISE    = 'revise';
     const TRANSLATE = 'translate';

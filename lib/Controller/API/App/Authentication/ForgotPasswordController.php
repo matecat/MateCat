@@ -9,8 +9,7 @@
 
 namespace API\App\Authentication;
 
-use API\App\RateLimiterTrait;
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Exceptions\ValidationError;
 use Exception;
 use FlashMessage;
@@ -19,6 +18,7 @@ use Klein\Response;
 use Log;
 use Predis\PredisException;
 use Routes;
+use Traits\RateLimiterTrait;
 use Users\Authentication\PasswordResetModel;
 use Users\Authentication\SignupModel;
 use Utils;

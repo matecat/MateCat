@@ -2,8 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\AbstractStatefulKleinController;
-use API\Commons\KleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
@@ -19,7 +18,6 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
-use Klein\Response;
 use Langs\Languages;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
@@ -31,6 +29,7 @@ use Projects_MetadataDao;
 use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
+use Teams\TeamStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Utils;
@@ -53,190 +52,190 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function create(): Response {
-        try {
-            $this->featureSet->loadFromUserEmail( $this->user->email );
-            $this->data = $this->validateTheRequest();
+    /**
+     * @throws Exception
+     */
+    public function create(): void {
 
-            $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-            $default_project_name = $arFiles[ 0 ];
+        $this->featureSet->loadFromUserEmail( $this->user->email );
+        $this->data = $this->validateTheRequest();
 
-            if ( count( $arFiles ) > 1 ) {
-                $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
-            }
+        $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
+        $default_project_name = $arFiles[ 0 ];
 
-            if ( empty( $this->data[ 'project_name' ] ) ) {
-                $this->data[ 'project_name' ] = $default_project_name;
-            }
+        if ( count( $arFiles ) > 1 ) {
+            $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
+        }
 
-            // SET SOURCE COOKIE
-            CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
-                    [
-                            'expires'  => time() + ( 86400 * 365 ),
-                            'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
-                            'secure'   => true,
-                            'httponly' => true,
-                            'samesite' => 'None',
-                    ]
-            );
+        if ( empty( $this->data[ 'project_name' ] ) ) {
+            $this->data[ 'project_name' ] = $default_project_name;
+        }
 
-            // SET TARGET COOKIE
-            CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $this->data[ 'target_lang' ],
-                    [
-                            'expires'  => time() + ( 86400 * 365 ),
-                            'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
-                            'secure'   => true,
-                            'httponly' => true,
-                            'samesite' => 'None',
-                    ]
-            );
+        // SET SOURCE COOKIE
+        CookieManager::setCookie( Constants::COOKIE_SOURCE_LANG, $this->data[ 'source_lang' ],
+                [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
-            //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
+        // SET TARGET COOKIE
+        CookieManager::setCookie( Constants::COOKIE_TARGET_LANG, $this->data[ 'target_lang' ],
+                [
+                        'expires'  => time() + ( 86400 * 365 ),
+                        'path'     => '/',
+                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'secure'   => true,
+                        'httponly' => true,
+                        'samesite' => 'None',
+                ]
+        );
 
-            $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-            $newArFiles = [];
-            $fs         = FilesStorageFactory::create();
+        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
-            foreach ( $arFiles as $__fName ) {
-                if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $newArFiles = [];
+        $fs         = FilesStorageFactory::create();
 
-                    $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
+        foreach ( $arFiles as $__fName ) {
+            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
 
-                    $linkFiles = scandir( $uploadDir );
+                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
 
-                    //fetch cache links, created by converter, from upload directory
-                    foreach ( $linkFiles as $storedFileName ) {
-                        //check if file begins with the name of the zip file.
-                        // If so, then it was stored in the zip file.
-                        if ( strpos( $storedFileName, $__fName ) !== false &&
-                                substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
-                            //add file name to the files array
-                            $newArFiles[] = $storedFileName;
-                        }
-                    }
+                $linkFiles = scandir( $uploadDir );
 
-                } else { //this file was not in a zip. Add it normally
-
-                    if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                        $newArFiles[] = $__fName;
+                //fetch cache links, created by converter, from upload directory
+                foreach ( $linkFiles as $storedFileName ) {
+                    //check if file begins with the name of the zip file.
+                    // If so, then it was stored in the zip file.
+                    if ( strpos( $storedFileName, $__fName ) !== false &&
+                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
+                        //add file name to the files array
+                        $newArFiles[] = $storedFileName;
                     }
                 }
+
+            } else { //this file was not in a zip. Add it normally
+
+                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
+                    $newArFiles[] = $__fName;
+                }
             }
-
-            $arFiles = $newArFiles;
-            $arMeta  = [];
-
-            // create array_files_meta
-            foreach ( $arFiles as $arFile ) {
-                $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
-            }
-
-            $projectManager   = new ProjectManager();
-            $projectStructure = $projectManager->getProjectStructure();
-
-            $projectStructure[ 'project_name' ]                          = $this->data[ 'project_name' ];
-            $projectStructure[ 'private_tm_key' ]                        = $this->data[ 'private_tm_key' ];
-            $projectStructure[ 'uploadToken' ]                           = $_COOKIE[ 'upload_token' ];
-            $projectStructure[ 'array_files' ]                           = $arFiles; //list of file name
-            $projectStructure[ 'array_files_meta' ]                      = $arMeta; //list of file metadata
-            $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
-            $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
-            $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
-            $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
-            $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ];
-            $projectStructure[ 'status' ]                                = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
-            $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
-            $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
-            $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
-            $projectStructure[ 'only_private' ]                          = $this->data[ 'only_private' ];
-            $projectStructure[ 'due_date' ]                              = $this->data[ 'due_date' ];
-            $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
-            $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-            $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-            $projectStructure[ 'dictation' ]                             = (!empty($this->data[ 'dictation' ])) ? $this->data[ 'dictation' ] : null;
-            $projectStructure[ 'show_whitespace' ]                       = (!empty($this->data[ 'show_whitespace' ])) ? $this->data[ 'show_whitespace' ] : null;
-            $projectStructure[ 'character_counter' ]                     = (!empty($this->data[ 'character_counter' ])) ? $this->data[ 'character_counter' ] : null;
-            $projectStructure[ 'ai_assistant' ]                          = (!empty($this->data[ 'ai_assistant' ])) ? $this->data[ 'ai_assistant' ] : null;
-            $projectStructure[ 'tm_prioritization' ]                     = (!empty($this->data[ 'tm_prioritization' ])) ? $this->data[ 'tm_prioritization' ] : null;
-            $projectStructure[ 'character_counter_mode' ]                = (!empty($this->data[ 'character_counter_mode' ])) ? $this->data[ 'character_counter_mode' ] : null;
-            $projectStructure[ 'character_counter_count_tags' ]          = (!empty($this->data[ 'character_counter_count_tags' ])) ? $this->data[ 'character_counter_count_tags' ] : null;
-
-            // GDrive session instance
-            if(isset($_SESSION[ "gdrive_session" ])){
-                $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
-                $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
-            }
-
-            // MMT Glossaries
-            // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-            $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
-            if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
-                $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
-            }
-
-            // DeepL
-            if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_formality' ] !== null ) {
-                $projectStructure[ 'deepl_formality' ] = $this->data[ 'deepl_formality' ];
-            }
-
-            if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
-                $projectStructure[ 'deepl_id_glossary' ] = $this->data[ 'deepl_id_glossary' ];
-            }
-
-            if ( !empty( $this->data[ 'filters_extraction_parameters' ] ) ) {
-                $projectStructure[ 'filters_extraction_parameters' ] = $this->data[ 'filters_extraction_parameters' ];
-            }
-
-            if ( !empty( $this->data[ 'xliff_parameters' ] ) ) {
-                $projectStructure[ 'xliff_parameters' ] = $this->data[ 'xliff_parameters' ];
-            }
-
-            // with the qa template id
-            if ( !empty( $this->data[ 'qa_model_template' ] ) ) {
-                $projectStructure[ 'qa_model_template' ] = $this->data[ 'qa_model_template' ]->getDecodedModel();
-            }
-
-            if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
-                $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
-            }
-
-            //TODO enable from CONFIG
-            $projectStructure[ 'metadata' ] = $this->metadata;
-
-            $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->user->uid;
-            $projectStructure[ 'id_customer' ]  = $this->user->email;
-            $projectStructure[ 'owner' ]        = $this->user->email;
-            $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
-
-            //set features override
-            $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
-
-            //reserve a project id from the sequence
-            $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
-            $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
-
-            $projectManager->sanitizeProjectStructure();
-            $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
-
-            Queue::sendProject( $projectStructure );
-
-            $this->clearSessionFiles();
-            $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );
-
-            return $this->response->json( [
-                    'data'   => [
-                            'id_project' => (int)$projectStructure[ 'id_project' ],
-                            'password'   => $projectStructure[ 'ppassword' ]
-                    ],
-                    'errors' => [],
-            ] );
-
-        } catch ( Exception $exception ) {
-            return $this->returnException( $exception );
         }
+
+        $arFiles = $newArFiles;
+        $arMeta  = [];
+
+        // create array_files_meta
+        foreach ( $arFiles as $arFile ) {
+            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
+        }
+
+        $projectManager   = new ProjectManager();
+        $projectStructure = $projectManager->getProjectStructure();
+
+        $projectStructure[ 'project_name' ]                          = $this->data[ 'project_name' ];
+        $projectStructure[ 'private_tm_key' ]                        = $this->data[ 'private_tm_key' ];
+        $projectStructure[ 'uploadToken' ]                           = $_COOKIE[ 'upload_token' ];
+        $projectStructure[ 'array_files' ]                           = $arFiles; //list of file name
+        $projectStructure[ 'array_files_meta' ]                      = $arMeta; //list of file metadata
+        $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
+        $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
+        $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
+        $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
+        $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
+        $projectStructure[ 'status' ]                                = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
+        $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
+        $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
+        $projectStructure[ 'only_private' ]                          = $this->data[ 'only_private' ];
+        $projectStructure[ 'due_date' ]                              = $this->data[ 'due_date' ];
+        $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
+        $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'dictation' ]                             = ( !empty( $this->data[ 'dictation' ] ) ) ? $this->data[ 'dictation' ] : null;
+        $projectStructure[ 'show_whitespace' ]                       = ( !empty( $this->data[ 'show_whitespace' ] ) ) ? $this->data[ 'show_whitespace' ] : null;
+        $projectStructure[ 'character_counter' ]                     = ( !empty( $this->data[ 'character_counter' ] ) ) ? $this->data[ 'character_counter' ] : null;
+        $projectStructure[ 'ai_assistant' ]                          = ( !empty( $this->data[ 'ai_assistant' ] ) ) ? $this->data[ 'ai_assistant' ] : null;
+        $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
+        $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
+        $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
+
+        // GDrive session instance
+        if(isset($_SESSION[ "gdrive_session" ])){
+            $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
+            $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
+        }
+
+        // MMT Glossaries
+        // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
+        $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
+        if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
+            $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
+        }
+
+        // DeepL
+        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_formality' ] !== null ) {
+            $projectStructure[ 'deepl_formality' ] = $this->data[ 'deepl_formality' ];
+        }
+
+        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
+            $projectStructure[ 'deepl_id_glossary' ] = $this->data[ 'deepl_id_glossary' ];
+        }
+
+        if ( !empty( $this->data[ 'filters_extraction_parameters' ] ) ) {
+            $projectStructure[ 'filters_extraction_parameters' ] = $this->data[ 'filters_extraction_parameters' ];
+        }
+
+        if ( !empty( $this->data[ 'xliff_parameters' ] ) ) {
+            $projectStructure[ 'xliff_parameters' ] = $this->data[ 'xliff_parameters' ];
+        }
+
+        // with the qa template id
+        if ( !empty( $this->data[ 'qa_model_template' ] ) ) {
+            $projectStructure[ 'qa_model_template' ] = $this->data[ 'qa_model_template' ]->getDecodedModel();
+        }
+
+        if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
+            $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
+        }
+
+        //TODO enable from CONFIG
+        $projectStructure[ 'metadata' ] = $this->metadata;
+
+        $projectStructure[ 'userIsLogged' ] = true;
+        $projectStructure[ 'uid' ]          = $this->user->uid;
+        $projectStructure[ 'id_customer' ]  = $this->user->email;
+        $projectStructure[ 'owner' ]        = $this->user->email;
+        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
+
+        //set features override
+        $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
+
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
+
+        $projectManager->sanitizeProjectStructure();
+        $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
+
+        Queue::sendProject( $projectStructure );
+
+        $this->clearSessionFiles();
+        $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );
+
+        $this->response->json( [
+                'data'   => [
+                        'id_project' => (int)$projectStructure[ 'id_project' ],
+                        'password'   => $projectStructure[ 'ppassword' ]
+                ],
+                'errors' => [],
+        ] );
+
     }
 
     /**
@@ -295,7 +294,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( $array_keys ) { // some keys are selected from panel
 
             //remove duplicates
-            foreach ( $array_keys as $pos => $value ) {
+            foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
@@ -313,7 +312,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
         $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
         $private_tm_key   = $postPrivateTmKey;
-        $only_private     = ( is_null( $get_public_matches ) ? false : !$get_public_matches );
+        $only_private     = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
         $data = [
@@ -324,26 +323,26 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'job_subject'                   => $job_subject,
                 'pretranslate_100'              => $pretranslate_100,
                 'pretranslate_101'              => $pretranslate_101,
-                'tm_prioritization'             => (!empty($tm_prioritization)) ? $tm_prioritization : null,
+                'tm_prioritization'             => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
                 'id_team'                       => $id_team,
-                'mmt_glossaries'                => (!empty($mmt_glossaries)) ? $mmt_glossaries : null,
-                'deepl_id_glossary'             => (!empty($deepl_id_glossary)) ? $deepl_id_glossary : null,
-                'deepl_formality'               => (!empty($deepl_formality)) ? $deepl_formality : null,
+                'mmt_glossaries'                => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+                'deepl_id_glossary'             => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+                'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
-                'dictation'                     => (!empty($dictation)) ? $dictation : null,
-                'show_whitespace'               => (!empty($show_whitespace)) ? $show_whitespace : null,
-                'character_counter'             => (!empty($character_counter)) ? $character_counter : null,
-                'character_counter_count_tags'  => (!empty($character_counter_count_tags)) ? $character_counter_count_tags : null,
-                'character_counter_mode'        => (!empty($character_counter_mode)) ? $character_counter_mode : null,
-                'ai_assistant'                  => (!empty($ai_assistant)) ? $ai_assistant : null,
-                'dialect_strict'                => (!empty($dialect_strict)) ? $dialect_strict : null,
-                'filters_extraction_parameters' => (!empty($filters_extraction_parameters)) ? $filters_extraction_parameters : null,
-                'xliff_parameters'              => (!empty($xliff_parameters)) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'  => (!empty($xliff_parameters_template_id)) ? $xliff_parameters_template_id : null,
-                'qa_model_template_id'          => (!empty($qa_model_template_id)) ? $qa_model_template_id : null,
-                'payable_rate_template_id'      => (!empty($payable_rate_template_id)) ? $payable_rate_template_id : null,
-                'array_keys'                    => (!empty($array_keys)) ? $array_keys : [],
+                'dictation'                     => ( !empty( $dictation ) ) ? $dictation : null,
+                'show_whitespace'               => ( !empty( $show_whitespace ) ) ? $show_whitespace : null,
+                'character_counter'             => ( !empty( $character_counter ) ) ? $character_counter : null,
+                'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+                'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+                'ai_assistant'                  => ( !empty( $ai_assistant ) ) ? $ai_assistant : null,
+                'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+                'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+                'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+                'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+                'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
                 'postPrivateTmKey'              => $postPrivateTmKey,
                 'mt_engine'                     => $mt_engine,
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
@@ -393,9 +392,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
     /**
      * @param $elem
+     *
      * @return array
      */
-    private static function sanitizeTmKeyArr( $elem ) {
+    private static function sanitizeTmKeyArr( $elem ): array {
         $element                  = new TmKeyManagement_TmKeyStruct( $elem );
         $element->complete_format = true;
         $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
@@ -479,7 +479,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     /**
      * Check if MT engine (except MyMemory) belongs to user
      *
-     * @param $mt_engine
+     * @param int $mt_engine
      *
      * @return int
      */
@@ -492,7 +492,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             }
         }
 
-        return (int)$mt_engine;
+        return $mt_engine;
     }
 
     /**
@@ -571,7 +571,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @param null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
-     * @throws \Exception
+     * @throws Exception
      */
     private function validatePayableRateTemplate( $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
@@ -651,6 +651,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     /**
      * @param null $xliff_parameters
      * @param null $xliff_parameters_template_id
+     *
      * @return array|null
      * @throws Exception
      */
@@ -722,10 +723,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
     /**
      * @param null $id_team
      *
-     * @return \Teams\TeamStruct|null
+     * @return TeamStruct|null
      * @throws Exception
      */
-    private function setTeam( $id_team = null ) {
+    private function setTeam( $id_team = null ): ?TeamStruct {
         if ( is_null( $id_team ) ) {
             return $this->user->getPersonalTeam();
         }
@@ -748,7 +749,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      *
      * @throws Exception
      */
-    private function getFileMetadata( $filename ) {
+    private function getFileMetadata( $filename ): array {
         $info          = XliffProprietaryDetect::getInfo( $filename );
         $isXliff       = XliffFiles::isXliff( $filename );
         $isGlossary    = XliffFiles::isGlossaryFile( $filename );

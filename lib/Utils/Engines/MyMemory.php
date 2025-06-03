@@ -3,6 +3,7 @@
 use API\Commons\Exceptions\AuthenticationError;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
@@ -29,12 +30,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @var string
      */
-    protected $content_type = 'json';
+    protected string $content_type = 'json';
 
     /**
      * @var array
      */
-    protected $_config = [
+    protected array $_config = [
             'dataRefMap'    => [],
             'segment'       => null,
             'translation'   => null,
@@ -80,7 +81,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        $dataRefMap = isset( $this->_config[ 'dataRefMap' ] ) ? $this->_config[ 'dataRefMap' ] : [];
+        $dataRefMap = $this->_config[ 'dataRefMap' ] ?? [];
 
         switch ( $functionName ) {
 
@@ -160,9 +161,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @param $prefix
      *
-     * @return array
+     * @return void
      */
-    private function rebuildResult( $prefix ) {
+    private function rebuildResults( $prefix ): void {
 
         if ( !empty( $this->result->responseData[ 'translatedText' ] ) ) {
             $this->result->responseData[ 'translatedText' ] = $prefix . $this->result->responseData[ 'translatedText' ];
@@ -177,9 +178,33 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             }
         }
 
-        return $this->result;
-
     }
+
+    private function reorderResults(): void {
+        if ( !empty( $this->result->matches ) ) {
+            /** @var $match Engines_Results_MyMemory_Matches */
+            foreach ( $this->result->matches as $match ) {
+                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+
+                    $match->match = $this->getStandardPenaltyString();
+
+                    //reorder after penalty modification
+                    usort( $this->result->matches, function ( $a, $b ): int {
+                        /** @var $a Engines_Results_MyMemory_Matches */
+                        /** @var $b Engines_Results_MyMemory_Matches */
+                        if ( floatval( $a->match ) == floatval( $b->match ) ) {
+                            return 0;
+                        }
+
+                        return ( floatval( $a->match ) < floatval( $b->match ) ? 1 : -1 ); //SORT DESC !!!!!!! INVERT MINUS SIGN
+                        //this is necessary since usort sorts is ascending order, thus inverting the ranking
+                    } );
+
+                }
+            }
+        }
+    }
+
 
     /**
      * @param $_config
@@ -248,8 +273,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( "translate_relative_url", $parameters, true );
 
         if ( isset( $segment_file_chr[ 1 ] ) ) {
-            $this->rebuildResult( $segment_file_chr[ 1 ] );
+            $this->rebuildResults( $segment_file_chr[ 1 ] );
         }
+
+        $this->reorderResults();
 
         return $this->result;
 
@@ -370,18 +397,18 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * Check the entry status on myMemory
      *
      * @param string $uuid
+     *
      * @return array
      */
-    public function entryStatus( string $uuid )
-    {
+    public function entryStatus( string $uuid ) {
         $this->call( "entry_status_relative_url", [
-            'uuid' => $uuid
+                'uuid' => $uuid
         ], false );
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
-                CURLOPT_TIMEOUT => 1
-            ]
+                        CURLOPT_TIMEOUT => 1
+                ]
         );
 
         /**
@@ -772,7 +799,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         if ( !$this->result->responseStatus == 200 ) {
             Log::doJsonLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
-            throw new Exception( "Error: The private TM key you entered ( $apiKey ) seems to be invalid. Please, check that the key is correct.", -2 );
+            throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 
         $isValidKey = filter_var( $this->result->responseData, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
@@ -858,7 +885,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ] );
 
         $this->getEngineRecord()->base_url                    = parse_url( $this->getEngineRecord()->base_url, PHP_URL_HOST ) . ":10000";
-        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
+        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/pippo/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
         $this->call( 'tags_projection', $parameters );
 
         if ( !empty( $this->result->responseData ) ) {

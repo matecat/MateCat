@@ -10,34 +10,35 @@ namespace API\V3\Json;
 
 use API\App\Json\OutsourceConfirmation;
 use API\V2\Json\JobTranslator;
-use API\V2\Json\ProjectUrls;
 use Constants;
-use DataAccess\ShapelessConcreteStruct;
+use Exception;
+use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Langs\Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
-use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Utils;
 use WordCount\WordCountStruct;
 
 class Chunk extends \API\V2\Json\Chunk {
 
-    protected $chunk_reviews;
-    protected $chunk;
+    protected array          $chunk_reviews = [];
+    protected Jobs_JobStruct $chunk;
 
     /**
-     * @param \Jobs_JobStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return array
-     * @throws \Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws Exception
+     * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ) {
+    public function renderOne( Jobs_JobStruct $chunk ): array {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
@@ -56,9 +57,9 @@ class Chunk extends \API\V2\Json\Chunk {
      * @param FeatureSet              $featureSet
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ) {
+    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $this->chunk   = $chunk;
         $outsourceInfo = $chunk->getOutsource();
@@ -92,18 +93,18 @@ class Chunk extends \API\V2\Json\Chunk {
                 'subject_printable'       => $subjectsHashMap[ $chunk->subject ],
                 'owner'                   => $chunk->owner,
                 'time_to_edit'            => $this->getTimeToEditArray( $chunk->id ),
-                'total_time_to_edit'      => (int)$chunk->total_time_to_edit,
+                'total_time_to_edit'      => $chunk->total_time_to_edit,
                 'avg_post_editing_effort' => (float)$chunk->avg_post_editing_effort,
                 'open_threads_count'      => (int)$chunk->getOpenThreadsCount(),
                 'created_at'              => Utils::api_timestamp( $chunk->create_date ),
                 'pee'                     => $chunk->getPeeForTranslatedSegments(),
                 'private_tm_key'          => $this->getKeyList( $chunk ),
                 'warnings_count'          => $warningsCount->warnings_count,
-                'warning_segments'        => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
+                'warning_segments'        => ( $warningsCount->warning_segments ?? [] ),
                 'stats'                   => $jobStats,
                 'outsource'               => $outsource,
                 'translator'              => $translator,
-                'total_raw_wc'            => (int)$chunk->total_raw_wc,
+                'total_raw_wc'            => $chunk->total_raw_wc,
                 'standard_wc'             => (float)$chunk->standard_analysis_wc,
         ];
 
@@ -112,33 +113,20 @@ class Chunk extends \API\V2\Json\Chunk {
 
         $result = array_merge( $result, ( new QualitySummary( $chunk, $project ) )->render( $chunkReviewsList ) );
 
-        foreach ( $chunkReviewsList as $index => $chunkReview ) {
+        foreach ( $chunkReviewsList as $chunkReview ) {
             $result = static::populateRevisePasswords( $chunkReview, $result );
         }
 
+        return $this->fillUrls( $result, $chunk, $project, $featureSet );
 
-        /**
-         * @var $projectData ShapelessConcreteStruct[]
-         */
-        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
-
-        $formatted = new ProjectUrls( $projectData );
-
-        /** @var $formatted ProjectUrls */
-        $formatted = $featureSet->filter( 'projectUrls', $formatted );
-
-        $urlsObject       = $formatted->render( true );
-        $result[ 'urls' ] = $urlsObject[ 'jobs' ][ $chunk->id ][ 'chunks' ][ $chunk->password ];
-
-        $result[ 'urls' ][ 'original_download_url' ]    = $urlsObject[ 'jobs' ][ $chunk->id ][ 'original_download_url' ];
-        $result[ 'urls' ][ 'translation_download_url' ] = $urlsObject[ 'jobs' ][ $chunk->id ][ 'translation_download_url' ];
-        $result[ 'urls' ][ 'xliff_download_url' ]       = $urlsObject[ 'jobs' ][ $chunk->id ][ 'xliff_download_url' ];
-
-        return $result;
     }
 
-    protected function getChunkReviews() {
-        if ( is_null( $this->chunk_reviews ) ) {
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    protected function getChunkReviews(): array {
+        if ( empty( $this->chunk_reviews ) ) {
             $this->chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
         }
 
@@ -146,13 +134,25 @@ class Chunk extends \API\V2\Json\Chunk {
     }
 
     /**
+     * @param ChunkReviewStruct[] $chunk_reviews
+     *
+     * @return void
+     */
+    public function setChunkReviews( array $chunk_reviews ): Chunk {
+        $this->chunk_reviews = $chunk_reviews;
+
+        return $this;
+    }
+
+    /**
      * @param $chunk_id
      *
      * @return array
+     * @throws ReflectionException
      */
-    protected function getTimeToEditArray( $chunk_id ) {
+    protected function getTimeToEditArray( $chunk_id ): array {
 
-        $jobDao   = new \Jobs_JobDao();
+        $jobDao   = new Jobs_JobDao();
         $tteT     = (int)$jobDao->getTimeToEdit( $chunk_id, 1 )[ 'tte' ];
         $tteR1    = (int)$jobDao->getTimeToEdit( $chunk_id, 2 )[ 'tte' ];
         $tteR2    = (int)$jobDao->getTimeToEdit( $chunk_id, 3 )[ 'tte' ];
