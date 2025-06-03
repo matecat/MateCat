@@ -6,11 +6,11 @@ use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use Constants;
-use ConversionHandler;
-use FileConverter;
+use Conversion\ConversionHandler;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
+use FilesConverter;
 use FilesStorage\AbstractFilesStorage;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
@@ -247,7 +247,7 @@ class ConvertFileController extends KleinController {
 
         /* Do conversions here */
         foreach ( $stdFileObjects as $stdFileObject ) {
-            $convertFile = new FileConverter(
+            $convertFile = new FilesConverter(
                     [ $stdFileObject->name ],
                     $this->data[ 'source_lang' ],
                     $this->data[ 'target_lang' ],
@@ -263,7 +263,7 @@ class ConvertFileController extends KleinController {
             $convertFile->convertFiles();
 
             if ( $convertFile->hasErrors() ) {
-                foreach ( $convertFile->getErroredFileNames() as $error ) {
+                foreach ( $convertFile->getErrors() as $error ) {
                     throw new RuntimeException( $error );
                 }
             }

@@ -28,9 +28,9 @@ class ConvertedFileModel implements JsonSerializable {
     private ?string $debug = null;
 
     /**
-     * @var array
+     * @var InternalHashPaths|null
      */
-    private array $internal_path_data = [ 'cacheHash' => null, 'diskHash' => null ];
+    private ?InternalHashPaths $_internal_path_data = null;
 
     /**
      * ConvertFileModel constructor.
@@ -155,8 +155,16 @@ class ConvertedFileModel implements JsonSerializable {
      *
      * @return void
      */
-    public function addData( array $data ) {
-        $this->internal_path_data = $data;
+    public function addData( InternalHashPaths $data ) {
+        $this->_internal_path_data = $data;
+    }
+
+    public function getData(): InternalHashPaths {
+        return $this->_internal_path_data ?? new InternalHashPaths();
+    }
+
+    public function hasData(): bool {
+        return !empty( $this->_internal_path_data ) && !$this->_internal_path_data->isEmpty();
     }
 
     /**

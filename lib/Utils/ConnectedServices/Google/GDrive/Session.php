@@ -13,7 +13,7 @@ use ArrayObject;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
-use ConversionHandler;
+use Conversion\ConversionHandler;
 use DirectoryIterator;
 use Exception;
 use Exceptions\NotFoundException;

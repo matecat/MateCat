@@ -1,19 +1,27 @@
 <?php
 
+namespace Conversion;
+
 use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertedFileModel;
+use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesStorage\FilesStorageFactory;
+use Filters;
 use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateStruct;
 use Filters\OCRCheck;
+use INIT;
+use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
+use Upload;
+use ZipArchiveExtended;
 
 class ConversionHandler {
 
@@ -65,7 +73,7 @@ class ConversionHandler {
      * @throws AuthenticationError
      * @throws Exception
      */
-    public function processConversion(): ?array {
+    public function processConversion(): void {
 
         $fs        = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
@@ -74,14 +82,14 @@ class ConversionHandler {
             $this->result->changeCode( ConversionHandlerStatus::UPLOAD_ERROR );
             $this->result->addError( "Error during upload. Please retry.", AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-            return null;
+            return;
         }
 
         //XLIFF Conversion management
         $fileMustBeConverted = $this->fileMustBeConverted();
 
         if ( $fileMustBeConverted === false ) {
-            return null;
+            return;
         } else {
             if ( $fileMustBeConverted === true ) {
                 //Continue with conversion
@@ -97,7 +105,7 @@ class ConversionHandler {
                 $this->result->addError( 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
                         AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return null;
+                return;
             }
         }
 
@@ -141,7 +149,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_ERROR );
                 $this->result->addError( "File is not valid. OCR for RTL languages is not supported." );
 
-                return null; //break project creation
+                return; //break project creation
             }
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
@@ -189,7 +197,7 @@ class ConversionHandler {
 
                         unset( $cachedXliffPath );
 
-                        return null;
+                        return;
                     }
 
                 } catch ( FileSystemException $e ) {
@@ -199,7 +207,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                     $this->result->addError( $e->getMessage() );
 
-                    return null;
+                    return;
 
                 } catch ( Exception $e ) {
 
@@ -208,7 +216,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::S3_ERROR );
                     $this->result->addError( 'Sorry, file name too long. Try shortening it and try again.' );
 
-                    return null;
+                    return;
                 }
 
             } else {
@@ -216,7 +224,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::GENERIC_ERROR );
                 $this->result->addError( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ), AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return null;
+                return;
             }
 
         }
@@ -241,9 +249,9 @@ class ConversionHandler {
 
         }
 
-        $this->result->addData( [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ] );
+        $this->result->addData( new InternalHashPaths( [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ] ) );
 
-        return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
+//        return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
     }
 
     /**
@@ -335,7 +343,7 @@ class ConversionHandler {
     /**
      * @throws Exception
      */
-    public function extractZipFile() {
+    public function extractZipFile(): array {
 
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
         $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
@@ -352,7 +360,7 @@ class ConversionHandler {
 
             //get system temporary folder
             $tmpFolder = ini_get( 'upload_tmp_dir' );
-            ( empty( $tmpFolder ) ) ? $tmpFolder = "/tmp" : null;
+            $tmpFolder = $tmpFolder ?: "/tmp";
             $tmpFolder .= "/" . uniqid() . "/";
 
             mkdir( $tmpFolder, 0777, true );
@@ -370,9 +378,9 @@ class ConversionHandler {
             try {
                 $stdResult = $uploadFile->uploadFiles( $filesArray );
 
-                if ( $this->zipExtractionFailed( $stdResult ) ) {
-                    $this->zipExtractionErrorFlag    = true;
-                    $this->zipExtractionErrorFiles[] = $stdResult;
+                if ( $this->isZipExtractionFailed( $stdResult ) ) {
+                    $this->zipExtractionErrorFlag  = true;
+                    $this->zipExtractionErrorFiles = (array)$stdResult;
                 }
 
             } catch ( Exception $e ) {
@@ -404,7 +412,7 @@ class ConversionHandler {
      *
      * @return bool
      */
-    public function zipExtractionFailed( $stdResult ): bool {
+    public function isZipExtractionFailed( $stdResult ): bool {
 
         $error = false;
 
