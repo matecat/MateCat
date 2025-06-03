@@ -53,9 +53,12 @@ class TeamsProjectsController extends KleinController {
         }
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
-        $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter, 0 );
+        $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter );
 
-        $projectsList = ( new Project( $projectsList ) )->render();
+        $formatted     = new Project( $projectsList );
+        $formatted->setUser( $this->user );
+
+        $projectsList = $formatted->render();
 
         $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );

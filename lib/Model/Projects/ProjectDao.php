@@ -1,6 +1,7 @@
 <?php
 
 use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
 use Exceptions\NotFoundException;
 use RemoteFiles\RemoteFileServiceNameStruct;
@@ -169,7 +170,8 @@ class Projects_ProjectDao extends AbstractDao {
      * @param int   $ttl
      * @param array $filter
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return IDaoStruct[]
+     * @throws ReflectionException
      */
     public static function findByTeamId( $id_team, $filter = [], $ttl = 0 ) {
 
@@ -203,7 +205,10 @@ class Projects_ProjectDao extends AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), $values );
+        /** @var $result Projects_ProjectStruct[] */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt,  Projects_ProjectStruct::class, $values );
+
+        return $result;
     }
 
     /**
@@ -329,7 +334,7 @@ class Projects_ProjectDao extends AbstractDao {
     /**
      * @param array $id_list
      *
-     * @return Projects_ProjectStruct[]|\DataAccess\IDaoStruct[]|[]
+     * @return Projects_ProjectStruct[]|IDaoStruct[]|[]
      */
     public function getByIdList( array $id_list ) {
         if ( empty( $id_list ) ) {
@@ -446,7 +451,7 @@ class Projects_ProjectDao extends AbstractDao {
     /**
      * @param $project_ids
      *
-     * @return \DataAccess\IDaoStruct[]|RemoteFileServiceNameStruct[] *
+     * @return IDaoStruct[]|RemoteFileServiceNameStruct[] *
      */
     public function getRemoteFileServiceName( $project_ids ) {
 
