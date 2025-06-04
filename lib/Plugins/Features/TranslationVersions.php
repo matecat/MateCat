@@ -19,7 +19,7 @@ class TranslationVersions extends BaseFeature {
      * @param Projects_ProjectStruct $projectStruct
      * @param int|null               $id_segment
      *
-     * @return TranslationVersionsHandler
+     * @return VersionHandlerInterface
      */
     public static function getVersionHandlerNewInstance( Jobs_JobStruct $chunkStruct, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct, ?int $id_segment = null ) {
 
