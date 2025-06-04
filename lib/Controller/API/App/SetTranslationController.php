@@ -262,7 +262,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
                 $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
-                $this->VersionsHandler->propagateTranslation( $TPropagation );
+                $propagationTotal = $this->VersionsHandler->propagateTranslation( $TPropagation );
 
             }
 
