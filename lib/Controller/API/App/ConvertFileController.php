@@ -3,13 +3,10 @@
 namespace API\App;
 
 use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use Constants;
 use Conversion\ConversionHandler;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FilesConverter;
 use FilesStorage\AbstractFilesStorage;
 use Filters\FiltersConfigTemplateDao;
@@ -21,8 +18,6 @@ use Langs\Languages;
 use ReflectionException;
 use RuntimeException;
 use stdClass;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Utils;
 use ZipArchiveExtended;
 
@@ -35,20 +30,15 @@ class ConvertFileController extends KleinController {
     }
 
     /**
-     * @throws NotFoundException
-     * @throws AuthenticationError
-     * @throws ReQueueException
-     * @throws EndQueueException
-     * @throws ValidationError
      * @throws Exception
      */
     public function handle(): void {
-        $this->data = $this->validateTheRequest();
-        $cookieDir  = $_COOKIE[ 'upload_token' ];
-        $intDir     = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir     = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        $this->data       = $this->validateTheRequest();
+        $uploadTokenValue = $_COOKIE[ 'upload_token' ];
+        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        if ( !Utils::isTokenValid( $cookieDir ) ) {
+        if ( !Utils::isTokenValid( $uploadTokenValue ) ) {
             throw new RuntimeException( "Invalid Upload Token." );
         }
 
@@ -56,33 +46,41 @@ class ConvertFileController extends KleinController {
 
         $ext = AbstractFilesStorage::pathinfo_fix( $this->data[ 'file_name' ], PATHINFO_EXTENSION );
 
-        $conversionHandler = new ConversionHandler();
-        $conversionHandler->setFileName( $this->data[ 'file_name' ] );
-        $conversionHandler->setSourceLang( $this->data[ 'source_lang' ] );
-        $conversionHandler->setTargetLang( $this->data[ 'target_lang' ] );
-        $conversionHandler->setSegmentationRule( $this->data[ 'segmentation_rule' ] );
-        $conversionHandler->setCookieDir( $cookieDir );
-        $conversionHandler->setIntDir( $intDir );
-        $conversionHandler->setErrDir( $errDir );
-        $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setFiltersExtractionParameters( $this->data[ 'filters_extraction_parameters' ] );
-        $conversionHandler->setReconversion( $this->data[ 'restarted_conversion' ] );
+        $converter = new FilesConverter(
+                [ $this->data[ 'file_name' ] ],
+                $this->data[ 'source_lang' ],
+                $this->data[ 'target_lang' ],
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $this->data[ 'segmentation_rule' ],
+                $this->featureSet,
+                $this->data[ 'filters_extraction_parameters' ],
+        );
 
-        if ( $ext == "zip" ) {
-            $result = $this->handleZip( $conversionHandler, $intDir, $errDir, $cookieDir );
-        } else {
-            $conversionHandler->processConversion();
-            $result = $conversionHandler->getResult();
+        $converter->convertFiles();
 
-            if ( $result->hasErrors() ) {
-                foreach ( $result->getError() as $error ) {
-                    throw new RuntimeException( $error[ 'message' ], $error[ 'code' ] );
-                }
-            }
-
+        $result      = $converter->getResult();
+        
+        $errorStatus = [];
+        if ( $result->hasErrors() ) {
+            $errorStatus = $result->getErrors();
         }
 
-        $this->response->json( $result );
+        $warningStatus = [];
+        if ( $result->hasWarnings() ) {
+            $warningStatus = $result->getWarnings();
+        }
+
+        // Upload errors handling
+        if ( !empty( $errorStatus ) ) {
+            $this->response->code( 400 );
+            $this->response->json( [ "code" => 0, "errors" => $errorStatus, "warnings" => [], "data" => [] ] );
+
+            return;
+        }
+
+        $this->response->json( [ "code" => 1, "errors" => [], "warnings" => $warningStatus, "data" => [] ] );
 
     }
 
@@ -257,7 +255,6 @@ class ConvertFileController extends KleinController {
                     $this->data[ 'segmentation_rule' ],
                     $this->featureSet,
                     $this->data[ 'filters_extraction_parameters' ],
-                    false
             );
 
             $convertFile->convertFiles();

@@ -5,16 +5,17 @@ use Conversion\ConversionHandler;
 use Conversion\ConvertedFileList;
 use Conversion\ConvertedFileModel;
 use FilesStorage\AbstractFilesStorage;
+use Filters\FiltersConfigTemplateStruct;
 use Langs\Languages;
 
 class FilesConverter {
-    private $source_lang;
-    private $target_lang;
-    private $intDir;
-    private $errDir;
-    private $cookieDir;
-    private $segmentation_rule;
-    private $files;
+    private string  $source_lang;
+    private string  $target_lang;
+    private string  $fullUploadDirPath;
+    private string  $errDir;
+    private string  $uploadTokenValue;
+    private ?string $segmentation_rule;
+    private array   $files;
 
     /**
      * @var ConvertedFileList
@@ -22,56 +23,48 @@ class FilesConverter {
     private ConvertedFileList $resultStack;
 
     /**
-     * @var Languages
+     * @var Languages|null
      */
-    private ?Languages $lang_handler = null;
+    private ?Languages $lang_handler;
 
     /**
      * @var FeatureSet
      */
-    private $featureSet;
+    private FeatureSet $featureSet;
 
-    private $filters_extraction_parameters;
-
-    /**
-     * @var bool
-     */
-    private bool $convertZipFile;
+    private ?FiltersConfigTemplateStruct $filters_extraction_parameters;
 
     /**
      * FilesConverter constructor.
      *
-     * @param            $files
-     * @param            $source_lang
-     * @param            $target_lang
-     * @param            $intDir
-     * @param            $errDir
-     * @param            $cookieDir
-     * @param            $segmentation_rule
-     * @param FeatureSet $featureSet
-     * @param            $filters_extraction_parameters
-     * @param bool       $convertZipFile
+     * @param array                            $files
+     * @param string                           $source_lang
+     * @param string                           $target_lang
+     * @param string                           $intDir
+     * @param string                           $errDir
+     * @param string                           $uploadTokenValue
+     * @param string|null                      $segmentation_rule
+     * @param FeatureSet                       $featureSet
+     * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
     public function __construct(
-            $files,
-            $source_lang,
-            $target_lang,
-            $intDir,
-            $errDir,
-            $cookieDir,
-            $segmentation_rule,
-            FeatureSet $featureSet,
-            $filters_extraction_parameters = null,
-            bool $convertZipFile = true
+            array                        $files,
+            string                       $source_lang,
+            string                       $target_lang,
+            string                       $intDir,
+            string                       $errDir,
+            string                       $uploadTokenValue,
+            ?string                      $segmentation_rule,
+            FeatureSet                   $featureSet,
+            ?FiltersConfigTemplateStruct $filters_extraction_parameters = null
     ) {
-        $this->lang_handler   = Languages::getInstance();
-        $this->files          = $files;
-        $this->convertZipFile = $convertZipFile;
+        $this->lang_handler = Languages::getInstance();
+        $this->files        = $files;
         $this->setSourceLang( $source_lang );
         $this->setTargetLangs( $target_lang );
-        $this->intDir                        = $intDir;
+        $this->fullUploadDirPath             = $intDir;
         $this->errDir                        = $errDir;
-        $this->cookieDir                     = $cookieDir;
+        $this->uploadTokenValue              = $uploadTokenValue;
         $this->segmentation_rule             = $segmentation_rule;
         $this->featureSet                    = $featureSet;
         $this->filters_extraction_parameters = $filters_extraction_parameters;
@@ -151,8 +144,8 @@ class FilesConverter {
         $conversionHandler->setSourceLang( $this->source_lang );
         $conversionHandler->setTargetLang( $this->target_lang );
         $conversionHandler->setSegmentationRule( $this->segmentation_rule );
-        $conversionHandler->setCookieDir( $this->cookieDir );
-        $conversionHandler->setIntDir( $this->intDir );
+        $conversionHandler->setCookieDir( $this->uploadTokenValue );
+        $conversionHandler->setIntDir( $this->fullUploadDirPath );
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
@@ -172,7 +165,7 @@ class FilesConverter {
             throw new InvalidArgumentException( $e->getMessage(), ConversionHandlerStatus::INVALID_SEGMENTATION_RULE );
         }
 
-        if ( !Utils::isTokenValid( $this->cookieDir ) ) {
+        if ( !Utils::isTokenValid( $this->uploadTokenValue ) ) {
             throw new InvalidArgumentException( "Invalid Upload Token.", ConversionHandlerStatus::INVALID_TOKEN );
         }
 
@@ -193,7 +186,7 @@ class FilesConverter {
 
         $conversionHandler = $this->getConversionHandlerInstance( $zipName );
 
-        // this makes the conversionhandler accumulate eventual errors on files and continue
+        // this makes the conversion-handler accumulate eventual errors on files and continue
         $conversionHandler->setStopOnFileException( false );
 
         $internalZipFileNames = $conversionHandler->extractZipFile();
@@ -207,9 +200,7 @@ class FilesConverter {
                     continue;
                 }
 
-                $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-
-                throw new RuntimeException( $fileError->error[ 'message' ], $fileError->error[ 'code' ] ); //@TODO usare $brokenFileName
+                throw new RuntimeException( $fileError->error[ 'message' ], $fileError->error[ 'code' ] );
             }
         }
 
@@ -221,7 +212,7 @@ class FilesConverter {
         foreach ( $realFileNames as $i => &$fileObject ) {
             $fileObject = [
                     'name' => $fileObject,
-                    'size' => filesize( $this->intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
+                    'size' => filesize( $this->fullUploadDirPath . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
             ];
         }
 
@@ -244,18 +235,6 @@ class FilesConverter {
 
     public function getResult(): ConvertedFileList {
         return $this->resultStack;
-    }
-
-    public static function extractFileNameFromErrorString( $randomString ) {
-        $path = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $randomString );
-
-        if ( count( $path ) < 2 ) {
-            return null;
-        }
-
-        $regexp = '';
-
-        return array_pop( $path );
     }
 
 }

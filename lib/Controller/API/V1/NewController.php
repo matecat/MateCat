@@ -4,6 +4,7 @@ namespace API\V1;
 
 use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Traits\ScanDirectoryForConvertedFiles;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use Constants;
@@ -27,8 +28,6 @@ use Langs\Languages;
 use Log;
 use LQA\ModelDao;
 use LQA\ModelStruct;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use MTQE\PayableRate\MTQEPayableRateTemplateDao;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -60,6 +59,8 @@ use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
 
 class NewController extends KleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     const MAX_NUM_KEYS = 10;
 
@@ -100,26 +101,25 @@ class NewController extends KleinController {
             $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $cookieDir = $uploadFile->getDirUploadToken();
-        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        $uploadTokenValue = $uploadFile->getDirUploadToken();
+        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $converter = new FilesConverter(
                 $arFiles,
                 $request[ 'source_lang' ],
                 $request[ 'target_lang' ],
-                $intDir,
+                $uploadDir,
                 $errDir,
-                $cookieDir,
+                $uploadTokenValue,
                 $request[ 'segmentation_rule' ],
                 $this->featureSet,
                 $request[ 'filters_extraction_parameters' ],
-                true
         );
 
         $converter->convertFiles();
 
-        $result = $converter->getResult();
+        $result      = $converter->getResult();
         $errorStatus = [];
         if ( $result->hasErrors() ) {
             $errorStatus = $result->getErrors();
@@ -135,42 +135,7 @@ class NewController extends KleinController {
 
         $result = $result->getData();
 
-        $newArFiles = [];
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-
-                $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $intDir );
-
-                //fetch cache links, created by converter, from the upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //Check if the file begins with the name of the zip file.
-                    //If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
-                    ) {
-                        //add the file name to the file's array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //This file was not in a zip. Add it normally
-                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $filesFound = $this->getFilesList( FilesStorageFactory::create(), $arFiles, $uploadDir );
 
         $projectManager                                 = new ProjectManager();
         $projectStructure                               = $projectManager->getProjectStructure();
@@ -182,8 +147,8 @@ class NewController extends KleinController {
         $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
         $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
         $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]              = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]         = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
@@ -1077,10 +1042,10 @@ class NewController extends KleinController {
      * @param null $filters_extraction_parameters
      * @param null $filters_extraction_parameters_template_id
      *
-     * @return FiltersConfigTemplateStruct|mixed|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ) {
+    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             // first check if `filters_extraction_parameters` is a valid JSON
@@ -1269,43 +1234,4 @@ class NewController extends KleinController {
         ];
     }
 
-    /**
-     * @param $filename
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
-    }
 }

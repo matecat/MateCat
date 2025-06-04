@@ -33,6 +33,16 @@ class ConvertedFileList {
         return false;
     }
 
+    public function hasWarnings(): bool {
+        foreach ( $this->convertedFiles as $res ) {
+            if ( $res->hasAnErrorCode() ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Check on executed conversion results and filter the stack to get errors only.
      * @return array
@@ -47,6 +57,21 @@ class ConvertedFileList {
         }
 
         return $errors;
+    }
+
+    /**
+     * Returns OCR warnings
+     * @return array
+     */
+    public function getWarnings(): array {
+        $warnings = [];
+        foreach ( $this->convertedFiles as $res ) {
+            if ( $res->hasAnErrorCode() ) {
+                $warnings[] = $res;
+            }
+        }
+
+        return $warnings;
     }
 
     public function getData(): array {

@@ -321,7 +321,7 @@ class ConversionHandler {
      *
      * @return string
      */
-    private function formatConversionFailureMessage( $message ) {
+    private function formatConversionFailureMessage( string $message ): string {
         // WinConverter error
         if ( strpos( $message, 'WinConverter' ) !== false ) {
 
@@ -509,9 +509,9 @@ class ConversionHandler {
     }
 
     /**
-     * @param mixed $intDir
+     * @param string $intDir
      */
-    public function setIntDir( $intDir ) {
+    public function setIntDir( string $intDir ) {
         $this->intDir = $intDir;
     }
 
