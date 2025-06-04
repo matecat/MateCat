@@ -214,35 +214,35 @@ abstract class AbstractStatus {
             $matchType = $matchConstantsClass::toExternalMatchTypeName( $segInfo[ 'match_type' ] ?? 'default' );
 
             // increment file totals
-            $file->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $file->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $file->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $file->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
 
             // increment single file match
             $match = $file->getMatch( $matchType );
-            $match->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $match->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $match->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $match->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
 
             //increment chunk summary for the current match type
             $chunkMatchTotal = $chunk->getSummary()->getMatch( $matchType );
-            $chunkMatchTotal->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $chunkMatchTotal->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $chunkMatchTotal->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $chunkMatchTotal->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
 
             // increment job totals
-            $job->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $job->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $job->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $job->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
             $job->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
             // increment chunk totals
-            $chunk->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $chunk->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $chunk->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $chunk->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
             $chunk->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
             // increment project summary
             if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
                 $project->getSummary()->incrementAnalyzed();
             }
-            $project->getSummary()->incrementRaw( $segInfo[ 'raw_word_count' ] );
-            $project->getSummary()->incrementEquivalent( $segInfo[ 'eq_word_count' ] );
+            $project->getSummary()->incrementRaw( $segInfo[ 'raw_word_count' ] ?? 0 );
+            $project->getSummary()->incrementEquivalent( $segInfo[ 'eq_word_count' ] ?? 0 );
             $project->getSummary()->incrementIndustry( $segInfo[ 'standard_word_count' ] ?? 0 ); //backward compatibility, some old projects may have this field set as null
 
         }
@@ -282,9 +282,9 @@ abstract class AbstractStatus {
 
             }
 
-            $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementRaw( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0 );
             $project->getSummary()->incrementIndustry( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0 );  //backward compatibility, some old projects may have this field set as null
-            $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] );
+            $project->getSummary()->incrementEquivalent( $this->_project_data[ 0 ][ 'standard_analysis_wc' ] ?? 0 );
 
             return $this;
 
