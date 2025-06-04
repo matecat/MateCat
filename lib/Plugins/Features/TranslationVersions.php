@@ -15,15 +15,15 @@ class TranslationVersions extends BaseFeature {
 
     /**
      * @param Jobs_JobStruct         $chunkStruct
-     * @param int                    $id_segment
      * @param Users_UserStruct       $userStruct
      * @param Projects_ProjectStruct $projectStruct
+     * @param int|null               $id_segment
      *
-     * @return VersionHandlerInterface
+     * @return TranslationVersionsHandler
      */
-    public static function getVersionHandlerNewInstance( Jobs_JobStruct $chunkStruct, int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public static function getVersionHandlerNewInstance( Jobs_JobStruct $chunkStruct, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct, ?int $id_segment = null ) {
 
-        if ( $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
+        if ( $id_segment && $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
             return new TranslationVersionsHandler(
                     $chunkStruct,
                     $id_segment,
