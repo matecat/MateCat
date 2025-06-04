@@ -82,16 +82,14 @@ const SplitJobModal = ({job, project, callback}) => {
       .then(({data}) => {
         setSplitData(data)
       })
-      .catch((errors) => {
-        if (errors !== 'undefined' && errors.length && errors[0].code === -7) {
-          setJobSplittable(false)
-          setErrorMsg('This job cannot be split.')
-          setShowError(true)
-          setShowLoader(false)
-          setShowStartLoader(false)
-          setSplitChecked(false)
-        } else if (errors !== 'undefined' && errors.length) {
-          setErrorMsg(errors[0].message)
+      .catch(({errors}) => {
+        if (errors !== 'undefined' && errors.length) {
+          if (errors[0].code === -7) {
+            setJobSplittable(false)
+            setErrorMsg('This job cannot be split.')
+          } else {
+            setErrorMsg(errors[0].message)
+          }
           setShowError(true)
           setShowLoader(false)
           setShowStartLoader(false)
@@ -170,7 +168,7 @@ const SplitJobModal = ({job, project, callback}) => {
       .then(({data}) => {
         setSplitData(data)
       })
-      .catch((errors) => {
+      .catch(({errors}) => {
         if (typeof errors !== 'undefined' && errors.length) {
           setErrorMsg(errors[0].message)
           setShowError(true)
