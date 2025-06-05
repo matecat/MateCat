@@ -262,7 +262,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 $TPropagation[ 'match_type' ]             = $old_translation[ 'match_type' ];
                 $TPropagation[ 'locked' ]                 = $old_translation[ 'locked' ];
 
-                $this->VersionsHandler->propagateTranslation( $TPropagation );
+                $propagationTotal = $this->VersionsHandler->propagateTranslation( $TPropagation );
 
             }
 
@@ -599,7 +599,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * init VersionHandler
      */
     private function initVersionHandler(): void {
-        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->data[ 'chunk' ], $this->data[ 'id_segment' ], $this->user, $this->data[ 'project' ] );
+        $this->VersionsHandler = TranslationVersions::getVersionHandlerNewInstance( $this->data[ 'chunk' ], $this->user, $this->data[ 'project' ], $this->data[ 'id_segment' ] );
     }
 
     /**
