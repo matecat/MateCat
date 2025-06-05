@@ -1,17 +1,25 @@
 import React from 'react'
 import Cookies from 'js-cookie'
 import DatePicker from 'react-datepicker'
-import GMTSelect from './GMTSelect'
+import {GMTSelect} from './GMTSelect'
 import CommonUtils from '../../utils/commonUtils'
 import {addJobTranslator} from '../../api/addJobTranslator'
 import ModalsActions from '../../actions/ModalsActions'
 import CatToolActions from '../../actions/CatToolActions'
 import ManageActions from '../../actions/ManageActions'
 import 'react-datepicker/dist/react-datepicker.css'
+import {Select} from '../common/Select'
 
 class AssignToTranslator extends React.Component {
   constructor(props) {
     super(props)
+    let time = 12
+    if (this.props.job.get('translator')) {
+      let date = CommonUtils.getGMTDate(
+        this.props.job.get('translator').get('delivery_timestamp') * 1000,
+      )
+      time = date.time.split(':')[0]
+    }
     this.state = {
       timezone: Cookies.get('matecat_timezone'),
       deliveryDate: this.props.job.get('translator')
@@ -19,6 +27,7 @@ class AssignToTranslator extends React.Component {
             this.props.job.get('translator').get('delivery_timestamp') * 1000,
           )
         : new Date(),
+      time: parseInt(time),
     }
   }
 
@@ -26,7 +35,7 @@ class AssignToTranslator extends React.Component {
     //Check email and validations errors
 
     let date = this.state.deliveryDate
-    let time = $(this.dropdownTime).dropdown('get value')
+    let time = this.state.time
     date.setHours(time)
     date.setMinutes(0)
 
@@ -193,7 +202,6 @@ class AssignToTranslator extends React.Component {
   }
 
   GmtSelectChanged(value) {
-    Cookies.get('matecat_timezone', value)
     this.checkSendToTranslatorButton()
     this.setState({
       timezone: value,
@@ -212,32 +220,37 @@ class AssignToTranslator extends React.Component {
     }
   }
 
-  initTime() {
-    let self = this
-    let time = 12
-    if (this.props.job.get('translator')) {
-      let date = CommonUtils.getGMTDate(
-        this.props.job.get('translator').get('delivery_timestamp') * 1000,
-      )
-      time = date.time.split(':')[0]
-    }
-    $(this.dropdownTime).dropdown({
-      onChange: function () {
-        self.checkSendToTranslatorButton()
-      },
-    })
-    $(this.dropdownTime).dropdown('set selected', parseInt(time))
-  }
-
-  componentDidMount() {
-    this.initTime()
-  }
-
   render() {
     let translatorEmail = ''
     if (this.props.job.get('translator')) {
       translatorEmail = this.props.job.get('translator').get('email')
     }
+    const timeOptions = [
+      {name: '1:00 AM', id: '1'},
+      {name: '2:00 AM', id: '2'},
+      {name: '3:00 AM', id: '3'},
+      {name: '4:00 AM', id: '4'},
+      {name: '5:00 AM', id: '5'},
+      {name: '6:00 AM', id: '6'},
+      {name: '7:00 AM', id: '7'},
+      {name: '8:00 AM', id: '8'},
+      {name: '9:00 AM', id: '9'},
+      {name: '10:00 AM', id: '10'},
+      {name: '11:00 AM', id: '11'},
+      {name: '12:00 AM', id: '12'},
+      {name: '1:00 PM', id: '13'},
+      {name: '2:00 PM', id: '14'},
+      {name: '3:00 PM', id: '15'},
+      {name: '4:00 PM', id: '16'},
+      {name: '5:00 PM', id: '17'},
+      {name: '6:00 PM', id: '18'},
+      {name: '7:00 PM', id: '19'},
+      {name: '8:00 PM', id: '20'},
+      {name: '9:00 PM', id: '21'},
+      {name: '10:00 PM', id: '22'},
+      {name: '11:00 PM', id: '23'},
+      {name: '12:00 PM', id: '24'},
+    ]
     return (
       <div className="assign-job-translator sixteen wide column">
         <div className="title">Assign Job to translator</div>
@@ -272,39 +285,25 @@ class AssignToTranslator extends React.Component {
                   </div>
                 </div>
                 <div className="field translator-time">
-                  <label>Time</label>
-                  <select
-                    className="ui dropdown"
-                    ref={(dropdown) => (this.dropdownTime = dropdown)}
-                  >
-                    <option value="1">1:00 AM</option>
-                    <option value="2">2:00 AM</option>
-                    <option value="3">3:00 AM</option>
-                    <option value="4">4:00 AM</option>
-                    <option value="5">5:00 AM</option>
-                    <option value="6">6:00 AM</option>
-                    <option value="7">7:00 AM</option>
-                    <option value="8">8:00 AM</option>
-                    <option value="9">9:00 AM</option>
-                    <option value="10">10:00 AM</option>
-                    <option value="11">11:00 AM</option>
-                    <option value="12">12:00 AM</option>
-                    <option value="13">1:00 PM</option>
-                    <option value="14">2:00 PM</option>
-                    <option value="15">3:00 PM</option>
-                    <option value="16">4:00 PM</option>
-                    <option value="17">5:00 PM</option>
-                    <option value="18">6:00 PM</option>
-                    <option value="19">7:00 PM</option>
-                    <option value="20">8:00 PM</option>
-                    <option value="21">9:00 PM</option>
-                    <option value="22">10:00 PM</option>
-                    <option value="23">11:00 PM</option>
-                    <option value="24">12:00 PM</option>
-                  </select>
+                  <Select
+                    label="Time"
+                    onSelect={({id}) => {
+                      this.setState({
+                        time: parseInt(id),
+                      })
+                      self.checkSendToTranslatorButton()
+                    }}
+                    activeOption={timeOptions.find(
+                      ({id}) => parseInt(id) === this.state.time,
+                    )}
+                    options={timeOptions}
+                  />
                 </div>
                 <div className="field gmt">
-                  <GMTSelect changeValue={this.GmtSelectChanged.bind(this)} />
+                  <GMTSelect
+                    changeValue={this.GmtSelectChanged.bind(this)}
+                    showLabel={true}
+                  />
                 </div>
                 <div className="field send-job-box">
                   <button

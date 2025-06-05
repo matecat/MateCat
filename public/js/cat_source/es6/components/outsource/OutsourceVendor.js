@@ -6,13 +6,14 @@ import {isNull} from 'lodash/lang'
 import DatePicker from 'react-datepicker'
 
 import OutsourceInfo from './OutsourceInfo'
-import GMTSelect from './GMTSelect'
+import {GMTSelect} from './GMTSelect'
 import {getOutsourceQuote} from '../../api/getOutsourceQuote'
 import {getChangeRates} from '../../api/getChangeRates'
 import CommonUtils from '../../utils/commonUtils'
 import UserStore from '../../stores/UserStore'
 
 import 'react-datepicker/dist/react-datepicker.css'
+import {Select} from '../common/Select'
 class OutsourceVendor extends React.Component {
   constructor(props) {
     super(props)
@@ -39,6 +40,7 @@ class OutsourceVendor extends React.Component {
         this.props.job && this.props.job.get('outsource')
           ? new Date(this.props.job.get('outsource').get('delivery_date'))
           : null,
+      selectedTime: '12',
     }
     this.getOutsourceQuote = this.getOutsourceQuote.bind(this)
     if (config.enable_outsource) {
@@ -66,6 +68,23 @@ class OutsourceVendor extends React.Component {
       JPY: {symbol: '￥', name: 'Yen (JPY)'},
       PLN: {symbol: 'zł', name: 'Złoty (PLN)'},
     }
+    this.timeOptions = [
+      {name: '7:00 AM', id: '7'},
+      {name: '8:00 AM', id: '8'},
+      {name: '9:00 AM', id: '9'},
+      {name: '10:00 AM', id: '10'},
+      {name: '11:00 AM', id: '11'},
+      {name: '12:00 AM', id: '12'},
+      {name: '1:00 PM', id: '13'},
+      {name: '2:00 PM', id: '14'},
+      {name: '3:00 PM', id: '15'},
+      {name: '4:00 PM', id: '16'},
+      {name: '5:00 PM', id: '17'},
+      {name: '6:00 PM', id: '18'},
+      {name: '7:00 PM', id: '19'},
+      {name: '8:00 PM', id: '20'},
+      {name: '9:00 PM', id: '21'},
+    ]
   }
 
   getOutsourceQuote(delivery, revisionType) {
@@ -78,70 +97,76 @@ class OutsourceVendor extends React.Component {
     let timezoneToShow = this.state.timezone
     let currency = this.getCurrentCurrency()
     getOutsourceQuote(
-        this.props.project.get('id'),
-        this.props.project.get('password'),
-        this.props.job.get('id'),
-        this.props.job.get('password'),
-        fixedDelivery,
-        typeOfService,
-        timezoneToShow,
-        currency,
+      this.props.project.get('id'),
+      this.props.project.get('password'),
+      this.props.job.get('id'),
+      this.props.job.get('password'),
+      fixedDelivery,
+      typeOfService,
+      timezoneToShow,
+      currency,
     )
-        .then(function (quoteData) {
-          if (quoteData.data && quoteData.data.length > 0) {
-            if (
-                quoteData.data[0][0].quote_available !== '1' &&
-                quoteData.data[0][0].outsourced !== '1'
-            ) {
-              self.setState({
-                outsource: true,
-                quoteNotAvailable: true,
-              })
-              return
-            } else if (
-                quoteData.data[0][0].quote_result !== '1' &&
-                quoteData.data[0][0].outsourced !== '1'
-            ) {
-              self.setState({
-                outsource: true,
-                errorQuote: true,
-              })
-              return
-            }
-
-            self.quoteResponse = quoteData.data[0]
-            let chunk = fromJS(quoteData.data[0][0])
-
-            self.url_ok = quoteData.return_url.url_ok
-            self.url_ko = quoteData.return_url.url_ko
-            self.confirm_urls = quoteData.return_url.confirm_urls
-            self.data_key = chunk.get('id')
-
+      .then((quoteData) => {
+        if (quoteData.data && quoteData.data.length > 0) {
+          if (
+            quoteData.data[0][0].quote_available !== '1' &&
+            quoteData.data[0][0].outsourced !== '1'
+          ) {
             self.setState({
               outsource: true,
-              quoteNotAvailable: false,
-              errorQuote: false,
-              chunkQuote: chunk,
-              revision: chunk.get('typeOfService') === 'premium' ? true : false,
-              jobOutsourced: chunk.get('outsourced') === '1',
-              outsourceConfirmed: chunk.get('outsourced') === '1',
-              deliveryDate: new Date(chunk.get('delivery')),
+              quoteNotAvailable: true,
             })
-          } else {
+            return
+          } else if (
+            quoteData.data[0][0].quote_result !== '1' &&
+            quoteData.data[0][0].outsourced !== '1'
+          ) {
             self.setState({
-              outsource: false,
+              outsource: true,
               errorQuote: true,
-              errorOutsource: true,
             })
+            return
           }
-        })
-        .catch(() => {
-          this.setState({
+
+          self.quoteResponse = quoteData.data[0]
+          let chunk = fromJS(quoteData.data[0][0])
+
+          self.url_ok = quoteData.return_url.url_ok
+          self.url_ko = quoteData.return_url.url_ko
+          self.confirm_urls = quoteData.return_url.confirm_urls
+          self.data_key = chunk.get('id')
+
+          self.setState({
+            outsource: true,
+            quoteNotAvailable: false,
+            errorQuote: false,
+            chunkQuote: chunk,
+            revision: chunk.get('typeOfService') === 'premium' ? true : false,
+            jobOutsourced: chunk.get('outsourced') === '1',
+            outsourceConfirmed: chunk.get('outsourced') === '1',
+            deliveryDate: new Date(chunk.get('delivery')),
+          })
+          setTimeout(() => {
+            let date = this.getDeliveryDate()
+            this.setState({
+              selectedTime: date.time2.split(':')[0],
+            })
+          })
+        } else {
+          self.setState({
             outsource: false,
             errorQuote: true,
             errorOutsource: true,
           })
+        }
+      })
+      .catch(() => {
+        this.setState({
+          outsource: false,
+          errorQuote: true,
+          errorOutsource: true,
         })
+      })
   }
 
   getCurrentCurrency() {
@@ -381,7 +406,7 @@ class OutsourceVendor extends React.Component {
 
   getNewRates() {
     let date = this.state.deliveryDate
-    let time = $(this.dropdownTime).dropdown('get value')
+    let time = this.state.selectedTime
     date.setHours(time)
     date.setMinutes((2 - parseFloat(this.state.timezone)) * 60)
     let timestamp = new Date(date).getTime()
@@ -502,7 +527,8 @@ class OutsourceVendor extends React.Component {
                       Translated uses the <b>most qualified translator</b>{' '}
                       <br /> and{' '}
                       <b>
-                        keeps using the same translator for your next projects.{' '}
+                        keeps using the same translator for your next
+                        projects.{' '}
                       </b>
                     </p>
                   </div>
@@ -570,15 +596,18 @@ class OutsourceVendor extends React.Component {
                 <div className="delivery-order">
                   <div className="delivery-box">
                     <label>Delivery date:</label>
+
                     <div className="delivery-date">
                       {delivery.day + ' ' + delivery.month}
                     </div>
                     <div className="atdd">at</div>
                     <div className="delivery-time">{delivery.time}</div>
+
                     <div className="gmt">
                       <GMTSelect changeValue={this.changeTimezone.bind(this)} />
                       {/* <div className="gmt-outsourced"> GMT +2 </div>*/}
                     </div>
+
                     {!this.state.outsourceConfirmed ? (
                       <div className="need-it-faster">
                         {this.state.errorPastDate ? (
@@ -687,30 +716,22 @@ class OutsourceVendor extends React.Component {
                           </div>
                         </div>
                         <div className="field input-time">
-                          <label>Time</label>
-                          <select
-                            className="ui fluid search dropdown"
-                            ref={(dropdown) => (this.dropdownTime = dropdown)}
-                          >
-                            <option value="7">7:00 AM</option>
-                            <option value="8">8:00 AM</option>
-                            <option value="9">9:00 AM</option>
-                            <option value="10">10:00 AM</option>
-                            <option value="11">11:00 AM</option>
-                            <option value="12">12:00 AM</option>
-                            <option value="13">1:00 PM</option>
-                            <option value="14">2:00 PM</option>
-                            <option value="15">3:00 PM</option>
-                            <option value="16">4:00 PM</option>
-                            <option value="17">5:00 PM</option>
-                            <option value="18">6:00 PM</option>
-                            <option value="19">7:00 PM</option>
-                            <option value="20">8:00 PM</option>
-                            <option value="21">9:00 PM</option>
-                          </select>
+                          <Select
+                            label="Time"
+                            onSelect={({id}) => {
+                              this.setState({
+                                selectedTime: id,
+                              })
+                            }}
+                            activeOption={this.timeOptions.find(
+                              ({id}) => id === this.state.selectedTime,
+                            )}
+                            options={this.timeOptions}
+                          />
                         </div>
                         <div className="field gmt">
                           <GMTSelect
+                            showLabel={true}
                             changeValue={this.changeTimezone.bind(this)}
                           />
                         </div>
@@ -944,17 +965,20 @@ class OutsourceVendor extends React.Component {
                   <div className="delivery-box">
                     <label>Delivery date:</label>
                     {/*<br />*/}
-                    <div className="delivery-date">
-                      {delivery.day + ' ' + delivery.month}
-                    </div>
-                    <div className="atdd">at</div>
-                    <div className="delivery-time">{delivery.time}</div>
-                    <div className="gmt">
-                      <GMTSelect
-                        direction="up"
-                        changeValue={this.changeTimezone.bind(this)}
-                      />
-                      {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
+                    <div>
+                      <div className="delivery-date">
+                        {delivery.day + ' ' + delivery.month}
+                      </div>
+                      <div className="atdd">at</div>
+                      <div className="delivery-time">{delivery.time}</div>
+
+                      <div className="gmt">
+                        <GMTSelect
+                          direction="up"
+                          changeValue={this.changeTimezone.bind(this)}
+                        />
+                        {/*<div className="gmt-outsourced"> GMT +2 </div>*/}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1174,24 +1198,6 @@ class OutsourceVendor extends React.Component {
   componentDidUpdate() {
     let self = this
     if (this.state.outsource) {
-      let date = this.getDeliveryDate()
-      $(this.dropdownTime).dropdown('set selected', date.time2.split(':')[0])
-      let today = new Date()
-      /*$(this.calendar).calendar({
-        type: 'date',
-        minDate: new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate(),
-        ),
-        className: {
-          calendar: 'calendar-outsource',
-        },
-        onVisible: function () {
-          $(this).find('table tbody tr td:first-child').addClass('disabled')
-        },
-      })*/
-
       let currencyToShow = Cookies.get('matecat_currency')
       $(this.currencySelect).dropdown('set selected', currencyToShow)
       $(this.currencySelect).dropdown({
@@ -1224,7 +1230,8 @@ class OutsourceVendor extends React.Component {
       nextState.errorPastDate !== this.state.errorPastDate ||
       nextState.quoteNotAvailable !== this.state.quoteNotAvailable ||
       nextState.needItFaster !== this.state.needItFaster ||
-      nextState.deliveryDate !== this.state.deliveryDate
+      nextState.deliveryDate !== this.state.deliveryDate ||
+      nextState.selectedTime !== this.state.selectedTime
     )
   }
 
