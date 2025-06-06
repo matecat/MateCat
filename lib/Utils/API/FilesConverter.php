@@ -204,32 +204,12 @@ class FilesConverter {
             }
         }
 
-        $realFileNames = array_map(
-                [ 'ZipArchiveExtended', 'getFileName' ],
-                $internalZipFileNames
-        );
-
-        foreach ( $realFileNames as $i => &$fileObject ) {
-            $fileObject = [
-                    'name' => $fileObject,
-                    'size' => filesize( $this->fullUploadDirPath . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
-            ];
-        }
-
-        $stdFileObjects = [];
-        if ( !empty( $internalZipFileNames ) ) {
-            foreach ( $internalZipFileNames as $fName ) {
-                $stdFileObjects[] = $fName;
-            }
-        } else {
-
-            //handling errors of zip file extraction
+        if ( empty( $internalZipFileNames ) ) {
             $errors = $conversionHandler->getResult();
             throw new DomainException( $errors->getMessage(), $errors->getCode() );
-
         }
 
-        return $stdFileObjects;
+        return $internalZipFileNames;
 
     }
 
