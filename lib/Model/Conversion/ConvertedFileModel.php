@@ -4,45 +4,66 @@ namespace Conversion;
 
 use Constants\ConversionHandlerStatus;
 use Exception;
+use JsonSerializable;
 
-class ConvertedFileModel implements \JsonSerializable {
+class ConvertedFileModel implements JsonSerializable {
     /**
      * @var int
      */
-    private $code;
+    private int $code = ConversionHandlerStatus::NOT_CONVERTED;
 
     /**
-     * @var array
+     * @var ?string
      */
-    private $errors;
+    private ?string $message = null;
 
     /**
-     * @var array
+     * @var ?string
      */
-    private $warnings;
+    private ?string $warning = null;
 
     /**
-     * @var array
+     * @var ?string
      */
-    private $data;
+    private ?string $debug = null;
+
+    /**
+     * @var InternalHashPaths|null
+     */
+    private ?InternalHashPaths $_internal_path_data = null;
+
+    private array $warningCodes = [
+            ConversionHandlerStatus::OCR_WARNING,
+            ConversionHandlerStatus::ZIP_HANDLING,
+    ];
+
+    private array $errorCodes = [
+            ConversionHandlerStatus::NOT_CONVERTED,
+            ConversionHandlerStatus::INVALID_FILE,
+            ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
+            ConversionHandlerStatus::SOURCE_ERROR,
+            ConversionHandlerStatus::TARGET_ERROR,
+            ConversionHandlerStatus::UPLOAD_ERROR,
+            ConversionHandlerStatus::MISCONFIGURATION,
+            ConversionHandlerStatus::INVALID_TOKEN,
+            ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
+            ConversionHandlerStatus::OCR_ERROR,
+            ConversionHandlerStatus::GENERIC_ERROR,
+            ConversionHandlerStatus::FILESYSTEM_ERROR,
+            ConversionHandlerStatus::S3_ERROR,
+    ];
 
     /**
      * ConvertFileModel constructor.
      *
-     * @param null $code
+     * @param ?int $code
      *
      * @throws Exception
      */
-    public function __construct( $code = null ) {
-        if ( empty( $code ) ) {
-            $this->code = ConversionHandlerStatus::NOT_CONVERTED;
-        } else {
+    public function __construct( ?int $code = null ) {
+        if ( !empty( $code ) ) {
             $this->changeCode( $code );
         }
-
-        $this->warnings = [];
-        $this->errors   = [];
-        $this->data     = [];
     }
 
     /**
@@ -50,25 +71,8 @@ class ConvertedFileModel implements \JsonSerializable {
      *
      * @return bool
      */
-    private function validateCode( $code ) {
-        $allowed = [
-                ConversionHandlerStatus::ZIP_HANDLING,
-                ConversionHandlerStatus::OK,
-                ConversionHandlerStatus::NOT_CONVERTED,
-                ConversionHandlerStatus::INVALID_FILE,
-                ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
-                ConversionHandlerStatus::SOURCE_ERROR,
-                ConversionHandlerStatus::TARGET_ERROR,
-                ConversionHandlerStatus::UPLOAD_ERROR,
-                ConversionHandlerStatus::MISCONFIGURATION,
-                ConversionHandlerStatus::INVALID_TOKEN,
-                ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
-                ConversionHandlerStatus::OCR_WARNING,
-                ConversionHandlerStatus::OCR_ERROR,
-                ConversionHandlerStatus::GENERIC_ERROR,
-                ConversionHandlerStatus::FILESYSTEM_ERROR,
-                ConversionHandlerStatus::S3_ERROR,
-        ];
+    private function validateCode( $code ): bool {
+        $allowed = array_merge( $this->errorCodes, $this->warningCodes, [ ConversionHandlerStatus::OK ] );
 
         return in_array( $code, $allowed );
     }
@@ -89,91 +93,103 @@ class ConvertedFileModel implements \JsonSerializable {
     /**
      * @return int
      */
-    public function getCode() {
+    public function getCode(): int {
         return $this->code;
     }
 
     /**
      * @return bool
      */
-    public function hasAnErrorCode() {
-        return $this->code <= 0;
-    }
-
-    /**
-     * @param string $messageError
-     * @param null   $debug
-     */
-    public function addError( $messageError, $debug = null ) {
-        $this->errors[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-                'debug'   => $debug,
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function getErrors() {
-        return $this->errors;
+    public function hasAnErrorCode(): bool {
+        return in_array( $this->code, $this->errorCodes, true );
     }
 
     /**
      * @return bool
      */
-    public function hasErrors() {
-        return !empty( $this->errors );
+    public function hasAWarningCode(): bool {
+        return in_array( $this->code, $this->warningCodes, true );
     }
 
     /**
-     * @param string $messageError
+     * @param string  $messageError
+     * @param ?string $debug
      */
-    public function addWarning( $messageError ) {
-        $this->warnings[] = [
-                'code'    => $this->code,
-                'message' => $messageError,
-        ];
+    public function addError( string $messageError, ?string $debug = null ) {
+        $this->message = $messageError;
+        $this->debug   = $debug;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getWarnings() {
-        return $this->warnings;
+    public function getMessage(): ?string {
+        return $this->message;
     }
 
     /**
      * @return bool
      */
-    public function hasWarnings() {
-        return !empty( $this->warnings );
+    public function hasErrors(): bool {
+        return !empty( $this->message );
+    }
+
+    /**
+     * @param string      $warningMessage
+     * @param string|null $debug
+     */
+    public function addWarning( string $warningMessage, ?string $debug = null ) {
+        $this->warning = $warningMessage;
+        $this->debug   = $debug;
+    }
+
+    /**
+     * @return string
+     */
+    public function getWarning(): ?string {
+        return $this->warning;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasWarnings(): bool {
+        return !empty( $this->warning );
+    }
+
+    public function getDebug(): ?string {
+        return $this->debug;
+    }
+
+    /**
+     * @param InternalHashPaths $data
+     *
+     * @return void
+     */
+    public function addData( InternalHashPaths $data ) {
+        $this->_internal_path_data = $data;
+    }
+
+    /**
+     * @return InternalHashPaths
+     */
+    public function getData(): InternalHashPaths {
+        return $this->_internal_path_data ?? new InternalHashPaths( [] );
+    }
+
+    public function hasData(): bool {
+        return !empty( $this->_internal_path_data ) && !$this->_internal_path_data->isEmpty();
     }
 
     /**
      * @return array
      */
-    public function getData() {
-        return $this->data;
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     */
-    public function addData( $key, $value ) {
-        $this->data[ $key ] = $value;
-    }
-
-    /**
-     * @return array
-     */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
-                'code'     => $this->getCode(),
-                'errors'   => $this->getErrors(),
-                'warnings' => $this->getWarnings(),
-                'data'     => $this->getData(),
+                'code'    => $this->getCode(),
+                'message'   => $this->getMessage(),
+                'warning' => $this->getWarning(),
+//                'debug'   => $this->getDebug(),
         ];
     }
 }
