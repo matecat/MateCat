@@ -15,7 +15,7 @@ class ConvertedFileModel implements JsonSerializable {
     /**
      * @var ?string
      */
-    private ?string $error = null;
+    private ?string $message = null;
 
     /**
      * @var ?string
@@ -31,6 +31,27 @@ class ConvertedFileModel implements JsonSerializable {
      * @var InternalHashPaths|null
      */
     private ?InternalHashPaths $_internal_path_data = null;
+
+    private array $warningCodes = [
+            ConversionHandlerStatus::OCR_WARNING,
+            ConversionHandlerStatus::ZIP_HANDLING,
+    ];
+
+    private array $errorCodes = [
+            ConversionHandlerStatus::NOT_CONVERTED,
+            ConversionHandlerStatus::INVALID_FILE,
+            ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
+            ConversionHandlerStatus::SOURCE_ERROR,
+            ConversionHandlerStatus::TARGET_ERROR,
+            ConversionHandlerStatus::UPLOAD_ERROR,
+            ConversionHandlerStatus::MISCONFIGURATION,
+            ConversionHandlerStatus::INVALID_TOKEN,
+            ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
+            ConversionHandlerStatus::OCR_ERROR,
+            ConversionHandlerStatus::GENERIC_ERROR,
+            ConversionHandlerStatus::FILESYSTEM_ERROR,
+            ConversionHandlerStatus::S3_ERROR,
+    ];
 
     /**
      * ConvertFileModel constructor.
@@ -51,24 +72,7 @@ class ConvertedFileModel implements JsonSerializable {
      * @return bool
      */
     private function validateCode( $code ): bool {
-        $allowed = [
-                ConversionHandlerStatus::ZIP_HANDLING,
-                ConversionHandlerStatus::OK,
-                ConversionHandlerStatus::NOT_CONVERTED,
-                ConversionHandlerStatus::INVALID_FILE,
-                ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
-                ConversionHandlerStatus::SOURCE_ERROR,
-                ConversionHandlerStatus::TARGET_ERROR,
-                ConversionHandlerStatus::UPLOAD_ERROR,
-                ConversionHandlerStatus::MISCONFIGURATION,
-                ConversionHandlerStatus::INVALID_TOKEN,
-                ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
-                ConversionHandlerStatus::OCR_WARNING,
-                ConversionHandlerStatus::OCR_ERROR,
-                ConversionHandlerStatus::GENERIC_ERROR,
-                ConversionHandlerStatus::FILESYSTEM_ERROR,
-                ConversionHandlerStatus::S3_ERROR,
-        ];
+        $allowed = array_merge( $this->errorCodes, $this->warningCodes, [ ConversionHandlerStatus::OK ] );
 
         return in_array( $code, $allowed );
     }
@@ -97,7 +101,14 @@ class ConvertedFileModel implements JsonSerializable {
      * @return bool
      */
     public function hasAnErrorCode(): bool {
-        return $this->code <= 0;
+        return in_array( $this->code, $this->errorCodes, true );
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasAWarningCode(): bool {
+        return in_array( $this->code, $this->warningCodes, true );
     }
 
     /**
@@ -105,22 +116,22 @@ class ConvertedFileModel implements JsonSerializable {
      * @param ?string $debug
      */
     public function addError( string $messageError, ?string $debug = null ) {
-        $this->error = $messageError;
-        $this->debug = $debug;
+        $this->message = $messageError;
+        $this->debug   = $debug;
     }
 
     /**
      * @return string
      */
-    public function getError(): ?string {
-        return $this->error;
+    public function getMessage(): ?string {
+        return $this->message;
     }
 
     /**
      * @return bool
      */
     public function hasErrors(): bool {
-        return !empty( $this->error );
+        return !empty( $this->message );
     }
 
     /**
@@ -159,8 +170,11 @@ class ConvertedFileModel implements JsonSerializable {
         $this->_internal_path_data = $data;
     }
 
+    /**
+     * @return InternalHashPaths
+     */
     public function getData(): InternalHashPaths {
-        return $this->_internal_path_data ?? new InternalHashPaths();
+        return $this->_internal_path_data ?? new InternalHashPaths( [] );
     }
 
     public function hasData(): bool {
@@ -173,9 +187,9 @@ class ConvertedFileModel implements JsonSerializable {
     public function jsonSerialize(): array {
         return [
                 'code'    => $this->getCode(),
-                'error'   => $this->getError(),
+                'message'   => $this->getMessage(),
                 'warning' => $this->getWarning(),
-                'debug'   => $this->getDebug(),
+//                'debug'   => $this->getDebug(),
         ];
     }
 }

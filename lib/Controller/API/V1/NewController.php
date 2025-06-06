@@ -246,7 +246,6 @@ class NewController extends KleinController {
 
         Queue::sendProject( $projectStructure );
 
-        //XXX check this error handling part
         $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
 
         if ( $result == null ) {

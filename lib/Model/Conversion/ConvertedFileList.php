@@ -35,7 +35,7 @@ class ConvertedFileList {
 
     public function hasWarnings(): bool {
         foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAnErrorCode() ) {
+            if ( $res->hasAWarningCode() ) {
                 return true;
             }
         }
@@ -66,7 +66,7 @@ class ConvertedFileList {
     public function getWarnings(): array {
         $warnings = [];
         foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAnErrorCode() ) {
+            if ( $res->hasAWarningCode() ) {
                 $warnings[] = $res;
             }
         }
@@ -74,6 +74,9 @@ class ConvertedFileList {
         return $warnings;
     }
 
+    /**
+     * @return InternalHashPaths[]
+     */
     public function getData(): array {
         $data = [];
 

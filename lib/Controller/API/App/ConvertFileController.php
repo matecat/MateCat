@@ -60,8 +60,8 @@ class ConvertFileController extends KleinController {
 
         $converter->convertFiles();
 
-        $result      = $converter->getResult();
-        
+        $result = $converter->getResult();
+
         $errorStatus = [];
         if ( $result->hasErrors() ) {
             $errorStatus = $result->getErrors();
@@ -75,12 +75,17 @@ class ConvertFileController extends KleinController {
         // Upload errors handling
         if ( !empty( $errorStatus ) ) {
             $this->response->code( 400 );
-            $this->response->json( [ "code" => 0, "errors" => $errorStatus, "warnings" => [], "data" => [] ] );
-
-            return;
         }
 
-        $this->response->json( [ "code" => 1, "errors" => [], "warnings" => $warningStatus, "data" => [] ] );
+        $data = [];
+        foreach ( $result->getData() as $value ) {
+            $data[ 'zipFiles' ][]       = $value->getZipFiles();
+            $data[ 'simpleFileName' ][] = $value->getSimpleFileContent();
+        }
+        $data[ 'zipFiles' ]       = array_filter( $data[ 'zipFiles' ] );
+        $data[ 'simpleFileName' ] = array_filter( $data[ 'simpleFileName' ] );
+
+        $this->response->json( [ "errors" => $errorStatus, "warnings" => $warningStatus, "data" => $data ] );
 
     }
 
@@ -236,7 +241,7 @@ class ConvertFileController extends KleinController {
             }
         } else {
             $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getError() );
+            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getMessage() );
 
             foreach ( $errors as $error ) {
                 throw new RuntimeException( $error );

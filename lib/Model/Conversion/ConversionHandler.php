@@ -249,9 +249,18 @@ class ConversionHandler {
 
         }
 
-        $this->result->addData( new InternalHashPaths( [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ] ) );
+        $zipInfo = ZipArchiveExtended::zipPathInfo( $file_path );
 
-//        return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
+        $this->result->addData(
+                new InternalHashPaths( [
+                        'cacheHash'      => $short_hash,
+                        'diskHash'       => $hash_name_for_disk,
+                        'zipFiles'       => $zipInfo ?
+                                new ZipContent( ZipArchiveExtended::getFileName( AbstractFilesStorage::basename_fix( $file_path ) ), filesize( $file_path ) ) : null,
+                        'simpleFileName' => !$zipInfo ? new SimpleFileContent( AbstractFilesStorage::basename_fix( $file_path ), filesize( $file_path ) ) : null,
+                ] )
+        );
+
     }
 
     /**

@@ -13,6 +13,15 @@ class InternalHashPaths {
 
     protected string $cacheHash;
     protected string $diskHash;
+    /**
+     * @var ?ZipContent
+     */
+    protected ?ZipContent $zipFiles = null;
+
+    /**
+     * @var ?SimpleFileContent
+     */
+    protected ?SimpleFileContent $simpleFileContent = null;
 
     public function __construct( array $array_params ) {
         if ( $array_params != null ) {
@@ -31,7 +40,21 @@ class InternalHashPaths {
     }
 
     public function isEmpty(): bool {
-        return empty( $this->cacheHash ) && empty( $this->diskHash );
+        return empty( $this->cacheHash ) && empty( $this->diskHash ) && empty( $this->zipFiles ) && empty( $this->simpleFileContent );
+    }
+
+    /**
+     * @return ?ZipContent
+     */
+    public function getZipFiles(): ?ZipContent {
+        return $this->zipFiles;
+    }
+
+    /**
+     * @return SimpleFileContent|null
+     */
+    public function getSimpleFileContent(): ?SimpleFileContent {
+        return $this->simpleFileContent;
     }
 
 }

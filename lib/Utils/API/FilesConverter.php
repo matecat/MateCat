@@ -225,7 +225,7 @@ class FilesConverter {
 
             //handling errors of zip file extraction
             $errors = $conversionHandler->getResult();
-            throw new DomainException( $errors->getError(), $errors->getCode() );
+            throw new DomainException( $errors->getMessage(), $errors->getCode() );
 
         }
 

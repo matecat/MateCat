@@ -23,7 +23,7 @@ class ConvertFileModelTest extends AbstractTest {
         $model->changeCode( ConversionHandlerStatus::SOURCE_ERROR );
         $model->addError( 'Source not valid' );
 
-        $this->assertCount( 1, $model->getError() );
+        $this->assertCount( 1, $model->getMessage() );
         $this->assertTrue( $model->hasErrors() );
 
         $json = json_encode( $model );
