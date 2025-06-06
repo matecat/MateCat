@@ -29,7 +29,7 @@ class OutsourceContainer extends React.Component {
 
   handleDocumentClick(evt) {
     evt.stopPropagation()
-
+    const parentClass = '.outsource-container'
     if (
       this.container &&
       !this.container.contains(evt.target) &&
@@ -39,7 +39,9 @@ class OutsourceContainer extends React.Component {
       !$(evt.target).hasClass('need-it-faster-close') &&
       !$(evt.target).hasClass('need-it-faster-close-icon') &&
       !$(evt.target).hasClass('get-price') &&
-      !$(evt.target).hasClass('react-datepicker__day')
+      !$(evt.target).hasClass('react-datepicker__day') &&
+      !evt.target.closest('.dropdown__list') &&
+      !evt.target.closest(parentClass)
     ) {
       this.props.onClickOutside(evt)
     }
