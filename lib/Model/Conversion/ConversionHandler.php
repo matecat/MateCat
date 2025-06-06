@@ -34,9 +34,9 @@ class ConversionHandler {
     protected string                       $source_lang;
     protected string                       $target_lang;
     protected ?string                      $segmentation_rule             = null;
-    protected string                       $intDir;
+    protected string                       $uploadDir;
     protected string                       $errDir;
-    protected string                       $cookieDir;
+    protected string                       $uploadTokenValue;
     protected bool                         $stopOnFileException           = true;
     protected array                        $zipExtractionErrorFiles       = [];
     public bool                            $zipExtractionErrorFlag        = false;
@@ -62,7 +62,7 @@ class ConversionHandler {
     public function getLocalFilePath(): string {
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
 
-        return $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        return $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
     /**
@@ -233,14 +233,14 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
                 //put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForOriginalFiles(
                         $hash_name_for_disk,
-                        $this->cookieDir,
+                        $this->uploadTokenValue,
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
             } else {
@@ -331,19 +331,23 @@ class ConversionHandler {
      * @return string
      */
     private function formatConversionFailureMessage( string $message ): string {
-        // WinConverter error
-        if ( strpos( $message, 'WinConverter' ) !== false ) {
+        $errorPatterns = [
+                'WinConverter error 5' => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
+                'WinConverter'         => 'File conversion issue, please contact us at support@matecat.com',
+                'java.lang.'           => 'File conversion issue, please contact us at support@matecat.com',
+                '.okapi.'              => 'File conversion issue, please contact us at support@matecat.com',
+        ];
 
-            // file conversion error
-            if ( strpos( $message, 'WinConverter error 5' ) !== false ) {
-                return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
+        foreach ( $errorPatterns as $pattern => $response ) {
+            if ( strpos( $message, $pattern ) !== false ) {
+                return $response;
             }
-
-            return 'File conversion issue, please contact us at support@matecat.com';
         }
 
-        if ( strpos( $message, 'java.lang.' ) !== false ) {
-            return 'File conversion issue, please contact us at support@matecat.com';
+        if ( strpos( $message, 'Exception:' ) !== false ) {
+            $msg = explode( 'Exception:', $message );
+
+            return $msg[ 1 ];
         }
 
         return $message;
@@ -355,7 +359,7 @@ class ConversionHandler {
     public function extractZipFile(): array {
 
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-        $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $file_path       = $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
 
         //The zip file name is set in $this->file_name
 
@@ -380,7 +384,7 @@ class ConversionHandler {
 
             // The $this->cookieDir parameter makes Upload get the upload directory from the cookie.
             // In this way it'll find the unzipped files
-            $uploadFile = new Upload( $this->cookieDir );
+            $uploadFile = new Upload( $this->uploadTokenValue );
 
             $uploadFile->setRaiseException( $this->stopOnFileException );
 
@@ -513,15 +517,15 @@ class ConversionHandler {
     /**
      * @return mixed
      */
-    public function getIntDir() {
-        return $this->intDir;
+    public function getUploadDir() {
+        return $this->uploadDir;
     }
 
     /**
-     * @param string $intDir
+     * @param string $uploadDir
      */
-    public function setIntDir( string $intDir ) {
-        $this->intDir = $intDir;
+    public function setUploadDir( string $uploadDir ) {
+        $this->uploadDir = $uploadDir;
     }
 
     /**
@@ -541,15 +545,15 @@ class ConversionHandler {
     /**
      * @return mixed
      */
-    public function getCookieDir() {
-        return $this->cookieDir;
+    public function getUploadTokenValue() {
+        return $this->uploadTokenValue;
     }
 
     /**
-     * @param mixed $cookieDir
+     * @param mixed $uploadTokenValue
      */
-    public function setCookieDir( $cookieDir ) {
-        $this->cookieDir = $cookieDir;
+    public function setUploadTokenValue( $uploadTokenValue ) {
+        $this->uploadTokenValue = $uploadTokenValue;
     }
 
     /**

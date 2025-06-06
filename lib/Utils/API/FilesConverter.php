@@ -144,8 +144,8 @@ class FilesConverter {
         $conversionHandler->setSourceLang( $this->source_lang );
         $conversionHandler->setTargetLang( $this->target_lang );
         $conversionHandler->setSegmentationRule( $this->segmentation_rule );
-        $conversionHandler->setCookieDir( $this->uploadTokenValue );
-        $conversionHandler->setIntDir( $this->fullUploadDirPath );
+        $conversionHandler->setUploadTokenValue( $this->uploadTokenValue );
+        $conversionHandler->setUploadDir( $this->fullUploadDirPath );
         $conversionHandler->setErrDir( $this->errDir );
         $conversionHandler->setFeatures( $this->featureSet );
         $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );

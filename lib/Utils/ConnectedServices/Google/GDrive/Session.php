@@ -13,12 +13,12 @@ use ArrayObject;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
-use Conversion\ConversionHandler;
 use DirectoryIterator;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use FeatureSet;
+use FilesConverter;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -681,40 +681,51 @@ class Session {
     /**
      * @param string $file_name
      *
-     * @return array|null
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @return array
+     * @throws Exception
      */
-    public function doConversion( string $file_name ): ?array {
+    public function doConversion( string $file_name ): array {
 
-        $uploadDir = $this->guid;
+        $uploadTokenValue = $this->guid;
 
-        $intDir = INIT::$UPLOAD_REPOSITORY .
-                DIRECTORY_SEPARATOR . $uploadDir;
+        $uploadDir = INIT::$UPLOAD_REPOSITORY .
+                DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $errDir = INIT::$STORAGE_DIR .
                 DIRECTORY_SEPARATOR .
                 'conversion_errors' .
-                DIRECTORY_SEPARATOR . $uploadDir;
-
-        $conversionHandler = new ConversionHandler();
-        $conversionHandler->setFileName( $file_name );
-        $conversionHandler->setSourceLang( $this->source_lang );
-        $conversionHandler->setTargetLang( $this->target_lang );
-        $conversionHandler->setSegmentationRule( $this->seg_rule );
-        $conversionHandler->setCookieDir( $uploadDir );
-        $conversionHandler->setIntDir( $intDir );
-        $conversionHandler->setErrDir( $errDir );
-        $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
+                DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->session[ 'user' ]->email );
-        $conversionHandler->setFeatures( $this->featureSet );
 
-        return $conversionHandler->processConversion();
+        $converter = new FilesConverter(
+                [ $file_name ],
+                $this->source_lang,
+                $this->target_lang,
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $this->seg_rule,
+                $this->featureSet,
+                $this->filters_extraction_parameters,
+        );
+
+        $converter->convertFiles();
+
+        $result = $converter->getResult();
+
+        if ( $result->hasErrors() ) {
+            throw new RuntimeException( $result->getErrors()[ 0 ] );
+        }
+
+        $data = [];
+        foreach ( $result->getData() as $value ) {
+            $data = [ 'cacheHash' => $value->getCacheHash(), 'diskHash' => $value->getDiskHash() ];
+        }
+
+        return $data;
 
     }
+
 }
