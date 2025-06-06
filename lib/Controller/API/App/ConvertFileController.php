@@ -5,10 +5,8 @@ namespace API\App;
 use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Constants;
-use Conversion\ConversionHandler;
 use Exception;
 use FilesConverter;
-use FilesStorage\AbstractFilesStorage;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
 use INIT;
@@ -17,13 +15,9 @@ use Langs\InvalidLanguageException;
 use Langs\Languages;
 use ReflectionException;
 use RuntimeException;
-use stdClass;
 use Utils;
-use ZipArchiveExtended;
 
 class ConvertFileController extends KleinController {
-
-    private array $data = [];
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -33,7 +27,7 @@ class ConvertFileController extends KleinController {
      * @throws Exception
      */
     public function handle(): void {
-        $this->data       = $this->validateTheRequest();
+        $data             = $this->validateTheRequest();
         $uploadTokenValue = $_COOKIE[ 'upload_token' ];
         $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
         $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
@@ -44,18 +38,16 @@ class ConvertFileController extends KleinController {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 
-        $ext = AbstractFilesStorage::pathinfo_fix( $this->data[ 'file_name' ], PATHINFO_EXTENSION );
-
         $converter = new FilesConverter(
-                [ $this->data[ 'file_name' ] ],
-                $this->data[ 'source_lang' ],
-                $this->data[ 'target_lang' ],
+                [ $data[ 'file_name' ] ],
+                $data[ 'source_lang' ],
+                $data[ 'target_lang' ],
                 $uploadDir,
                 $errDir,
                 $uploadTokenValue,
-                $this->data[ 'segmentation_rule' ],
+                $data[ 'segmentation_rule' ],
                 $this->featureSet,
-                $this->data[ 'filters_extraction_parameters' ],
+                $data[ 'filters_extraction_parameters' ],
         );
 
         $converter->convertFiles();
@@ -98,7 +90,6 @@ class ConvertFileController extends KleinController {
         $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $restarted_conversion                      = filter_var( $this->request->param( 'restarted_conversion' ), FILTER_VALIDATE_BOOLEAN );
 
@@ -185,97 +176,4 @@ class ConvertFileController extends KleinController {
 
     }
 
-    /**
-     * @param ConversionHandler $conversionHandler
-     * @param                   $intDir
-     * @param                   $errDir
-     * @param                   $cookieDir
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function handleZip( ConversionHandler $conversionHandler, $intDir, $errDir, $cookieDir ): array {
-        // this makes the conversionhandler accumulate eventual errors on files and continue
-        $conversionHandler->setStopOnFileException( false );
-
-        $internalZipFileNames = $conversionHandler->extractZipFile();
-        //call convertFileWrapper and start conversions for each file
-
-        if ( $conversionHandler->zipExtractionErrorFlag ) {
-            $fileErrors = $conversionHandler->getZipExtractionErrorFiles();
-
-            foreach ( $fileErrors as $fileError ) {
-                if ( count( $fileError->error ) == 0 ) {
-                    continue;
-                }
-
-                $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-
-                throw new RuntimeException( "Error during processing file " . $brokenFileName . ":" . $fileError->error[ 'message' ] );
-            }
-        }
-
-        $realFileNames = array_map(
-                [ 'ZipArchiveExtended', 'getFileName' ],
-                $internalZipFileNames
-        );
-
-        foreach ( $realFileNames as $i => &$fileObject ) {
-            $fileObject = [
-                    'name' => $fileObject,
-                    'size' => filesize( $intDir . DIRECTORY_SEPARATOR . $internalZipFileNames[ $i ] )
-            ];
-        }
-
-        $zipFiles = [ 'zipFiles' => json_encode( $realFileNames ) ];
-
-        $stdFileObjects = [];
-
-        if ( $internalZipFileNames !== null ) {
-            foreach ( $internalZipFileNames as $fName ) {
-
-                $newStdFile       = new stdClass();
-                $newStdFile->name = $fName;
-                $stdFileObjects[] = $newStdFile;
-
-            }
-        } else {
-            $errors = $conversionHandler->getResult();
-            $errors = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getMessage() );
-
-            foreach ( $errors as $error ) {
-                throw new RuntimeException( $error );
-            }
-        }
-
-        /* Do conversions here */
-        foreach ( $stdFileObjects as $stdFileObject ) {
-            $convertFile = new FilesConverter(
-                    [ $stdFileObject->name ],
-                    $this->data[ 'source_lang' ],
-                    $this->data[ 'target_lang' ],
-                    $intDir,
-                    $errDir,
-                    $cookieDir,
-                    $this->data[ 'segmentation_rule' ],
-                    $this->featureSet,
-                    $this->data[ 'filters_extraction_parameters' ],
-            );
-
-            $convertFile->convertFiles();
-
-            if ( $convertFile->hasErrors() ) {
-                foreach ( $convertFile->getErrors() as $error ) {
-                    throw new RuntimeException( $error );
-                }
-            }
-        }
-
-        return [
-                'code'    => Constants\ConversionHandlerStatus::ZIP_HANDLING,
-                'data'    => $zipFiles,
-                'errors'  => [],
-                'warning' => [],
-        ];
-    }
 }

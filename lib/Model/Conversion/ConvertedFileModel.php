@@ -153,7 +153,7 @@ class ConvertedFileModel implements JsonSerializable {
     /**
      * @return bool
      */
-    public function hasWarnings() {
+    public function hasWarnings(): bool {
         return !empty( $this->warning );
     }
 
@@ -162,7 +162,7 @@ class ConvertedFileModel implements JsonSerializable {
     }
 
     /**
-     * @param array $data
+     * @param InternalHashPaths $data
      *
      * @return void
      */

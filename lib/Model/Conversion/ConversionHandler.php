@@ -46,7 +46,6 @@ class ConversionHandler {
      * @var FeatureSet
      */
     public FeatureSet $features;
-    protected bool    $isReconversion = false;
 
     /**
      * ConversionHandler constructor.
@@ -96,7 +95,7 @@ class ConversionHandler {
             } else {
                 /**
                  * Application misconfiguration.
-                 * upload should not be happened, but if we are here, raise an error.
+                 * Upload should not be happened, but if we are here, raise an error.
                  * @see upload.class.php
                  */
                 unlink( $file_path );
@@ -129,7 +128,7 @@ class ConversionHandler {
             INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
         }
 
-        //if already present in database cache get the converted without convert it again
+        //if already present in the database cache, get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
             //move the file in the right directory from the packages to the file dir
@@ -180,9 +179,9 @@ class ConversionHandler {
                 unset( $convertResult[ 'xliff' ] );
 
                 /*
-                   store the converted file in the cache
-                   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
-                   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
+                   Store the converted file in the cache and put a reference in the upload dir to the cache dir,
+                    so that from the UUID we can reach the converted file in the cache;
+                   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk).
                  */
                 //save in cache
                 try {
@@ -232,7 +231,7 @@ class ConversionHandler {
         //if everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
         if ( !empty( $cachedXliffPath ) ) {
 
-            //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
+            //FILE Found in cache, destroy the already present shasum for other languages (if user swapped languages)
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
@@ -459,9 +458,9 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getFileName() {
+    public function getFileName(): string {
         return $this->file_name;
     }
 
@@ -473,24 +472,10 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
-     */
-    public function getSourceLang() {
-        return $this->source_lang;
-    }
-
-    /**
      * @param mixed $source_lang
      */
     public function setSourceLang( $source_lang ) {
         $this->source_lang = $source_lang;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTargetLang() {
-        return $this->target_lang;
     }
 
     /**
@@ -501,24 +486,10 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
-     */
-    public function getSegmentationRule() {
-        return $this->segmentation_rule;
-    }
-
-    /**
      * @param mixed $segmentation_rule
      */
     public function setSegmentationRule( $segmentation_rule ) {
         $this->segmentation_rule = $segmentation_rule;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUploadDir() {
-        return $this->uploadDir;
     }
 
     /**
@@ -529,24 +500,10 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
-     */
-    public function getErrDir() {
-        return $this->errDir;
-    }
-
-    /**
      * @param mixed $errDir
      */
     public function setErrDir( $errDir ) {
         $this->errDir = $errDir;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUploadTokenValue() {
-        return $this->uploadTokenValue;
     }
 
     /**
@@ -559,7 +516,7 @@ class ConversionHandler {
     /**
      * @param boolean $stopOnFileException
      */
-    public function setStopOnFileException( $stopOnFileException ) {
+    public function setStopOnFileException( bool $stopOnFileException ) {
         $this->stopOnFileException = $stopOnFileException;
     }
 
@@ -568,7 +525,7 @@ class ConversionHandler {
      *
      * @return $this
      */
-    public function setFeatures( FeatureSet $features ) {
+    public function setFeatures( FeatureSet $features ): ConversionHandler {
         $this->features = $features;
 
         return $this;
@@ -579,10 +536,6 @@ class ConversionHandler {
      */
     public function setFiltersExtractionParameters( ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
-    }
-
-    public function setReconversion( bool $isReconversion ) {
-        $this->isReconversion = $isReconversion;
     }
 
 }
