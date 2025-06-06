@@ -95,7 +95,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 ]
         );
 
-        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
+        //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
         $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
         $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
@@ -170,7 +170,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
         $projectStructure[ 'owner' ]        = $this->user->email;
-        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
+        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid a useless query
 
         //set features override
         $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
@@ -250,14 +250,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $private_tm_key = [];
         }
 
-        if ( $array_keys ) { // some keys are selected from panel
+        if ( $array_keys ) { // some keys are selected from the panel
 
             //remove duplicates
             foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
-                    //same key was get from keyring, remove
+                    //the same key was get from keyring, remove
                     $private_tm_key = [];
                 }
             }
