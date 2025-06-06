@@ -202,7 +202,9 @@ class QualitySummaryTable extends React.Component {
             totalIssues.get('founds').get(currentSev.label)
           ) {
             const issues = totalIssues.get('founds').get(currentSev.label)
-            const total = issues * severityFound.get(0).get('penalty')
+            const total = parseFloat(
+              (issues * severityFound.get(0).get('penalty')).toFixed(2),
+            )
             catTotalWeightValue = catTotalWeightValue + total
             catHtml.push(
               <div
@@ -281,7 +283,9 @@ class QualitySummaryTable extends React.Component {
         if (severityFound.size > 0 && totalIssues > 0) {
           catTotalWeightValue =
             catTotalWeightValue +
-            totalIssues * severityFound.get(0).get('penalty')
+            parseFloat(
+              (totalIssues * severityFound.get(0).get('penalty')).toFixed(2),
+            )
           catHtml.push(
             <div
               className="qr-element severity"
