@@ -1,19 +1,27 @@
 <?php
 
+namespace Conversion;
+
 use API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertedFileModel;
+use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\Exceptions\FileSystemException;
 use FilesStorage\FilesStorageFactory;
+use Filters;
 use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateStruct;
 use Filters\OCRCheck;
+use INIT;
+use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
+use Upload;
+use ZipArchiveExtended;
 
 class ConversionHandler {
 
@@ -26,20 +34,18 @@ class ConversionHandler {
     protected string                       $source_lang;
     protected string                       $target_lang;
     protected ?string                      $segmentation_rule             = null;
-    protected string                       $intDir;
+    protected string                       $uploadDir;
     protected string                       $errDir;
-    protected string                       $cookieDir;
+    protected string                       $uploadTokenValue;
     protected bool                         $stopOnFileException           = true;
-    protected ?object                      $uploadedFiles                 = null;
-    public bool                            $uploadError                   = false;
-    protected bool                         $_userIsLogged;
+    protected array                        $zipExtractionErrorFiles       = [];
+    public bool                            $zipExtractionErrorFlag        = false;
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
      * @var FeatureSet
      */
-    public         $features;
-    protected bool $isReconversion = false;
+    public FeatureSet $features;
 
     /**
      * ConversionHandler constructor.
@@ -55,7 +61,7 @@ class ConversionHandler {
     public function getLocalFilePath(): string {
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
 
-        return $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        return $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
     /**
@@ -66,7 +72,7 @@ class ConversionHandler {
      * @throws AuthenticationError
      * @throws Exception
      */
-    public function processConversion(): ?array {
+    public function processConversion(): void {
 
         $fs        = FilesStorageFactory::create();
         $file_path = $this->getLocalFilePath();
@@ -75,21 +81,21 @@ class ConversionHandler {
             $this->result->changeCode( ConversionHandlerStatus::UPLOAD_ERROR );
             $this->result->addError( "Error during upload. Please retry.", AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-            return null;
+            return;
         }
 
         //XLIFF Conversion management
         $fileMustBeConverted = $this->fileMustBeConverted();
 
         if ( $fileMustBeConverted === false ) {
-            return null;
+            return;
         } else {
             if ( $fileMustBeConverted === true ) {
                 //Continue with conversion
             } else {
                 /**
                  * Application misconfiguration.
-                 * upload should not be happened, but if we are here, raise an error.
+                 * Upload should not be happened, but if we are here, raise an error.
                  * @see upload.class.php
                  */
                 unlink( $file_path );
@@ -98,7 +104,7 @@ class ConversionHandler {
                 $this->result->addError( 'Matecat Open-Source does not support ' . ucwords( XliffProprietaryDetect::getInfo( $file_path )[ 'proprietary_name' ] ) . '. Use MatecatPro.',
                         AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return null;
+                return;
             }
         }
 
@@ -122,7 +128,7 @@ class ConversionHandler {
             INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
         }
 
-        //if already present in database cache get the converted without convert it again
+        //if already present in the database cache, get the converted without convert it again
         if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
             //move the file in the right directory from the packages to the file dir
@@ -142,11 +148,11 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_ERROR );
                 $this->result->addError( "File is not valid. OCR for RTL languages is not supported." );
 
-                return null; //break project creation
+                return; //break project creation
             }
             if ( $ocrCheck->thereIsWarning( $file_path ) ) {
                 $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
-                $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
+                $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental.", AbstractFilesStorage::basename_fix( $this->file_name ) );
             }
 
             if ( strpos( $this->target_lang, ',' ) !== false ) {
@@ -173,9 +179,9 @@ class ConversionHandler {
                 unset( $convertResult[ 'xliff' ] );
 
                 /*
-                   store the converted file in the cache
-                   put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
-                   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
+                   Store the converted file in the cache and put a reference in the upload dir to the cache dir,
+                    so that from the UUID we can reach the converted file in the cache;
+                   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk).
                  */
                 //save in cache
                 try {
@@ -190,7 +196,7 @@ class ConversionHandler {
 
                         unset( $cachedXliffPath );
 
-                        return null;
+                        return;
                     }
 
                 } catch ( FileSystemException $e ) {
@@ -200,7 +206,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                     $this->result->addError( $e->getMessage() );
 
-                    return null;
+                    return;
 
                 } catch ( Exception $e ) {
 
@@ -209,7 +215,7 @@ class ConversionHandler {
                     $this->result->changeCode( ConversionHandlerStatus::S3_ERROR );
                     $this->result->addError( 'Sorry, file name too long. Try shortening it and try again.' );
 
-                    return null;
+                    return;
                 }
 
             } else {
@@ -217,7 +223,7 @@ class ConversionHandler {
                 $this->result->changeCode( ConversionHandlerStatus::GENERIC_ERROR );
                 $this->result->addError( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ), AbstractFilesStorage::basename_fix( $this->file_name ) );
 
-                return null;
+                return;
             }
 
         }
@@ -225,15 +231,15 @@ class ConversionHandler {
         //if everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
         if ( !empty( $cachedXliffPath ) ) {
 
-            //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            //FILE Found in cache, destroy the already present shasum for other languages (if user swapped languages)
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
                 //put reference to cache in upload dir to link cache to session
                 $fs->linkSessionToCacheForOriginalFiles(
                         $hash_name_for_disk,
-                        $this->cookieDir,
+                        $this->uploadTokenValue,
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
             } else {
@@ -242,7 +248,18 @@ class ConversionHandler {
 
         }
 
-        return [ 'cacheHash' => $short_hash, 'diskHash' => $hash_name_for_disk ];
+        $zipInfo = ZipArchiveExtended::zipPathInfo( $file_path );
+
+        $this->result->addData(
+                new InternalHashPaths( [
+                        'cacheHash'      => $short_hash,
+                        'diskHash'       => $hash_name_for_disk,
+                        'zipFiles'       => $zipInfo ?
+                                new ZipContent( ZipArchiveExtended::getFileName( AbstractFilesStorage::basename_fix( $file_path ) ), filesize( $file_path ) ) : null,
+                        'simpleFileName' => !$zipInfo ? new SimpleFileContent( AbstractFilesStorage::basename_fix( $file_path ), filesize( $file_path ) ) : null,
+                ] )
+        );
+
     }
 
     /**
@@ -312,16 +329,24 @@ class ConversionHandler {
      *
      * @return string
      */
-    private function formatConversionFailureMessage( $message ) {
-        // WinConverter error
-        if ( strpos( $message, 'WinConverter' ) !== false ) {
+    private function formatConversionFailureMessage( string $message ): string {
+        $errorPatterns = [
+                'WinConverter error 5' => 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload',
+                'WinConverter'         => 'File conversion issue, please contact us at support@matecat.com',
+                'java.lang.'           => 'File conversion issue, please contact us at support@matecat.com',
+                '.okapi.'              => 'File conversion issue, please contact us at support@matecat.com',
+        ];
 
-            // file conversion error
-            if ( strpos( $message, 'WinConverter error 5' ) !== false ) {
-                return 'Scanned file conversion issue, please convert it to editable format (e.g. docx) and retry upload';
+        foreach ( $errorPatterns as $pattern => $response ) {
+            if ( strpos( $message, $pattern ) !== false ) {
+                return $response;
             }
+        }
 
-            return 'File conversion issue, please contact us at support@matecat.com';
+        if ( strpos( $message, 'Exception:' ) !== false ) {
+            $msg = explode( 'Exception:', $message );
+
+            return $msg[ 1 ];
         }
 
         return $message;
@@ -330,10 +355,10 @@ class ConversionHandler {
     /**
      * @throws Exception
      */
-    public function extractZipFile() {
+    public function extractZipFile(): array {
 
         $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-        $file_path       = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $file_path       = $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
 
         //The zip file name is set in $this->file_name
 
@@ -347,7 +372,7 @@ class ConversionHandler {
 
             //get system temporary folder
             $tmpFolder = ini_get( 'upload_tmp_dir' );
-            ( empty( $tmpFolder ) ) ? $tmpFolder = "/tmp" : null;
+            $tmpFolder = $tmpFolder ?: "/tmp";
             $tmpFolder .= "/" . uniqid() . "/";
 
             mkdir( $tmpFolder, 0777, true );
@@ -358,16 +383,16 @@ class ConversionHandler {
 
             // The $this->cookieDir parameter makes Upload get the upload directory from the cookie.
             // In this way it'll find the unzipped files
-            $uploadFile = new Upload( $this->cookieDir );
+            $uploadFile = new Upload( $this->uploadTokenValue );
 
             $uploadFile->setRaiseException( $this->stopOnFileException );
 
             try {
                 $stdResult = $uploadFile->uploadFiles( $filesArray );
 
-                if ( $this->uploadFailed( $stdResult ) ) {
-                    $this->uploadError   = true;
-                    $this->uploadedFiles = $stdResult;
+                if ( $this->isZipExtractionFailed( $stdResult ) ) {
+                    $this->zipExtractionErrorFlag  = true;
+                    $this->zipExtractionErrorFiles = (array)$stdResult;
                 }
 
             } catch ( Exception $e ) {
@@ -399,7 +424,7 @@ class ConversionHandler {
      *
      * @return bool
      */
-    public function uploadFailed( $stdResult ) {
+    public function isZipExtractionFailed( $stdResult ): bool {
 
         $error = false;
 
@@ -420,8 +445,8 @@ class ConversionHandler {
     /**
      * @return mixed
      */
-    public function getUploadedFiles() {
-        return $this->uploadedFiles;
+    public function getZipExtractionErrorFiles(): array {
+        return $this->zipExtractionErrorFiles;
     }
 
 
@@ -433,9 +458,9 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getFileName() {
+    public function getFileName(): string {
         return $this->file_name;
     }
 
@@ -447,24 +472,10 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
-     */
-    public function getSourceLang() {
-        return $this->source_lang;
-    }
-
-    /**
      * @param mixed $source_lang
      */
     public function setSourceLang( $source_lang ) {
         $this->source_lang = $source_lang;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getTargetLang() {
-        return $this->target_lang;
     }
 
     /**
@@ -475,13 +486,6 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
-     */
-    public function getSegmentationRule() {
-        return $this->segmentation_rule;
-    }
-
-    /**
      * @param mixed $segmentation_rule
      */
     public function setSegmentationRule( $segmentation_rule ) {
@@ -489,24 +493,10 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
+     * @param string $uploadDir
      */
-    public function getIntDir() {
-        return $this->intDir;
-    }
-
-    /**
-     * @param mixed $intDir
-     */
-    public function setIntDir( $intDir ) {
-        $this->intDir = $intDir;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getErrDir() {
-        return $this->errDir;
+    public function setUploadDir( string $uploadDir ) {
+        $this->uploadDir = $uploadDir;
     }
 
     /**
@@ -517,23 +507,16 @@ class ConversionHandler {
     }
 
     /**
-     * @return mixed
+     * @param mixed $uploadTokenValue
      */
-    public function getCookieDir() {
-        return $this->cookieDir;
-    }
-
-    /**
-     * @param mixed $cookieDir
-     */
-    public function setCookieDir( $cookieDir ) {
-        $this->cookieDir = $cookieDir;
+    public function setUploadTokenValue( $uploadTokenValue ) {
+        $this->uploadTokenValue = $uploadTokenValue;
     }
 
     /**
      * @param boolean $stopOnFileException
      */
-    public function setStopOnFileException( $stopOnFileException ) {
+    public function setStopOnFileException( bool $stopOnFileException ) {
         $this->stopOnFileException = $stopOnFileException;
     }
 
@@ -542,19 +525,8 @@ class ConversionHandler {
      *
      * @return $this
      */
-    public function setFeatures( FeatureSet $features ) {
+    public function setFeatures( FeatureSet $features ): ConversionHandler {
         $this->features = $features;
-
-        return $this;
-    }
-
-    /**
-     * @param mixed $_userIsLogged
-     *
-     * @return $this
-     */
-    public function setUserIsLogged( $_userIsLogged ) {
-        $this->_userIsLogged = $_userIsLogged;
 
         return $this;
     }
@@ -564,10 +536,6 @@ class ConversionHandler {
      */
     public function setFiltersExtractionParameters( ?FiltersConfigTemplateStruct $filters_extraction_parameters = null ) {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
-    }
-
-    public function setReconversion( bool $isReconversion ) {
-        $this->isReconversion = $isReconversion;
     }
 
 }

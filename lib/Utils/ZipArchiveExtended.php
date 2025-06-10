@@ -22,12 +22,12 @@ class ZipArchiveExtended extends ZipArchive {
 
     const ARRAY_FILES_PREFIX = "@@_prefix_@@";
 
-    public $tree;
-    public $treeList;
+    public array $tree     = [];
+    public array $treeList = [];
 
-    protected static $MAX_FILES;
+    protected static int $MAX_FILES;
 
-    public function message( $code ) {
+    public function message( $code ): string {
         switch ( $code ) {
             case 0:
                 return 'No error';
@@ -106,7 +106,7 @@ class ZipArchiveExtended extends ZipArchive {
         }
     }
 
-    public function isDir( $path ) {
+    public function isDir( string $path ): bool {
         return substr( $path, -1 ) == DIRECTORY_SEPARATOR;
     }
 
@@ -154,7 +154,8 @@ class ZipArchiveExtended extends ZipArchive {
 
             $pathWithoutFile = $pathBySlash;
             $fileName        = array_pop( $pathWithoutFile );
-            $lastFolder      = array_pop( $pathWithoutFile );
+            array_pop( $pathWithoutFile );
+            //remove the last element, which is the file name, and the second last, which is the folder name
             $pathWithoutFile = implode( DIRECTORY_SEPARATOR, $pathWithoutFile );
 
             if ( $pathWithoutFile != "" && !isset( $path2numOfFolders[ $pathWithoutFile ] ) ) {
@@ -181,8 +182,8 @@ class ZipArchiveExtended extends ZipArchive {
 
             $folderCanBeVisited = true;
             //check that every ancestor folder has a number of folders below the allowed threshold
-            foreach ( $path2numOfFolders as $fpath => $number ) {
-                if ( @strpos( $pathWithoutFile, $fpath ) > -1 && $number > self::MAX_VISITED_FOLDERS_PER_DEPTH ) {
+            foreach ( $path2numOfFolders as $file_path => $number ) {
+                if ( @strpos( $pathWithoutFile, $file_path ) > -1 && $number > self::MAX_VISITED_FOLDERS_PER_DEPTH ) {
                     $folderCanBeVisited = false;
                     break;
                 }
@@ -200,12 +201,10 @@ class ZipArchiveExtended extends ZipArchive {
             for ( $j = 0; $j < $c - 1; $j++ ) {
                 $count       = 1;
                 $originalKey = str_replace( self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $j ], $count );
-                if ( isset( $temp[ $originalKey ] ) ) {
-                    $temp = &$temp[ $originalKey ];
-                } else {
+                if ( !isset( $temp[ $originalKey ] ) ) {
                     $temp[ $originalKey ] = [];
-                    $temp                 = &$temp[ $originalKey ];
                 }
+                $temp = &$temp[ $originalKey ];
             }
 
             $last_originalKey = str_replace( self::ARRAY_FILES_PREFIX, "", $pathBySlash[ $c - 1 ], $count );
@@ -223,7 +222,7 @@ class ZipArchiveExtended extends ZipArchive {
 
     }
 
-    public function extractFilesInTmp( $tmp_folder ) {
+    public function extractFilesInTmp( string $tmp_folder ): array {
 
         $filesArray = [];
         $fileErrors = [];
@@ -250,8 +249,8 @@ class ZipArchiveExtended extends ZipArchive {
             $sizeExceeded = false;
             $fileSize     = 0;
             while ( !feof( $fp ) && !$sizeExceeded ) {
-                fwrite( $tmpFp, fread( $fp, 8192 ) );
-                $fileSize += 8192;
+                $realSize = fwrite( $tmpFp, fread( $fp, 8192 ) );
+                $fileSize += $realSize;
 
                 if ( $fileSize > INIT::$MAX_UPLOAD_FILE_SIZE ) {
                     $sizeExceeded = true;
@@ -275,31 +274,29 @@ class ZipArchiveExtended extends ZipArchive {
 
         foreach ( $filesArray as $filePath => &$objectFile ) {
             $objectFile[ 'error' ] = $fileErrors[ $filePath ] ?? null;
-            $objectFile[ 'type' ]  = (new MimeTypes())->guessMimeType( $tmp_folder . $filePath );
+            $objectFile[ 'type' ]  = ( new MimeTypes() )->guessMimeType( $tmp_folder . $filePath );
         }
 
         return $filesArray;
 
     }
 
-    private function treeKey( $key ) {
+    private function treeKey( string $key ): string {
         return self::ARRAY_FILES_PREFIX . $key;
     }
 
-    private function prependZipFileName( $fName ) {
+    private function prependZipFileName( string $fName ): string {
         return AbstractFilesStorage::pathinfo_fix( $this->filename, PATHINFO_BASENAME ) . self::INTERNAL_SEPARATOR . $fName;
     }
 
     /**
-     * Gets path informations for a file unzipped using ZipArchiveExtended.
+     * Gets path information for a file unzipped using ZipArchiveExtended.
      *
-     * @param $path        string A valid ZipArchiveExtended path. it must be a path that uses the internal
-     *                     separator of this class.
+     * @param $path        string A valid ZipArchiveExtended path. It must be a path that uses the internal separator of this class.
      *
-     * @return array|null Returns null if path is not valid, otherwise it will return the array returned
-     *                    by pathinfo() function, plus a 'zipfilename' key, containing the zip file name.
+     * @return array|null Returns null if the path is not valid, otherwise it will return the array returned by pathinfo() function, plus a 'zipfilename' key, containing the zip file name.
      */
-    public static function zipPathInfo( $path ) {
+    public static function zipPathInfo( string $path ): ?array {
         if ( strpos( $path, self::INTERNAL_SEPARATOR ) === false ) {
             return null;
         }
@@ -313,15 +310,13 @@ class ZipArchiveExtended extends ZipArchive {
         $filename     = implode( ".", $filenameInfo );
         $dirname      = implode( DIRECTORY_SEPARATOR, $path );
 
-        $pathInfo = [
+        return [
                 'dirname'     => $dirname,
                 'basename'    => $basename,
                 'extension'   => $extension,
                 'filename'    => $filename,
                 'zipfilename' => $zipFile
         ];
-
-        return $pathInfo;
     }
 
     /**
@@ -329,7 +324,7 @@ class ZipArchiveExtended extends ZipArchive {
      *
      * @return string
      */
-    public static function getFileName( $internalFileName ) {
+    public static function getFileName( string $internalFileName ): string {
         $path = explode( self::INTERNAL_SEPARATOR, $internalFileName );
 
         return implode( DIRECTORY_SEPARATOR, $path );
@@ -340,7 +335,7 @@ class ZipArchiveExtended extends ZipArchive {
      *
      * @return string
      */
-    public static function getInternalFileName( $fileName ) {
+    public static function getInternalFileName( string $fileName ): string {
         $path = explode( DIRECTORY_SEPARATOR, $fileName );
 
         return implode( self::INTERNAL_SEPARATOR, $path );

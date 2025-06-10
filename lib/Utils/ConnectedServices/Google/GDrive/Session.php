@@ -8,18 +8,15 @@
 
 namespace ConnectedServices\Google\GDrive;
 
-use API\Commons\Exceptions\AuthenticationError;
 use ArrayObject;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
-use ConversionHandler;
 use DirectoryIterator;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
+use FilesConverter;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -38,8 +35,6 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use RemoteFiles_RemoteFileDao;
 use RuntimeException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Users_UserStruct;
 use Utils;
 
@@ -71,7 +66,7 @@ class Session {
     /**
      * @var AbstractFilesStorage
      */
-    protected $files_storage;
+    protected AbstractFilesStorage $files_storage;
 
     /**
      * @var FeatureSet
@@ -102,7 +97,7 @@ class Session {
     }
 
     /**
-     * This class overrides a not existent super global when called by CLI
+     * Creates a new instance of the Session class for CLI usage.
      *
      * @param $session
      *
@@ -150,36 +145,6 @@ class Session {
         }
 
         return true;
-    }
-
-    /**
-     * Rename the filemap in session folder stored on filesystem
-     *
-     * ----------------------------------------------------------------------
-     *
-     * Example:
-     *
-     * 2344e5918dcff468b4362d79cb16b0039c77d608|af-ZA ---> 2344e5918dcff468b4362d79cb16b0039c77d608|it-IT
-     *
-     * @param array $file
-     */
-    private function renameTheFileMap( array $file ) {
-        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
-
-        /** @var DirectoryIterator $item */
-        foreach (
-                new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( $uploadDir, FilesystemIterator::SKIP_DOTS ),
-                        RecursiveIteratorIterator::SELF_FIRST ) as $item
-        ) {
-
-            $diskHash = explode( "_", $file[ self::FILE_HASH ][ 'diskHash' ] );
-
-            if ( Utils::stringStartsWith( $item->getBasename(), $diskHash[ 0 ] ) ) {
-                rename( $item->getBasename(), $file[ self::FILE_HASH ][ 'diskHash' ] );
-            }
-
-        }
     }
 
     /**
@@ -284,7 +249,7 @@ class Session {
      *
      * @param string $fileId
      * @param string $fileName
-     * @param string $fileHash
+     * @param array  $fileHash
      */
     public function addFiles( string $fileId, string $fileName, array $fileHash ) {
 
@@ -473,24 +438,12 @@ class Session {
     }
 
     /**
-     * @return string
-     */
-    private function getUploadDir(): string {
-        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input( INPUT_COOKIE, 'upload_token' );
-    }
-
-    /**
      * @param array $file
-     * @param ?string $lang
      *
      * @return string
      */
-    private function getCacheFileDir( array $file, ?string $lang = '' ): string {
+    private function getCacheFileDir( array $file ): string {
         $sourceLang = $this->session[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-
-        if ( $lang !== '' ) {
-            $sourceLang = $lang;
-        }
 
         $fileHash = $file[ self::FILE_HASH ][ 'cacheHash' ];
 
@@ -619,11 +572,6 @@ class Session {
      * @param string        $googleFileId
      * @param Google_Client $gClient
      *
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
      * @throws Exception
      */
     public function importFile( string $googleFileId, Google_Client $gClient ) {
@@ -697,41 +645,51 @@ class Session {
     /**
      * @param string $file_name
      *
-     * @return array|null
-     * @throws AuthenticationError
-     * @throws EndQueueException
-     * @throws NotFoundException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @return array
+     * @throws Exception
      */
-    public function doConversion( string $file_name ): ?array {
+    public function doConversion( string $file_name ): array {
 
-        $uploadDir = $this->guid;
+        $uploadTokenValue = $this->guid;
 
-        $intDir = INIT::$UPLOAD_REPOSITORY .
-                DIRECTORY_SEPARATOR . $uploadDir;
+        $uploadDir = INIT::$UPLOAD_REPOSITORY .
+                DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $errDir = INIT::$STORAGE_DIR .
                 DIRECTORY_SEPARATOR .
                 'conversion_errors' .
-                DIRECTORY_SEPARATOR . $uploadDir;
-
-        $conversionHandler = new ConversionHandler();
-        $conversionHandler->setFileName( $file_name );
-        $conversionHandler->setSourceLang( $this->source_lang );
-        $conversionHandler->setTargetLang( $this->target_lang );
-        $conversionHandler->setSegmentationRule( $this->seg_rule );
-        $conversionHandler->setCookieDir( $uploadDir );
-        $conversionHandler->setIntDir( $intDir );
-        $conversionHandler->setErrDir( $errDir );
-        $conversionHandler->setFiltersExtractionParameters( $this->filters_extraction_parameters );
+                DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->session[ 'user' ]->email );
-        $conversionHandler->setFeatures( $this->featureSet );
-        $conversionHandler->setUserIsLogged( true );
 
-        return $conversionHandler->processConversion();
+        $converter = new FilesConverter(
+                [ $file_name ],
+                $this->source_lang,
+                $this->target_lang,
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $this->seg_rule,
+                $this->featureSet,
+                $this->filters_extraction_parameters,
+        );
+
+        $converter->convertFiles();
+
+        $result = $converter->getResult();
+
+        if ( $result->hasErrors() ) {
+            throw new RuntimeException( $result->getErrors()[ 0 ] );
+        }
+
+        $data = [];
+        foreach ( $result->getData() as $value ) {
+            $data = [ 'cacheHash' => $value->getCacheHash(), 'diskHash' => $value->getDiskHash() ];
+        }
+
+        return $data;
 
     }
+
 }
