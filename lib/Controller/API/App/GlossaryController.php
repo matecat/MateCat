@@ -4,6 +4,7 @@ namespace API\App;
 
 use AbstractControllers\KleinController;
 use CatUtils;
+use DomainException;
 use INIT;
 use Langs\Languages;
 use ReflectionException;
@@ -256,11 +257,7 @@ class GlossaryController extends KleinController {
         $job = CatUtils::getJobFromIdAndAnyPassword( $json[ 'id_job' ], $json[ 'password' ] );
 
         if ( $job === null ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => 'Wrong id_job/password combination'
-            ] );
-            die();
+            throw new DomainException( 'Wrong id_job/password combination' );
         }
 
         $json[ 'id_segment' ] = ( isset( $json[ 'id_segment' ] ) ) ? $json[ 'id_segment' ] : null;
