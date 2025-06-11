@@ -884,7 +884,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         ] );
 
         $this->getEngineRecord()->base_url                    = parse_url( $this->getEngineRecord()->base_url, PHP_URL_HOST ) . ":10000";
-        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/pippo/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
+        $this->getEngineRecord()->others[ 'tags_projection' ] .= '/' . $config[ 'source_lang' ] . "/" . $config[ 'target_lang' ] . "/";
         $this->call( 'tags_projection', $parameters );
 
         if ( !empty( $this->result->responseData ) ) {

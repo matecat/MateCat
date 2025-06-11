@@ -321,7 +321,7 @@ class GetSearchController extends KleinController {
 
         $chunk           = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
         $project         = Projects_ProjectDao::findByJobId( (int)$id_job );
-        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $id_segment, $this->user, $project );
+        $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->user, $project, $id_segment );
 
         // loop all segments to replace
         foreach ( $search_results as $key => $tRow ) {

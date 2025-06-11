@@ -55,6 +55,7 @@ class TeamsProjectsController extends KleinController {
 
         $updatedStruct = $projectModel->update();
         $formatted     = new Project();
+        $formatted->setUser( $this->user );
 
         $this->refreshClientSessionIfNotApi();
 
