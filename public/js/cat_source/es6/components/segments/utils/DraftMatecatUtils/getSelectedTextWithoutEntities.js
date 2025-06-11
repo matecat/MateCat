@@ -47,7 +47,6 @@ const getSelectedTextWithoutEntities = (editorState) => {
   } catch (e) {
     console.log(e)
   }
-  console.log('getSelectedTextWithoutEntities', result)
   return result
 }
 
