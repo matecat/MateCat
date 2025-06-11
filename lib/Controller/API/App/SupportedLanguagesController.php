@@ -4,7 +4,7 @@
 namespace API\App;
 
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use Langs\Languages;
 
 class SupportedLanguagesController extends KleinController {

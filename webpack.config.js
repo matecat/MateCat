@@ -618,6 +618,13 @@ const matecatConfig = async ({env}, {mode}) => {
         xhtml: true,
       }),
       new HtmlWebPackPlugin({
+        filename: path.resolve(__dirname, './lib/View/410.html'),
+        template: path.resolve(__dirname, './lib/View/templates/_410.html'),
+        chunks: ['errorPage'],
+        publicPath: '/public/build/',
+        xhtml: true,
+      }),
+      new HtmlWebPackPlugin({
         filename: path.resolve(__dirname, './lib/View/500.html'),
         template: path.resolve(__dirname, './lib/View/templates/_500.html'),
         chunks: ['errorPage'],

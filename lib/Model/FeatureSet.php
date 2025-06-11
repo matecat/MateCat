@@ -257,7 +257,6 @@ class FeatureSet implements FeatureSetInterface {
     /**
      * @param $method
      *
-     * @throws Exception
      */
     public function run( $method ) {
         $args = array_slice( func_get_args(), 1 );

@@ -1,33 +1,54 @@
-<!DOCTYPE HTML>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Bad Configuration - Matecat</title>
-
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Bad Configuration</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/meta/favicon-32x32.svg"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/meta/favicon-16x16.svg"/>
+    <style>
+        .cat {
+            height: 215px;
+            background: url(/public/img/offline.png) no-repeat center center;
+            margin-top: 60px;
+        }
+    </style>
 </head>
-<body class="offline">
-<header>
-    <div class="wrapper ">
-        <a href="/" class="logo"></a>
-    </div>
+<body class="started">
+<header class="upload-page-header">
+    <section class="nav-bar ui grid">
+        <nav class="sixteen wide column navigation">
+            <div class="ui grid">
+                <div class="three wide column" data-testid="logo"><a href="/" class="logo"></a></div>
+                <div class="user-teams thirteen wide column right floated">
+                    <div>
+                        <ul id="menu-site">
+                            <li><a href="https://site.matecat.com">About</a></li>
+                            <li><a href="https://site.matecat.com/benefits/">Benefits</a></li>
+                            <li><a href="https://site.matecat.com/outsourcing/">Outsource</a></li>
+                            <li><a href="https://site.matecat.com/open-source/">Opensource</a></li>
+                            <li><a href="https://site.matecat.com/contact-us/">Contact us</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </section>
 </header>
 <div class="claim">
     <div class="cat"></div>
     <h1>Bad Configuration</h1>
     <h2>Dear System Administrator, The Matecat configuration file ( config.ini ) is not up-to-date.</h2>
-    <h3><a id="badConf" href="/" >Click this link after you corrected the issue to see if is all right.</a></h3>
+    <h3><a id="badConf" href="/">Click this link after you corrected the issue to see if is all right.</a></h3>
     <h3>A message has been sent to the system administrator.<br/><br/>
         Please retry in 5 minutes.</h3>
-
 </div>
 
 <script>
-    // self executing function here
-    (function () {
-        var href = document.getElementById( "badConf" );
-        href.setAttribute( "href", href + '?' + ( new Date() ).getTime() );
-    })();
+  // self executing function here
+  (function () {
+    const href = document.getElementById("badConf");
+    href.setAttribute("href", href + '?' + (new Date()).getTime());
+  })();
 </script>
 
 </body>

@@ -1,6 +1,6 @@
 <?php
 
-class Segments_SegmentMetadataStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Segments_SegmentMetadataStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id_segment;
     public $meta_key;

@@ -1,9 +1,11 @@
 <?php
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
+use Files\FileStruct;
 use Segments\SegmentUIStruct;
 
-class Segments_SegmentDao extends DataAccess_AbstractDao {
+class Segments_SegmentDao extends AbstractDao {
     const TABLE = 'segments';
     protected static array $auto_increment_field = [ 'id' ];
 
@@ -37,7 +39,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
                     GROUP BY translation, id_job
             ";
 
-    public function countByFile( Files_FileStruct $file ) {
+    public function countByFile( FileStruct $file ) {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
 
@@ -554,9 +556,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param                $where
      * @param array          $options
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return SegmentUIStruct[]
+     * @throws ReflectionException
      */
-    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ) {
+    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ): array {
 
         switch ( $where ) {
             case 'after':
@@ -623,7 +626,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         }
 
         $optional_fields = "";
-        if ( isset( $options[ 'optional_fields' ] ) && !empty( $options[ 'optional_fields' ] ) ) {
+        if ( !empty( $options[ 'optional_fields' ] ) ) {
             $optional_fields = ', ' . implode( ', ', $options[ 'optional_fields' ] );
         }
 
@@ -678,7 +681,9 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
 
-        return $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+        /** @var SegmentUIStruct[] $r */
+        $r = $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+        return $r;
 
     }
 
@@ -978,7 +983,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $limit
      * @param $offset
      * @param int $ttl
-     * @return array|DataAccess_IDaoStruct[]
+     * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0 ) {
@@ -1072,7 +1077,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @param $limit
      * @param $offset
      * @param int $ttl
-     * @return array|DataAccess_IDaoStruct[]
+     * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public static function getSegmentsForAnalysisFromIdProjectAndPassword( $idProject, $password, $limit, $offset, $ttl = 0 ) {

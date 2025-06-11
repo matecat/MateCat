@@ -120,7 +120,6 @@ const SegmentQRLine = ({
 
       {showSuggestionSource ? (
         <div className="segment-content qr-spec">
-          <div>Match:</div>
           <div className={'tm-percent ' + suggestionMatchClass}>
             {segment.get('suggestion_source') !== 'MT' ? (
               <b>

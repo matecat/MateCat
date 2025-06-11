@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
@@ -185,7 +185,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             $this->revisionFactory = RevisionFactory::initFromProject( $jobValidator->getChunk()->getProject() );
             //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this->request )->setChunkReview( $jobValidator->getChunkReview() );
+            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this )->setChunkReview( $jobValidator->getChunkReview() );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );

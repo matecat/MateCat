@@ -1,8 +1,8 @@
 <?php
 
-use API\Commons\Authentication\AuthCookie;
-use API\Commons\Authentication\AuthenticationHelper;
 use ConnectedServices\OauthTokenEncryption;
+use Controller\Authentication\AuthCookie;
+use Controller\Authentication\AuthenticationHelper;
 use Email\WelcomeEmail;
 use Teams\TeamDao;
 use Users\MetadataDao;

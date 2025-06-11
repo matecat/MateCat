@@ -47,15 +47,24 @@ export const METADATA_KEY = 'cross_language_matches'
 
 export const ANALYSIS_BUCKETS_LABELS = {
   MT: 'Machine Translation',
-  NO_MATCH: 'New',
-  REPETITIONS: 'Repetitions',
-  INTERNAL: 'Internal 75-99%',
-  '50%-74%': 'TM Partial 50-74%',
-  '75%-84%': 'TM Partial 75-84%',
-  '85%-94%': 'TM Partial 85-94%',
-  '95%-99%': 'TM Partial 95-99%',
-  '100%': 'TM 100%',
-  '100%_PUBLIC': 'Public TM 100%',
-  ICE: 'TM 100% in context',
-  ICE_MT: 'Top Quality Machine Translation',
+  new: 'New',
+  repetitions: 'Repetitions',
+  internal: 'Internal     75-99%',
+  tm_50_74: 'TM Partial 50-74%',
+  tm_75_84: 'TM Partial 75-84%',
+  tm_85_94: 'TM Partial 85-94%',
+  tm_95_99: 'TM Partial 95-99%',
+  tm_100: 'TM 100%',
+  tm_100_public: 'Public TM 100%',
+  ice: 'TM 100% in context',
+  ice_mt: 'Top-Quality Machine Translation',
+  top_quality_mt: 'Premium Machine Translation',
+  higher_quality_mt: 'High-Quality Machine Translation',
+  standard_quality_mt: 'Baseline Machine Translation',
+  numbers_only: 'Numbers Only',
+}
+
+export const ANALYSIS_WORKFLOW_TYPES = {
+  STANDARD: 'standard',
+  MTQE: 'mtqe',
 }

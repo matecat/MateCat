@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewDao;

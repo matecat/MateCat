@@ -111,10 +111,10 @@ class Features {
      *
      * @return string
      */
-    public static function getPluginClass( $code ) {
+    public static function getPluginClass( $code ): string {
         $instance = static::getInstance();
         if ( !isset( $instance->PLUGIN_CLASSES[ $code ] ) ) {
-            //try default auto loading for internal plugins
+            //try default autoloading for internal plugins
             return '\\Features\\' . Utils::underscoreToCamelCase( $code );
         }
 
@@ -167,11 +167,11 @@ class Features {
      */
     public static function loadRoutes( Klein $klein ) {
 
-        [ , , $plugin_code ] = explode( '/', Request::createFromGlobals()->uri() );
+        $path = explode( '/', Request::createFromGlobals()->uri() );
 
         $instance = static::getInstance();
 
-        if ( array_search( $plugin_code, $instance->VALID_CODES ) !== false ) {
+        if ( in_array( $path[ 2 ] ?? null, $instance->VALID_CODES ) ) {
 
             /**
              * Try to load external plugins classes and fallback to internal plugin code in case of failure
@@ -184,9 +184,9 @@ class Features {
              *             should be something like
              *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
              */
-            $cls = static::getPluginClass( $plugin_code );
+            $cls = static::getPluginClass( $path[ 2 ] );
 
-            $klein->with( "/plugins/$plugin_code", function () use ( $cls, $klein ) {
+            $klein->with( "/plugins/" . $path[ 2 ], function () use ( $cls, $klein ) {
                 /**
                  * @var $cls BaseFeature
                  */

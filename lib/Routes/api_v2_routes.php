@@ -133,8 +133,8 @@ route( '/api/v2/change-password', 'POST', [ 'API\V2\ChangePasswordController', '
 // Download files
 route( '/api/v2/original/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadOriginalController', 'index' ] );
 route( '/api/v2/translation/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadFileController', 'index' ] );
-route( '/api/v2/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
-route( '/api/v2/TMX/[:id_job]/[:password]', 'GET', [ 'API\V2\ExportTMXController', 'index' ] );
+route( '/api/v2/xliff/[:id_job]/[:password]/[:filename]', 'GET', [ 'API\V2\DownloadFileController', 'forceXliff' ] );
+route( '/api/v2/tmx/[:id_job]/[:password]', 'GET', [ 'API\V2\DownloadJobTMXController', 'index' ] );
 
 // User
 route('/api/v2/user', 'PUT',  ['API\V2\UserController', 'edit']);

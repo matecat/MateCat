@@ -2,9 +2,11 @@
 
 namespace LQA;
 
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Exceptions\ValidationError;
 
-class EntryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $uid;

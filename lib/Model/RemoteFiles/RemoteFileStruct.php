@@ -1,6 +1,6 @@
 <?php
 
-class RemoteFiles_RemoteFileStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class RemoteFiles_RemoteFileStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
     public $id;
     public $id_file;
     public $id_job;
