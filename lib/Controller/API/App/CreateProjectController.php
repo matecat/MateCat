@@ -130,6 +130,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
+        // GDrive session instance
+        if(isset($_SESSION[ "gdrive_session" ])){
+            $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
+            $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
+        }
+
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
