@@ -71,7 +71,7 @@ class ConvertFileController extends KleinController {
 
         $data = [];
         foreach ( $result->getData() as $value ) {
-            $data[ 'zipFiles' ][]       = $value->getZipFiles();
+            $data[ 'zipFiles' ][]       = $value->getZipContent();
             $data[ 'simpleFileName' ][] = $value->getSimpleFileContent();
         }
         $data[ 'zipFiles' ]       = array_filter( $data[ 'zipFiles' ] );
