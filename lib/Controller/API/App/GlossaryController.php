@@ -265,7 +265,7 @@ class GlossaryController extends KleinController {
 
         $json[ 'id_segment' ] = ( isset( $json[ 'id_segment' ] ) ) ? $json[ 'id_segment' ] : null;
         $json[ 'jobData' ]    = $job->toArray();
-        $json[ 'tmKeys' ]     = \json_decode( $job->tm_keys, true );
+        $json[ 'tmKeys' ]     = json_decode( $job->tm_keys, true );
         $json[ 'userKeys' ]   = [];
 
         // Add user keys
@@ -370,6 +370,7 @@ class GlossaryController extends KleinController {
     /**
      * @param $json
      * @param $jsonSchema
+     *
      * @throws InvalidValue
      * @throws \Swaggest\JsonSchema\Exception
      * @throws \Validator\Errors\JSONValidatorException

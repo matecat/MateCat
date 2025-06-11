@@ -24,7 +24,7 @@ import {EditorSettingsTab} from './Contents/EditorSettingsTab'
 import ModalsActions from '../../actions/ModalsActions'
 import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
 import defaultFiltersParams from './Contents/defaultTemplates/filterParams.json'
-import {debounce, isEqual} from 'lodash'
+import {isEqual} from 'lodash'
 import useSyncTemplateWithConvertFile from './useSyncTemplateWithConvertFile'
 import {EditorOtherTab} from './Contents/EditorOtherTab'
 
@@ -125,14 +125,16 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
               'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
-          {
-            ...(config.ownerIsMe === 1 && {
-              id: SETTINGS_PANEL_TABS.editorOther,
-              label: 'Other',
-              description: 'Adjust other project creation settings.',
-              component: <EditorOtherTab />,
-            }),
-          },
+          ...(config.ownerIsMe === 1
+            ? [
+                {
+                  id: SETTINGS_PANEL_TABS.editorOther,
+                  label: 'Other',
+                  description: 'Adjust other project creation settings.',
+                  component: <EditorOtherTab />,
+                },
+              ]
+            : []),
         ]
       : []),
   ]
