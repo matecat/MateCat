@@ -29,7 +29,7 @@ class OutsourceContainer extends React.Component {
 
   handleDocumentClick(evt) {
     evt.stopPropagation()
-
+    const parentClass = '.outsource-container'
     if (
       this.container &&
       !this.container.contains(evt.target) &&
@@ -39,7 +39,9 @@ class OutsourceContainer extends React.Component {
       !$(evt.target).hasClass('need-it-faster-close') &&
       !$(evt.target).hasClass('need-it-faster-close-icon') &&
       !$(evt.target).hasClass('get-price') &&
-      !$(evt.target).hasClass('react-datepicker__day')
+      !$(evt.target).hasClass('react-datepicker__day') &&
+      !evt.target.closest('.dropdown__list') &&
+      !evt.target.closest(parentClass)
     ) {
       this.props.onClickOutside(evt)
     }
@@ -56,7 +58,7 @@ class OutsourceContainer extends React.Component {
   componentDidMount() {}
 
   componentWillUnmount() {
-    window.removeEventListener('click', this.handleDocumentClick)
+    window.removeEventListener('mousedown', this.handleDocumentClick)
     window.removeEventListener('keydown', this._handleEscKey)
   }
 
@@ -64,12 +66,12 @@ class OutsourceContainer extends React.Component {
     let self = this
     if (this.props.openOutsource || this.props.showTranslatorBox) {
       setTimeout(function () {
-        window.addEventListener('click', self.handleDocumentClick)
+        window.addEventListener('mousedown', self.handleDocumentClick)
         window.addEventListener('keydown', self._handleEscKey)
         self.container && self.container.scrollIntoView({block: 'center'})
       }, 500)
     } else {
-      window.removeEventListener('click', self.handleDocumentClick)
+      window.removeEventListener('mousedown', self.handleDocumentClick)
       window.removeEventListener('keydown', self._handleEscKey)
     }
   }
