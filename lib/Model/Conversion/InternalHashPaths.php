@@ -16,7 +16,7 @@ class InternalHashPaths {
     /**
      * @var ?ZipContent
      */
-    protected ?ZipContent $zipFiles = null;
+    protected ?ZipContent $zipContent = null;
 
     /**
      * @var ?SimpleFileContent
@@ -40,14 +40,14 @@ class InternalHashPaths {
     }
 
     public function isEmpty(): bool {
-        return empty( $this->cacheHash ) && empty( $this->diskHash ) && empty( $this->zipFiles ) && empty( $this->simpleFileContent );
+        return empty( $this->cacheHash ) && empty( $this->diskHash ) && empty( $this->zipContent ) && empty( $this->simpleFileContent );
     }
 
     /**
      * @return ?ZipContent
      */
-    public function getZipFiles(): ?ZipContent {
-        return $this->zipFiles;
+    public function getZipContent(): ?ZipContent {
+        return $this->zipContent;
     }
 
     /**

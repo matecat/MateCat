@@ -717,7 +717,7 @@ class NewController extends KleinController {
         if ( empty( $private_tm_key ) ) {
             $uniformedFileObject = Upload::getUniformGlobalFilesStructure( $_FILES );
             foreach ( $uniformedFileObject as $_fileinfo ) {
-                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo->name );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $private_tm_key[] = [ 'key' => 'new' ];
                     break;
