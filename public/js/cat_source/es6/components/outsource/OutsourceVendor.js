@@ -14,6 +14,8 @@ import UserStore from '../../stores/UserStore'
 
 import 'react-datepicker/dist/react-datepicker.css'
 import {Select} from '../common/Select'
+import {DropdownMenu} from '../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE} from '../common/Button/Button'
 class OutsourceVendor extends React.Component {
   constructor(props) {
     super(props)
@@ -492,20 +494,6 @@ class OutsourceVendor extends React.Component {
                     <div className="item">
                       <b>{this.state.chunkQuote.get('t_name')}</b> by Translated
                     </div>
-                    <div className="item">
-                      <div
-                        className="ui mini star rating"
-                        data-rating={Number(
-                          (
-                            parseFloat(this.state.chunkQuote.get('t_vote')) /
-                            2 /
-                            10
-                          ).toFixed(0),
-                        )}
-                        data-max-rating="5"
-                        ref={(rating) => (this.rating = rating)}
-                      />
-                    </div>
                   </div>
                   <div className="ui list right">
                     <div className="item">
@@ -764,121 +752,26 @@ class OutsourceVendor extends React.Component {
                     {priceCurrencySymbol}{' '}
                     {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
                   </div>
-                  <div className="select-value">
-                    <h4 className="ui header">
-                      <div className="content">
-                        <div
-                          className="ui scrolling dropdown"
-                          ref={(select) => (this.currencySelect = select)}
-                        >
+                  <DropdownMenu
+                    toggleButtonProps={{
+                      children: (
+                        <>
                           <a className="price-pw">
                             about {priceCurrencySymbol} {pricePWord} / word
                           </a>
-                          <i className="dropdown icon" />
-                          <div className="menu">
-                            <div
-                              className="item"
-                              data-value="EUR"
-                              data-symbol="€"
-                            >
-                              Euro (EUR)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="USD"
-                              data-symbol="US$"
-                            >
-                              US dollar (USD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="AUD"
-                              data-symbol="$"
-                            >
-                              Australian dollar (AUD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="CAD"
-                              data-symbol="$"
-                            >
-                              Canadian dollar (CAD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="NZD"
-                              data-symbol="$"
-                            >
-                              New Zealand dollar (NZD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="GBP"
-                              data-symbol="£"
-                            >
-                              Pound sterling (GBP)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="BRL"
-                              data-symbol="R$"
-                            >
-                              Real (BRL)
-                            </div>
-                            {/*<div*/}
-                            {/*  className="item"*/}
-                            {/*  data-value="RUB"*/}
-                            {/*  data-symbol="руб"*/}
-                            {/*>*/}
-                            {/*  Russian ruble (RUB)*/}
-                            {/*</div>*/}
-                            <div
-                              className="item"
-                              data-value="SEK"
-                              data-symbol="kr"
-                            >
-                              Swedish krona (SEK)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="CHF"
-                              data-symbol="Fr."
-                            >
-                              Swiss franc (CHF)
-                            </div>
-                            {/*<div*/}
-                            {/*  className="item"*/}
-                            {/*  data-value="TRY"*/}
-                            {/*  data-symbol="TL"*/}
-                            {/*>*/}
-                            {/*  Turkish lira (TL)*/}
-                            {/*</div>*/}
-                            <div
-                              className="item"
-                              data-value="KRW"
-                              data-symbol="￦"
-                            >
-                              Won (KRW)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="JPY"
-                              data-symbol="￥"
-                            >
-                              Yen (JPY)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="PLN"
-                              data-symbol="zł"
-                            >
-                              Złoty (PLN)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </h4>
-                  </div>
+                        </>
+                      ),
+                      mode: BUTTON_MODE.LINK,
+                    }}
+                    items={Object.keys(this.currencies).map((key) => {
+                      return {
+                        label: this.currencies[key].name,
+                        onClick: () => {
+                          this.onCurrencyChange(key)
+                        },
+                      }
+                    })}
+                  />
                 </div>
                 <div className="order-button-outsource">
                   {!this.state.outsourceConfirmed ? (
@@ -1023,123 +916,25 @@ class OutsourceVendor extends React.Component {
                     {priceCurrencySymbol}{' '}
                     {price.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')}
                   </div>
-                  <div className="select-value">
-                    <h4 className="ui header">
-                      <div className="content">
-                        <div
-                          className="ui scrolling dropdown"
-                          ref={(select) => (this.currencySelect = select)}
-                        >
+                  <DropdownMenu
+                    toggleButtonProps={{
+                      children: (
+                        <>
                           <a className="price-pw">
                             about {priceCurrencySymbol} {pricePWord} / word
                           </a>
-                          <i className="dropdown icon" />
-                          <div className="menu">
-                            {/*<div className="header">Select Currency</div>*/}
-                            {/*<div className="divider"/>*/}
-                            <div
-                              className="item"
-                              data-value="EUR"
-                              data-symbol="€"
-                            >
-                              Euro (EUR)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="USD"
-                              data-symbol="US$"
-                            >
-                              US dollar (USD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="AUD"
-                              data-symbol="$"
-                            >
-                              Australian dollar (AUD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="CAD"
-                              data-symbol="$"
-                            >
-                              Canadian dollar (CAD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="NZD"
-                              data-symbol="$"
-                            >
-                              New Zealand dollar (NZD)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="GBP"
-                              data-symbol="£"
-                            >
-                              Pound sterling (GBP)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="BRL"
-                              data-symbol="R$"
-                            >
-                              Real (BRL)
-                            </div>
-                            {/*<div*/}
-                            {/*  className="item"*/}
-                            {/*  data-value="RUB"*/}
-                            {/*  data-symbol="руб"*/}
-                            {/*>*/}
-                            {/*  Russian ruble (RUB)*/}
-                            {/*</div>*/}
-                            <div
-                              className="item"
-                              data-value="SEK"
-                              data-symbol="kr"
-                            >
-                              Swedish krona (SEK)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="CHF"
-                              data-symbol="Fr."
-                            >
-                              Swiss franc (CHF)
-                            </div>
-                            {/*<div*/}
-                            {/*  className="item"*/}
-                            {/*  data-value="TRY"*/}
-                            {/*  data-symbol="TL"*/}
-                            {/*>*/}
-                            {/*  Turkish lira (TL)*/}
-                            {/*</div>*/}
-                            <div
-                              className="item"
-                              data-value="KRW"
-                              data-symbol="￦"
-                            >
-                              Won (KRW)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="JPY"
-                              data-symbol="￥"
-                            >
-                              Yen (JPY)
-                            </div>
-                            <div
-                              className="item"
-                              data-value="PLN"
-                              data-symbol="zł"
-                            >
-                              Złoty (PLN)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </h4>
-                  </div>
+                        </>
+                      ),
+                    }}
+                    items={Object.keys(this.currencies).map((key) => {
+                      return {
+                        label: this.currencies[key].name,
+                        onClick: () => {
+                          this.onCurrencyChange(key)
+                        },
+                      }
+                    })}
+                  />
                 </div>
                 <div className="order-button-outsource">
                   {!this.state.outsourceConfirmed ? (
@@ -1196,16 +991,7 @@ class OutsourceVendor extends React.Component {
   }
 
   componentDidUpdate() {
-    let self = this
     if (this.state.outsource) {
-      let currencyToShow = Cookies.get('matecat_currency')
-      $(this.currencySelect).dropdown('set selected', currencyToShow)
-      $(this.currencySelect).dropdown({
-        onChange: function (value) {
-          self.onCurrencyChange(value)
-        },
-      })
-
       if (this.state.extendedView) {
         this.revisionCheckbox.checked =
           this.state.chunkQuote.get('typeOfService') === 'premium'
@@ -1213,8 +999,6 @@ class OutsourceVendor extends React.Component {
             : false
       }
     }
-
-    $(this.rating).rating('disable')
   }
 
   shouldComponentUpdate(nextProps, nextState) {

@@ -738,29 +738,37 @@
             height: 70px;
             text-align: center;
             margin-bottom: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .price-pw {
+              font-size: 16px;
+              color: colors.$black;
+              font-weight: 100;
+              cursor: pointer;
+            }
             .outsource-price {
               font-size: 26px;
               font-weight: 700;
               padding: 17px 0 10px;
             }
-            .select-value {
-              .content {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                font-size: 15px;
-                a {
-                  color: #000000;
-                  font-weight: 100;
-                  margin-left: 10px;
-                }
-                i {
-                  margin-left: 5px;
-                }
-                .menu {
-                  height: 236px;
-                  left: -10px;
-                }
+            .content {
+              font-family: Calibri, Arial, Helvetica, sans-serif;
+              font-size: 15px;
+              a {
+                color: #000000;
+                font-weight: 100;
+                margin-left: 10px;
+              }
+              i {
+                margin-left: 5px;
+              }
+              .menu {
+                height: 236px;
+                left: -10px;
               }
             }
+
           }
           @media only screen and (max-width: 1199px) and (min-width: 992px) {
             width: 21%;
@@ -1112,29 +1120,37 @@
             background-color: #a7d7916b;
             padding: 25px 5px 15px;
             margin-bottom: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            .price-pw {
+              font-size: 16px;
+              color: colors.$black;
+              font-weight: 100;
+              cursor: pointer;
+            }
             .outsource-price {
               font-size: 28px;
               font-weight: 700;
               margin-bottom: 10px;
             }
-            .select-value {
-              .content {
-                font-family: Calibri, Arial, Helvetica, sans-serif;
-                a {
-                  color: #000000;
-                  font-weight: 100;
-                  font-size: 14px;
-                }
-                i {
-                  margin-left: 5px !important;
-                }
-                .menu {
-                  top: -5px;
-                  left: -23px;
-                  height: 95px;
-                }
+            .content {
+              font-family: Calibri, Arial, Helvetica, sans-serif;
+              a {
+                color: #000000;
+                font-weight: 100;
+                font-size: 14px;
+              }
+              i {
+                margin-left: 5px !important;
+              }
+              .menu {
+                top: -5px;
+                left: -23px;
+                height: 95px;
               }
             }
+
           }
           .order-button-outsource {
             .open-order,
