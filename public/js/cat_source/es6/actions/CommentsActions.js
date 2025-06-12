@@ -42,7 +42,7 @@ const CommentsActions = {
       .then((resp) => {
         AppDispatcher.dispatch({
           actionType: CommentsConstants.ADD_COMMENT,
-          comment: resp.data.entries[0],
+          comment: resp.data.entries.comment[0],
           sid: sid,
         })
       })

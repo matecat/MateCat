@@ -44,7 +44,6 @@ import {
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
 } from '../constants/Constants'
-import segment from '../components/segments/Segment'
 
 EventEmitter.prototype.setMaxListeners(0)
 
