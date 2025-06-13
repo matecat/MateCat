@@ -4,12 +4,12 @@ namespace API\V3;
 
 use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
+use Conversion\Upload;
 use Engines_DeepL;
 use Exception;
 use Files\CSV as CSVParser;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use Upload;
 use Validator\EngineValidator;
 
 class DeepLGlossaryController extends KleinController
@@ -25,7 +25,7 @@ class DeepLGlossaryController extends KleinController
     public function all()
     {
         try {
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
             $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
@@ -91,7 +91,7 @@ class DeepLGlossaryController extends KleinController
                 "entries_format" => "csv",
             ];
 
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
             $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
@@ -132,7 +132,7 @@ class DeepLGlossaryController extends KleinController
     {
         try {
             $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
             $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
@@ -162,7 +162,7 @@ class DeepLGlossaryController extends KleinController
     {
         try {
             $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
             $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];
@@ -189,7 +189,7 @@ class DeepLGlossaryController extends KleinController
     {
         try {
             $id = filter_var( $this->request->id, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH|FILTER_FLAG_ENCODE_LOW );
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT );
             $deepLClient = $this->getDeepLClient($engineId);
 
             $deepLApiKey = $deepLClient->getEngineRecord()->extra_parameters['DeepL-Auth-Key'];

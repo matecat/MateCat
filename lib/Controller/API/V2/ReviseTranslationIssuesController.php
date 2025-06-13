@@ -14,11 +14,17 @@ use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\SegmentTranslation;
 use API\V2\Json\SegmentVersion;
 use Chunks_ChunkDao;
+use Exception;
+use Exceptions\NotFoundException;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Jobs_JobStruct;
+use ReflectionException;
 
 class ReviseTranslationIssuesController extends BaseChunkController {
 
+    /**
+     * @throws ReflectionException
+     */
     public function afterConstruct() {
         $validator = new JobPasswordValidator( $this );
         $validator->onSuccess( function () use ( $validator ) {
@@ -29,10 +35,15 @@ class ReviseTranslationIssuesController extends BaseChunkController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function index() {
         $records = ( new TranslationVersionDao() )->setCacheTTL( 0 )->getVersionsForRevision(
-                $this->request->id_job,
-                $this->request->id_segment
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'id_segment' )
         );
 
         $chunk = Chunks_ChunkDao::getByIdAndPassword( $this->params[ 'id_job' ], $this->params[ 'password' ] );
@@ -45,7 +56,7 @@ class ReviseTranslationIssuesController extends BaseChunkController {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param Jobs_JobStruct|null $chunk
      */
     public function setChunk( Jobs_JobStruct $chunk = null ) {
         $this->chunk = $chunk;

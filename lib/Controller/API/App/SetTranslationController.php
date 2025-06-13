@@ -562,7 +562,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
             case Constants_TranslationStatus::STATUS_DRAFT:
             case Constants_TranslationStatus::STATUS_NEW:
             case Constants_TranslationStatus::STATUS_FIXED:
-            case Constants_TranslationStatus::STATUS_REBUTTED:
                 break;
 
             default:

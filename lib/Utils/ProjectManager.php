@@ -432,7 +432,7 @@ class ProjectManager {
 
         // mt evaluation => ice_mt already in metadata
         // add json parameters to the project metadata as json string
-        if ( $options[ 'mt_qe_workflow_enabled' ] ) {
+        if ( $options[ 'mt_qe_workflow_enabled' ] ?? false ) {
             $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
         }
 
@@ -1143,7 +1143,7 @@ class ProjectManager {
                     AMQHandler::getNewInstanceForDaemons(),
                     'ACTIVITYLOG',
                     '\AsyncTasks\Workers\ActivityLogWorker',
-                    $activity,
+                    $activity->toArray(),
                     [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
             );
         } catch ( Exception $e ) {
@@ -1709,7 +1709,7 @@ class ProjectManager {
              * Async worker to re-count avg-PEE and total-TTE for split jobs
              */
             try {
-                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
             } catch ( Exception $e ) {
                 # Handle the error, logging, ...
                 $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";

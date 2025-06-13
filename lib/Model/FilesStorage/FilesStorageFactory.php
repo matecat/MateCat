@@ -10,7 +10,7 @@ class FilesStorageFactory {
      * @return AbstractFilesStorage
      * @throws Exception
      */
-    public static function create() {
+    public static function create(): AbstractFilesStorage {
         $storageMethod = !empty( INIT::$FILE_STORAGE_METHOD ) ? INIT::$FILE_STORAGE_METHOD : 'fs';
 
         if ( $storageMethod === 'fs' ) {

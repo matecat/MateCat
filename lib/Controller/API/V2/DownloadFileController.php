@@ -10,6 +10,8 @@ use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDriveTokenVerifyModel;
 use ConnectedServices\Google\GDrive\RemoteFileService;
 use ConnectedServices\Google\GoogleProvider;
+use Conversion\Filters;
+use Conversion\ZipArchiveHandler;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -19,7 +21,6 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\FsFilesStorage;
 use FilesStorage\S3FilesStorage;
-use Filters;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Jobs_JobDao;
@@ -39,7 +40,6 @@ use RemoteFiles_RemoteFileDao;
 use Segments_SegmentDao;
 use Utils;
 use XliffReplacer\XliffReplacerCallback;
-use ZipArchiveExtended;
 use ZipContentObject;
 
 set_time_limit( 180 );
@@ -396,7 +396,7 @@ class DownloadFileController extends AbstractDownloadController {
         }
 
         foreach ( $output_content as $idFile => $fileInformation ) {
-            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $fileInformation[ 'output_filename' ] );
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo( $fileInformation[ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
@@ -869,7 +869,7 @@ class DownloadFileController extends AbstractDownloadController {
             copy( $zipFile, $tmpFName );
         }
 
-        $zip = new ZipArchiveExtended();
+        $zip = new ZipArchiveHandler();
         if ( $zip->open( $tmpFName ) ) {
 
             $zip->createTree();
@@ -879,7 +879,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                 $realZipFilePath    = str_replace(
                         [
-                                ZipArchiveExtended::INTERNAL_SEPARATOR,
+                                ZipArchiveHandler::INTERNAL_SEPARATOR,
                                 AbstractFilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ],
                         [ DIRECTORY_SEPARATOR, "" ],

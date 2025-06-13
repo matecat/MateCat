@@ -179,6 +179,8 @@ class GDriveController extends AbstractStatefulKleinController {
                 break;
             }
         }
+
+        $_SESSION[ "gdrive_session" ] = $this->gdriveUserSession->getSession();
     }
 
     /**

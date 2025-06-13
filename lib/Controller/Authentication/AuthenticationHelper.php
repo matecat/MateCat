@@ -168,7 +168,7 @@ class AuthenticationHelper {
         return false;
     }
 
-    public function getUser(): ?Users_UserStruct {
+    public function getUser(): Users_UserStruct {
         return $this->user;
     }
 

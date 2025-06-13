@@ -11,7 +11,7 @@ use \DataAccess\IDaoStruct;
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     /**
      * MAP to convert the values to the right string definition

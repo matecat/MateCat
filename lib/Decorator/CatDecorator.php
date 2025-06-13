@@ -39,42 +39,42 @@ class CatDecorator extends \AbstractDecorator {
     }
 
     public function decorate() {
-        $this->template->pageTitle      = $this->_buildPageTitle();
-        $this->template->revisionNumber = $this->controller->getRevisionNumber();
-        $this->template->isReview       = $this->controller->getRevisionNumber() > 0 ? 'true' : 'false';
+        $this->template->{'pageTitle'}      = $this->_buildPageTitle();
+        $this->template->{'revisionNumber'} = $this->controller->getRevisionNumber();
+        $this->template->{'isReview'}       = $this->controller->getRevisionNumber() > 0 ? 'true' : 'false';
 
-        $this->template->isCJK = false;
+        $this->template->{'isCJK'} = false;
 
-        $this->template->segmentFilterEnabled = true;
+        $this->template->{'segmentFilterEnabled'} = true;
 
-        $this->template->status_labels = json_encode( $this->getStatusLabels() );
+        $this->template->{'status_labels'} = json_encode( $this->getStatusLabels() );
 
         $this->assignCatDecorator();
 
         $this->setQualityReportHref();
 
-        $this->template->searchable_statuses = $this->searchableStatuses();
-        $this->template->remoteFilesInJob    = [];
+        $this->template->{'searchable_statuses'} = $this->searchableStatuses();
+        $this->template->{'remoteFilesInJob'}    = [];
 
         if ( $this->isGDriveProject ) {
             $files = array_map( function ( $item ) {
                 return $item->toArray( [ 'id' ] );
             }, RemoteFiles_RemoteFileDao::getByJobId( $this->job->id ) );
 
-            $this->template->remoteFilesInJob = $files;
-            $this->template->isGDriveProject = $this->isGDriveProject;
+            $this->template->{'remoteFilesInJob'} = $files;
+            $this->template->{'isGDriveProject'} = $this->isGDriveProject;
         }
 
-        $this->template->support_mail               = INIT::$SUPPORT_MAIL;
-        $this->template->showReplaceOptionsInSearch = true;
+        $this->template->{'support_mail'}               = INIT::$SUPPORT_MAIL;
+        $this->template->{'showReplaceOptionsInSearch'} = true;
 
         $this->decorateForCJK();
 
         $this->assignOptions();
 
-        $this->template->chunk_completion_undoable   = true;
-        $this->template->translation_matches_enabled = true;
-        $this->template->allow_link_to_analysis      = true;
+        $this->template->{'chunk_completion_undoable'}   = true;
+        $this->template->{'translation_matches_enabled'} = true;
+        $this->template->{'allow_link_to_analysis'}      = true;
 
 
     }
@@ -107,7 +107,7 @@ class CatDecorator extends \AbstractDecorator {
     }
 
     private function setQualityReportHref() {
-        $this->template->quality_report_href =
+        $this->template->{'quality_report_href'} =
                 INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
 
@@ -118,13 +118,13 @@ class CatDecorator extends \AbstractDecorator {
         $chunk_options_model = new ChunkOptionsModel( $this->job );
 
         //show Tag Projection
-        $this->template->show_tag_projection = true;
-        $this->template->speech2text_enabled    = $chunk_options_model->isEnabled( 'speech2text' );
+        $this->template->{'show_tag_projection'} = true;
+        $this->template->{'speech2text_enabled'}    = $chunk_options_model->isEnabled( 'speech2text' );
 
         LexiQADecorator::getInstance( $this->template )->checkJobHasLexiQAEnabled( $chunk_options_model )->decorateViewLexiQA();
 
-        $this->template->segmentation_rule        = $chunk_options_model->project_metadata[ 'segmentation_rule' ] ?? null;
-        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
+        $this->template->{'segmentation_rule'}        = $chunk_options_model->project_metadata[ 'segmentation_rule' ] ?? null;
+        $this->template->{'tag_projection_languages'} = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
 
     }
 
@@ -134,27 +134,27 @@ class CatDecorator extends \AbstractDecorator {
         $lang_handler                = Languages::getInstance();
         $isSourceRTL                 = $lang_handler->isRTL( $this->controller->source_code );
         $isTargetRTL                 = $lang_handler->isRTL( $this->controller->target_code );
-        $this->template->isTargetRTL = $isTargetRTL ?: 0;
-        $this->template->isSourceRTL = $isSourceRTL ?: 0;
-        $this->template->source_rtl  = $isSourceRTL ? ' rtl-source' : '';
-        $this->template->target_rtl  = $isTargetRTL ? ' rtl-target' : '';
+        $this->template->{'isTargetRTL'} = $isTargetRTL ?: 0;
+        $this->template->{'isSourceRTL'} = $isSourceRTL ?: 0;
+        $this->template->{'source_rtl'}  = $isSourceRTL ? ' rtl-source' : '';
+        $this->template->{'target_rtl'}  = $isTargetRTL ? ' rtl-target' : '';
 
 
         //check if it is a composite language, for cjk check that accepts only ISO 639 code
         //check if cjk
         if ( array_key_exists( explode( '-', $this->controller->target_code )[ 0 ], CatUtils::$cjk ) ) {
-//            $this->template->taglockEnabled = 0;
-            $this->template->targetIsCJK = var_export( true, true ); //config.js -> editArea is a CJK lang?
+//            $this->template->{'taglockEnabled'} = 0;
+            $this->template->{'targetIsCJK'} = var_export( true, true ); //config.js -> editArea is a CJK lang?
         } else {
-            $this->template->targetIsCJK = var_export( false, true );
+            $this->template->{'targetIsCJK'} = var_export( false, true );
         }
 
         //check if it is a composite language, for cjk check that accepts only ISO 639 code
         //check if cjk
         if ( array_key_exists( explode( '-', $this->controller->source_code )[ 0 ], CatUtils::$cjk ) ) {
-            $this->template->isCJK = true; // show "Characters" instead of "Words" ( Footer )
+            $this->template->{'isCJK'} = true; // show "Characters" instead of "Words" ( Footer )
         } else {
-            $this->template->isCJK = false;
+            $this->template->{'isCJK'} = false;
         }
 
     }

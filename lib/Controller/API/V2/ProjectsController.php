@@ -7,7 +7,6 @@ use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Project;
-use API\V2\Json\ProjectAnonymous;
 use Constants_JobStatus;
 use Exception;
 use Exceptions\NotFoundException;
@@ -39,14 +38,10 @@ class ProjectsController extends KleinController {
      */
     public function get() {
 
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-            $formatted->setUser( $this->user );
-            if ( !empty( $this->api_key ) ) {
-                $formatted->setCalledFromApi( true );
-            }
+        $formatted = new Project();
+        $formatted->setUser( $this->user );
+        if ( !empty( $this->api_key ) ) {
+            $formatted->setCalledFromApi( true );
         }
 
         $this->featureSet->loadForProject( $this->project );
@@ -80,11 +75,8 @@ class ProjectsController extends KleinController {
             $project_dao = new Projects_ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
+
+        $formatted = new Project();
 
         //$this->response->json( $this->project->toArray() );
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
@@ -98,11 +90,7 @@ class ProjectsController extends KleinController {
         $project_dao = new Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
 
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
+        $formatted = new Project();
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 

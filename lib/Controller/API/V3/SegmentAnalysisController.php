@@ -7,6 +7,7 @@ use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
 use DataAccess\IDaoStruct;
+use DataAccess\ShapelessConcreteStruct;
 use Exception;
 use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
@@ -287,12 +288,12 @@ class SegmentAnalysisController extends KleinController {
     }
 
     /**
-     * @param IDaoStruct $segmentForAnalysis
-     * @param array                 $projectPasswordsMap
-     * @param array                 $notesAggregate
-     * @param array                 $issuesAggregate
-     * @param array                 $idRequestsAggregate
-     * @param ConstantsInterface    $matchConstants
+     * @param IDaoStruct         $segmentForAnalysis
+     * @param array              $projectPasswordsMap
+     * @param array              $notesAggregate
+     * @param array              $issuesAggregate
+     * @param array              $idRequestsAggregate
+     * @param ConstantsInterface $matchConstants
      *
      * @return array
      * @throws Exception
@@ -301,6 +302,9 @@ class SegmentAnalysisController extends KleinController {
         // id_request
         $idRequest = $idRequestsAggregate[ $segmentForAnalysis->id ] ?? null;
 
+        /**
+         * @var $segmentForAnalysis ShapelessConcreteStruct
+         */
         // original_filename
         $originalFile = ( null !== $segmentForAnalysis->tag_key and $segmentForAnalysis->tag_key === 'original' ) ? $segmentForAnalysis->tag_value : $segmentForAnalysis->filename;
 

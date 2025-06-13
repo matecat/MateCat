@@ -16,7 +16,7 @@ class MyMemoryController extends KleinController {
      */
     public function status() {
         try {
-            $uuid = $this->request->uuid;
+            $uuid = $this->request->param('uuid');
             $mmEngine = $this->getMMEngine($this->featureSet);
             $status = $mmEngine->entryStatus($uuid);
             $this->response->json( $status );

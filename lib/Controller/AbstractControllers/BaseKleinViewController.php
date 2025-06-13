@@ -80,17 +80,10 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
-        $this->view->{'user_plugins'}  = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
-        $this->view->{'isLoggedIn'}    = $this->isLoggedIn();
-        $this->view->{'userMail'}      = $this->getUser()->email;
-        $this->view->{'logged_user'}   = $this->getUser()->shortName();
-        $this->view->{'extended_user'} = $this->getUser()->fullName();
-
-        $MMTLicense                       = $this->isLoggedIn() ? $this->featureSet->filter( "MMTLicense", $this->getUser() ) : [];
-        $isAnInternalUser                 = $this->isLoggedIn() ? $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email ) : false;
-        $this->view->{'isAnInternalUser'} = $isAnInternalUser;
-        $this->view->{'isMMTEnabled'}     = ( isset( $MMTLicense[ 'enabled' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'enabled' ] : false;
-        $this->view->{'MMTId'}            = ( isset( $MMTLicense[ 'id' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'id' ] : null;
+        $this->view->{'user_plugins'}     = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
+        $this->view->{'isLoggedIn'}       = $this->isLoggedIn();
+        $this->view->{'userMail'}         = $this->getUser()->email;
+        $this->view->{'isAnInternalUser'} = $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email );
 
         $this->view->{'footer_js'}     = [];
         $this->view->{'config_js'}     = [];

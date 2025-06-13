@@ -2,30 +2,21 @@
 
 namespace AbstractControllers;
 
-use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
 use CatUtils;
 use Controller\Authentication\AuthenticationHelper;
 use Controller\Authentication\AuthenticationTrait;
-use DomainException;
 use Exception;
-use Exceptions\NotFoundException;
 use FeatureSet;
-use InvalidArgumentException;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Log;
 use ReflectionException;
-use RuntimeException;
-use SebastianBergmann\Invoker\TimeoutException;
-use Swaggest\JsonSchema\InvalidValue;
 use Traits\TimeLogger;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
 
 abstract class KleinController implements IController {
 
@@ -109,10 +100,10 @@ abstract class KleinController implements IController {
         $this->service  = $service;
         $this->app      = $app;
 
-        $paramsPut        = $this->getPutParams();
+        $paramsPut        = $this->getPutParams() ?: [];
         $paramsGet        = $this->request->paramsNamed()->getIterator()->getArrayCopy();
         $this->params     = $this->request->paramsPost()->getIterator()->getArrayCopy();
-        $this->params     = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
+        $this->params     = array_merge( $this->params, $paramsGet, $paramsPut );
         $this->featureSet = new FeatureSet();
         $this->identifyUser( $this->useSession );
         $this->afterConstruct();

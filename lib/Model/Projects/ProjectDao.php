@@ -173,7 +173,7 @@ class Projects_ProjectDao extends AbstractDao {
      * @return IDaoStruct[]
      * @throws ReflectionException
      */
-    public static function findByTeamId( $id_team, $filter = [], $ttl = 0 ) {
+    public static function findByTeamId( $id_team, $filter = [], $ttl = 0 ): array {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -205,10 +205,7 @@ class Projects_ProjectDao extends AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        /** @var $result Projects_ProjectStruct[] */
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt,  Projects_ProjectStruct::class, $values );
-
-        return $result;
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, Projects_ProjectStruct::class, $values );
     }
 
     /**
@@ -263,7 +260,10 @@ class Projects_ProjectDao extends AbstractDao {
                 " LIMIT 1 ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id_job' => $id_job ] )[ 0 ] ?? null;
+        /** @var Projects_ProjectStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, Projects_ProjectStruct::class, [ 'id_job' => $id_job ] )[ 0 ] ?? null;
+
+        return $result;
     }
 
     /**
@@ -356,21 +356,25 @@ class Projects_ProjectDao extends AbstractDao {
      * @return Projects_ProjectStruct
      * @throws NotFoundException|ReflectionException
      */
-    static function findByIdAndPassword( $id, $password, $ttl = 0 ) {
+    static function findByIdAndPassword( $id, $password, int $ttl = 0 ): Projects_ProjectStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );
-        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, Projects_ProjectStruct::class, [ 'id' => $id, 'password' => $password ] )[ 0 ];
 
         if ( !$fetched ) {
             throw new NotFoundException( "No project found." );
         }
 
+        /** @var Projects_ProjectStruct $fetched */
         return $fetched;
     }
 
-    static function destroyCacheByIdAndPassword( $id, $password ) {
+    /**
+     * @throws ReflectionException
+     */
+    static function destroyCacheByIdAndPassword( int $id, string $password ): bool {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );

@@ -53,8 +53,8 @@ class MyMemory {
         preg_match_all( '/(\p{P}|\p{S}|\x{00a0})+/u', $seg2, $temp2 );
         $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
-        $seg1 = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1 );
-        $seg2 = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2 );
+        $seg1              = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1 );
+        $seg2              = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2 );
         $penalty_placeable += 0.02 * $c;
 
         // penalty per case sensitive / formatting
@@ -64,7 +64,7 @@ class MyMemory {
         $seg1 = preg_replace( '/[ ]+/u', ' ', $seg1 );
         $seg2 = preg_replace( '/[ ]+/u', ' ', $seg2 );
 
-        if ( $language !== FALSE && CatUtils::isCJK( $language ) ) {
+        if ( $language !== false && CatUtils::isCJK( $language ) ) {
             $a = self::CJK_tokenizer( $seg1 );
             $b = self::CJK_tokenizer( $seg2 );
         } else {
@@ -134,7 +134,7 @@ class MyMemory {
 
     }
 
-    protected static function CJK_tokenizer( $text ) {
+    protected static function CJK_tokenizer( $text ): array {
         $words = explode( ' ', ( $text ) );
         //$words = preg_split("/\\p{Z}+/", ($text));
         //If characters are not latin then use bigram
@@ -171,7 +171,7 @@ class MyMemory {
     }
 
     // I expect this to be in PHP in the future...
-    public static function my_array_xor( $array_a, $array_b ) {
+    public static function my_array_xor( $array_a, $array_b ): array {
         $union_array     = array_merge( $array_a, $array_b );
         $intersect_array = array_intersect( $array_a, $array_b );
 
@@ -181,7 +181,7 @@ class MyMemory {
     public static function diff( $old, $new ) {
 
         $maxlen = 0;
-
+        $omax   = $nmax = null;
         foreach ( $old as $oindex => $ovalue ) {
             $nkeys = array_keys( $new, $ovalue );
             foreach ( $nkeys as $nindex ) {
@@ -202,70 +202,9 @@ class MyMemory {
                 self::diff( array_slice( $old, 0, $omax ), array_slice( $new, 0, $nmax ) ),
                 array_slice( $new, $nmax, $maxlen ),
                 self::diff( array_slice( $old, $omax + $maxlen ),
-                array_slice( $new, $nmax + $maxlen ) )
+                        array_slice( $new, $nmax + $maxlen ) )
         );
 
-    }
-
-    public static function diff_html( $old, $new, $by_word = true ) {
-
-        // No diff no work
-        if ( $old == $new ) {
-            return $new;
-        }
-
-        if ( strlen( $old ) <= 254 AND strlen( $old ) <= 254 ) {
-            if ( levenshtein( $new, $old ) <= 2 ) {
-                $by_word = false;
-            }
-        }
-
-        if ( $by_word == true ) {
-            $sep = ' ';
-            $old_array = explode( ' ', $old );
-            $new_array = explode( ' ', $new );
-        } else {
-            $sep = '';
-            $old_array = preg_split( '//u', $old, -1, PREG_SPLIT_NO_EMPTY );
-            $new_array = preg_split( '//u', $new, -1, PREG_SPLIT_NO_EMPTY );
-        }
-
-        $diff = self::diff( $old_array, $new_array );
-
-        $array_patterns = array(
-                "/&#x0A;/",
-                "/&#x0D;/",
-                "/&#x0D;&#x0A;/",
-                "/&#x09;/",
-                "/&#xA0;|&#nbsp;/",
-        );
-
-        $array_replacements = array(
-                '<span class="_0A"></span><br />',
-                '<span class="_0D"></span><br />',
-                '<span class="_0D0A"></span><br />',
-                '<span class="_tab">&#9;</span>',
-                '<span class="_nbsp">&nbsp;</span>',
-        );
-
-        $ret = '';
-        foreach ( $diff as $k ) {
-
-            if ( is_array( $k ) ) {
-
-                $k[ 'd' ] = preg_replace( $array_patterns, $array_replacements, $k[ 'd' ] );
-                $k[ 'i' ] = preg_replace( $array_patterns, $array_replacements, $k[ 'i' ] );
-
-                $ret .= ( !empty( $k[ 'd' ] ) ? "<strike><span style=\"color:red;\">" . implode( $sep, $k[ 'd' ] ) . "</span></strike>$sep" : $sep ) .
-                        ( !empty( $k[ 'i' ] ) ? "<span style=\"color:blue\">" . implode( $sep, $k[ 'i' ] ) . "</span>$sep" : $sep );
-            } else {
-
-                $k = preg_replace( $array_patterns, $array_replacements, $k );
-                $ret .= $k . $sep;
-            }
-        }
-
-        return $ret;
     }
 
 }

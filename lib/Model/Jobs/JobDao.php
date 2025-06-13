@@ -39,8 +39,8 @@ class Jobs_JobDao extends AbstractDao {
         $stmt = $this->_getStatementForQuery( self::$_query_cache );
 
         /** @var Jobs_JobStruct[] */
-        return $this->_fetchObject( $stmt,
-                $jobQuery,
+        return $this->_fetchObjectMap( $stmt,
+                get_class( $jobQuery ),
                 [
                         'id_job'   => $jobQuery->id,
                         'password' => $jobQuery->password
@@ -189,7 +189,7 @@ class Jobs_JobDao extends AbstractDao {
         /**
          * @var $res Jobs_JobStruct
          */
-        $res = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [
+        $res = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, Jobs_JobStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password
         ] )[ 0 ] ?? null;
