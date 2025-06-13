@@ -13,6 +13,7 @@ class Engines_Intento extends Engines_AbstractEngine {
     ];
 
     private $apiKey;
+    private $service  = null;
     private $provider = [];
     private $providerKey;
     private $providerCategory;
@@ -27,6 +28,7 @@ class Engines_Intento extends Engines_AbstractEngine {
         $extra = $engineRecord->getExtraParamsAsArray();
 
         $this->apiKey           = $extra[ 'apikey' ] ?? null;
+        $this->service          = $extra[ 'service' ] ?? null;
         $this->provider         = $extra[ 'provider' ] ?? [];
         $this->providerKey      = $extra[ 'providerkey' ] ?? null;
         $this->providerCategory = $extra[ 'providercategory' ] ?? null;
@@ -124,6 +126,14 @@ class Engines_Intento extends Engines_AbstractEngine {
         return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
     }
 
+    /**
+     * Get matches
+     *
+     * @param $_config
+     *
+     * @return array|Engines_Results_AbstractResponse
+     * @throws Exception
+     */
     public function get( $_config ) {
 
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
@@ -137,11 +147,14 @@ class Engines_Intento extends Engines_AbstractEngine {
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
+        $service                           = $this->service;
         $provider                          = $this->provider;
         $providerKey                       = $this->providerKey;
         $providerCategory                  = $this->providerCategory;
 
-        if ( !empty( $provider ) ) {
+        if ( !empty( $service ) ) {
+            $parameters[ 'service' ][ 'routing' ] = $service;
+        } elseif ( !empty( $provider ) ) {
             $parameters[ 'service' ][ 'async' ]    = true;
             $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
 
@@ -224,9 +237,6 @@ class Engines_Intento extends Engines_AbstractEngine {
 
     /**
      * Get provider list
-     *
-     * @return array|mixed
-     * @throws ReflectionException
      */
     public static function getProviderList() {
         $redisHandler = new RedisHandler();
@@ -236,45 +246,9 @@ class Engines_Intento extends Engines_AbstractEngine {
             return json_decode( $result, true );
         }
 
-        $result = self::curl( '/ai/text/translate?fields=auth&integrated=true&published=true');
-        $_providers = [];
-
-        if ( $result ) {
-            foreach ( $result as $value ) {
-                $example                  = (array)$value->auth;
-                $example                  = json_encode( $example );
-                $_providers[ $value->id ] = [ 'id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example ];
-            }
-            ksort( $_providers );
-        }
-
-        $conn->set( 'IntentoProviders', json_encode( $_providers ) );
-        $conn->expire( 'IntentoProviders', 60 * 60 * 24 );
-
-        return $_providers;
-    }
-
-    /**
-     * @return array
-     */
-    public static function getRoutingList() {
-        $result = self::curl('/routing-designer');
-
-        if ( $result['data'] ) {
-            return $result['data'];
-        }
-
-        return [];
-    }
-
-    /**
-     * @param $url
-     *
-     * @return mixed
-     */
-    private static function curl( $url ) {
-        $curl    = curl_init( self::INTENTO_API_URL . $url );
-        $_params = [
+        $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
+        $curl     = curl_init( $_api_url );
+        $_params  = [
                 CURLOPT_HTTPHEADER     => [ 'apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json' ],
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
@@ -283,12 +257,22 @@ class Engines_Intento extends Engines_AbstractEngine {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         ];
-
         curl_setopt_array( $curl, $_params );
         $response = curl_exec( $curl );
         $result   = json_decode( $response );
         curl_close( $curl );
+        $_providers = [];
+        if ( $result ) {
+            foreach ( $result as $value ) {
+                $example                  = (array)$value->auth;
+                $example                  = json_encode( $example );
+                $_providers[ $value->id ] = [ 'id' => $value->id, 'name' => $value->name, 'vendor' => $value->vendor, 'auth_example' => $example ];
+            }
+            ksort( $_providers );
+        }
+        $conn->set( 'IntentoProviders', json_encode( $_providers ) );
+        $conn->expire( 'IntentoProviders', 60 * 60 * 24 );
 
-        return $result;
+        return $_providers;
     }
 }
