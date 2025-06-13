@@ -157,10 +157,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-        $projectStructure[ 'dictation' ]                             = ( !empty( $this->data[ 'dictation' ] ) ) ? $this->data[ 'dictation' ] : null;
-        $projectStructure[ 'show_whitespace' ]                       = ( !empty( $this->data[ 'show_whitespace' ] ) ) ? $this->data[ 'show_whitespace' ] : null;
-        $projectStructure[ 'character_counter' ]                     = ( !empty( $this->data[ 'character_counter' ] ) ) ? $this->data[ 'character_counter' ] : null;
-        $projectStructure[ 'ai_assistant' ]                          = ( !empty( $this->data[ 'ai_assistant' ] ) ) ? $this->data[ 'ai_assistant' ] : null;
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
@@ -255,12 +251,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $deepl_formality               = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $project_completion            = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $get_public_matches            = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
-        $dictation                     = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
-        $show_whitespace               = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
-        $character_counter             = filter_var( $this->request->param( 'character_counter' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags  = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode        = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $ai_assistant                  = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
         $dialect_strict                = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
         $filters_extraction_parameters = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING );
         $xliff_parameters              = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING );
@@ -324,12 +316,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
-                'dictation'                     => ( !empty( $dictation ) ) ? $dictation : null,
-                'show_whitespace'               => ( !empty( $show_whitespace ) ) ? $show_whitespace : null,
-                'character_counter'             => ( !empty( $character_counter ) ) ? $character_counter : null,
                 'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
                 'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'ai_assistant'                  => ( !empty( $ai_assistant ) ) ? $ai_assistant : null,
                 'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
                 'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
                 'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
@@ -408,16 +396,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // new raw counter model
         $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
 
-        if ( isset( $data[ 'lexiqa' ] ) ) {
-            $options[ 'lexiqa' ] = $data[ 'lexiqa' ];
-        }
-
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
-        }
-
-        if ( isset( $data[ 'tag_projection' ] ) ) {
-            $options[ 'tag_projection' ] = $data[ 'tag_projection' ];
         }
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
