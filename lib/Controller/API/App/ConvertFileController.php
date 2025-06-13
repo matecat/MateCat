@@ -5,8 +5,8 @@ namespace API\App;
 use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Constants;
+use Conversion\FilesConverter;
 use Exception;
-use FilesConverter;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
 use INIT;
@@ -69,15 +69,7 @@ class ConvertFileController extends KleinController {
             $this->response->code( 400 );
         }
 
-        $data = [];
-        foreach ( $result->getData() as $value ) {
-            $data[ 'zipFiles' ][]       = $value->getZipContent();
-            $data[ 'simpleFileName' ][] = $value->getSimpleFileContent();
-        }
-        $data[ 'zipFiles' ]       = array_filter( $data[ 'zipFiles' ] );
-        $data[ 'simpleFileName' ] = array_filter( $data[ 'simpleFileName' ] );
-
-        $this->response->json( [ "errors" => $errorStatus, "warnings" => $warningStatus, "data" => $data ] );
+        $this->response->json( [ "errors" => $errorStatus, "warnings" => $warningStatus, "data" => $result->getData() ] );
 
     }
 

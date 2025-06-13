@@ -9,19 +9,12 @@
 
 namespace Conversion;
 
+use DomainException;
+
 class InternalHashPaths {
 
     protected string $cacheHash;
     protected string $diskHash;
-    /**
-     * @var ?ZipContent
-     */
-    protected ?ZipContent $zipContent = null;
-
-    /**
-     * @var ?SimpleFileContent
-     */
-    protected ?SimpleFileContent $simpleFileContent = null;
 
     public function __construct( array $array_params ) {
         if ( $array_params != null ) {
@@ -40,21 +33,20 @@ class InternalHashPaths {
     }
 
     public function isEmpty(): bool {
-        return empty( $this->cacheHash ) && empty( $this->diskHash ) && empty( $this->zipContent ) && empty( $this->simpleFileContent );
+        return empty( $this->cacheHash ) && empty( $this->diskHash );
     }
 
     /**
-     * @return ?ZipContent
+     * @param $name
+     * @param $value
+     *
+     * @return void
+     * @throws DomainException
      */
-    public function getZipContent(): ?ZipContent {
-        return $this->zipContent;
-    }
-
-    /**
-     * @return SimpleFileContent|null
-     */
-    public function getSimpleFileContent(): ?SimpleFileContent {
-        return $this->simpleFileContent;
+    public function __set( $name, $value ) {
+        if ( !property_exists( $this, $name ) ) {
+            throw new DomainException( 'Unknown property ' . $name );
+        }
     }
 
 }

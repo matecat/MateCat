@@ -1,7 +1,13 @@
 <?php
 
+namespace Conversion;
+
+use Conversion\MimeTypes\MimeTypes;
+use Exception;
 use FilesStorage\AbstractFilesStorage;
-use MimeTypes\MimeTypes;
+use INIT;
+use RuntimeException;
+use ZipArchive;
 
 /**
  * Created by PhpStorm.
@@ -9,7 +15,7 @@ use MimeTypes\MimeTypes;
  * Date: 19/06/15
  * Time: 13.43
  */
-class ZipArchiveExtended extends ZipArchive {
+class ZipArchiveHandler extends ZipArchive {
 
     const REFERENCE_FOLDER = '__reference';
     const META_FOLDER      = '__meta';
@@ -150,7 +156,7 @@ class ZipArchiveExtended extends ZipArchive {
                 continue;
             }
 
-            $pathBySlash = array_map( [ 'ZipArchiveExtended', 'treeKey' ], $pathBySlash );
+            $pathBySlash = array_map( [ 'Conversion\ZipArchiveHandler', 'treeKey' ], $pathBySlash );
 
             $pathWithoutFile = $pathBySlash;
             $fileName        = array_pop( $pathWithoutFile );
@@ -218,7 +224,7 @@ class ZipArchiveExtended extends ZipArchive {
         $this->tree     = $Tree;
         $this->treeList = array_unique( $filePaths );
         $this->treeList = str_replace( DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $this->treeList );
-        $this->treeList = array_map( [ 'ZipArchiveExtended', 'prependZipFileName' ], $this->treeList );
+        $this->treeList = array_map( [ 'Conversion\ZipArchiveHandler', 'prependZipFileName' ], $this->treeList );
 
     }
 

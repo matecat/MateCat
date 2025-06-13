@@ -1,12 +1,18 @@
 <?php
 
+namespace Conversion;
+
+use Constants;
 use Constants\ConversionHandlerStatus;
-use Conversion\ConversionHandler;
-use Conversion\ConvertedFileList;
-use Conversion\ConvertedFileModel;
+use DomainException;
+use Exception;
+use FeatureSet;
 use FilesStorage\AbstractFilesStorage;
 use Filters\FiltersConfigTemplateStruct;
+use InvalidArgumentException;
 use Langs\Languages;
+use RuntimeException;
+use Utils;
 
 class FilesConverter {
     private string  $source_lang;
@@ -126,12 +132,28 @@ class FilesConverter {
                         throw new DomainException( "Nested zip files are not allowed.", ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED );
                     }
 
-                    $this->resultStack->add( $this->convertFile( $internalFile ) );
+                    $res = $this->convertFile( $internalFile );
+                    $this->resultStack->add( $res );
+
+                    if ( $res->isError() ) {
+                        $this->resultStack->setErroredFile( $res );
+                    } elseif ( $res->isWarning() ) {
+                        $this->resultStack->setWarnedFile( $res );
+                    }
 
                 }
 
             } else {
-                $this->resultStack->add( $this->convertFile( $fileName ) );
+
+                $res = $this->convertFile( $fileName );
+                $this->resultStack->add( $res );
+
+                if ( $res->isError() ) {
+                    $this->resultStack->setErroredFile( $res );
+                } elseif ( $res->isWarning() ) {
+                    $this->resultStack->setWarnedFile( $res );
+                }
+
             }
         }
 

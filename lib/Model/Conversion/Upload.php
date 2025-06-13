@@ -1,6 +1,12 @@
 <?php
 
-use MimeTypes\MimeTypes;
+namespace Conversion;
+
+use Conversion\MimeTypes\MimeTypes;
+use Exception;
+use INIT;
+use stdClass;
+use Utils;
 
 /**
  *
@@ -137,7 +143,7 @@ class Upload {
         $fileError   = $fileUp[ 'error' ];
         $fileSize    = $fileUp[ 'size' ];
 
-        $out_filename = ZipArchiveExtended::getFileName( $fileName );
+        $out_filename = ZipArchiveHandler::getFileName( $fileName );
 
         if ( $fileSize == 0 ) {
             throw new Exception ( "The file '$out_filename' is empty." );
@@ -353,20 +359,6 @@ class Upload {
         }
 
         return false;
-    }
-
-    public static function formatExceptionMessage( $errorArray ) {
-        //The message format is: __METHOD__ -> <message>.
-        //The client output should be just <message>
-        $msg = $errorArray[ 'message' ];
-        if ( strpos( $msg, " -> " ) !== false ) {
-            $msg                     = explode( " -> ", $msg );
-            $errorArray[ 'message' ] = $msg[ 1 ];
-        } else {
-            $errorArray[ 'message' ] = $msg;
-        }
-
-        return $errorArray;
     }
 
     /**

@@ -13,10 +13,10 @@ use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use Constants;
+use Conversion\FilesConverter;
 use DirectoryIterator;
 use Exception;
 use FeatureSet;
-use FilesConverter;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\S3FilesStorage;
@@ -684,7 +684,7 @@ class Session {
         }
 
         $data = [];
-        foreach ( $result->getData() as $value ) {
+        foreach ( $result->getHashes() as $value ) {
             $data = [ 'cacheHash' => $value->getCacheHash(), 'diskHash' => $value->getDiskHash() ];
         }
 
