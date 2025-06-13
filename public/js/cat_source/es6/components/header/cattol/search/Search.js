@@ -57,7 +57,6 @@ class Search extends React.Component {
     this.replaceTargetOnFocus = this.replaceTargetOnFocus.bind(this)
     this.handelKeydownFunction = this.handelKeydownFunction.bind(this)
     this.updateSearch = this.updateSearch.bind(this)
-    this.dropdownInit = false
     this.jobIsSplitted = false
   }
 
@@ -185,7 +184,6 @@ class Search extends React.Component {
   }
 
   handleCancelClick() {
-    this.dropdownInit = false
     UI.body.removeClass('searchActive')
     this.handleClearClick()
     if (SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)) {
@@ -206,7 +204,6 @@ class Search extends React.Component {
   }
 
   handleClearClick() {
-    this.dropdownInit = false
     // SearchUtils.clearSearchMarkers();
     this.resetStatusFilter()
     setTimeout(() => {
@@ -371,17 +368,6 @@ class Search extends React.Component {
         }
       }
       $('body').addClass('search-open')
-
-      let self = this
-      if (!this.dropdownInit) {
-        this.dropdownInit = true
-        $(this.statusDropDown).dropdown({
-          onChange: function (value) {
-            value = value === '' ? 'all' : value
-            self.handleStatusChange(value)
-          },
-        })
-      }
     } else {
       $('body').removeClass('search-open')
       if (!this.state.focus) {
@@ -389,7 +375,6 @@ class Search extends React.Component {
           focus: true,
         })
       }
-      this.dropdownInit = false
     }
 
     // reset tag projection
