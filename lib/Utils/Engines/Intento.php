@@ -26,10 +26,10 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         $extra = $engineRecord->getExtraParamsAsArray();
 
-        $this->apiKey = $extra['apikey'] ?? null;
-        $this->provider = $extra['provider'] ?? [];
-        $this->providerKey = $extra['providerkey'] ?? null;
-        $this->providerCategory = $extra['providercategory'] ?? null;
+        $this->apiKey           = $extra[ 'apikey' ] ?? null;
+        $this->provider         = $extra[ 'provider' ] ?? [];
+        $this->providerKey      = $extra[ 'providerkey' ] ?? null;
+        $this->providerCategory = $extra[ 'providercategory' ] ?? null;
     }
 
     /**
@@ -60,14 +60,14 @@ class Engines_Intento extends Engines_AbstractEngine {
             if ( $result and isset( $result->id ) ) {
                 $id = $result->id;
 
-                if ( isset( $result->response ) and !empty($result->response) and isset( $result->done ) and $result->done == true ) {
+                if ( isset( $result->response ) and !empty( $result->response ) and isset( $result->done ) and $result->done == true ) {
                     $text    = $result->response[ 0 ]->results[ 0 ];
                     $decoded = [
-                        'data' => [
-                            'translations' => [
-                                [ 'translatedText' => $text ]
+                            'data' => [
+                                    'translations' => [
+                                            [ 'translatedText' => $text ]
+                                    ]
                             ]
-                        ]
                     ];
 
                 } elseif ( isset( $result->done ) and $result->done == false ) {
@@ -75,17 +75,17 @@ class Engines_Intento extends Engines_AbstractEngine {
                     $cnf = [ 'async' => true, 'id' => $id ];
 
                     return $this->_curl_async( $cnf, $parameters, $function );
-                } elseif ( isset( $result->error ) and !empty($result->error) ) {
+                } elseif ( isset( $result->error ) and !empty( $result->error ) ) {
 
-                    $httpCode = $result->error->data[0]->response->body->error->code ?? 500;
-                    $message = $result->error->data[0]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
+                    $httpCode = $result->error->data[ 0 ]->response->body->error->code ?? 500;
+                    $message  = $result->error->data[ 0 ]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
 
                     $decoded = [
-                        'error' => [
-                            'code'    => -2,
-                            'message' => $message,
-                            'http_code' => $httpCode
-                        ]
+                            'error' => [
+                                    'code'      => -2,
+                                    'message'   => $message,
+                                    'http_code' => $httpCode
+                            ]
                     ];
                 } else {
                     $cnf = [ 'async' => true, 'id' => $id ];
@@ -121,16 +121,16 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        return $this->_composeMTResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
     }
 
     public function get( $_config ) {
 
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
@@ -141,15 +141,15 @@ class Engines_Intento extends Engines_AbstractEngine {
         $providerKey                       = $this->providerKey;
         $providerCategory                  = $this->providerCategory;
 
-        if ( !empty($provider) ) {
+        if ( !empty( $provider ) ) {
             $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider['id'];
+            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
 
-            if ( !empty($providerKey) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [json_decode( $providerKey, true )];
+            if ( !empty( $providerKey ) ) {
+                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
             }
 
-            if ( !empty($providerCategory) ) {
+            if ( !empty( $providerCategory ) ) {
                 $parameters[ 'context' ][ 'category' ] = $providerCategory;
             }
         }
@@ -173,7 +173,7 @@ class Engines_Intento extends Engines_AbstractEngine {
     protected function _curl_async( $config, $parameters = null, $function = null ) {
         $id = $config[ 'id' ];
 
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
@@ -224,6 +224,9 @@ class Engines_Intento extends Engines_AbstractEngine {
 
     /**
      * Get provider list
+     *
+     * @return array|mixed
+     * @throws ReflectionException
      */
     public static function getProviderList() {
         $redisHandler = new RedisHandler();
@@ -233,22 +236,9 @@ class Engines_Intento extends Engines_AbstractEngine {
             return json_decode( $result, true );
         }
 
-        $_api_url = self::INTENTO_API_URL . '/ai/text/translate?fields=auth&integrated=true&published=true';
-        $curl     = curl_init( $_api_url );
-        $_params  = [
-                CURLOPT_HTTPHEADER     => [ 'apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json' ],
-                CURLOPT_HEADER         => false,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
-                CURLOPT_CONNECTTIMEOUT => 10,
-                CURLOPT_SSL_VERIFYPEER => true,
-                CURLOPT_SSL_VERIFYHOST => 2
-        ];
-        curl_setopt_array( $curl, $_params );
-        $response = curl_exec( $curl );
-        $result   = json_decode( $response );
-        curl_close( $curl );
+        $result = self::curl( '/ai/text/translate?fields=auth&integrated=true&published=true');
         $_providers = [];
+
         if ( $result ) {
             foreach ( $result as $value ) {
                 $example                  = (array)$value->auth;
@@ -257,9 +247,48 @@ class Engines_Intento extends Engines_AbstractEngine {
             }
             ksort( $_providers );
         }
+
         $conn->set( 'IntentoProviders', json_encode( $_providers ) );
         $conn->expire( 'IntentoProviders', 60 * 60 * 24 );
 
         return $_providers;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getRoutingList() {
+        $result = self::curl('/routing-designer');
+
+        if ( $result['data'] ) {
+            return $result['data'];
+        }
+
+        return [];
+    }
+
+    /**
+     * @param $url
+     *
+     * @return mixed
+     */
+    private static function curl( $url ) {
+        $curl    = curl_init( self::INTENTO_API_URL . $url );
+        $_params = [
+                CURLOPT_HTTPHEADER     => [ 'apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json' ],
+                CURLOPT_HEADER         => false,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                CURLOPT_CONNECTTIMEOUT => 10,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
+        ];
+
+        curl_setopt_array( $curl, $_params );
+        $response = curl_exec( $curl );
+        $result   = json_decode( $response );
+        curl_close( $curl );
+
+        return $result;
     }
 }
