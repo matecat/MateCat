@@ -1,5 +1,3 @@
-import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
-
 /**
  * Create project api
  *
