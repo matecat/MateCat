@@ -12,6 +12,7 @@ import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
+import IconCloseCircle from '../icons/IconCloseCircle'
 
 const mergeClassNames = (...args) => {
   return (
@@ -55,6 +56,8 @@ export const Select = ({
   maxHeightDroplist = 128,
   isPortalDropdown,
   dropdownClassName,
+  showResetButton = false,
+  resetFunction = () => {},
   children,
 }) => {
   const dropDownRef = useRef()
@@ -328,9 +331,20 @@ export const Select = ({
         }
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
-          <span className={inputClassName} onClick={toggleDropdown}>
+          <div className={inputClassName} onClick={toggleDropdown}>
             {renderSelection()}
-          </span>
+            {showResetButton && activeOption ? (
+              <div
+                className="icon-reset"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  resetFunction()
+                }}
+              >
+                <IconCloseCircle />
+              </div>
+            ) : undefined}
+          </div>
           <input
             name={name}
             readOnly={true}
@@ -340,6 +354,7 @@ export const Select = ({
             onFocus={handleFocus}
             value={value}
           />
+
           <ChevronDown />
         </div>
       </Tooltip>
@@ -387,5 +402,7 @@ Select.propTypes = {
   maxHeightDroplist: PropTypes.number,
   isPortalDropdown: PropTypes.bool,
   dropdownClassName: PropTypes.string,
+  showResetButton: PropTypes.bool,
+  resetFunction: PropTypes.func,
   children: PropTypes.func,
 }
