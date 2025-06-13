@@ -7,7 +7,7 @@
  *
  */
 
-namespace MimeTypes\Guesser;
+namespace Conversion\MimeTypes\Guesser;
 
 use RuntimeException;
 

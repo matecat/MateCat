@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace MimeTypes\Guesser;
+namespace Conversion\MimeTypes\Guesser;
 
 use InvalidArgumentException;
 use LogicException;

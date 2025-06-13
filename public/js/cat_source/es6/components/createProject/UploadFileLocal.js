@@ -157,8 +157,7 @@ function UploadFileLocal() {
               clearInterval(interval)
               setUploadedFilesNames((prev) => prev.concat([name]))
               if (data.data.zipFiles) {
-                const zipFiles = JSON.parse(data.data.zipFiles)
-                zipFiles.forEach((zipFile) => {
+                data.data.zipFiles.forEach((zipFile) => {
                   setFiles((prevFiles) =>
                     prevFiles.concat({
                       name: zipFile.name,
