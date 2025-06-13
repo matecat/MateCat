@@ -17,6 +17,7 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
 import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
+import {Select} from '../../../common/Select'
 
 class Search extends React.Component {
   constructor(props) {
@@ -58,17 +59,6 @@ class Search extends React.Component {
     this.updateSearch = this.updateSearch.bind(this)
     this.dropdownInit = false
     this.jobIsSplitted = false
-  }
-
-  resetSearch() {
-    this.setState({
-      total: null,
-      searchReturn: false,
-      searchResults: [],
-      occurrencesList: [],
-      searchResultsDictionary: {},
-      featuredSearchResult: null,
-    })
   }
 
   handleSubmit() {
@@ -241,7 +231,7 @@ class Search extends React.Component {
   }
 
   resetStatusFilter() {
-    $(this.statusDropDown).dropdown('restore defaults')
+    this.handleStatusChange('all')
   }
 
   handleReplaceAllClick(event) {
@@ -610,32 +600,36 @@ class Search extends React.Component {
   }
 
   render() {
-    let options = config.searchable_statuses.map(function (item, index) {
-      return (
-        <React.Fragment key={index}>
-          <div className="item" key={index} data-value={item.value}>
+    let statusOptions = config.searchable_statuses.map((item) => {
+      return {
+        name: (
+          <>
             <div
               className={
                 'ui ' + item.label.toLowerCase() + '-color empty circular label'
               }
             />
             {item.label}
-          </div>
-          {config.secondRevisionsCount && item.value === 'APPROVED' ? (
-            <div className="item" key={index + '-2'} data-value={'APPROVED-2'}>
-              <div
-                className={
-                  'ui ' +
-                  item.label.toLowerCase() +
-                  '-2ndpass-color empty circular label'
-                }
-              />
-              {item.label}
-            </div>
-          ) : null}
-        </React.Fragment>
-      )
+          </>
+        ),
+        id: item.value,
+        onClick: () => this.handleStatusChange(item.value),
+      }
     })
+    if (config.secondRevisionsCount) {
+      statusOptions.push({
+        name: (
+          <>
+            <div
+              className={'ui ' + 'approved-2ndpass-color empty circular label'}
+            />
+            APPROVED
+          </>
+        ),
+        id: 'APPROVED-2',
+        onClick: () => this.handleStatusChange('APPROVED-2'),
+      })
+    }
     let findIsDisabled = true
     if (
       this.state.search.searchTarget !== '' ||
@@ -781,30 +775,31 @@ class Search extends React.Component {
                   ) : null}
                 </div>
                 <div className="find-element find-dropdown-status">
-                  <div
+                  <Select
+                    options={statusOptions}
                     className={
                       'find-dropdown ' +
                       statusDropdownClass +
                       ' ' +
                       statusDropdownDisabled
                     }
-                  >
-                    <div
-                      className="ui top left pointing dropdown basic tiny button"
-                      ref={(dropdown) => (this.statusDropDown = dropdown)}
-                    >
-                      <div className="text">
-                        <div>Status Segment</div>
-                      </div>
-                      <div
-                        className="ui cancel label"
-                        onClick={this.resetStatusFilter.bind(this)}
-                      >
-                        <i className="icon-cancel3" />
-                      </div>
-                      <div className="menu">{options}</div>
-                    </div>
-                  </div>
+                    isDisabled={
+                      this.state.search.searchTarget === '' &&
+                      this.state.search.searchSource === ''
+                    }
+                    onSelect={(value) => {
+                      this.handleStatusChange(value.id)
+                    }}
+                    activeOption={
+                      statusOptions.find(
+                        (item) => item.id === this.state.search.selectStatus,
+                      ) || undefined
+                    }
+                    placeholder={'Status Segment'}
+                    checkSpaceToReverse={false}
+                    showResetButton={true}
+                    resetFunction={() => this.handleStatusChange('all')}
+                  />
                 </div>
                 <div className="find-element find-clear-all">
                   {clearVisible ? (

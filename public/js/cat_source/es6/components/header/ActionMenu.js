@@ -39,14 +39,6 @@ export const ActionMenu = ({
   const [isExportCsvDisabled, setIsExportCsvDisabled] = useState(false)
   const [isExportJsonDisabled, setIsExportJsonDisabled] = useState(false)
   const [isExportXMLDisabled, setIsExportXMLDisabled] = useState(false)
-  const dropdownThreeDots = useRef()
-
-  const initDropdowns = () => {
-    // 3Dots
-    if (dropdownThreeDots.current) {
-      $(dropdownThreeDots.current).dropdown()
-    }
-  }
 
   const openShortcutsModal = (event) => {
     event.preventDefault()
