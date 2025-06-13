@@ -4,15 +4,14 @@ namespace API\V1;
 
 use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Traits\ScanDirectoryForConvertedFiles;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use Constants;
-use Constants\ConversionHandlerStatus;
 use Constants_ProjectStatus;
 use Constants_TmKeyPermissions;
-use Conversion\ConvertedFileModel;
-use ConversionHandler;
-use ConvertFile;
+use Conversion\FilesConverter;
+use Conversion\Upload;
 use Database;
 use Engine;
 use Engines_DeepL;
@@ -30,8 +29,6 @@ use Langs\Languages;
 use Log;
 use LQA\ModelDao;
 use LQA\ModelStruct;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use MTQE\PayableRate\MTQEPayableRateTemplateDao;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -45,7 +42,6 @@ use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
-use stdClass;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
@@ -55,16 +51,16 @@ use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Upload;
 use Utils;
 use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
-use ZipArchiveExtended;
 
 class NewController extends KleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     const MAX_NUM_KEYS = 10;
 
@@ -105,195 +101,41 @@ class NewController extends KleinController {
             $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $cookieDir = $uploadFile->getDirUploadToken();
-        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        $uploadTokenValue = $uploadFile->getDirUploadToken();
+        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        $status = [];
+        $converter = new FilesConverter(
+                $arFiles,
+                $request[ 'source_lang' ],
+                $request[ 'target_lang' ],
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $request[ 'segmentation_rule' ],
+                $this->featureSet,
+                $request[ 'filters_extraction_parameters' ],
+        );
 
-        foreach ( $arFiles as $file_name ) {
-            $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+        $converter->convertFiles();
 
-            $conversionHandler = new ConversionHandler();
-            $conversionHandler->setFileName( $file_name );
-            $conversionHandler->setSourceLang( $request[ 'source_lang' ] );
-            $conversionHandler->setTargetLang( $request[ 'target_lang' ] );
-            $conversionHandler->setSegmentationRule( $request[ 'segmentation_rule' ] );
-            $conversionHandler->setCookieDir( $cookieDir );
-            $conversionHandler->setIntDir( $intDir );
-            $conversionHandler->setErrDir( $errDir );
-            $conversionHandler->setFeatures( $this->featureSet );
-            $conversionHandler->setUserIsLogged( $this->userIsLogged );
-            $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
-
-            if ( $ext == "zip" ) {
-                // this makes the ConversionHandler accumulate eventual errors on files and continue
-                $conversionHandler->setStopOnFileException( false );
-                $fileObjects = $conversionHandler->extractZipFile();
-                Log::doJsonLog( 'fileObjets', $fileObjects );
-
-                // call convertFileWrapper and start conversions for each file
-                if ( $conversionHandler->uploadError ) {
-                    $fileErrors = $conversionHandler->getUploadedFiles();
-
-                    foreach ( $fileErrors as $fileError ) {
-                        if ( count( $fileError->error ) == 0 ) {
-                            continue;
-                        }
-
-                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-                        $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
-                        $result->addError( $fileError->error[ 'message' ], $brokenFileName );
-                    }
-                }
-
-                $realFileObjectInfo  = $fileObjects;
-                $realFileObjectNames = array_map(
-                        [ 'ZipArchiveExtended', 'getFileName' ],
-                        $fileObjects
-                );
-
-                foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                    $__fileName     = $fileObject;
-                    $__realFileName = $realFileObjectInfo[ $i ];
-                    $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
-
-                    $fileObject               = [
-                            'name' => $__fileName,
-                            'size' => $filesize
-                    ];
-                    $realFileObjectInfo[ $i ] = $fileObject;
-                }
-
-                $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                $stdFileObjects                 = [];
-
-                if ( $fileObjects !== null ) {
-                    foreach ( $fileObjects as $fName ) {
-
-                        if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                            continue;
-                        }
-
-                        $newStdFile       = new stdClass();
-                        $newStdFile->name = $fName;
-                        $stdFileObjects[] = $newStdFile;
-
-                    }
-                } else {
-                    $errors             = $conversionHandler->getResult();
-                    $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                    $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                    Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
-
-                    throw new RuntimeException( "Zip Error" );
-                }
-
-                /* Do conversions here */
-                foreach ( $stdFileObjects as $stdFileObject ) {
-
-                    $converter = new ConvertFile(
-                            [ $stdFileObject->name ],
-                            $request[ 'source_lang' ],
-                            $request[ 'target_lang' ],
-                            $intDir,
-                            $errDir,
-                            $cookieDir,
-                            $request[ 'segmentation_rule' ],
-                            $this->featureSet,
-                            $request[ 'filters_extraction_parameters' ],
-                            false );
-
-                    $converter->setUser( $this->user );
-                    $converter->convertFiles();
-
-                    $status = $errors = $converter->getErrors();
-
-                    if ( !empty( $errors ) ) {
-
-                        $result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                        $result->changeCode( 500 );
-                        $savedErrors    = $result->getErrors();
-                        $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $errors )[ 0 ] );
-
-                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
-                            $result->addError( $errors[ 0 ][ 'message' ], $brokenFileName );
-                        }
-
-                        $result = $status = [
-                                'code'   => 500,
-                                'data'   => [], // Is it correct????
-                                'errors' => $errors,
-                        ];
-                    }
-
-                }
-            } else {
-                $conversionHandler->processConversion();
-                $res = $conversionHandler->getResult();
-                if ( $res->getCode() < 0 ) {
-                    $status[] = [
-                            'code'     => $res->getCode(),
-                            'data'     => $res->getData(), // Is it correct????
-                            'errors'   => $res->getErrors(),
-                            'warnings' => $res->getWarnings(),
-                    ];
-                }
-            }
+        $result      = $converter->getResult();
+        $errorStatus = [];
+        if ( $result->hasErrors() ) {
+            $errorStatus = $result->getErrors();
         }
-
-        $status = array_values( $status );
 
         // Upload errors handling
-        if ( !empty( $status ) ) {
-            throw new RuntimeException( 'Project Conversion Failure' );
+        if ( !empty( $errorStatus ) ) {
+            $this->response->code( 400 );
+            $this->response->json( [ 'status' => 'KO', 'errors' => $errorStatus ] );
+
+            return;
         }
 
-        /* Do conversions here */
-        if ( !empty( $result[ 'data' ] ) ) {
-            foreach ( $result[ 'data' ] as $zipFiles ) {
-                $zipFiles  = json_decode( $zipFiles, true );
-                $fileNames = array_column( $zipFiles, 'name' );
-                $arFiles   = array_merge( $arFiles, $fileNames );
-            }
-        }
+        $result = $result->getData();
 
-        $newArFiles = [];
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-
-                $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $intDir );
-
-                //fetch cache links, created by converter, from the upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //Check if the file begins with the name of the zip file.
-                    //If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
-                    ) {
-                        //add the file name to the file's array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //This file was not in a zip. Add it normally
-                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $filesFound = $this->getFilesList( FilesStorageFactory::create(), $arFiles, $uploadDir );
 
         $projectManager                                 = new ProjectManager();
         $projectStructure                               = $projectManager->getProjectStructure();
@@ -305,8 +147,8 @@ class NewController extends KleinController {
         $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
         $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
         $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]              = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]         = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
@@ -874,7 +716,7 @@ class NewController extends KleinController {
         if ( empty( $private_tm_key ) ) {
             $uniformedFileObject = Upload::getUniformGlobalFilesStructure( $_FILES );
             foreach ( $uniformedFileObject as $_fileinfo ) {
-                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo->name );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $private_tm_key[] = [ 'key' => 'new' ];
                     break;
@@ -1199,10 +1041,10 @@ class NewController extends KleinController {
      * @param null $filters_extraction_parameters
      * @param null $filters_extraction_parameters_template_id
      *
-     * @return FiltersConfigTemplateStruct|mixed|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ) {
+    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             // first check if `filters_extraction_parameters` is a valid JSON
@@ -1391,43 +1233,4 @@ class NewController extends KleinController {
         ];
     }
 
-    /**
-     * @param $filename
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
-    }
 }

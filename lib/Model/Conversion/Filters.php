@@ -1,8 +1,18 @@
 <?php
 
+namespace Conversion;
+
+use CURLFile;
+use Exception;
 use FilesStorage\AbstractFilesStorage;
 use Filters\DTO\IDto;
+use INIT;
+use Jobs_JobStruct;
 use Langs\Languages;
+use Log;
+use MultiCurlHandler;
+use PDO;
+use Utils;
 
 class Filters {
 
@@ -305,6 +315,7 @@ class Filters {
     /**
      * Moves $sentFile to the backup folder, that is like
      *   $STORAGE_DIR/conversion_errors/YYYYMMDD/HHmmSS-filename.ext
+     *
      * @param string $sentFile
      */
     private static function backupFailedConversion( string &$sentFile ) {
