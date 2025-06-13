@@ -319,6 +319,21 @@
         {
             "localized": [
                 {
+                    "en": "Baluchi (Pakistan)"
+                }
+            ],
+            "isocode": "bal",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bal-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Bambara"
                 }
             ],
@@ -1776,6 +1791,21 @@
         {
             "localized": [
                 {
+                    "en": "Hindi (Latin script)"
+                }
+            ],
+            "isocode": "hi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hi-Latn-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Hmong"
                 }
             ],
@@ -3218,6 +3248,21 @@
         {
             "localized": [
                 {
+                    "en": "Nupe"
+                }
+            ],
+            "isocode": "nup",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nup-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Nyanja"
                 }
             ],
@@ -4507,6 +4552,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "ti-ET",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tiv"
+                }
+            ],
+            "isocode": "tiv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tiv-NG",
             "ocr": {
                 "supported": false,
                 "not_supported_or_rtl": false
