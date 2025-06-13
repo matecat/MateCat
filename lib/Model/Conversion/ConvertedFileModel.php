@@ -4,9 +4,8 @@ namespace Conversion;
 
 use Constants\ConversionHandlerStatus;
 use Exception;
-use JsonSerializable;
 
-class ConvertedFileModel implements JsonSerializable {
+class ConvertedFileModel {
     /**
      * @var int
      */
@@ -18,40 +17,18 @@ class ConvertedFileModel implements JsonSerializable {
     private ?string $message = null;
 
     /**
-     * @var ?string
+     * @var string
      */
-    private ?string $warning = null;
-
-    /**
-     * @var ?string
-     */
-    private ?string $debug = null;
+    private string $name;
 
     /**
      * @var InternalHashPaths|null
      */
-    private ?InternalHashPaths $_internal_path_data = null;
+    private ?InternalHashPaths $_internal_conversion_hashes = null;
 
-    private array $warningCodes = [
-            ConversionHandlerStatus::OCR_WARNING,
-            ConversionHandlerStatus::ZIP_HANDLING,
-    ];
+    private int $size = 0;
 
-    private array $errorCodes = [
-            ConversionHandlerStatus::NOT_CONVERTED,
-            ConversionHandlerStatus::INVALID_FILE,
-            ConversionHandlerStatus::NESTED_ZIP_FILES_NOT_ALLOWED,
-            ConversionHandlerStatus::SOURCE_ERROR,
-            ConversionHandlerStatus::TARGET_ERROR,
-            ConversionHandlerStatus::UPLOAD_ERROR,
-            ConversionHandlerStatus::MISCONFIGURATION,
-            ConversionHandlerStatus::INVALID_TOKEN,
-            ConversionHandlerStatus::INVALID_SEGMENTATION_RULE,
-            ConversionHandlerStatus::OCR_ERROR,
-            ConversionHandlerStatus::GENERIC_ERROR,
-            ConversionHandlerStatus::FILESYSTEM_ERROR,
-            ConversionHandlerStatus::S3_ERROR,
-    ];
+    private bool $isZipContent = false;
 
     /**
      * ConvertFileModel constructor.
@@ -62,7 +39,7 @@ class ConvertedFileModel implements JsonSerializable {
      */
     public function __construct( ?int $code = null ) {
         if ( !empty( $code ) ) {
-            $this->changeCode( $code );
+            $this->setErrorCode( $code );
         }
     }
 
@@ -72,7 +49,7 @@ class ConvertedFileModel implements JsonSerializable {
      * @return bool
      */
     private function validateCode( $code ): bool {
-        $allowed = array_merge( $this->errorCodes, $this->warningCodes, [ ConversionHandlerStatus::OK ] );
+        $allowed = array_merge( ConversionHandlerStatus::errorCodes, ConversionHandlerStatus::warningCodes, [ ConversionHandlerStatus::OK ] );
 
         return in_array( $code, $allowed );
     }
@@ -82,7 +59,7 @@ class ConvertedFileModel implements JsonSerializable {
      *
      * @throws Exception
      */
-    public function changeCode( $code ) {
+    public function setErrorCode( $code ) {
         if ( !$this->validateCode( $code ) ) {
             throw new Exception( $code . ' is not a valid code' );
         }
@@ -100,24 +77,22 @@ class ConvertedFileModel implements JsonSerializable {
     /**
      * @return bool
      */
-    public function hasAnErrorCode(): bool {
-        return in_array( $this->code, $this->errorCodes, true );
+    public function isError(): bool {
+        return in_array( $this->code, ConversionHandlerStatus::errorCodes, true );
     }
 
     /**
      * @return bool
      */
-    public function hasAWarningCode(): bool {
-        return in_array( $this->code, $this->warningCodes, true );
+    public function isWarning(): bool {
+        return in_array( $this->code, ConversionHandlerStatus::warningCodes, true );
     }
 
     /**
-     * @param string  $messageError
-     * @param ?string $debug
+     * @param string $messageError
      */
-    public function addError( string $messageError, ?string $debug = null ) {
+    public function setErrorMessage( string $messageError ) {
         $this->message = $messageError;
-        $this->debug   = $debug;
     }
 
     /**
@@ -127,38 +102,41 @@ class ConvertedFileModel implements JsonSerializable {
         return $this->message;
     }
 
-    /**
-     * @return bool
-     */
-    public function hasErrors(): bool {
-        return !empty( $this->message );
+    public function getName(): string {
+        return $this->name;
     }
 
     /**
-     * @param string      $warningMessage
-     * @param string|null $debug
+     * @param string $name
+     *
      */
-    public function addWarning( string $warningMessage, ?string $debug = null ) {
-        $this->warning = $warningMessage;
-        $this->debug   = $debug;
+    public function setFileName( string $name, bool $isZipContent = false ) {
+        $this->name = $name;
+        $this->zipContent( $isZipContent );
+    }
+
+    public function getSize(): int {
+        return $this->size;
+    }
+
+    public function isZipContent(): bool {
+        return $this->isZipContent;
     }
 
     /**
-     * @return string
+     * @param bool $isZipContent
+     *
      */
-    public function getWarning(): ?string {
-        return $this->warning;
+    public function zipContent( bool $isZipContent = true ) {
+        $this->isZipContent = $isZipContent;
     }
 
     /**
-     * @return bool
+     * @param int $size
+     *
      */
-    public function hasWarnings(): bool {
-        return !empty( $this->warning );
-    }
-
-    public function getDebug(): ?string {
-        return $this->debug;
+    public function setSize( int $size ) {
+        $this->size = $size;
     }
 
     /**
@@ -166,30 +144,34 @@ class ConvertedFileModel implements JsonSerializable {
      *
      * @return void
      */
-    public function addData( InternalHashPaths $data ) {
-        $this->_internal_path_data = $data;
+    public function addConversionHashes( InternalHashPaths $data ) {
+        $this->_internal_conversion_hashes = $data;
     }
 
     /**
      * @return InternalHashPaths
      */
-    public function getData(): InternalHashPaths {
-        return $this->_internal_path_data ?? new InternalHashPaths( [] );
+    public function getConversionHashes(): InternalHashPaths {
+        return $this->_internal_conversion_hashes ?? new InternalHashPaths( [] );
     }
 
-    public function hasData(): bool {
-        return !empty( $this->_internal_path_data ) && !$this->_internal_path_data->isEmpty();
+    public function hasConversionHashes(): bool {
+        return !empty( $this->_internal_conversion_hashes ) && !$this->_internal_conversion_hashes->isEmpty();
     }
 
-    /**
-     * @return array
-     */
-    public function jsonSerialize(): array {
+    public function asError(): array {
         return [
                 'code'    => $this->getCode(),
-                'message'   => $this->getMessage(),
-                'warning' => $this->getWarning(),
-//                'debug'   => $this->getDebug(),
+                'message' => $this->getMessage(),
+                'name'    => $this->getName(),
         ];
     }
+
+    public function getResult(): array {
+        return [
+                'name' => $this->getName(),
+                'size' => $this->getSize(),
+        ];
+    }
+
 }

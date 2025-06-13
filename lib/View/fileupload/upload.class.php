@@ -1,10 +1,11 @@
 <?php
 
+use Conversion\MimeTypes\MimeTypes;
+use Conversion\ZipArchiveHandler;
 use FilesStorage\AbstractFilesStorage;
 use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
-use MimeTypes\MimeTypes;
 
 define( "DIRSEP", "//" );
 
@@ -44,10 +45,10 @@ class UploadHandler {
         return
             ( $https ? 'https://' : 'http://' ) .
             ( !empty( $_SERVER[ 'REMOTE_USER' ] ) ? $_SERVER[ 'REMOTE_USER' ] . '@' : '' ) .
-            ( isset( $_SERVER[ 'HTTP_HOST' ] ) ? $_SERVER[ 'HTTP_HOST' ] : ( $_SERVER[ 'SERVER_NAME' ] .
-                ( $https && $_SERVER[ 'SERVER_PORT' ] === 443 ||
-                $_SERVER[ 'SERVER_PORT' ] === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ] ) ) ) .
-            rtrim( $_SERVER[ 'REQUEST_URI' ], '/' );
+            ( $_SERVER[ 'HTTP_HOST' ] ?? (
+                    ( $_SERVER[ 'SERVER_NAME' ] ?? '' ) .
+                    ( $https && ( $_SERVER[ 'SERVER_PORT' ] ?? 0 ) === 443 || ( $_SERVER[ 'SERVER_PORT' ] ?? 0 ) === 80 ? '' : ':' . $_SERVER[ 'SERVER_PORT' ] ) ) ) .
+            rtrim( $_SERVER[ 'REQUEST_URI' ] ?? '', '/' );
     }
 
     protected function set_file_delete_url( $file ) {
@@ -495,7 +496,7 @@ class UploadHandler {
             $success = $this->zipFileDelete( $file_name, $source, $segmentationRule, $filtersTemplate );
         } //if it's a file in a zipped folder, delete it.
         elseif ( preg_match( '#^[^\.]*\.zip/#', $_REQUEST[ 'file' ] ) ) {
-            $file_name = ZipArchiveExtended::getInternalFileName( $_REQUEST[ 'file' ] );
+            $file_name = ZipArchiveHandler::getInternalFileName( $_REQUEST[ 'file' ] );
 
             $success = $this->zipInternalFileDelete( $file_name, $source, $segmentationRule, $filtersTemplate );
         } else {
@@ -521,7 +522,7 @@ class UploadHandler {
     private function zipFileDelete( $file_name, $source, $segmentationRule = null, $filtersTemplate = 0 ) {
         $file_path = $this->options[ 'upload_dir' ] . $file_name;
 
-        $out_file_name = ZipArchiveExtended::getFileName( $file_name );
+        $out_file_name = ZipArchiveHandler::getFileName( $file_name );
 
         $success[ $out_file_name ] = is_file( $file_path ) && $file_name[ 0 ] !== '.' && unlink( $file_path );
         if ( $success[ $out_file_name ] ) {
@@ -544,7 +545,7 @@ class UploadHandler {
         $file_path = $this->options[ 'upload_dir' ] . $file_name;
         $this->deleteSha( $file_path, $source, $segmentationRule, $filtersTemplate );
 
-        $out_file_name = ZipArchiveExtended::getFileName( $file_name );
+        $out_file_name = ZipArchiveHandler::getFileName( $file_name );
 
         $success[ $out_file_name ] = is_file( $file_path ) && $file_name[ 0 ] !== '.' && unlink( $file_path );
 

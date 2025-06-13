@@ -15,32 +15,37 @@ class ConvertedFileList {
      * @var ConvertedFileModel[]
      */
     private array $convertedFiles = [];
+    private array $erroredFiles   = [];
+    private array $warnedFiles    = [];
 
     public function add( ConvertedFileModel $convertedFileModel ): void {
         $this->convertedFiles[] = $convertedFileModel;
     }
 
     /**
+     * @param ConvertedFileModel $warnedFile
+     */
+    public function setWarnedFile( ConvertedFileModel $warnedFile ) {
+        $this->warnedFiles[] = $warnedFile->asError();
+    }
+
+    /**
+     * @param ConvertedFileModel $erroredFile
+     *
+     */
+    public function setErroredFile( ConvertedFileModel $erroredFile ) {
+        $this->erroredFiles[] = $erroredFile->asError();
+    }
+
+    /**
      * @return bool
      */
     public function hasErrors(): bool {
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAnErrorCode() ) {
-                return true;
-            }
-        }
-
-        return false;
+        return !empty( $this->erroredFiles );
     }
 
     public function hasWarnings(): bool {
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAWarningCode() ) {
-                return true;
-            }
-        }
-
-        return false;
+        return !empty( $this->warnedFiles );
     }
 
     /**
@@ -48,15 +53,7 @@ class ConvertedFileList {
      * @return array
      */
     public function getErrors(): array {
-        $errors = [];
-
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAnErrorCode() ) {
-                $errors[] = $res;
-            }
-        }
-
-        return $errors;
+        return $this->erroredFiles;
     }
 
     /**
@@ -64,25 +61,34 @@ class ConvertedFileList {
      * @return array
      */
     public function getWarnings(): array {
-        $warnings = [];
-        foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasAWarningCode() ) {
-                $warnings[] = $res;
-            }
-        }
-
-        return $warnings;
+        return $this->warnedFiles;
     }
 
     /**
      * @return InternalHashPaths[]
      */
+    public function getHashes(): array {
+        $hashes = [];
+        foreach ( $this->convertedFiles as $res ) {
+            if ( $res->hasConversionHashes() ) {
+                $hashes[] = $res->getConversionHashes();
+            }
+        }
+
+        return $hashes;
+    }
+
+    /**
+     * @return array
+     */
     public function getData(): array {
         $data = [];
 
         foreach ( $this->convertedFiles as $res ) {
-            if ( $res->hasData() ) {
-                $data[] = $res->getData();
+            if ( $res->isZipContent() ) {
+                $data[ 'zipFiles' ][] = $res->getResult();
+            } else {
+                $data[ 'simpleFileName' ][] = $res->getResult();
             }
         }
 
