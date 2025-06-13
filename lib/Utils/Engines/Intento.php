@@ -13,6 +13,7 @@ class Engines_Intento extends Engines_AbstractEngine {
     ];
 
     private $apiKey;
+    private $service  = null;
     private $provider = [];
     private $providerKey;
     private $providerCategory;
@@ -26,10 +27,11 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         $extra = $engineRecord->getExtraParamsAsArray();
 
-        $this->apiKey = $extra['apikey'] ?? null;
-        $this->provider = $extra['provider'] ?? [];
-        $this->providerKey = $extra['providerkey'] ?? null;
-        $this->providerCategory = $extra['providercategory'] ?? null;
+        $this->apiKey           = $extra[ 'apikey' ] ?? null;
+        $this->service          = $extra[ 'service' ] ?? null;
+        $this->provider         = $extra[ 'provider' ] ?? [];
+        $this->providerKey      = $extra[ 'providerkey' ] ?? null;
+        $this->providerCategory = $extra[ 'providercategory' ] ?? null;
     }
 
     /**
@@ -60,14 +62,14 @@ class Engines_Intento extends Engines_AbstractEngine {
             if ( $result and isset( $result->id ) ) {
                 $id = $result->id;
 
-                if ( isset( $result->response ) and !empty($result->response) and isset( $result->done ) and $result->done == true ) {
+                if ( isset( $result->response ) and !empty( $result->response ) and isset( $result->done ) and $result->done == true ) {
                     $text    = $result->response[ 0 ]->results[ 0 ];
                     $decoded = [
-                        'data' => [
-                            'translations' => [
-                                [ 'translatedText' => $text ]
+                            'data' => [
+                                    'translations' => [
+                                            [ 'translatedText' => $text ]
+                                    ]
                             ]
-                        ]
                     ];
 
                 } elseif ( isset( $result->done ) and $result->done == false ) {
@@ -75,17 +77,17 @@ class Engines_Intento extends Engines_AbstractEngine {
                     $cnf = [ 'async' => true, 'id' => $id ];
 
                     return $this->_curl_async( $cnf, $parameters, $function );
-                } elseif ( isset( $result->error ) and !empty($result->error) ) {
+                } elseif ( isset( $result->error ) and !empty( $result->error ) ) {
 
-                    $httpCode = $result->error->data[0]->response->body->error->code ?? 500;
-                    $message = $result->error->data[0]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
+                    $httpCode = $result->error->data[ 0 ]->response->body->error->code ?? 500;
+                    $message  = $result->error->data[ 0 ]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
 
                     $decoded = [
-                        'error' => [
-                            'code'    => -2,
-                            'message' => $message,
-                            'http_code' => $httpCode
-                        ]
+                            'error' => [
+                                    'code'      => -2,
+                                    'message'   => $message,
+                                    'http_code' => $httpCode
+                            ]
                     ];
                 } else {
                     $cnf = [ 'async' => true, 'id' => $id ];
@@ -121,35 +123,46 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        return $this->_composeMTResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
     }
 
+    /**
+     * Get matches
+     *
+     * @param $_config
+     *
+     * @return array|Engines_Results_AbstractResponse
+     * @throws Exception
+     */
     public function get( $_config ) {
 
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
+        $service                           = $this->service;
         $provider                          = $this->provider;
         $providerKey                       = $this->providerKey;
         $providerCategory                  = $this->providerCategory;
 
-        if ( !empty($provider) ) {
+        if ( !empty( $service ) ) {
+            $parameters[ 'service' ][ 'routing' ] = $service;
+        } elseif ( !empty( $provider ) ) {
             $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider['id'];
+            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
 
-            if ( !empty($providerKey) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [json_decode( $providerKey, true )];
+            if ( !empty( $providerKey ) ) {
+                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
             }
 
-            if ( !empty($providerCategory) ) {
+            if ( !empty( $providerCategory ) ) {
                 $parameters[ 'context' ][ 'category' ] = $providerCategory;
             }
         }
@@ -173,7 +186,7 @@ class Engines_Intento extends Engines_AbstractEngine {
     protected function _curl_async( $config, $parameters = null, $function = null ) {
         $id = $config[ 'id' ];
 
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
