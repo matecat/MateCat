@@ -4,14 +4,14 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
     /**
      * @var Engines_Results_MyMemory_Matches[]|array
      */
-    public $matches = [];
+    public array $matches = [];
 
     public function __construct( $result ) {
 
-        $this->responseData    = isset( $result[ 'responseData' ] ) ? $result[ 'responseData' ] : '';
-        $this->responseDetails = isset( $result[ 'responseDetails' ] ) ? $result[ 'responseDetails' ] : '';
-        $this->responseStatus  = isset( $result[ 'responseStatus' ] ) ? $result[ 'responseStatus' ] : '';
-        $this->mtLangSupported = ( isset( $result[ 'mtLangSupported' ] ) && !is_null( $result[ 'mtLangSupported' ] ) ) ? $result[ 'mtLangSupported' ] : true;
+        $this->responseData    = $result[ 'responseData' ] ?? '';
+        $this->responseDetails = $result[ 'responseDetails' ] ?? '';
+        $this->responseStatus  = $result[ 'responseStatus' ] ?? '';
+        $this->mtLangSupported = $result[ 'mtLangSupported' ] ?? true;
 
         if ( is_array( $result ) and !empty( $result ) and array_key_exists( 'matches', $result ) ) {
 
@@ -29,8 +29,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
      * @param $match
      * @return Engines_Results_MyMemory_Matches
      */
-    private function buildMyMemoryMatch($match)
-    {
+    private function buildMyMemoryMatch($match): Engines_Results_MyMemory_Matches {
         if ( $match[ 'last-update-date' ] == "0000-00-00 00:00:00" ) {
             $match[ 'last-update-date' ] = "1970-01-01 00:00:00";
         }
@@ -80,7 +79,7 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
      * @return array
      * @throws Exception
      */
-    public function get_matches_as_array( $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ) {
+    public function get_matches_as_array( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ): array {
         $matchesArray = [];
 
         foreach ( $this->matches as $match ) {
@@ -89,27 +88,6 @@ class Engines_Results_MyMemory_TMS extends Engines_Results_AbstractResponse {
         }
 
         return $matchesArray;
-    }
-
-    /**
-     * Transform one level list to multi level matches based on segment key
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function get_glossary_matches_as_array() {
-        $tmp_vector = [];
-        $TMS_RESULT = $this->get_matches_as_array();
-        foreach ( $TMS_RESULT as $single_match ) {
-            $tmp_vector[ $single_match[ 'segment' ] ][] = $single_match;
-        }
-        $TMS_RESULT = $tmp_vector;
-
-        return $TMS_RESULT;
-    }
-
-    public function get_as_array() {
-        return (array)$this;
     }
 
 }

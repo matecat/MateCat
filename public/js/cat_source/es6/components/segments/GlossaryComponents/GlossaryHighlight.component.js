@@ -68,11 +68,15 @@ class GlossaryHighlight extends Component {
             .getText()
             .substring(startB, endB)
             .replace(
-              new RegExp('​' + tagSignatures.space.placeholder + '​'),
+              new RegExp('​' + tagSignatures.space.placeholder + '​', 'g'),
               ' ',
             )
 
-          if (startB === startAbsolute || endB === endAbsolute) {
+          if (
+            startB === startAbsolute ||
+            endB === endAbsolute ||
+            (startAbsolute > startB && endAbsolute < endB)
+          ) {
             result = glossary.find(({matching_words: matchingWords}) =>
               matchingWords.find(
                 (value) => value.toLowerCase() === words.toLowerCase(),

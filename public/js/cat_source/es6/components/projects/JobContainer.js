@@ -375,12 +375,12 @@ class JobContainer extends React.Component {
 
   getJobMenu() {
     let jobTMXUrl =
-      '/api/v2/TMX/' +
+      '/api/v2/tmx/' +
       this.props.job.get('id') +
       '/' +
       this.props.job.get('password')
     let exportXliffUrl =
-      '/api/v2/SDLXLIFF/' +
+      '/api/v2/xliff/' +
       this.props.job.get('id') +
       '/' +
       this.props.job.get('password') +

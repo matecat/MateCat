@@ -1,5 +1,8 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Class BasicFeatureStruct
  *
@@ -10,7 +13,7 @@
  *
  *
  */
-class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $feature_code;
     public $options;

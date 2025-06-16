@@ -9,9 +9,9 @@
 
 namespace API\V2;
 
+use AbstractControllers\KleinController;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;

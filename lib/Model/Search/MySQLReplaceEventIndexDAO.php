@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Search\ReplaceEventCurrentVersionStruct;
 
-class Search_MySQLReplaceEventIndexDAO extends DataAccess_AbstractDao implements Search_ReplaceEventIndexDAOInterface {
+class Search_MySQLReplaceEventIndexDAO extends AbstractDao implements Search_ReplaceEventIndexDAOInterface {
 
     const STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
     const TABLE       = 'replace_events_current_version';

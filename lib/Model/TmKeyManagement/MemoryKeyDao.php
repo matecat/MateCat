@@ -6,13 +6,15 @@
  * Time: 18.45
  */
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
 
 /**
  * Class DataAccess_MemoryKeyDao<br/>
  * This class handles the communication with the corresponding table in the database using a CRUD interface
  */
-class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
+class TmKeyManagement_MemoryKeyDao extends AbstractDao {
 
     const TABLE = "memory_keys";
 
@@ -317,12 +319,12 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @param TmKeyManagement_MemoryKeyStruct $input
      *
-     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct
+     * @return IDaoStruct|TmKeyManagement_MemoryKeyStruct
      * @throws Exception
-     * @see DataAccess_AbstractDao::sanitize
+     * @see AbstractDao::sanitize
      *
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -333,7 +335,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return array
      * @throws Exception
-     * @see DataAccess_AbstractDao::sanitizeArray
+     * @see AbstractDao::sanitizeArray
      *
      */
     public static function sanitizeArray( array $input ): array {
@@ -341,16 +343,16 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * See in DataAccess_AbstractDao::validatePrimaryKey
+     * See in AbstractDao::validatePrimaryKey
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
      *
      * @return void
      * @throws Exception
-     * @see DataAccess_AbstractDao::_validatePrimaryKey
+     * @see AbstractDao::_validatePrimaryKey
      *
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
@@ -366,16 +368,16 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * See in DataAccess_AbstractDao::validateNotNullFields
+     * See in AbstractDao::validateNotNullFields
      *
-     * @param DataAccess_IDaoStruct $obj
+     * @param IDaoStruct $obj
      *
      * @return null
      * @throws Exception
-     * @see DataAccess_AbstractDao::_validateNotNullFields
+     * @see AbstractDao::_validateNotNullFields
      *
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */

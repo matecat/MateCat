@@ -3,8 +3,8 @@
 namespace Model\Analysis;
 
 use API\App\Json\Analysis\AnalysisProject;
-use API\App\Json\Analysis\MatchConstants;
 use API\App\Json\Analysis\MatchContainerInterface;
+use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 
 /**
  * Created by PhpStorm.
@@ -16,14 +16,9 @@ use API\App\Json\Analysis\MatchContainerInterface;
 class XTRFStatus extends AbstractStatus {
 
     /**
-     * @var AnalysisProject $result
-     */
-    protected $result;
-
-    /**
      * @return array
      */
-    public function getResult() {
+    public function getResultArray(): array {
 
         $outputContent = [];
 
@@ -65,37 +60,37 @@ class XTRFStatus extends AbstractStatus {
 
     }
 
-    protected function formatFile( MatchContainerInterface $values, $vector ) {
+    protected function formatFile( MatchContainerInterface $values, $vector ): string {
 
 
         $_TOTAL_RAW_SUM = (
-                $values->getMatch( MatchConstants::_NEW )->getRaw() +
-                $values->getMatch( MatchConstants::_ICE )->getRaw() +
-                $values->getMatch( MatchConstants::_REPETITIONS )->getRaw() +
-                $values->getMatch( MatchConstants::_NUMBERS_ONLY )->getRaw() +
-                $values->getMatch( MatchConstants::_INTERNAL )->getRaw() +
-                $values->getMatch( MatchConstants::_100 )->getRaw() +
-                $values->getMatch( MatchConstants::_100_PUBLIC )->getRaw() +
-                $values->getMatch( MatchConstants::_95_99 )->getRaw() +
-                $values->getMatch( MatchConstants::_85_94 )->getRaw() +
-                $values->getMatch( MatchConstants::_75_84 )->getRaw() +
-                $values->getMatch( MatchConstants::_50_74 )->getRaw() +
-                $values->getMatch( MatchConstants::_MT )->getRaw()
+                $values->getMatch( StandardMatchTypeNamesConstants::_NEW )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_REPETITIONS )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_NUMBERS_ONLY )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_100 )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_100_PUBLIC )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_95_99 )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_85_94 )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_75_84 )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_50_74 )->getRaw() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_MT )->getRaw()
         );
 
         $TOTAL_EQUIVALENT = (
-                $values->getMatch( MatchConstants::_NEW )->getEquivalent() +
-                $values->getMatch( MatchConstants::_ICE )->getEquivalent() +
-                $values->getMatch( MatchConstants::_REPETITIONS )->getEquivalent() +
-                $values->getMatch( MatchConstants::_NUMBERS_ONLY )->getEquivalent() +
-                $values->getMatch( MatchConstants::_INTERNAL )->getEquivalent() +
-                $values->getMatch( MatchConstants::_100 )->getEquivalent() +
-                $values->getMatch( MatchConstants::_100_PUBLIC )->getEquivalent() +
-                $values->getMatch( MatchConstants::_95_99 )->getEquivalent() +
-                $values->getMatch( MatchConstants::_85_94 )->getEquivalent() +
-                $values->getMatch( MatchConstants::_75_84 )->getEquivalent() +
-                $values->getMatch( MatchConstants::_50_74 )->getEquivalent() +
-                $values->getMatch( MatchConstants::_MT )->getEquivalent()
+                $values->getMatch( StandardMatchTypeNamesConstants::_NEW )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_REPETITIONS )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_NUMBERS_ONLY )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_100 )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_100_PUBLIC )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_95_99 )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_85_94 )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_75_84 )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_50_74 )->getEquivalent() +
+                $values->getMatch( StandardMatchTypeNamesConstants::_MT )->getEquivalent()
         );
 
         $fileContent = $vector[ 'firstLine' ] . PHP_EOL;
@@ -112,74 +107,74 @@ class XTRFStatus extends AbstractStatus {
 
         $fileContent .=
                 str_pad( "New words", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_NEW )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_NEW )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_NEW )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_NEW )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "Context Match", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_ICE )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_ICE )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_ICE )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "Repetitions", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_REPETITIONS )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_REPETITIONS )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_REPETITIONS )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_REPETITIONS )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "Format Change", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_NUMBERS_ONLY )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_NUMBERS_ONLY )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_NUMBERS_ONLY )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_NUMBERS_ONLY )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "Internal Match", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_INTERNAL )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_INTERNAL )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_INTERNAL )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "100%", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_100 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_100 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_100 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_100 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "100% Public TM", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_100_PUBLIC )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_100_PUBLIC )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_100_PUBLIC )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_100_PUBLIC )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "95% - 99%", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_95_99 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_95_99 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_95_99 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_95_99 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "85% - 94%", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_85_94 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_85_94 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_85_94 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_85_94 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "75% - 84%", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_75_84 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_75_84 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_75_84 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_75_84 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "50% - 74%", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_50_74 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_50_74 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_50_74 )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_50_74 )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .=
                 str_pad( "MT", 16 ) .
-                str_pad( $values->getMatch( MatchConstants::_MT )->getRaw(), 12, " ", STR_PAD_LEFT ) .
-                str_pad( number_format( $values->getMatch( MatchConstants::_MT )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
+                str_pad( $values->getMatch( StandardMatchTypeNamesConstants::_MT )->getRaw(), 12, " ", STR_PAD_LEFT ) .
+                str_pad( number_format( $values->getMatch( StandardMatchTypeNamesConstants::_MT )->getRaw() / $_TOTAL_RAW_SUM * 100, 2, '.', '' ), 14, " ", STR_PAD_LEFT ) .
                 PHP_EOL;
 
         $fileContent .= PHP_EOL;

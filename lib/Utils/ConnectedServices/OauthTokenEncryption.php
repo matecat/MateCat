@@ -4,6 +4,7 @@ namespace ConnectedServices;
 
 use Constants;
 use DefuseEncryption;
+use Exception;
 use INIT;
 
 /**
@@ -20,6 +21,7 @@ class OauthTokenEncryption extends DefuseEncryption {
     /**
      * Singleton method to create a new instance of OauthTokenEncryption with the token key file.
      * @return null|OauthTokenEncryption
+     * @throws Exception
      */
     public static function getInstance(): ?OauthTokenEncryption {
         if ( self::$instance === null ) {

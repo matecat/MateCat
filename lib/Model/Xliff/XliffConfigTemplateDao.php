@@ -2,8 +2,8 @@
 
 namespace Xliff;
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
 use Database;
 use DateTime;
 use Exception;
@@ -14,7 +14,7 @@ use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Utils;
 
-class XliffConfigTemplateDao extends DataAccess_AbstractDao {
+class XliffConfigTemplateDao extends AbstractDao {
 
     const TABLE = 'xliff_config_templates';
 

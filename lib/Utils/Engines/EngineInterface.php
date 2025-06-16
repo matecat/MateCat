@@ -48,6 +48,13 @@ interface Engines_EngineInterface {
     public function setAnalysis(): Engines_EngineInterface;
 
     /**
+     * @param int $mt_penalty
+     *
+     * @return Engines_EngineInterface
+     */
+    public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
+
+    /**
      * @return EnginesModel_EngineStruct
      */
     public function getEngineRecord(): EnginesModel_EngineStruct;
@@ -74,8 +81,9 @@ interface Engines_EngineInterface {
 
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKey
-     * @throws Exception
+     *
      * @return ?array
+     * @throws Exception
      */
     public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
 
@@ -96,16 +104,18 @@ interface Engines_EngineInterface {
      * @param TmKeyManagement_MemoryKeyStruct $memoryKey
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
- * @throws Exception
+     * @throws Exception
      */
     public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
 
     /**
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
+     *
      * @return float|null
      */
-    public function getQualityEstimation($source, $target, $sentence, $translation) : ?float;
+    public function getQualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id = 'default' ): ?float;
 }

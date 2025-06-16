@@ -1,6 +1,8 @@
 <?php
 
 use ConnectedServices\OauthTokenEncryption;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Teams\MembershipDao;
 use Teams\TeamDao;
@@ -14,7 +16,7 @@ use Users\MetadataStruct;
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public ?int    $uid                           = null;
     public ?string $email                         = null;

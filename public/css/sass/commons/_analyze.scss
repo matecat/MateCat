@@ -260,6 +260,11 @@ body.analyze {
       padding: 45px 15px 15px;
       background-color: colors.$grey5;
       margin: 0 -1rem 0;
+      &.type-mtqe {
+        .title-total-words, .title-matecat-words {
+          width: 50% !important;
+        }
+      }
       .compare-table {
         background-color: colors.$grey3;
         margin-bottom: 1px;

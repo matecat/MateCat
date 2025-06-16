@@ -103,7 +103,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=110&id_file=&password=9599a9febd1e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/110/9599a9febd1e/110.zip',
+                'https://dev.matecat.com/xliff/110/9599a9febd1e/110.zip',
             },
           },
         ],
@@ -203,7 +203,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=98&id_file=&password=defe9aad39e3&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/98/defe9aad39e3/98.zip',
+                'https://dev.matecat.com/xliff/98/defe9aad39e3/98.zip',
             },
           },
           {
@@ -275,7 +275,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=99&id_file=&password=278d3f0a255b&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/99/278d3f0a255b/99.zip',
+                'https://dev.matecat.com/xliff/99/278d3f0a255b/99.zip',
             },
           },
           {
@@ -347,7 +347,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=100&id_file=&password=b9d1cf9c3a04&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/100/b9d1cf9c3a04/100.zip',
+                'https://dev.matecat.com/xliff/100/b9d1cf9c3a04/100.zip',
             },
           },
           {
@@ -419,7 +419,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=101&id_file=&password=61b34dd4d39e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/101/61b34dd4d39e/101.zip',
+                'https://dev.matecat.com/xliff/101/61b34dd4d39e/101.zip',
             },
           },
         ],
@@ -517,7 +517,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=6&id_file=&password=2a35d508882e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/6/2a35d508882e/6.zip',
+                'https://dev.matecat.com/xliff/6/2a35d508882e/6.zip',
             },
           },
           {
@@ -587,7 +587,7 @@ const fakeProjectsData = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=6&id_file=&password=2a35d508882e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/6/2a35d508882e/6.zip',
+                'https://dev.matecat.com/xliff/6/2a35d508882e/6.zip',
             },
           },
         ],

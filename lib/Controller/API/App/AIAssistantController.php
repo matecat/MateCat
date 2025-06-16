@@ -2,7 +2,7 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use AsyncTasks\Workers\AIAssistantWorker;
 use INIT;
 use Langs\Languages;

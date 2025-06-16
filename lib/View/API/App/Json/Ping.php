@@ -9,7 +9,7 @@
 
 namespace API\App\Json;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use Utils;
 
 class Ping {

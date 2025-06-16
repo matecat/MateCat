@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Teams\TeamStruct;
 
-class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
+class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
 
     const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
 
@@ -24,11 +25,11 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param DataAccess_IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
+     * @param \DataAccess\IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
      *
      * @return int
      */
-    public function create( DataAccess_IDaoStruct $obj ) {
+    public function create( \DataAccess\IDaoStruct $obj ) {
 
         $conn = Database::obtain()->getConnection();
 
@@ -62,7 +63,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
      *
      * @param int    $ttl
      *
-     * @return DataAccess_IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     * @return \DataAccess\IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
      * @throws ReflectionException
      */
     public static function getByIdCustomer( string $id_customer, int $ttl = 3600 ): array {
