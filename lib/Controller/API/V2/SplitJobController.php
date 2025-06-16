@@ -143,7 +143,7 @@ class SplitJobController extends KleinController {
 
         $split_raw_words = filter_var( $this->request->param( 'split_raw_words' ), FILTER_VALIDATE_BOOLEAN );
         $num_split       = filter_var( $this->request->param( 'num_split' ), FILTER_SANITIZE_NUMBER_INT );
-        $split_values    = filter_var( $this->request->param( 'split_values' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'min_range' => 2 ] ] );
+        $split_values    = is_array($this->request->param( 'split_values' )) ? filter_var_array( $this->request->param( 'split_values' ), FILTER_SANITIZE_NUMBER_INT ) : [];
 
         if ( empty( $project_id ) ) {
             throw new InvalidArgumentException( "No id project provided", -1 );
