@@ -1,6 +1,8 @@
 <?php
 
 use ConnectedServices\OauthTokenEncryption;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Teams\MembershipDao;
 use Teams\TeamDao;
@@ -14,7 +16,7 @@ use Users\MetadataStruct;
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public ?int    $uid                           = null;
     public ?string $email                         = null;
@@ -29,18 +31,20 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public ?string $confirmation_token_created_at = null;
 
     /**
-     * Sometimes we send around empty UserStruct to signify Anonymous user.
-     * This a convenience method to encapsulate the logic that defines an anonymous user.
-     * We check for uid not to be empty. Additional check on email to be sure we don't consider the user anonymous
-     * when it's submitting registration info.
-     *
-     * This logic may change in the future if we decide to keep anonymous users inside database
-     * (i.e. !is_null($this->uid)).
-     *
      * @return bool
      */
     public function isAnonymous(): bool {
-        return is_null( $this->uid ) && is_null( $this->email );
+        return !$this->isLogged();
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLogged(): bool {
+        return !empty( $this->uid ) &&
+                !empty( $this->email ) &&
+                !empty( $this->first_name ) &&
+                !empty( $this->last_name );
     }
 
     public function clearAuthToken() {

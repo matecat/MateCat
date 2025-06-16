@@ -3,7 +3,7 @@
 namespace PayableRates;
 
 use Analysis\PayableRates;
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
@@ -16,7 +16,7 @@ use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
 
-class CustomPayableRateDao extends DataAccess_AbstractDao {
+class CustomPayableRateDao extends AbstractDao {
     const TABLE           = 'payable_rate_templates';
     const TABLE_JOB_PIVOT = 'job_custom_payable_rates';
 
@@ -286,7 +286,7 @@ class CustomPayableRateDao extends DataAccess_AbstractDao {
      */
     private
     static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
 

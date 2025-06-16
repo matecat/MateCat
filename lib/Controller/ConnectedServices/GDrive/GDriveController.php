@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
@@ -179,6 +179,8 @@ class GDriveController extends AbstractStatefulKleinController {
                 break;
             }
         }
+
+        $_SESSION[ "gdrive_session" ] = $this->gdriveUserSession->getSession();
     }
 
     /**

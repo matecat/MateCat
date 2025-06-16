@@ -17,13 +17,13 @@ let TranslationMatches = {
     let matchToUse = segment.contributions.matches[index - 1] ?? {}
 
     translation = translation ? translation : matchToUse.translation
-    var percentageClass = this.getPercentuageClass(matchToUse.match)
+    var percentageClass = this.getPercentageClass(matchToUse)
     if ($.trim(translation) !== '') {
       SegmentActions.replaceEditAreaTextContent(segment.sid, translation)
       SegmentActions.setHeaderPercentage(
         segment.sid,
         segment.id_file,
-        matchToUse.match,
+        matchToUse,
         percentageClass,
         matchToUse.created_by,
       )
@@ -182,7 +182,11 @@ let TranslationMatches = {
 
     if (isUndefined(config.id_client)) {
       setTimeout(function () {
-        TranslationMatches.getContribution(segmentSid, next)
+        TranslationMatches.getContribution(
+          segmentSid,
+          next,
+          crossLanguageSettings,
+        )
       }, 3000)
       // console.log('SSE: ID_CLIENT not found')
       return Promise.resolve()
@@ -231,22 +235,19 @@ let TranslationMatches = {
       OfflineUtils.failedConnection()
     })
   },
-  getPercentuageClass: function (match) {
-    var percentageClass = ''
-    var m_parse = parseInt(match)
+  getPercentageClass: function (matchArray) {
+    let percentageClass
 
-    if (!isNaN(m_parse)) {
-      match = m_parse
-    }
+    const match = this.getNumericMatchBaseOrMTString(matchArray.match)
 
     switch (true) {
-      case match == 100:
+      case match === 100 && !matchArray.ICE: //'100%'
         percentageClass = 'per-green'
         break
-      case match == 101:
+      case match === 100 && matchArray.ICE: //'101%'
         percentageClass = 'per-blue'
         break
-      case match > 0 && match <= 99:
+      case match > 0 && match <= 99: //Ex: '75%-84%'
         percentageClass = 'per-orange'
         break
       case match === 'MT':
@@ -259,6 +260,40 @@ let TranslationMatches = {
         percentageClass = ''
     }
     return percentageClass
+  },
+
+  /**
+   * Get the match value from the match string or return the match value as is if it is not a number
+   * Ex: '75%-84%', '101%', '100%', 'MT', 'ICE_MT' -> 75, 101, 100, NaN, NaN
+   *
+   * @param matchValue
+   * @returns {number|string}
+   */
+  getNumericMatchBaseOrMTString: function (matchValue) {
+    const m_parse = parseInt(matchValue) //Ex: '75%-84%', '101%', '100%', 'MT', 'ICE_MT' -> 75, 101, 100, NaN, NaN
+
+    if (!isNaN(m_parse)) {
+      matchValue = m_parse
+    }
+
+    return matchValue
+  },
+
+  /**
+   * Get the percent string for value rewriting the ICE match as 101% and ICE_MT as TQMT
+   * @param matchArray
+   * @returns {string}
+   */
+  getPercentTextForMatch: function (matchArray) {
+    if (
+      TranslationMatches.getNumericMatchBaseOrMTString(matchArray.match) ===
+        100 &&
+      matchArray.ICE
+    ) {
+      return '101%'
+    } else {
+      return matchArray.match === 'ICE_MT' ? 'TQMT' : matchArray.match
+    }
   },
 }
 

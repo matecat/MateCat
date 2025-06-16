@@ -2,7 +2,6 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const getSegments = async ({jid, password, step, segment, where}) => {
   const paramsData = {
-    action: 'getSegments',
     jid,
     password,
     step,
@@ -15,14 +14,11 @@ export const getSegments = async ({jid, password, step, segment, where}) => {
     formData.append(key, paramsData[key])
   })
 
-  const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
-    {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    },
-  )
+  const response = await fetch(`${getMatecatApiDomain()}api/app/get-segments`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
 
   if (!response.ok) return Promise.reject(response)
 

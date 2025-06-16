@@ -3,7 +3,7 @@
 namespace Filters;
 
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use DateTime;
 use Exception;
@@ -15,7 +15,7 @@ use Projects\ProjectTemplateStruct;
 use ReflectionException;
 use Utils;
 
-class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
+class FiltersConfigTemplateDao extends AbstractDao {
     const TABLE = 'filters_config_templates';
 
     const query_by_id         = "SELECT * FROM " . self::TABLE . " WHERE id = :id AND deleted_at IS NULL";
@@ -239,7 +239,7 @@ class FiltersConfigTemplateDao extends DataAccess_AbstractDao {
      * @throws ReflectionException
      */
     private static function destroyQueryPaginated( int $uid ) {
-        self::getInstance()->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        self::getInstance()->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
     /**

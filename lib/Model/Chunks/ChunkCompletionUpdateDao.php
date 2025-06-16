@@ -1,6 +1,8 @@
 <?php
 
-class Chunks_ChunkCompletionUpdateDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class Chunks_ChunkCompletionUpdateDao extends AbstractDao {
 
     protected function _buildResult( array $array_result ) {
     }

@@ -2,9 +2,8 @@
 
 namespace LQA;
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
 use Jobs_JobStruct;
@@ -12,7 +11,7 @@ use Log;
 use PDO;
 use Utils;
 
-class EntryDao extends DataAccess_AbstractDao {
+class EntryDao extends AbstractDao {
     protected function _buildResult( array $array_result ) {
     }
 
@@ -362,7 +361,7 @@ class EntryDao extends DataAccess_AbstractDao {
      * @param null $idFilePart
      * @param int  $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      */
     public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0 ) {
 

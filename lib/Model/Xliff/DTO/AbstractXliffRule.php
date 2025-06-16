@@ -2,12 +2,12 @@
 
 namespace Xliff\DTO;
 
-use API\App\Json\Analysis\MatchConstants;
 use Constants_TranslationStatus;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use LogicException;
+use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
 use RecursiveArrayObject;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
@@ -36,8 +36,6 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             self::_APPROVED,
             self::_APPROVED2
     ];
-
-    const ALLOWED_MATCH_TYPES = MatchConstants::forValue;
 
     /**
      * @var string[]
@@ -133,7 +131,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      */
     protected function setMatchCategory( ?string $matchCategory = null ): void {
 
-        if ( !empty( $matchCategory ) && !in_array( $matchCategory, static::ALLOWED_MATCH_TYPES ) ) {
+        if ( !empty( $matchCategory ) && !in_array( $matchCategory, StandardMatchTypeNamesConstants::forValue() ) ) {
             throw new DomainException( "Wrong match_category value", 400 );
         } elseif ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty( $matchCategory ) ) {
             throw new DomainException( "Wrong match_category value. A `new` rule can not have an assigned match category.", 400 );
@@ -259,7 +257,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
             throw new LogicException( "Invalid call for rule. A `new` analysis rule do not have a match category.", 500 );
         }
 
-        return MatchConstants::toInternalMatchTypeValue( $this->matchCategory );
+        return StandardMatchTypeNamesConstants::toInternalMatchTypeName( $this->matchCategory );
     }
 
     /**
@@ -270,7 +268,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @throws Exception
      */
     public function asStandardWordCount( int $raw_word_count, array $payable_rates ): float {
-        if ( $this->matchCategory == MatchConstants::_MT ) {
+        if ( $this->matchCategory == StandardMatchTypeNamesConstants::_MT ) {
             return $raw_word_count;
         }
 

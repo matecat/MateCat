@@ -2,7 +2,10 @@
 
 namespace LQA;
 
-class CategoryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+
+class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $severities;

@@ -11,10 +11,10 @@ namespace Segments;
 
 use ArrayAccess;
 use DataAccess\ArrayAccessTrait;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class ContextStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 

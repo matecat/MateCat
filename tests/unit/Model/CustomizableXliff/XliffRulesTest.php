@@ -19,7 +19,7 @@ class XliffRulesTest extends AbstractTest {
      */
     public function testTranslated() {
 
-        $rule = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated', 'translated', '100' );
+        $rule = new Xliff12Rule( [ 'needs-l10n' ], 'pre-translated', 'translated', 'tm_100' );
 
         $this->assertTrue( $rule->isTranslated( "testo", "traduzione" ) );
         $this->assertEquals( 'TRANSLATED', $rule->asEditorStatus() );
@@ -158,7 +158,7 @@ class XliffRulesTest extends AbstractTest {
         $this->expectExceptionMessage( "Wrong match_category value. A `new` rule can not have an assigned match category." );
         $this->expectExceptionCode( 400 );
 
-        new Xliff20Rule( [ 'final' ], 'new', null, '100' );
+        new Xliff20Rule( [ 'final' ], 'new', null, 'tm_100' );
 
     }
 
@@ -168,7 +168,7 @@ class XliffRulesTest extends AbstractTest {
      */
     public function testStatesSeparationFor12() {
 
-        $rule = new Xliff12Rule( [ /*state */ 'needs-l10n', /*state-qualifier */ 'exact-match' ], 'pre-translated', 'translated', '100' );
+        $rule = new Xliff12Rule( [ /*state */ 'needs-l10n', /*state-qualifier */ 'exact-match' ], 'pre-translated', 'translated', 'tm_100' );
         $this->assertEquals( [ 'needs-l10n' ], $rule->getStates( 'states' ) );
         $this->assertEquals( [ 'exact-match' ], $rule->getStates( 'state-qualifiers' ) );
         $this->assertEquals( [ 'needs-l10n', 'exact-match' ], $rule->getStates() );

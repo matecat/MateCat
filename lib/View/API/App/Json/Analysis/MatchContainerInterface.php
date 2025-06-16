@@ -12,10 +12,10 @@ namespace API\App\Json\Analysis;
 interface MatchContainerInterface {
 
     /**
-     * @param $matchName
+     * @param string $matchName
      *
      * @return AnalysisMatch
      */
-    public function getMatch( $matchName );
+    public function getMatch( string $matchName ): AnalysisMatch;
 
 }

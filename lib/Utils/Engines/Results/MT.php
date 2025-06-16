@@ -21,7 +21,7 @@ class Engines_Results_MT {
         }
     }
 
-    public function get_as_array() {
+    public function get_as_array(): array {
         if ( $this->error != "" ) {
             $this->error = $this->error->get_as_array();
         }

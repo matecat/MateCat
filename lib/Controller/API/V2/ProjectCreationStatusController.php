@@ -10,8 +10,9 @@
 namespace API\V2;
 
 
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\KleinController;
 use API\V2\Json\CreationStatus;
 use API\V2\Json\WaitCreation;
 use Exception;
@@ -26,7 +27,7 @@ class ProjectCreationStatusController extends KleinController {
 
     /**
      * @throws AuthorizationError
-     * @throws \API\Commons\Exceptions\AuthenticationError
+     * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
      * @throws EndQueueException
@@ -54,7 +55,6 @@ class ProjectCreationStatusController extends KleinController {
 
         } else {
 
-
             // project is created, find it with password
             try {
                 $project = Projects_ProjectDao::findByIdAndPassword( $this->request->id_project, $this->request->password );
@@ -65,7 +65,7 @@ class ProjectCreationStatusController extends KleinController {
             $featureSet = $project->getFeaturesSet();
             $result     = $featureSet->filter( 'filterCreationStatus', $result, $project );
 
-            if ( empty( $result ) ) {
+            if ( empty( $result['id_project'] ) ) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;

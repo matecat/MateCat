@@ -17,7 +17,7 @@ export const getPrintableFileSize = (filesizeInBytes) => {
   return Math.round(filesizeInBytes * 100, 2) / 100 + ext
 }
 export const UploadFile = ({...props}) => {
-  const {openGDrive} = useContext(CreateProjectContext)
+  const {openGDrive, currentProjectTemplate} = useContext(CreateProjectContext)
   const {isUserLogged} = useContext(ApplicationWrapperContext)
 
   useEffect(() => {
@@ -33,23 +33,23 @@ export const UploadFile = ({...props}) => {
       window.removeEventListener('beforeunload', onBeforeUnload)
     }
   }, [])
-  return typeof isUserLogged === 'boolean' ? (
-    isUserLogged ? (
-      <>
-        {!openGDrive && <UploadFileLocal {...props} />}
+  return isUserLogged === true && currentProjectTemplate ? (
+    <>
+      {!openGDrive && <UploadFileLocal {...props} />}
 
-        <UploadGdrive {...props} />
-      </>
-    ) : (
-      <div className="upload-box-not-logged">
-        <h2>
-          <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
-          project.
-        </h2>
-        <span>Start translating now!</span>
-      </div>
-    )
+      <UploadGdrive {...props} />
+    </>
+  ) : isUserLogged === false ? (
+    <div className="upload-box-not-logged">
+      <h2>
+        <a onClick={ModalsActions.openLoginModal}>Sign in</a> to create a
+        project.
+      </h2>
+      <span>Start translating now!</span>
+    </div>
   ) : (
-    <div className="upload-waiting-logged"></div>
+    <div className="upload-waiting-logged">
+      <div className="upload-loading" />
+    </div>
   )
 }

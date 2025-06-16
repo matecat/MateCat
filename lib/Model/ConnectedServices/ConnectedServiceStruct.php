@@ -9,12 +9,12 @@
 namespace ConnectedServices;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 
-class ConnectedServiceStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public ?int    $id                 = null;
     public int     $uid;

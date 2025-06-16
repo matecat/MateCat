@@ -116,7 +116,7 @@ const ProjectContainer = ({
         ' Are you sure you want to proceed?',
       successText: 'Yes, delete it',
       successCallback: () => {
-        ManageActions.updateStatusProject(this.props.project, 'delete')
+        ManageActions.updateStatusProject(project, 'delete')
       },
       cancelCallback: () => {},
     }

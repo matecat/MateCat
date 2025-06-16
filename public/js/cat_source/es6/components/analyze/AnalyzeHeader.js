@@ -347,8 +347,7 @@ class AnalyzeHeader extends React.Component {
     var ppassword = config.password
 
     var form =
-      '			<form id="downloadAnalysisReportForm" action="/" method="post">' +
-      '				<input type=hidden name="action" value="downloadAnalysisReport">' +
+      '			<form id="downloadAnalysisReportForm" action="/api/app/download-analysis-report" method="post">' +
       '				<input type=hidden name="id_project" value="' +
       pid +
       '">' +

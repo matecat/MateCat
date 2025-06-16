@@ -15,7 +15,7 @@ class Engine {
      * @return Engines_AbstractEngine
      * @throws Exception
      */
-    public static function getInstance( $id ) {
+    public static function getInstance( $id ): Engines_AbstractEngine {
 
         if ( !is_numeric( $id ) ) {
             throw new Exception( "Missing id engineRecord", -1 );

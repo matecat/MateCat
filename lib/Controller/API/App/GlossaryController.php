@@ -2,14 +2,16 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use CatUtils;
+use DomainException;
 use INIT;
 use Langs\Languages;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
+use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
@@ -255,16 +257,12 @@ class GlossaryController extends KleinController {
         $job = CatUtils::getJobFromIdAndAnyPassword( $json[ 'id_job' ], $json[ 'password' ] );
 
         if ( $job === null ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => 'Wrong id_job/password combination'
-            ] );
-            die();
+            throw new DomainException( 'Wrong id_job/password combination' );
         }
 
         $json[ 'id_segment' ] = ( isset( $json[ 'id_segment' ] ) ) ? $json[ 'id_segment' ] : null;
         $json[ 'jobData' ]    = $job->toArray();
-        $json[ 'tmKeys' ]     = \json_decode( $job->tm_keys, true );
+        $json[ 'tmKeys' ]     = json_decode( $job->tm_keys, true );
         $json[ 'userKeys' ]   = [];
 
         // Add user keys
@@ -371,12 +369,15 @@ class GlossaryController extends KleinController {
      * @param $jsonSchema
      *
      * @throws InvalidValue
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws \Validator\Errors\JSONValidatorException
+     * @throws \Validator\Errors\JsonValidatorGenericException
      */
     private function validateJson( $json, $jsonSchema ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
 
-        $validator = new \Validator\JSONValidator( $jsonSchema );
+        $validator = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {

@@ -365,12 +365,12 @@ const SegmentActions = {
     UI.changeStatus(segment, 'translated', afterTranslateFn)
   },
 
-  setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
+  setHeaderPercentage: function (sid, fid, match, className, createdBy) {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.SET_SEGMENT_HEADER,
       id: sid,
       fid: fid,
-      perc: perc,
+      match,
       className: className,
       createdBy: createdBy,
     })

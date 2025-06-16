@@ -50,17 +50,21 @@ const SegmentQRLine = ({
   let suggestionMatch, suggestionMatchClass
   if (showSuggestionSource) {
     suggestionMatch =
-      segment.get('match_type') === 'ICE'
+      segment.get('match_type').toUpperCase() === 'ICE'
         ? 101
         : parseInt(segment.get('suggestion_match'))
     suggestionMatchClass =
-      suggestionMatch === 101
-        ? 'per-blu'
-        : suggestionMatch === 100
-          ? 'per-green'
-          : suggestionMatch > 0 && suggestionMatch <= 99
-            ? 'per-orange'
-            : ''
+      segment.get('suggestion_source') === 'MT'
+        ? 'per-yellow'
+        : suggestionMatch === 101
+          ? 'per-blu'
+          : suggestionMatch === 100
+            ? 'per-green'
+            : suggestionMatch > 0 && suggestionMatch <= 99
+              ? 'per-orange'
+              : suggestionMatch === 0
+                ? 'per-red'
+                : ''
   }
 
   const copyText = async (e) => {
@@ -116,41 +120,19 @@ const SegmentQRLine = ({
 
       {showSuggestionSource ? (
         <div className="segment-content qr-spec">
-          <div
-            className={
-              segment.get('suggestion_source') === 'MT' ? 'per-yellow' : null
-            }
-          >
-            <b>{segment.get('suggestion_source')}</b>
+          <div className={'tm-percent ' + suggestionMatchClass}>
+            {segment.get('suggestion_source') !== 'MT' ? (
+              <b>
+                {segment.get('suggestion_source')} - {suggestionMatch}%
+              </b>
+            ) : (
+              <b>{segment.get('suggestion_source')}</b>
+            )}
           </div>
-          {segment.get('suggestion_source') &&
-          segment.get('suggestion_source') !== 'MT' ? (
-            <div className={'tm-percent ' + suggestionMatchClass}>
-              {suggestionMatch}%
-            </div>
-          ) : null}
         </div>
       ) : null}
 
-      {showIceMatchInfo && segment.get('ice_locked') === '1' ? (
-        <div className="segment-content qr-spec">
-          {segment.get('ice_locked') === '1' ? (
-            <div>
-              <b>ICE Match</b>
-              {segment.get('ice_modified') ? <div>(Modified)</div> : null}
-            </div>
-          ) : null}
-
-          {tte ? (
-            <div className={'tte-container'}>
-              <b>TTE:</b>
-              <div>
-                <div>{getTimeToEdit(tte)}</div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      ) : tte ? (
+      {tte ? (
         <div className="segment-content qr-spec tte">
           <b>TTE:</b>
           <div>

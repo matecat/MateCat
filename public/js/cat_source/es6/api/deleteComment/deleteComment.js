@@ -20,7 +20,6 @@ export const deleteComment = async ({
   sourcePage = config.revisionNumber,
 }) => {
   const dataParams = {
-    _sub: 'delete',
     id_comment: idComment,
     id_segment: idSegment,
     id_job: idJob,
@@ -32,11 +31,14 @@ export const deleteComment = async ({
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=comment`, {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  })
+  const response = await fetch(
+    `${getMatecatApiDomain()}api/app/comment/delete`,
+    {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    },
+  )
 
   if (!response.ok) return Promise.reject(response)
 

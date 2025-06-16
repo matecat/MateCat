@@ -88,6 +88,10 @@ abstract class OutsourceTo_AbstractProvider {
      */
     protected $timezone = "0";
 
+    protected ?FeatureSet $features = null;
+
+    protected ?Users_UserStruct $user = null;
+
     /**
      * List of job Ids and relative passwords that will be sent to the provider for quoting
      *
@@ -168,6 +172,32 @@ abstract class OutsourceTo_AbstractProvider {
      */
     public function setPpassword( $ppassword ) {
         $this->ppassword = $ppassword;
+
+        return $this;
+    }
+
+    /**
+     * @param FeatureSet|null $features
+     * @return $this
+     */
+    public function setFeatures(?FeatureSet $features)
+    {
+        if ( !empty( $features ) ) {
+            $this->features = $features;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Users_UserStruct|null $user
+     * @return $this
+     */
+    public function setUser(?Users_UserStruct $user)
+    {
+        if ( !empty( $user ) ) {
+            $this->user = $user;
+        }
 
         return $this;
     }

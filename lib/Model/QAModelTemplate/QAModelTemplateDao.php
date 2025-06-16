@@ -2,8 +2,8 @@
 
 namespace QAModelTemplate;
 
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
@@ -18,7 +18,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 
-class QAModelTemplateDao extends DataAccess_AbstractDao {
+class QAModelTemplateDao extends AbstractDao {
 
     const query_paginated   = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
     const paginated_map_key = __CLASS__ . "::getAllPaginated";
@@ -174,7 +174,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
 
             $severities = [];
             unset( $category[ 'dqf_id' ] );
-            $category[ 'id' ] = ( $cindex + 1 );
+            $category[ 'id' ]   = ( $cindex + 1 );
             $category[ 'sort' ] = ( $cindex + 1 );
 
             foreach ( $defaultTemplateModel[ 'model' ][ 'severities' ] as $sindex => $severity ) {
@@ -541,7 +541,7 @@ class QAModelTemplateDao extends DataAccess_AbstractDao {
      */
     private
     static function destroyQueryPaginated( int $uid ) {
-        ( new static() )->_destroyCache( self::paginated_map_key . ":" . $uid, false );
+        ( new static() )->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
     }
 
 }

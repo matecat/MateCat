@@ -17,50 +17,31 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
 
-
-RewriteCond %{QUERY_STRING} submit=Search
-RewriteRule ^$ /support [QSA,L]
-
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
 
-RewriteRule ^signin[/]?$ index.php?action=signin [QSA,L]
-
 RewriteRule ^action/convertFile[/]?$ index.php?action=convertFile [QSA,L]
 
-RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
 
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
 RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$5&password=$6&revision=$2 [L]
 
-RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
-RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
-
-RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
-
-RewriteRule ^(manage)[/]?$ index.php?action=manage [QSA,L]
-
-RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
-RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
-
-RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activityLog&id_project=$1&password=$2&download=$3 [QSA,L]
-
-RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
-RewriteRule ^api/v1/new$ index.php?api=true&action=new [QSA,L]
+# Page Views (replacing old viewController until we can definitely remove it by routing everything through the router)
+RewriteRule ^manage$ router.php [QSA,L]
+RewriteRule ^analyze/(.*)$ router.php [L]
+RewriteRule ^jobanalysis/(.*)$ router.php [L]
+RewriteRule ^signin$ router.php [L]
+RewriteRule ^revise-summary/(.*)$ router.php [QSA,L]
+RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
+RewriteRule ^views/(.*)$ router.php [QSA,L]
+RewriteRule ^utils/(.*)$ router.php [QSA,L]
 
-RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 RewriteRule ^api/(.*)$ router.php [QSA,L]
 RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
 RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
-
-RewriteRule ^utils/pee$ router.php [L]
-
-RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
-RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
-RewriteRule ^translation/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2 [L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
@@ -72,6 +53,7 @@ ErrorDocument 401 /lib/View/401.html
 ErrorDocument 403 /lib/View/403.html
 ErrorDocument 404 /lib/View/404.html
 ErrorDocument 409 /lib/View/409.html
+ErrorDocument 410 /lib/View/410.html
 ErrorDocument 503 /lib/View/503.html
 ErrorDocument 500 /lib/View/500.html
 

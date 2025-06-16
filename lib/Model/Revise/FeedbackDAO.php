@@ -2,11 +2,11 @@
 
 namespace Revise;
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
 
-class FeedbackDAO extends DataAccess_AbstractDao {
+class FeedbackDAO extends AbstractDao {
 
     const TABLE = "revision_feedbacks";
 
@@ -73,7 +73,7 @@ class FeedbackDAO extends DataAccess_AbstractDao {
      * @param $password
      * @param $revision_number
      *
-     * @return DataAccess_IDaoStruct
+     * @return IDaoStruct
      */
     public function getFeedback( $id_job, $password, $revision_number ) {
         $query = "SELECT feedback FROM  " . self::TABLE . " 

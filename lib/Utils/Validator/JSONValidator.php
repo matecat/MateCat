@@ -22,8 +22,8 @@ class JSONValidator extends AbstractValidator {
      *
      * @var SchemaContract
      */
-    private      $schemaContract;
-    private bool $throwExceptions;
+    private SchemaContract $schemaContract;
+    private bool           $throwExceptions;
 
     /**
      * JSONSchemaValidator constructor.
@@ -66,7 +66,7 @@ class JSONValidator extends AbstractValidator {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    public function validate( ValidatorObject $object ): ?ValidatorObject {
+    public function validate( ValidatorObject $object ): ?JSONValidatorObject {
 
         if ( !$object instanceof JSONValidatorObject ) {
             throw new RuntimeException( 'Object given is not an instance of JSONValidatorObject' );

@@ -1,7 +1,15 @@
 <?php
 
-use DataAccess\DaoCacheTrait;
+namespace DataAccess;
+
+use Database;
+use Exception;
 use Exceptions\ValidationError;
+use IDatabase;
+use Log;
+use PDO;
+use PDOStatement;
+use ReflectionException;
 
 /**
  * Created by PhpStorm.
@@ -9,7 +17,7 @@ use Exceptions\ValidationError;
  * Date: 29/09/14
  * Time: 17.55
  */
-abstract class DataAccess_AbstractDao {
+abstract class AbstractDao {
 
     use DaoCacheTrait;
 
@@ -53,7 +61,7 @@ abstract class DataAccess_AbstractDao {
             $con = Database::obtain();
         }
 
-        $this->database = $con;
+        $this->database             = $con;
         self::$auto_increment_field = [];
     }
 
@@ -86,24 +94,24 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param $input DataAccess_IDaoStruct The input object
+     * @param $input IDaoStruct The input object
      *
-     * @return DataAccess_IDaoStruct The input object, sanitized.
-     * @throws Exception This function throws exception input is not a DataAccess_IDaoStruct object
+     * @return IDaoStruct The input object, sanitized.
+     * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
     /**
-     * @param $input array An array of DataAccess_IDaoStruct objects
+     * @param $input array An array of \DataAccess\IDaoStruct objects
      *
      * @return array The input array, sanitized.
      * @throws Exception This function throws exception if input is not:<br/>
      *                  <ul>
      *                      <li>An array of $type objects</li>
      *                      or
-     *                      <li>A DataAccess_IDaoStruct object</li>
+     *                      <li>A \DataAccess\IDaoStruct object</li>
      *                  </ul>
      */
     public static function sanitizeArray( array $input ): array {
@@ -132,13 +140,13 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param DataAccess_IDaoStruct $input The input to be sanitized
-     * @param string                $type  The expected type
+     * @param IDaoStruct $input The input to be sanitized
+     * @param string     $type  The expected type
      *
-     * @return DataAccess_IDaoStruct The input object if sanitize was successful, otherwise this function throws exception.
+     * @return IDaoStruct The input object if sanitize was successful, otherwise this function throws exception.
      * @throws Exception This function throws exception input is not an object of type $type
      */
-    protected static function _sanitizeInput( DataAccess_IDaoStruct $input, string $type ): DataAccess_IDaoStruct {
+    protected static function _sanitizeInput( IDaoStruct $input, string $type ): IDaoStruct {
 
         //if something different from $type is passed, throw exception
         if ( !( $input instanceof $type ) ) {
@@ -152,25 +160,23 @@ abstract class DataAccess_AbstractDao {
     /**
      * This method validates the primary key of a single object to be used in persistency.
      *
-     * @param $obj DataAccess_IDaoStruct The input object
+     * @param $obj IDaoStruct The input object
      *
-     * @return bool True if object is valid, false otherwise
+     * @return void
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
-        //to be overridden in sub-classes
-        return true;
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
+        //to be overridden in subclasses
     }
 
     /**
      * This method validates the fields of a single object that have to be not null.
      *
-     * @param $obj DataAccess_IDaoStruct The input object
+     * @param $obj IDaoStruct The input object
      *
-     * @return bool True if object is valid, false otherwise
+     * @return void
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
-        //to be overridden in sub-classes
-        return true;
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
+        //to be overridden in subclasses
     }
 
     /**
@@ -188,49 +194,51 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
-     * @param PDOStatement          $stmt
-     * @param DataAccess_IDaoStruct $fetchClass
-     * @param array                 $bindParams
+     * @param PDOStatement $stmt
+     * @param IDaoStruct   $fetchClass
+     * @param array        $bindParams
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
      * @throws ReflectionException
+     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
+     *
      */
-    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, array $bindParams ): array {
+    protected function _fetchObject( PDOStatement $stmt, IDaoStruct $fetchClass, array $bindParams ): array {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ) );
+        $trace = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
 
-        if ( !empty( $_cacheResult ) ) {
-            return $_cacheResult;
-        }
+        $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
-        $stmt->execute( $bindParams );
-        $result = $stmt->fetchAll();
-        $stmt->closeCursor();
-
-        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . get_class( $fetchClass ), $result );
-
-        return $result;
-
+        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
     }
 
     /**
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
-        return $this->_destroyCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
+        return $this->_deleteCacheByKey( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass ) );
     }
 
     /**
-     * @param string       $keyMap
+     * * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
+     *
+     *  Replacement for deprecated `AbstractDao::_fetchObject`
+     *
      * @param PDOStatement $stmt
      * @param string       $fetchClass
      * @param array        $bindParams
      *
-     * @return DataAccess_IDaoStruct[]
+     * @param string|null  $keyMap
+     *
+     * @return IDaoStruct[]
      * @throws ReflectionException
      */
-    protected function _fetchObjectMap( string $keyMap, PDOStatement $stmt, string $fetchClass, array $bindParams ): array {
+    protected function _fetchObjectMap( PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null ): array {
+
+        if ( empty( $keyMap ) ) {
+            $trace  = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
+            $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
+        }
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 
@@ -331,12 +339,12 @@ abstract class DataAccess_AbstractDao {
      * Ensures the primary keys are populated on the struct.
      *
      * @throw \Exceptions\ValidationError
-     * @param DataAccess_AbstractDaoObjectStruct $struct
+     * @param AbstractDaoObjectStruct $struct
      *
      * @throws ValidationError
      */
 
-    protected static function ensurePrimaryKeyValues( DataAccess_AbstractDaoObjectStruct $struct ) {
+    protected static function ensurePrimaryKeyValues( AbstractDaoObjectStruct $struct ) {
         $attrs = self::structKeys( $struct );
 
         foreach ( $attrs as $k => $v ) {
@@ -350,12 +358,12 @@ abstract class DataAccess_AbstractDao {
      * Returns an array of the specified attributes, plus the primary
      * keys specified by the current DAO.
      *
-     * @param DataAccess_AbstractDaoObjectStruct $struct
+     * @param AbstractDaoObjectStruct $struct
      *
      * @return array the struct's primary keys
      */
 
-    protected static function structKeys( DataAccess_AbstractDaoObjectStruct $struct ): array {
+    protected static function structKeys( AbstractDaoObjectStruct $struct ): array {
         $keys = static::$primary_keys;
 
         return $struct->toArray( $keys );
@@ -369,13 +377,13 @@ abstract class DataAccess_AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param DataAccess_AbstractDaoObjectStruct|DataAccess_IDaoStruct $struct
-     * @param array                                                    $options
+     * @param AbstractDaoObjectStruct|IDaoStruct $struct
+     * @param array                              $options
      *
      * @return int
      * @throws Exception
      */
-    public static function updateStruct( DataAccess_IDaoStruct $struct, array $options = [] ): int {
+    public static function updateStruct( IDaoStruct $struct, array $options = [] ): int {
 
         $attrs = $struct->toArray();
 
@@ -426,13 +434,13 @@ abstract class DataAccess_AbstractDao {
      *
      * Returns FALSE on failure.
      *
-     * @param DataAccess_IDaoStruct $struct
-     * @param array|null            $options
+     * @param IDaoStruct $struct
+     * @param array|null $options
      *
      * @return bool|string
      * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, ?array $options = [] ) {
+    public static function insertStruct( IDaoStruct $struct, ?array $options = [] ) {
 
         $ignore              = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls            = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;

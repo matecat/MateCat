@@ -13,7 +13,7 @@ class Engines_Results_ErrorMatches {
         }
     }
 
-    public function get_as_array() {
+    public function get_as_array(): array {
         return (array)$this;
     }
 
