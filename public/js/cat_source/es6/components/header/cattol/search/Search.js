@@ -598,7 +598,6 @@ class Search extends React.Component {
           </>
         ),
         id: item.value,
-        onClick: () => this.handleStatusChange(item.value),
       }
     })
     if (config.secondRevisionsCount) {
@@ -612,7 +611,6 @@ class Search extends React.Component {
           </>
         ),
         id: 'APPROVED-2',
-        onClick: () => this.handleStatusChange('APPROVED-2'),
       })
     }
     let findIsDisabled = true

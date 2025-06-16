@@ -466,37 +466,6 @@ header {
                           }
                         }
                       }
-                      .segment-status-container {
-                        width: 14%;
-                        padding: 15px 0.78571429em;
-                        .status-new {
-                          font-size: 20px;
-                          color: #8b8e92;
-                        }
-                        .status-translated {
-                          font-size: 20px;
-                          color: colors.$translatedBlue;
-                        }
-                        .status-approved {
-                          font-size: 20px;
-                          color: colors.$approvedGreen;
-                          &.approved-r2 {
-                            color: colors.$approved2Green;
-                          }
-                        }
-                        .status-approved2 {
-                          color: colors.$approved2Green;
-                          font-size: 20px;
-                        }
-                        .status-draft {
-                          font-size: 20px;
-                          color: colors.$grey1;
-                        }
-                        .status-rejected {
-                          font-size: 20px;
-                          color: colors.$rebuttedRed;
-                        }
-                      }
                     }
                     .qr-segment-body {
                       border-bottom: 1px solid colors.$grey2;
@@ -723,6 +692,31 @@ header {
                     }
                   }
                 }
+              }
+              .select {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 5px;
+                padding: 9px 46px 9px 12px;
+                border-radius: 40px;
+                height: 38px;
+              }
+              li.dropdown__option {
+                padding: 8px;
+              }
+              .dropdown__option span {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 16px;
+              }
+              .custom-dropdown.select__dropdown {
+                background-color: #fff;
+                min-width: 120px;
+              }
+              .filter-category .select__dropdown-wrapper {
+                width: unset;
               }
             }
           }

@@ -170,3 +170,26 @@ label
   z-index: 12;
   top: 0;
 }
+.select, .select__dropdown-wrapper {
+    .new-color {
+      box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+      background: #ffffff;
+    }
+    .draft-color {
+      background: colors.$grey1;
+    }
+    .translated-color,
+    .post-edited-color {
+      background: colors.$translatedBlue;
+    }
+    .approved-color {
+      background: colors.$approvedGreen;
+    }
+    .approved-2ndpass-color, .approved2-color {
+      background: colors.$approved2Green;
+    }
+    .rejected-color {
+      background: colors.$rebuttedRed;
+    }
+
+}
