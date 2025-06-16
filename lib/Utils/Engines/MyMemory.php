@@ -434,6 +434,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $postFields = [
                 'glossary' => $this->getCurlFile( $file ),
                 'key'      => trim( $key ),
+                'de'       => INIT::$MYMEMORY_API_KEY,
         ];
 
         if ( $name and $name !== '' ) {

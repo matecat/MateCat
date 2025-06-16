@@ -274,7 +274,6 @@ test('Enabled/disable key', async () => {
 })
 
 test('Create and delete new resource', async () => {
-
   executeMswServer()
 
   mswServer.use(
