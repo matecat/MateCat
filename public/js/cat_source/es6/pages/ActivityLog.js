@@ -21,8 +21,8 @@ import {FilterColumn} from '../components/activityLog/FilterColumn'
 
 const headerMountPoint = document.querySelector('header.upload-page-header')
 
-const projectId = config.project_id;
-const password = config.password;
+const projectId = config.project_id
+const password = config.password
 
 export const ActivityLogContext = createContext({})
 
