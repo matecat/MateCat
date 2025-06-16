@@ -1791,13 +1791,13 @@
         {
             "localized": [
                 {
-                    "en": "Hindi (Latin script)"
+                    "en": "Hindi (Fiji)"
                 }
             ],
             "isocode": "hi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hi-Latn-IN",
+            "rfc3066code": "hi-FJ",
             "ocr": {
                 "supported": false,
                 "not_supported_or_rtl": false
