@@ -94,6 +94,13 @@ class Session {
     }
 
     /**
+     * @return array
+     */
+    public function getSession(): array {
+        return $this->session;
+    }
+
+    /**
      * This class overrides a not existent super global when called by CLI
      *
      * @param $session
@@ -464,7 +471,7 @@ class Session {
     }
 
     /**
-     * @param array   $file
+     * @param array $file
      * @param ?string $lang
      *
      * @return string

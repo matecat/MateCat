@@ -21,6 +21,7 @@ import SegmentUtils from '../../../utils/segmentUtils'
 import {SegmentFooterTabError} from '../SegmentFooterTabError'
 import {checkMymemoryStatus} from '../../../api/checkMymemoryStatus'
 import AppDispatcher from '../../../stores/AppDispatcher'
+import {removeZeroWidthSpace} from '../utils/DraftMatecatUtils/tagUtils'
 
 export const TERM_FORM_FIELDS = {
   DEFINITION: 'definition',
@@ -119,14 +120,14 @@ export const SegmentFooterTabGlossary = ({
 
       const source = !isDelete
         ? {
-            term: getFieldValue(originalTerm),
+            term: removeZeroWidthSpace(getFieldValue(originalTerm)),
             note: getFieldValue(originalDescription),
             sentence: getFieldValue(originalExample),
           }
         : null
       const target = !isDelete
         ? {
-            term: getFieldValue(translatedTerm),
+            term: removeZeroWidthSpace(getFieldValue(translatedTerm)),
             note: getFieldValue(translatedDescription),
             sentence: getFieldValue(translatedExample),
           }

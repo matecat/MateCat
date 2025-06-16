@@ -74,7 +74,7 @@ class ModelDao extends AbstractDao {
                 'uid'                  => $data[ 'uid' ],
                 'label'                => $data[ 'label' ] ?? null,
                 'pass_type'            => $data[ 'passfail' ][ 'type' ],
-                'pass_options'         => json_encode( $data[ 'passfail' ][ 'options' ] ),
+                'pass_options'         => self::decodePassOptions( $data[ 'passfail' ][ 'options' ] ),
                 'hash'                 => $model_hash,
                 'qa_model_template_id' => ( isset( $data[ 'id_template' ] ) ) ? $data[ 'id_template' ] : null,
         ] );
@@ -89,6 +89,29 @@ class ModelDao extends AbstractDao {
         $struct->id = $conn->lastInsertId();
 
         return $struct;
+    }
+
+    /**
+     * Return ALWAYS a structure like this: {"limit":[15,10]}
+     *
+     * @param $options
+     *
+     * @return false|string
+     */
+    private static function decodePassOptions( $options ) {
+        if ( !isset( $options[ 'limit' ] ) ) {
+            return json_encode( [] );
+        }
+
+        $limits = [];
+
+        foreach ($options[ 'limit' ] as $limit){
+            $limits[] = (int)$limit;
+        }
+
+        $options[ 'limit' ] = $limits;
+
+        return json_encode( $options );
     }
 
     protected static function _getModelHash( array $model_root ): int {
