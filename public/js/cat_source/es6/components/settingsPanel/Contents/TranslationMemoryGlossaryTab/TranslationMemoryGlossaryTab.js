@@ -204,14 +204,27 @@ export const TranslationMemoryGlossaryTab = () => {
       updateJobKeys({
         getPublicMatches,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-      }).then(() => {
-        CatToolActions.onTMKeysChangeStatus()
-        SegmentActions.getContributions(
-          SegmentStore.getCurrentSegmentId(),
-          userInfo.metadata[METADATA_KEY],
-          true,
-        )
       })
+        .then(() => {
+          CatToolActions.onTMKeysChangeStatus()
+          SegmentActions.getContributions(
+            SegmentStore.getCurrentSegmentId(),
+            userInfo.metadata[METADATA_KEY],
+            true,
+          )
+        })
+        .catch((errors) =>
+          CatToolActions.addNotification({
+            title: 'Invalid key',
+            type: 'error',
+            text:
+              !errors?.[0] || errors[0].code === '23000'
+                ? 'The key you entered is invalid.'
+                : errors[0].message,
+            position: 'br',
+            timer: 5000,
+          }),
+        )
     }
   }
 
@@ -367,14 +380,38 @@ export const TranslationMemoryGlossaryTab = () => {
         updateJobKeys({
           getPublicMatches,
           dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
-        }).then(() => {
-          CatToolActions.onTMKeysChangeStatus()
-          SegmentActions.getContributions(
-            SegmentStore.getCurrentSegmentId(),
-            userInfo.metadata[METADATA_KEY],
-            true,
-          )
         })
+          .then(() => {
+            CatToolActions.onTMKeysChangeStatus()
+            SegmentActions.getContributions(
+              SegmentStore.getCurrentSegmentId(),
+              userInfo.metadata[METADATA_KEY],
+              true,
+            )
+          })
+          .catch(() => {
+            const keysErrors = tmKeysActive.filter(
+              ({key}) => !prevTmKeysActive.some((tm) => tm.key === key),
+            )
+            setTmKeys((prevState) =>
+              prevState.map((tm) =>
+                keysErrors.some(({key}) => key === tm.key)
+                  ? {...tm, r: 0, w: 0, isActive: false}
+                  : tm,
+              ),
+            )
+            current.tmKeys = current.tmKeys.filter(
+              ({key}) => !keysErrors.some((tm) => tm.key === key),
+            )
+
+            CatToolActions.addNotification({
+              title: 'Error',
+              type: 'error',
+              text: 'We got an error, please contact support',
+              position: 'br',
+              timer: 5000,
+            })
+          })
       }
 
       if (tmPrioritization !== current.tmPrioritization) {
@@ -481,7 +518,7 @@ export const TranslationMemoryGlossaryTab = () => {
             <h2>Inactive Resources</h2>
             <input
               className="translation-memory-glossary-tab-input-text"
-              placeholder="Search resources"
+              placeholder="Search resources by name or key"
               value={filterInactiveKeys}
               onChange={(e) => setFilterInactiveKeys(e.currentTarget.value)}
               data-testid="search-inactive-tmkeys"

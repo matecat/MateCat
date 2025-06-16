@@ -4,7 +4,7 @@ namespace Files;
 
 use API\V3\Json\FilesInfo;
 use Files\MetadataDao as Files_MetadataDao;
-use Files_FileDao;
+use Files\FileDao;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
@@ -112,7 +112,7 @@ class FilesInfoUtility {
      */
     public function getInstructions( $id_file, $filePartsId = null ) {
 
-        if ( Files_FileDao::isFileInProject( $id_file, $this->project->id ) ) {
+        if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao  = new Files_MetadataDao;
             $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5 );
 
@@ -138,7 +138,7 @@ class FilesInfoUtility {
      */
     public function setInstructions( $id_file, $instructions ) {
 
-        if ( Files_FileDao::isFileInProject( $id_file, $this->project->id ) ) {
+        if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao = new Files_MetadataDao;
             if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 ) ) {
                 $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );

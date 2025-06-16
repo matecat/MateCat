@@ -174,7 +174,7 @@ function useImport({type, row, onClose}) {
     CatToolActions.addNotification({
       title: 'Error upload',
       type: 'error',
-      text: error.errors?.[0].message ?? 'Error',
+      text: error.errors?.message ?? 'Error',
       position: 'br',
       allowHtml: true,
       timer: 5000,

@@ -10,7 +10,9 @@
 namespace Translators;
 
 
-class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class TranslatorsProfilesDao extends AbstractDao {
 
     const TABLE       = "translator_profiles";
     const STRUCT_TYPE = "TranslatorProfilesStruct";

@@ -2,16 +2,11 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
 use LQA\ChunkReviewStruct;
+use Teams\MembershipStruct;
 use WordCount\WordCountStruct;
 
 /**
@@ -54,7 +49,7 @@ class catController extends viewController {
     private $chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ?Projects_ProjectStruct
      */
     public $project;
 
@@ -74,7 +69,6 @@ class catController extends viewController {
 
         parent::__construct();
         $this->checkLoginRequiredAndRedirect();
-
         parent::makeTemplate( $this->templateName );
 
         $filterArgs = [
@@ -186,13 +180,13 @@ class catController extends viewController {
 
         $active_mt_engine_array = [];
         if ( !empty( $active_mt_engine ) ) {
-            $engine_type = explode("\\", $active_mt_engine[ 0 ]->class_load);
+            $engine_type            = explode( "\\", $active_mt_engine[ 0 ]->class_load );
             $active_mt_engine_array = [
                     "id"          => $active_mt_engine[ 0 ]->id,
                     "name"        => $active_mt_engine[ 0 ]->name,
                     "type"        => $active_mt_engine[ 0 ]->type,
                     "description" => $active_mt_engine[ 0 ]->description,
-                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop($engine_type) ),
+                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop( $engine_type ) ),
             ];
         }
 
@@ -277,37 +271,10 @@ class catController extends viewController {
      */
     public function setTemplateVars() {
 
-        if ( $this->job_not_found ) {
-            parent::makeTemplate( 'job_not_found.html' );
-            $this->template->support_mail = INIT::$SUPPORT_MAIL;
-            throw new NotFoundException( "Job Not Found." );
-        }
-
-        if ( $this->job_cancelled ) {
-            parent::makeTemplate( 'job_cancelled.html' );
-        }
-        if ( $this->job_archived ) {
-            parent::makeTemplate( 'job_archived.html' );
-        }
-
-        $this->template->jid             = $this->jid;
-        $this->template->currentPassword = $this->currentPassword;
-
-        $this->template->id_team = null;
+        $ownerMail    = INIT::$SUPPORT_MAIL;
+        $jobOwnerIsMe = false;
 
         if ( $this->job_cancelled || $this->job_archived ) {
-
-            $this->template->pid         = null;
-            $this->template->source_code = null;
-            $this->template->target_code = null;
-
-            $this->template->jobOwnerIsMe = false;
-            $this->template->support_mail = INIT::$SUPPORT_MAIL;
-            $this->template->owner_email  = INIT::$SUPPORT_MAIL;
-
-            if ( $this->user ) {
-                $this->template->owner = $this->user->getEmail();
-            }
 
             $team = $this->project->getTeam();
 
@@ -316,47 +283,69 @@ class catController extends viewController {
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
                 $membersIdList = [];
-                $ownerMail     = null;
                 if ( $team->type == Constants_Teams::PERSONAL ) {
                     $ownerMail = $team->getMembers()[ 0 ]->getUser()->getEmail();
                 } else {
                     $assignee = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee );
+
                     if ( $assignee ) {
                         $ownerMail = $assignee->getEmail();
                     } else {
                         $ownerMail = INIT::$SUPPORT_MAIL;
                     }
+
                     $membersIdList = array_map( function ( $memberStruct ) {
                         /**
-                         * @var $memberStruct \Teams\MembershipStruct
+                         * @var $memberStruct MembershipStruct
                          */
                         return $memberStruct->uid;
                     }, $team->getMembers() );
 
                 }
-                $this->template->owner_email = $ownerMail;
 
                 if ( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ) {
-                    $this->template->jobOwnerIsMe = true;
-                } else {
-                    $this->template->jobOwnerIsMe = false;
+                    $jobOwnerIsMe = true;
                 }
 
             }
 
-            $this->template->job_not_found = $this->job_not_found;
-            $this->template->job_archived  = ( $this->job_archived ) ? 1 : '';
-            $this->template->job_cancelled = $this->job_cancelled;
-            $this->template->password      = $this->password;
-
-            return;
-
-
-        } else {
-            $this->template->pid         = $this->pid;
-            $this->template->source_code = $this->source_code;
-            $this->template->target_code = $this->target_code;
         }
+
+        if ( $this->job_not_found ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
+            $controllerInstance->render();
+        }
+
+        if ( $this->job_cancelled ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_cancelled.html', [
+                    "support_mail" => INIT::$SUPPORT_MAIL,
+                    "owner_email"  => $ownerMail
+            ] );
+            $controllerInstance->render();
+        }
+
+        if ( $this->job_archived ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_archived.html', [
+                    "support_mail" => INIT::$SUPPORT_MAIL,
+                    "owner_email"  => $ownerMail,
+                    'jid'          => $this->jid,
+                    'password'     => $this->password,
+                    'jobOwnerIsMe' => $jobOwnerIsMe
+            ] );
+            $controllerInstance->render();
+        }
+
+        $this->template->jid             = $this->jid;
+        $this->template->currentPassword = $this->currentPassword;
+
+        $this->template->id_team = null;
+
+        $this->template->pid         = $this->pid;
+        $this->template->source_code = $this->source_code;
+        $this->template->target_code = $this->target_code;
 
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
@@ -442,7 +431,7 @@ class catController extends viewController {
 
         if ( INIT::$COMMENTS_ENABLED ) {
             $this->template->comments_enabled = true;
-            $this->template->socket_base_url     = INIT::$SOCKET_BASE_URL;
+            $this->template->socket_base_url  = INIT::$SOCKET_BASE_URL;
         }
 
         $projectMetaDataDao              = new Projects_MetadataDao();

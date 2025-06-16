@@ -42,7 +42,7 @@
     "passfail" : {
       "type" : "points_per_thousand",
       "options" : {
-        "limit" : [ 20, 15 ]
+        "limit" : [ 8, 5 ]
       }
     }
   }

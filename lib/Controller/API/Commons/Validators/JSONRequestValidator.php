@@ -2,28 +2,15 @@
 
 namespace API\Commons\Validators;
 
-use API\Commons\KleinController;
 use Exception;
 
 class JSONRequestValidator extends Base {
 
     /**
-     * @var KleinController
-     */
-    protected $controller;
-
-    public function __construct( KleinController $controller ) {
-
-        parent::__construct( $controller->getRequest() );
-        $this->controller = $controller;
-
-    }
-
-    /**
-     * @return mixed|void
+     * @return void
      * @throws Exception
      */
-    protected function _validate() {
+    protected function _validate(): void {
         if ( !preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ) {
             throw new Exception('Content type provided not valid (application/json expected)', 405);
         }

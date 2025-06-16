@@ -7,10 +7,11 @@
  */
 
 namespace API\V2;
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
+use Jobs_JobDao;
 use Jobs_JobStruct;
 use ProjectManager;
 
@@ -45,10 +46,10 @@ class JobMergeController extends KleinController {
         $this->validator->validate();
         // TODO: additional validation to be included in a ProjectAndJob Validation object
 
-        $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
+        $this->job = Jobs_JobDao::getById( $this->request->id_job )[0];
 
         if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id || $this->job->isDeleted() ) {
-            throw new \Exceptions\NotFoundException();
+            throw new NotFoundException();
         }
     }
 

@@ -81,8 +81,8 @@ export const EmailsBadge = ({
       setEmails((prevState) => {
         const updatedState = [
           ...prevState,
-          ...emails,
-          ...(hasSeparator && lastEmail ? [lastEmail] : []),
+          ...emails.map((email) => email.trim()),
+          ...(hasSeparator && lastEmail ? [lastEmail.trim()] : []),
         ]
         return hasSeparator ? removeDuplicates(updatedState) : updatedState
       })

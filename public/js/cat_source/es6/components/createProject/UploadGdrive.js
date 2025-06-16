@@ -28,6 +28,7 @@ export const UploadGdrive = () => {
     currentProjectTemplate,
     setUploadedFilesNames,
     setOpenGDrive,
+    setIsGDriveEnabled,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
@@ -35,9 +36,14 @@ export const UploadGdrive = () => {
   const openGDrivePrev = usePrevious(openGDrive)
 
   useEffect(() => {
-    if (gapi) {
-      gapi.load('auth', {callback: setAuthApiLoaded(true)})
-      gapi.load('picker', {callback: setPickerApiLoaded(true)})
+    try {
+      if (gapi) {
+        gapi.load('auth', {callback: setAuthApiLoaded(true)})
+        gapi.load('picker', {callback: setPickerApiLoaded(true)})
+      }
+    } catch (e) {
+      console.error('Google API not loaded')
+      setIsGDriveEnabled(false)
     }
   }, [])
 

@@ -2,12 +2,12 @@
 
 namespace Projects;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 use JsonSerializable;
 use stdClass;
 
-class ProjectTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
+class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
     public ?int    $id                           = null;
     public string  $name                         = "";
     public bool    $is_default                   = false;

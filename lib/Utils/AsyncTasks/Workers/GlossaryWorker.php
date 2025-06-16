@@ -2,9 +2,7 @@
 
 namespace AsyncTasks\Workers;
 
-use Database;
 use Engine;
-use Engines_AbstractEngine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_CheckGlossaryResponse;
 use Engines_Results_MyMemory_DomainsResponse;
@@ -13,8 +11,6 @@ use Engines_Results_MyMemory_KeysGlossaryResponse;
 use Engines_Results_MyMemory_SearchGlossaryResponse;
 use Engines_Results_MyMemory_SetGlossaryResponse;
 use Engines_Results_MyMemory_UpdateGlossaryResponse;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use Stomp\Exception\StompException;
@@ -292,34 +288,14 @@ class GlossaryWorker extends AbstractWorker {
      * @return array
      * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches( $matches, $payload ) {
-        $tmKeys = $payload[ 'tmKeys' ];
-
-        if ( !is_array( $matches ) ) {
-            $this->_doLog( "Invalid response received from Glossary (not an array). This is the payload that was sent: " . json_encode( $payload ) . ". Got back from MM: " . $matches );
-            throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
-        }
+    private function formatGetGlossaryMatches( array $matches, array $payload ): array {
 
         if ( empty( $matches ) ) {
             throw new EndQueueException( "Empty response received from Glossary" );
         }
 
         if ( $matches[ 'id_segment' ] === null or $matches[ 'id_segment' ] === "" ) {
-            $matches[ 'id_segment' ] = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
-        }
-
-        // could not have metadata, suppress warning
-        $key = @$matches[ 'terms' ][ 'metadata' ][ 'key' ];
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( $tmKey[ 'key' ] === $key and $tmKey[ 'is_shared' ] === false ) {
-
-                $keyLength   = strlen( $key );
-                $last_digits = substr( $key, -8 );
-                $key         = str_repeat( "*", $keyLength - 8 ) . $last_digits;
-
-                $matches[ 'terms' ][ 'metadata' ][ 'key' ] = $key;
-            }
+            $matches[ 'id_segment' ] = $payload[ 'id_segment' ] ?? null;
         }
 
         return $matches;

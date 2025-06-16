@@ -10,7 +10,7 @@
 namespace API\V2;
 
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Engine;
 use Database;

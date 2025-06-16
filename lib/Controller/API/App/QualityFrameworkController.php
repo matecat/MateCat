@@ -2,10 +2,11 @@
 
 namespace API\App;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Exceptions\NotFoundException;
 use LQA\ModelDao;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use QAModelTemplate\QAModelTemplateDao;
 
@@ -25,7 +26,7 @@ class QualityFrameworkController extends KleinController {
         $password  = $this->request->param( 'password' );
 
         try {
-            $project = ( new \Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
+            $project = ( new Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
         } catch ( NotFoundException $exception ) {
             $this->response->code( 500 );
             $this->response->json( [

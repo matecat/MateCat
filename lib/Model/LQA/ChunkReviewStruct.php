@@ -3,10 +3,12 @@
 namespace LQA;
 
 use Chunks_ChunkDao;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Jobs_JobStruct;
 use Utils;
 
-class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
     public $id_project;

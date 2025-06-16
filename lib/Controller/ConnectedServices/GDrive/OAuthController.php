@@ -8,8 +8,7 @@
 
 namespace ConnectedServices\GDrive;
 
-use API\Commons\AbstractStatefulKleinController;
-use API\Commons\Authentication\AuthenticationHelper;
+use AbstractControllers\AbstractStatefulKleinController;
 use ConnectedServices\GDriveUserAuthorizationModel;
 use Exception;
 use Exceptions\ValidationError;

@@ -10,51 +10,55 @@
 namespace API\Commons;
 
 
-use Exception;
+use INIT;
+use JsonSerializable;
 use Throwable;
 
-class Error {
+class Error implements JsonSerializable {
 
-    private $data;
+    private Throwable $data;
 
     /**
      * Error constructor.
      *
-     * @param Exception[] $exceptions
+     * @param Throwable $exceptions
      */
-    public function __construct( $exceptions = [] ) {
+    public function __construct( Throwable $exceptions ) {
         $this->data = $exceptions;
     }
 
-    public function render( $data = null ) {
+    public function render( bool $force_print_errors = false ): array {
 
         $row = [
                 "errors" => [],
                 "data"   => []
         ];
 
-        if ( empty( $data ) ) {
-            $data = $this->data;
-        }
+        $code   = $this->data->getCode();
+        $output = $this->data->getMessage();
 
-        foreach ( $data as $error ) {
-
-            if ( $error instanceof Throwable ) {
-                $code   = $error->getCode();
-                $output = $error->getMessage();
-            } else {
-                $code   = -1000;
-                $output = $error;
+        if ( INIT::$PRINT_ERRORS || $force_print_errors ) {
+            $row[ 'errors' ][ 0 ][ 'file' ]  = $this->data->getFile();
+            $row[ 'errors' ][ 0 ][ 'line' ]  = $this->data->getLine();
+            $row[ 'errors' ][ 0 ][ 'trace' ] = $this->data->getTrace();
+            if ( $this->data->getPrevious() ) {
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'message' ] = $this->data->getPrevious()->getMessage();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'code' ]    = $this->data->getPrevious()->getCode();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'file' ]    = $this->data->getPrevious()->getFile();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'line' ]    = $this->data->getPrevious()->getLine();
+                $row[ 'errors' ][ 0 ][ 'caused_by' ][ 'trace' ]   = $this->data->getPrevious()->getTrace();
             }
-
-            $row[ 'errors' ][] = [
-                    "code"    => $code,
-                    "message" => $output
-            ];
-
         }
+
+        $row[ 'errors' ][ 0 ][ 'code' ]    = $code;
+        $row[ 'errors' ][ 0 ][ 'message' ] = $output;
 
         return $row;
     }
+
+    public function jsonSerialize(): array {
+        return $this->render();
+    }
+
 
 }

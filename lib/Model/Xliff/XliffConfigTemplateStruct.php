@@ -2,7 +2,7 @@
 
 namespace Xliff;
 
-use DataAccess_AbstractDaoSilentStruct;
+use DataAccess\AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
@@ -12,7 +12,7 @@ use Xliff\DTO\Xliff12Rule;
 use Xliff\DTO\Xliff20Rule;
 use Xliff\DTO\XliffRulesModel;
 
-class XliffConfigTemplateStruct extends DataAccess_AbstractDaoSilentStruct implements JsonSerializable {
+class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";

@@ -246,13 +246,12 @@ class Search extends React.Component {
 
   handleReplaceAllClick(event) {
     event.preventDefault()
-    let self = this
     let props = {
       modalName: 'confirmReplace',
       text: 'Do you really want to replace this text in all search results?',
       successText: 'Continue',
-      successCallback: function () {
-        SearchUtils.execReplaceAll(self.state.search)
+      successCallback: () => {
+        SearchUtils.execReplaceAll(this.state.search)
           .then(() => {
             const currentId = SegmentStore.getCurrentSegmentId()
             SegmentActions.removeAllSegments()

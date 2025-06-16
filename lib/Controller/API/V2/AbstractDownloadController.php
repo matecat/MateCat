@@ -2,45 +2,47 @@
 
 namespace API\V2;
 
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use CookieManager;
 use Exception;
-use Files_FileDao;
+use Files\FileDao;
 use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
+use ZipArchive;
 use ZipContentObject;
 
-abstract class AbstractDownloadController extends AbstractStatefulKleinController
-{
-    public $id_job;
-    public $password;
+abstract class AbstractDownloadController extends AbstractStatefulKleinController {
+    public int $id_job;
+    public string $password;
 
-    protected $outputContent = "";
-    protected $_filename     = "";
+    protected string $outputContent = "";
+    protected string $_filename     = "";
 
-    protected static $ZIP_ARCHIVE  = "application/zip";
-    protected static $XLIFF_FILE   = "application/xliff+xml";
-    protected static $OCTET_STREAM = "application/octet-stream";
-    protected        $mimeType     = "application/octet-stream";
+    protected static string $ZIP_ARCHIVE  = "application/zip";
+    protected static string $XLIFF_FILE   = "application/xliff+xml";
+    protected static string $OCTET_STREAM = "application/octet-stream";
+    protected string        $mimeType     = "application/octet-stream";
 
 
-    protected $_user_provided_filename;
+    protected ?string $_user_provided_filename = null;
 
     /**
      * @var Jobs_JobStruct
      */
-    protected $job;
+    protected Jobs_JobStruct $job;
 
     /**
      * @param int $ttl
      *
      * @return Jobs_JobStruct
+     * @throws ReflectionException
      */
-    public function getJob( $ttl = 0 ) {
+    public function getJob( int $ttl = 0 ): Jobs_JobStruct {
         if ( empty( $this->job ) ) {
             $this->job = Jobs_JobDao::getById( $this->id_job, $ttl )[ 0 ];
         }
@@ -54,7 +56,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      * @return $this
      * @throws Exception
      */
-    public function setOutputContent( ZipContentObject $content ) {
+    public function setOutputContent( ZipContentObject $content ): AbstractDownloadController {
         $this->outputContent = $content->getContent();
 
         return $this;
@@ -85,7 +87,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      *
      * @return $this
      */
-    public function setFilename( $filename ) {
+    public function setFilename( string $filename ): AbstractDownloadController {
         $this->_filename = $filename;
 
         return $this;
@@ -94,38 +96,38 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     /**
      * @return string
      */
-    public function getFilename() {
+    public function getFilename(): string {
         return $this->_filename;
     }
 
     /**
      * @var Projects_ProjectStruct
      */
-    protected $project;
+    protected Projects_ProjectStruct $project;
 
     /**
      * @return Projects_ProjectStruct
      */
-    public function getProject() {
+    public function getProject(): Projects_ProjectStruct {
         return $this->project;
     }
 
     protected function unlockToken( $tokenContent = null ) {
 
-        if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
+        if ( !empty( $this->downloadToken ) ) {
             CookieManager::setCookie( $this->downloadToken,
-                ( empty( $tokenContent ) ? json_encode( [
-                    "code"    => 0,
-                    "message" => "Download complete."
-                ] ) : json_encode( $tokenContent ) ),
-                [
-                    'expires'  => time() + 600,
-                    'path'     => '/',
-                    'domain'   => INIT::$COOKIE_DOMAIN,
-                    'secure'   => true,
-                    'httponly' => false,
-                    'samesite' => 'None',
-                ]
+                    ( empty( $tokenContent ) ? json_encode( [
+                            "code"    => 0,
+                            "message" => "Download complete."
+                    ] ) : json_encode( $tokenContent ) ),
+                    [
+                            'expires'  => time() + 600,
+                            'path'     => '/',
+                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'secure'   => true,
+                            'httponly' => false,
+                            'samesite' => 'None',
+                    ]
             );
             $this->downloadToken = null;
         }
@@ -145,9 +147,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     /**
      * Download the file
+     *
      * @param bool $forceXliff
      */
-    public function finalize($forceXliff = false) {
+    public function finalize( bool $forceXliff = false ) {
         try {
             $this->unlockToken();
 
@@ -162,7 +165,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             if ( !$isGDriveProject || $forceXliff === true ) {
-                $buffer = ob_get_contents();
+                ob_get_contents();
                 ob_get_clean();
                 ob_start( "ob_gzhandler" );  // compress page before sending
                 $this->nocache();
@@ -190,9 +193,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      * @param $project Projects_ProjectStruct
      *
      * @return string
+     * @throws ReflectionException
      */
-    public function getDefaultFileName( Projects_ProjectStruct $project ) {
-        $files = Files_FileDao::getByProjectId( $project->id );
+    public function getDefaultFileName( Projects_ProjectStruct $project ): string {
+        $files = FileDao::getByProjectId( $project->id );
 
         if ( count( $files ) > 1 ) {
             return $this->project->name . ".zip";
@@ -203,37 +207,37 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
 
     /**
      * @param ZipContentObject[] $output_content
-     * @param string             $outputFile
+     * @param string|null        $outputFile
      *
-     * @param bool               $isOriginalFile
+     * @param ?bool              $isOriginalFile
      *
      * @return string The zip binary
      * @throws Exception
      */
-    protected static function composeZip( Array $output_content, $outputFile = null, $isOriginalFile = false ) {
+    protected static function composeZip( array $output_content, ?string $outputFile = null, ?bool $isOriginalFile = false ): string {
         if ( empty( $outputFile ) ) {
             $outputFile = tempnam( "/tmp", "zipmatecat" );
         }
 
-        $zip = new \ZipArchive();
-        $zip->open( $outputFile, \ZipArchive::OVERWRITE );
+        $zip = new ZipArchive();
+        $zip->open( $outputFile, ZipArchive::OVERWRITE );
 
-        $rev_index_name = [];
+        $rev_index_name            = [];
         $rev_index_duplicate_count = [];
 
         foreach ( $output_content as $f ) {
 
-            $fName = $f->output_filename ;
+            $fName = $f->output_filename;
 
-            if ( $isOriginalFile != true ) {
+            if ( !$isOriginalFile ) {
                 $fName = self::forceOcrExtension( $fName );
             }
 
             // avoid collisions
             if ( array_key_exists( $fName, $rev_index_name ) ) {
-                $rev_index_duplicate_count[ $fName ] = isset($rev_index_duplicate_count[ $fName ]) ? $rev_index_duplicate_count[ $fName ] + 1 : 1;
+                $rev_index_duplicate_count[ $fName ] = isset( $rev_index_duplicate_count[ $fName ] ) ? $rev_index_duplicate_count[ $fName ] + 1 : 1;
 
-                $fName = $fName . "(".$rev_index_duplicate_count[ $fName ].")";
+                $fName = $fName . "(" . $rev_index_duplicate_count[ $fName ] . ")";
             }
 
             $rev_index_name[ $fName ] = $fName;
@@ -253,10 +257,11 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param $filename
+     * @param string $filename
+     *
      * @return string
      */
-    public static function forceOcrExtension( $filename ) {
+    public static function forceOcrExtension( string $filename ): string {
 
         $pathinfo = AbstractFilesStorage::pathinfo_fix( $filename );
 

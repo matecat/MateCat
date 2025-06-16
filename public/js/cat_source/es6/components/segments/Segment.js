@@ -26,6 +26,7 @@ import DraftMatecatUtils from './utils/DraftMatecatUtils'
 import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
+import {Shortcuts} from '../../utils/shortcuts'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext
@@ -102,7 +103,7 @@ class Segment extends React.Component {
         this.alertNotTranslatedYet(this.props.segment.sid)
       }
     } else {
-      if (this.props.segment.translation.length !== 0) {
+      if (this.props.segment.translation?.length !== 0) {
         SegmentActions.getSegmentsQa(this.props.segment)
       }
 
@@ -793,7 +794,7 @@ class Segment extends React.Component {
                 <div className="actions">
                   <button
                     className="split"
-                    title="Click to split segment"
+                    title={`Click to split segment (${Shortcuts.cattol.events.splitSegment.keystrokes[Shortcuts.shortCutsKeyType].toUpperCase()})`}
                     onClick={() =>
                       SegmentActions.openSplitSegment(this.props.segment.sid)
                     }

@@ -658,7 +658,7 @@ class TmKeyManagement_TmKeyManagement {
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
      * @param TmKeyManagement_MemoryKeyDao $mkDao
-     * @return DataAccess_IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @return \DataAccess\IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
      * @throws Exception
      */
     protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){

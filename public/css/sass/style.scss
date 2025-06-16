@@ -1726,7 +1726,7 @@ body.rtl-target .editor .editarea span {
   right: 0;
   margin-top: 10px;
   margin-right: 15px;
-  margin-bottom: 10px;
+  z-index: 0;
 }
 
 .graysmall-details li {
@@ -2051,6 +2051,8 @@ section.opened.editor .status {
   .alternatives .graysmall .b {
     /*padding-left:85px !important;*/
     width: 41% !important;
+    z-index: 1;
+    line-height: 24px;
   }
 
   .graysmall-message {

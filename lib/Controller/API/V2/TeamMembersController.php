@@ -9,11 +9,12 @@
 
 namespace API\V2;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
 use Exception;
+use RedisHandler;
 use ReflectionException;
 use TeamModel;
 use Teams\PendingInvitations;
@@ -31,7 +32,7 @@ class TeamMembersController extends KleinController {
      */
     public function index(){
 
-        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
+        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
 
         $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->id_team );
         $teamModel = new TeamModel( $team );
@@ -94,7 +95,7 @@ class TeamMembersController extends KleinController {
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
 
-        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
+        $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), [] );
         $formatter = new Membership( $membersList ) ;
 
         $this->refreshClientSessionIfNotApi();

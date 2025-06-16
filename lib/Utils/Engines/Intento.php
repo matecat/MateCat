@@ -6,7 +6,7 @@ class Engines_Intento extends Engines_AbstractEngine {
     const INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
     const INTENTO_API_URL      = 'https://api.inten.to';
 
-    protected $_config = [
+    protected array $_config = [
             'segment' => null,
             'source'  => null,
             'target'  => null
@@ -121,7 +121,7 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        return $this->_composeResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
     }
 
     public function get( $_config ) {

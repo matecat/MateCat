@@ -56,6 +56,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const [name, setName] = useState(row.name)
 
   const valueChange = useRef(false)
+  const valueName = useRef(row.name)
   const deleteTmKeyRemoveFrom = useRef()
 
   const penalty = row.penalty ?? 0
@@ -151,16 +152,27 @@ export const TMKeyRow = ({row, onExpandRow}) => {
           key: row.key,
           penalty: row.penalty,
           description: name,
-        }).catch(() => {
-          CatToolActions.addNotification({
-            title: 'Error updating key',
-            type: 'error',
-            text: `errors[0].message`,
-            position: 'br',
-            allowHtml: true,
-            timer: 5000,
-          })
         })
+          .then(() => {
+            setName(row.name)
+            valueName.current = row.name
+          })
+          .catch(({errors}) => {
+            CatToolActions.addNotification({
+              title: 'Error updating key',
+              type: 'error',
+              text: errors ? errors.message : 'Invalid key',
+              position: 'br',
+              allowHtml: true,
+              timer: 5000,
+            })
+            setTmKeys((prevState) =>
+              prevState.map((tm) =>
+                tm.id === row.id ? {...tm, name: valueName.current} : tm,
+              ),
+            )
+            setName(valueName.current)
+          })
 
         if (config.is_cattool) {
           updateJobKeys({
@@ -168,8 +180,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             dataTm: getTmDataStructureToSendServer({tmKeys}),
           }).then(() => CatToolActions.onTMKeysChangeStatus())
         }
-      } else {
-        setName(row.name)
       }
 
       valueChange.current = false

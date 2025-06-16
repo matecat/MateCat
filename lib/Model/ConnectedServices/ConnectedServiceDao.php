@@ -3,12 +3,14 @@
 
 namespace ConnectedServices;
 
+use DataAccess\AbstractDao;
+use Exception;
 use Exceptions\ValidationError;
 use PDO;
 use Users_UserStruct;
 use Utils;
 
-class ConnectedServiceDao extends \DataAccess_AbstractDao {
+class ConnectedServiceDao extends AbstractDao {
 
     const TABLE          = 'connected_services';
     const GDRIVE_SERVICE = 'gdrive';
@@ -26,7 +28,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         $stmt = $conn->prepare(
                 "SELECT * FROM connected_services WHERE id = :id"
         );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute( [ 'id' => $id ] );
 
         return $stmt->fetch();
@@ -37,9 +39,9 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param ConnectedServiceStruct $service
      *
      * @return ConnectedServiceStruct
-     * @throws \Exception
+     * @throws Exception
      */
-    public function updateOauthToken( $token, ConnectedServiceStruct $service ) {
+    public function updateOauthToken( $token, ConnectedServiceStruct $service ): ConnectedServiceStruct {
         $service->updated_at = Utils::mysqlTimestamp( time() );
         $service->setEncryptedAccessToken( $token );
 
@@ -52,10 +54,10 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param                        $time
      * @param ConnectedServiceStruct $service
      *
-     * @return bool
-     * @throws \Exception
+     * @return int
+     * @throws Exception
      */
-    public function setServiceExpired( $time, ConnectedServiceStruct $service ) {
+    public function setServiceExpired( $time, ConnectedServiceStruct $service ): int {
         $service->expired_at = Utils::mysqlTimestamp( $time );
 
         return $this->updateStruct( $service, [ 'fields' => [ 'expired_at' ] ] );
@@ -82,7 +84,13 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         $stmt->execute( [ 'uid' => $service->uid, 'service' => $service->service, 'id' => $service->id ] );
     }
 
-    public function findServiceByUserAndId( Users_UserStruct $user, $id_service ) {
+    /**
+     * @param Users_UserStruct $user
+     * @param                  $id_service
+     *
+     * @return ?ConnectedServiceStruct
+     */
+    public function findServiceByUserAndId( Users_UserStruct $user, $id_service ): ?ConnectedServiceStruct {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -90,7 +98,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
                 " uid = :uid AND id = :id "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'id' => $id_service ]
         );
@@ -104,7 +112,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      *
      * @return ConnectedServiceStruct[]
      */
-    public function findServicesByUser( Users_UserStruct $user ) {
+    public function findServicesByUser( Users_UserStruct $user ): array {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -112,7 +120,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
                 " uid = :uid "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid ]
         );
@@ -124,7 +132,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param Users_UserStruct $user
      * @param                  $name
      *
-     * @return \ConnectedServices\ConnectedServiceStruct[]
+     * @return ConnectedServiceStruct[]
      *
      */
     public function findServicesByUserAndName( Users_UserStruct $user, $name ) {
@@ -135,7 +143,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
                 " uid = :uid AND service = :service "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
@@ -158,7 +166,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
                 " uid = :uid AND service = :service AND is_default LIMIT 1"
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute(
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
@@ -179,15 +187,15 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @param                  $service
      * @param                  $email
      *
-     * @return mixed
+     * @return ?ConnectedServiceStruct
      */
-    public function findUserServicesByNameAndEmail( Users_UserStruct $user, $service, $email ) {
+    public function findUserServicesByNameAndEmail( Users_UserStruct $user, $service, $email ): ?ConnectedServiceStruct {
         $stmt = $this->database->getConnection()->prepare(
                 " SELECT * FROM connected_services WHERE " .
                 " uid = :uid AND service = :service AND email = :email "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ConnectedServiceStruct::class );
         $stmt->execute( [
                 'uid'     => $user->uid,
                 'service' => $service,
@@ -203,7 +211,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
                 " uid = :remote_id AND service = :service "
         );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS,  ConnectedServiceStruct::class );
         $stmt->execute( [
                 'service'   => $service,
                 'remote_id' => $remote_id

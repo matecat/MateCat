@@ -5,7 +5,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers DataAccess_AbstractDao::setCacheTTL
+ * @covers DataAccess\AbstractDao::setCacheTTL
  * User: dinies
  * Date: 18/04/16
  * Time: 15.08
@@ -26,7 +26,7 @@ class SetCacheTTLTest extends AbstractTest {
     /**
      * It sets the cache TTL to 55.
      * @group  regression
-     * @covers DataAccess_AbstractDao::setCacheTTL
+     * @covers DataAccess\AbstractDao::setCacheTTL
      */
     public function test_setCacheTTL_to_value_not_zero() {
         $previous_TTL_value = $this->cache_TTL->getValue( $this->databaseInstance );

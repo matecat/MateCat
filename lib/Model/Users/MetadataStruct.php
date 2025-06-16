@@ -8,14 +8,15 @@
 
 namespace Users;
 
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoObjectStruct;
+use \DataAccess\IDaoStruct;
 use JsonSerializable;
 
-class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct, JsonSerializable {
-    public $id;
-    public $uid;
-    public $key;
-    public $value;
+class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, JsonSerializable {
+    public string $id;
+    public string $uid;
+    public string $key;
+    public        $value;
 
     /**
      * @inheritDoc
@@ -39,7 +40,7 @@ class MetadataStruct extends \DataAccess_AbstractDaoObjectStruct implements Data
         }
 
         // in case of serialized data, return an object
-        if ( ( unserialize( $this->value ) ?? false ) !== false ) {
+        if ( ( @unserialize( $this->value ) ?? false ) !== false ) {
             return (object)unserialize( $this->value );
         }
 

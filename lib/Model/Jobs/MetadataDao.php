@@ -2,10 +2,12 @@
 
 namespace Jobs;
 
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use Database;
+use ReflectionException;
 
-class MetadataDao extends \DataAccess_AbstractDao {
+class MetadataDao extends AbstractDao {
 
     const TABLE = 'job_metadata';
 
@@ -18,7 +20,8 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param     $key
      * @param int $ttl
      *
-     * @return DataAccess_IDaoStruct[]|MetadataStruct[]
+     * @return IDaoStruct[]|MetadataStruct[]
+     * @throws ReflectionException
      */
     public function getByIdJob( $id_job, $key, $ttl = 0 ) {
 
@@ -40,10 +43,11 @@ class MetadataDao extends \DataAccess_AbstractDao {
      * @param $id_job
      * @param $password
      * @param int $ttl
-     * @return array|DataAccess_IDaoStruct[]
-     * @throws \ReflectionException
+     *
+     * @return ?array|?MetadataStruct[]
+     * @throws ReflectionException
      */
-    public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ) {
+    public function getByJobIdAndPassword( $id_job, $password, $ttl = 0 ): ?array {
 
         $stmt = $this->_getStatementForQuery(self::_query_metadata_by_job_password);
 
@@ -52,7 +56,7 @@ class MetadataDao extends \DataAccess_AbstractDao {
                 'password' => $password,
         ] );
 
-        return @$result;
+        return $result ?? null;
     }
 
     public function destroyCacheByJobAndPassword( $id_job, $password ) {
@@ -107,10 +111,10 @@ class MetadataDao extends \DataAccess_AbstractDao {
      */
     public function set( $id_job, $password, $key, $value ) {
         $sql = "INSERT INTO job_metadata " .
-                " ( id_job, password, `key`, value ) " .
+                " ( `id_job`, `password`, `key`, `value` ) " .
                 " VALUES " .
                 " ( :id_job, :password, :key, :value ) " .
-                " ON DUPLICATE KEY UPDATE value = :value ";
+                " ON DUPLICATE KEY UPDATE `value` = :value ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

@@ -6,16 +6,14 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const tmCreateRandUser = async () => {
-  const paramsData = {
-    action: 'createRandUser',
-  }
+  const paramsData = {}
   const formData = new FormData()
 
   Object.keys(paramsData).forEach((key) => {
     formData.append(key, paramsData[key])
   })
   const response = await fetch(
-    `${getMatecatApiDomain()}?action=${paramsData.action}`,
+    `${getMatecatApiDomain()}api/app/create-random-user`,
     {
       method: 'POST',
       body: formData,

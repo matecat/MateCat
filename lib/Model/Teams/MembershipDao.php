@@ -8,6 +8,8 @@
 
 namespace Teams;
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use Database;
 use Exception;
 use PDO;
@@ -17,7 +19,7 @@ use Users_UserDao;
 use Users_UserStruct;
 use Utils;
 
-class MembershipDao extends \DataAccess_AbstractDao {
+class MembershipDao extends AbstractDao {
 
     const TABLE       = "teams_users";
     const STRUCT_TYPE = "\\Teams\\MembershipStruct";
@@ -150,7 +152,7 @@ class MembershipDao extends \DataAccess_AbstractDao {
      * @param $id_team
      * @param $traverse
      *
-     * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
+     * @return IDaoStruct[]|MembershipStruct[]
      * @throws ReflectionException
      */
     public function getMemberListByTeamId( $id_team, $traverse = true ) {

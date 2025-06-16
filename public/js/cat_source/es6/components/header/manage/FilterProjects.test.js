@@ -183,7 +183,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=6&id_file=&password=2a35d508882e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/6/2a35d508882e/6.zip',
+                'https://dev.matecat.com/xliff/6/2a35d508882e/6.zip',
             },
           },
           {
@@ -274,7 +274,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=6&id_file=&password=2a35d508882e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/6/2a35d508882e/6.zip',
+                'https://dev.matecat.com/xliff/6/2a35d508882e/6.zip',
             },
           },
         ],
@@ -401,7 +401,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=90&id_file=&password=NWUxMWYjEwZT600&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/90/NWUxMWYjEwZT600/90.zip',
+                'https://dev.matecat.com/xliff/90/NWUxMWYjEwZT600/90.zip',
             },
           },
           {
@@ -499,7 +499,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=91&id_file=&password=ce560196ca5c&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/91/ce560196ca5c/91.zip',
+                'https://dev.matecat.com/xliff/91/ce560196ca5c/91.zip',
             },
           },
           {
@@ -597,7 +597,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=92&id_file=&password=25c9442ad64c&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/92/25c9442ad64c/92.zip',
+                'https://dev.matecat.com/xliff/92/25c9442ad64c/92.zip',
             },
           },
           {
@@ -695,7 +695,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=93&id_file=&password=667611949406&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/93/667611949406/93.zip',
+                'https://dev.matecat.com/xliff/93/667611949406/93.zip',
             },
           },
         ],
@@ -822,7 +822,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=108&id_file=&password=f03b800ea879&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/108/f03b800ea879/108.zip',
+                'https://dev.matecat.com/xliff/108/f03b800ea879/108.zip',
             },
           },
           {
@@ -920,7 +920,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=109&id_file=&password=3d3086540f6e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/109/3d3086540f6e/109.zip',
+                'https://dev.matecat.com/xliff/109/3d3086540f6e/109.zip',
             },
           },
         ],
@@ -1039,7 +1039,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=104&id_file=&password=8114722e28eb&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/104/8114722e28eb/104.zip',
+                'https://dev.matecat.com/xliff/104/8114722e28eb/104.zip',
             },
           },
           {
@@ -1137,7 +1137,7 @@ const apiGetProjects = {
               translation_download_url:
                 'https://dev.matecat.com/?action=downloadFile&id_job=105&id_file=&password=d3d64e864c1e&download_type=all',
               xliff_download_url:
-                'https://dev.matecat.com/SDLXLIFF/105/d3d64e864c1e/105.zip',
+                'https://dev.matecat.com/xliff/105/d3d64e864c1e/105.zip',
             },
           },
         ],
@@ -1159,7 +1159,7 @@ const apiGetProjects = {
 const executeMswServer = (response) => {
   mswServer.use(
     ...[
-      http.post(config.basepath, () => {
+      http.post(config.basepath + 'api/app/get-projects', () => {
         return HttpResponse.json(response)
       }),
     ],

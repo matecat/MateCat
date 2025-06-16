@@ -25,8 +25,6 @@ export const submitComment = async ({
   isAnonymous = false,
 }) => {
   const dataParams = {
-    action: 'comment',
-    _sub: 'create',
     id_job: idJob,
     id_segment: idSegment,
     revision_number: revisionNumber,
@@ -41,7 +39,7 @@ export const submitComment = async ({
   Object.keys(dataParams).forEach((key) => {
     if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
   })
-  const response = await fetch(`${getMatecatApiDomain()}?action=comment`, {
+  const response = await fetch(`${getMatecatApiDomain()}api/app/comment/create`, {
     method: 'POST',
     credentials: 'include',
     body: formData,
