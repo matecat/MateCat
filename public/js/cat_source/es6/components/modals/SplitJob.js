@@ -15,7 +15,7 @@ const SplitJobModal = ({job, project, callback}) => {
   const [numSplit, setNumSplit] = useState(2)
   const [wordsArray, setWordsArray] = useState(null)
   const [splitChecked, setSplitChecked] = useState(false)
-  const [showLoader, setShowLoader] = useState(false)
+  const [showLoader, setShowLoader] = useState(true)
   const [showStartLoader, setShowStartLoader] = useState(true)
   const [showError, setShowError] = useState(false)
   const [total, setTotal] = useState(0)
@@ -346,6 +346,7 @@ const SplitJobModal = ({job, project, callback}) => {
               <span className="err-msg">{errorMsg}</span>
             </div>
           )}
+          {showLoader && <div className="button-loader show" />}
           <Button
             mode={BUTTON_MODE.OUTLINE}
             size={BUTTON_SIZE.MEDIUM}
@@ -371,11 +372,6 @@ const SplitJobModal = ({job, project, callback}) => {
             >
               Check split
             </Button>
-          )}
-          {showLoader && (
-            <div className="loader">
-              <i className="fa fa-spinner fa-spin"></i>
-            </div>
           )}
         </div>
       </div>
