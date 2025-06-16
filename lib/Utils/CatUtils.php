@@ -1,6 +1,5 @@
 <?php
 
-use Exceptions\ControllerReturnException;
 use FilesStorage\AbstractFilesStorage;
 use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateDao;
