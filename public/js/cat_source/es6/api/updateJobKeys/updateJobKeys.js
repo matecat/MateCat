@@ -18,7 +18,6 @@ export const updateJobKeys = async ({
   getPublicMatches,
   dataTm,
 }) => {
-
   const paramsData = Object.entries({
     action: 'updateJobKeys',
     job_id: idJob,
