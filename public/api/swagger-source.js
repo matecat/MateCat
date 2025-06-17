@@ -65,7 +65,7 @@ var spec = {
             name: 'files[]',
             in: 'formData',
             description:
-                'The file(s) to be uploaded. You may also upload your own translation memories (TMX). To upload multiple files, add more files[] fields.',
+              'The file(s) to be uploaded. You may also upload your own translation memories (TMX). To upload multiple files, add more files[] fields.',
             required: true,
             type: 'file',
           },

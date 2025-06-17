@@ -4,6 +4,7 @@ import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
 import {NumbersDashBadge} from './NumbersDashBadge'
+import Tooltip from '../../../../common/Tooltip'
 
 const convertTranslateSlidesToServer = (value) =>
   value.reduce((acc, cur) => {
@@ -62,6 +63,7 @@ export const MsPowerpoint = () => {
 
   const msPowerpoint = useRef()
   msPowerpoint.current = currentTemplate.msPowerpoint
+  const translateSlidesRef = useRef()
 
   const temporaryFormData = watch()
   const previousData = useRef()
@@ -195,8 +197,9 @@ export const MsPowerpoint = () => {
             Choose which slides should be translated.
             <br />
             If left empty, all the slides in the file will be extracted as
-            translatable except for hidden slides unless otherwise specified
-            through the dedicated option.
+            translatable except for hidden slides, unless otherwise specified
+            through the dedicated option. Mutually exclusive with "Translate
+            hidden slides".
           </p>
         </div>
         <Controller
@@ -204,13 +207,22 @@ export const MsPowerpoint = () => {
           name="translate_slides"
           disabled={formData?.extract_hidden_slides}
           render={({field: {onChange, value, name}}) => (
-            <NumbersDashBadge
-              name={name}
-              value={value}
-              onChange={onChange}
-              placeholder={''}
-              disabled={formData?.extract_hidden_slides}
-            />
+            <Tooltip
+              content={
+                formData?.extract_hidden_slides &&
+                "'Translatable slides' is disabled because 'Translate hidden slides' is active. Turn off 'Translate hidden slides' to enable this option."
+              }
+            >
+              <div ref={translateSlidesRef}>
+                <NumbersDashBadge
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  placeholder={''}
+                  disabled={formData?.extract_hidden_slides}
+                />
+              </div>
+            </Tooltip>
           )}
         />
       </div>
