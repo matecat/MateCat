@@ -1,6 +1,5 @@
 <?php
 
-use Exceptions\ControllerReturnException;
 use FilesStorage\AbstractFilesStorage;
 use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateDao;
@@ -899,13 +898,14 @@ class CatUtils {
     /**
      * Avoid race conditions by javascript multiple calls
      *
-     * @param $file_path
-     * @param $source
-     * @param null $segmentationRule
-     * @param int $filtersTemplateId
-     * @throws Exception
+     * @param string      $file_path
+     * @param string      $source
+     * @param string|null $segmentationRule
+     * @param int|null    $filtersTemplateId
+     *
+     * @throws ReflectionException
      */
-    public static function deleteSha( $file_path, $source, $segmentationRule = null, $filtersTemplateId = 0 ) {
+    public static function deleteSha( string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0 ) {
 
         $extraction_parameters = null;
 
@@ -920,11 +920,11 @@ class CatUtils {
         $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
 
         $hash_name_for_disk =
-            sha1_file( $file_path )
-            . "_" .
-            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
-            . "|" .
-            $source;
+                sha1_file( $file_path )
+                . "_" .
+                sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+                . "|" .
+                $source;
 
         if ( !$hash_name_for_disk ) {
             return;
