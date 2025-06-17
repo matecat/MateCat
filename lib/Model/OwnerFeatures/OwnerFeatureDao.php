@@ -1,35 +1,19 @@
 <?php
 
 use DataAccess\AbstractDao;
-use Teams\TeamStruct;
+use DataAccess\IDaoStruct;
 
 class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
 
     const query_by_user_email = " SELECT * FROM owner_features INNER JOIN users ON users.uid = owner_features.uid WHERE users.email = :id_customer AND owner_features.enabled ORDER BY id ";
-
-    public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
-        // TODO:
-    }
-
-    public function getByTeam( TeamStruct $team ) {
-        $conn = Database::obtain()->getConnection();
-
-        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
-                " WHERE owner_features.id_team = :id_team " .
-                " AND owner_features.enabled "
-        );
-        $stmt->execute( [ 'id_team' => $team->id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct' );
-
-        return $stmt->fetchAll();
-    }
+    const query_user_id       = "SELECT * FROM owner_features WHERE uid = :uid ORDER BY id";
 
     /**
-     * @param \DataAccess\IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
+     * @param IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
      *
-     * @return int
+     * @return OwnerFeatures_OwnerFeatureStruct
      */
-    public function create( \DataAccess\IDaoStruct $obj ) {
+    public function create( IDaoStruct $obj ) {
 
         $conn = Database::obtain()->getConnection();
 
@@ -63,7 +47,7 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
      *
      * @param int    $ttl
      *
-     * @return \DataAccess\IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
+     * @return IDaoStruct[]|OwnerFeatures_OwnerFeatureStruct[]
      * @throws ReflectionException
      */
     public static function getByIdCustomer( string $id_customer, int $ttl = 3600 ): array {
@@ -71,7 +55,7 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
         $thisDao = new self();
         $stmt    = $conn->prepare( self::query_by_user_email );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new OwnerFeatures_OwnerFeatureStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [
                 'id_customer' => $id_customer
         ] ) ?? [];
     }
@@ -81,21 +65,57 @@ class OwnerFeatures_OwnerFeatureDao extends AbstractDao {
      *
      * @param $id_customer
      *
-     * @return bool|int
+     * @return bool
+     * @throws ReflectionException
      */
-    public static function destroyCacheByIdCustomer( $id_customer ) {
+    public static function destroyCacheByIdCustomer( $id_customer ): bool {
         $thisDao = new self();
         $stmt    = $thisDao->_getStatementForQuery( self::query_by_user_email );
 
         return $thisDao->_destroyObjectCache( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [ 'id_customer' => $id_customer ] );
     }
 
-    public static function getById( $id ) {
+    /**
+     * @throws ReflectionException
+     */
+    public static function getByUserId( ?int $uid, int $ttl = 3600 ): array {
+
+        if ( empty( $uid ) ) {
+            return [];
+        }
+
+        $conn    = Database::obtain()->getConnection();
+        $thisDao = new self();
+        $stmt    = $conn->prepare( self::query_user_id );
+
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [
+                'uid' => $uid
+        ] ) ?? [];
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function destroyCacheByUserId( int $uid ): bool {
+        $thisDao = new self();
+        $stmt    = $thisDao->_getStatementForQuery( self::query_user_id );
+
+        return $thisDao->_destroyObjectCache( $stmt, OwnerFeatures_OwnerFeatureStruct::class, [ 'uid' => $uid ] );
+    }
+
+    /**
+     * Get owner feature by ID
+     *
+     * @param int $id
+     *
+     * @return OwnerFeatures_OwnerFeatureStruct
+     */
+    public static function getById( int $id ): OwnerFeatures_OwnerFeatureStruct {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( " SELECT * FROM owner_features WHERE id = ? " );
         $stmt->execute( [ $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, OwnerFeatures_OwnerFeatureStruct::class );
 
         return $stmt->fetch();
     }

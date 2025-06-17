@@ -33,15 +33,15 @@
         maxNumberFiles: ${maxNumberFiles},
         ownerIsMe: true,
         lxq_license: '${lxq_license | string:}',
-        lexiqa_languages: ${lexiqa_languages| string:[]},
+        lexiqa_languages: ${lexiqa_languages},
         tag_projection_languages: ${tag_projection_languages},
-        user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-        enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-        ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-        subject_array: ${subjects | string:[]},
+        user_plugins: ${user_plugins},
+        enableMultiDomainApi: ${enableMultiDomainApi},
+        ajaxDomainsNumber: ${ajaxDomainsNumber},
+        subject_array: ${subjects},
         formats_number: ${formats_number},
-        isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-        intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
+        isAnInternalUser: ${isAnInternalUser},
+        intento_providers: ${translation_engines_intento_prov_json},
       }
       /*]]>*/
     </script>

@@ -20,23 +20,23 @@
         var config = {
             basepath: '${basepath | string:/}',
             status: '${project_status}',
-            totalSegments: '${num_segments}',
-            totalAnalyzed: '${num_segments_analyzed}',
-            showModalBoxLogin: '${showModalBoxLogin}',
+            totalSegments: ${num_segments},
+            totalAnalyzed: ${num_segments_analyzed},
+            showModalBoxLogin: ${showModalBoxLogin},
             enable_outsource: ${enable_outsource | string:false},
             daemon_warning: ${daemon_misconfiguration},
             support_mail: '${support_mail}',
-            id_project: '${pid}',
-            id_job: '${jid}',
+            id_project: ${pid},
+            id_job: ${jid},
             password: '${project_password}',
             jpassword: '${job_password}',
             outsource_service_login : '${outsource_service_login}',
-            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
+            isAnInternalUser: ${isAnInternalUser},
             jobs: ${json_jobs},
             jobAnalysis: true,
-            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-            project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
-        };
+            user_plugins: ${user_plugins},
+            project_plugins: ${project_plugins},
+        }
         /*]]>*/
     </script>
 

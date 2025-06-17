@@ -136,7 +136,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @return ChunkReviewStruct
      * @throws NotFoundException
      */
-    public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) {
+    public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) { // XXX REMOVE THIS METHOD
         $chunk_review = ( new ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
 
         if ( !$chunk_review ) {

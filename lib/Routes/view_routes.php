@@ -19,6 +19,10 @@ route( '/revise-summary/[i:jid]-[:password]', 'GET', [ 'Views\QualityReportContr
 route( '/activityLog/[i:id_project]/[:password]', 'GET', [ 'Views\ActivityLogController', 'renderView' ] );
 route( '/utils/xliff-to-target', 'GET', [ 'Views\XliffToTargetController', 'renderView' ] );
 
+route( '/translate/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Views\CattoolController', 'renderView' ] );
+route( '/revise/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Views\CattoolController', 'renderView' ] );
+route( '/revise2/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Views\CattoolController', 'renderView' ] );
+
 // outsource authentication callbacks
 route( '/webhooks/outsource/success', 'GET', [ 'Views\OutsourceTo\TranslatedCallbackController', 'renderView' ] );
 route( '/webhooks/outsource/failure', 'GET', [ 'Views\OutsourceTo\TranslatedCallbackController', 'renderView' ] );

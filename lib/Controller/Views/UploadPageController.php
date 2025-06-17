@@ -17,6 +17,8 @@ use Engines_Intento;
 use Exception;
 use INIT;
 use Langs\LanguageDomains;
+use PHPTalBoolean;
+use PHPTalMap;
 use ProjectOptionsSanitizer;
 use Utils;
 
@@ -36,15 +38,15 @@ class UploadPageController extends BaseKleinViewController {
         $this->setEmptyCookieValueIfNoHistory( Constants::COOKIE_TARGET_LANG );
 
         $this->setView( 'upload.html', [
-                'conversion_enabled'                    => !empty( INIT::$FILTERS_ADDRESS ),
-                'volume_analysis_enabled'               => INIT::$VOLUME_ANALYSIS_ENABLED,
+                'conversion_enabled'                    => new PHPTalBoolean( !empty( INIT::$FILTERS_ADDRESS ) ),
+                'volume_analysis_enabled'               => new PHPTalBoolean( INIT::$VOLUME_ANALYSIS_ENABLED ),
                 'maxFileSize'                           => INIT::$MAX_UPLOAD_FILE_SIZE,
                 'maxTMXFileSize'                        => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
                 'maxNumberFiles'                        => INIT::$MAX_NUM_FILES,
-                'subjects'                              => json_encode( LanguageDomains::getInstance()->getEnabledDomains() ),
+                'subjects'                              => new PHPTalMap( LanguageDomains::getInstance()->getEnabledDomains() ),
                 'formats_number'                        => $this->countSupportedFileTypes(),
-                'translation_engines_intento_prov_json' => str_replace( "\\\"", "\\\\\\\"", json_encode( Engines_Intento::getProviderList() ) ), // needed by JSON.parse() function
-                'tag_projection_languages'              => json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ),
+                'translation_engines_intento_prov_json' => new PHPTalMap( Engines_Intento::getProviderList() ),
+                'tag_projection_languages'              => new PHPTalMap( ProjectOptionsSanitizer::$tag_projection_allowed_languages ),
                 'developerKey'                          => INIT::$GOOGLE_OAUTH_BROWSER_API_KEY,
                 'clientId'                              => INIT::$GOOGLE_OAUTH_CLIENT_ID
         ] );
@@ -53,7 +55,7 @@ class UploadPageController extends BaseKleinViewController {
             $this->addParamsToView( [
                             'lxq_license'      => INIT::$LXQ_LICENSE,
                             'lxq_partnerid'    => INIT::$LXQ_PARTNERID,
-                            'lexiqa_languages' => json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ),
+                            'lexiqa_languages' => new PHPTalMap( ProjectOptionsSanitizer::$lexiQA_allowed_languages ),
                             'lexiqaServer'     => INIT::$LXQ_SERVER,
                     ]
             );

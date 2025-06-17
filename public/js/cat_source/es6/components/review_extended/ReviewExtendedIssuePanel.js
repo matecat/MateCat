@@ -17,7 +17,7 @@ class ReviewExtendedIssuePanel extends React.Component {
 
   constructor(props) {
     super(props)
-    this.issueCategoriesFlat = JSON.parse(config.lqa_flat_categories)
+    this.issueCategoriesFlat = config.lqa_flat_categories
     this.state = {
       submitDisabled: false,
       categorySelectedIndex: 0,
@@ -26,7 +26,7 @@ class ReviewExtendedIssuePanel extends React.Component {
       severityIndex: 0,
     }
     this.issueCategories = orderBy(
-      JSON.parse(config.lqa_nested_categories).categories,
+      config.lqa_nested_categories.categories,
       ['id'],
     )
 

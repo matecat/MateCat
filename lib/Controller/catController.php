@@ -14,6 +14,7 @@ use WordCount\WordCountStruct;
  *
  * @property CatDecorator decorator
  * @author antonio
+ * @deprecated
  */
 class catController extends viewController {
 
@@ -492,9 +493,7 @@ class catController extends viewController {
      * @return int|null
      */
     public function getRevisionNumber() {
-        return catController::isRevision() ? (
-        $this->revision == null ? 1 : $this->revision
-        ) : null;
+        return catController::isRevision() ? ( $this->revision == null ? 1 : $this->revision ) : null;
     }
 
     public function getQaOverall() {

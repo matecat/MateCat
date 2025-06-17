@@ -71,12 +71,13 @@ class ChunkReviewDao extends AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $source_page
+     * @param int      $id_job
+     * @param string   $password
+     * @param int|null $source_page
      *
      * @return ChunkReviewStruct
      */
-    public static function findByIdJobAndPasswordAndSourcePage( $id_job, $password, $source_page ) {
+    public static function findByIdJobAndPasswordAndSourcePage( int $id_job, string $password, ?int $source_page ): ?ChunkReviewStruct {
         $sql  = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE id_job = :id_job 
                 AND password = :password
@@ -92,7 +93,7 @@ class ChunkReviewDao extends AbstractDao {
 
         $results = $stmt->fetchAll();
 
-        return ( isset( $results[ 0 ] ) ) ? $results[ 0 ] : null;
+        return $results[ 0 ] ?? null;
     }
 
     /**
@@ -115,7 +116,7 @@ class ChunkReviewDao extends AbstractDao {
     /**
      * @param Jobs_JobStruct $chunk
      *
-     * @param null               $source_page
+     * @param null           $source_page
      *
      * @return int
      */
@@ -234,7 +235,7 @@ class ChunkReviewDao extends AbstractDao {
 
     /**
      * @param Jobs_JobStruct $chunkStruct
-     * @param int                $source_page
+     * @param int            $source_page
      *
      * @return ChunkReviewStruct[]
      */
@@ -335,7 +336,7 @@ class ChunkReviewDao extends AbstractDao {
                 'jid'      => $jid
         ];
 
-        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $parameters )[ 0 ];
+        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $parameters )[ 0 ];
     }
 
     /**

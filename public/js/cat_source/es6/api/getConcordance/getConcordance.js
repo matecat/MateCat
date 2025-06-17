@@ -6,7 +6,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  *
  * @param {string} query
  * @param {number} type
- * @param {string} [idJob=config.job_id]
+ * @param {string} [idJob=config.id_job]
  * @param {string} [idTranslator=config.id_translator]
  * @param {string} [password=config.password]
  * @param {string} [idClient=config.id_client]
@@ -16,7 +16,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 export const getConcordance = async (
   query,
   type,
-  idJob = config.job_id,
+  idJob = config.id_job,
   password = config.password,
   idClient = config.id_client,
   currentPassword = config.currentPassword,

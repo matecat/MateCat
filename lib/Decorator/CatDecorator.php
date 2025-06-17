@@ -108,7 +108,7 @@ class CatDecorator extends \AbstractDecorator {
 
     private function setQualityReportHref() {
         $this->template->{'quality_report_href'} =
-                INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
+                    INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
 
     /**

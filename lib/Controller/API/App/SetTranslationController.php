@@ -39,6 +39,7 @@ use Segments_SegmentOriginalDataDao;
 use Segments_SegmentStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
+use Traits\SourcePageGuesser;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use TranslationsSplit_SplitDAO;
@@ -48,16 +49,14 @@ use WordCount\WordCountStruct;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 
+    use SourcePageGuesser;
+
     /**
      * @var array
      */
     protected array $data;
 
-    protected ?int $id_job = null;
-
     protected ?string $password = null;
-
-    protected ?string $received_password = null;
 
     /**
      * @var Jobs_JobStruct

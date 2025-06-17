@@ -40,6 +40,28 @@ function route( string $path, string $method, array $callback ) {
     } );
 }
 
+/**
+ * Handles HTTP errors for the Klein router.
+ * Since the Klein router now manages all requests (see .htaccess),
+ * this function is triggered whenever an HTTP error occurs.
+ *
+ * Specifically, it handles 404 errors (when no routes match in Klein)
+ * by rendering a custom view for the 404 error page.
+ *
+ * @param int $code The HTTP error code.
+ */
+$klein->onHttpError( function ( int $code, Klein $klein ) {
+    // Check if the error code is 404 (page not found)
+    if ( $code == 404 ) {
+        // Create a new instance of the custom page view
+        $view = new CustomPageView();
+        // Set the view file for the 404 error page
+        $view->setView( '404.html' );
+        // Render the view with the 404 error code
+        $view->render( 404 );
+    }
+} );
+
 $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $exception ) use ( &$isView ) {
 
     if ( !$isView ) {

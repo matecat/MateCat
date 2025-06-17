@@ -21,6 +21,8 @@ use Exception;
 use INIT;
 use Jobs_JobDao;
 use Model\Analysis\Status;
+use PHPTalBoolean;
+use PHPTalMap;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Utils;
@@ -117,29 +119,23 @@ class AnalyzeController extends BaseKleinViewController implements IController {
             $this->featureSet->loadForProject( $projectStruct );
         }
 
-        $projectMetaDataDao = new Projects_MetadataDao();
-        $projectMetaData    = $projectMetaDataDao->get( $projectStruct->id, Projects_MetadataDao::FEATURES_KEY );
-
         $projectData    = Projects_ProjectDao::getProjectAndJobData( $pid );
         $analysisStatus = new Status( $projectData, $this->featureSet, $this->user );
 
-        /**
-         * @var AnalysisProject $model
-         */
         $model = $analysisStatus->fetchData()->getResult();
 
         $this->addParamsToView( [
                 'pid'                     => $projectStruct->id,
                 'project_status'          => $projectStruct->status_analysis,
                 'outsource_service_login' => $this->_outsource_login_API,
-                'showModalBoxLogin'       => !$this->isLoggedIn(),
-                'project_plugins'         => $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) ?? [],
+                'showModalBoxLogin'       => new PHPTalBoolean( !$this->isLoggedIn() ),
+                'project_plugins'         => new PHPTalMap( $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() ) ?? [] ),
                 'num_segments'            => $model->getSummary()->getTotalSegments(),
                 'num_segments_analyzed'   => $model->getSummary()->getSegmentsAnalyzed(),
-                'daemon_misconfiguration' => var_export( Health::thereIsAMisconfiguration(), true ),
+                'daemon_misconfiguration' => new PHPTalBoolean( Health::thereIsAMisconfiguration() ),
                 'json_jobs'               => json_encode( $model ),
-                'split_enabled'           => true,
-                'enable_outsource'        => INIT::$ENABLE_OUTSOURCE,
+                'split_enabled'           => new PHPTalBoolean( true ),
+                'enable_outsource'        => new PHPTalBoolean( INIT::$ENABLE_OUTSOURCE ),
         ] );
 
         $activity             = new ActivityLogStruct();

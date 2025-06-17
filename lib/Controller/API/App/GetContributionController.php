@@ -20,12 +20,12 @@ use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
+use Traits\SourcePageGuesser;
 use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    protected int $id_job;
-    protected string $received_password;
+    use SourcePageGuesser;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

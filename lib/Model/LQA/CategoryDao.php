@@ -99,7 +99,7 @@ class CategoryDao extends AbstractDao {
      *
      * @return array
      */
-    public static function getCategoriesAndSeverities( $id_model ) {
+    public static function getCategoriesAndSeverities( $id_model ): array {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
         $conn = \Database::obtain()->getConnection();

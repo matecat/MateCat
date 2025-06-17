@@ -195,5 +195,13 @@ class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         return $decoded;
     }
 
+    /**
+     * @throws ReflectionException
+     */
+    public function getOwnerFeatures(){
+        $ownerFeaturesDao = new OwnerFeatures_OwnerFeatureDao();
+        $ownerFeaturesDao->setCacheTTL( 60 * 60 * 24 );
+        return $ownerFeaturesDao->getByUserId( $this->uid );
+    }
 
 }

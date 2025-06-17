@@ -18,26 +18,11 @@ RewriteCond %{REQUEST_URI} /offline.html
 RewriteRule $ / [R=307,L]
 
 RewriteRule ^fileupload/$ lib/View/fileupload/index.php [QSA,L]
-
-RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5 [L]
-RewriteRule ^(revise)([^/]*)?/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*$ index.php?action=cat&jid=$5&password=$6&revision=$2 [L]
-
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
-# Page Views (replacing old viewController until we can definitely remove it by routing everything through the router)
+# Route all through the router
 RewriteRule ^$ router.php [QSA,L]
-RewriteRule ^manage$ router.php [QSA,L]
-RewriteRule ^analyze/(.*)$ router.php [L]
-RewriteRule ^jobanalysis/(.*)$ router.php [L]
-RewriteRule ^signin$ router.php [L]
-RewriteRule ^revise-summary/(.*)$ router.php [QSA,L]
-RewriteRule ^activityLog/([0-9]+)/([^/]+)$ router.php [QSA,L]
-RewriteRule ^views/(.*)$ router.php [QSA,L]
-RewriteRule ^utils/(.*)$ router.php [QSA,L]
-
-RewriteRule ^api/(.*)$ router.php [QSA,L]
-RewriteRule ^webhooks/(.*)$ router.php [QSA,L]
-RewriteRule ^gdrive/(.*)$ router.php [QSA,L]
+RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf)$ router.php [QSA,L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
@@ -68,6 +53,7 @@ SetEnvIfNoCase Request_URI \.(?:css|js)$ !no-gzip
     ExpiresByType image/png "access plus 1 month"
     ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
     ExpiresByType image/ico "access plus 1 month"
+    ExpiresByType image/svg "access plus 1 month"
 </IfModule>
 
 <IfModule mod_headers.c>
