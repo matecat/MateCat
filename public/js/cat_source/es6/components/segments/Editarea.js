@@ -450,6 +450,7 @@ class Editarea extends React.Component {
     }
 
     if (changedDecorator) {
+      const timer = inSearch ? 800 : 0
       const decorator = new CompositeDecorator(this.decoratorsStructure)
       setTimeout(() => {
         this.setState({
