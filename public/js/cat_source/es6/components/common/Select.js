@@ -12,7 +12,7 @@ import TEXT_UTILS from '../../utils/textUtils'
 import ChevronDown from '../../../../../img/icons/ChevronDown'
 import Tooltip from './Tooltip'
 import usePortal from '../../hooks/usePortal'
-import IconCloseCircle from '../icons/IconCloseCircle'
+import IconClose from '../icons/IconClose'
 
 const mergeClassNames = (...args) => {
   return (
@@ -332,7 +332,6 @@ export const Select = ({
       >
         <div ref={selectedItemRef} className="select-with-icon__wrapper">
           <div className={inputClassName} onClick={toggleDropdown}>
-            {renderSelection()}
             {showResetButton && activeOption ? (
               <div
                 className="icon-reset"
@@ -341,9 +340,10 @@ export const Select = ({
                   resetFunction()
                 }}
               >
-                <IconCloseCircle />
+                <IconClose size={8} />
               </div>
             ) : undefined}
+            {renderSelection()}
           </div>
           <input
             name={name}
