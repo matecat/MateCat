@@ -13,7 +13,6 @@ use LQA\EntryWithCategoryStruct;
 use RuntimeException;
 use Segments_SegmentDao;
 use Segments_SegmentStruct;
-use TaskRunner\Exceptions\EndQueueException;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 

@@ -9,7 +9,7 @@
 
 namespace Outsource;
 
-use \DataAccess\IDaoStruct;
+use DataAccess\IDaoStruct;
 
 class TranslatedConfirmationStruct extends ConfirmationStruct implements IDaoStruct {
 

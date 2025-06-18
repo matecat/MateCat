@@ -10,9 +10,6 @@
 namespace RemoteFiles;
 
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-
 class RemoteFileServiceNameStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id_project;

@@ -2,8 +2,8 @@
 
 namespace ActivityLog;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.

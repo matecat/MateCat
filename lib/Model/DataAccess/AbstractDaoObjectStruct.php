@@ -9,12 +9,11 @@
 
 namespace DataAccess;
 
-use stdClass;
 use Countable;
-use ArrayAccess;
 use DomainException;
 use ReflectionObject;
 use ReflectionProperty;
+use stdClass;
 
 abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
 

@@ -5,7 +5,6 @@ namespace AbstractControllers;
 use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
-use CatUtils;
 use Controller\Authentication\AuthenticationHelper;
 use Controller\Authentication\AuthenticationTrait;
 use Exception;
@@ -24,6 +23,7 @@ abstract class KleinController implements IController {
     use AuthenticationTrait;
 
     protected bool $useSession = false;
+    protected bool $isView     = false;
 
     /**
      * @var Request
@@ -80,6 +80,10 @@ abstract class KleinController implements IController {
      */
     public function getParams(): array {
         return $this->params;
+    }
+
+    public function isView(): bool {
+        return $this->isView;
     }
 
     /**

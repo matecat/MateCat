@@ -9,7 +9,7 @@
 
 namespace MTQE\PayableRate;
 
-use \DataAccess\AbstractDaoSilentStruct;
+use DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;

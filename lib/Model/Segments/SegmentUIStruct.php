@@ -11,8 +11,6 @@ namespace Segments;
 
 
 use DataAccess\ArrayAccessTrait;
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
 
 class SegmentUIStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \ArrayAccess {
 

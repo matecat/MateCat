@@ -11,10 +11,10 @@ namespace Traits;
 
 use CatUtils;
 
-trait SourcePageGuesser {
+trait APISourcePageGuesser {
 
     protected int     $id_job;
-    protected ?string $received_password = null;
+    protected ?string $request_password = null;
 
     /**
      * @return bool|null
@@ -22,10 +22,8 @@ trait SourcePageGuesser {
     protected function isRevision(): ?bool {
         $controller = $this;
 
-        if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
-            $jid        = $controller->id_job;
-            $password   = $controller->received_password;
-            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
+        if ( isset( $controller->id_job ) and isset( $controller->request_password ) ) {
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $controller->id_job, $controller->request_password );
 
             if ( !$isRevision ) {
                 $isRevision = CatUtils::getIsRevisionFromReferer();

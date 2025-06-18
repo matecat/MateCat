@@ -9,7 +9,7 @@
 
 namespace MTQE\Templates;
 
-use \DataAccess\AbstractDaoSilentStruct;
+use DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
 use MTQE\Templates\DTO\MTQEWorkflowParams;

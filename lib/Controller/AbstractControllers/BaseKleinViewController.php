@@ -31,6 +31,8 @@ use Utils;
  */
 abstract class BaseKleinViewController extends AbstractStatefulKleinController implements IController {
 
+    protected bool $isView = true;
+
     /**
      * @var PHPTALWithAppend
      */

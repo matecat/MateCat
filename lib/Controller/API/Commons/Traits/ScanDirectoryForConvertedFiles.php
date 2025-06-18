@@ -11,7 +11,6 @@ namespace API\Commons\Traits;
 
 use Exception;
 use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use INIT;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;

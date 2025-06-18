@@ -1367,7 +1367,7 @@ class ProjectManager {
 
             // check for job_first_segment and job_last_segment existence
             if ( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) or !isset( $this->min_max_segments_id[ 'job_last_segment' ] ) ) {
-                throw new Exception( 'Job cannot be created. No job_first_segment or job_last_segment found!' );
+                throw new Exception( 'Job cannot be created. No segments found!' );
             }
 
             $this->_log( $projectStructure[ 'private_tm_key' ] );

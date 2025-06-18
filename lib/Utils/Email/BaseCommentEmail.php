@@ -8,7 +8,6 @@
 
 namespace Email;
 
-use CatUtils;
 use Comments_CommentStruct;
 use Users_UserStruct;
 

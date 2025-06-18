@@ -3,7 +3,6 @@
 namespace Views;
 
 use AbstractControllers\BaseKleinViewController;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 
 class SignInController extends BaseKleinViewController {

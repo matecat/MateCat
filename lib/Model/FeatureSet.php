@@ -8,6 +8,8 @@ use Features\BaseFeature;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
+use TemplateDecorator\AbstractDecorator;
+use TemplateDecorator\ArgumentInterface;
 
 /**
  * Created by PhpStorm.
@@ -279,7 +281,7 @@ class FeatureSet implements FeatureSetInterface {
      *
      * @throws Exception
      */
-    public function appendDecorators( string $name, IController $controller, PHPTAL $template ) {
+    public function appendDecorators( string $name, IController $controller, PHPTAL $template, ?ArgumentInterface $arguments = null ) {
 
         foreach ( $this->features as $feature ) {
 
@@ -287,7 +289,7 @@ class FeatureSet implements FeatureSetInterface {
             if ( !empty( $cls ) ) {
                 /** @var AbstractDecorator $obj */
                 $obj = new $cls( $controller, $template );
-                $obj->decorate();
+                $obj->decorate( $arguments );
             }
 
         }

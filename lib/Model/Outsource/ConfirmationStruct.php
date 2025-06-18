@@ -10,8 +10,8 @@
 namespace Outsource;
 
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 abstract class ConfirmationStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

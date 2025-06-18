@@ -38,13 +38,14 @@ use ReflectionException;
 use stdClass;
 use TeamModel;
 use Teams\MembershipStruct;
-use Traits\SourcePageGuesser;
+use TemplateDecorator\CatDecoratorArguments;
+use Traits\APISourcePageGuesser;
 use Users_UserDao;
 use Utils;
 
 class CattoolController extends BaseKleinViewController {
 
-    use SourcePageGuesser;
+    use APISourcePageGuesser;
 
     protected function afterConstruct() {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
@@ -59,9 +60,9 @@ class CattoolController extends BaseKleinViewController {
                 ],
         ];
 
-        $result                  = filter_var_array( $this->request->paramsNamed()->all(), $filterArgs );
-        $this->received_password = $result[ 'password' ];
-        $this->id_job            = $result[ 'jid' ];
+        $result                 = filter_var_array( $this->request->paramsNamed()->all(), $filterArgs );
+        $this->request_password = $result[ 'password' ];
+        $this->id_job           = $result[ 'jid' ];
 
         return $result;
     }
@@ -86,6 +87,7 @@ class CattoolController extends BaseKleinViewController {
         $result = [
                 'chunk'             => null,
                 'chunkReviewStruct' => null,
+                'isRevision'        => $isRevision,
         ];
 
         if ( $isRevision ) {
@@ -113,7 +115,7 @@ class CattoolController extends BaseKleinViewController {
 
         $chunkAndPasswords = new stdClass();
         $request           = $this->validateTheRequest();
-        $isRevision        = $this->isRevision();
+        $isRevision        = CatUtils::getIsRevisionFromRequestUri();
         $revisionNumber    = null;
 
         try {
@@ -165,7 +167,7 @@ class CattoolController extends BaseKleinViewController {
                 'isCJK'                                 => new PHPTalBoolean( CatUtils::isCJK( $chunkStruct->source ) ),
                 'isGDriveProject'                       => new PHPTalBoolean( Projects_ProjectDao::isGDriveProject( $chunkStruct->id_project ) ),
                 'isOpenAiEnabled'                       => new PHPTalBoolean( !empty( INIT::$OPENAI_API_KEY ) ),
-                'isRevision'                            => new PHPTalBoolean( $isRevision ),
+                'isReview'                              => new PHPTalBoolean( $isRevision ),
                 'isSourceRTL'                           => new PHPTalBoolean( Languages::getInstance()->isRTL( $chunkStruct->source ) ),
                 'isTargetRTL'                           => new PHPTalBoolean( Languages::getInstance()->isRTL( $chunkStruct->target ) ),
                 'jobOwnerIsMe'                          => new PHPTalBoolean( $jobOwnership[ 'jobOwnerIsMe' ] ),
@@ -184,7 +186,7 @@ class CattoolController extends BaseKleinViewController {
                 'project_plugins'                       => new PHPTalMap( $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() ) ),
                 'quality_report_href'                   => INIT::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
                 'review_extended'                       => new PHPTalBoolean( true ),
-                'review_password'                       => $chunkReviewStruct->review_password,
+                'review_password'                       => $isRevision ? $chunkReviewStruct->review_password : ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $chunkStruct, Utils::getSourcePage() + 1 )[ 0 ]->review_password,
                 'revisionNumber'                        => $revisionNumber,
                 'searchable_statuses'                   => new PHPTalMap( $this->searchableStatuses() ),
                 'secondRevisionsCount'                  => count( ChunkReviewDao::findByProjectId( $chunkStruct->getProject()->id ) ),
@@ -244,10 +246,18 @@ class CattoolController extends BaseKleinViewController {
             );
         }
 
+        $wStruct = CatUtils::getWStructFromJobArray( $chunkStruct, $chunkStruct->getProject() );
+
         $this->featureSet->appendDecorators(
                 'CatDecorator',
                 $this,
-                $this->view
+                $this->view,
+                new CatDecoratorArguments(
+                        $chunkStruct,
+                        $isRevision,
+                        CatUtils::getWStructFromJobArray( $chunkStruct, $chunkStruct->getProject() ),
+                        $chunkReviewStruct
+                )
         );
 
         $this->_saveActivity( $chunkStruct->id, $chunkStruct->getProject()->id, $isRevision );
@@ -280,7 +290,7 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     private function notFound() {
-        $this->setView( 'job_not_found . html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
+        $this->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
         $this->render();
     }
 
@@ -288,7 +298,7 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     private function cancelled( array $jobOwnership ) {
-        $this->setView( 'job_cancelled . html', [
+        $this->setView( 'job_cancelled.html', [
                 "support_mail" => INIT::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
         ] );
@@ -299,7 +309,7 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     private function archived( int $job_id, string $password, array $jobOwnership ) {
-        $this->setView( 'job_archived . html', [
+        $this->setView( 'job_archived.html', [
                 "support_mail" => INIT::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
                 "jid"          => $job_id,

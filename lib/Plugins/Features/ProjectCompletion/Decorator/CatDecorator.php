@@ -2,58 +2,59 @@
 
 namespace Features\ProjectCompletion\Decorator;
 
-use AbstractDecorator;
-use catController;
+use CatUtils;
 use Chunks_ChunkCompletionEventDao;
+use Exception;
 use Projects_MetadataDao;
+use TemplateDecorator\AbstractDecorator;
+use TemplateDecorator\ArgumentInterface;
+use TemplateDecorator\CatDecoratorArguments;
 
 class CatDecorator extends AbstractDecorator {
 
-    /** @var  catController */
-    protected $controller;
+    private array $stats;
 
-    private $stats;
+    private string $current_phase;
+    /**
+     * @var CatDecoratorArguments|null
+     */
+    private ?CatDecoratorArguments $arguments;
 
-    private $current_phase;
+    /**
+     * @param CatDecoratorArguments|null $arguments
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function decorate( ?ArgumentInterface $arguments = null ) {
 
-    public function decorate() {
-        $job = $this->controller->getChunk();
+        $this->arguments = $arguments;
+        $job             = $this->arguments->getJob();
 
-        $this->stats = $this->controller->getJobStats();
-        $completed   = $job->isMarkedComplete( [ 'is_review' => $this->controller->isRevision() ] );
+        $this->stats = CatUtils::getFastStatsForJob( $this->arguments->getWordCountStruct() );
+        $completed   = $job->isMarkedComplete( [ 'is_review' => $this->arguments->isRevision() ] );
 
         $lastCompletionEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
-                $job, [ 'is_review' => $this->controller->isRevision() ]
+                $job, [ 'is_review' => $this->arguments->isRevision() ]
         );
 
         $dao                 = new Chunks_ChunkCompletionEventDao();
-        $this->current_phase = $dao->currentPhase( $this->controller->getChunk() );
+        $this->current_phase = $dao->currentPhase( $this->arguments->getJob() );
 
-        $displayButton = true;
-        $displayButton = $job->getProject()->getFeaturesSet()->filter( 'filterProjectCompletionDisplayButton', $displayButton, $this );
+        $this->template->{'project_completion_feature_enabled'} = true;
+        $this->template->{'header_main_button_id'}              = 'markAsCompleteButton';
+        $this->template->{'job_completion_current_phase'}       = $this->current_phase;
 
-        if ( $displayButton ) {
-            $this->template->{'project_completion_feature_enabled'} = true;
-            $this->template->{'header_main_button_id'}              = 'markAsCompleteButton';
-            $this->template->{'job_completion_current_phase'}       = $this->current_phase;
-
-            if ( $lastCompletionEvent ) {
-                $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent[ 'id_event' ];
-            }
-
-            if ( $completed ) {
-                $this->varsForComplete();
-            } else {
-                $this->varsForUncomplete();
-            }
+        if ( $lastCompletionEvent ) {
+            $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent[ 'id_event' ];
         }
-    }
 
-    /**
-     * @return catController
-     */
-    public function getController() {
-        return $this->controller;
+        if ( $completed ) {
+            $this->varsForComplete();
+        } else {
+            $this->varsForUncomplete();
+        }
+
     }
 
     private function varsForUncomplete() {
@@ -77,11 +78,11 @@ class CatDecorator extends AbstractDecorator {
         $this->template->{'mark_as_complete_button_enabled'} = false;
     }
 
-    private function completable() {
+    private function completable(): bool {
 
-        if ( $this->controller->getChunk()->getProject()->getWordCountType() != Projects_MetadataDao::WORD_COUNT_RAW ) {
+        if ( $this->arguments->getJob()->getProject()->getWordCountType() != Projects_MetadataDao::WORD_COUNT_RAW ) {
 
-            if ( $this->controller->isRevision() ) {
+            if ( $this->arguments->isRevision() ) {
                 $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
                         $this->stats[ 'DRAFT' ] == 0 &&
                         ( $this->stats[ 'APPROVED' ] + $this->stats[ 'REJECTED' ] ) > 0;
@@ -92,7 +93,7 @@ class CatDecorator extends AbstractDecorator {
 
         } else {
 
-            if ( $this->controller->isRevision() ) {
+            if ( $this->arguments->isRevision() ) {
                 $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
                         $this->stats[ 'raw' ][ 'draft' ] == 0 && $this->stats[ 'raw' ][ 'new' ] == 0 &&
                         ( $this->stats[ 'raw' ][ 'approved' ] + $this->stats[ 'raw' ][ 'approved2' ] + $this->stats[ 'raw' ][ 'rejected' ] ) > 0;

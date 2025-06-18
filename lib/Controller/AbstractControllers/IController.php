@@ -30,4 +30,6 @@ interface IController {
      */
     public function setFeatureSet( FeatureSet $featureSet );
 
+    public function isView(): bool;
+
 }

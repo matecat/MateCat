@@ -9,8 +9,6 @@
 
 namespace Translators;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
 use Users_UserDao;
 use Users_UserStruct;
 

@@ -20,12 +20,12 @@ use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
-use Traits\SourcePageGuesser;
+use Traits\APISourcePageGuesser;
 use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    use SourcePageGuesser;
+    use APISourcePageGuesser;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -225,8 +225,8 @@ class GetContributionController extends KleinController {
             throw new InvalidArgumentException( "missing id_client", -5 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_client'           => $id_client,

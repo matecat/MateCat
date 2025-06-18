@@ -10,7 +10,6 @@ use Features\BaseFeature;
 use Features\ReviewExtended;
 use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\TranslationEvents\Model\TranslationEvent;
-use Klein\Request;
 use LQA\ChunkReviewStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;

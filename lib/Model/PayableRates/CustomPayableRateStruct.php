@@ -3,8 +3,8 @@
 namespace PayableRates;
 
 use Analysis\PayableRates;
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;

@@ -39,7 +39,7 @@ use Segments_SegmentOriginalDataDao;
 use Segments_SegmentStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Traits\SourcePageGuesser;
+use Traits\APISourcePageGuesser;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use TranslationsSplit_SplitDAO;
@@ -49,7 +49,7 @@ use WordCount\WordCountStruct;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 
-    use SourcePageGuesser;
+    use APISourcePageGuesser;
 
     /**
      * @var array
@@ -453,7 +453,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
         $this->id_job            = $id_job;
         $this->password          = $password;
-        $this->received_password = $received_password;
+        $this->request_password = $received_password;
 
         $data = [
                 'id_job'                  => $id_job,

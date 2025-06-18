@@ -7,7 +7,7 @@ use Filters\DTO\IDto;
 use Filters\FiltersConfigTemplateDao;
 use Filters\FiltersConfigTemplateStruct;
 
-define( "DIRSEP", "//" );
+const DIRSEP = "//";
 
 class UploadHandler {
 

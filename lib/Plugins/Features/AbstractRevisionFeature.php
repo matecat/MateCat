@@ -118,35 +118,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * filter_review_password_to_job_password
-     *
-     * If this method is reached it means that the project we are
-     * working on has ReviewExtended feature enabled, and that we
-     * are in review mode.
-     *
-     * Assuming the provided password is a "review_password".
-     * This review password is checked against the `qa_chunk_reviews`.
-     * If not found, raise an exception.
-     * If found, override the input password with job password.
-     *
-     * @param string $review_password
-     * @param int    $id_job
-     * @param int    $source_page
-     *
-     * @return ChunkReviewStruct
-     * @throws NotFoundException
-     */
-    public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) { // XXX REMOVE THIS METHOD
-        $chunk_review = ( new ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
-
-        if ( !$chunk_review ) {
-            throw new NotFoundException( 'Review record was not found' );
-        }
-
-        return $chunk_review;
-    }
-
-    /**
      * @param $password
      * @param $id_job
      *

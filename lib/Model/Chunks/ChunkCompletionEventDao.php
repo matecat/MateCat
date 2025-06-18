@@ -92,7 +92,10 @@ class Chunks_ChunkCompletionEventDao extends AbstractDao {
     }
 
 
-    public function currentPhase( Jobs_JobStruct $chunk ) {
+    /**
+     * @throws Exception
+     */
+    public function currentPhase( Jobs_JobStruct $chunk ): string {
         $lastTranslate = $this->lastCompletionRecord( $chunk, [ 'is_review' => false ] );
         if ( $lastTranslate ) {
             $lastRevise = $this->lastCompletionRecord( $chunk, [ 'is_review' => true ] );

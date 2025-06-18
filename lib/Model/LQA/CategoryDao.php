@@ -4,7 +4,6 @@ namespace LQA;
 
 use DataAccess\AbstractDao;
 use PDO;
-use ReflectionException;
 
 class CategoryDao extends AbstractDao {
     const TABLE = 'qa_categories';

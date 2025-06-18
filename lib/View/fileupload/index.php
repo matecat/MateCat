@@ -10,7 +10,7 @@ require_once realpath( dirname( __FILE__ ) . '/../../../' ) . '/inc/Bootstrap.ph
 @Bootstrap::start();
 @Bootstrap::sessionStart();
 @Bootstrap::sessionClose();
-require_once( 'upload.class.php' );
+require_once( 'UploadHandler.php' );
 
 $upload_handler = new UploadHandler();
 

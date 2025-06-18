@@ -35,7 +35,7 @@ function route( string $path, string $method, array $callback ) {
         $reflect = new ReflectionClass( $callback[ 0 ] );
         /** @var KleinController $instance */
         $instance = $reflect->newInstanceArgs( func_get_args() );
-        $isView   = $instance instanceof BaseKleinViewController;
+        $isView   = $instance->isView();
         $instance->respond( $callback[ 1 ] );
     } );
 }

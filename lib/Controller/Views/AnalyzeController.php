@@ -14,7 +14,6 @@ use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
-use API\App\Json\Analysis\AnalysisProject;
 use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Chunks_ChunkDao;
 use Exception;
@@ -23,7 +22,6 @@ use Jobs_JobDao;
 use Model\Analysis\Status;
 use PHPTalBoolean;
 use PHPTalMap;
-use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Utils;
 

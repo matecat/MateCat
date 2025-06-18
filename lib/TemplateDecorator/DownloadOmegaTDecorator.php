@@ -10,16 +10,9 @@ use TMS\TMSService;
  * Time: 11.58
  *
  */
-
-
 class DownloadOmegaTDecorator extends AbstractDecorator {
 
-    /**
-     * @var downloadController
-     */
-    protected $controller;
-
-    public function decorate() {
+    public function decorate( ?ArgumentInterface $arguments = null ) {
 
         $output_content = [];
 
@@ -138,8 +131,8 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
         // Close and send to users
         $zip->close();
-        $zip_content                  = new ZipContentObject();
-        $zip_content->input_filename  = $file;
+        $zip_content                 = new ZipContentObject();
+        $zip_content->input_filename = $file;
 
         $this->controller->setOutputContent( $zip_content );
 
