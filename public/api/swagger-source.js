@@ -65,7 +65,7 @@ var spec = {
             name: 'files[]',
             in: 'formData',
             description:
-              'The file(s) to be uploaded. You may also upload your own translation memories (TMX). To upload multiple files, add more files[] fields.',
+                'The file(s) to be uploaded, supported file formats <a href="#file-format">available here</a>. You may also upload TMX files, which will trigger the creation of a new translation memory in the account.',
             required: true,
             type: 'file',
           },
@@ -177,6 +177,7 @@ var spec = {
             type: 'string',
           },
           {
+<<<<<<< HEAD
             name: 'speech2text',
             in: 'formData',
             description:
@@ -186,6 +187,8 @@ var spec = {
             default: 0,
           },
           {
+=======
+>>>>>>> remove-unused-params-from-api-v1
             name: 'get_public_matches',
             in: 'formData',
             description: 'Enable suggestions from the Public TM',
