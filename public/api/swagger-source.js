@@ -177,18 +177,6 @@ var spec = {
             type: 'string',
           },
           {
-<<<<<<< HEAD
-            name: 'speech2text',
-            in: 'formData',
-            description:
-              'Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.',
-            required: false,
-            type: 'integer',
-            default: 0,
-          },
-          {
-=======
->>>>>>> remove-unused-params-from-api-v1
             name: 'get_public_matches',
             in: 'formData',
             description: 'Enable suggestions from the Public TM',
