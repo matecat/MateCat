@@ -131,6 +131,11 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      */
     protected function setMatchCategory( ?string $matchCategory = null ): void {
 
+        // Ensure retrocompatibility for previously saved models
+        if($matchCategory == "mt"){
+            $matchCategory = StandardMatchTypeNamesConstants::_MT;
+        }
+
         if ( !empty( $matchCategory ) && !in_array( $matchCategory, StandardMatchTypeNamesConstants::forValue() ) ) {
             throw new DomainException( "Wrong match_category value", 400 );
         } elseif ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW && !empty( $matchCategory ) ) {
