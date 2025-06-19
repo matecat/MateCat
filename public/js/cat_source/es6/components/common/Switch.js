@@ -9,6 +9,7 @@ const Switch = ({
   onClick = () => {},
   className = '',
   testId,
+  showText = true,
   activeText = 'Active',
   disabledText = 'Unavailable',
   inactiveText = 'Inactive',
@@ -32,12 +33,14 @@ const Switch = ({
 
         <span></span>
       </label>
-      {disabled && disabledText ? (
-        <span className="switch-container-disabled">{disabledText}</span>
-      ) : active && activeText ? (
-        <span className="switch-container-active">{activeText}</span>
-      ) : !active && inactiveText ? (
-        <span className="switch-container-inactive">{inactiveText}</span>
+      {showText ? (
+        disabled && disabledText ? (
+          <span className="switch-container-disabled">{disabledText}</span>
+        ) : active && activeText ? (
+          <span className="switch-container-active">{activeText}</span>
+        ) : !active && inactiveText ? (
+          <span className="switch-container-inactive">{inactiveText}</span>
+        ) : null
       ) : null}
     </div>
   )
