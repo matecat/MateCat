@@ -28,17 +28,24 @@ class FilterProjects extends React.Component {
 
   onChangeSearchInput(value) {
     this.currentText = value
-    let self = this
+    const {currentStatus, currentUser} = this.state
+
     ManageActions.filterProjects(
-      self.selectedUser,
-      self.currentText,
-      self.state.currentStatus,
+      typeof currentUser === 'object' ? currentUser.user.uid : value,
+      value,
+      currentStatus,
     )
   }
 
   filterByStatus(status) {
     this.setState({currentStatus: status})
-    ManageActions.filterProjects(this.selectedUser, this.currentText, status)
+    const {currentUser} = this.state
+
+    ManageActions.filterProjects(
+      typeof currentUser === 'object' ? currentUser.user.uid : value,
+      this.currentText,
+      status,
+    )
   }
 
   shouldComponentUpdate(nextProps, nextState) {

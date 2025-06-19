@@ -1,79 +1,52 @@
-import React from 'react'
-
+import React, {useState} from 'react'
+import PropTypes from 'prop-types'
+import {
+  DropdownMenu,
+  DROPDOWN_MENU_ALIGN,
+} from '../../common/DropdownMenu/DropdownMenu'
+import {BUTTON_MODE, BUTTON_SIZE} from '../../common/Button/Button'
 import IconFilter from '../../icons/IconFilter'
-import IconTick from '../../icons/IconTick'
 
-class FilterProjectsStatus extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      status: ['active', 'archived', 'cancelled'],
-      currentStatus: 'active',
-    }
+const STATES = [
+  {label: 'Active', value: 'active'},
+  {label: 'Archived', value: 'archived'},
+  {label: 'Cancelled', value: 'cancelled'},
+]
 
-    this.onChangeFunction = this.onChangeFunction.bind(this)
-  }
+const FilterProjectsStatus = ({filterFunction}) => {
+  const [currentState, setCurrentState] = useState(STATES[0].value)
 
-  componentDidMount() {
-    let self = this
+  const items = STATES.map(({label, value}) => ({
+    label,
+    selected: value === currentState,
+    onClick: () => {
+      filterFunction(value)
+      setCurrentState(value)
+    },
+  }))
 
-    const {currentStatus} = this.state
+  return (
+    <DropdownMenu
+      dropdownClassName="filter-project-status-dropdown"
+      align={DROPDOWN_MENU_ALIGN.RIGHT}
+      toggleButtonProps={{
+        mode: BUTTON_MODE.BASIC,
+        size: BUTTON_SIZE.STANDARD,
+        className: 'filter-project-status-dropdown-trigger',
+        children: (
+          <>
+            <IconFilter width={36} height={36} color={'#002b5c'} />
+            {STATES.find(({value}) => value === currentState)?.label}
+          </>
+        ),
+      }}
+      items={items}
+    />
+  )
+}
 
-    $(this.dropdown).dropdown({
-      onChange: function () {
-        self.onChangeFunction()
-      },
-    })
-    this.currentFilter = currentStatus
-    $(this.dropdown).dropdown('set selected', currentStatus)
-  }
-
-  onChangeFunction() {
-    if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
-      this.props.filterFunction($(this.dropdown).dropdown('get value'))
-      this.currentFilter = $(this.dropdown).dropdown('get value')
-
-      this.setState({
-        currentStatus: this.currentFilter,
-      })
-    }
-  }
-
-  componentDidUpdate() {}
-
-  render = () => {
-    const {status} = this.state
-
-    return (
-      <div
-        className="ui top left pointing dropdown"
-        title="Status Filter"
-        ref={(dropdown) => (this.dropdown = dropdown)}
-        data-testid="status-filter"
-      >
-        <IconFilter width={36} height={36} color={'#002b5c'} />
-        <div style={{textTransform: 'capitalize'}} className="text">
-          Active
-        </div>
-        <div className="menu">
-          {status.map((e, i) => (
-            <div
-              style={{textTransform: 'capitalize'}}
-              key={i}
-              className="item"
-              data-value={e}
-              data-testid={`item-${e}`}
-            >
-              {e}{' '}
-              {e === this.currentFilter ? (
-                <IconTick width={14} height={14} color={'#ffffff'} />
-              ) : null}
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
+FilterProjectsStatus.propTypes = {
+  filterFunction: PropTypes.func,
 }
 
 export default FilterProjectsStatus

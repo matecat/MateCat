@@ -115,22 +115,24 @@
   }
 }
 
-/*.cta-create-team {
-    margin-top: 10px;
-    float: left;
-}*/
+.filter-project-status-dropdown-trigger {
+  gap: 0 !important;
+  border-radius: 0 !important;
+  opacity: 0.4;
+  margin-left: 1px;
 
-// New Style for the Search Bar Example
-
-/*
-.ui.fluid.input > input {
-	background-color: #6f6f6f;
-	box-shadow: none;
+  &:hover,
+  &[data-state='open'] {
+    opacity: 1;
+  }
 }
+.filter-project-status-dropdown {
+  min-width: 140px;
 
-.ui.labeled.input > .label {
-	background: #6f6f6f;
-	border-left: 1px solid #4d4d4d;
-	color: white;
-	font-weight: 100;
-}*/
+  .dropdownmenu-item {
+    &:not([data-disabled]).selected {
+      background-color: #00254f !important;
+      color: white !important;
+    }
+  }
+}
