@@ -340,18 +340,22 @@ class ChunkReviewDao extends AbstractDao {
     }
 
     /**
-     * @return ChunkReviewStruct[]
+     * @param int $id_project
+     * @param int $ttl
+     *
+     * @return array
+     * @throws ReflectionException
      */
-
-    public static function findByProjectId( $id_project ) {
-        $sql  = "SELECT * FROM qa_chunk_reviews " .
+    public static function findByProjectId( int $id_project, int $ttl = 60 * 60 ): array {
+        $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE id_project = :id_project ORDER BY id ";
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute( [ 'id_project' => $id_project ] );
 
-        return $stmt->fetchAll();
+        $self = new self();
+        $self->setCacheTTL( $ttl );
+        $stmt = $self->_getStatementForQuery( $sql );
+
+        return $self->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
+
     }
 
     /**
@@ -405,25 +409,24 @@ class ChunkReviewDao extends AbstractDao {
 
     /**
      * @return ChunkReviewStruct
+     * @throws ReflectionException
      */
-    public function findByJobIdReviewPasswordAndSourcePage( $id_job, $review_password, $source_page ) {
+    public function findByJobIdReviewPasswordAndSourcePage( int $id_job, string $review_password, int $source_page, int $ttl = 60 * 60 ): ?ChunkReviewStruct {
         $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE review_password = :review_password " .
                 " AND id_job = :id_job " .
                 " AND source_page = :source_page ";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkReviewStruct::class );
-        $stmt->execute(
-                [
-                        'review_password' => $review_password,
-                        'id_job'          => $id_job,
-                        'source_page'     => $source_page
-                ]
-        );
+        $this->setCacheTTL( $ttl );
+        $stmt = $this->_getStatementForQuery( $sql );
+        /** @var $retValue ChunkReviewStruct */
+        $retValue = $this->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [
+                'review_password' => $review_password,
+                'id_job'          => $id_job,
+                'source_page'     => $source_page
+        ] )[ 0 ] ?? null;
 
-        return $stmt->fetch();
+        return $retValue;
     }
 
 

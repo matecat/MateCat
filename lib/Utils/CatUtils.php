@@ -109,13 +109,6 @@ class CatUtils {
         return [ $hours, $minutes, $seconds, $usec ];
     }
 
-    public static function dos2unix( string $dosString ): string {
-        $dosString = str_replace( "\r\n", "\r", $dosString );
-        $dosString = str_replace( "\n", "\r", $dosString );
-
-        return str_replace( "\r", "\n", $dosString );
-    }
-
     /**
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
@@ -290,7 +283,6 @@ class CatUtils {
          * @see https://regex101.com/r/oQFKn8/5
          *
          */
-        $linkRegexp = '%(?:[a-z]+://|//)?(?:\S+(?::\S*)?@)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|(?:(?:\S\S{0,62})?\S\.)+\S{2,}\.?)(?::\d{2,5})?(?:[/?#]\S*)?\b%ui';
         $linkRegexp = '%(?:[a-z]+://|//)?(?:[\p{Latin}\d\-_]+)?[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#?=.\-_]+%ui';
 
         $link_placeholder      = ' L ';
@@ -556,7 +548,7 @@ class CatUtils {
         $entityDecoded = html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
         // parse and extract CDATA
-        preg_match_all( '/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches );
+        preg_match_all( '/<!\[CDATA\[((?:[^]]|](?!]>))*)]]>/', $entityDecoded, $cdataMatches );
 
         if ( isset( $cdataMatches[ 1 ] ) and !empty( $cdataMatches[ 1 ] ) ) {
             foreach ( $cdataMatches[ 1 ] as $k => $m ) {
@@ -614,15 +606,11 @@ class CatUtils {
 
         $is_pass = $values->is_pass;
 
-        if ( $is_pass == true ) {
+        if ( $is_pass ) {
             return 'excellent';
         }
 
-        if ( $is_pass == false ) {
-            return 'fail';
-        }
-
-        return null;
+        return 'fail';
     }
 
     /**
@@ -741,7 +729,7 @@ class CatUtils {
         }
 
         // Parse the referer URL to extract its components
-        $_from_url = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
+        $_from_url = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
 
         // Check if the path corresponds to a "revise" operation
         return self::isARevisePath( $_from_url[ 'path' ] );
@@ -836,37 +824,6 @@ class CatUtils {
         $idJobs = array_unique( $idJobs );
 
         return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
-    }
-
-    /**
-     * This function appends _{x} to a string.
-     *
-     * Example: house   ---> house_1
-     *          house_1 ---> house_2
-     *
-     * @param string $string
-     *
-     * @return string
-     */
-    public static function upCountName( string $string ): string {
-
-        if ( empty( $string ) ) {
-            return Utils::randomString();
-        }
-
-        $a   = explode( "_", $string );
-        $end = (int)end( $a );
-
-        if ( ( $end > 0 ) and count( $a ) > 1 ) {
-            array_pop( $a );
-        }
-
-        $name = implode( '_', $a );
-
-        $return = $name;
-        $return .= '_' . ( $end + 1 );
-
-        return $return;
     }
 
     /**

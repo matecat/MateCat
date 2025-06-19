@@ -15,11 +15,11 @@ use Klein\Response;
 use Klein\ServiceProvider;
 use Log;
 use ReflectionException;
-use Traits\TimeLogger;
+use Traits\TimeLoggerTrait;
 
 abstract class KleinController implements IController {
 
-    use TimeLogger;
+    use TimeLoggerTrait;
     use AuthenticationTrait;
 
     protected bool $useSession = false;
@@ -133,11 +133,11 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @param $method
+     * @param string $method
      *
      * @throws Exception
      */
-    public function respond( $method ) {
+    public function respond( string $method ) {
 
         $this->performValidations();
 

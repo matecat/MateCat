@@ -8,8 +8,8 @@ use Features\BaseFeature;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use TemplateDecorator\AbstractDecorator;
-use TemplateDecorator\ArgumentInterface;
+use Views\TemplateDecorator\AbstractDecorator;
+use Views\TemplateDecorator\Arguments\ArgumentInterface;
 
 /**
  * Created by PhpStorm.
@@ -42,7 +42,7 @@ class FeatureSet implements FeatureSetInterface {
      */
     public function __construct( $features = null ) {
         if ( is_null( $features ) ) {
-            $this->__loadFromMandatory();
+            $this->loadFromMandatory();
         } else {
 
             $_features = [];
@@ -93,12 +93,13 @@ class FeatureSet implements FeatureSetInterface {
     }
 
     /**
+     * Reset all existing features and load the mandatory ones.
      * Load features that should be enabled on project scope.
      *
-     * This fetures include
+     * Those features include:
      *
-     * 1. the ones explicity defined `project_metadata`;
-     * 2. the ones in autoload array that can be forcedly enabled on project.
+     * 1. The ones explicitly defined `project_metadata`;
+     * 2. The ones in the autoloaded array that can be forcedly enabled on a project.
      *
      * @param Projects_ProjectStruct $project
      *
@@ -142,13 +143,22 @@ class FeatureSet implements FeatureSetInterface {
     }
 
     /**
+     * Loads features associated with a user based on their email.
      *
-     * @param $id_customer
+     * This method retrieves features linked to the specified customer ID,
+     * clears the current feature set, loads mandatory features, and merges
+     * the retrieved features into the feature set.
      *
-     * @throws Exception
+     * @param string $id_customer The ID of the customer whose features are to be loaded.
+     *
+     * @return void
+     * @throws Exception If an error occurs during the merging process.
      */
-    public function loadFromUserEmail( $id_customer ) {
+    public function loadFromUserEmail( string $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $this->clear();
+        $this->_setIgnoreDependencies( false );
+        $this->loadFromMandatory();
         $this->merge( $features );
     }
 
@@ -159,7 +169,7 @@ class FeatureSet implements FeatureSetInterface {
      * @throws Exception
      */
     public function loadForceableProjectFeatures() {
-        $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
+        $returnable = array_filter( $this->getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
 
             return $concreteClass->isForceableOnProject();
@@ -172,15 +182,15 @@ class FeatureSet implements FeatureSetInterface {
      * Loads features that can be activated automatically on proejct, i.e. those that
      * don't require a parameter to be passed from the UI.
      *
-     * This functions does some transformation in order to leverage `autoActivateOnProject()` function
+     * This functions does some transformation to leverage `autoActivateOnProject()` function
      * which is defined on the concrete feature class.
      *
      * So it does the following:
      *
-     * 1. find all owner_features for the given user
-     * 2. instantiate a concrete feature class for each record
-     * 3. filter the list based on the return of autoActivateOnProject()
-     * 4. populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
+     * 1. Find all owner_features for the given user
+     * 2. Instantiate a concrete feature class for each record
+     * 3. Filter the list based on the return of autoActivateOnProject()
+     * 4. Populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
      *
      * @param $id_customer
      *
@@ -308,7 +318,7 @@ class FeatureSet implements FeatureSetInterface {
 
 
         $toBeSorted     = array_values( $this->features );
-        $sortedFeatures = $this->_quickSort( $toBeSorted );
+        $sortedFeatures = $this->quickSort( $toBeSorted );
 
         $this->clear();
         foreach ( $sortedFeatures as $value ) {
@@ -326,7 +336,7 @@ class FeatureSet implements FeatureSetInterface {
      *
      * @return BasicFeatureStruct[]
      */
-    private function _quickSort( array $featureStructsList ): array {
+    private function quickSort( array $featureStructsList ): array {
 
         $length = count( $featureStructsList );
         if ( $length < 2 ) {
@@ -348,7 +358,7 @@ class FeatureSet implements FeatureSetInterface {
 
         }
 
-        return array_merge( $this->_quickSort( $leftBucket ), [ $firstInList ], $this->_quickSort( $rightBucket ) );
+        return array_merge( $this->quickSort( $leftBucket ), [ $firstInList ], $this->quickSort( $rightBucket ) );
 
     }
 
@@ -356,7 +366,7 @@ class FeatureSet implements FeatureSetInterface {
      * Foe each feature Load it's defined dependencies
      * @throws Exception
      */
-    private function _loadFeatureDependencies() {
+    private function loadFeatureDependencies() {
 
         $codes = $this->getCodes();
         foreach ( $this->features as $feature ) {
@@ -385,7 +395,7 @@ class FeatureSet implements FeatureSetInterface {
     private function merge( array $new_features ) {
 
         if ( !$this->_ignoreDependencies ) {
-            $this->_loadFeatureDependencies();
+            $this->loadFeatureDependencies();
         }
 
         $all_features    = [];
@@ -440,15 +450,15 @@ class FeatureSet implements FeatureSetInterface {
      *
      * @throws Exception
      */
-    private function __loadFromMandatory() {
-        $features = $this->__getAutoloadPlugins();
+    private function loadFromMandatory() {
+        $features = $this->getAutoloadPlugins();
         $this->merge( $features );
     }
 
     /**
      * @return array
      */
-    private function __getAutoloadPlugins(): array {
+    private function getAutoloadPlugins(): array {
         $features = [];
 
         if ( !empty( INIT::$AUTOLOAD_PLUGINS ) ) {

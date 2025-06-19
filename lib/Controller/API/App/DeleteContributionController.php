@@ -15,12 +15,12 @@ use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Traits\APISourcePageGuesser;
+use Traits\APISourcePageGuesserTrait;
 use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
-    use APISourcePageGuesser;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

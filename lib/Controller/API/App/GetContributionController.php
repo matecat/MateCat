@@ -20,12 +20,12 @@ use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
-use Traits\APISourcePageGuesser;
+use Traits\APISourcePageGuesserTrait;
 use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    use APISourcePageGuesser;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -203,7 +203,7 @@ class GetContributionController extends KleinController {
         if ( !$concordance_search ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
-            //because segment can be optional
+            //because the segment can be optional
             if ( empty( $id_segment ) ) {
                 throw new InvalidArgumentException( "missing id_segment", -1 );
             }

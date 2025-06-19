@@ -10,12 +10,12 @@ use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use ReflectionException;
-use Traits\APISourcePageGuesser;
+use Traits\APISourcePageGuesserTrait;
 use Utils;
 
 class SetChunkCompletedController extends KleinController {
 
-    use APISourcePageGuesser;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

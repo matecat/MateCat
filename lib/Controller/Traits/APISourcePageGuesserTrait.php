@@ -11,10 +11,10 @@ namespace Traits;
 
 use CatUtils;
 
-trait APISourcePageGuesser {
+trait APISourcePageGuesserTrait {
 
-    protected int     $id_job;
-    protected ?string $request_password = null;
+    protected int    $id_job;
+    protected string $request_password;
 
     /**
      * @return bool|null

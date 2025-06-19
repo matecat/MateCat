@@ -12,6 +12,8 @@ use Constants_TranslationStatus;
 use Exception;
 use Jobs_JobDao;
 use Langs\Languages;
+use PHPTalBoolean;
+use PHPTalMap;
 use Utils;
 
 /**
@@ -65,9 +67,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
                 'source_code'         => $jobStruct[ 'source' ],
                 'target_code'         => $jobStruct[ 'target' ],
-                'source_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ),
-                'target_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ),
-                'searchable_statuses' => $this->searchableStatuses(),
+                'source_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ) ),
+                'target_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ) ),
+                'searchable_statuses' => new PHPTalMap( $this->searchableStatuses() ),
 
         ] );
 

@@ -1,7 +1,16 @@
 <?php
 
+namespace Views\TemplateDecorator;
+
+use AbstractControllers\IController;
+use API\V2\AbstractDownloadController;
+use Exception;
 use FilesStorage\AbstractFilesStorage;
+use ReflectionException;
 use TMS\TMSService;
+use Views\TemplateDecorator\Arguments\ArgumentInterface;
+use ZipArchive;
+use ZipContentObject;
 
 /**
  * Created by PhpStorm.
@@ -10,9 +19,17 @@ use TMS\TMSService;
  * Time: 11.58
  *
  */
-class DownloadOmegaTDecorator extends AbstractDecorator {
+class DownloadOmegaTOutputDecorator extends AbstractDecorator {
 
-    public function decorate( ?ArgumentInterface $arguments = null ) {
+    /**
+     * @var AbstractDownloadController
+     */
+    protected IController $controller;
+
+    /**
+     * @throws Exception
+     */
+    public function decorate( ?ArgumentInterface $arguments = null ): array {
 
         $output_content = [];
 
@@ -28,9 +45,6 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         $tmsService = new TMSService();
         $tmsService->setOutputType( 'tm' );
 
-        /**
-         * @var $tmFile SplTempFileObject
-         */
         $tmFile = $tmsService->exportJobAsTMX(
                 $this->controller->id_job,
                 $this->controller->password,
@@ -41,9 +55,6 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
         $tmsService->setOutputType( 'mt' );
 
-        /**
-         * @var $mtFile SplTempFileObject
-         */
         $mtFile = $tmsService->exportJobAsTMX( $this->controller->id_job, $this->controller->password, $this->controller->getJob()->source, $this->controller->getJob()->target );
 
         $tm_id                    = uniqid( 'tm' );
@@ -53,7 +64,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
                 'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_TM . tmx"
         ];
 
-        foreach ( $tmFile as $lineNumber => $content ) {
+        foreach ( $tmFile as $content ) {
             $output_content[ $tm_id ][ 'document_content' ] .= $content;
         }
 
@@ -62,7 +73,7 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
                 'output_filename'  => $pathinfo[ 'filename' ] . "_" . $this->controller->getJob()->target . "_MT . tmx"
         ];
 
-        foreach ( $mtFile as $lineNumber => $content ) {
+        foreach ( $mtFile as $content ) {
             $output_content[ $mt_id ][ 'document_content' ] .= $content;
         }
 
@@ -70,6 +81,10 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function createOmegaTZip( $output_content ) {
 
         $file = tempnam( "/tmp", "zipmatecat" );
@@ -81,25 +96,25 @@ class DownloadOmegaTDecorator extends AbstractDecorator {
         $zip_fileDir   = $zip_baseDir . "inbox/";
         $zip_tm_mt_Dir = $zip_baseDir . "tm/";
 
-        $a[] = $zip->addEmptyDir( $zip_baseDir );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "glossary" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "inbox" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "omegat" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "target" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "terminology" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "tm" );
-        $a[] = $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
+        $zip->addEmptyDir( $zip_baseDir );
+        $zip->addEmptyDir( $zip_baseDir . "glossary" );
+        $zip->addEmptyDir( $zip_baseDir . "inbox" );
+        $zip->addEmptyDir( $zip_baseDir . "omegat" );
+        $zip->addEmptyDir( $zip_baseDir . "target" );
+        $zip->addEmptyDir( $zip_baseDir . "terminology" );
+        $zip->addEmptyDir( $zip_baseDir . "tm" );
+        $zip->addEmptyDir( $zip_baseDir . "tm/auto" );
 
         $rev_index_name = [];
 
         // Staff with content
         foreach ( $output_content as $key => $f ) {
 
-            $f[ 'output_filename' ] = downloadController::forceOcrExtension( $f[ 'output_filename' ] );
+            $f[ 'output_filename' ] = AbstractDownloadController::forceOcrExtension( $f[ 'output_filename' ] );
 
             //Php Zip bug, utf-8 not supported
-            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f[ 'output_filename' ] );
-            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
+            $fName = preg_replace( '/[^0-9a-zA-Z_.-]/u', "_", $f[ 'output_filename' ] );
+            $fName = preg_replace( '/_{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
             $fName = str_replace( '._', ".", $fName );
             $fName = str_replace( ".out.sdlxliff", ".sdlxliff", $fName );

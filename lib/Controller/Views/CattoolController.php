@@ -38,14 +38,11 @@ use ReflectionException;
 use stdClass;
 use TeamModel;
 use Teams\MembershipStruct;
-use TemplateDecorator\CatDecoratorArguments;
-use Traits\APISourcePageGuesser;
 use Users_UserDao;
 use Utils;
+use Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 
 class CattoolController extends BaseKleinViewController {
-
-    use APISourcePageGuesser;
 
     protected function afterConstruct() {
         $this->appendValidator( new ViewLoginRedirectValidator( $this ) );
@@ -131,8 +128,6 @@ class CattoolController extends BaseKleinViewController {
         /** @var  $chunkReviewStruct ?ChunkReviewStruct */
         $chunkReviewStruct = $chunkAndPasswords->chunkReviewStruct;
 
-        $this->featureSet->loadForProject( $chunkStruct->getProject() );
-
         $jobOwnership = $this->findOwnerEmailAndTeam( $chunkStruct->getProject() );
 
         if ( $chunkStruct->isCanceled() ) {
@@ -158,7 +153,7 @@ class CattoolController extends BaseKleinViewController {
                 'allow_link_to_analysis'                => new PHPTalBoolean( true ),
                 'chunk_completion_undoable'             => new PHPTalBoolean( true ),
                 'comments_enabled'                      => new PHPTalBoolean( INIT::$COMMENTS_ENABLED ),
-                'currentPassword'                       => $isRevision ? $chunkReviewStruct->review_password : $chunkReviewStruct->password,
+                'currentPassword'                       => $isRevision ? $chunkReviewStruct->review_password : $chunkStruct->password,
                 'footer_show_revise_link'               => new PHPTalBoolean( !$isRevision ),
                 'first_job_segment'                     => $chunkStruct->job_first_segment,
                 'id_job'                                => $chunkStruct->id,
@@ -183,7 +178,6 @@ class CattoolController extends BaseKleinViewController {
                 'password'                              => $chunkStruct->password,
                 'project'                               => $chunkStruct->getProject(),
                 'project_name'                          => $chunkStruct->getProject()->name,
-                'project_plugins'                       => new PHPTalMap( $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() ) ),
                 'quality_report_href'                   => INIT::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
                 'review_extended'                       => new PHPTalBoolean( true ),
                 'review_password'                       => $isRevision ? $chunkReviewStruct->review_password : ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $chunkStruct, Utils::getSourcePage() + 1 )[ 0 ]->review_password,
@@ -246,7 +240,11 @@ class CattoolController extends BaseKleinViewController {
             );
         }
 
-        $wStruct = CatUtils::getWStructFromJobArray( $chunkStruct, $chunkStruct->getProject() );
+        // reset the feature set and load only the features for the current project (plus the autoloaded ones)
+        $this->featureSet->loadForProject( $chunkStruct->getProject() );
+        $this->addParamsToView( [
+                'project_plugins' => new PHPTalMap( $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() ) ),
+        ] );
 
         $this->featureSet->appendDecorators(
                 'CatDecorator',

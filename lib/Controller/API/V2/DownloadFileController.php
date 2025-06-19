@@ -12,7 +12,6 @@ use ConnectedServices\Google\GDrive\RemoteFileService;
 use ConnectedServices\Google\GoogleProvider;
 use Conversion\Filters;
 use Conversion\ZipArchiveHandler;
-use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -24,6 +23,7 @@ use FilesStorage\S3FilesStorage;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Jobs_JobDao;
+use Jobs_JobStruct;
 use Langs\Languages;
 use Log;
 use LQA\ChunkReviewDao;
@@ -39,6 +39,7 @@ use ReflectionException;
 use RemoteFiles_RemoteFileDao;
 use Segments_SegmentDao;
 use Utils;
+use Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use XliffReplacer\XliffReplacerCallback;
 use ZipContentObject;
 
@@ -46,25 +47,25 @@ set_time_limit( 180 );
 
 class DownloadFileController extends AbstractDownloadController {
 
-    protected                 $download_type;
-    protected \Jobs_JobStruct $job;
-    protected                 $forceXliff;
-    protected $downloadToken;
+    protected string         $download_type;
+    protected Jobs_JobStruct $job;
+    protected bool           $forceXliff = false;
+    protected                $downloadToken;
 
     /**
      * @var RemoteFileService
      */
-    protected $remoteFileService;
+    protected RemoteFileService $remoteFileService;
 
-    protected $openOriginalFiles;
-    protected $id_file;
+    protected bool $openOriginalFiles = false;
+    protected ?int $id_file           = null;
 
-    protected $thereIsARemoteFile = null;
+    protected ?bool $thereIsARemoteFile = null;
 
     /**
-     * @var Google_Service_Drive_DriveFile
+     * @var Google_Service_Drive_DriveFile[]
      */
-    protected $remoteFiles = [];
+    protected array $remoteFiles = [];
 
     const FILES_CHUNK_SIZE = 3;
 
@@ -105,7 +106,7 @@ class DownloadFileController extends AbstractDownloadController {
      * @throws NotValidFileException
      * @throws ConnectionException
      */
-    private function downloadFile( $forceXliff = false ) {
+    private function downloadFile( bool $forceXliff = false ) {
         $__postInput = filter_var_array( $this->request->params(), [
                 'filename'      => [
                         'filter' => FILTER_SANITIZE_STRING,
@@ -164,12 +165,12 @@ class DownloadFileController extends AbstractDownloadController {
      * @throws Exception
      */
     private function processDownload() {
-        // get Job Info, we need only a row of jobs ( split )
-        $jobData = $this->job = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+        // get Job Info, we need only a row of jobs (split)
+        $jobData = $this->job = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
-            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, (int)$this->id_job );
+            $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, $this->id_job );
             $jobData           = $this->job = $chunkReviewStruct->getChunk();
         }
 
@@ -202,18 +203,18 @@ class DownloadFileController extends AbstractDownloadController {
          */
         $sDao = new Segments_SegmentDao();
 
-        //file array is chunked. Each chunk will be used for a parallel conversion request.
+        //File array is chunked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
         foreach ( $files_job as $chunk ) {
 
             $files_to_be_converted = [];
 
             foreach ( $chunk as $file ) {
-                $mime_type        = $file[ 'mime_type' ];
+
                 $fileID           = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
 
-                //get path for the output file converted to know its right extension
+                //get the path for the output file converted to know its right extension
                 $xliffFilePath = $file[ 'xliffFilePath' ];
 
                 $_fileName  = explode( DIRECTORY_SEPARATOR, $xliffFilePath );
@@ -231,7 +232,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                 foreach ( $data as $i => $k ) {
                     //create a secondary indexing mechanism on segments' array; this will be useful
-                    //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
+                    //prepend a string so non-trans unit id (ex: numerical) are not overwritten
                     $internalId = $k[ 'internal_id' ];
 
                     $transUnits[ $internalId ] [] = $i;
@@ -239,20 +240,9 @@ class DownloadFileController extends AbstractDownloadController {
                     $data[ 'matecat|' . $internalId ] [] = $i;
                 }
 
-                /**
-                 * Because of a bug in the filters for the cjk languages ( Exception when downloading translations )
-                 * we add an hook to allow some plugins to force the conversion parameters ( languages for example )
-                 * TODO: ( 25/05/2018 ) Remove when the issue will be fixed
-                 */
-                $_target_lang = $this->featureSet->filter(
-                        'changeXliffTargetLangCode',
-                        $jobData[ 'target' ]
-                        , $xliffFilePath
-                );
-
                 // if FileStorage is on S3, download the file on a temp dir
                 if ( AbstractFilesStorage::isOnS3() ) {
-                    $s3Client = S3FilesStorage::getStaticS3Client();
+                    $s3Client            = S3FilesStorage::getStaticS3Client();
                     $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
                     $params[ 'key' ]     = $xliffFilePath;
                     $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $xliffFilePath, PATHINFO_BASENAME );
@@ -262,7 +252,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                 $fileType = XliffProprietaryDetect::getInfo( $xliffFilePath );
 
-                // if data is empty copy the original file in the outputPath
+                // if data is empty, copy the original file in the outputPath
                 if ( empty( $data ) ) {
                     copy( $xliffFilePath, $outputPath );
                 } else {
@@ -270,12 +260,12 @@ class DownloadFileController extends AbstractDownloadController {
                     $xsp = new XliffParser();
 
                     // instantiateXliffReplacerCallback
-                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $_target_lang );
+                    $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ] );
 
                     // run xliff replacer
                     Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
                     $setSourceInTarget = $this->download_type === 'omegat';
-                    $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $_target_lang, $outputPath, $setSourceInTarget, $xliffReplacerCallback );
+                    $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $jobData[ 'target' ], $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
                     //free memory
                     unset( $xsp );
@@ -296,7 +286,7 @@ class DownloadFileController extends AbstractDownloadController {
                         // extension for the XLIFF behind the projects.
                         // Changing this behavior requires a huge refactoring that
                         // it's scheduled for future versions.
-                        // We quickly fixed the behaviour from the user standpoint
+                        // We quickly fixed the behavior from the user standpoint
                         // using the following line of code, that changes the XLIFF's
                         // extension just a moment before it is downloaded by the user.
                         $output_content[ $fileID ][ 'output_filename' ] = preg_replace( "|\\.sdlxliff$|i", ".xlf", $output_content[ $fileID ][ 'output_filename' ] );
@@ -309,10 +299,10 @@ class DownloadFileController extends AbstractDownloadController {
                  */
                 $convertBackToOriginal = true;
 
-                //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
+                //if it is a not converted file (sdlxliff), we have originalFile equals to xliffFile (it has just been copied)
                 if ( AbstractFilesStorage::isOnS3() ) {
-                    $originalFilePath = $file[ 'originalFilePath' ];
-                    $s3Client = S3FilesStorage::getStaticS3Client();
+                    $originalFilePath        = $file[ 'originalFilePath' ];
+                    $s3Client                = S3FilesStorage::getStaticS3Client();
                     $file[ 'original_file' ] = $s3Client->openItem( [
                             'bucket' => S3FilesStorage::getFilesStorageBucket(),
                             'key'    => $originalFilePath
@@ -373,7 +363,7 @@ class DownloadFileController extends AbstractDownloadController {
                         Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
                 );
 
-                //in case of .strings, they are required to be in UTF-16
+                //in the case of .strings, they are required to be in UTF-16
                 //get extension to perform file detection
                 $extension = AbstractFilesStorage::pathinfo_fix( $output_content[ $fileID ][ 'output_filename' ], PATHINFO_EXTENSION );
                 if ( strtoupper( $extension ) == 'STRINGS' ) {
@@ -406,7 +396,7 @@ class DownloadFileController extends AbstractDownloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $OtDownloadDecorator = new DownloadOmegaTDecorator( $this );
+            $OtDownloadDecorator = new DownloadOmegaTOutputDecorator( $this );
             $output_content      = array_merge( $output_content, $OtDownloadDecorator->decorate() );
             $OtDownloadDecorator->createOmegaTZip( $output_content );
 
@@ -454,8 +444,8 @@ class DownloadFileController extends AbstractDownloadController {
                         // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
-                        $filename = $this->generateFilename($oContent->output_filename);
-                        $pathinfo = pathinfo($filename);
+                        $filename = $this->generateFilename( $oContent->output_filename );
+                        $pathinfo = pathinfo( $filename );
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );
@@ -493,13 +483,14 @@ class DownloadFileController extends AbstractDownloadController {
                 Log::doJsonLog( 'Failed to delete dir:' . $e->getMessage() );
             }
 
-            $this->_saveActivity();
         }
+
+        $this->_saveActivity();
+
     }
 
     /**
      * @throws ReflectionException
-     * @throws ConnectionException
      */
     protected function _saveActivity() {
 
@@ -532,14 +523,14 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * Also, check for encoding and transform utf16 to utf8 and back
      *
-     * @param $documentContent
-     * @param $path
+     * @param string $documentContent
+     * @param string $path
      *
      * @return string
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
      */
-    public function ifGlobalSightXliffRemoveTargetMarks( $documentContent, $path ) {
+    public function ifGlobalSightXliffRemoveTargetMarks( string $documentContent, string $path ): string {
 
         if ( !XliffFiles::isXliff( $path ) ) {
             return $documentContent;
@@ -556,7 +547,7 @@ class DownloadFileController extends AbstractDownloadController {
 
         }
 
-        //avoid in memory copy of very large files if possible
+        //Let's avoid in-memory copy of very large files if possible
         $detect_result = XliffProprietaryDetect::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
 
         //clean mrk tags for GlobalSight application compatibility
@@ -568,7 +559,7 @@ class DownloadFileController extends AbstractDownloadController {
 
             foreach ( $trans_units as $pos => $trans_unit ) {
 
-                // First element in the XLIFF split is the header, not the first file
+                // The First element in the XLIFF split is the header, not the first file
                 if ( $pos > 0 ) {
 
                     //remove seg-source tags
@@ -594,13 +585,13 @@ class DownloadFileController extends AbstractDownloadController {
     }
 
     /**
-     * Initializes remoteFiles property reading entries from database
+     * Initializes remoteFiles property reading entries from the database
      *
-     * Cached result to avoid query executed more than once
+     * Cached result to avoid the query executed more than once
      *
      * @return bool
      */
-    private function anyRemoteFile() {
+    private function anyRemoteFile(): bool {
         if ( is_null( $this->thereIsARemoteFile ) ) {
             $this->thereIsARemoteFile = RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
         }
@@ -609,12 +600,12 @@ class DownloadFileController extends AbstractDownloadController {
     }
 
     /**
-     * @param string $originalFilename
-     * @param null   $target
+     * @param string      $originalFilename
+     * @param string|null $target
      *
      * @return string
      */
-    private function generateFilename( $originalFilename, $target = null ) {
+    private function generateFilename( string $originalFilename, string $target = null ): string {
         $pathInfo  = AbstractFilesStorage::pathinfo_fix( $originalFilename );
         $extension = ( $this->isAnIWorkFile( $pathInfo[ 'extension' ] ) ) ? $this->overrideExtensionForIWorkFiles( $pathInfo[ 'extension' ] ) : $pathInfo[ 'extension' ];
 
@@ -640,7 +631,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @return bool
      */
-    private function isAnIWorkFile( $extension ) {
+    private function isAnIWorkFile( string $extension ): bool {
         return in_array( $extension, [ 'pages', 'numbers', 'key' ] );
     }
 
@@ -653,7 +644,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @return string
      */
-    private function overrideExtensionForIWorkFiles( $extension ) {
+    private function overrideExtensionForIWorkFiles( string $extension ): string {
 
         switch ( $extension ) {
             case "key":
@@ -688,7 +679,6 @@ class DownloadFileController extends AbstractDownloadController {
         $connectedService = $dao->findById( $remoteFile->connected_service_id );
 
         if ( !$connectedService || $connectedService->disabled_at ) {
-            // TODO: check how this exception is handled
             throw new Exception( 'Connected service missing or disabled' );
         }
 
@@ -700,7 +690,6 @@ class DownloadFileController extends AbstractDownloadController {
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->remoteFileService = new RemoteFileService( $raw_token, $client );
         } else {
-            // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
         }
     }
@@ -758,12 +747,12 @@ class DownloadFileController extends AbstractDownloadController {
     }
 
     /**
-     * @param $output_content
+     * @param array $output_content
      *
      * @return array
      * @throws Exception
      */
-    private function getOutputContentsWithZipFiles( $output_content ) {
+    private function getOutputContentsWithZipFiles( array $output_content ): array {
 
         $zipFiles         = [];
         $newOutputContent = [];
@@ -826,7 +815,7 @@ class DownloadFileController extends AbstractDownloadController {
 
         foreach ( $output_content as $idFile => $content ) {
 
-            //this is true only for files that are not inside a zip ( normal uploaded files )
+            //this is true only for files that are not inside a zip (normal uploaded files)
             if ( isset( $content[ 'out_xliff_name' ] ) ) {
                 //rename the key to make this compatible with ZipContentObject
                 $output_content[ $idFile ][ 'input_filename' ] = $content[ 'out_xliff_name' ];
@@ -845,13 +834,15 @@ class DownloadFileController extends AbstractDownloadController {
     }
 
     /**
-     * @param $zipFileName
-     * @param $newInternalZipFiles ZipContentObject[]
+     * @param string             $zipFileName
+     * @param ZipContentObject[] $newInternalZipFiles
      *
      * @return string
+     * @throws ConnectionException
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function reBuildZipContent( $zipFileName, $newInternalZipFiles ) {
+    public function reBuildZipContent( string $zipFileName, array $newInternalZipFiles ): string {
 
         $project = Projects_ProjectDao::findById( $this->job[ 'id_project' ] );
 
@@ -861,7 +852,7 @@ class DownloadFileController extends AbstractDownloadController {
 
         $isFsOnS3 = AbstractFilesStorage::isOnS3();
         if ( $isFsOnS3 and false === file_exists( $zipFile ) ) {
-            // transfer zip file to tmp path
+            // transfer the zip file to tmp path
             $fs      = FilesStorageFactory::create();
             $zipPath = $fs->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
             $this->transferZipFromS3ToTmpDir( $zipPath, $tmpFName );
@@ -887,14 +878,14 @@ class DownloadFileController extends AbstractDownloadController {
                 $realZipFilePath    = ltrim( $realZipFilePath, "/" );
                 $newRealZipFilePath = $this->generateFilename( $realZipFilePath );
 
-                //remove the tmx from the original zip ( we want not to be exported as preview )
+                //remove the tmx from the original zip (we want not to be exported as preview)
                 if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'tmx' ) {
                     $zip->deleteName( $newRealZipFilePath );
                     $zip->deleteName( $realZipFilePath );
                     continue;
                 }
 
-                // fix the file names inside the zip file, so we compare with our files
+                // fix the file names inside the zip file, so we compare with our files,
                 // and if matches we can substitute them with the converted ones
                 foreach ( $newInternalZipFiles as $newInternalZipFile ) {
 

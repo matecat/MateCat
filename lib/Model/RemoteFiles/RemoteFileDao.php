@@ -112,7 +112,7 @@ class RemoteFiles_RemoteFileDao extends AbstractDao {
      *
      * @return boolean
      */
-    public static function jobHasRemoteFiles( $id_job ) {
+    public static function jobHasRemoteFiles( int $id_job ): bool {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "  SELECT count(id) "

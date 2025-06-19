@@ -81,10 +81,11 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'flashMessages'}        = FlashMessage::flush();
 
         if ( $this->isLoggedIn() ) {
+            // Load the feature set for the user (plus the autoloaded ones)
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
-        $this->view->{'user_plugins'}     = new PHPTalMap( $this->getUser()->getOwnerFeatures() );
+        $this->view->{'user_plugins'}     = new PHPTalMap( $this->featureSet->getCodes() );
         $this->view->{'isLoggedIn'}       = new PHPTalBoolean( $this->isLoggedIn() );
         $this->view->{'userMail'}         = $this->getUser()->email;
         $this->view->{'isAnInternalUser'} = new PHPTalBoolean( $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email ) );

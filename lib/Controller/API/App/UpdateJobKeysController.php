@@ -20,7 +20,7 @@ use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Traits\APISourcePageGuesser;
+use Traits\APISourcePageGuesserTrait;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
 use Validator\JSONValidator;
@@ -28,7 +28,7 @@ use Validator\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 
-    use APISourcePageGuesser;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

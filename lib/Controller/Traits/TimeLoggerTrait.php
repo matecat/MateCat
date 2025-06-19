@@ -14,7 +14,7 @@ use AbstractControllers\IController;
 use Log;
 use Utils;
 
-trait TimeLogger {
+trait TimeLoggerTrait {
 
     protected string $timingLogFileName  = 'ui_calls_time.log';
     protected array  $timingCustomObject = [];
@@ -35,7 +35,7 @@ trait TimeLogger {
 
         Log::$fileName = $this->timingLogFileName;
 
-        /** @var $this IController|TimeLogger */
+        /** @var $this IController|TimeLoggerTrait */
 
         $_request_uri = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         if ( isset( $_request_uri[ 'query' ] ) ) {

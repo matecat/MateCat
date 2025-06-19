@@ -39,7 +39,7 @@ use Segments_SegmentOriginalDataDao;
 use Segments_SegmentStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Traits\APISourcePageGuesser;
+use Traits\APISourcePageGuesserTrait;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use TranslationsSplit_SplitDAO;
@@ -49,7 +49,7 @@ use WordCount\WordCountStruct;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 
-    use APISourcePageGuesser;
+    use APISourcePageGuesserTrait;
 
     /**
      * @var array
