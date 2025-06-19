@@ -166,7 +166,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
         // GDrive session instance
-        if(isset($_SESSION[ "gdrive_session" ])){
+        if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
             $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
             $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
         }
@@ -273,6 +273,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $xliff_parameters_template_id  = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $qa_model_template_id          = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_quality_value_in_editor    = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
 
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
@@ -348,6 +349,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
                 'only_private'                  => $only_private,
+                'mt_quality_value_in_editor'    => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 86,
                 'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
         ];
 
@@ -428,6 +430,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
             $options[ 'segmentation_rule' ] = $data[ 'segmentation_rule' ];
+        }
+
+        if ( isset( $data[ 'mt_quality_value_in_editor' ] ) ) {
+            $options[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $data[ 'mt_quality_value_in_editor' ];
         }
 
         $this->metadata = $options;
