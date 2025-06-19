@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import {flushSync} from 'react-dom'
 import ProjectContainer from './ProjectContainer'
 import UserConstants from '../../constants/UserConstants'

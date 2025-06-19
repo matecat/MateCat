@@ -2,6 +2,7 @@ import {cloneDeep} from 'lodash/lang'
 import {each} from 'lodash/collection'
 import {merge} from 'lodash/object'
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import SegmentActions from '../actions/SegmentActions'
 import {toggleTagLexica} from '../api/toggleTagLexica'

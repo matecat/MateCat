@@ -1,4 +1,5 @@
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import SegmentUtils from '../../../utils/segmentUtils'
 import CommonUtils from '../../../utils/commonUtils'

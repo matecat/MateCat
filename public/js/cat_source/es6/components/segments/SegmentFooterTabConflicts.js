@@ -1,6 +1,7 @@
 import React from 'react'
 import {isUndefined, size} from 'lodash'
 import {fromJS} from 'immutable'
+import $ from 'jquery'
 
 import TextUtils from '../../utils/textUtils'
 import SegmentActions from '../../actions/SegmentActions'

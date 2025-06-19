@@ -1,6 +1,7 @@
 import React from 'react'
 import {fromJS} from 'immutable'
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import TextUtils from '../../utils/textUtils'
 import TranslationMatches from './utils/translationMatches'

@@ -1,3 +1,4 @@
+import $ from 'jquery'
 const CursorUtils = {
   savedSel: null,
   savedSelActiveElement: null,

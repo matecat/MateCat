@@ -195,22 +195,6 @@ const SegmentUtils = {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
     }
-    if (
-      !idBefore &&
-      !idAfter &&
-      config.project_plugins.indexOf('airbnb') === -1
-    ) {
-      try {
-        const segments = SegmentStore._segments
-        const segmentInStore = SegmentStore.getSegmentByIdToJS(sid)
-        if (segments.size !== 1) {
-          const trackingMessage = `Undefined idBefore and idAfter in setTranslation, Segments length: ${segments.size}, Segment exist ${segmentInStore ? 'true' : 'false'} Segment Id ${sid}`
-          CommonUtils.dispatchTrackingError(trackingMessage)
-        }
-      } catch (e) {
-        console.log(e)
-      }
-    }
     return {
       id_segment: segment.sid,
       id_job: config.id_job,

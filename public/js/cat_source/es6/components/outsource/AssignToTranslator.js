@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import Cookies from 'js-cookie'
 import DatePicker from 'react-datepicker'
 import {GMTSelect} from './GMTSelect'

@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import classnames from 'classnames'
 class ReviewExtendedCategorySelector extends React.Component {
   constructor(props) {

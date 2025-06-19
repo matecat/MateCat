@@ -1,7 +1,4 @@
-/*
- * Analyze Store
- */
-
+import $ from 'jquery'
 import AppDispatcher from './AppDispatcher'
 import {EventEmitter} from 'events'
 import assign from 'object-assign'

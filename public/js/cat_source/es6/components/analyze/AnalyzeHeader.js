@@ -1,7 +1,7 @@
 import React from 'react'
 import $ from 'jquery'
 import {TransitionGroup, CSSTransition} from 'react-transition-group'
-import {ANALYSIS_STATUS, SEGMENTS_STATUS} from '../../constants/Constants'
+import {ANALYSIS_STATUS} from '../../constants/Constants'
 import {Popup} from 'semantic-ui-react'
 
 class AnalyzeHeader extends React.Component {

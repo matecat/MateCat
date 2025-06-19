@@ -33,6 +33,7 @@ import {isUndefined, uniq, each} from 'lodash'
 import {EventEmitter} from 'events'
 import {fromJS} from 'immutable'
 import assign from 'object-assign'
+import $ from 'jquery'
 
 import AppDispatcher from './AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'

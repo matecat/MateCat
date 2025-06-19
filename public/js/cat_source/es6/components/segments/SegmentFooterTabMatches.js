@@ -1,6 +1,7 @@
 import React, {createRef} from 'react'
 import {isUndefined} from 'lodash'
 import {fromJS} from 'immutable'
+import $ from 'jquery'
 
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentStore from '../../stores/SegmentStore'

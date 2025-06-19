@@ -1,5 +1,6 @@
 import React from 'react'
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import CatToolConstants from '../../../../constants/CatToolConstants'
 import CatToolStore from '../../../../stores/CatToolStore'

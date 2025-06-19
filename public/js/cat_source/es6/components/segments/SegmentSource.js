@@ -388,7 +388,6 @@ class SegmentSource extends React.Component {
       SegmentConstants.REFRESH_TAG_MAP,
       this.refreshTagMap,
     )
-    this.$source = $(this.source)
     setTimeout(() => {
       this.checkDecorators()
       this.updateSourceInStore()

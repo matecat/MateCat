@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import ReviewExtendedIssue from './ReviewExtendedIssue'
 import WrapperLoader from '../common/WrapperLoader'
 import SegmentConstants from '../../constants/SegmentConstants'

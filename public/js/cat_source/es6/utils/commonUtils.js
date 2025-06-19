@@ -1,4 +1,5 @@
 import Cookies from 'js-cookie'
+import $ from 'jquery'
 import OfflineUtils from './offlineUtils'
 import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'

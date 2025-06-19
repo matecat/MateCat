@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import $ from 'jquery'
 import CommonUtils from '../../../utils/commonUtils'
 import CatToolStore from '../../../stores/CatToolStore'
 import CattolConstants from '../../../constants/CatToolConstants'

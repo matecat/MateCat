@@ -1,5 +1,6 @@
 import moment from 'moment'
 import React from 'react'
+import $ from 'jquery'
 import {isUndefined} from 'lodash'
 import SegmentActions from '../../actions/SegmentActions'
 import SegmentConstants from '../../constants/SegmentConstants'

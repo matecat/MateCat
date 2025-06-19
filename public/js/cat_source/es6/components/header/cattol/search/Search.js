@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import {isUndefined} from 'lodash'
 import {cloneDeep} from 'lodash/lang'
 import {find, map} from 'lodash/collection'

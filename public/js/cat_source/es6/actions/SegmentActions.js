@@ -1,5 +1,6 @@
 import {each, forEach, isUndefined} from 'lodash'
 import {debounce} from 'lodash/function'
+import $ from 'jquery'
 
 import AppDispatcher from '../stores/AppDispatcher'
 import SegmentConstants from '../constants/SegmentConstants'
