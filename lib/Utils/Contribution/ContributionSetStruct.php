@@ -10,8 +10,8 @@
 namespace Contribution;
 
 use Constants_TranslationStatus;
-use \DataAccess\AbstractDaoObjectStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
 use Jobs_JobDao;

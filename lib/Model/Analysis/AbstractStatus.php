@@ -8,21 +8,24 @@ use API\App\Json\Analysis\AnalysisFile;
 use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
+use API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
 use Constants_ProjectStatus;
 use Exception;
 use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use Jobs_JobStruct;
 use Langs\LanguageDomains;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Analysis\Constants\MatchConstantsFactory;
-use OutsourceTo_OutsourceAvailable;
+use OutsourceTo\OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Routes;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use Users_UserStruct;
 
 /**
@@ -35,19 +38,17 @@ use Users_UserStruct;
  */
 abstract class AbstractStatus {
 
-    protected $_data_struct = [];
-
     /**
-     * Carry the result from Executed Controller Action and returned in json format to the Client
+     * Carry the result from Executed Controller Action and returned in JSON format to the Client
      *
      * @var ?AnalysisProject
      */
     protected ?AnalysisProject $result = null;
 
-    protected int   $total_segments = 0;
-    protected array $_resultSet     = [];
-    protected int   $_others_in_queue = 0;
-    protected array $_project_data    = [];
+    protected int    $total_segments   = 0;
+    protected array  $_resultSet       = [];
+    protected int    $_others_in_queue = 0;
+    protected array  $_project_data    = [];
     protected string $status_project   = "";
 
     protected FeatureSet $featureSet;
@@ -109,7 +110,7 @@ abstract class AbstractStatus {
 
         $this->total_segments = count( $this->_resultSet );
 
-        //get status of project
+        //get the status of a project
         $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
 
         $subject_handler = LanguageDomains::getInstance();
@@ -130,14 +131,22 @@ abstract class AbstractStatus {
     }
 
     /**
+     * @param $targetLang
+     * @param $id_customer
+     * @param $idJob
+     *
      * @return bool
-     * @throws Exception
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    protected function isOutsourceEnabled( $targetLang, $id_customer, $idJob ) {
+    protected function isOutsourceEnabled( $targetLang, $id_customer, $idJob ): bool {
 
         $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $targetLang, $id_customer, $idJob );
 
-        // if the hook is not triggered by any plugin
+        // if any plugin does not trigger the hook
         if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
             $outsourceAvailableInfo = [
                     'disabled_email'         => false,
@@ -146,7 +155,7 @@ abstract class AbstractStatus {
             ];
         }
 
-        return OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+        return OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
 
     }
 
@@ -254,10 +263,10 @@ abstract class AbstractStatus {
                         ]
                 ) ) {
 
-            //Related to an issue in the outsource
-            //Here, the Fast analysis was not performed, return the number of raw word count
+            //Related to an issue in the outsourcing
+            //Here, the Fast analysis was not performed, return the number of raw word counts
             //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
-            //( there are no segment_translations )
+            //(there are no segment_translations)
 
             foreach ( $this->_project_data as $_job_fallback ) {
 
@@ -298,7 +307,7 @@ abstract class AbstractStatus {
      * @return string
      * @throws Exception
      */
-    private function getAnalyzeLink() {
+    private function getAnalyzeLink(): string {
         return Routes::analyze( [
                 'project_name' => $this->project->name,
                 'id_project'   => $this->project->id,

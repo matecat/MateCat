@@ -10,10 +10,10 @@
 namespace Outsource;
 
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
-abstract class ConfirmationStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+abstract class ConfirmationStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     const VENDOR_NAME       = null;
     const VENDOR_ID         = null;

@@ -2,8 +2,8 @@
 
 namespace LQA;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 class EntryCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

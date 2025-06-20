@@ -2,8 +2,8 @@
 
 namespace Files;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 class FilesJobStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

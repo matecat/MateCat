@@ -9,7 +9,7 @@
 namespace Files;
 
 use DataAccess\AbstractDao;
-use \DataAccess\IDaoStruct;
+use DataAccess\IDaoStruct;
 use Database;
 use ReflectionException;
 

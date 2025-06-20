@@ -15,12 +15,12 @@ use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
+use Traits\APISourcePageGuesserTrait;
 use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
-    protected        $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -167,8 +167,8 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing job password", -6 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_segment'        => $id_segment,

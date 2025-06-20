@@ -9,11 +9,11 @@
 
 namespace DataAccess;
 
-use stdClass;
 use Countable;
 use DomainException;
 use ReflectionObject;
 use ReflectionProperty;
+use stdClass;
 
 abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
 
@@ -114,6 +114,5 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
 
         return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
     }
-
 
 } 

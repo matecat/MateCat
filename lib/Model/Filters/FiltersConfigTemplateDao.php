@@ -2,8 +2,8 @@
 
 namespace Filters;
 
-use DataAccess\ShapelessConcreteStruct;
 use DataAccess\AbstractDao;
+use DataAccess\ShapelessConcreteStruct;
 use Database;
 use DateTime;
 use Exception;

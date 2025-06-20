@@ -10,12 +10,12 @@ use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use ReflectionException;
+use Traits\APISourcePageGuesserTrait;
 use Utils;
 
 class SetChunkCompletedController extends KleinController {
 
-    protected int    $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -71,8 +71,8 @@ class SetChunkCompletedController extends KleinController {
             throw new InvalidArgumentException( "wrong password", -10 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_job'            => $id_job,

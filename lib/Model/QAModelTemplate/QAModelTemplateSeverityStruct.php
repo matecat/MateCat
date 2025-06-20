@@ -2,9 +2,6 @@
 
 namespace QAModelTemplate;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-
 class QAModelTemplateSeverityStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \JsonSerializable {
     public $id;
     public $id_category;

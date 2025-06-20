@@ -2,9 +2,6 @@
 
 namespace Features\TranslationVersions\Model;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-
 class TranslationVersionStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id;

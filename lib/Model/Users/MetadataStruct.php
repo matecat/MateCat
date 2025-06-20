@@ -8,8 +8,8 @@
 
 namespace Users;
 
-use \DataAccess\AbstractDaoObjectStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 use JsonSerializable;
 
 class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, JsonSerializable {

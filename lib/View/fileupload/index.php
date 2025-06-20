@@ -10,7 +10,7 @@ require_once realpath( dirname( __FILE__ ) . '/../../../' ) . '/inc/Bootstrap.ph
 @Bootstrap::start();
 @Bootstrap::sessionStart();
 @Bootstrap::sessionClose();
-require_once( 'upload.class.php' );
+require_once( 'UploadHandler.php' );
 
 $upload_handler = new UploadHandler();
 
@@ -22,7 +22,7 @@ header( 'Access-Control-Allow-Origin: *' );
 header( 'Access-Control-Allow-Methods: OPTIONS, HEAD, GET, POST, PUT, DELETE' );
 header( 'Access-Control-Allow-Headers: X-File-Name, X-File-Type, X-File-Size' );
 
-switch ( $_SERVER[ 'REQUEST_METHOD' ] ) {
+switch ( $_SERVER[ 'REQUEST_METHOD' ] ?? '' ) {
     case 'OPTIONS':
         break;
     case 'HEAD':

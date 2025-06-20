@@ -20,6 +20,7 @@ use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
+use Traits\APISourcePageGuesserTrait;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
 use Validator\JSONValidator;
@@ -27,8 +28,7 @@ use Validator\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 
-    protected $id_job;
-    protected $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -45,6 +45,7 @@ class UpdateJobKeysController extends KleinController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
+        $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
             $userRole = TmKeyManagement_Filter::OWNER;
         } elseif ( $this->isRevision() ) {
@@ -218,8 +219,8 @@ class UpdateJobKeysController extends KleinController {
             throw new DomainException( $exception->getMessage() );
         }
 
-        $this->id_job            = $job_id;
-        $this->received_password = $current_password;
+        $this->id_job           = $job_id;
+        $this->request_password = $current_password;
 
         return [
                 'job_id'                       => $job_id,

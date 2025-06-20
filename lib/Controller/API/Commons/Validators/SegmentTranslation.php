@@ -17,6 +17,7 @@ class SegmentTranslation extends Base {
     /**
      * @return void
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     protected function _validate(): void {
         $this->ensureTranslationExists();
@@ -29,7 +30,7 @@ class SegmentTranslation extends Base {
      */
 
     private function ensureTranslationExists() {
-        $this->translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->request->id_segment, $this->request->id_job );
+        $this->translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->request->param( 'id_segment' ), $this->request->param( 'id_job' ) );
         if ( !$this->translation ) {
             throw new NotFoundException( 'translation not found' );
         }

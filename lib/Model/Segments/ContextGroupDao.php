@@ -10,7 +10,7 @@
 namespace Segments;
 
 use DataAccess\AbstractDao;
-use \DataAccess\IDaoStruct;
+use DataAccess\IDaoStruct;
 use Projects_ProjectStruct;
 
 class ContextGroupDao extends AbstractDao {

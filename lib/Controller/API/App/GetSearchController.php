@@ -5,7 +5,6 @@ namespace API\App;
 use AbstractControllers\KleinController;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
 use Database;
 use Exception;

@@ -2,12 +2,13 @@
 
 namespace Features;
 
+use API\App\CreateProjectController;
 use API\Commons\Exceptions\ValidationError;
+use API\V1\NewController;
 use ArrayObject;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Constants;
-use createProjectController;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
@@ -32,7 +33,6 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
-use NewController;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -57,7 +57,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      * @param array $projectFeatures
-     * @param       $controller NewController|createProjectController
+     * @param       $controller NewController|CreateProjectController
      *
      * @return array
      * @throws Exception
@@ -115,35 +115,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         }
 
         return $data;
-    }
-
-    /**
-     * filter_review_password_to_job_password
-     *
-     * If this method is reached it means that the project we are
-     * working on has ReviewExtended feature enabled, and that we
-     * are in review mode.
-     *
-     * Assuming the provided password is a "review_password".
-     * This review password is checked against the `qa_chunk_reviews`.
-     * If not found, raise an exception.
-     * If found, override the input password with job password.
-     *
-     * @param string $review_password
-     * @param int    $id_job
-     * @param int    $source_page
-     *
-     * @return ChunkReviewStruct
-     * @throws NotFoundException
-     */
-    public function filter_review_password_to_job_password( ChunkReviewStruct $chunkReviewStruct, $source_page ) {
-        $chunk_review = ( new ChunkReviewDao() )->findByJobIdReviewPasswordAndSourcePage( $chunkReviewStruct->id_job, $chunkReviewStruct->review_password, $source_page );
-
-        if ( !$chunk_review ) {
-            throw new NotFoundException( 'Review record was not found' );
-        }
-
-        return $chunk_review;
     }
 
     /**

@@ -24,7 +24,6 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public $comment;
     public $create_date;
     public $target_text;
-    public $rebutted_at;
     public $source_page;
     public $deleted_at;
 

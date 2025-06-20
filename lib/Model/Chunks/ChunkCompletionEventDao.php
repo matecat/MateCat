@@ -92,7 +92,10 @@ class Chunks_ChunkCompletionEventDao extends AbstractDao {
     }
 
 
-    public function currentPhase( Jobs_JobStruct $chunk ) {
+    /**
+     * @throws Exception
+     */
+    public function currentPhase( Jobs_JobStruct $chunk ): string {
         $lastTranslate = $this->lastCompletionRecord( $chunk, [ 'is_review' => false ] );
         if ( $lastTranslate ) {
             $lastRevise = $this->lastCompletionRecord( $chunk, [ 'is_review' => true ] );
@@ -120,8 +123,8 @@ class Chunks_ChunkCompletionEventDao extends AbstractDao {
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  chunk to examinate
-     * @param $params list of params for query: is_review
+     * @param $chunk  Jobs_JobStruct to examinate
+     * @param $params array of params for query: is_review
      *
      * @return array
      *

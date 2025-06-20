@@ -18,6 +18,8 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use PHPTAL;
+use PHPTalBoolean;
+use PHPTalMap;
 use PHPTALWithAppend;
 use Utils;
 
@@ -28,6 +30,8 @@ use Utils;
  * Time: 10:24
  */
 abstract class BaseKleinViewController extends AbstractStatefulKleinController implements IController {
+
+    protected bool $isView = true;
 
     /**
      * @var PHPTALWithAppend
@@ -70,27 +74,21 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'hostpath'}             = INIT::$HTTPHOST;
         $this->view->{'build_number'}         = INIT::$BUILD_NUMBER;
         $this->view->{'support_mail'}         = INIT::$SUPPORT_MAIL;
-        $this->view->{'enableMultiDomainApi'} = INIT::$ENABLE_MULTI_DOMAIN_API;
+        $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean( INIT::$ENABLE_MULTI_DOMAIN_API );
         $this->view->{'ajaxDomainsNumber'}    = INIT::$AJAX_DOMAINS;
         $this->view->{'maxFileSize'}          = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->view->{'maxTMXFileSize'}       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->view->{'flashMessages'}        = FlashMessage::flush();
 
         if ( $this->isLoggedIn() ) {
+            // Load the feature set for the user (plus the autoloaded ones)
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
-        $this->view->{'user_plugins'}  = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
-        $this->view->{'isLoggedIn'}    = $this->isLoggedIn();
-        $this->view->{'userMail'}      = $this->getUser()->email;
-        $this->view->{'logged_user'}   = $this->getUser()->shortName();
-        $this->view->{'extended_user'} = $this->getUser()->fullName();
-
-        $MMTLicense                       = $this->isLoggedIn() ? $this->featureSet->filter( "MMTLicense", $this->getUser() ) : [];
-        $isAnInternalUser                 = $this->isLoggedIn() ? $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email ) : false;
-        $this->view->{'isAnInternalUser'} = $isAnInternalUser;
-        $this->view->{'isMMTEnabled'}     = ( isset( $MMTLicense[ 'enabled' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'enabled' ] : false;
-        $this->view->{'MMTId'}            = ( isset( $MMTLicense[ 'id' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'id' ] : null;
+        $this->view->{'user_plugins'}     = new PHPTalMap( $this->featureSet->getCodes() );
+        $this->view->{'isLoggedIn'}       = new PHPTalBoolean( $this->isLoggedIn() );
+        $this->view->{'userMail'}         = $this->getUser()->email;
+        $this->view->{'isAnInternalUser'} = new PHPTalBoolean( $this->featureSet->filter( "isAnInternalUser", $this->getUser()->email ) );
 
         $this->view->{'footer_js'}     = [];
         $this->view->{'config_js'}     = [];
@@ -103,7 +101,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'microsoftAuthUrl'} = ( INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
         $this->view->{'facebookAuthUrl'}  = ( INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
 
-        $this->view->{'googleDriveEnabled'} = Bootstrap::isGDriveConfigured();
+        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean( Bootstrap::isGDriveConfigured() );
         $this->view->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
 
         /**

@@ -2,7 +2,7 @@
 
 namespace API\V2;
 
-use AbstractControllers\KleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use ArrayObject;
@@ -14,7 +14,7 @@ use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 
-class SplitJobController extends KleinController {
+class SplitJobController extends AbstractStatefulKleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );

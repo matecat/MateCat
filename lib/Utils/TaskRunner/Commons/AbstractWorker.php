@@ -17,7 +17,9 @@ use PDOException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Message;
+use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class AbstractWorker
@@ -30,7 +32,7 @@ abstract class AbstractWorker implements SplSubject {
     const ERR_EMPTY_ELEMENT = 3;
 
     /**
-     * Observers container
+     * Observer container
      *
      * @var SplObserver[]
      */
@@ -80,7 +82,7 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
-     * Set the caller pid. Needed to log the process Id.
+     * Set the caller pid. Needed to log the process ID.
      *
      * @param $_myPid
      */
@@ -118,6 +120,9 @@ abstract class AbstractWorker implements SplSubject {
      * @param $queueElement AbstractElement
      *
      * @return mixed
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws EmptyElementException
      */
     abstract public function process( AbstractElement $queueElement );
 
@@ -182,7 +187,7 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     * Check how many times the element was re-queued and raise an Exception when the limit is reached (100 times)
      *
      * @param QueueElement $queueElement
      *
@@ -209,11 +214,11 @@ abstract class AbstractWorker implements SplSubject {
 
     /**
      * Check the connection.
-     * MySql timeout close the socket and throws Exception in the nex read/write access
+     * MySql timeout closes the socket and throws Exception in the nex read/write access
      *
      * <code>
      * By default, the server closes the connection after eight hours if nothing has happened.
-     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
+     * You can change the time limit by setting the wait_timeout variable when you start mysql.
      * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
      * </code>
      *

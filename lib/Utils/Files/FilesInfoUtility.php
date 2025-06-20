@@ -4,7 +4,6 @@ namespace Files;
 
 use API\V3\Json\FilesInfo;
 use Files\MetadataDao as Files_MetadataDao;
-use Files\FileDao;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;

@@ -10,7 +10,6 @@ use Features\BaseFeature;
 use Features\ReviewExtended;
 use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\TranslationEvents\Model\TranslationEvent;
-use Klein\Request;
 use LQA\ChunkReviewStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -70,7 +69,7 @@ class RevisionFactory {
     }
 
     /**
-     * This method use a filter because of external plugins
+     * This method uses a filter because of external plugins
      *
      * @param KleinController $controller
      *
@@ -81,7 +80,7 @@ class RevisionFactory {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    public function getTranslationIssuesValidator( KleinController $controller ) {
+    public function getTranslationIssuesValidator( KleinController $controller ): SegmentTranslationIssueValidator {
         return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $controller ) );
     }
 

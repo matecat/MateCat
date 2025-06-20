@@ -49,10 +49,6 @@ class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct impl
         return $this->tm_analysis_status == 'SKIPPED';
     }
 
-    public function isPostReviewedStatus(): bool {
-        return in_array( $this->status, Constants_TranslationStatus::$POST_REVISION_STATUSES );
-    }
-
     public function isRejected(): bool {
         return $this->status == Constants_TranslationStatus::STATUS_REJECTED;
     }

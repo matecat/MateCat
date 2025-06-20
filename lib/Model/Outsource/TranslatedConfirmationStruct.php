@@ -9,9 +9,9 @@
 
 namespace Outsource;
 
-use \DataAccess\IDaoStruct;
+use DataAccess\IDaoStruct;
 
-class TranslatedConfirmationStruct extends ConfirmationStruct implements \DataAccess\IDaoStruct {
+class TranslatedConfirmationStruct extends ConfirmationStruct implements IDaoStruct {
 
     const VENDOR_NAME = 'Translated';
     const VENDOR_ID   = 1; //Hardcoded, this value would be stored in a database table to avoid implementation collisions, but for now there are no other providers

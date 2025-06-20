@@ -2,8 +2,8 @@
 
 namespace QAModelTemplate;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use Exception;
 use JsonSerializable;

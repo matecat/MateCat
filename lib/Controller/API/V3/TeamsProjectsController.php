@@ -16,6 +16,7 @@ use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Project;
 use INIT;
 use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {
@@ -23,7 +24,7 @@ class TeamsProjectsController extends KleinController {
     protected $project;
 
     /** @var TeamStruct */
-    protected $team;
+    protected TeamStruct $team;
 
     protected function afterConstruct() {
         parent::afterConstruct();
@@ -53,12 +54,10 @@ class TeamsProjectsController extends KleinController {
         }
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
+
+        /** @var Projects_ProjectStruct[] $projectsList */
         $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter );
-
-        $formatted     = new Project( $projectsList );
-        $formatted->setUser( $this->user );
-
-        $projectsList = $formatted->render();
+        $projectsList = ( new Project( $projectsList ) )->render();
 
         $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );

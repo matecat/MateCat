@@ -9,8 +9,8 @@
 namespace Teams;
 
 use Constants_Teams;
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

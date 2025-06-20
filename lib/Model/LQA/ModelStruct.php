@@ -22,20 +22,20 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     /**
      * Returns the serialized representation of categires and subcategories.
      *
-     * @return string
+     * @return array
      */
-    public function getSerializedCategories() {
-        return json_encode( [ 'categories' => CategoryDao::getCategoriesAndSeverities( $this->id ) ], JSON_HEX_APOS );
+    public function getSerializedCategories(): array {
+        return [ 'categories' => CategoryDao::getCategoriesAndSeverities( $this->id ) ];
     }
 
-    public function getCategoriesAndSeverities() {
+    public function getCategoriesAndSeverities(): array {
         return CategoryDao::getCategoriesAndSeverities( $this->id );
     }
 
     /**
      * @return CategoryStruct[]
      */
-    public function getCategories() {
+    public function getCategories(): array {
         return CategoryDao::getCategoriesByModel( $this );
     }
 

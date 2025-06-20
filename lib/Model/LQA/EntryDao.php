@@ -323,38 +323,6 @@ class EntryDao extends AbstractDao {
     }
 
     /**
-     * Function to update the rebutted_at column
-     *
-     * @param Integer $id        ID of the Entry
-     * @param Boolean $isToRebut If true rebut, else undo rebut
-     *
-     * @return EntryStruct
-     *
-     */
-    public function updateRebutted( $id, $isToRebut ) {
-        $rebutted_at = null;
-
-        if ( $isToRebut === true ) {
-            $rebutted_at = date( 'Y-m-d H:i:s' );
-        }
-
-        $sql = "  UPDATE qa_entries "
-                . "   SET rebutted_at = :rebutted_at "
-                . " WHERE id = :id ; ";
-
-        $opts = [
-                'rebutted_at' => $rebutted_at,
-                'id'          => $id
-        ];
-
-        $stmt = $this->database->prepare( $sql );
-
-        $stmt->execute( $opts );
-
-        return $this->findById( $opts[ 'id' ] );
-    }
-
-    /**
      * @param      $id_job
      * @param      $password
      * @param      $revisionNumber

@@ -2,8 +2,6 @@
 
 namespace Projects;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
 use JsonSerializable;
 use stdClass;
 

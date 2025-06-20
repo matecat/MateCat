@@ -8,8 +8,8 @@
 
 namespace Teams;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

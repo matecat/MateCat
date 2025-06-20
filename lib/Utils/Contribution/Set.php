@@ -9,6 +9,7 @@
  */
 
 namespace Contribution;
+
 use Exception;
 use Log;
 use WorkerClient;
@@ -25,14 +26,14 @@ class Set {
      *
      * @throws Exception
      */
-    public static function contribution( ContributionSetStruct $contribution ){
+    public static function contribution( ContributionSetStruct $contribution ) {
 
-        try{
-            WorkerClient::enqueue( 'CONTRIBUTION', '\AsyncTasks\Workers\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
-        } catch ( Exception $e ){
+        try {
+            WorkerClient::enqueue( 'CONTRIBUTION', '\AsyncTasks\Workers\SetContributionWorker', $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        } catch ( Exception $e ) {
 
             # Handle the error, logging, ...
-            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
             Log::doJsonLog( $output );
@@ -45,16 +46,18 @@ class Set {
     /**
      * @throws Exception
      */
-    public static function contributionMT( ContributionSetStruct $contribution = null ){
-        try{
+    public static function contributionMT( ContributionSetStruct $contribution = null ) {
+        try {
 
-            if ( empty( $contribution ) ) return;
+            if ( empty( $contribution ) ) {
+                return;
+            }
 
-            WorkerClient::enqueue( 'CONTRIBUTION_MT', '\AsyncTasks\Workers\SetContributionMTWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
-        } catch ( Exception $e ){
+            WorkerClient::enqueue( 'CONTRIBUTION_MT', '\AsyncTasks\Workers\SetContributionMTWorker', $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        } catch ( Exception $e ) {
 
             # Handle the error, logging, ...
-            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
             Log::doJsonLog( $output );

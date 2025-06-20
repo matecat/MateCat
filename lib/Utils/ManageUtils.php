@@ -1,7 +1,6 @@
 <?php
 
 use API\V2\Json\Project;
-use Exceptions\NotFoundException;
 use Teams\TeamStruct;
 
 class ManageUtils {

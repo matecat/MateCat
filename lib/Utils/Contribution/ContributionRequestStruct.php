@@ -10,8 +10,8 @@
 namespace Contribution;
 
 
+use DataAccess\AbstractDaoObjectStruct;
 use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
 use Engine;
 use Engines_AbstractEngine;
 use Exception;
@@ -20,7 +20,7 @@ use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Users_UserStruct;
 
-class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoStruct {
+class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     // Needed by getSessionId()
     public ?int    $id_file  = null;

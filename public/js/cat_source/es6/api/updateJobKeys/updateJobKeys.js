@@ -4,7 +4,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * Update job keys from settings panel of job
  *
  * @param {Object} options
- * @param {string} [options.idJob=config.job_id]
+ * @param {string} [options.idJob=config.id_job]
  * @param {string} [options.password=config.password]
  * @param {string} [options.currentPassword=config.currentPassword]
  * @param {string} options.getPublicMatches
@@ -12,7 +12,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const updateJobKeys = async ({
-  idJob = config.job_id,
+  idJob = config.id_job,
   password = config.password,
   currentPassword = config.currentPassword,
   getPublicMatches,

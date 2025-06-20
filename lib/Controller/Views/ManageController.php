@@ -15,6 +15,7 @@ use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
+use PHPTalBoolean;
 use Utils;
 
 class ManageController extends BaseKleinViewController implements IController {
@@ -32,8 +33,8 @@ class ManageController extends BaseKleinViewController implements IController {
 
         $this->setView( "manage.html", [
                 'outsource_service_login' => $this->_outsource_login_API,
-                'split_enabled'           => true,
-                'enable_outsource'        => true
+                'split_enabled'           => new PHPTalBoolean( true ),
+                'enable_outsource'        => new PHPTalBoolean( true )
         ] );
 
         $activity             = new ActivityLogStruct();

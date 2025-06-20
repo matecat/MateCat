@@ -6,6 +6,7 @@ use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
 use Constants_Engines;
 use Constants_TranslationStatus;
+use Conversion\Upload;
 use DateTime;
 use DateTimeZone;
 use Engine;
@@ -23,7 +24,6 @@ use Matecat\SubFiltering\MateCatFilter;
 use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
-use Upload;
 use Users\MetadataDao;
 use Users_UserStruct;
 use Utils;
@@ -319,10 +319,12 @@ class TMSService {
     }
 
     /**
+     * @param $uuid
+     *
      * @return array
      * @throws Exception
      */
-    public function tmxUploadStatus( $uuid ) {
+    public function tmxUploadStatus( $uuid ): array {
 
         $allMemories = $this->mymemory_engine->getStatus( $uuid );
 

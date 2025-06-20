@@ -259,27 +259,21 @@ class CounterModel {
     }
 
     /**
-     * Returns the name of the method to call. In case of fixed and rebutted,
-     * translated and rejected are returned respectively.
      *
-     * @param $name
+     * @param      $name
+     * @param bool $raw_count
      *
      * @return string
      */
-    private function methodNameForStatusCall( $name, $raw_count = false ) {
-        if ( in_array( strtoupper( $name ), Constants_TranslationStatus::$POST_REVISION_STATUSES ) ) {
-            return 'TranslatedWords';
-        }
-
+    private function methodNameForStatusCall( $name, bool $raw_count = false ): string {
         return ucfirst( strtolower( $name ) ) . ( $raw_count ? "Raw" : "" ) . 'Words';
-
     }
 
     /**
      * Checks whether the old and new statuses are equal in regard
      * of the database column to update.
      */
-    private function equivalentStatuses() {
+    private function equivalentStatuses(): bool {
         return (
                 $this->methodNameForStatusCall( $this->newStatus ) ==
                 $this->methodNameForStatusCall( $this->oldStatus )

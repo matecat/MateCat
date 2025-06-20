@@ -195,5 +195,4 @@ class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         return $decoded;
     }
 
-
 }
