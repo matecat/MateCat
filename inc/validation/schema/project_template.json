@@ -38,7 +38,7 @@
     "mt_quality_value_in_editor": {
       "type": "number",
       "minimum": 76,
-      "maximum": 102,
+      "maximum": 102
     },
     "segmentation_rule": {
       "type": ["null", "object"]
