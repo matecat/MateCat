@@ -50,6 +50,8 @@ class UpdateJobKeysController extends KleinController {
             $userRole = TmKeyManagement_Filter::OWNER;
         } elseif ( $this->isRevision() ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } else {
+            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         }
 
         /*

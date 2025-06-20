@@ -278,6 +278,7 @@ class FastAnalysis extends AbstractDaemon {
                     //Logging done and email sent
                     //set to error
                     $insertReportRes = -1;
+                    $this->_logTimeStampedMsg( $e->getMessage() . " " . $e->getTraceAsString() );
                 }
 
                 if ( $insertReportRes < 0 ) {

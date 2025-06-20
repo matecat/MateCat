@@ -72,10 +72,10 @@ export const SeveritiyRow = ({severity}) => {
 
     const originalSeverity = originalCurrentTemplate.categories
       .find(({id}) => id === severity.id_category)
-      .severities.find(({id}) => id === severity.id)
+      ?.severities.find(({id}) => id === severity.id)
     const currentSeverity = currentTemplate.categories
       .find(({id}) => id === severity.id_category)
-      .severities.find(({id}) => id === severity.id)
+      ?.severities.find(({id}) => id === severity.id)
 
     const isModified = originalSeverity?.penalty !== currentSeverity.penalty
 
