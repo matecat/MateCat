@@ -14,10 +14,7 @@ class FilterDefinition {
     /**
      * @var array
      */
-    private $filter_data;
-
-    private $custom_conditions_sql  = [] ;
-    private $custom_conditions_data = [] ;
+    private array $filter_data;
 
     /**
      * @param array $filter_data
@@ -26,37 +23,36 @@ class FilterDefinition {
         $this->filter_data = $filter_data;
     }
 
-    public function isRevision(){
-        return !empty( $this->filter_data['revision'] ) && $this->filter_data['revision'] == 1;
+    public function isRevision(): bool {
+        return !empty( $this->filter_data[ 'revision' ] ) && $this->filter_data[ 'revision' ] == 1;
     }
 
-    public function isSampled() {
-        return array_key_exists('sample', $this->filter_data) && $this->filter_data['sample'] == true;
+    public function isSampled(): bool {
+        return array_key_exists( 'sample', $this->filter_data ) && $this->filter_data[ 'sample' ] == true;
     }
 
-    public function isFiltered() {
-        return !empty( $this->filter_data['status'] );
+    public function isFiltered(): bool {
+        return !empty( $this->filter_data[ 'status' ] );
     }
 
-    public function sampleData() {
-        return $this->filter_data['sample'];
+    public function sampleData(): array {
+        return $this->filter_data[ 'sample' ] ?? [];
     }
 
-    public function sampleType() {
-        return $this->filter_data['sample']['type'];
+    public function sampleType(): string {
+        return $this->filter_data[ 'sample' ][ 'type' ] ?? '';
     }
 
-    public function sampleSize() {
-        return @$this->filter_data['sample']['size'];
+    public function sampleSize(): int {
+        return $this->filter_data[ 'sample' ][ 'size' ] ?? 0;
     }
 
-    public function getSegmentStatus() {
-        return strtoupper( $this->filter_data['status'] );
+    public function getSegmentStatus(): string {
+        return strtoupper( $this->filter_data[ 'status' ] );
     }
 
-    public function isValid() {
-        // TODO: validate revision number
-        return ( $this->isSampled() || $this->getSegmentStatus() != '' ) ;
+    public function isValid(): bool {
+        return ( $this->isSampled() || $this->getSegmentStatus() != '' );
     }
 
 }
