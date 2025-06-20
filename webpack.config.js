@@ -41,7 +41,6 @@ const matecatConfig = async ({env}, {mode}) => {
   const isDev = mode === 'development'
   const config = ini.parse(fs.readFileSync('./inc/config.ini', 'utf-8'))
   const lxqLicence = config[config.ENV]?.LXQ_LICENSE
-  console.log('sdsdsdsdsd', lxqLicence)
   if (lxqLicence) {
     const lxqServer = config[config.ENV].LXQ_SERVER
     if (!fs.existsSync(lxqDownload)) {
