@@ -3,9 +3,6 @@
 use Conversion\MimeTypes\MimeTypes;
 use Conversion\ZipArchiveHandler;
 use FilesStorage\AbstractFilesStorage;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
 
 const DIRSEP = "//";
 
