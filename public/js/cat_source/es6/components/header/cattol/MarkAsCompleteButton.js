@@ -1,4 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
+import $ from 'jquery'
 import ConfirmMessageModal from '../../modals/ConfirmMessageModal'
 import {setChunkComplete} from '../../../api/setChunkComplete'
 import AlertModal from '../../modals/AlertModal'
@@ -212,8 +213,8 @@ export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
             markedAsComplete
               ? 'isMarkedComplete'
               : buttonEnabled
-              ? 'isMarkableAsComplete'
-              : 'notMarkedComplete'
+                ? 'isMarkableAsComplete'
+                : 'notMarkedComplete'
           }`}
           id="markAsCompleteButton"
           disabled={!buttonEnabled}

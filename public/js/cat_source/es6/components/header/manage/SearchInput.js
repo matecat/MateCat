@@ -1,5 +1,6 @@
 import React from 'react'
 import {debounce} from 'lodash'
+import $ from 'jquery'
 
 class SearchInput extends React.Component {
   constructor(props) {

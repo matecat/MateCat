@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import $ from 'jquery'
 import {isUndefined, isNull} from 'lodash'
 
 import SegmentStore from '../../stores/SegmentStore'

@@ -2,6 +2,7 @@ import {cloneDeep} from 'lodash/lang'
 import {each} from 'lodash/collection'
 import {merge} from 'lodash/object'
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import SegmentActions from '../actions/SegmentActions'
 import {toggleTagLexica} from '../api/toggleTagLexica'
@@ -9,7 +10,6 @@ import {getLexiqaWarnings as getLexiqaWarningsApi} from '../api/getLexiqaWarning
 import {lexiqaIgnoreError} from '../api/lexiqaIgnoreError'
 import SegmentStore from '../stores/SegmentStore'
 import {lexiqaTooltipwarnings} from '../api/lexiqaTooltipwarnings'
-import CatToolActions from '../actions/CatToolActions'
 import UserStore from '../stores/UserStore'
 
 const LXQ = {
@@ -312,7 +312,7 @@ LXQ.init = function () {
     })
   })
 
-  return (function ($, config, window, LXQ) {
+  return (function (config, window, LXQ) {
     var partnerid = config.lxq_partnerid
     var colors = {
       numbers: '#D08053',
@@ -777,7 +777,7 @@ LXQ.init = function () {
       partnerid: partnerid,
       projectid: config.id_job + '-' + config.password,
     })
-  })(jQuery, config, window, LXQ)
+  })(config, window, LXQ)
 }
 
 export default LXQ

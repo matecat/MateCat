@@ -1,4 +1,5 @@
 import React from 'react'
+import $ from 'jquery'
 import {isEmpty, isUndefined} from 'lodash'
 
 import EditArea from './Editarea'

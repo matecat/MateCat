@@ -1,7 +1,6 @@
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
-import TextUtils from '../../utils/textUtils'
-
+import $ from 'jquery'
 class JobMetadataModal extends React.Component {
   constructor(props) {
     super(props)

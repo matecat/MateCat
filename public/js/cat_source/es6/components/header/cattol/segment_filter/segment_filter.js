@@ -1,3 +1,4 @@
+import $ from 'jquery'
 import SegmentStore from '../../../../stores/SegmentStore'
 import SegmentActions from '../../../../actions/SegmentActions'
 import CatToolActions from '../../../../actions/CatToolActions'

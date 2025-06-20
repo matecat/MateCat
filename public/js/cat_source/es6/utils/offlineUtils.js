@@ -1,3 +1,4 @@
+import $ from 'jquery'
 import SegmentActions from '../actions/SegmentActions'
 import {checkConnectionPing} from '../api/checkConnectionPing'
 import CatToolActions from '../actions/CatToolActions'

@@ -1,6 +1,6 @@
 import React from 'react'
 import SegmentActions from '../../actions/SegmentActions'
-
+import $ from 'jquery'
 import {Shortcuts} from '../../utils/shortcuts'
 import SegmentUtils from '../../utils/segmentUtils'
 

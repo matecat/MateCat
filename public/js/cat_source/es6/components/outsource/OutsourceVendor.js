@@ -4,6 +4,7 @@ import Cookies from 'js-cookie'
 import {isUndefined} from 'lodash'
 import {isNull} from 'lodash/lang'
 import DatePicker from 'react-datepicker'
+import $ from 'jquery'
 
 import OutsourceInfo from './OutsourceInfo'
 import {GMTSelect} from './GMTSelect'

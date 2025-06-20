@@ -1,7 +1,3 @@
-import {createRoot} from 'react-dom/client'
-import React from 'react'
-import $ from 'jquery'
-
 import AppDispatcher from '../stores/AppDispatcher'
 import RevisionFeedbackModal from '../components/modals/RevisionFeedbackModal'
 import CommonUtils from '../utils/commonUtils'
@@ -19,19 +15,6 @@ import ConfirmMessageModal from '../components/modals/ConfirmMessageModal'
 
 let CatToolActions = {
   popupInfoUserMenu: () => 'infoUserMenu-' + config.userMail,
-
-  openQaIssues: function () {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.SHOW_CONTAINER,
-      container: 'qaComponent',
-    })
-  },
-  openSearch: function () {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.SHOW_CONTAINER,
-      container: 'search',
-    })
-  },
   openSegmentFilter: function () {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.SHOW_CONTAINER,
@@ -68,12 +51,6 @@ let CatToolActions = {
       data: data,
     })
   },
-  toggleSegmentFilter: function () {
-    AppDispatcher.dispatch({
-      actionType: CatToolConstants.TOGGLE_CONTAINER,
-      container: 'segmentFilter',
-    })
-  },
   closeSubHeader: function () {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.CLOSE_SUBHEADER,
@@ -95,9 +72,6 @@ let CatToolActions = {
     AppDispatcher.dispatch({
       actionType: CatToolConstants.CLIENT_RECONNECTION,
     })
-  },
-  setPopupUserMenuCookie: function () {
-    CommonUtils.addInStorage(this.popupInfoUserMenu(), true, 'infoUserMenu')
   },
   storeFilesInfo: function (files, firstSegment, lastSegment) {
     AppDispatcher.dispatch({

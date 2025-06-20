@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react'
 import moment from 'moment'
 import {isUndefined} from 'lodash'
+import $ from 'jquery'
 
 import ManageConstants from '../../constants/ManageConstants'
 import JobContainer from './JobContainer'
