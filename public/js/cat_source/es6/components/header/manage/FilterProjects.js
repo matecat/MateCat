@@ -42,7 +42,7 @@ class FilterProjects extends React.Component {
     const {currentUser} = this.state
 
     ManageActions.filterProjects(
-      typeof currentUser === 'object' ? currentUser.user.uid : value,
+      typeof currentUser === 'object' ? currentUser.user.uid : currentUser,
       this.currentText,
       status,
     )
