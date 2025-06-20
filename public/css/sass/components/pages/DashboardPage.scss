@@ -1,4 +1,4 @@
-@use "../../common-main";
+@use '../../common-main';
 @use '../../commons/filter-teams';
 @use '../../commons/icons';
 @use '../../commons/project';
@@ -17,3 +17,4 @@
 @use '../header/TeamDropdown';
 @use '../UserProjectDropdown';
 @use '../signin/OnBoarding';
+@use '../MembersFilter';

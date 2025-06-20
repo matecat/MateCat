@@ -12,6 +12,7 @@ import {isNull} from 'lodash/lang'
 import {each} from 'lodash/collection'
 import {findIndex} from 'lodash/array'
 import classnames from 'classnames'
+import ReviewExtendedIssuesTabGroup from './ReviewExtendedIssuesTabGroup'
 
 class ReviewExtendedIssuesContainer extends React.Component {
   static contextType = SegmentContext
@@ -93,70 +94,124 @@ class ReviewExtendedIssuesContainer extends React.Component {
       let r2Active =
         (this.reviewType === 2 && htmlR2.length > 0) ||
         (htmlR2.length > 0 && htmlR1.length === 0)
-      return (
-        <div>
-          <div
-            className="ui top attached tabular menu"
-            ref={(tabs) => (this.tabs = tabs)}
-          >
-            <a
+
+      const tabs = [
+        {
+          id: 'r1',
+          label: 'R1 issues',
+          disabled: htmlR1.length === 0,
+          content: (
+            <div
               className={classnames(
-                'item',
                 r1Active && 'active',
                 htmlR1.length === 0 && 'disabled',
               )}
-              data-tab="r1"
+              style={{
+                padding: '0px',
+                width: '99.5%',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                marginBottom: 'unset',
+              }}
             >
-              R1 issues
-            </a>
-            <a
+              {htmlR1}
+            </div>
+          ),
+        },
+        {
+          id: 'r2',
+          label: 'R2 issues',
+          disabled: htmlR2.length === 0,
+          content: (
+            <div
               className={classnames(
-                'item',
                 r2Active && 'active',
                 htmlR2.length === 0 && 'disabled',
               )}
-              data-tab="r2"
+              style={{
+                padding: '0px',
+                width: '99.5%',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                margingBottom: 'unset',
+              }}
             >
-              R2 issues
-            </a>
-          </div>
+              {htmlR2}
+            </div>
+          ),
+        },
+      ]
 
-          <div
-            className={classnames(
-              'ui bottom attached tab segment',
-              htmlR1.length === 0 && 'disabled',
-              r1Active && 'active',
-            )}
-            data-tab="r1"
-            style={{
-              padding: '0px',
-              width: '99.5%',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              marginBottom: 'unset',
-            }}
-          >
-            {htmlR1}
-          </div>
-          <div
-            className={classnames(
-              'ui bottom attached tab segment',
-              htmlR2.length === 0 && 'disabled',
-              r2Active && 'active',
-            )}
-            data-tab="r2"
-            style={{
-              padding: '0px',
-              width: '99.5%',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              marginBottom: 'unset',
-            }}
-          >
-            {htmlR2}
-          </div>
-        </div>
+      return (
+        <ReviewExtendedIssuesTabGroup
+          {...{tabs, selectedTabId: r1Active ? 'r1' : 'r2'}}
+        />
       )
+
+      // return (
+      //   <div>
+      //     <div
+      //       className="ui top attached tabular menu"
+      //       ref={(tabs) => (this.tabs = tabs)}
+      //     >
+      //       <a
+      //         className={classnames(
+      //           'item',
+      //           r1Active && 'active',
+      //           htmlR1.length === 0 && 'disabled',
+      //         )}
+      //         data-tab="r1"
+      //       >
+      //         R1 issues
+      //       </a>
+      //       <a
+      //         className={classnames(
+      //           'item',
+      //           r2Active && 'active',
+      //           htmlR2.length === 0 && 'disabled',
+      //         )}
+      //         data-tab="r2"
+      //       >
+      //         R2 issues
+      //       </a>
+      //     </div>
+
+      //     <div
+      //       className={classnames(
+      //         'ui bottom attached tab segment',
+      //         htmlR1.length === 0 && 'disabled',
+      //         r1Active && 'active',
+      //       )}
+      //       data-tab="r1"
+      //       style={{
+      //         padding: '0px',
+      //         width: '99.5%',
+      //         maxHeight: '200px',
+      //         overflowY: 'auto',
+      //         marginBottom: 'unset',
+      //       }}
+      //     >
+      //       {htmlR1}
+      //     </div>
+      //     <div
+      //       className={classnames(
+      //         'ui bottom attached tab segment',
+      //         htmlR2.length === 0 && 'disabled',
+      //         r2Active && 'active',
+      //       )}
+      //       data-tab="r2"
+      //       style={{
+      //         padding: '0px',
+      //         width: '99.5%',
+      //         maxHeight: '200px',
+      //         overflowY: 'auto',
+      //         marginBottom: 'unset',
+      //       }}
+      //     >
+      //       {htmlR2}
+      //     </div>
+      //   </div>
+      // )
     } else {
       return htmlR1
     }
@@ -175,70 +230,58 @@ class ReviewExtendedIssuesContainer extends React.Component {
       let r2Active =
         (this.reviewType === 2 && issues.r2.length > 0) ||
         (issues.r2.length > 0 && issues.r1.length === 0)
-      return (
-        <div>
-          <div
-            className="ui top attached tabular menu"
-            ref={(tabs) => (this.tabs = tabs)}
-          >
-            <a
+
+      const tabs = [
+        {
+          id: 'r1',
+          label: 'R1 issues',
+          disabled: issues.r1.length === 0,
+          content: (
+            <div
               className={classnames(
-                'item',
                 r1Active && 'active',
                 issues.r1.length === 0 && 'disabled',
               )}
-              data-tab="r1"
+              style={{
+                padding: '0px',
+                width: '99.5%',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                marginBottom: 'unset',
+              }}
             >
-              R1 issues
-            </a>
-            <a
+              {issues.r1}
+            </div>
+          ),
+        },
+        {
+          id: 'r2',
+          label: 'R2 issues',
+          disabled: issues.r2.length === 0,
+          content: (
+            <div
               className={classnames(
-                'item',
                 r2Active && 'active',
                 issues.r2.length === 0 && 'disabled',
               )}
-              data-tab="r2"
+              style={{
+                padding: '0px',
+                width: '99.5%',
+                maxHeight: '200px',
+                overflowY: 'auto',
+                margingBottom: 'unset',
+              }}
             >
-              R2 issues
-            </a>
-          </div>
+              {issues.r2}
+            </div>
+          ),
+        },
+      ]
 
-          <div
-            className={classnames(
-              'ui bottom attached tab segment',
-              r1Active && 'active',
-              issues.r1.length === 0 && 'disabled',
-            )}
-            data-tab="r1"
-            style={{
-              padding: '0px',
-              width: '99.5%',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              marginBottom: 'unset',
-            }}
-          >
-            {' '}
-            {issues.r1}
-          </div>
-          <div
-            className={classnames(
-              'ui bottom attached tab segment',
-              r2Active && 'active',
-              issues.r2.length === 0 && 'disabled',
-            )}
-            data-tab="r2"
-            style={{
-              padding: '0px',
-              width: '99.5%',
-              maxHeight: '200px',
-              overflowY: 'auto',
-              margingBottom: 'unset',
-            }}
-          >
-            {issues.r2}
-          </div>
-        </div>
+      return (
+        <ReviewExtendedIssuesTabGroup
+          {...{tabs, selectedTabId: r1Active ? 'r1' : 'r2'}}
+        />
       )
     } else {
       return (

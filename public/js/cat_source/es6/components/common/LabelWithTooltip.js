@@ -4,7 +4,12 @@ import PropTypes from 'prop-types'
 import usePortal from '../../hooks/usePortal'
 import TEXT_UTILS from '../../utils/textUtils'
 
-const LabelWithTooltip = ({children, className, tooltipTarget}) => {
+const LabelWithTooltip = ({
+  children,
+  className,
+  tooltipTarget,
+  isPositionBottom = false,
+}) => {
   const TooltipPortal = usePortal(tooltipTarget ? tooltipTarget : document.body)
 
   const [tooltipCoords, setTooltipCoords] = useState()
@@ -57,11 +62,11 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
 
   const mouseEnter = () => {
     const rect = ref.current.getBoundingClientRect()
-
+    console.log(rect)
     tooltipDelayRef.current = setTimeout(() => {
       setTooltipCoords({
         left: rect.left + rect.width / 2,
-        top: rect.y - 10,
+        top: isPositionBottom ? rect.y + rect.height + 35 : rect.y - 10,
       })
     }, 200)
   }
@@ -82,7 +87,7 @@ const LabelWithTooltip = ({children, className, tooltipTarget}) => {
       {shouldShowTooltip && tooltipCoords && (
         <TooltipPortal>
           <div
-            className="label-with-tooltip"
+            className={`label-with-tooltip ${isPositionBottom ? 'label-with-tooltip-bottom' : ''}`}
             style={{left: tooltipCoords.left, top: tooltipCoords.top}}
           >
             <p className="label-with-tooltip-content">{getContentText()}</p>
@@ -97,6 +102,7 @@ LabelWithTooltip.propTypes = {
   children: PropTypes.node.isRequired,
   className: PropTypes.string,
   tooltipTarget: PropTypes.object,
+  isPositionBottom: PropTypes.bool,
 }
 
 export default LabelWithTooltip
