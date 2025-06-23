@@ -8,6 +8,7 @@ use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
+use PDOException;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -68,7 +69,21 @@ class UserKeysController extends KleinController {
         $request           = $this->validateTheRequest();
         $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
         $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+
+        try {
+            $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+        } catch (PDOException $exception){
+
+            //$this->response->status()->setCode(400);
+            $this->response->json( [
+                    'errors'  => [$exception->getMessage()],
+                    'data'    => null,
+                    "success" => false
+            ] );
+
+            exit();
+        }
+
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
 
         $this->response->json( [
@@ -122,6 +137,15 @@ class UserKeysController extends KleinController {
      * @return array
      */
     protected function getKeyUsersInfo( array $userMemoryKeys ): array {
+
+        if(empty($userMemoryKeys)){
+            return [
+                    'errors'  => [],
+                    "data"    => [],
+                    "success" => true
+            ];
+        }
+
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
             $_userStructs[] = new Users_ClientUserFacade( $userStruct );
