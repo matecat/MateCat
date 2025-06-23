@@ -1,35 +1,15 @@
 const path = require('path')
 const webpack = require('webpack')
 const {globSync} = require('glob')
-const terser = require('terser')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 const WebpackConcatPlugin = require('webpack-concat-files-plugin')
 const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
-const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
 // const BundleAnalyzerPlugin =
 //   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-
-const buildPath = './public/build/'
-const lxqDownload = './public/buildResources/'
-
-const downloadFile = async (url, dest, cb) => {
-  const file = fs.createWriteStream(dest)
-  return new Promise((resolve, reject) => {
-    https.get(url, function (response) {
-      response.pipe(file)
-      file.on('finish', function () {
-        resolve()
-      })
-      file.on('error', function (response) {
-        reject()
-      })
-    })
-  })
-}
 
 function getDirectories(path) {
   return fs.readdirSync(path).filter(function (file) {
@@ -40,22 +20,6 @@ function getDirectories(path) {
 const matecatConfig = async ({env}, {mode}) => {
   const isDev = mode === 'development'
   const config = ini.parse(fs.readFileSync('./inc/config.ini', 'utf-8'))
-  const lxqLicence = config[config.ENV]?.LXQ_LICENSE
-  if (lxqLicence) {
-    const lxqServer = config[config.ENV].LXQ_SERVER
-    if (!fs.existsSync(lxqDownload)) {
-      fs.mkdirSync(lxqDownload)
-    }
-    await downloadFile(
-      lxqServer + '/js/lxqlicense.js',
-      lxqDownload + 'lxqlicense.js',
-    )
-  } else {
-    if (!fs.existsSync(lxqDownload)) {
-      fs.mkdirSync(lxqDownload)
-    }
-    fs.closeSync(fs.openSync(lxqDownload + 'lxqlicense.js', 'w'))
-  }
   let pluginsCattoolFiles = []
   let pluginsUploadFiles = []
   let pluginsAllPagesFiles = []
@@ -260,7 +224,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       ...entryPoints,
       cattool: [
-        path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
         path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
         path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
         path.resolve(
@@ -342,23 +305,6 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
       }),
-      // new WebpackConcatPlugin({
-      //   bundles: [
-      //     {
-      //       src: [
-      //         './public/js/lib/jquery-3.7.1.min.js',
-      //         './public/js/lib/semantic.min.js',
-      //       ],
-      //       dest: './public/build/libs.js',
-      //       transforms: {
-      //         after: async (code) => {
-      //           const minifiedCode = await terser.minify(code)
-      //           return minifiedCode.code
-      //         },
-      //       },
-      //     },
-      //   ],
-      // }),
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash].css',
         chunkFilename: '[id].[contenthash].css',
