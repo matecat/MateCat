@@ -391,3 +391,38 @@ section {
     margin: 0 !important;
   }
 }
+
+.review-extended-issues-tab-group {
+  .tabs-container {
+    display: flex;
+    position: absolute;
+    top: 10px;
+    z-index: 1;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    font-size: 14px;
+    color: black;
+    padding: 0 15px;
+    cursor: pointer;
+
+    &.active {
+      background-color: white;
+      border-radius: 4px 4px 0 0;
+      border-bottom: unset;
+      font-weight: bold;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+
+  .tab-content {
+    margin-top: 41px;
+  }
+}
