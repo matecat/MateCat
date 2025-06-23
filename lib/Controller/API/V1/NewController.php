@@ -454,42 +454,49 @@ class NewController extends KleinController {
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
-        $instructions                              = filter_var( $this->request->param( 'instructions' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
-        $lexiqa                                    = filter_var( $this->request->param( 'lexiqa' ), FILTER_VALIDATE_BOOLEAN );
-        $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
-        $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
-        $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
-        $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
-        $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
-        $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
-        $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
-        $mt_qe_workflow_payable_rate_template_id   = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
-        $payable_rate_template_id                  = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
-        $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
-        $project_name                              = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
-        $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
-        $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $private_tm_key_json                       = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $project_completion                        = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
-        $qa_model_template_id                      = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
-        $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $show_whitespace                           = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
-        $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
-        $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $tag_projection                            = filter_var( $this->request->param( 'tag_projection' ), FILTER_VALIDATE_BOOLEAN );
-        $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
-        $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $lexiqa                                  = filter_var( $this->request->param( 'lexiqa' ), FILTER_VALIDATE_BOOLEAN );
+        $metadata                                = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $mmt_glossaries                          = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
+        $mt_engine                               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
+        $mt_evaluation                           = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
+        $mt_quality_value_in_editor              = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
+        $mt_qe_workflow_enable                   = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
+        $mt_qe_workflow_template_id              = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
+        $mt_qe_workflow_template_raw_parameters  = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
+        $mt_qe_workflow_payable_rate_template_id = filter_var( $this->request->param( 'mt_qe_workflow_payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
+        $payable_rate_template_id                = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $payable_rate_template_name              = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
+        $project_info                            = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
+        $project_name                            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $pretranslate_100                        = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
+        $pretranslate_101                        = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
+        $private_tm_key                          = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $private_tm_key_json                     = filter_var( $this->request->param( 'private_tm_key_json' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $project_completion                      = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
+        $qa_model_template_id                    = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $segmentation_rule                       = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $show_whitespace                         = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
+        $source_lang                             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $speech2text                             = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
+        $subject                                 = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang                             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $tag_projection                          = filter_var( $this->request->param( 'tag_projection' ), FILTER_VALIDATE_BOOLEAN );
+        $tms_engine                              = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
+        $xliff_parameters                        = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $xliff_parameters_template_id            = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
-        /**
-         * Uber plugin callback
-         */
-        $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        // Strip tags from instructions
+        $instructions = [];
+        if ( is_array( $this->request->param( 'instructions' ) ) ) {
+            foreach ( $this->request->param( 'instructions' ) as $value ) {
+                $instructions[] = Utils::stripTagsPreservingHrefs( $value );
+            }
+
+            /**
+             * Uber plugin callback
+             */
+            $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        }
 
         if ( empty( $_FILES ) ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
