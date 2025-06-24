@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use ConnectedServices\Google\GDrive\Session;
 use Controller\Abstracts\KleinController;

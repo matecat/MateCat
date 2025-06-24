@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -8,10 +8,16 @@ use Files\MetadataDao as FileMetadataDao;
 use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
+use ReflectionException;
 use stdClass;
 
 class MetaDataController extends KleinController {
     use ChunkNotFoundHandlerTrait;
+
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function index() {
 
         // params
@@ -41,7 +47,7 @@ class MetaDataController extends KleinController {
      *
      * @return stdClass
      */
-    private function getProjectInfo( Projects_ProjectStruct $project ) {
+    private function getProjectInfo( Projects_ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
 
@@ -57,6 +63,7 @@ class MetaDataController extends KleinController {
      * @param Jobs_JobStruct $job
      *
      * @return stdClass
+     * @throws ReflectionException
      */
     private function getJobMetaData( Jobs_JobStruct $job ): object {
 
@@ -75,9 +82,9 @@ class MetaDataController extends KleinController {
      * @param Jobs_JobStruct $job
      *
      * @return array
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    private function getJobFilesMetaData( Jobs_JobStruct $job ) {
+    private function getJobFilesMetaData( Jobs_JobStruct $job ): array {
 
         $metadata         = [];
         $filesMetaDataDao = new FileMetadataDao();

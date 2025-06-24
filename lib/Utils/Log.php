@@ -11,7 +11,7 @@ if ( !defined( 'LOG_FILENAME' ) ) {
 }
 
 // Be sure Monolog is installed via composer
-if ( @include 'vendor/autoload.php' ) {
+if ( class_exists( 'Monolog\Logger' ) ) {
     Log::$useMonolog = true;
 }
 
@@ -21,23 +21,21 @@ use Monolog\Logger;
 
 class Log {
 
-    protected static $fileNamePath;
-
     /**
-     * @var Monolog\Logger
+     * @var ?Logger
      */
-    protected static $logger;
+    protected static ?Logger $logger = null;
 
     /**
      * @var bool
      */
-    public static $useMonolog = false;
+    public static bool $useMonolog = false;
 
-    public static $fileName;
+    public static string $fileName = LOG_FILENAME;
 
-    public static $uniqID;
+    public static ?string $uniqID = null;
 
-    public static $requestID;
+    public static ?string $requestID = null;
 
     protected static function _writeTo( $stringData ) {
 
@@ -59,18 +57,16 @@ class Log {
     }
 
     protected static function initMonolog() {
-        $fileHandler   = new StreamHandler( self::getFileNamePath() );
-        $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
-        $fileHandler->setFormatter( $fileFormatter );
-        self::$logger = new Logger( 'Matecat', [ $fileHandler ] );
+        if( empty( self::$logger ) ){
+            $streamHandler   = new StreamHandler( self::getFileNamePath() );
+            $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
+            $streamHandler->setFormatter( $fileFormatter );
+            self::$logger = new Logger( 'Matecat', [ $streamHandler ] );
+        }
     }
 
-    protected static function getFileNamePath() {
+    protected static function getFileNamePath(): string {
         if ( !empty( self::$fileName ) ) {
-            if ( is_array( self::$fileName ) ) {
-                self::$fileName = implode( self::$fileName );
-            }
-
             $name = LOG_REPOSITORY . "/" . self::$fileName;
         } else {
             $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
@@ -79,7 +75,7 @@ class Log {
         return $name;
     }
 
-    protected static function _getHeader() {
+    protected static function _getHeader(): string {
 
         $trace = debug_backtrace( 2 );
 
@@ -103,7 +99,7 @@ class Log {
 
     }
 
-    public static function getContext() {
+    public static function getContext(): array {
 
         $trace = debug_backtrace( 2 );
         $_ip   = Utils::getRealIpAddr();
@@ -118,15 +114,6 @@ class Log {
 
         return $context;
 
-    }
-
-    /**
-     * @return void
-     * @deprecated
-     * @see        Log::doJsonLog()
-     */
-    public static function doLog() {
-        Log::doJsonLog( func_get_arg( 0 ) );
     }
 
     public static function doJsonLog( $content, $filename = null ) {
@@ -152,7 +139,10 @@ class Log {
         }
     }
 
-    public static function getLogger() {
+    /**
+     * @throws Exception
+     */
+    public static function getLogger(): Logger {
         if ( !self::$useMonolog ) {
             throw new Exception( 'Logger is not set. Is monolog available?' );
         }
@@ -174,7 +164,7 @@ class Log {
      * with non-viewable characters.
      *
      */
-    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ) {
+    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ): ?string {
 
         if ( is_array( $data ) ) {
             $data = print_r( $data, true );
@@ -231,6 +221,7 @@ class Log {
         // Output method
         if ( $return === false ) {
             self::_writeTo( self::_getHeader() . "\n" . $dump . "\n" );
+            return null;
         } else {
             return $dump;
         }
@@ -245,7 +236,7 @@ class Log {
         self::$logger = null;
     }
 
-    public static function getRequestID() {
+    public static function getRequestID(): string {
         if ( self::$requestID == null ) {
             self::$requestID = uniqid();
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices\GDrive;
+namespace Controller\ConnectedServices\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;

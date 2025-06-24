@@ -1,12 +1,13 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use API\App\Json\Analysis\AnalysisProject;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Exception;
 use Model\Analysis\Status;
 use Projects_ProjectDao;
 
@@ -23,14 +24,12 @@ class StatusController extends KleinController {
     /**
      * @throws NotFoundException
      * @throws \Exceptions\NotFoundException
+     * @throws Exception
      */
     public function index() {
 
         $_project_data  = Projects_ProjectDao::getProjectAndJobData( $this->request->param( 'id_project' ) );
         $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
-        /**
-         * @var AnalysisProject $result
-         */
         $result = $analysisStatus->fetchData()->getResult();
 
         // return 404 if there are no chunks

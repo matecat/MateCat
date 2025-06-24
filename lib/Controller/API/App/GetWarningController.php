@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;

@@ -22,7 +22,7 @@ $klein->with( '/api/v2/projects/[:id_project]/[:password]', function () {
     route( '/archive', 'POST', [ 'Controller\API\V2\ProjectsController', 'archive' ] );
     route( '/active', 'POST', [ 'Controller\API\V2\ProjectsController', 'active' ] );
     route( '/r2', 'POST', [ 'Controller\API\V2\ReviewsController', 'createReview' ] );
-    route( '/analysis/status', 'GET', [ '\API\V3\StatusController', 'index' ] );
+    route( '/analysis/status', 'GET', [ '\Controller\API\V3\StatusController', 'index' ] );
 
     // change project name
     route( '/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
@@ -117,13 +117,13 @@ $klein->with( '/api/v2/files', function () {
 } );
 
 $klein->with( '/api/v2/payable_rate', function () {
-    route( '/schema', 'GET', [ '\API\V3\PayableRateController', 'schema' ] );
-    route( '/validate', 'POST', [ '\API\V3\PayableRateController', 'validate' ] );
-    route( '', 'GET', [ '\API\V3\PayableRateController', 'index' ] );
-    route( '', 'POST', [ '\API\V3\PayableRateController', 'create' ] );
-    route( '/[:id]', 'GET', [ '\API\V3\PayableRateController', 'view' ] );
-    route( '/[:id]', 'DELETE', [ '\API\V3\PayableRateController', 'delete' ] );
-    route( '/[:id]', 'PUT', [ '\API\V3\PayableRateController', 'edit' ] );
+    route( '/schema', 'GET', [ '\Controller\API\V3\PayableRateController', 'schema' ] );
+    route( '/validate', 'POST', [ '\Controller\API\V3\PayableRateController', 'validate' ] );
+    route( '', 'GET', [ '\Controller\API\V3\PayableRateController', 'index' ] );
+    route( '', 'POST', [ '\Controller\API\V3\PayableRateController', 'create' ] );
+    route( '/[:id]', 'GET', [ '\Controller\API\V3\PayableRateController', 'view' ] );
+    route( '/[:id]', 'DELETE', [ '\Controller\API\V3\PayableRateController', 'delete' ] );
+    route( '/[:id]', 'PUT', [ '\Controller\API\V3\PayableRateController', 'edit' ] );
 
 } );
 

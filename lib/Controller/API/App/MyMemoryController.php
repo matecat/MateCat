@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -38,7 +38,7 @@ class MyMemoryController extends KleinController {
      * @return Engines_MyMemory
      * @throws Exception
      */
-    private function getMMEngine( FeatureSet $featureSet ) {
+    private function getMMEngine( FeatureSet $featureSet ): Engines_MyMemory {
         $_TMS = Engine::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 

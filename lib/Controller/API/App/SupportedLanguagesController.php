@@ -1,7 +1,7 @@
 <?php
 
 
-namespace API\App;
+namespace Controller\API\App;
 
 
 use Controller\Abstracts\KleinController;

@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;

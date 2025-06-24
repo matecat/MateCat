@@ -46,7 +46,7 @@ class Bootstrap {
 
         $this->_setIncludePath();
         spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
-        @include_once 'vendor/autoload.php';
+        @include_once self::$_ROOT . '/vendor/autoload.php';
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
 

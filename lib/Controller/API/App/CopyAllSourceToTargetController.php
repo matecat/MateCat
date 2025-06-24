@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;

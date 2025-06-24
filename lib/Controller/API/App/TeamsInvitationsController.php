@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App;
+namespace Controller\API\App;
 
 
 use Controller\API\Commons\Exceptions\ValidationError;

@@ -6,6 +6,7 @@ use API\App\Json\UserProfile;
 use ApiKeys_ApiKeyDao;
 use ApiKeys_ApiKeyStruct;
 use ConnectedServices\ConnectedServiceDao;
+use Log;
 use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;
@@ -80,7 +81,7 @@ class AuthenticationHelper {
 
             }
         } catch ( Throwable $ignore ) {
-
+            Log::doJsonLog( $ignore );
         } finally {
             $this->logged = $this->user->isLogged();
         }

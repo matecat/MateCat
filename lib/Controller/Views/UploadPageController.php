@@ -10,7 +10,7 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
-use ConnectedServices\GDrive\GDriveController;
+use Controller\ConnectedServices\GDrive\GDriveController;
 use Constants;
 use CookieManager;
 use Engines_Intento;

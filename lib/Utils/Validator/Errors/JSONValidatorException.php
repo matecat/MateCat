@@ -5,7 +5,7 @@ namespace Validator\Errors;
 use Exception;
 use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
-
+//XXX Move to validator namespace and use Base if possible
 class JSONValidatorException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface {
     /**
      * @var Error

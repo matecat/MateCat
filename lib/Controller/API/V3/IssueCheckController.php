@@ -1,16 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DataAccess\ShapelessConcreteStruct;
+use ReflectionException;
 use Translations_SegmentTranslationDao;
 
 class IssueCheckController extends KleinController {
     use ChunkNotFoundHandlerTrait;
+
     /**
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function segments() {
 

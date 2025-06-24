@@ -1,12 +1,13 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Jobs_JobStruct;
+use ReflectionException;
 use Revise\FeedbackDAO;
 use Revise\FeedbackStruct;
 
@@ -17,12 +18,16 @@ class RevisionFeedbackController extends KleinController {
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( Jobs_JobStruct $chunk ): RevisionFeedbackController {
         $this->chunk = $chunk;
 
         return $this;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function feedback() {
 
         // insert or update feedback

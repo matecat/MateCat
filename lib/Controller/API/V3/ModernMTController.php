@@ -1,11 +1,12 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Conversion\Upload;
 use CURLFile;
+use Engines_AbstractEngine;
 use Engines_MMT;
 use Exception;
 use Files\CSV as CSVParser;
@@ -419,20 +420,20 @@ class ModernMTController extends KleinController {
     /**
      * @param $engineId
      *
-     * @return \Engines_AbstractEngine
+     * @return Engines_MMT
      * @throws Exception
      */
-    private function getModernMTClient( $engineId ) {
+    private function getModernMTClient( $engineId ): Engines_AbstractEngine {
         return EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Engines_MMT::class );
     }
 
     /**
-     * @param $params
-     * @param $memory
+     * @param array $params
+     * @param array $memory
      *
      * @return bool
      */
-    private function filterResult( $params, $memory ) {
+    private function filterResult( array $params, array $memory ): bool {
         if ( isset( $params[ 'q' ] ) ) {
             $q = filter_var( $params[ 'q' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW );
             if ( false === strpos( strtolower( $memory[ 'name' ] ), strtolower( $q ) ) ) {
@@ -444,11 +445,11 @@ class ModernMTController extends KleinController {
     }
 
     /**
-     * @param $memory
+     * @param array $memory
      *
      * @return array
      */
-    private function buildResult( $memory ) {
+    private function buildResult( array $memory ): array {
         return [
                 'id'           => $memory[ 'id' ],
                 'name'         => $memory[ 'name' ],
@@ -462,7 +463,7 @@ class ModernMTController extends KleinController {
      * @return string
      * @throws Exception
      */
-    private function getCsvType( array $csv ) {
+    private function getCsvType( array $csv ): string {
         $firstCell    = $csv[ 0 ][ 0 ];
         $numberOfRows = count( $csv[ 0 ] );
 

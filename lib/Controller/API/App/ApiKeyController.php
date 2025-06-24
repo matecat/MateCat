@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use ApiKeys_ApiKeyDao;
 use ApiKeys_ApiKeyStruct;

@@ -6,7 +6,7 @@
  * Time: 13:03
  */
 
-namespace API\V3;
+namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;

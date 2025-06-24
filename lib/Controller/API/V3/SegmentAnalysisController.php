@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use CatUtils;
 use Chunks_ChunkDao;

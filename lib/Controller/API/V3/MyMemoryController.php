@@ -1,10 +1,11 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
+use Engines_MyMemory;
 use Exception;
 use InvalidArgumentException;
 use TmKeyManagement_MemoryKeyDao;
@@ -25,7 +26,6 @@ class MyMemoryController extends KleinController {
             $json = $this->request->body();
             $json = json_decode( $json, true );
 
-            $name = null;
             $key  = null;
 
             if ( !isset( $json[ 'name' ] ) ) {
@@ -50,7 +50,7 @@ class MyMemoryController extends KleinController {
             ] );
             exit();
 
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( $exception->getCode() );
             $this->response->json( [
                     'errors' => [
@@ -63,13 +63,14 @@ class MyMemoryController extends KleinController {
     }
 
     /**
-     * @param $name
+     * @param string $name
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    private function createANewKeyAndAssignToUser( $name ) {
-        $tms    = Engine::getInstance( 1 );
+    private function createANewKeyAndAssignToUser( string $name ) {
+        $tms = Engine::getInstance( 1 );
+        /** @var Engines_MyMemory $tms */
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey( $newKey->key, $name );
@@ -78,13 +79,13 @@ class MyMemoryController extends KleinController {
     }
 
     /**
-     * @param $key
-     * @param $name
+     * @param string $key
+     * @param string $name
      *
-     * @return mixed
-     * @throws \Exception
+     * @return string
+     * @throws Exception
      */
-    private function checkTheKeyAndAssignToUser( $key, $name ) {
+    private function checkTheKeyAndAssignToUser( string $key, string $name ) {
         $tmxHandler = new TMSService();
         $keyExists  = $tmxHandler->checkCorrectKey( $key );
 
@@ -101,9 +102,9 @@ class MyMemoryController extends KleinController {
      * @param string $key
      * @param string $name
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    private function saveMemoryKey( $key, $name ) {
+    private function saveMemoryKey( string $key, string $name ) {
         $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
         $tmKeyStruct->key  = $key;
         $tmKeyStruct->name = $name;
@@ -118,7 +119,7 @@ class MyMemoryController extends KleinController {
 
         try {
             $mkDao->create( $newMemoryKey );
-        } catch ( \Exception $exception ) {
+        } catch ( Exception $exception ) {
             $mkDao->atomicUpdate( $newMemoryKey );
         }
     }

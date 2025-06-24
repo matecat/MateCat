@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -204,7 +204,6 @@ class DeepLGlossaryController extends KleinController {
 
     /**
      * @param $glossary
-     * @param $type
      *
      * @return false|string
      * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
@@ -229,10 +228,11 @@ class DeepLGlossaryController extends KleinController {
     /**
      * @param $engineId
      *
-     * @return \Engines_AbstractEngine
+     * @return Engines_DeepL
      * @throws Exception
      */
-    private function getDeepLClient( $engineId ) {
+    private function getDeepLClient( $engineId ): Engines_DeepL {
+        /** @var Engines_DeepL $engine */
         $engine      = EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Engines_DeepL::class );
         $extraParams = $engine->getEngineRecord()->extra_parameters;
 

@@ -18,10 +18,10 @@ trait ChunkNotFoundHandlerTrait {
      * @param $id_job
      * @param $password
      *
-     * @return Jobs_JobStruct
+     * @return ?Jobs_JobStruct
      * @throws ReflectionException
      */
-    protected function getJob( $id_job, $password ): Jobs_JobStruct {
+    protected function getJob( $id_job, $password ): ?Jobs_JobStruct {
 
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
 

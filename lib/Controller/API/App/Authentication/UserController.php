@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\ValidationError;

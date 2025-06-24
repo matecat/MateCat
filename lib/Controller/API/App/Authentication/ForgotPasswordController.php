@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Abstracts\AbstractStatefulKleinController;

@@ -6,7 +6,7 @@
  * Time: 13:03
  */
 
-namespace API\V3;
+namespace Controller\API\V3;
 use API\V3\Json\Chunk;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;

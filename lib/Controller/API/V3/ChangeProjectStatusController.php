@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use Controller\API\V2\ProjectsController as ProjectsControllerV2;
 use Constants_JobStatus;

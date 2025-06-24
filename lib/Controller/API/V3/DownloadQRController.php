@@ -1,47 +1,44 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
+
+use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use DOMDocument;
 use Exception;
+use Exceptions\NotFoundException;
+use Jobs_JobStruct;
 use QualityReport\QualityReportSegmentModel;
+use QualityReport_QualityReportSegmentStruct;
 use ZipArchive;
 
 
 class DownloadQRController extends KleinController {
     use ChunkNotFoundHandlerTrait;
-    /**
-     * @var int
-     */
-    private $idJob;
-
-    /**
-     * @var string
-     */
-    private $password;
 
     /**
      * @var string|null
      */
-    private $format;
+    private ?string $format;
 
     /**
      * @var int
      */
-    private $segmentsPerFile;
+    private int $segmentsPerFile;
 
     /**
      * @var array
      */
-    private $allowedFormats = [ 'csv', 'json', 'xml' ];
+    private array $allowedFormats = [ 'csv', 'json', 'xml' ];
 
     /**
      * Download QR to a file
      */
     public function download() {
 
-        $this->idJob           = $this->request->param( 'jid' );
-        $this->password        = $this->request->param( 'password' );
+        $idJob                 = $this->request->param( 'jid' );
+        $password              = $this->request->param( 'password' );
         $this->format          = $this->request->param( 'format', 'csv' );
         $this->segmentsPerFile = $this->request->param( 'segmentsPerFile', 20 );
 
@@ -61,16 +58,16 @@ class DownloadQRController extends KleinController {
         }
 
         try {
-            $chunk = \Chunks_ChunkDao::getByIdAndPassword( $this->idJob, $this->password );
+            $chunk = Chunks_ChunkDao::getByIdAndPassword( $idJob, $password );
 
-            $prefix   = "QR_" . $this->idJob . "_" . $this->password . "_";
+            $prefix   = "QR_" . $idJob . "_" . $password . "_";
             $filePath = tempnam( "/tmp", $prefix );
 
             $fileContent = $this->composeFileContent( $chunk );
             file_put_contents( $filePath, $fileContent );
             $this->downloadFile( $this->fileMimeType(), $prefix . date( 'YmdHis' ) . '.' . $this->format, $filePath );
 
-        } catch ( \Exceptions\NotFoundException $e ) {
+        } catch ( NotFoundException $e ) {
             $this->response->status()->setCode( 404 );
             $this->response->json( [
                     'errors' => [
@@ -79,7 +76,7 @@ class DownloadQRController extends KleinController {
                     ]
             ] );
             exit();
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
             $this->response->status()->setCode( 500 );
             $this->response->json( [
                     'errors' => [
@@ -94,7 +91,7 @@ class DownloadQRController extends KleinController {
     /**
      * @return string
      */
-    private function fileMimeType() {
+    private function fileMimeType(): string {
         if ( $this->format === 'json' ) {
             return 'application/json';
         }
@@ -111,12 +108,12 @@ class DownloadQRController extends KleinController {
     }
 
     /**
-     * @param \Jobs_JobStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return bool|false|string
-     * @throws \Exception
+     * @throws Exception
      */
-    private function composeFileContent( \Jobs_JobStruct $chunk ) {
+    private function composeFileContent( Jobs_JobStruct $chunk ) {
 
         $data = [];
 
@@ -169,10 +166,10 @@ class DownloadQRController extends KleinController {
      * @param int                       $refSegment
      * @param array                     $ids
      *
-     * @return array
-     * @throws \Exception
+     * @return void
+     * @throws Exception
      */
-    private function buildArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, $step, $refSegment, &$ids ) {
+    private function buildArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, int $step, int $refSegment, array &$ids ): void {
 
         $where  = "after";
         $filter = [ 'filter' => null ];
@@ -183,8 +180,6 @@ class DownloadQRController extends KleinController {
             $refSegment = end( $segments_ids );
             $ids[]      = $segments_ids;
             $this->buildArrayOfSegmentIds( $qrSegmentModel, $step, $refSegment, $ids );
-        } else {
-            return $ids;
         }
     }
 
@@ -193,14 +188,14 @@ class DownloadQRController extends KleinController {
      * @param                           $segments_ids
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
-    private function buildFileContentFromArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, $segments_ids ) {
+    private function buildFileContentFromArrayOfSegmentIds( QualityReportSegmentModel $qrSegmentModel, $segments_ids ): array {
         $segments = $qrSegmentModel->getSegmentsForQR( $segments_ids );
 
         $data = [];
 
-        /** @var \QualityReport_QualityReportSegmentStruct $segment */
+        /** @var QualityReport_QualityReportSegmentStruct $segment */
         foreach ( $segments as $segment ) {
 
             $issues   = [];
@@ -443,7 +438,7 @@ class DownloadQRController extends KleinController {
 
         $xml .= '</segments>';
 
-        $dom                     = new \DOMDocument;
+        $dom                     = new DOMDocument;
         $dom->preserveWhiteSpace = false;
         $dom->loadXML( $xml, LIBXML_NOENT );
         $dom->formatOutput = true;
@@ -521,7 +516,7 @@ class DownloadQRController extends KleinController {
      * @param string $filename
      * @param array  $files
      */
-    private function composeZipFile( $filename, array $files ) {
+    private function composeZipFile( string $filename, array $files ) {
         $zip = new ZipArchive;
 
         if ( $zip->open( $filename, ZipArchive::CREATE ) ) {
@@ -540,7 +535,7 @@ class DownloadQRController extends KleinController {
      * @param string $filename
      * @param string $filePath
      */
-    private function downloadFile( $mimeType, $filename, $filePath ) {
+    private function downloadFile( string $mimeType, string $filename, string $filePath ) {
 
         $outputContent = file_get_contents( $filePath );
 

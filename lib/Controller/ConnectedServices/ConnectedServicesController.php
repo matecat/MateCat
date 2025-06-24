@@ -6,10 +6,13 @@
  * Time: 16:01
  */
 
-namespace ConnectedServices;
+namespace Controller\ConnectedServices;
 
 
 use API\App\Json\ConnectedService;
+use ConnectedServices\ConnectedServiceDao;
+use ConnectedServices\ConnectedServiceStruct;
+use ConnectedServices\GDriveTokenVerifyModel;
 use ConnectedServices\Google\GoogleProvider;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;

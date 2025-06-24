@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
 use AMQHandler;
 use Comments_CommentDao;
@@ -389,7 +389,7 @@ class CommentController extends KleinController {
         $owner = $userDao->getProjectOwner( $job->id );
 
         if ( !empty( $owner->uid ) and !empty( $owner->email ) ) {
-            array_push( $users, $owner );
+            $users[] = $owner;
         }
 
         $userDao->setCacheTTL( 60 * 10 );

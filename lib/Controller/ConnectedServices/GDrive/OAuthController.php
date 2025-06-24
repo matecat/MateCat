@@ -6,7 +6,7 @@
  * Time: 16:05
  */
 
-namespace ConnectedServices\GDrive;
+namespace Controller\ConnectedServices\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use ConnectedServices\GDriveUserAuthorizationModel;
@@ -18,6 +18,7 @@ use ReflectionException;
 class OAuthController extends AbstractStatefulKleinController {
 
     /**
+     * @throws ReflectionException
      * @throws ValidationError
      */
     public function response() {

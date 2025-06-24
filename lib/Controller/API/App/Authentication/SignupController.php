@@ -1,6 +1,6 @@
 <?php
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
 use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;

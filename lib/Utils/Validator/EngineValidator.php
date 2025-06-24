@@ -8,14 +8,14 @@ use Exception;
 
 class EngineValidator {
     /**
-     * @param $engineId
-     * @param $uid
-     * @param $engineClass
+     * @param int  $engineId
+     * @param int  $uid
+     * @param null $engineClass
      *
      * @return Engines_AbstractEngine
      * @throws Exception
      */
-    public static function engineBelongsToUser( $engineId, int $uid, $engineClass = null ): Engines_AbstractEngine {
+    public static function engineBelongsToUser( int $engineId, int $uid, $engineClass = null ): Engines_AbstractEngine {
         $engine       = Engine::getInstance( $engineId );
         $engineRecord = $engine->getEngineRecord();
 

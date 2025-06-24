@@ -6,7 +6,7 @@
  * Time: 09:38
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
