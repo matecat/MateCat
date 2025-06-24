@@ -180,10 +180,11 @@ export const TMCreateResourceRow = ({row}) => {
           CatToolActions.addNotification({
             title: 'Invalid key',
             type: 'error',
-            text:
-              errors[0].code === '23000'
+            text: errors?.length
+              ? errors[0].code && errors[0].code === '23000'
                 ? 'The key you entered is invalid.'
-                : errors[0].message,
+                : errors[0].message
+              : 'Invalid key',
             position: 'br',
             timer: 5000,
           })
