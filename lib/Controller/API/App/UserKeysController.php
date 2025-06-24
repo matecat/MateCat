@@ -66,14 +66,13 @@ class UserKeysController extends KleinController {
      */
     public function newKey(): void {
 
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
-        $mkDao             = $this->getMkDao();
-
         try {
+            $request           = $this->validateTheRequest();
+            $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+            $mkDao             = $this->getMkDao();
             $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
         } catch (Exception $exception){
-            throw new InvalidArgumentException($exception->getMessage(), $exception->getCode());
+            throw new InvalidArgumentException('The key you entered is invalid.', $exception->getCode());
         }
 
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
