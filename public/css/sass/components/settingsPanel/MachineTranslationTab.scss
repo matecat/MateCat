@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -505,4 +505,24 @@
 
 .create-glossary-button-disabled {
   visibility: hidden;
+}
+
+.machine-translation-tab-add-mt-engine-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .mt-quality-value {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background-color: colors.$grey4;
+    padding: 5px;
+    border-radius: 4px;
+    border: solid 1px colors.$grey2;
+
+    h4 {
+      margin: 0;
+    }
+  }
 }
