@@ -147,14 +147,11 @@ export const TMCreateResourceRow = ({row}) => {
             timer: 5000,
           })
         })
-        .catch((errors) => {
+        .catch(() => {
           CatToolActions.addNotification({
             title: 'Invalid key',
             type: 'error',
-            text:
-              !errors?.[0] || errors[0].code === '23000'
-                ? 'The key you entered is invalid.'
-                : errors[0].message,
+            text: 'The key you entered is invalid.',
             position: 'br',
             timer: 5000,
           })
@@ -176,15 +173,11 @@ export const TMCreateResourceRow = ({row}) => {
           onReset()
           getInfoTmKeyCallback()
         })
-        .catch((errors) => {
+        .catch(() => {
           CatToolActions.addNotification({
             title: 'Invalid key',
             type: 'error',
-            text: errors?.length
-              ? errors[0].code && errors[0].code === '23000'
-                ? 'The key you entered is invalid.'
-                : errors[0].message
-              : 'Invalid key',
+            text: 'The key you entered is invalid.',
             position: 'br',
             timer: 5000,
           })
