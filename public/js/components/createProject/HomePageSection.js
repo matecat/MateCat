@@ -8,7 +8,7 @@ export const HomePageSection = () => {
         <div className={'layout-grid'}>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-aiDriven.svg" />
+              <img src="/public/img/icons/home/home-aiDriven.svg" />
               <h3>AI-Driven Precision and Speed</h3>
             </div>
             <p>
@@ -24,7 +24,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-goFaster.svg" />
+              <img src="/public/img/icons/home/home-goFaster.svg" />
               <h3>Save time with adaptive Machine Translation</h3>
             </div>
             <p>
@@ -40,7 +40,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-freeToUse.svg" />
+              <img src="/public/img/icons/home/home-freeToUse.svg" />
               <h3>Free to use</h3>
             </div>
             <p>
@@ -56,7 +56,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-cloud.svg" />
+              <img src="/public/img/icons/home/home-cloud.svg" />
               <h3>Keep your data secure</h3>
             </div>
             <p>
@@ -72,7 +72,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-liveSupport.svg" />
+              <img src="/public/img/icons/home/home-liveSupport.svg" />
               <h3>A User-friendly Experience</h3>
             </div>
             <p>
@@ -88,7 +88,7 @@ export const HomePageSection = () => {
           </div>
           <div className="content-box">
             <div className="content-box_header">
-              <img src="/img/icons/home/home-work.svg" />
+              <img src="/public/img/icons/home/home-work.svg" />
               <h3>Work from anywhere</h3>
             </div>
             <p>

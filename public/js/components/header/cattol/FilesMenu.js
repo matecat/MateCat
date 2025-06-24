@@ -95,7 +95,7 @@ export const FilesMenu = ({projectName}) => {
             <span id="project-badge">
               <span>{files.length}</span>
             </span>
-            <img src="/img/icons/icon-folder.svg" alt="" />
+            <img src="/public/img/icons/icon-folder.svg" alt="" />
           </div>
           <div id="pname-container">
             <FilenameLabel cssClassName={'project-name'}>

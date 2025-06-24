@@ -42,7 +42,7 @@ export const Header = ({
     <header>
       <div className="wrapper nav-bar">
         <div className="logo-menu">
-          <a href="/public" className="logo" />
+          <a href="/" className="logo" />
         </div>
         {isUserLogged ? (
           <>

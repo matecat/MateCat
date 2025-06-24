@@ -479,7 +479,10 @@ class OutsourceVendor extends React.Component {
           <div className="fiducial-logo">
             <div className="translated-logo">
               Guaranteed by
-              <img className="logo-t" src="/img/matecat-logo-translated.svg" />
+              <img
+                className="logo-t"
+                src="/public/img/matecat-logo-translated.svg"
+              />
             </div>
           </div>
         </div>

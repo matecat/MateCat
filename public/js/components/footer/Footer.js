@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="footer-body">
         <div className="info">
           <div className="image">
-            <img src="/img/logo_matecat_small.svg" />
+            <img src="/public/img/logo_matecat_small.svg" />
           </div>
           <div className="description">
             Matecat is a free and open source online CAT tool. It’s free for
@@ -52,7 +52,7 @@ const Footer = () => {
         </div>
         <div className="footer-logo">
           <a href="https://www.translated.com" rel="noreferrer" target="_blank">
-            <img src="/img/matecat-logo-translated.svg" width="130" />
+            <img src="/public/img/matecat-logo-translated.svg" width="130" />
           </a>
         </div>
       </div>

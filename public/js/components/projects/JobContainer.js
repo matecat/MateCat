@@ -726,7 +726,7 @@ class JobContainer extends React.Component {
           >
             <img
               className="outsource-logo"
-              src="/img/matecat-logo-translated.svg"
+              src="/public/img/matecat-logo-translated.svg"
               title="Outsourced to translated.net"
               alt="Translated logo"
             />

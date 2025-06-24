@@ -11,7 +11,7 @@ const SocialButtons = () => {
           size={BUTTON_SIZE.ICON_STANDARD}
           onClick={() => socialLogin(socialUrls.googleUrl)}
         >
-          <img alt="Google login" src="/img/icons/social/google.svg" />
+          <img alt="Google login" src="/public/img/icons/social/google.svg" />
         </Button>
       )}
       {socialUrls.linkedIn && (
@@ -19,7 +19,7 @@ const SocialButtons = () => {
           size={BUTTON_SIZE.ICON_STANDARD}
           onClick={() => socialLogin(socialUrls.linkedIn)}
         >
-          <img alt="Google login" src="/img/icons/social/linkedIn.svg" />
+          <img alt="Google login" src="/public/img/icons/social/linkedIn.svg" />
         </Button>
       )}
       {socialUrls.microsoft && (
@@ -27,7 +27,10 @@ const SocialButtons = () => {
           size={BUTTON_SIZE.ICON_STANDARD}
           onClick={() => socialLogin(socialUrls.microsoft)}
         >
-          <img alt="Google login" src="/img/icons/social/microsoft.svg" />
+          <img
+            alt="Google login"
+            src="/public/img/icons/social/microsoft.svg"
+          />
         </Button>
       )}
       {socialUrls.github && (
@@ -35,7 +38,7 @@ const SocialButtons = () => {
           size={BUTTON_SIZE.ICON_STANDARD}
           onClick={() => socialLogin(socialUrls.github)}
         >
-          <img alt="Google login" src="/img/icons/social/github.svg" />
+          <img alt="Google login" src="/public/img/icons/social/github.svg" />
         </Button>
       )}
       {socialUrls.meta && (
@@ -43,7 +46,7 @@ const SocialButtons = () => {
           size={BUTTON_SIZE.ICON_STANDARD}
           onClick={() => socialLogin(socialUrls.meta)}
         >
-          <img alt="Google login" src="/img/icons/social/meta.svg" />
+          <img alt="Google login" src="/public/img/icons/social/meta.svg" />
         </Button>
       )}
     </div>
