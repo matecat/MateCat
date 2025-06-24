@@ -29,6 +29,7 @@ import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
+import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -82,6 +83,13 @@ export const MachineTranslationTab = () => {
               id,
             }
           : {},
+    }))
+
+  const mtQualityValue = currentProjectTemplate.mtQualityValueInEditor
+  const setMtQualityValue = (value) =>
+    modifyingCurrentTemplate((prevTemplate) => ({
+      ...prevTemplate,
+      mtQualityValueInEditor: value,
     }))
 
   const [addMTVisible, setAddMTVisible] = useState(
@@ -345,14 +353,29 @@ export const MachineTranslationTab = () => {
       <div data-testid="active-mt">
         <div className="machine-translation-tab-table-title">
           <h2>Active MT</h2>
-          {!config.is_cattool && !addMTVisible && (
-            <button
-              className="ui primary button settings-panel-button-icon"
-              onClick={() => setAddMTVisible(true)}
-              title="Add MT engine"
-            >
-              <AddWide size={18} /> Add MT engine
-            </button>
+          {!config.is_cattool && (
+            <div className="machine-translation-tab-add-mt-engine-container">
+              <div className="mt-quality-value">
+                <h4>MT match</h4>
+                <NumericStepper
+                  value={mtQualityValue}
+                  valuePlaceholder={`${mtQualityValue}%`}
+                  onChange={setMtQualityValue}
+                  minimumValue={76}
+                  maximumValue={101}
+                  stepValue={1}
+                />
+              </div>
+              {!config.is_cattool && !addMTVisible && (
+                <button
+                  className="ui primary button settings-panel-button-icon"
+                  onClick={() => setAddMTVisible(true)}
+                  title="Add MT engine"
+                >
+                  <AddWide size={18} /> Add MT engine
+                </button>
+              )}
+            </div>
           )}
         </div>
 
