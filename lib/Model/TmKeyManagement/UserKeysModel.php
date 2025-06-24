@@ -104,6 +104,7 @@ class UserKeysModel {
                             // so, i can upload and download TMX, but i don't want it to be removed from job
                             // in tm.html relaxed the control to "key.edit" to enable buttons
                             // $jobKey = $jobKey->hideKey( $uid ); // enable editing
+                            $jobKey->owner = false;
 
                         } else {
                             if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
