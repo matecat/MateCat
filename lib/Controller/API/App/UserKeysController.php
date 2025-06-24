@@ -72,16 +72,8 @@ class UserKeysController extends KleinController {
 
         try {
             $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
-        } catch (PDOException $exception){
-
-            //$this->response->status()->setCode(400);
-            $this->response->json( [
-                    'errors'  => [$exception->getMessage()],
-                    'data'    => null,
-                    "success" => false
-            ] );
-
-            exit();
+        } catch (Exception $exception){
+            throw new InvalidArgumentException($exception->getMessage(), $exception->getCode());
         }
 
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
