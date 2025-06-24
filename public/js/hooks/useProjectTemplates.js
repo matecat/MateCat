@@ -42,6 +42,7 @@ const STANDARD_TEMPLATE = {
   character_counter_count_tags: false,
   character_counter_mode: 'google_ads',
   dialect_strict: false,
+  mt_quality_value_in_editor: null,
 }
 
 const CATTOOL_TEMPLATE = {
@@ -74,6 +75,7 @@ export const SCHEMA_KEYS = {
   characterCounterCountTags: 'character_counter_count_tags',
   characterCounterMode: 'character_counter_mode',
   dialectStrict: 'dialect_strict',
+  mtQualityValueInEditor: 'mt_quality_value_in_editor',
 }
 
 export class UseProjectTemplateInterface extends ComponentExtendInterface {
