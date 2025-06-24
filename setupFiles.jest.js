@@ -5,5 +5,3 @@ import 'whatwg-fetch'
 global.config = {
   id_job: 2,
 }
-
-require('./public/js/lib/semantic.min.js')
