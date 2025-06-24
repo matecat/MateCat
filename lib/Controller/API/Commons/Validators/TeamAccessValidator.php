@@ -7,10 +7,10 @@
  *
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
 

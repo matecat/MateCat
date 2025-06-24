@@ -6,9 +6,9 @@ use CatUtils;
 use Chunks_ChunkCompletionEventDao;
 use Exception;
 use Projects_MetadataDao;
-use Views\TemplateDecorator\AbstractDecorator;
-use Views\TemplateDecorator\Arguments\ArgumentInterface;
-use Views\TemplateDecorator\Arguments\CatDecoratorArguments;
+use Controller\Views\TemplateDecorator\AbstractDecorator;
+use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
+use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 
 class CatDecorator extends AbstractDecorator {
 

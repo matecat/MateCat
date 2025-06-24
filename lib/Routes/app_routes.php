@@ -54,7 +54,7 @@ $klein->with( '/api/app/jobs/[:id_job]/[:password]', function () {
     route( '/quality-report/segments', 'GET', [ 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments_for_ui' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 } );
 
-route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET', [ 'API\App\StatsController', 'stats' ] );
+route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET', [ 'Controller\API\V2\StatsController', 'stats' ] );
 route( '/api/app/jobs/[:id_job]/[:password]/segments', 'POST', [ 'API\App\FilesController', 'segments' ] );
 
 $klein->with( '/api/app/api-key', function () {
@@ -69,8 +69,8 @@ route( '/api/app/jobs/[:id_job]/[:password]/segment-analysis', 'GET', [ 'API\V3\
 route( '/api/app/projects/[:id_project]/[:password]/quality-framework', 'GET', [ 'API\App\QualityFrameworkController', 'project' ] );
 route( '/api/app/jobs/[:id_job]/[:password]/quality-framework', 'GET', [ 'API\App\QualityFrameworkController', 'job' ] );
 
-route( '/api/app/change-password', 'POST', [ 'API\V2\ChangePasswordController', 'changePassword' ] );
-route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
+route( '/api/app/change-password', 'POST', [ 'Controller\API\V2\ChangePasswordController', 'changePassword' ] );
+route( '/api/app/projects/[:id_project]/[:password]/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
 
 // TM Keys
 $klein->with( '/api/app/tm-keys', function () {
@@ -104,7 +104,7 @@ $klein->with( '/api/app/languages', function () {
 } );
 
 $klein->with( '/api/app/files', function () {
-    route( '', 'GET', [ '\API\App\SupportedFilesController', 'index' ] );
+    route( '', 'GET', [ '\Controller\API\V2\SupportedFilesController', 'index' ] );
 } );
 
 //PAYABLE RATES
@@ -142,9 +142,9 @@ route( '/api/app/comment/get-range', 'POST', [ 'API\App\CommentController', 'get
 route( '/api/app/copy-all-source-to-target', 'POST', [ 'API\App\CopyAllSourceToTargetController', 'copy' ] );
 route( '/api/app/get-global-warning', 'POST', [ 'API\App\GetWarningController', 'global' ] );
 route( '/api/app/get-local-warning', 'POST', [ 'API\App\GetWarningController', 'local' ] );
-route( '/api/app/split-job-apply', 'POST', [ 'API\V2\SplitJobController', 'apply' ] ); // Same API as public V2
-route( '/api/app/split-job-check', 'POST', [ 'API\V2\SplitJobController', 'check' ] ); // Same API as public V2
-route( '/api/app/split-job-merge', 'POST', [ 'API\V2\SplitJobController', 'merge' ] ); // Same API as public V2
+route( '/api/app/split-job-apply', 'POST', [ 'Controller\API\V2\SplitJobController', 'apply' ] ); // Same API as public V2
+route( '/api/app/split-job-check', 'POST', [ 'Controller\API\V2\SplitJobController', 'check' ] ); // Same API as public V2
+route( '/api/app/split-job-merge', 'POST', [ 'Controller\API\V2\SplitJobController', 'merge' ] ); // Same API as public V2
 route( '/api/app/user-keys-delete', 'POST', [ 'API\App\UserKeysController', 'delete' ] );
 route( '/api/app/user-keys-update', 'POST', [ 'API\App\UserKeysController', 'update' ] );
 route( '/api/app/user-keys-new-key', 'POST', [ 'API\App\UserKeysController', 'newKey' ] );

@@ -6,7 +6,7 @@
  * Time: 12:40
  */
 
-namespace AbstractControllers;
+namespace Controller\Abstracts;
 
 
 use FeatureSet;

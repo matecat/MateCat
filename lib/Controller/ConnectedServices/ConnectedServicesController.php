@@ -9,10 +9,10 @@
 namespace ConnectedServices;
 
 
-use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
-use API\Commons\Validators\LoginValidator;
 use ConnectedServices\Google\GoogleProvider;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Exceptions\NotFoundException;
 use INIT;

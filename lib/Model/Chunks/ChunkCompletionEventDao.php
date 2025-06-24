@@ -1,7 +1,7 @@
 <?php
 
 use DataAccess\AbstractDao;
-use Features\ProjectCompletion\CompletionEventStruct;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 
 class Chunks_ChunkCompletionEventDao extends AbstractDao {
 

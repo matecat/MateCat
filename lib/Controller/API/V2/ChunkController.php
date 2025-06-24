@@ -6,13 +6,15 @@
  * Time: 10:39
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
 use API\V2\Json\Chunk;
 use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
@@ -21,7 +23,8 @@ use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 
-class ChunkController extends BaseChunkController {
+class ChunkController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     /**
      * @var Projects_ProjectStruct

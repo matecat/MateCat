@@ -6,7 +6,7 @@
  * Time: 12:15
  */
 
-namespace AbstractControllers;
+namespace Controller\Traits;
 
 
 use FilesStorage\AbstractFilesStorage;

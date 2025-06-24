@@ -1,9 +1,9 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
@@ -15,26 +15,26 @@ use Translations_SegmentTranslationStruct;
 class SegmentTranslationIssueValidator extends Base {
 
     /**
-     * @var EntryStruct
+     * @var ?EntryStruct
      */
-    public $issue;
+    public ?EntryStruct $issue;
     /**
      * @var Translations_SegmentTranslationStruct
      */
-    public $translation;
+    public Translations_SegmentTranslationStruct $translation;
 
     /**
      * @var ChunkReviewStruct
      */
-    protected $chunk_review;
+    protected ChunkReviewStruct $chunkReview;
 
     /**
      * @param ChunkReviewStruct $chunkReviewStruct
      *
      * @return $this
      */
-    public function setChunkReview( ChunkReviewStruct $chunkReviewStruct ) {
-        $this->chunk_review = $chunkReviewStruct;
+    public function setChunkReview( ChunkReviewStruct $chunkReviewStruct ): SegmentTranslationIssueValidator {
+        $this->chunkReview = $chunkReviewStruct;
 
         return $this;
     }
@@ -64,15 +64,11 @@ class SegmentTranslationIssueValidator extends Base {
 
     }
 
-    public function getChunkReview() {
-        return $this->chunk_review;
-    }
-
     /**
      * @throws ValidationError
      */
     protected function __ensureRevisionPasswordAllowsDeleteForIssue() {
-        if ( $this->issue->source_page > $this->chunk_review->source_page ) {
+        if ( $this->issue->source_page > $this->chunkReview->source_page ) {
             throw new ValidationError( 'Not enough privileges to delete this issue' );
         }
     }
@@ -84,9 +80,9 @@ class SegmentTranslationIssueValidator extends Base {
      */
     protected function __ensureSegmentRevisionIsCompatibleWithIssueRevisionNumber() {
 
-        $latestSegmentEvent = ( new TranslationEventDao() )->getLatestEventForSegment( $this->chunk_review->id_job, $this->translation->id_segment );
+        $latestSegmentEvent = ( new TranslationEventDao() )->getLatestEventForSegment( $this->chunkReview->id_job, $this->translation->id_segment );
 
-        if ( !$latestSegmentEvent && ( $this->translation->isICE() || $this->translation->isPreTranslated()) ) {
+        if ( !$latestSegmentEvent && ( $this->translation->isICE() || $this->translation->isPreTranslated() ) ) {
             throw new ValidationError( 'Cannot set issues on unmodified ICE.', -2000 );
         } elseif ( $latestSegmentEvent->source_page != ReviewUtils::revisionNumberToSourcePage( $this->request->param( 'revision_number' ) ) ) {
             // Can latest event be missing here? Actually yes, for example in case we are setting an issue on

@@ -1,10 +1,11 @@
 <?php
 
-namespace API\V2 ;
+namespace Controller\API\V2;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\Validators\ProjectValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\ProjectValidator;
+use Exception;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use Projects_ProjectStruct;
 
@@ -13,7 +14,7 @@ class ProjectCompletionStatus extends KleinController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project ;
+    private Projects_ProjectStruct $project;
 
     public function afterConstruct() {
 
@@ -23,13 +24,13 @@ class ProjectCompletionStatus extends KleinController {
             $projectPasswordValidator = new ProjectPasswordValidator( $this );
             $projectPasswordValidator->onSuccess( function () use ( $projectPasswordValidator, $projectValidator ) {
                 $this->project = $projectPasswordValidator->getProject();
-                $projectValidator->setProject($this->project);
+                $projectValidator->setProject( $this->project );
             } );
 
             $this->appendValidator( $projectPasswordValidator );
         }
 
-        if($this->getUser()){
+        if ( $this->getUser() ) {
             $projectValidator->setUser( $this->getUser() );
         }
 
@@ -43,12 +44,15 @@ class ProjectCompletionStatus extends KleinController {
         $this->appendValidator( $projectValidator );
     }
 
+    /**
+     * @throws Exception
+     */
     public function status() {
 
-        $model = new ProjectCompletionStatusModel( $this->project ) ;
+        $model = new ProjectCompletionStatusModel( $this->project );
         $this->response->json( [
-            'project_status' => $model->getStatus()
-        ] ) ;
+                'project_status' => $model->getStatus()
+        ] );
     }
 
 }

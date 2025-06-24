@@ -2,10 +2,10 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Membership;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use ReflectionException;
 use Teams\MembershipDao;
 

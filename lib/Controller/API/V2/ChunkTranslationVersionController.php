@@ -6,17 +6,19 @@
  * Time: 12:00 PM
  */
 
-namespace API\V2;
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
+namespace Controller\API\V2;
 use API\V2\Json\SegmentVersion as JsonFormatter;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Jobs_JobStruct;
 
 
-class ChunkTranslationVersionController extends BaseChunkController {
-
+class ChunkTranslationVersionController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
      * @param Jobs_JobStruct $chunk
      *
@@ -28,6 +30,9 @@ class ChunkTranslationVersionController extends BaseChunkController {
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function index() {
 
         $this->return404IfTheJobWasDeleted();
@@ -38,14 +43,14 @@ class ChunkTranslationVersionController extends BaseChunkController {
 
         $formatted = new JsonFormatter( $this->chunk, $results, false, $this->featureSet );
 
-        $this->response->json( array(
+        $this->response->json( [
                 'versions' => $formatted->render()
-        )) ;
+        ] );
 
     }
 
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Validator  = new ChunkPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );

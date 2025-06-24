@@ -7,16 +7,17 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use CatUtils;
 use Chunks_ChunkDao;
 use Constants_Teams;
 use Constants_TranslationStatus;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Engines_Intento;
 use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
@@ -40,7 +41,6 @@ use TeamModel;
 use Teams\MembershipStruct;
 use Users_UserDao;
 use Utils;
-use Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 
 class CattoolController extends BaseKleinViewController {
 

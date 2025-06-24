@@ -1,13 +1,13 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Project;
 use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
@@ -52,7 +52,6 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
-     * @throws NotFoundException
      */
     public function setDueDate() {
         $this->updateDueDate();
@@ -60,7 +59,6 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
-     * @throws NotFoundException
      */
     public function updateDueDate() {
         if (
@@ -71,7 +69,7 @@ class ProjectsController extends KleinController {
                 $this->params[ 'due_date' ] > time()
         ) {
 
-            $due_date    = \Utils::mysqlTimestamp( $this->params[ 'due_date' ] );
+            $due_date    = Utils::mysqlTimestamp( $this->params[ 'due_date' ] );
             $project_dao = new Projects_ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
@@ -84,7 +82,6 @@ class ProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
-     * @throws NotFoundException
      */
     public function deleteDueDate() {
         $project_dao = new Projects_ProjectDao;

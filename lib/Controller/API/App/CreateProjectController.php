@@ -2,13 +2,13 @@
 
 namespace API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Traits\ScanDirectoryForConvertedFiles;
-use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
 use Constants;
 use Constants_ProjectStatus;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use CookieManager;
 use Database;
 use Engine;
@@ -131,7 +131,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
         // GDrive session instance
-        if(isset($_SESSION[ "gdrive_session" ])){
+        if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
             $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
             $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
         }

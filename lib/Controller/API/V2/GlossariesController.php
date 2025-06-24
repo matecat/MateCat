@@ -6,12 +6,12 @@
  * Time: 17:12
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\LoginValidator;
 use Bootstrap;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
@@ -95,7 +95,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $this->extractCSV( $stdResult );
 
-        $results              = [];
+        $results = [];
 
         foreach ( $stdResult as $fileInfo ) {
 

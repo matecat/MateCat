@@ -2,9 +2,6 @@
 
 namespace API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
 use Constants_Engines;
@@ -13,10 +10,13 @@ use Constants_ProjectStatus;
 use Constants_TranslationStatus;
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Database;
 use EditLog\EditLogSegmentStruct;
 use Exception;
-use Exceptions\ControllerReturnException;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
@@ -39,7 +39,6 @@ use Segments_SegmentOriginalDataDao;
 use Segments_SegmentStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Traits\APISourcePageGuesserTrait;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use TranslationsSplit_SplitDAO;
@@ -89,7 +88,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
-     * @throws ControllerReturnException
+     * @throws Exception
      */
     public function translate(): void {
 
@@ -451,8 +450,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $dao           = new Segments_SegmentDao( Database::obtain() );
         $this->segment = $dao->getById( (int)$id_segment ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
-        $this->id_job            = $id_job;
-        $this->password          = $password;
+        $this->id_job           = $id_job;
+        $this->password         = $password;
         $this->request_password = $received_password;
 
         $data = [
@@ -630,7 +629,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             try {
                 CatUtils::addSegmentTranslation( $translation, $this->isRevision() );
-            } catch ( ControllerReturnException $e ) {
+            } catch ( Exception $e ) {
                 Database::obtain()->rollback();
                 throw new RuntimeException( $e->getMessage() );
             }

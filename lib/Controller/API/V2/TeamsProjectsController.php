@@ -6,17 +6,17 @@
  * Time: 10:06
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectExistsInTeamValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\Commons\Validators\TeamProjectValidator;
 use API\V2\Json\Project;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectExistsInTeamValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
+use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
 use Exceptions\ValidationError;
 use ManageUtils;
@@ -28,7 +28,10 @@ use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {
 
-    protected $project;
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected Projects_ProjectStruct $project;
 
     /** @var TeamStruct */
     protected TeamStruct $team;
@@ -37,6 +40,7 @@ class TeamsProjectsController extends KleinController {
      * @throws AuthorizationError
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     public function update() {
 
@@ -71,6 +75,7 @@ class TeamsProjectsController extends KleinController {
 
     /**
      * @return $this
+     * @throws ReflectionException
      */
     protected function _appendSingleProjectTeamValidators(): TeamsProjectsController {
         $this->project = Projects_ProjectDao::findById( $this->request->param( 'id_project' ) ); //check login and auth before request the project info
@@ -82,6 +87,7 @@ class TeamsProjectsController extends KleinController {
 
     /**
      * @throws ReflectionException
+     * @throws Exception
      */
     public function get() {
         $this->_appendSingleProjectTeamValidators()->validateRequest();

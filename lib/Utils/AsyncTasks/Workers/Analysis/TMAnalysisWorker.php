@@ -9,7 +9,7 @@
 
 namespace AsyncTasks\Workers\Analysis;
 
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use AsyncTasks\Workers\Traits\ProjectWordCount;
 use AsyncTasks\Workers\Traits\SortMatchesTrait;
 use Constants\Ices;

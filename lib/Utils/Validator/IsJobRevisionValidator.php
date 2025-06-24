@@ -2,7 +2,7 @@
 
 namespace Validator;
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use DataAccess\ShapelessConcreteStruct;
 use DomainException;
 use LQA\ChunkReviewDao;

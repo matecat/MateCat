@@ -1,12 +1,13 @@
 <?php
 
-namespace AbstractControllers;
+namespace Controller\Abstracts;
 
-use API\Commons\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use Bootstrap;
-use Controller\Authentication\AuthenticationHelper;
-use Controller\Authentication\AuthenticationTrait;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\AuthenticationTrait;
+use Controller\API\Commons\Validators\Base;
+use Controller\Traits\TimeLoggerTrait;
 use Exception;
 use FeatureSet;
 use Klein\App;
@@ -15,7 +16,6 @@ use Klein\Response;
 use Klein\ServiceProvider;
 use Log;
 use ReflectionException;
-use Traits\TimeLoggerTrait;
 
 abstract class KleinController implements IController {
 

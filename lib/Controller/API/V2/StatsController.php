@@ -1,23 +1,23 @@
 <?php
 
-namespace API\V1;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Jobs_JobStruct;
 use WordCount\WordCountStruct;
 
 class StatsController extends KleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var ?Jobs_JobStruct
      */
-    protected $chunk ;
+    protected ?Jobs_JobStruct $chunk = null;
 
-    public function setChunk( Jobs_JobStruct $chunk ){
+    public function setChunk( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -25,8 +25,8 @@ class StatsController extends KleinController {
      * @return void
      */
     public function stats() {
-        $wStruct = WordCountStruct::loadFromJob( $this->chunk );
-        $job_stats   = CatUtils::getFastStatsForJob( $wStruct );
+        $wStruct                          = WordCountStruct::loadFromJob( $this->chunk );
+        $job_stats                        = CatUtils::getFastStatsForJob( $wStruct );
         $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
 
         $this->response->json( $job_stats );
@@ -34,7 +34,7 @@ class StatsController extends KleinController {
 
     protected function afterConstruct() {
 
-        $Validator = ( new ChunkPasswordValidator( $this ) );
+        $Validator  = ( new ChunkPasswordValidator( $this ) );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );

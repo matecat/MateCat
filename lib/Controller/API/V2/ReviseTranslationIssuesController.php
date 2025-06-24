@@ -6,23 +6,26 @@
  * Time: 15:24
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-
-use API\Commons\Validators\JobPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\SegmentTranslation;
 use API\V2\Json\SegmentVersion;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\SegmentTranslation;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Exceptions\NotFoundException;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Jobs_JobStruct;
 use ReflectionException;
 
-class ReviseTranslationIssuesController extends BaseChunkController {
+class ReviseTranslationIssuesController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     /**
+     * @throws NotFoundException
      * @throws ReflectionException
      */
     public function afterConstruct() {

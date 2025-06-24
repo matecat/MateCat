@@ -6,10 +6,10 @@
  * Date: 05/11/15
  * Time: 11.56
  */
-namespace Views\TemplateDecorator;
-use AbstractControllers\IController;
+namespace Controller\Views\TemplateDecorator;
+use Controller\Abstracts\IController;
 use PHPTALWithAppend;
-use Views\TemplateDecorator\Arguments\ArgumentInterface;
+use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 
 /**
  * Class AbstractDecorator

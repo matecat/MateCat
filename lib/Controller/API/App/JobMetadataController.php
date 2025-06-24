@@ -2,9 +2,9 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Jobs\MetadataDao;
 use Utils;
@@ -19,26 +19,25 @@ class JobMetadataController extends KleinController {
     /**
      * Delete metadata by key
      */
-    public function delete()
-    {
+    public function delete() {
         $params = $this->sanitizeRequestParams();
-        $dao = new MetadataDao();
+        $dao    = new MetadataDao();
 
         try {
-            $struct = $dao->get($params['id_job'], $params['password'], $params['key']);
+            $struct = $dao->get( $params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ] );
 
-            if(empty($struct)){
+            if ( empty( $struct ) ) {
                 throw new Exception( 'Metadata not found', 400 );
             }
 
-            $dao->delete($params['id_job'], $params['password'], $params['key']);
-            $this->response->json([
-                'id' => $struct->id
-            ]);
-        } catch (Exception $exception){
+            $dao->delete( $params[ 'id_job' ], $params[ 'password' ], $params[ 'key' ] );
+            $this->response->json( [
+                    'id' => $struct->id
+            ] );
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( $exception->getCode() >= 400 ? $exception->getCode() : 500 );
             $this->response->json( [
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ] );
         }
     }
@@ -46,17 +45,16 @@ class JobMetadataController extends KleinController {
     /**
      * Get all job metadata
      */
-    public function get()
-    {
+    public function get() {
         $params = $this->sanitizeRequestParams();
-        $dao = new MetadataDao();
+        $dao    = new MetadataDao();
 
         try {
-            $this->response->json( $dao->getByJobIdAndPassword($params['id_job'], $params['password']) );
-        } catch (Exception $exception){
+            $this->response->json( $dao->getByJobIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( $exception->getCode() >= 400 ? $exception->getCode() : 500 );
             $this->response->json( [
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ] );
         }
     }
@@ -64,11 +62,10 @@ class JobMetadataController extends KleinController {
     /**
      * Upsert metadata
      */
-    public function save()
-    {
+    public function save() {
         $params = $this->sanitizeRequestParams();
-        $dao = new MetadataDao();
-        $json = $this->request->body();
+        $dao    = new MetadataDao();
+        $json   = $this->request->body();
 
         try {
             // accept only JSON
@@ -77,39 +74,39 @@ class JobMetadataController extends KleinController {
             }
 
             $return = [];
-            $json = json_decode($json, true);
+            $json   = json_decode( $json, true );
 
-            if(!Utils::arrayIsList($json)){
+            if ( !Utils::arrayIsList( $json ) ) {
                 throw new Exception( 'JSON is not a list of metadata', 400 );
             }
 
-            foreach ($json as $item){
-                if(!isset($item['key'])){
+            foreach ( $json as $item ) {
+                if ( !isset( $item[ 'key' ] ) ) {
                     throw new Exception( 'Missing `key` property', 400 );
                 }
 
-                if(empty($item['key'])){
+                if ( empty( $item[ 'key' ] ) ) {
                     throw new Exception( 'Empty `key` property', 400 );
                 }
 
-                if(!isset($item['value'])){
+                if ( !isset( $item[ 'value' ] ) ) {
                     throw new Exception( 'Missing `value` property', 400 );
                 }
 
-                if($item['value'] === ""){
+                if ( $item[ 'value' ] === "" ) {
                     throw new Exception( 'Empty `value` property', 400 );
                 }
 
-                $struct = $dao->set($params['id_job'], $params['password'], $item['key'], $item['value']);
+                $struct   = $dao->set( $params[ 'id_job' ], $params[ 'password' ], $item[ 'key' ], $item[ 'value' ] );
                 $return[] = $struct;
             }
 
-            $this->response->json($return);
+            $this->response->json( $return );
 
-        } catch (Exception $exception){
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( $exception->getCode() >= 400 ? $exception->getCode() : 500 );
             $this->response->json( [
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ] );
         }
     }
@@ -117,12 +114,11 @@ class JobMetadataController extends KleinController {
     /**
      * @return mixed
      */
-    private function sanitizeRequestParams()
-    {
+    private function sanitizeRequestParams() {
         return filter_var_array( $this->request->params(), [
-            'id_job'   => FILTER_SANITIZE_STRING,
-            'password' => FILTER_SANITIZE_STRING,
-            'key'      => FILTER_SANITIZE_STRING,
-        ]);
+                'id_job'   => FILTER_SANITIZE_STRING,
+                'password' => FILTER_SANITIZE_STRING,
+                'key'      => FILTER_SANITIZE_STRING,
+        ] );
     }
 }

@@ -2,10 +2,10 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
 use Constants_TranslationStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;

@@ -1,6 +1,8 @@
 <?php
 
-use AbstractControllers\BaseKleinViewController;
+namespace Controller\Views;
+
+use Controller\Abstracts\BaseKleinViewController;
 use Klein\Request;
 use Klein\Response;
 

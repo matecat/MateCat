@@ -2,10 +2,10 @@
 
 namespace API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
 use Exception;
@@ -160,8 +160,8 @@ class SegmentAnalysisController extends KleinController {
         $idProject = $this->request->param( 'id_project' );
         $password  = $this->request->param( 'password' );
 
-        $this->projectDao = new Projects_ProjectDao();
-        $this->project = $this->projectDao->findByIdAndPassword( $idProject, $password );
+        $this->projectDao       = new Projects_ProjectDao();
+        $this->project          = $this->projectDao->findByIdAndPassword( $idProject, $password );
         $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $matchClass             = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
         $segmentsCount          = CatUtils::getSegmentTranslationsCount( $this->project );

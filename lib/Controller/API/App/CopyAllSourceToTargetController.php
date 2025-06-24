@@ -2,9 +2,9 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Constants_TranslationStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
 use Features;
@@ -46,8 +46,8 @@ class CopyAllSourceToTargetController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $pass   = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $pass            = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
 
         $this->log( "Requested massive copy-source-to-target for job $id_job." );

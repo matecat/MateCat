@@ -10,7 +10,7 @@
 namespace Teams;
 
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use FlashMessage;
 use Klein\Response;

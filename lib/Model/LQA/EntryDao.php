@@ -84,9 +84,9 @@ class EntryDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return EntryStruct
+     * @return ?EntryStruct
      */
-    public static function findById( $id ) {
+    public static function findById( $id ): ?EntryStruct {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
                 " FROM qa_entries " .
                 " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
@@ -95,7 +95,7 @@ class EntryDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, EntryStruct::class );
 
         return $stmt->fetch();
     }

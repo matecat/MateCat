@@ -117,7 +117,7 @@ class BatchReviewProcessor {
 
         foreach ( $this->prepared_events as $translationEvent ) {
 
-            $segmentTranslationModel = $revisionFactory->getReviewedWordCountModel( $translationEvent, $chunkReviews, $this->jobWordCounter );
+            $segmentTranslationModel = new ReviewedWordCountModel( $translationEvent, $this->jobWordCounter, $chunkReviews );
 
             // here we process and count the reviewed word count and
             $segmentTranslationModel->evaluateChunkReviewEventTransitions();

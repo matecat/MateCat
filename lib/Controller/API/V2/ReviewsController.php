@@ -1,38 +1,38 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\Validators\TeamProjectValidator;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use RevisionFactory;
 
-class ReviewsController extends KleinController
-{
+class ReviewsController extends KleinController {
     /**
      * @var Projects_ProjectStruct $project
      */
-    protected $project;
+    protected Projects_ProjectStruct $project;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected Jobs_JobStruct $chunk;
+
+    protected int $nextSourcePage;
 
     /**
      * @var ChunkReviewStruct
      */
-    protected $chunk;
-
-    protected $nextSourcePage;
-
-    /**
-     * @var ChunkReviewStruct
-     */
-    protected $latestChunkReview;
+    protected ChunkReviewStruct $latestChunkReview;
 
     /**
      * @throws Exception
@@ -41,11 +41,11 @@ class ReviewsController extends KleinController
 
         // create a new chunk revision password
         $records = RevisionFactory::initFromProject( $this->project )->getRevisionFeature()->createQaChunkReviewRecords(
-            [ $this->chunk ],
-            $this->project,
-            [
-                'source_page' => $this->nextSourcePage
-            ]
+                [ $this->chunk ],
+                $this->project,
+                [
+                        'source_page' => $this->nextSourcePage
+                ]
         );
 
         // destroy project data cache
@@ -56,12 +56,12 @@ class ReviewsController extends KleinController
         ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
 
         $this->response->json( [
-                'chunk_review' => [
-                    'id'              => $records[ 0 ]->id,
-                    'id_job'          => $records[ 0 ]->id_job,
-                    'review_password' => $records[ 0 ]->review_password
+                        'chunk_review' => [
+                                'id'              => $records[ 0 ]->id,
+                                'id_job'          => $records[ 0 ]->id_job,
+                                'review_password' => $records[ 0 ]->review_password
+                        ]
                 ]
-            ]
         );
     }
 
@@ -92,8 +92,8 @@ class ReviewsController extends KleinController
         $post = $this->request->paramsPost();
 
         $requiredParams = [
-            'id_job',
-            'password',
+                'id_job',
+                'password',
         ];
 
         foreach ( $requiredParams as $requiredParam ) {
@@ -110,12 +110,12 @@ class ReviewsController extends KleinController
 
         // check if the $revision_number exists
         if ( false === $chunkReviewDao->exists( $id_job, $password, $revision_number ) ) {
-            throw new ValidationError( "Revision ". ($revision_number-1) ." link does not exists." );
+            throw new ValidationError( "Revision " . ( $revision_number - 1 ) . " link does not exists." );
         }
 
         // check if the $revision_number + 1 exists
         if ( true === $chunkReviewDao->exists( $id_job, $password, ( $revision_number + 1 ) ) ) {
-            throw new ValidationError( "Revision ".$revision_number." link already exists." );
+            throw new ValidationError( "Revision " . $revision_number . " link already exists." );
         }
 
         $this->nextSourcePage    = $revision_number + 1;

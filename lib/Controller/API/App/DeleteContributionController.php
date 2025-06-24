@@ -2,10 +2,11 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Engine;
 use Exception;
 use INIT;
@@ -15,7 +16,6 @@ use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Traits\APISourcePageGuesserTrait;
 use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {

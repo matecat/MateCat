@@ -11,10 +11,10 @@ namespace Features;
 
 
 use API\App\CreateProjectController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\V1\NewController;
 use BasicFeatureStruct;
 use Constants_Engines;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\V1\NewController;
 use Database;
 use Engine;
 use Engines\MMT\MMTServiceApiException;

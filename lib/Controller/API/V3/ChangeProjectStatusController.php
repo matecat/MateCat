@@ -2,12 +2,11 @@
 
 namespace API\V3;
 
-use API\V2\ProjectsController as ProjectsControllerV2;
+use Controller\API\V2\ProjectsController as ProjectsControllerV2;
 use Constants_JobStatus;
 use Exception;
 
-class ChangeProjectStatusController extends ProjectsControllerV2
-{
+class ChangeProjectStatusController extends ProjectsControllerV2 {
     /**
      * @throws Exception
      */

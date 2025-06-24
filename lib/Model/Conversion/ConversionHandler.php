@@ -2,7 +2,7 @@
 
 namespace Conversion;
 
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
 use Exception;
 use Exceptions\NotFoundException;

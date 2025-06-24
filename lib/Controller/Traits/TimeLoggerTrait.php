@@ -7,10 +7,10 @@
  *
  */
 
-namespace Traits;
+namespace Controller\Traits;
 
 
-use AbstractControllers\IController;
+use Controller\Abstracts\IController;
 use Log;
 use Utils;
 

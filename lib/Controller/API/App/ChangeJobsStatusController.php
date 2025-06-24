@@ -2,10 +2,10 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
 use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;

@@ -9,19 +9,18 @@
 namespace API\V3;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Project;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
+use Exception;
 use INIT;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Teams\TeamStruct;
 
 class TeamsProjectsController extends KleinController {
-
-    protected $project;
 
     /** @var TeamStruct */
     protected TeamStruct $team;
@@ -35,7 +34,7 @@ class TeamsProjectsController extends KleinController {
     /**
      * @throws NotFoundException
      * @throws \Exceptions\NotFoundException
-     * @throws \Exception
+     * @throws Exception
      */
     public function getPaginated() {
 
@@ -59,7 +58,7 @@ class TeamsProjectsController extends KleinController {
         $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter );
         $projectsList = ( new Project( $projectsList ) )->render();
 
-        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
+        $totals      = Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );
 
         if ( $totals == 0 ) {
@@ -82,22 +81,23 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @param int $page
-     * @param int $totals
-     * @param int $step
+     * @param int   $page
+     * @param int   $totals
+     * @param int   $step
+     * @param array $search
      *
      * @return array
      */
-    private function _getPaginationLinks( $page, $totals, $step = 20, $search = [] ) {
+    private function _getPaginationLinks( int $page, int $totals, int $step = 20, array $search = [] ): array {
 
         $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
         $links = [
                 "base"        => INIT::$HTTPHOST,
                 "self"        => $_SERVER[ 'REQUEST_URI' ],
-                "page"        => (int)$page,
-                "step"        => (int)$step,
-                "totals"      => (int)$totals,
+                "page"        => $page,
+                "step"        => $step,
+                "totals"      => $totals,
                 "total_pages" => $total_pages = $this->getTotalPages( $step, $totals ),
         ];
 
@@ -121,7 +121,7 @@ class TeamsProjectsController extends KleinController {
      *
      * @return int
      */
-    private function getOffset( $page, $step ) {
+    private function getOffset( int $page, int $step ) {
 
         if ( $page === 1 ) {
             return 0;
@@ -136,8 +136,8 @@ class TeamsProjectsController extends KleinController {
      *
      * @return int
      */
-    private function getTotalPages( $step, $totals ) {
-        return (int)ceil( (int)$totals / (int)$step );
+    private function getTotalPages( int $step, int $totals ): int {
+        return (int)ceil( $totals / $step );
     }
 
     /**

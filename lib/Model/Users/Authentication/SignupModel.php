@@ -2,7 +2,7 @@
 
 namespace Users\Authentication;
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;

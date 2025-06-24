@@ -1,16 +1,17 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Jobs_JobStruct;
 use Projects\ChunkOptionsModel;
 
-class ChunkOptionsController extends BaseChunkController {
-
+class ChunkOptionsController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
      * @param Jobs_JobStruct $chunk
      *
@@ -18,6 +19,7 @@ class ChunkOptionsController extends BaseChunkController {
      */
     public function setChunk( Jobs_JobStruct $chunk ): ChunkOptionsController {
         $this->chunk = $chunk;
+
         return $this;
     }
 
@@ -28,16 +30,16 @@ class ChunkOptionsController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $chunk_options_model = new ChunkOptionsModel( $this->chunk ) ;
+        $chunk_options_model = new ChunkOptionsModel( $this->chunk );
 
-        $chunk_options_model->setOptions( $this->filteredParams() ) ;
+        $chunk_options_model->setOptions( $this->filteredParams() );
         $chunk_options_model->save();
 
-        $this->response->json( array( 'options' => $chunk_options_model->toArray() ) ) ;
+        $this->response->json( [ 'options' => $chunk_options_model->toArray() ] );
     }
 
     protected function afterConstruct() {
-        $Validator = new ChunkPasswordValidator( $this ) ;
+        $Validator  = new ChunkPasswordValidator( $this );
         $Controller = $this;
         $Validator->onSuccess( function () use ( $Validator, $Controller ) {
             $Controller->setChunk( $Validator->getChunk() );
@@ -47,15 +49,15 @@ class ChunkOptionsController extends BaseChunkController {
     }
 
     protected function filteredParams() {
-        $args = array(
-            'speech2text' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'lexiqa' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'tag_projection' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-        );
+        $args = [
+                'speech2text'    => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'lexiqa'         => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+        ];
 
         $args = array_intersect_key( $args, $this->request->params() );
 
-        return filter_var_array( $this->request->params(), $args);
+        return filter_var_array( $this->request->params(), $args );
 
     }
 }

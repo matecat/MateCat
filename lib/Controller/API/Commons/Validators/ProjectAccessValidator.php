@@ -1,9 +1,9 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthorizationError;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Teams\MembershipDao;

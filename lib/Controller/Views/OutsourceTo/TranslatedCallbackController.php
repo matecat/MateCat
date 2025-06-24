@@ -2,7 +2,7 @@
 /**
  * Created by PhpStorm.
  */
-namespace Views\OutsourceTo;
+namespace Controller\Views\OutsourceTo;
 
 use Outsource\TranslatedConfirmationStruct;
 

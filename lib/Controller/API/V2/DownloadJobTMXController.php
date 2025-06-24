@@ -1,10 +1,12 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Chunks_ChunkDao;
+use Controller\Abstracts\AbstractDownloadController;
+use Exception;
 use FeatureSet;
 use SplTempFileObject;
 use TMS\TMSService;
@@ -13,9 +15,7 @@ use Utils;
 class DownloadJobTMXController extends AbstractDownloadController {
 
     private $jobID;
-    private $jobPass;
     private $tmx;
-    private $type;
     private $fileName;
 
     protected $errors;
@@ -23,40 +23,39 @@ class DownloadJobTMXController extends AbstractDownloadController {
     public $jobInfo;
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function index()
-    {
+    public function index() {
         $getInput = filter_var_array( $this->request->params(), [
-            'id_job'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-            'password' => [
-                'filter'  => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-            ],
-            'type'  => [
-                'filter'  => FILTER_SANITIZE_STRING,
-                'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-            ]
-        ]);
+                'id_job'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'type'     => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ]
+        ] );
 
         $this->errors = [];
 
-        $this->jobID   = $getInput[ 'id_job' ];
-        $this->jobPass = $getInput[ 'password' ];
-        $this->type    = $getInput[ 'type' ];
+        $this->jobID = $getInput[ 'id_job' ];
+        $jobPass     = $getInput[ 'password' ];
+        $type = $getInput[ 'type' ];
 
-        if ( $this->jobID == null || empty( $this->jobID ) ) {
-            $this->errors [ ] = array(
-                'code'    => -1,
-                'message' => 'Job ID missing'
-            );
+        if ( empty( $this->jobID ) ) {
+            $this->errors [] = [
+                    'code'    => -1,
+                    'message' => 'Job ID missing'
+            ];
         }
 
-        if ( $this->jobPass == null || empty( $this->jobPass ) ) {
-            $this->errors [ ] = array(
-                'code'    => -2,
-                'message' => 'Job password missing'
-            );
+        if ( empty( $jobPass ) ) {
+            $this->errors [] = [
+                    'code'    => -2,
+                    'message' => 'Job password missing'
+            ];
         }
 
         $this->featureSet = new FeatureSet();
@@ -71,7 +70,7 @@ class DownloadJobTMXController extends AbstractDownloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = Chunks_ChunkDao::getByIdAndPassword( $this->jobID, $this->jobPass );
+        $jobData = $this->jobInfo = Chunks_ChunkDao::getByIdAndPassword( $this->jobID, $jobPass );
         $this->featureSet->loadForProject( $this->jobInfo->getProject() );
 
         $projectData = $this->jobInfo->getProject();
@@ -81,19 +80,19 @@ class DownloadJobTMXController extends AbstractDownloadController {
 
         $tmsService = new TMSService( $this->featureSet );
 
-        switch( $this->type ){
+        switch ( $type ) {
             case 'csv':
                 /**
                  * @var $tmx SplTempFileObject
                  */
-                $this->tmx = $tmsService->exportJobAsCSV( $this->jobID, $this->jobPass, $source, $target );
+                $this->tmx      = $tmsService->exportJobAsCSV( $this->jobID, $jobPass, $source, $target );
                 $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".csv";
                 break;
             default:
                 /**
                  * @var $tmx SplTempFileObject
                  */
-                $this->tmx = $tmsService->exportJobAsTMX( $this->jobID, $this->jobPass, $source, $target );
+                $this->tmx      = $tmsService->exportJobAsTMX( $this->jobID, $jobPass, $source, $target );
                 $this->fileName = $projectData[ 'name' ] . "-" . $this->jobID . ".tmx";
                 break;
         }
@@ -102,11 +101,11 @@ class DownloadJobTMXController extends AbstractDownloadController {
         $this->finalize();
     }
 
-    protected function _saveActivity(){
+    protected function _saveActivity() {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jobID;
-        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->id_project = $this->jobInfo[ 'id_project' ];
         $activity->action     = ActivityLogStruct::DOWNLOAD_JOB_TMX;
         $activity->ip         = Utils::getRealIpAddr();
         $activity->uid        = $this->user->uid;
@@ -118,7 +117,7 @@ class DownloadJobTMXController extends AbstractDownloadController {
     /**
      * @Override
      */
-    public function finalize( bool $forceXliff = false) {
+    public function finalize( bool $forceXliff = false ) {
 
         $buffer = ob_get_contents();
         ob_get_clean();

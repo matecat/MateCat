@@ -7,9 +7,9 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
+use Controller\Abstracts\BaseKleinViewController;
 use ConnectedServices\GDrive\GDriveController;
 use Constants;
 use CookieManager;

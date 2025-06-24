@@ -1,6 +1,6 @@
 <?php
 
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use Model\Analysis\Constants\InternalMatchesConstants;

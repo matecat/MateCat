@@ -1,9 +1,9 @@
 <?php
 
 namespace API\V3;
-
-use API\Commons\Validators\LoginValidator;
-use API\V2\BaseChunkController;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Conversion\Upload;
 use CURLFile;
 use Engines_MMT;
@@ -14,7 +14,9 @@ use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Validator\EngineValidator;
 
 
-class ModernMTController extends BaseChunkController {
+class ModernMTController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
+
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->appendValidator( new LoginValidator( $this ) );

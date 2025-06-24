@@ -8,7 +8,7 @@
 
 namespace Users\Authentication;
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Routes;
 use Users_UserDao;

@@ -10,8 +10,8 @@
 namespace API\App;
 
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Abstracts\AbstractStatefulKleinController;
 use Routes;
 use Teams\InvitedUser;
 

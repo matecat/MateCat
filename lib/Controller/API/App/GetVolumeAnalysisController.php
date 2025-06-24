@@ -2,10 +2,10 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
 use AjaxPasswordCheck;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;

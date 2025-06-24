@@ -6,17 +6,18 @@
  * Time: 15:08
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
 use Comments_CommentDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Jobs_JobStruct;
 
-class CommentsController extends BaseChunkController {
-
+class CommentsController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
      * @param Jobs_JobStruct $chunk
      *

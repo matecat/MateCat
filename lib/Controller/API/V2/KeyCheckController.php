@@ -6,15 +6,15 @@
  * Time: 18:09
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use ApiKeys_ApiKeyDao;
+use Controller\Abstracts\KleinController;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
-use Traits\RateLimiterTrait;
 use Utils;
 
 class KeyCheckController extends KleinController {
@@ -96,7 +96,7 @@ class KeyCheckController extends KleinController {
                     $userJson = [ 'user' => User::renderItem( $user ) ]:
                 */
 
-                $userJson = [ 'user' => [ 'uid' => (int)$api_record->uid ] ];
+                $userJson = [ 'user' => [ 'uid' => $api_record->uid ] ];
                 $this->response->json( $userJson );
 
                 return;

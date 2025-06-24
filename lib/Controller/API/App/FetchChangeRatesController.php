@@ -2,8 +2,8 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use currency_translatedChangeRatesFetcher;
 
 class FetchChangeRatesController extends KleinController {

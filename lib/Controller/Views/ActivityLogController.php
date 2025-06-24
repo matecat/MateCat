@@ -1,13 +1,13 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use ReflectionException;
 

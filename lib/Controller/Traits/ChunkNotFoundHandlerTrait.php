@@ -1,14 +1,13 @@
 <?php
 
-namespace API\V2;
+namespace Controller\Traits;
 
-use AbstractControllers\KleinController;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use ReflectionException;
 
-abstract class BaseChunkController extends KleinController {
+trait ChunkNotFoundHandlerTrait {
 
     /**
      * @var Jobs_JobStruct

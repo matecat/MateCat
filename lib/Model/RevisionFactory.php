@@ -1,18 +1,13 @@
 <?php
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\SegmentTranslationIssueValidator;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
+use Features\ReviewExtended\TranslationIssueModel;
+use Features\SecondPassReview;
 use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\TranslationEvents\Model\TranslationEvent;
 use LQA\ChunkReviewStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use WordCount\CounterModel;
 
 /**
@@ -30,7 +25,7 @@ class RevisionFactory {
     protected $_featureSet;
 
     /**
-     * @param AbstractRevisionFeature $revisionFeature
+     * @param AbstractRevisionFeature|null $revisionFeature
      *
      * @return RevisionFactory
      * @throws Exception
@@ -59,32 +54,6 @@ class RevisionFactory {
     }
 
     /**
-     * @param TranslationEvent    $translationEvent
-     * @param ChunkReviewStruct[] $chunkReviews
-     *
-     * @return ReviewedWordCountModel
-     */
-    public function getReviewedWordCountModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
-        return $this->revision->getReviewedWordCountModel( $translationEvent, $jobWordCounter, $chunkReviews );
-    }
-
-    /**
-     * This method uses a filter because of external plugins
-     *
-     * @param KleinController $controller
-     *
-     * @return SegmentTranslationIssueValidator
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
-     */
-    public function getTranslationIssuesValidator( KleinController $controller ): SegmentTranslationIssueValidator {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $controller ) );
-    }
-
-    /**
      * @param FeatureSet $featureSet
      *
      * @return $this
@@ -93,17 +62,6 @@ class RevisionFactory {
         $this->_featureSet = $featureSet;
 
         return $this;
-    }
-
-    /**
-     * @param $id_job
-     * @param $password
-     * @param $issue
-     *
-     * @return ReviewExtended\TranslationIssueModel
-     */
-    public function getTranslationIssueModel( $id_job, $password, $issue ) {
-        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
     }
 
     /**
@@ -121,9 +79,8 @@ class RevisionFactory {
      *
      * @return static
      * @throws Exception
-     * @see RevisionFactory::getTranslationIssuesValidator
      */
-    public static function initFromProject( Projects_ProjectStruct $project ) {
+    public static function initFromProject( Projects_ProjectStruct $project ): RevisionFactory {
         foreach ( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ) {
             $feature = $featureStruct->toNewObject();
             if ( $feature instanceof AbstractRevisionFeature ) { //only one revision type can be present
@@ -137,9 +94,7 @@ class RevisionFactory {
          * When review_improved or review_extended is loaded by initProject we never reach this line
          */
         return static::getInstance(
-                new ReviewExtended(
-                        new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] )
-                )
+                new SecondPassReview( new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] ) )
         )->setFeatureSet( $project->getFeaturesSet() );
     }
 

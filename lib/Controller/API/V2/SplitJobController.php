@@ -1,11 +1,11 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
 use ArrayObject;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Jobs_JobStruct;
@@ -143,7 +143,7 @@ class SplitJobController extends AbstractStatefulKleinController {
 
         $split_raw_words = filter_var( $this->request->param( 'split_raw_words' ), FILTER_VALIDATE_BOOLEAN );
         $num_split       = filter_var( $this->request->param( 'num_split' ), FILTER_SANITIZE_NUMBER_INT );
-        $split_values    = is_array($this->request->param( 'split_values' )) ? filter_var_array( $this->request->param( 'split_values' ), FILTER_SANITIZE_NUMBER_INT ) : [];
+        $split_values    = is_array( $this->request->param( 'split_values' ) ) ? filter_var_array( $this->request->param( 'split_values' ), FILTER_SANITIZE_NUMBER_INT ) : [];
 
         if ( empty( $project_id ) ) {
             throw new InvalidArgumentException( "No id project provided", -1 );

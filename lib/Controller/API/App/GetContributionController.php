@@ -2,11 +2,12 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use Exceptions\NotFoundException;
 use FeatureSet;
@@ -20,7 +21,6 @@ use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
-use Traits\APISourcePageGuesserTrait;
 use Users_UserDao;
 
 class GetContributionController extends KleinController {

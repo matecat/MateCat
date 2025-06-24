@@ -2,15 +2,15 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkCompletionEventStruct;
-use Features\ProjectCompletion\CompletionEventStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
 use Jobs_JobDao;
 use ReflectionException;
-use Traits\APISourcePageGuesserTrait;
 use Utils;
 
 class SetChunkCompletedController extends KleinController {

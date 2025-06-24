@@ -1,8 +1,7 @@
 <?php
 
-namespace AbstractControllers;
+namespace Controller\Abstracts;
 
-use API\Commons\ViewValidators\MandatoryKeysValidator;
 use Bootstrap;
 use ConnectedServices\Facebook\FacebookProvider;
 use ConnectedServices\Github\GithubProvider;
@@ -10,6 +9,7 @@ use ConnectedServices\Google\GoogleProvider;
 use ConnectedServices\LinkedIn\LinkedInProvider;
 use ConnectedServices\Microsoft\MicrosoftProvider;
 use ConnectedServices\OauthClient;
+use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
 use FlashMessage;
 use INIT;

@@ -2,9 +2,9 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Constants;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Conversion\FilesConverter;
 use Exception;
 use Filters\FiltersConfigTemplateDao;

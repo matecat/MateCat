@@ -6,7 +6,7 @@
  * Time: 10:57
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
 use Exceptions\NotFoundException;

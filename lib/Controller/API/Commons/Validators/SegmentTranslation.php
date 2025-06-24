@@ -1,6 +1,6 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 use Exceptions\NotFoundException;
 use ReflectionException;
@@ -10,9 +10,9 @@ use Translations_SegmentTranslationStruct;
 class SegmentTranslation extends Base {
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var Translations_SegmentTranslationStruct|null
      */
-    public $translation;
+    public ?Translations_SegmentTranslationStruct $translation = null;
 
     /**
      * @return void
@@ -20,16 +20,6 @@ class SegmentTranslation extends Base {
      * @throws ReflectionException
      */
     protected function _validate(): void {
-        $this->ensureTranslationExists();
-    }
-
-    /**
-     *
-     * @throws NotFoundException
-     * @throws ReflectionException
-     */
-
-    private function ensureTranslationExists() {
         $this->translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->request->param( 'id_segment' ), $this->request->param( 'id_job' ) );
         if ( !$this->translation ) {
             throw new NotFoundException( 'translation not found' );

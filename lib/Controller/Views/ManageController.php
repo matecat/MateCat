@@ -7,13 +7,13 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use PHPTalBoolean;
 use Utils;

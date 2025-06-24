@@ -1,7 +1,8 @@
 <?php
 
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Views\CustomPageView;
 
 /**
  * Created by PhpStorm.
@@ -172,12 +173,12 @@ class Bootstrap {
                 Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case Exceptions\NotFoundException:: class:
-            case API\Commons\Exceptions\NotFoundException::class:
+            case Controller\API\Commons\Exceptions\NotFoundException::class:
                 $code = 404;
                 Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case Exceptions\AuthorizationError::class:
-            case API\Commons\Exceptions\AuthorizationError::class:
+            case Controller\API\Commons\Exceptions\AuthorizationError::class:
                 $code = 403;
                 Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
@@ -284,17 +285,13 @@ class Bootstrap {
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = [
-                self::$_ROOT,
+                self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib",
-                self::$_ROOT . "/lib/Controller/AbstractControllers",
                 self::$_ROOT . "/lib/Controller/API",
                 self::$_ROOT . "/lib/Controller",
-                self::$_ROOT . "/inc/PHPTAL",
-                self::$_ROOT . "/lib/Utils/API",
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Model",
                 self::$_ROOT . "/lib/View",
-                self::$_ROOT . "/lib/Decorator",
                 self::$_ROOT . "/lib/Plugins",
 
         ];

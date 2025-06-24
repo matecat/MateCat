@@ -6,7 +6,7 @@
  * Time: 18:13
  */
 
-namespace AbstractControllers;
+namespace Controller\Abstracts;
 
 use Exception;
 use Klein\App;

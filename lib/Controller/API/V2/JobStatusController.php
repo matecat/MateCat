@@ -6,19 +6,20 @@
  * Time: 12:35
  */
 
-namespace API\V2;
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
+namespace Controller\API\V2;
 use Constants_TranslationStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Translations_SegmentTranslationDao;
 use WorkerClient;
 
 
-class JobStatusController extends BaseChunkController {
-
+class JobStatusController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     protected function afterConstruct() {
 
         $chunkValidator = new ChunkPasswordValidator( $this );
@@ -32,9 +33,9 @@ class JobStatusController extends BaseChunkController {
 
     /**
      * Change the status of segments based on the provided parameters.
-     * @see api_v2_routes.php
      * @return void
      * @throws Exception
+     * @see api_v2_routes.php
      */
     public function changeSegmentsStatus() {
 
@@ -61,7 +62,7 @@ class JobStatusController extends BaseChunkController {
             $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangeableStatus(
                     $this->chunk, $segments_id, $status, $source_page
             );
-            $segments_id          = array_diff( $segments_id, $unchangeable_segments );
+            $segments_id           = array_diff( $segments_id, $unchangeable_segments );
 
             if ( !empty( $segments_id ) ) {
 
@@ -88,7 +89,7 @@ class JobStatusController extends BaseChunkController {
         }
     }
 
-    protected function sanitizeSegmentIDs( $segment_list ) {
+    protected function sanitizeSegmentIDs( $segment_list ): array {
         foreach ( $segment_list as $pos => $integer ) {
             $result = (int)$integer;
             if ( empty( $result ) ) {

@@ -7,9 +7,9 @@
  */
 
 namespace Features\ReviewExtended\Controller\API;
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\V2\BaseChunkController;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
@@ -22,7 +22,8 @@ use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
 
-class QualityReportController extends BaseChunkController {
+class QualityReportController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     const DEFAULT_PER_PAGE = 20;
     const MAX_PER_PAGE     = 200;

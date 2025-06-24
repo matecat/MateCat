@@ -2,11 +2,11 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
 use Constants_TranslationStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;

@@ -1,33 +1,29 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Database;
+use Exception;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\TranslationIssueModel;
 use LQA\EntryCommentDao;
 use LQA\EntryDao as EntryDao;
 use LQA\EntryStruct;
-use RevisionFactory;
+use ReflectionException;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 
     /**
-     * @var RevisionFactory
+     * @var SegmentTranslationIssueValidator
      */
-    protected $revisionFactory;
-
-    /**
-     * @var \API\Commons\Validators\SegmentTranslationIssueValidator
-     */
-    private $validator;
-    private $issue;
+    private SegmentTranslationIssueValidator $validator;
 
     public function index() {
         $result = EntryDao::findAllByTranslationVersion(
@@ -43,7 +39,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     /**
-     * @throws \ReflectionException
      * @throws ValidationError
      */
     public function create() {
@@ -93,10 +88,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @return void
      */
     public function update() {
-        $issue = null;
         $this->response->json( [ 'issue' => 'ok' ] );
     }
 
+    /**
+     * @throws Exception
+     */
     public function delete() {
 
         Database::obtain()->begin();
@@ -124,7 +121,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     /**
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function createComment() {
 
@@ -132,7 +129,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
                 'comment'     => $this->request->param( 'message' ),
                 'id_qa_entry' => $this->validator->issue->id,
                 'source_page' => $this->request->param( 'source_page' ),
-                'uid'         => ( $this->user ) ? $this->user->uid : null
+                'uid'         => $this->user->uid
         ];
 
         $dao   = new EntryCommentDao();
@@ -150,23 +147,22 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     /**
-     * @param $id_job
-     * @param $password
-     * @param $issue
+     * @param int         $id_job
+     * @param string      $password
+     * @param EntryStruct $issue
      *
      * @return TranslationIssueModel
      */
-    protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
-        return $this->revisionFactory->getTranslationIssueModel( $id_job, $password, $issue );
+    protected function _getSegmentTranslationIssueModel( int $id_job, string $password, EntryStruct $issue ): TranslationIssueModel {
+        return new TranslationIssueModel( $id_job, $password, $issue );
     }
 
     protected function afterConstruct() {
 
         $jobValidator = new ChunkPasswordValidator( $this );
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
-            $this->revisionFactory = RevisionFactory::initFromProject( $jobValidator->getChunk()->getProject() );
-            //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this )->setChunkReview( $jobValidator->getChunkReview() );
+            //enable dynamic loading (Factory) by callback hook on revision features
+            $this->validator =  ( new SegmentTranslationIssueValidator( $this ) )->setChunkReview( $jobValidator->getChunkReview() );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );

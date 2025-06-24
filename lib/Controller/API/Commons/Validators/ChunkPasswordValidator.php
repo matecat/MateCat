@@ -11,9 +11,9 @@
  * This validator is to be used when we want to check that the
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
@@ -34,7 +34,7 @@ class ChunkPasswordValidator extends Base {
 
     protected int    $id_job;
     protected string $password;
-    protected ?int    $revision_number = null;
+    protected ?int   $revision_number = null;
 
     public function __construct( KleinController $controller ) {
 

@@ -9,7 +9,7 @@
 
 namespace Users\Authentication;
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Users_UserDao;
 use Users_UserStruct;

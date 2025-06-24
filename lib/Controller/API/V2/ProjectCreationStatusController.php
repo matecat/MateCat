@@ -7,31 +7,21 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\AuthorizationError;
 use API\V2\Json\CreationStatus;
 use API\V2\Json\WaitCreation;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use ProjectQueue\Queue;
 use Projects_ProjectDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 
 class ProjectCreationStatusController extends KleinController {
 
     /**
-     * @throws AuthorizationError
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      * @throws Exception
      */
     public function get() {
@@ -65,7 +55,7 @@ class ProjectCreationStatusController extends KleinController {
             $featureSet = $project->getFeaturesSet();
             $result     = $featureSet->filter( 'filterCreationStatus', $result, $project );
 
-            if ( empty( $result['id_project'] ) ) {
+            if ( empty( $result[ 'id_project' ] ) ) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;

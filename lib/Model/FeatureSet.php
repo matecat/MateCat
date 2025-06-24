@@ -1,15 +1,15 @@
 <?php
 
-use AbstractControllers\IController;
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Views\TemplateDecorator\AbstractDecorator;
-use Views\TemplateDecorator\Arguments\ArgumentInterface;
+use Controller\Views\TemplateDecorator\AbstractDecorator;
+use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 
 /**
  * Created by PhpStorm.

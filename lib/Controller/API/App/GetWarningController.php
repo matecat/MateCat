@@ -2,12 +2,12 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
 use API\V2\Json\QAGlobalWarning;
 use API\V2\Json\QALocalWarning;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;

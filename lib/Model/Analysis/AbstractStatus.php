@@ -8,7 +8,7 @@ use API\App\Json\Analysis\AnalysisFile;
 use API\App\Json\Analysis\AnalysisJob;
 use API\App\Json\Analysis\AnalysisProject;
 use API\App\Json\Analysis\AnalysisProjectSummary;
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkDao;
 use Constants_ProjectStatus;
 use Exception;

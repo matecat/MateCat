@@ -9,10 +9,10 @@
 
 namespace Features\ProjectCompletion\Controller;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Database;
 use Exception;
 use Jobs_JobStruct;

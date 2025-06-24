@@ -1,8 +1,7 @@
 <?php
 
-namespace API\V2;
+namespace Controller\Abstracts;
 
-use AbstractControllers\AbstractStatefulKleinController;
 use CookieManager;
 use Exception;
 use Files\FileDao;
@@ -17,7 +16,7 @@ use ZipArchive;
 use ZipContentObject;
 
 abstract class AbstractDownloadController extends AbstractStatefulKleinController {
-    public int $id_job;
+    public int    $id_job;
     public string $password;
 
     protected string $outputContent = "";

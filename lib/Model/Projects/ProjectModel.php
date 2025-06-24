@@ -2,7 +2,7 @@
 
 namespace Projects;
 
-use API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Constants_Teams;
 use Exceptions\ValidationError;
 use Projects_ProjectDao;

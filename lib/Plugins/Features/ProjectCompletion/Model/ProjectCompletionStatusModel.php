@@ -9,7 +9,7 @@
 namespace Features\ProjectCompletion\Model;
 
 
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Chunks_ChunkCompletionEventDao;
 use Exception;
 use Exceptions\NotFoundException;

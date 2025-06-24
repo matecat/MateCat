@@ -10,7 +10,7 @@
 namespace Translators;
 
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Email\SendToTranslatorForDeliveryChangeEmail;
 use Email\SendToTranslatorForJobSplitEmail;
 use Email\SendToTranslatorForNewJobEmail;

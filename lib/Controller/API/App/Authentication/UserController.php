@@ -2,12 +2,12 @@
 
 namespace API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
-use Traits\RateLimiterTrait;
 use Users\Authentication\ChangePasswordModel;
 
 class UserController extends AbstractStatefulKleinController {
@@ -18,7 +18,7 @@ class UserController extends AbstractStatefulKleinController {
      * @return void
      */
     public function show() {
-        if( empty( $_SESSION[ 'user_profile' ] ) ){
+        if ( empty( $_SESSION[ 'user_profile' ] ) ) {
             $this->response->code( 401 );
         }
         $this->response->json( $_SESSION[ 'user_profile' ] );

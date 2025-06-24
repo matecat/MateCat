@@ -1,14 +1,14 @@
 <?php
 
 namespace API\V3;
-
-use API\Commons\Exceptions\NotFoundException;
-use API\V2\BaseChunkController;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DataAccess\ShapelessConcreteStruct;
 use Translations_SegmentTranslationDao;
 
-class IssueCheckController extends BaseChunkController {
-
+class IssueCheckController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
      * @throws NotFoundException
      */

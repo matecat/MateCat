@@ -2,12 +2,12 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
 use Conversion\ZipArchiveHandler;
 use Exception;
 use Exceptions\ValidationError;

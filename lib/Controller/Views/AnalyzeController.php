@@ -7,15 +7,15 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Chunks_ChunkDao;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use INIT;
 use Jobs_JobDao;

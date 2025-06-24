@@ -1,9 +1,9 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Log;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -54,7 +54,7 @@ class ProjectValidator extends Base {
      * @var ?Projects_ProjectStruct
      */
     private ?Projects_ProjectStruct $project = null;
-    private ?string                $feature = null;
+    private ?string                 $feature = null;
 
     /**
      * @param Projects_ProjectStruct $project

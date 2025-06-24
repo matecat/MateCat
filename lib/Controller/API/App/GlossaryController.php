@@ -2,8 +2,8 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
 use CatUtils;
+use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
 use Langs\Languages;

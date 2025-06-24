@@ -2,9 +2,9 @@
 
 namespace API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use Files\FilesPartsDao;
 use Jobs_JobDao;
 use Jobs_JobStruct;

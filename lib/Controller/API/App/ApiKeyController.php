@@ -2,10 +2,10 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use ApiKeys_ApiKeyDao;
 use ApiKeys_ApiKeyStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Utils;
 
 class ApiKeyController extends KleinController {

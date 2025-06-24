@@ -3,17 +3,17 @@
 namespace Features;
 
 use API\App\CreateProjectController;
-use API\Commons\Exceptions\ValidationError;
-use API\V1\NewController;
 use ArrayObject;
 use BasicFeatureStruct;
 use Chunks_ChunkCompletionEventStruct;
 use Constants;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\V1\NewController;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use Features;
-use Features\ProjectCompletion\CompletionEventStruct;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\IChunkReviewModel;
@@ -69,7 +69,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     public static function loadRoutes( Klein $klein ) {
-        route( '/project/[:id_project]/[:password]/reviews', 'POST', [ 'Features\ReviewExtended\Controller\ReviewsController', 'createReview' ] );
+        route( '/project/[:id_project]/[:password]/reviews', 'POST', [ 'Controller\API\V2\ReviewsController', 'createReview' ] );
     }
 
     public static function projectUrls( $formatted ) {
@@ -548,28 +548,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
         return new ChunkReviewModel( $chunkReviewStruct );
-    }
-
-    /**
-     * @param TranslationEvent    $translation
-     * @param CounterModel        $jobWordCounter
-     * @param ChunkReviewStruct[] $chunkReviews
-     *
-     * @return ReviewedWordCountModel
-     */
-    public function getReviewedWordCountModel( TranslationEvent $translation, CounterModel $jobWordCounter, array $chunkReviews = [] ) {
-        return new ReviewedWordCountModel( $translation, $jobWordCounter, $chunkReviews );
-    }
-
-    /**
-     * @param $id_job
-     * @param $password
-     * @param $issue
-     *
-     * @return mixed
-     */
-    public function getTranslationIssueModel( $id_job, $password, $issue ) {
-        return new TranslationIssueModel( $id_job, $password, $issue );
     }
 
 }

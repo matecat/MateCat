@@ -2,11 +2,11 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
 use AMQHandler;
-use API\Commons\Validators\LoginValidator;
 use Comments_CommentDao;
 use Comments_CommentStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Email\CommentEmail;
 use Email\CommentMentionEmail;
@@ -38,7 +38,7 @@ class CommentController extends KleinController {
      * @throws ReflectionException
      */
     public function getRange(): void {
-        $data = [];
+        $data    = [];
         $request = $this->validateTheRequest();
 
         $struct                = new Comments_CommentStruct();
@@ -223,19 +223,19 @@ class CommentController extends KleinController {
      * @throws ReflectionException
      */
     private function validateTheRequest(): array {
-        $id_client    = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING );
-        $username     = filter_var( $this->request->param( 'username' ), FILTER_SANITIZE_STRING );
-        $id_job       = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_segment   = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
-        $source_page  = filter_var( $this->request->param( 'source_page' ), FILTER_SANITIZE_NUMBER_INT );
-        $is_anonymous = filter_var( $this->request->param( 'is_anonymous' ), FILTER_VALIDATE_BOOLEAN );
+        $id_client       = filter_var( $this->request->param( 'id_client' ), FILTER_SANITIZE_STRING );
+        $username        = filter_var( $this->request->param( 'username' ), FILTER_SANITIZE_STRING );
+        $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_segment      = filter_var( $this->request->param( 'id_segment' ), FILTER_SANITIZE_NUMBER_INT );
+        $source_page     = filter_var( $this->request->param( 'source_page' ), FILTER_SANITIZE_NUMBER_INT );
+        $is_anonymous    = filter_var( $this->request->param( 'is_anonymous' ), FILTER_VALIDATE_BOOLEAN );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
-        $first_seg    = filter_var( $this->request->param( 'first_seg' ), FILTER_SANITIZE_NUMBER_INT );
-        $last_seg     = filter_var( $this->request->param( 'last_seg' ), FILTER_SANITIZE_NUMBER_INT );
-        $id_comment   = filter_var( $this->request->param( 'id_comment' ), FILTER_SANITIZE_NUMBER_INT );
-        $password     = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $message      = filter_var( $this->request->param( 'message' ), FILTER_UNSAFE_RAW );
-        $message      = htmlspecialchars( $message );
+        $first_seg       = filter_var( $this->request->param( 'first_seg' ), FILTER_SANITIZE_NUMBER_INT );
+        $last_seg        = filter_var( $this->request->param( 'last_seg' ), FILTER_SANITIZE_NUMBER_INT );
+        $id_comment      = filter_var( $this->request->param( 'id_comment' ), FILTER_SANITIZE_NUMBER_INT );
+        $password        = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $message         = filter_var( $this->request->param( 'message' ), FILTER_UNSAFE_RAW );
+        $message         = htmlspecialchars( $message );
 
         $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
 
@@ -497,9 +497,9 @@ class CommentController extends KleinController {
 
     /**
      * @param Comments_CommentStruct $comment
-     * @param Jobs_JobStruct $job
-     * @param array          $users
-     * @param array          $users_mentioned
+     * @param Jobs_JobStruct         $job
+     * @param array                  $users
+     * @param array                  $users_mentioned
      *
      * @return \Klein\Response
      * @throws ReflectionException

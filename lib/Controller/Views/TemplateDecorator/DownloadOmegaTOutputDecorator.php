@@ -1,14 +1,14 @@
 <?php
 
-namespace Views\TemplateDecorator;
+namespace Controller\Views\TemplateDecorator;
 
-use AbstractControllers\IController;
-use API\V2\AbstractDownloadController;
+use Controller\Abstracts\AbstractDownloadController;
+use Controller\Abstracts\IController;
+use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use FilesStorage\AbstractFilesStorage;
 use ReflectionException;
 use TMS\TMSService;
-use Views\TemplateDecorator\Arguments\ArgumentInterface;
 use ZipArchive;
 use ZipContentObject;
 

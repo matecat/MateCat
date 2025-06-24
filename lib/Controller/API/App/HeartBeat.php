@@ -10,9 +10,9 @@
 namespace API\App;
 
 
-use AbstractControllers\KleinController;
 use API\App\Json\Ping;
-use API\Commons\Validators\WhitelistAccessValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\WhitelistAccessValidator;
 use INIT;
 use RuntimeException;
 

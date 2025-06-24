@@ -1,15 +1,17 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDriveTokenVerifyModel;
 use ConnectedServices\Google\GDrive\RemoteFileService;
 use ConnectedServices\Google\GoogleProvider;
+use Controller\Abstracts\AbstractDownloadController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Conversion\Filters;
 use Conversion\ZipArchiveHandler;
 use Exception;
@@ -39,13 +41,12 @@ use ReflectionException;
 use RemoteFiles_RemoteFileDao;
 use Segments_SegmentDao;
 use Utils;
-use Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use XliffReplacer\XliffReplacerCallback;
 use ZipContentObject;
 
 set_time_limit( 180 );
 
-class DownloadFileController extends AbstractDownloadController {
+class DownloadController extends AbstractDownloadController {
 
     protected string         $download_type;
     protected Jobs_JobStruct $job;

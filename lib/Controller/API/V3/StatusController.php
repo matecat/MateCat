@@ -2,11 +2,11 @@
 
 namespace API\V3;
 
-use AbstractControllers\KleinController;
 use API\App\Json\Analysis\AnalysisProject;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Model\Analysis\Status;
 use Projects_ProjectDao;
 
@@ -35,7 +35,7 @@ class StatusController extends KleinController {
 
         // return 404 if there are no chunks
         // (or they were deleted)
-        $chunksCount         = 0;
+        $chunksCount = 0;
         if ( !empty( $result->getJobs() ) ) {
             foreach ( $result->getJobs() as $j ) {
                 foreach ( $j->getChunks() as $chunk ) {

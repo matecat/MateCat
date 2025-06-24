@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\Commons\ViewValidators;
+namespace Controller\API\Commons\ViewValidators;
 
 
-use AbstractControllers\BaseKleinViewController;
-use API\Commons\Validators\Base;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\API\Commons\Validators\Base;
 use INIT;
 
 class ViewLoginRedirectValidator extends Base {

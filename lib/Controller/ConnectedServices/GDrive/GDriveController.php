@@ -2,7 +2,7 @@
 
 namespace ConnectedServices\GDrive;
 
-use AbstractControllers\AbstractStatefulKleinController;
+use Controller\Abstracts\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;

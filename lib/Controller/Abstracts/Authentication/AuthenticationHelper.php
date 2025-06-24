@@ -1,6 +1,6 @@
 <?php
 
-namespace Controller\Authentication;
+namespace Controller\Abstracts\Authentication;
 
 use API\App\Json\UserProfile;
 use ApiKeys_ApiKeyDao;

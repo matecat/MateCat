@@ -3,9 +3,9 @@
  * Created by PhpStorm.
  */
 
-namespace Views\OutsourceTo;
+namespace Controller\Views\OutsourceTo;
 
-use AbstractControllers\BaseKleinViewController;
+use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 use Log;
 use LogicException;

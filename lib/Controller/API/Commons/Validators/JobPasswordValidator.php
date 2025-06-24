@@ -1,14 +1,14 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 /**
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
 use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Jobs_JobStruct;
 use ReflectionException;
 

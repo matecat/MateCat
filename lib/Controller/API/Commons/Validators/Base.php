@@ -1,8 +1,8 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Exception;
 use Klein\Request;
 

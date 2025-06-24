@@ -4,7 +4,6 @@ namespace Features\TranslationVersions\Handlers;
 
 use Constants_TranslationStatus;
 use Exception;
-use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
@@ -16,6 +15,7 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use RuntimeException;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
@@ -166,7 +166,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
 
     /**
-     * @throws ControllerReturnException
+     * @throws Exception
      */
     public function storeTranslationEvent( $params ) {
 
@@ -244,7 +244,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
             Projects_ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( Exception $e ) {
-            throw new ControllerReturnException( $e->getMessage(), -2000 );
+            throw new RuntimeException( $e->getMessage(), -2000 );
         }
 
 

@@ -7,12 +7,12 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use API\V2\Json\Engine;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use EnginesModel_EngineDAO;
 use EnginesModel_EngineStruct;
@@ -23,14 +23,14 @@ class EnginesController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
-    public function listEngines(){
+    public function listEngines() {
 
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->uid = $this->user->uid;
+        $engineDAO            = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineStruct         = EnginesModel_EngineStruct::getStruct();
+        $engineStruct->uid    = $this->user->uid;
         $engineStruct->active = true;
 
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
+        $eng       = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
         $formatter = new Engine( $eng );
         $this->response->json( $formatter->render() );
 

@@ -7,14 +7,14 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\KleinController;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use ReflectionException;
 

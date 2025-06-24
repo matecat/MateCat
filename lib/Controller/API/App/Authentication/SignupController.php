@@ -2,17 +2,17 @@
 
 namespace API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
 use CatUtils;
-use Controller\Authentication\AuthCookie;
-use Controller\Authentication\AuthenticationHelper;
-use CustomPageView;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\AuthCookie;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Traits\RateLimiterTrait;
+use Controller\Views\CustomPageView;
 use Exception;
 use FlashMessage;
 use INIT;
 use Klein\Response;
 use Teams\InvitedUser;
-use Traits\RateLimiterTrait;
 use Users\Authentication\SignupModel;
 use Users\RedeemableProject;
 use Utils;
@@ -33,14 +33,14 @@ class SignupController extends AbstractStatefulKleinController {
                         'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
                         'first_name'            => [
-                            'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
-                                return CatUtils::stripMaliciousContentFromAName($firstName);
-                            }
+                                'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                                    return CatUtils::stripMaliciousContentFromAName( $firstName );
+                                }
                         ],
                         'last_name'             => [
-                            'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
-                                return CatUtils::stripMaliciousContentFromAName($lastName);
-                            }
+                                'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                                    return CatUtils::stripMaliciousContentFromAName( $lastName );
+                                }
                         ],
                         'wanted_url'            => [
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
@@ -52,32 +52,32 @@ class SignupController extends AbstractStatefulKleinController {
                 ]
         );
 
-        if(empty($user['email'])){
+        if ( empty( $user[ 'email' ] ) ) {
             $this->response->code( 400 );
             $this->response->json( [
-                'error' => [
-                    'message' => "Missing email"
-                ]
+                    'error' => [
+                            'message' => "Missing email"
+                    ]
             ] );
             exit();
         }
 
-        if(empty($user['first_name'])){
+        if ( empty( $user[ 'first_name' ] ) ) {
             $this->response->code( 400 );
             $this->response->json( [
-                'error' => [
-                    'message' => "First name must contain at least one letter"
-                ]
+                    'error' => [
+                            'message' => "First name must contain at least one letter"
+                    ]
             ] );
             exit();
         }
 
-        if(empty($user['last_name'])){
+        if ( empty( $user[ 'last_name' ] ) ) {
             $this->response->code( 400 );
             $this->response->json( [
-                'error' => [
-                    'message' => "Last name must contain at least one letter"
-                ]
+                    'error' => [
+                            'message' => "Last name must contain at least one letter"
+                    ]
             ] );
             exit();
         }

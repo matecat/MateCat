@@ -2,8 +2,8 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use TMS\TMSService;
@@ -26,7 +26,7 @@ class RequestExportTMXController extends KleinController {
          */
         $tmxHandler = $request[ 'tmxHandler' ];
 
-        $res     = $tmxHandler->requestTMXEmailDownload(
+        $res = $tmxHandler->requestTMXEmailDownload(
                 $this->user->email,
                 $this->user->first_name,
                 $this->user->last_name,

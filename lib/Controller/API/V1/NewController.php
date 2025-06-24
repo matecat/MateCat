@@ -1,15 +1,15 @@
 <?php
 
-namespace API\V1;
+namespace Controller\API\V1;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Traits\ScanDirectoryForConvertedFiles;
-use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use Constants;
 use Constants_ProjectStatus;
 use Constants_TmKeyPermissions;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Conversion\FilesConverter;
 use Conversion\Upload;
 use Database;

@@ -1,19 +1,19 @@
 <?php
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\KleinController;
 use API\Commons\Error;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Exceptions\UnprocessableException;
-use API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\UnprocessableException;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Abstracts\KleinController;
 use Exceptions\ValidationError as Model_ValidationError;
 use Klein\Klein;
 use Langs\InvalidLanguageException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\Errors\JSONValidatorException;
 use Validator\Errors\JsonValidatorGenericException;
+use Controller\Views\CustomPageView;
 
 require_once './inc/Bootstrap.php';
 

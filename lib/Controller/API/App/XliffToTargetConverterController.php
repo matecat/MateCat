@@ -9,7 +9,7 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Conversion\Filters;
 use Conversion\MimeTypes\MimeTypes;
 
@@ -29,10 +29,10 @@ class XliffToTargetConverterController extends KleinController {
         ] );
         $conversion = $conversion[ 0 ];
 
-        $error = false;
-        $errorMessage = null;
+        $error         = false;
+        $errorMessage  = null;
         $outputContent = null;
-        $filename = '';
+        $filename      = '';
 
         if ( $conversion[ 'successful' ] === true ) {
             $outputContent = json_encode( [

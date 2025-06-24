@@ -1,9 +1,10 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Controller\Abstracts\AbstractDownloadController;
 use Conversion\ZipArchiveHandler;
 use Exception;
 use FilesStorage\AbstractFilesStorage;

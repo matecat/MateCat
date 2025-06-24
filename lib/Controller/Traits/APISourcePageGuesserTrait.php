@@ -7,7 +7,7 @@
  *
  */
 
-namespace Traits;
+namespace Controller\Traits;
 
 use CatUtils;
 

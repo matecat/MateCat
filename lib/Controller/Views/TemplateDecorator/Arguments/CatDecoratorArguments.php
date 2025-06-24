@@ -1,6 +1,6 @@
 <?php
 
-namespace Views\TemplateDecorator\Arguments;
+namespace Controller\Views\TemplateDecorator\Arguments;
 
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;

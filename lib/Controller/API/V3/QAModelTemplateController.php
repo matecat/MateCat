@@ -2,8 +2,8 @@
 
 namespace API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
@@ -272,6 +272,7 @@ class QAModelTemplateController extends KleinController {
     public function default(): Response {
 
         $this->response->status()->setCode( 200 );
+
         return $this->response->json(
                 QAModelTemplateDao::getDefaultTemplate( $this->getUser()->uid )
         );

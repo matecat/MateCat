@@ -1,5 +1,5 @@
 <?php
-namespace Views\TemplateDecorator\Arguments;
+namespace Controller\Views\TemplateDecorator\Arguments;
 /**
  * Created by PhpStorm.
  * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com

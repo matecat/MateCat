@@ -2,11 +2,11 @@
 
 namespace API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Validators\LoginValidator;
 use Constants_Engines;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use DomainException;
 use Engine;

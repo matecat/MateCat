@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\Commons\Traits;
+namespace Controller\Traits;
 
 use Exception;
 use FilesStorage\AbstractFilesStorage;

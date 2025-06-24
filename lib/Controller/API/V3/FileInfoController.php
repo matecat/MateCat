@@ -7,13 +7,13 @@
  */
 
 namespace API\V3;
-
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\V2\BaseChunkController;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exceptions\ValidationError;
 use Files\FilesInfoUtility;
 use Jobs_JobStruct;
@@ -22,8 +22,8 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
 
-class FileInfoController extends BaseChunkController {
-
+class FileInfoController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
      * @var Projects_ProjectStruct
      */
@@ -34,7 +34,7 @@ class FileInfoController extends BaseChunkController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );
-            $this->appendValidator( new ProjectAccessValidator( $this,  $Validator->getChunk()->getProject() ) );
+            $this->appendValidator( new ProjectAccessValidator( $this, $Validator->getChunk()->getProject() ) );
             //those are not needed at moment, so avoid unnecessary queries
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );

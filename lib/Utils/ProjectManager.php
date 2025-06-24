@@ -10,7 +10,7 @@
 use ActivityLog\ActivityLogStruct;
 use Analysis\PayableRates;
 use API\Commons\Error;
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;

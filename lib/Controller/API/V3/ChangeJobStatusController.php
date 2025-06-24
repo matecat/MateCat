@@ -2,7 +2,7 @@
 
 namespace API\V3;
 
-use API\V2\ChunkController as ChunkControllerV2;
+use Controller\API\V2\ChunkController as ChunkControllerV2;
 use Constants_JobStatus;
 
 /**

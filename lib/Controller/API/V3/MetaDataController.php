@@ -1,17 +1,17 @@
 <?php
 
 namespace API\V3;
-
-use API\Commons\Exceptions\NotFoundException;
-use API\V2\BaseChunkController;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Files\MetadataDao as FileMetadataDao;
 use Jobs\MetadataDao;
 use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use stdClass;
 
-class MetaDataController extends BaseChunkController {
-
+class MetaDataController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     public function index() {
 
         // params
@@ -47,7 +47,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $project->getMetadata() as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric($metadatum->getValue()) ? (int)$metadatum->getValue() : $metadatum->getValue();
+            $metadata->$key = is_numeric( $metadatum->getValue() ) ? (int)$metadatum->getValue() : $metadatum->getValue();
         }
 
         return $metadata;
@@ -65,7 +65,7 @@ class MetaDataController extends BaseChunkController {
 
         foreach ( $jobMetaDataDao->getByJobIdAndPassword( $job->id, $job->password, 60 * 5 ) as $metadatum ) {
             $key            = $metadatum->key;
-            $metadata->$key = is_numeric($metadatum->value) ? (int)$metadatum->value : $metadatum->value;
+            $metadata->$key = is_numeric( $metadatum->value ) ? (int)$metadatum->value : $metadatum->value;
         }
 
         return $metadata;
@@ -73,6 +73,7 @@ class MetaDataController extends BaseChunkController {
 
     /**
      * @param Jobs_JobStruct $job
+     *
      * @return array
      * @throws \ReflectionException
      */
@@ -85,7 +86,7 @@ class MetaDataController extends BaseChunkController {
             $metadatum = new stdClass();
             foreach ( $filesMetaDataDao->getByJobIdProjectAndIdFile( $job->getProject()->id, $file->id, 60 * 5 ) as $meta ) {
                 $key             = $meta->key;
-                $metadatum->$key = is_numeric($meta->value) ? (int)$meta->value : $meta->value;
+                $metadatum->$key = is_numeric( $meta->value ) ? (int)$meta->value : $meta->value;
             }
 
             $metadataObject           = new stdClass();
