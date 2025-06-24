@@ -206,17 +206,14 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     entry: {
       'qa-report': [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/QualityReport.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/QualityReport.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/QualityReportPage.scss',
         ),
       ],
       upload: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
+        path.resolve(__dirname, 'public/js/pages/NewProject.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/NewProjectPage.scss',
@@ -224,52 +221,43 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       ...entryPoints,
       cattool: [
-        path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
+        path.resolve(__dirname, 'public/js/ui.core.js'),
+        path.resolve(__dirname, 'public/js/pages/CatTool.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/CattoolPage.scss',
         ),
       ],
       dashboard: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
+        path.resolve(__dirname, 'public/js/pages/Dashboard.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/DashboardPage.scss',
         ),
       ],
       analyze: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/AnalyzePage.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/AnalyzePage.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/AnalyzePage.scss',
         ),
       ],
       signin: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(__dirname, 'public/js/pages/SignIn.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/SignInPage.scss',
         ),
       ],
       xliffToTarget: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/XliffToTarget.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/XliffToTarget.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/NewProjectPage.scss',
         ),
       ],
       activityLog: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/ActivityLog.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/ActivityLog.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/ActivityLogPage.scss',
