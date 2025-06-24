@@ -62,7 +62,7 @@ class NewController extends KleinController {
 
     use ScanDirectoryForConvertedFiles;
 
-    const MAX_NUM_KEYS = 10;
+    const MAX_NUM_KEYS = 13;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
