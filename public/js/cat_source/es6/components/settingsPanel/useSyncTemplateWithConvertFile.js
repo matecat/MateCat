@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {executeOnce} from '../../utils/commonUtils'
+import {normalizeTemplatesWithNullProps} from '../../hooks/useTemplates'
 
 function useSyncTemplateWithConvertFile({
   currentTemplate,
@@ -22,8 +23,13 @@ function useSyncTemplateWithConvertFile({
           const selectedTemplateId =
             items.find(({id}) => id === idTemplate)?.id ?? 0
 
+          const templatesNormalized = normalizeTemplatesWithNullProps(
+            items,
+            defaultTemplate,
+          )
+
           setTemplates(
-            items.map((template) => ({
+            templatesNormalized.map((template) => ({
               ...template,
               isSelected: template.id === selectedTemplateId,
             })),

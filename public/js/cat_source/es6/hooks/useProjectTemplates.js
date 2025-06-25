@@ -4,8 +4,7 @@ import {
   getProjectTemplateDefault,
   getProjectTemplates,
 } from '../api/getProjectTemplates/getProjectTemplates'
-import useTemplates from './useTemplates'
-import {cloneDeep, mergeWith} from 'lodash'
+import useTemplates, {normalizeTemplatesWithNullProps} from './useTemplates'
 import {ComponentExtendInterface} from '../utils/ComponentExtendInterface'
 import {CHARS_SIZE_COUNTER_TYPES} from '../utils/charsSizeCounterUtil'
 
@@ -123,15 +122,9 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
               }),
             }
             // check if users templates have some properties value to undefined or null and assign them default value
-            const templatesNormalized = items.map((template) =>
-              mergeWith(
-                cloneDeep(templateDefaultNormalized),
-                cloneDeep(template),
-                (objValue, srcValue) =>
-                  typeof srcValue === 'undefined' || srcValue === null
-                    ? objValue
-                    : srcValue,
-              ),
+            const templatesNormalized = normalizeTemplatesWithNullProps(
+              items,
+              templateDefaultNormalized,
             )
 
             const shouldStandardToBeDefault = templatesNormalized.every(

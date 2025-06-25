@@ -27,9 +27,16 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
-import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
+import {
+  BUTTON_MODE,
+  BUTTON_SIZE,
+  BUTTON_TYPE,
+  Button,
+} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
+import Tooltip from '../../../common/Tooltip'
+import InfoIcon from '../../../../../../../img/icons/InfoIcon'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -108,6 +115,8 @@ export const MachineTranslationTab = () => {
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
+
+  const appThresholdInfoRef = useRef()
 
   const COLUMNS_TABLE = config.is_cattool
     ? [{name: 'Engine Name'}, {name: 'Description'}]
@@ -352,11 +361,19 @@ export const MachineTranslationTab = () => {
       )}
       <div data-testid="active-mt">
         <div className="machine-translation-tab-table-title">
-          <h2>Active MT</h2>
-          {!config.is_cattool && (
-            <div className="machine-translation-tab-add-mt-engine-container">
+          <div className="machine-translation-tab-title-container">
+            <h2>Active MT</h2>
+            {typeof mtQualityValue === 'number' && (
               <div className="mt-quality-value">
-                <h4>MT match</h4>
+                <div className="mt-quality-value-label">
+                  <h4>Application threshold</h4>
+                  <a
+                    href="https://guides.matecat.com/mt-settings"
+                    target="_blank"
+                  >
+                    <InfoIcon />
+                  </a>
+                </div>
                 <NumericStepper
                   value={mtQualityValue}
                   valuePlaceholder={`${mtQualityValue}%`}
@@ -364,18 +381,19 @@ export const MachineTranslationTab = () => {
                   minimumValue={76}
                   maximumValue={101}
                   stepValue={1}
+                  disabled={config.is_cattool}
                 />
               </div>
-              {!config.is_cattool && !addMTVisible && (
-                <button
-                  className="ui primary button settings-panel-button-icon"
-                  onClick={() => setAddMTVisible(true)}
-                  title="Add MT engine"
-                >
-                  <AddWide size={18} /> Add MT engine
-                </button>
-              )}
-            </div>
+            )}
+          </div>
+          {!config.is_cattool && !addMTVisible && (
+            <button
+              className="ui primary button settings-panel-button-icon"
+              onClick={() => setAddMTVisible(true)}
+              title="Add MT engine"
+            >
+              <AddWide size={18} /> Add MT engine
+            </button>
           )}
         </div>
 
