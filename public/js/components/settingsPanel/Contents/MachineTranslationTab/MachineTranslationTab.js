@@ -36,7 +36,7 @@ import {
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import Tooltip from '../../../common/Tooltip'
-import InfoIcon from '../../../../../../../img/icons/InfoIcon'
+import InfoIcon from '../../../../../img/icons/InfoIcon'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
