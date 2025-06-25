@@ -43,6 +43,7 @@
     justify-content: center;
     align-items: center;
     z-index: 2;
+    margin-bottom: 10px;
   }
   .add-provider-container {
     display: flex;
@@ -507,14 +508,14 @@
   visibility: hidden;
 }
 
-.machine-translation-tab-add-mt-engine-container {
+.machine-translation-tab-title-container {
   display: flex;
   align-items: center;
   gap: 10px;
 
   .mt-quality-value {
     display: flex;
-    gap: 20px;
+    gap: 15px;
     align-items: center;
     background-color: colors.$grey4;
     padding: 5px;
@@ -524,5 +525,11 @@
     h4 {
       margin: 0;
     }
+  }
+
+  .mt-quality-value-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
   }
 }
