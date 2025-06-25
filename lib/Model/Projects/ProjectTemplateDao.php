@@ -61,7 +61,7 @@ class ProjectTemplateDao extends AbstractDao {
         $default->qa_model_template_id         = 0;
         $default->xliff_config_template_id     = 0;
         $default->filters_template_id          = 0;
-        $default->mt_quality_value_in_editor   = 86;
+        $default->mt_quality_value_in_editor   = 85;
         $default->subject                      = "general";
         $default->source_language              = "en-US";
         $default->target_language              = serialize( [ "fr-FR" ] );
