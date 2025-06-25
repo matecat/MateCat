@@ -66,7 +66,7 @@ use ZipArchiveExtended;
 
 class NewController extends KleinController {
 
-    const MAX_NUM_KEYS = 10;
+    const MAX_NUM_KEYS = 13;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
