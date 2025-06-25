@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Chunks_ChunkDao;
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -12,6 +11,7 @@ use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use RuntimeException;
 use TranslationsSplit_SplitDAO;
 use TranslationsSplit_SplitStruct;
@@ -91,7 +91,7 @@ class SplitSegmentController extends KleinController {
         }
 
         // check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
 
         if ( is_null( $jobStruct ) ) {
             throw new NotFoundException( "Job not found" );

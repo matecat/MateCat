@@ -1,6 +1,6 @@
 <?php
 
-namespace Validator;
+namespace Validator\JSONSchema;
 
 use Exception;
 use INIT;
@@ -12,8 +12,8 @@ use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
+use Validator\JSONSchema\Errors\JSONValidatorException;
+use Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
 class JSONValidator extends AbstractValidator {
 
@@ -66,11 +66,7 @@ class JSONValidator extends AbstractValidator {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    public function validate( ValidatorObject $object ): ?JSONValidatorObject {
-
-        if ( !$object instanceof JSONValidatorObject ) {
-            throw new RuntimeException( 'Object given is not an instance of JSONValidatorObject' );
-        }
+    public function validate( ValidatorObject $object ): ?ValidatorObject {
 
         $object->decoded = json_decode( $object->json );
 

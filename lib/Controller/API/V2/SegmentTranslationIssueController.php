@@ -2,8 +2,6 @@
 
 namespace Controller\API\V2;
 
-use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
-use API\V2\Json\TranslationIssueComment;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -17,6 +15,8 @@ use LQA\EntryCommentDao;
 use LQA\EntryDao as EntryDao;
 use LQA\EntryStruct;
 use ReflectionException;
+use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
+use View\API\V2\Json\TranslationIssueComment;
 
 class SegmentTranslationIssueController extends AbstractStatefulKleinController {
 

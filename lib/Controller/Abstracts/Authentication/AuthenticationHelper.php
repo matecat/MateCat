@@ -2,11 +2,10 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use API\App\Json\UserProfile;
-use ApiKeys_ApiKeyDao;
-use ApiKeys_ApiKeyStruct;
 use ConnectedServices\ConnectedServiceDao;
 use Log;
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
 use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;
@@ -14,6 +13,7 @@ use Teams\TeamStruct;
 use Throwable;
 use Users_UserDao;
 use Users_UserStruct;
+use View\API\App\Json\UserProfile;
 
 /**
  * Created by PhpStorm.
@@ -28,9 +28,9 @@ class AuthenticationHelper {
     /**
      * @var true
      */
-    private bool                         $logged;
-    private ?ApiKeys_ApiKeyStruct        $api_record = null;
-    private array                        $session;
+    private bool          $logged;
+    private ?ApiKeyStruct $api_record = null;
+    private array         $session;
     private static ?AuthenticationHelper $instance   = null;
 
     /**
@@ -160,7 +160,7 @@ class AuthenticationHelper {
     protected function validKeys( ?string $api_key = null, ?string $api_secret = null ): bool {
 
         if ( $api_key || $api_secret ) {
-            $this->api_record = ApiKeys_ApiKeyDao::findByKey( $api_key );
+            $this->api_record = ApiKeyDao::findByKey( $api_key );
             if ( $this->api_record ) {
                 return $this->api_record->validSecret( $api_secret );
             }
@@ -177,7 +177,7 @@ class AuthenticationHelper {
         return $this->logged;
     }
 
-    public function getApiRecord(): ?ApiKeys_ApiKeyStruct {
+    public function getApiRecord(): ?ApiKeyStruct {
         return $this->api_record;
     }
 

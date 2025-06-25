@@ -1,8 +1,13 @@
 <?php
 
-use DataAccess\AbstractDao;
+namespace Model\ChunksCompletion;
 
-class Chunks_ChunkCompletionUpdateDao extends AbstractDao {
+use DataAccess\AbstractDao;
+use Database;
+use Jobs_JobStruct;
+use PDO;
+
+class ChunkCompletionUpdateDao extends AbstractDao {
 
     protected function _buildResult( array $array_result ) {
     }
@@ -24,8 +29,8 @@ class Chunks_ChunkCompletionUpdateDao extends AbstractDao {
 
     public static function validSources() {
         return [
-                'user'  => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-                'merge' => Chunks_ChunkCompletionEventStruct::SOURCE_MERGE
+                'user'  => ChunkCompletionEventStruct::SOURCE_USER,
+                'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
         ];
     }
 
@@ -57,14 +62,14 @@ class Chunks_ChunkCompletionUpdateDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkCompletionUpdateStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkCompletionUpdateStruct::class );
         $stmt->execute( $data );
 
         return $stmt->fetch();
     }
 
     public static function createOrUpdateFromStruct(
-            Chunks_ChunkCompletionUpdateStruct $struct, array $params = [] ) {
+            ChunkCompletionUpdateStruct $struct, array $params = [] ) {
 
         $sql_update = "  " .
                 " last_update = CURRENT_TIMESTAMP, source = :source, uid = :uid, " .
@@ -84,7 +89,7 @@ class Chunks_ChunkCompletionUpdateDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Chunks_ChunkCompletionUpdateStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkCompletionUpdateStruct::class );
 
         $data = $struct->toArray( [
                 'id_project', 'id_job', 'password', 'job_first_segment', 'job_last_segment',

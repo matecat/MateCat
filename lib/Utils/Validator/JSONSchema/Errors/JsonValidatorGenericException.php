@@ -7,12 +7,13 @@
  *
  */
 
-namespace Validator\Errors;
+namespace Validator\JSONSchema\Errors;
 
 use Exception;
 use JsonSerializable;
+use Validator\Contracts\ValidatorExceptionInterface;
 
-class JsonValidatorGenericException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface {
+class JsonValidatorGenericException extends Exception implements JsonSerializable, ValidatorExceptionInterface {
 
     private $error;
 

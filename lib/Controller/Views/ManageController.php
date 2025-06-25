@@ -9,12 +9,12 @@
 
 namespace Controller\Views;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use PHPTalBoolean;
 use Utils;
 

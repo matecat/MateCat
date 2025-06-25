@@ -11,10 +11,10 @@ namespace Controller\API\V2;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
-use ApiKeys_ApiKeyDao;
 use Controller\Abstracts\KleinController;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
+use Model\ApiKeys\ApiKeyDao;
 use Utils;
 
 class KeyCheckController extends KleinController {
@@ -84,7 +84,7 @@ class KeyCheckController extends KleinController {
 
         if ( $user_api_key && $user_api_secret ) {
 
-            $api_record = ApiKeys_ApiKeyDao::findByKey( $user_api_key );
+            $api_record = ApiKeyDao::findByKey( $user_api_key );
 
             if ( $api_record && $api_record->validSecret( $user_api_secret ) ) {
 

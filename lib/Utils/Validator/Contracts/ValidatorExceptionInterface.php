@@ -7,8 +7,8 @@
  *
  */
 
-namespace Validator\Errors;
+namespace Validator\Contracts;
 
-interface JsonValidatorExceptionInterface {
+interface ValidatorExceptionInterface {
 
 }

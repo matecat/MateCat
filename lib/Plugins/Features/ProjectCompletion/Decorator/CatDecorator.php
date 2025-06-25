@@ -3,12 +3,12 @@
 namespace Features\ProjectCompletion\Decorator;
 
 use CatUtils;
-use Chunks_ChunkCompletionEventDao;
-use Exception;
-use Projects_MetadataDao;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
+use Exception;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Projects_MetadataDao;
 
 class CatDecorator extends AbstractDecorator {
 
@@ -34,11 +34,11 @@ class CatDecorator extends AbstractDecorator {
         $this->stats = CatUtils::getFastStatsForJob( $this->arguments->getWordCountStruct() );
         $completed   = $job->isMarkedComplete( [ 'is_review' => $this->arguments->isRevision() ] );
 
-        $lastCompletionEvent = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord(
                 $job, [ 'is_review' => $this->arguments->isRevision() ]
         );
 
-        $dao                 = new Chunks_ChunkCompletionEventDao();
+        $dao                 = new ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase( $this->arguments->getJob() );
 
         $this->template->{'project_completion_feature_enabled'} = true;
@@ -83,22 +83,22 @@ class CatDecorator extends AbstractDecorator {
         if ( $this->arguments->getJob()->getProject()->getWordCountType() != Projects_MetadataDao::WORD_COUNT_RAW ) {
 
             if ( $this->arguments->isRevision() ) {
-                $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
+                $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
                         $this->stats[ 'DRAFT' ] == 0 &&
                         ( $this->stats[ 'APPROVED' ] + $this->stats[ 'REJECTED' ] ) > 0;
             } else {
-                $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
+                $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
                         $this->stats[ 'DRAFT' ] == 0 && $this->stats[ 'REJECTED' ] == 0;
             }
 
         } else {
 
             if ( $this->arguments->isRevision() ) {
-                $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
+                $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&
                         $this->stats[ 'raw' ][ 'draft' ] == 0 && $this->stats[ 'raw' ][ 'new' ] == 0 &&
                         ( $this->stats[ 'raw' ][ 'approved' ] + $this->stats[ 'raw' ][ 'approved2' ] + $this->stats[ 'raw' ][ 'rejected' ] ) > 0;
             } else {
-                $completable = $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
+                $completable = $this->current_phase == ChunkCompletionEventDao::TRANSLATE &&
                         $this->stats[ 'raw' ][ 'draft' ] == 0 &&
                         $this->stats[ 'raw' ][ 'new' ] == 0 &&
                         $this->stats[ 'raw' ][ 'rejected' ] == 0;

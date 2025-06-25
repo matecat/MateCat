@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use API\V2\Json\Project;
 use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -16,6 +15,7 @@ use Projects_ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Utils;
+use View\API\V2\Json\Project;
 
 /**
  * This controller can be called as Anonymous, but only if you already know the id and the password

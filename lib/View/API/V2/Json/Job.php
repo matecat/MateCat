@@ -7,10 +7,9 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use API\App\Json\OutsourceConfirmation;
 use CatUtils;
 use Constants;
 use Exception;
@@ -28,6 +27,7 @@ use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use Users_UserStruct;
 use Utils;
+use View\API\App\Json\OutsourceConfirmation;
 use WordCount\WordCountStruct;
 
 class Job {

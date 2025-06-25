@@ -2,7 +2,7 @@
 
 namespace Controller\Abstracts;
 
-use ApiKeys_ApiKeyStruct;
+use ApiKeyStruct;
 use Bootstrap;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
@@ -43,9 +43,9 @@ abstract class KleinController implements IController {
     protected array $validators = [];
 
     /**
-     * @var ApiKeys_ApiKeyStruct|null
+     * @var ApiKeyStruct|null
      */
-    protected ?ApiKeys_ApiKeyStruct $api_record = null;
+    protected ?ApiKeyStruct $api_record = null;
 
     /**
      * @var array

@@ -1,18 +1,21 @@
 <?php
 
+namespace Model\Comments;
+
 use DataAccess\IDaoStruct;
+use JsonSerializable;
 
 /**
  * This is NOT a database Entity, this is a utility vector to transport info.
  */
-class Comments_CommentStruct extends Comments_BaseCommentStruct implements IDaoStruct, JsonSerializable {
+class CommentStruct extends BaseCommentStruct implements IDaoStruct, JsonSerializable {
 
     // database fields
     public int     $id;
     public int     $id_job;
     public int     $id_segment;
     public string  $create_date;
-    public ?string $email = null;
+    public ?string $email        = null;
     public string  $full_name;
     public ?int    $uid          = null;
     public ?string $resolve_date = null;
@@ -26,8 +29,8 @@ class Comments_CommentStruct extends Comments_BaseCommentStruct implements IDaoS
     // returned values
     public ?string $thread_id = null;
 
-    public static function getStruct(): Comments_CommentStruct {
-        return new Comments_CommentStruct();
+    public static function getStruct(): CommentStruct {
+        return new CommentStruct();
     }
 
     public function getFormattedDate(): string {
@@ -41,22 +44,21 @@ class Comments_CommentStruct extends Comments_BaseCommentStruct implements IDaoS
     /**
      * @inheritDoc
      */
-    public function jsonSerialize(): array
-    {
+    public function jsonSerialize(): array {
         return [
-            'id' => $this->id,
-            'uid' => $this->uid,
-            'id_job' => $this->id_job,
-            'id_segment' => $this->id_segment,
-            'is_anonymous' => $this->is_anonymous,
-            'full_name' => $this->getFullName(),
-            'source_page' => $this->source_page,
-            'thread_id' => $this->thread_id,
-            'message' => $this->message,
-            'message_type' => $this->message_type,
-            'create_at' => $this->create_date,
-            'resolved_at' => $this->resolve_date,
-            'timestamp' => $this->timestamp,
+                'id'           => $this->id,
+                'uid'          => $this->uid,
+                'id_job'       => $this->id_job,
+                'id_segment'   => $this->id_segment,
+                'is_anonymous' => $this->is_anonymous,
+                'full_name'    => $this->getFullName(),
+                'source_page'  => $this->source_page,
+                'thread_id'    => $this->thread_id,
+                'message'      => $this->message,
+                'message_type' => $this->message_type,
+                'create_at'    => $this->create_date,
+                'resolved_at'  => $this->resolve_date,
+                'timestamp'    => $this->timestamp,
         ];
     }
 }

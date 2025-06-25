@@ -21,10 +21,10 @@ use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Validator\JSONSchema\Errors\JSONValidatorException;
+use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 

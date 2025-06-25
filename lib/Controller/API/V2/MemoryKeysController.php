@@ -10,12 +10,12 @@
 namespace Controller\API\V2;
 
 
-use API\V2\Json\MemoryKeys;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
+use View\API\V2\Json\MemoryKeys;
 
 class MemoryKeysController extends KleinController {
 

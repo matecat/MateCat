@@ -9,14 +9,14 @@
 
 namespace Controller\API\V2;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use API\V2\Json\Activity;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
 use ReflectionException;
+use View\API\V2\Json\Activity;
 
 class ActivityLogController extends KleinController {
 

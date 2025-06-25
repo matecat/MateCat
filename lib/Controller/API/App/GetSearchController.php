@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkDao;
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -15,6 +14,7 @@ use InvalidArgumentException;
 use Jobs_JobStruct;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use Projects_ProjectDao;
 use RuntimeException;
 use Search\ReplaceEventStruct;
@@ -189,7 +189,7 @@ class GetSearchController extends KleinController {
      * @throws Exception
      */
     private function getJobData( $job_id, $password ): ?Jobs_JobStruct {
-        return Chunks_ChunkDao::getByIdAndPassword( (int)$job_id, $password );
+        return ChunkDao::getByIdAndPassword( (int)$job_id, $password );
     }
 
     /**
@@ -319,7 +319,7 @@ class GetSearchController extends KleinController {
     private function updateSegments( $search_results, $id_job, $password, $id_segment, SearchQueryParamsStruct $queryParams, $revisionNumber = false ): void {
         $db = Database::obtain();
 
-        $chunk           = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
+        $chunk           = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
         $project         = Projects_ProjectDao::findByJobId( (int)$id_job );
         $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->user, $project, $id_segment );
 

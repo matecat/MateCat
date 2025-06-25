@@ -1,9 +1,13 @@
 <?php
+namespace Model\ApiKeys;
 
 use DataAccess\AbstractDaoObjectStruct;
 use DataAccess\IDaoStruct;
+use Database;
+use ReflectionException;
+use Users_UserDao;
 
-class ApiKeys_ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     public ?int    $id = null;
     public int    $uid;

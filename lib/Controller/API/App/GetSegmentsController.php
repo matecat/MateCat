@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
@@ -14,6 +13,7 @@ use Exceptions\ValidationError;
 use InvalidArgumentException;
 use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use ReflectionException;
 use Segments\ContextGroupDao;
 use Segments\SegmentUIStruct;
@@ -51,7 +51,7 @@ class GetSegmentsController extends KleinController {
         $password   = $request[ 'password' ];
         $where      = $request[ 'where' ];
 
-        $job = Chunks_ChunkDao::getByIdAndPassword( $jid, $password );
+        $job = ChunkDao::getByIdAndPassword( $jid, $password );
 
         $project    = $job->getProject();
         $featureSet = $this->getFeatureSet();

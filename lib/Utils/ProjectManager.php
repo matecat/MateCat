@@ -7,13 +7,11 @@
  *
  */
 
-use ActivityLog\ActivityLogStruct;
 use Analysis\PayableRates;
-use API\Commons\Error;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use ConnectedServices\Google\GDrive\Session;
 use ConnectedServices\Google\GoogleProvider;
 use Constants\XliffTranslationStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use Files\FileDao;
@@ -29,7 +27,9 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\AnalysisDao;
+use Model\Jobs\ChunkDao;
 use PayableRates\CustomPayableRateDao;
 use ProjectManager\ProjectManagerModel;
 use TaskRunner\Exceptions\EndQueueException;
@@ -39,6 +39,7 @@ use Teams\TeamStruct;
 use TMS\TMSFile;
 use TMS\TMSService;
 use Translators\TranslatorsModel;
+use View\API\Commons\Error;
 use WordCount\CounterModel;
 use Xliff\DTO\XliffRulesModel;
 use Xliff\XliffConfigTemplateStruct;
@@ -2742,7 +2743,7 @@ class ProjectManager {
                 }
 
                 // Use QA to get target segment
-                $chunk  = Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
+                $chunk  = ChunkDao::getByJobID( $jid )[ 0 ];
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 

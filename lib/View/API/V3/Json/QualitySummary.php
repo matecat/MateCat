@@ -7,17 +7,17 @@
  *
  */
 
-namespace API\V3\Json;
+namespace View\API\V3\Json;
 
 
 use Exception;
-use Features\ReviewExtended\Model\QualityReportDao;
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use Projects_ProjectStruct;
+use QualityReport\QualityReportDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 

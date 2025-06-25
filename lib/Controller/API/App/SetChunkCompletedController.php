@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkCompletionEventStruct;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
@@ -10,6 +9,7 @@ use Controller\Traits\APISourcePageGuesserTrait;
 use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
 use Jobs_JobDao;
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use ReflectionException;
 use Utils;
 
@@ -31,7 +31,7 @@ class SetChunkCompletedController extends KleinController {
         $struct = new CompletionEventStruct( [
                 'uid'               => $this->user->getUid(),
                 'remote_ip_address' => Utils::getRealIpAddr(),
-                'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+                'source'            => ChunkCompletionEventStruct::SOURCE_USER,
                 'is_review'         => $this->isRevision()
         ] );
 

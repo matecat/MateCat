@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ExternalServiceException;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -13,6 +12,7 @@ use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use ReflectionException;
 use Segments_SegmentOriginalDataDao;
 use Utils;
@@ -33,7 +33,7 @@ class GetTagProjectionController extends KleinController {
         Log::$fileName = 'tagProjection.log';
 
         $request   = $this->validateTheRequest();
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
+        $jobStruct = ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         /**

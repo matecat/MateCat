@@ -1,9 +1,15 @@
 <?php
 
+namespace Model\Jobs;
+
 use DataAccess\AbstractDao;
 use Exceptions\NotFoundException;
+use Jobs_JobDao;
+use Jobs_JobStruct;
+use ReflectionException;
+use Translations_SegmentTranslationStruct;
 
-class Chunks_ChunkDao extends AbstractDao {
+class ChunkDao extends AbstractDao {
 
     /**
      * @param int    $id_job
@@ -66,6 +72,7 @@ class Chunks_ChunkDao extends AbstractDao {
      * @param int $ttl
      *
      * @return Jobs_JobStruct[]
+     * @throws ReflectionException
      */
     public static function getByIdProjectAndIdJob( int $id_project, int $id_job, int $ttl = 0 ): array {
         return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl );

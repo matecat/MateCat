@@ -2,6 +2,7 @@
 
 use DataAccess\AbstractDao;
 use Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
 use Projects\ChunkOptionsModel;
 
 class Projects_MetadataDao extends AbstractDao {
@@ -152,7 +153,7 @@ class Projects_MetadataDao extends AbstractDao {
      */
     public function cleanupChunksOptions( array $jobs ) {
         foreach ( $jobs as $job ) {
-            $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
+            $chunk = ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
 
             foreach ( ChunkOptionsModel::$valid_keys as $key ) {
                 $this->delete(

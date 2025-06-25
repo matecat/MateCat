@@ -6,14 +6,14 @@
  * Time: 15:57
  */
 
-namespace Features\ReviewExtended\Controller\API\Json;
+namespace View\API\V2\Json\Json;
 
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Routes;
 
-class ProjectUrls extends \API\V2\Json\ProjectUrls {
+class ProjectUrls extends \View\API\V2\Json\ProjectUrls {
 
     protected function generateChunkUrls( $record ) {
 

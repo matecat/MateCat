@@ -14,18 +14,14 @@ class GlossaryCSVValidator extends AbstractValidator {
     /**
      * @inheritDoc
      */
-    public function validate( ValidatorObject $object ) {
-
-        if ( !$object instanceof GlossaryCSVValidatorObject ) {
-            throw new Exception( 'Object given is not a valid instance of GlossaryCSVValidatorObject' );
-        }
+    public function validate( ValidatorObject $object ): ?ValidatorObject {
 
         $headers          = $this->getHeaders( $object->csv );
         $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
         if ( !$this->validateLanguages( $headers, $languagesHandler ) ) {
-            return false;
+            return null;
         }
 
         $allowedLanguagesRegex = strtolower( implode( "|", array_keys( $languagesHandler->getEnabledLanguages() ) ) );
@@ -37,10 +33,10 @@ class GlossaryCSVValidator extends AbstractValidator {
 
             $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
 
-            return false;
+            return null;
         }
 
-        return true;
+        return $object;
     }
 
     /**
@@ -60,7 +56,7 @@ class GlossaryCSVValidator extends AbstractValidator {
      *
      * @return int
      */
-    public function getNumberOfLanguage( $filePath ) {
+    public function getNumberOfLanguage( $filePath ): int {
 
         $headers  = $this->getHeaders( $filePath );
         $skipKeys = [

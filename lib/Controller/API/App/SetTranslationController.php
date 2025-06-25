@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Chunks_ChunkDao;
 use Constants_Engines;
 use Constants_JobStatus;
 use Constants_ProjectStatus;
@@ -29,6 +28,7 @@ use Jobs_JobDao;
 use Jobs_JobStruct;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use RedisHandler;
@@ -437,7 +437,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         }
 
         //to get Job Info, we need only a row of jobs (split)
-        $chunk       = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
+        $chunk       = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
         $this->chunk = $chunk;
 
         //add check for job status archived.

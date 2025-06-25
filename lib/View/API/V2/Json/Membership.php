@@ -6,7 +6,7 @@
  * Time: 15:01
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
 use Teams\MembershipStruct;

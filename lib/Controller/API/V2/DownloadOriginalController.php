@@ -2,8 +2,6 @@
 
 namespace Controller\API\V2;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use Controller\Abstracts\AbstractDownloadController;
 use Conversion\ZipArchiveHandler;
 use Exception;
@@ -12,6 +10,8 @@ use FilesStorage\FilesStorageFactory;
 use Jobs_JobDao;
 use Log;
 use LQA\ChunkReviewDao;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use Projects_ProjectDao;
 use Utils;
 use ZipContentObject;

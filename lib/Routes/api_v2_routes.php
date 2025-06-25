@@ -41,8 +41,8 @@ $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', [ 'Controller\API\V2\ChunkController', 'show' ] );
     route( '/comments', 'GET', [ 'Controller\API\V2\CommentsController', 'index' ] );
 
-    route( '/quality-report', 'GET', [ 'Features\ReviewExtended\Controller\API\QualityReportController', 'show' ] );
-    route( '/quality-report/general', 'GET', [ 'Features\ReviewExtended\Controller\API\QualityReportController', 'general' ] );
+    route( '/quality-report', 'GET', [ 'Controller\API\V3\QualityReportControllerAPI', 'show' ] );
+    route( '/quality-report/general', 'GET', [ 'Controller\API\V3\QualityReportControllerAPI', 'general' ] );
 
     route( '/translator', 'GET', [ '\Controller\API\V2\JobsTranslatorsController', 'get' ] );
     route( '/translator', 'POST', [ '\Controller\API\V2\JobsTranslatorsController', 'add' ] );

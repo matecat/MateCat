@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
 use Controller\Abstracts\KleinController;
 use Utils;

@@ -52,9 +52,10 @@ use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
 use Utils;
+use Validator\Contracts\ValidatorObject;
 use Validator\EngineValidator;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
 
@@ -984,7 +985,12 @@ class NewController extends KleinController {
         if ( !empty( $mmt_glossaries ) ) {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
-                MMTValidator::validateGlossary( $mmtGlossaries );
+
+                ( new MMTValidator )->validate(
+                        ValidatorObject::fromArray( [
+                                'glossaryString' => $mmtGlossaries,
+                        ] )
+                );
 
                 return $mmtGlossaries;
             } catch ( Exception $exception ) {

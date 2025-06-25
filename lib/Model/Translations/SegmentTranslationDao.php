@@ -1,11 +1,11 @@
 <?php
 
-use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
 use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Files\FileStruct;
 use Search\ReplaceEventStruct;
+use View\API\V2\Json\Propagation as PropagationApi;
 
 class Translations_SegmentTranslationDao extends AbstractDao {
 

@@ -6,10 +6,10 @@ namespace Controller\API\Commons\Validators;
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Jobs_JobStruct;
+use Model\Jobs\ChunkDao;
 use ReflectionException;
 
 class JobPasswordValidator extends Base {
@@ -25,7 +25,7 @@ class JobPasswordValidator extends Base {
     public function __construct( KleinController $controller ) {
 
         parent::__construct( $controller );
-        $this->jStruct = Chunks_ChunkDao::getByIdAndPassword( $this->controller->params[ 'id_job' ], $this->controller->params[ 'password' ] );
+        $this->jStruct = ChunkDao::getByIdAndPassword( $this->controller->params[ 'id_job' ], $this->controller->params[ 'password' ] );
 
         $this->controller->setChunk( $this->jStruct );
 

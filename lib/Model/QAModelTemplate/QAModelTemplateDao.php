@@ -15,8 +15,8 @@ use PDO;
 use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 
 class QAModelTemplateDao extends AbstractDao {
 

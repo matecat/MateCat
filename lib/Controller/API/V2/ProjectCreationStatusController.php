@@ -10,14 +10,14 @@
 namespace Controller\API\V2;
 
 
-use API\V2\Json\CreationStatus;
-use API\V2\Json\WaitCreation;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Exceptions\NotFoundException;
 use ProjectQueue\Queue;
 use Projects_ProjectDao;
+use View\API\V2\Json\CreationStatus;
+use View\API\V2\Json\WaitCreation;
 
 class ProjectCreationStatusController extends KleinController {
 

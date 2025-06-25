@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
 use Engine;
 use Exception;
@@ -144,8 +144,8 @@ class AnalysisChunk implements JsonSerializable {
         }
 
         return [
-                'tm' => $tmEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
-                'mt' => $mtEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
+                'tm' => $tmEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
+                'mt' => $mtEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
         ];
     }
 

@@ -6,10 +6,8 @@
  * Time: 16:16
  */
 
-namespace API\V3\Json;
+namespace View\API\V3\Json;
 
-use API\App\Json\OutsourceConfirmation;
-use API\V2\Json\JobTranslator;
 use Constants;
 use Exception;
 use Exceptions\NotFoundException;
@@ -24,9 +22,11 @@ use LQA\ChunkReviewStruct;
 use Projects_ProjectStruct;
 use ReflectionException;
 use Utils;
+use View\API\App\Json\OutsourceConfirmation;
+use View\API\V2\Json\JobTranslator;
 use WordCount\WordCountStruct;
 
-class Chunk extends \API\V2\Json\Chunk {
+class Chunk extends \View\API\V2\Json\Chunk {
 
     protected array          $chunk_reviews = [];
     protected Jobs_JobStruct $chunk;

@@ -6,7 +6,7 @@
  * Time: 2:39 PM
  */
 
-namespace Features\ReviewExtended\Model;
+namespace QualityReport;
 
 use Constants;
 use DataAccess\AbstractDao;

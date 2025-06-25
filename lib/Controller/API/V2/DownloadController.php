@@ -2,8 +2,6 @@
 
 namespace Controller\API\V2;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\GDriveTokenVerifyModel;
@@ -34,6 +32,8 @@ use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use RedisHandler;

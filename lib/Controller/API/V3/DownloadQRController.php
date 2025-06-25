@@ -2,15 +2,15 @@
 
 namespace Controller\API\V3;
 
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DOMDocument;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobStruct;
-use QualityReport\QualityReportSegmentModel;
-use QualityReport_QualityReportSegmentStruct;
+use Model\Jobs\ChunkDao;
+use Model\QualityReport\QualityReportSegmentModel;
+use Model\QualityReport\QualityReportSegmentStruct;
 use ZipArchive;
 
 
@@ -58,7 +58,7 @@ class DownloadQRController extends KleinController {
         }
 
         try {
-            $chunk = Chunks_ChunkDao::getByIdAndPassword( $idJob, $password );
+            $chunk = ChunkDao::getByIdAndPassword( $idJob, $password );
 
             $prefix   = "QR_" . $idJob . "_" . $password . "_";
             $filePath = tempnam( "/tmp", $prefix );
@@ -195,7 +195,7 @@ class DownloadQRController extends KleinController {
 
         $data = [];
 
-        /** @var QualityReport_QualityReportSegmentStruct $segment */
+        /** @var QualityReportSegmentStruct $segment */
         foreach ( $segments as $segment ) {
 
             $issues   = [];

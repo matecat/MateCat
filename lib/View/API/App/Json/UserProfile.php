@@ -7,13 +7,13 @@
  *
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
-use API\V2\Json\Team;
-use API\V2\Json\User;
 use ConnectedServices\ConnectedServiceStruct;
 use Teams\TeamStruct;
 use Users_UserStruct;
+use View\API\V2\Json\Team;
+use View\API\V2\Json\User;
 
 class UserProfile {
 

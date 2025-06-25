@@ -1,6 +1,6 @@
 <?php
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 class Propagation {
 

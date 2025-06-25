@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use API\V2\Json\SegmentTranslationMismatches;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -10,6 +9,7 @@ use InvalidArgumentException;
 use Projects_ProjectDao;
 use ReflectionException;
 use Segments_SegmentDao;
+use View\API\V2\Json\SegmentTranslationMismatches;
 
 class GetTranslationMismatchesController extends KleinController {
 

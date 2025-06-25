@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Chunks_ChunkDao;
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -11,6 +10,7 @@ use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
+use Model\Jobs\ChunkDao;
 use ReflectionException;
 use Segments_SegmentDao;
 use TranslationsSplit_SplitDAO;
@@ -37,7 +37,7 @@ class SetCurrentSegmentController extends KleinController {
         $split_num       = $request[ 'split_num' ];
 
         //get Job Info, we need only a row of jobs (split)
-        Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        ChunkDao::getByIdAndPassword( $id_job, $password );
 
         if ( empty( $id_segment ) ) {
             throw new InvalidArgumentException( "missing segment id", -1 );

@@ -8,13 +8,13 @@
 
 namespace Controller\API\V2;
 
-use Comments_CommentDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Jobs_JobStruct;
+use Model\Comments\CommentDao;
 
 class CommentsController extends KleinController {
     use ChunkNotFoundHandlerTrait;
@@ -36,7 +36,7 @@ class CommentsController extends KleinController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, [
+        $comments = CommentDao::getCommentsForChunk( $this->chunk, [
                 'from_id' => $this->request->param( 'from_id' )
         ] );
 

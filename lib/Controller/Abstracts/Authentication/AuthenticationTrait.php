@@ -3,7 +3,7 @@
 namespace Controller\Abstracts\Authentication;
 
 use AMQHandler;
-use ApiKeys_ApiKeyStruct;
+use ApiKeyStruct;
 use Bootstrap;
 use Exception;
 use INIT;
@@ -20,8 +20,8 @@ use Users_UserStruct;
  */
 trait AuthenticationTrait {
 
-    protected ?ApiKeys_ApiKeyStruct $api_record = null;
-    protected bool                  $userIsLogged;
+    protected ?ApiKeyStruct $api_record = null;
+    protected bool          $userIsLogged;
     protected Users_UserStruct      $user;
 
     /**
@@ -111,7 +111,7 @@ trait AuthenticationTrait {
         AuthenticationHelper::destroyAuthentication( $_SESSION );
     }
 
-    public function getApiRecord(): ?ApiKeys_ApiKeyStruct {
+    public function getApiRecord(): ?ApiKeyStruct {
         return $this->api_record;
     }
 

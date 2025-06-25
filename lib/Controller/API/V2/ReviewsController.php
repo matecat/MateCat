@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
@@ -12,6 +11,7 @@ use Exception;
 use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
+use Model\Jobs\ChunkDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use RevisionFactory;
@@ -52,7 +52,7 @@ class ReviewsController extends KleinController {
         ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
 
         // destroy the 5 minutes chunk review cache
-        $chunk = ( new Chunks_ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
+        $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
         ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
 
         $this->response->json( [

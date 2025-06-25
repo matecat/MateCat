@@ -1,6 +1,6 @@
 <?php
 
-namespace ActivityLog;
+namespace Model\ActivityLog;
 
 use Exception;
 use Log;

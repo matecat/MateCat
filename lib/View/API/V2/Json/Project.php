@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 use Constants_JobStatus;
 use Exception;

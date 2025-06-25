@@ -4,6 +4,7 @@ namespace LQA;
 
 use Constants;
 use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
 use Database;
 use Exception;
@@ -314,19 +315,20 @@ class ChunkReviewDao extends AbstractDao {
      * - r1
      * - r2
      *
-     * @param     $jid
-     * @param     $password
-     * @param int $ttl
+     * @param int    $jid
+     * @param string $password
+     * @param int    $ttl
      *
-     * @return \DataAccess\IDaoStruct
+     * @return IDaoStruct
+     * @throws ReflectionException
      */
-    public function isTOrR1OrR2( $jid, $password, $ttl = 3600 ) {
+    public function isTOrR1OrR2( int $jid, string $password, int $ttl = 3600 ): ?IDaoStruct {
 
         $sql = "SELECT 
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.password=:password) as t,
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 2) as r1,
             (SELECT count(id) from qa_chunk_reviews cr where cr.id_job = :jid and cr.review_password=:password and cr.source_page = 3) as r2
-        from jobs where id = :jid;";
+        from DUAL";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -336,7 +338,7 @@ class ChunkReviewDao extends AbstractDao {
                 'jid'      => $jid
         ];
 
-        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $parameters )[ 0 ];
+        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $parameters )[ 0 ] ?? null;
     }
 
     /**

@@ -9,17 +9,17 @@
 
 namespace Controller\Views;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use Analysis\Health;
-use Chunks_ChunkDao;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use INIT;
 use Jobs_JobDao;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
+use Model\Jobs\ChunkDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Projects_ProjectDao;
@@ -96,7 +96,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
 
         } else {
 
-            $chunks = ( new Chunks_ChunkDao )->getByProjectID( $projectStruct->id );
+            $chunks = ( new ChunkDao )->getByProjectID( $projectStruct->id );
 
             $notDeleted = array_filter( $chunks, function ( $element ) {
                 return !$element->isDeleted(); //retain only jobs which are not deleted

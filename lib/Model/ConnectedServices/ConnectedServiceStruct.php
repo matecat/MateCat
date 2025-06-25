@@ -34,6 +34,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      *
      * @return string|null
      * @throws EnvironmentIsBrokenException
+     * @throws Exception
      */
     public function getDecryptedOauthAccessToken(): ?string {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
@@ -43,6 +44,8 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
 
     /**
      * @param $token
+     *
+     * @throws Exception
      */
     public function setEncryptedAccessToken( $token ) {
         $oauthTokenEncryption     = OauthTokenEncryption::getInstance();

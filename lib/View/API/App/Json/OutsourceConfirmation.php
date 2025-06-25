@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
 
 use Outsource\ConfirmationStruct;

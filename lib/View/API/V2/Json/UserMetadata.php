@@ -6,7 +6,7 @@
  * Time: 13:52
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
 use Users\MetadataStruct;

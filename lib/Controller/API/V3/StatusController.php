@@ -2,7 +2,6 @@
 
 namespace Controller\API\V3;
 
-use API\App\Json\Analysis\AnalysisProject;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;

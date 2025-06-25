@@ -6,6 +6,9 @@ use DataAccess\IDaoStruct;
 use Exceptions\NotFoundException;
 use Files\FileDao;
 use Files\FileStruct;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Comments\CommentDao;
+use Model\Jobs\ChunkDao;
 use Outsource\ConfirmationDao;
 use Outsource\ConfirmationStruct;
 use Outsource\TranslatedConfirmationStruct;
@@ -164,7 +167,7 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
 
         $this->_openThreads = $this->cachable( __METHOD__, $this, function ( Jobs_JobStruct $jobStruct ) {
 
-            $dao         = new Comments_CommentDao();
+            $dao         = new CommentDao();
             $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $jobStruct->id_project ] ); //ten minutes cache
             foreach ( $openThreads as $openThread ) {
                 if ( $openThread->id_job == $jobStruct->id && $openThread->password == $jobStruct->password ) {
@@ -243,7 +246,7 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
      */
     public function getChunks(): array {
         return $this->cachable( __METHOD__, $this, function ( $obj ) {
-            return Chunks_ChunkDao::getByJobID( $obj->id );
+            return ChunkDao::getByJobID( $obj->id );
         } );
     }
 
@@ -355,7 +358,7 @@ class Jobs_JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, Arra
     public function isMarkedComplete( $params ): bool {
         $params = Utils::ensure_keys( $params, [ 'is_review' ] );
 
-        return Chunks_ChunkCompletionEventDao::isCompleted( $this, [ 'is_review' => $params[ 'is_review' ] ] );
+        return ChunkCompletionEventDao::isCompleted( $this, [ 'is_review' => $params[ 'is_review' ] ] );
     }
 
     /**

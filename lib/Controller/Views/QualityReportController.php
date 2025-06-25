@@ -2,8 +2,6 @@
 
 namespace Controller\Views;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use CatUtils;
 use Constants_TranslationStatus;
 use Controller\Abstracts\BaseKleinViewController;
@@ -12,6 +10,8 @@ use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Jobs_JobDao;
 use Langs\Languages;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use PHPTalBoolean;
 use PHPTalMap;
 use Utils;

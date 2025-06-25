@@ -1,21 +1,30 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Controller\Features\ProjectCompletion\CompletionEventStruct;
+namespace Model\ChunksCompletion;
 
-class Chunks_ChunkCompletionEventDao extends AbstractDao {
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use DataAccess\AbstractDao;
+use Database;
+use DateTime;
+use Exception;
+use Jobs_JobStruct;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
+use Utils;
+
+class ChunkCompletionEventDao extends AbstractDao {
 
     const REVISE    = 'revise';
     const TRANSLATE = 'translate';
 
     public static function validSources() {
         return [
-                'user'  => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-                'merge' => Chunks_ChunkCompletionEventStruct::SOURCE_MERGE
+                'user'  => ChunkCompletionEventStruct::SOURCE_USER,
+                'merge' => ChunkCompletionEventStruct::SOURCE_MERGE
         ];
     }
 
-    public function deleteEvent( Chunks_ChunkCompletionEventStruct $event ) {
+    public function deleteEvent( ChunkCompletionEventStruct $event ) {
         $sql  = "DELETE FROM chunk_completion_events WHERE id = :id_event ";
         $stmt = $this->database->getConnection()->prepare( $sql );
 
@@ -28,9 +37,9 @@ class Chunks_ChunkCompletionEventDao extends AbstractDao {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Chunks_ChunkCompletionEventStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Model\ChunksCompletion\ChunkCompletionEventStruct' );
 
         $stmt->execute( [
                 'id_event' => $id_event,
@@ -45,7 +54,7 @@ class Chunks_ChunkCompletionEventDao extends AbstractDao {
         $sql = "UPDATE chunk_completion_events SET password = :new_password
                WHERE id_job = :id_job AND password = :password ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
                 'id_job'       => $id_job,

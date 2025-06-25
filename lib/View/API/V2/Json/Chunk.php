@@ -6,7 +6,7 @@
  * Time: 10:41
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 use Exception;
 use Exceptions\NotFoundException;

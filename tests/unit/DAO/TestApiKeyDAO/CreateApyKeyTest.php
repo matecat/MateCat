@@ -1,26 +1,29 @@
 <?php
 
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Predis\Client;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers ApiKeys_ApiKeyDao::create
+ * @covers ApiKeyDao::create
  * User: dinies
  * Date: 16/06/16
  * Time: 18.57
  */
 class CreateApyKeyTest extends AbstractTest {
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $flusher;
     /**
-     * @var ApiKeys_ApiKeyDao
+     * @var ApiKeyDao
      */
     protected $apikey_Dao;
     /**
-     * @var ApiKeys_ApiKeyStruct
+     * @var ApiKeyStruct
      */
     protected $apikey_struct_param;
     protected $sql_delete_apikey;
@@ -36,8 +39,8 @@ class CreateApyKeyTest extends AbstractTest {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
-        $this->apikey_Dao          = new ApiKeys_ApiKeyDao( $this->database_instance );
-        $this->apikey_struct_param = new ApiKeys_ApiKeyStruct();
+        $this->apikey_Dao          = new ApiKeyDao( $this->database_instance );
+        $this->apikey_struct_param = new ApiKeyStruct();
 
 
         $this->apikey_struct_param->uid         = '1999';
@@ -62,7 +65,7 @@ class CreateApyKeyTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers ApiKeys_ApiKeyDao::create
+     * @covers ApiKeyDao::create
      */
     public function test_create_with_success() {
 

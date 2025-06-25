@@ -7,7 +7,6 @@
  */
 
 namespace Controller\API\V3;
-use API\V3\Json\Chunk;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -18,6 +17,7 @@ use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Projects_ProjectStruct;
+use View\API\V3\Json\Chunk;
 
 class ChunkController extends KleinController {
     use ChunkNotFoundHandlerTrait;

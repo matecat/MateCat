@@ -9,10 +9,7 @@
 
 namespace Controller\Views;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use CatUtils;
-use Chunks_ChunkDao;
 use Constants_Teams;
 use Constants_TranslationStatus;
 use Controller\Abstracts\BaseKleinViewController;
@@ -30,6 +27,9 @@ use Langs\Languages;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelStruct;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Jobs\ChunkDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
@@ -98,7 +98,7 @@ class CattoolController extends BaseKleinViewController {
             $result[ 'chunk' ]             = $chunkReviewStruct->getChunk();
             $result[ 'chunkReviewStruct' ] = $chunkReviewStruct;
         } else {
-            $result[ 'chunk' ] = Chunks_ChunkDao::getByIdAndPassword( $job_id, $password );
+            $result[ 'chunk' ] = ChunkDao::getByIdAndPassword( $job_id, $password );
         }
 
         return (object)$result;

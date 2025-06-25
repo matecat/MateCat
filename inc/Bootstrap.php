@@ -184,11 +184,11 @@ class Bootstrap {
                 break;
             case PDOException::class:
                 $code = 503;
-                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                Log::doJsonLog( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
                 break;
             default:
                 $code = 500;
-                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                Log::doJsonLog( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
                 break;
         }
 
@@ -287,8 +287,6 @@ class Bootstrap {
         $def_path = [
                 self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib",
-                self::$_ROOT . "/lib/Controller/API",
-                self::$_ROOT . "/lib/Controller",
                 self::$_ROOT . "/lib/Utils",
                 self::$_ROOT . "/lib/Model",
                 self::$_ROOT . "/lib/View",

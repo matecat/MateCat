@@ -2,13 +2,13 @@
 
 namespace Controller\Views;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
 use ReflectionException;
 
 /**

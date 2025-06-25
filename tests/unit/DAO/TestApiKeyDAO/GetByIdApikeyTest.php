@@ -1,11 +1,13 @@
 <?php
 
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers ApiKeys_ApiKeyDao::getById
+ * @covers ApiKeyDao::getById
  * User: dinies
  * Date: 16/06/16
  * Time: 19.14
@@ -16,11 +18,11 @@ class GetByIdApikeyTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var ApiKeys_ApiKeyDao
+     * @var ApiKeyDao
      */
     protected $apikey_Dao;
     /**
-     * @var ApiKeys_ApiKeyStruct
+     * @var ApiKeyStruct
      */
     protected $apikey_struct_param;
     protected $sql_delete_apikey;
@@ -35,7 +37,7 @@ class GetByIdApikeyTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->apikey_Dao        = new ApiKeys_ApiKeyDao( $this->database_instance );
+        $this->apikey_Dao        = new ApiKeyDao( $this->database_instance );
 
         /**
          * apikey insertion
@@ -65,7 +67,7 @@ class GetByIdApikeyTest extends AbstractTest {
     public function test_getById() {
         $wrapped_result = $this->apikey_Dao->getById( $this->apikey_id );
         $apikey         = $wrapped_result[ '0' ];
-        $this->assertTrue( $apikey instanceof ApiKeys_ApiKeyStruct );
+        $this->assertTrue( $apikey instanceof ApiKeyStruct );
         $this->assertEquals( "{$this->apikey_id}", $apikey->id );
         $this->assertEquals( "1999", $apikey->uid );
         $this->assertEquals( "c4ca4238bar92382fake509a6f758foo", $apikey->api_key );

@@ -2,13 +2,13 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkDao;
 use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Exceptions\NotFoundException;
 use Jobs_JobDao;
+use Model\Jobs\ChunkDao;
 use Projects_ProjectDao;
 use ReflectionException;
 use Translations_SegmentTranslationDao;
@@ -52,7 +52,7 @@ class ChangeJobsStatusController extends KleinController {
         } else {
 
             try {
-                $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
+                $firstChunk = ChunkDao::getByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
                 $this->log( $msg );

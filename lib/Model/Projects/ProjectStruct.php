@@ -5,6 +5,7 @@ use DataAccess\ArrayAccessTrait;
 use DataAccess\IDaoStruct;
 use LQA\ModelDao;
 use LQA\ModelStruct;
+use Model\Jobs\ChunkDao;
 use RemoteFiles\RemoteFileServiceNameStruct;
 use Teams\TeamDao;
 use Teams\TeamStruct;
@@ -165,7 +166,7 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      */
     public function getChunks( int $ttl = 0 ): array {
         return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {
-            $dao = new Chunks_ChunkDao( Database::obtain() );
+            $dao = new ChunkDao( Database::obtain() );
 
             return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
         } );

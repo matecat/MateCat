@@ -8,7 +8,6 @@
 
 namespace Controller\API\V2;
 
-use API\V2\Json\Chunk;
 use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
@@ -22,6 +21,7 @@ use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
+use View\API\V2\Json\Chunk;
 
 class ChunkController extends KleinController {
     use ChunkNotFoundHandlerTrait;

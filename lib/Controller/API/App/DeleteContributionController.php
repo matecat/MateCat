@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -12,6 +11,7 @@ use Exception;
 use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
@@ -47,7 +47,7 @@ class DeleteContributionController extends KleinController {
         $received_password = $request[ 'received_password' ];
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         $tm_keys = $jobStruct[ 'tm_keys' ];

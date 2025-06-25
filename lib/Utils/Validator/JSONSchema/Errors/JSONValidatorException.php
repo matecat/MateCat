@@ -1,12 +1,13 @@
 <?php
 
-namespace Validator\Errors;
+namespace Validator\JSONSchema\Errors;
 
 use Exception;
 use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
-//XXX Move to validator namespace and use Base if possible
-class JSONValidatorException extends Exception implements JsonSerializable, JsonValidatorExceptionInterface {
+use Validator\Contracts\ValidatorExceptionInterface;
+
+class JSONValidatorException extends Exception implements JsonSerializable, ValidatorExceptionInterface {
     /**
      * @var Error
      */

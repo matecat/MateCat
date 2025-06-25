@@ -23,7 +23,7 @@ Example:
 $jsonSchema = file_get_contents( '/path/to/your/schema.json');
 $jsonToBeValidated = file_get_contents('path/to/your/json.json');
 
-$validator = new \Validator\JSONValidator($jsonSchema);
+$validator = new \Validator\JSONSchema\JSONValidator($jsonSchema);
 
 $validator->isValid($jsonToBeValidated); // return boolean
 $validator->validate($invalidFile);      // return an array of errors

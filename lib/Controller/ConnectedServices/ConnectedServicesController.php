@@ -9,7 +9,6 @@
 namespace Controller\ConnectedServices;
 
 
-use API\App\Json\ConnectedService;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use ConnectedServices\GDriveTokenVerifyModel;
@@ -20,6 +19,7 @@ use Exception;
 use Exceptions\NotFoundException;
 use INIT;
 use Utils;
+use View\API\App\Json\ConnectedService;
 
 class ConnectedServicesController extends AbstractStatefulKleinController {
 

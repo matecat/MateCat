@@ -2,10 +2,10 @@
 
 namespace Features;
 
-use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkCompletionUpdateDao;
-use Chunks_ChunkCompletionUpdateStruct;
 use Jobs_JobStruct;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\ChunksCompletion\ChunkCompletionUpdateDao;
+use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
 use Utils;
 
 class ProjectCompletion extends BaseFeature {
@@ -21,7 +21,7 @@ class ProjectCompletion extends BaseFeature {
 
         /** @var Jobs_JobStruct $chunk */
         $chunk                                     = $params[ 'chunk' ];
-        $chunk_completion_update_struct            = new Chunks_ChunkCompletionUpdateStruct( $chunk->toArray() );
+        $chunk_completion_update_struct            = new ChunkCompletionUpdateStruct( $chunk->toArray() );
         $chunk_completion_update_struct->is_review = $params[ 'is_review' ];
         $chunk_completion_update_struct->source    = 'user';
         $chunk_completion_update_struct->id_job    = $chunk->id;
@@ -32,26 +32,26 @@ class ProjectCompletion extends BaseFeature {
 
         $chunk_completion_update_struct->setTimestamp( 'last_translation_at', strtotime( 'now' ) );
 
-        $dao           = new Chunks_ChunkCompletionEventDao();
+        $dao           = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase( $chunk );
 
         /**
          * Only save the record if current phase is compatible
          */
         if (
-                ( $current_phase == Chunks_ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review ) ||
-                ( $current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review )
+                ( $current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review ) ||
+                ( $current_phase == ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review )
         ) {
-            Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
+            ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
         }
 
     }
 
     public function job_password_changed( Jobs_JobStruct $job, $old_password ) {
-        $dao = new Chunks_ChunkCompletionUpdateDao();
+        $dao = new ChunkCompletionUpdateDao();
         $dao->updatePassword( $job->id, $job->password, $old_password );
 
-        $dao = new Chunks_ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $dao->updatePassword( $job->id, $job->password, $old_password );
     }
 

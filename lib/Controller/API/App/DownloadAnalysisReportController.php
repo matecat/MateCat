@@ -2,14 +2,14 @@
 
 namespace Controller\API\App;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
 use AjaxPasswordCheck;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use FeatureSet;
 use InvalidArgumentException;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\XTRFStatus;
 use Projects_ProjectDao;
 use ReflectionException;

@@ -2,10 +2,9 @@
 
 namespace TMS;
 
-use Controller\API\Commons\Exceptions\UnprocessableException;
-use Chunks_ChunkDao;
 use Constants_Engines;
 use Constants_TranslationStatus;
+use Controller\API\Commons\Exceptions\UnprocessableException;
 use Conversion\Upload;
 use DateTime;
 use DateTimeZone;
@@ -21,6 +20,7 @@ use InvalidArgumentException;
 use Jobs_JobStruct;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
@@ -479,7 +479,7 @@ class TMSService {
         /**
          * @var $chunks Jobs_JobStruct[]
          */
-        $chunks = Chunks_ChunkDao::getByJobID( $jid );
+        $chunks = ChunkDao::getByJobID( $jid );
 
         foreach ( $result as $k => $row ) {
 

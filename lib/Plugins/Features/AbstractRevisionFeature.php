@@ -2,11 +2,10 @@
 
 namespace Features;
 
-use Controller\API\App\CreateProjectController;
 use ArrayObject;
 use BasicFeatureStruct;
-use Chunks_ChunkCompletionEventStruct;
 use Constants;
+use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
@@ -15,13 +14,8 @@ use Exception;
 use Exceptions\NotFoundException;
 use Features;
 use Features\ReviewExtended\ChunkReviewModel;
-use Features\ReviewExtended\Controller\API\Json\ProjectUrls;
 use Features\ReviewExtended\IChunkReviewModel;
-use Features\ReviewExtended\Model\QualityReportModel;
-use Features\ReviewExtended\ReviewedWordCountModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\ReviewExtended\TranslationIssueModel;
-use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
@@ -33,14 +27,16 @@ use Log;
 use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Predis\Connection\ConnectionException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use QualityReport\QualityReportModel;
 use RecursiveArrayObject;
 use ReflectionException;
 use Revise\FeedbackDAO;
 use Utils;
-use WordCount\CounterModel;
+use View\API\V2\Json\Json\ProjectUrls;
 use ZipArchive;
 
 ;
@@ -336,12 +332,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      *
-     * @param Chunks_ChunkCompletionEventStruct $event
+     * @param ChunkCompletionEventStruct $event
      *
      * @throws ReflectionException
      * @throws ValidationError
      */
-    public function alter_chunk_review_struct( Chunks_ChunkCompletionEventStruct $event ) {
+    public function alter_chunk_review_struct( ChunkCompletionEventStruct $event ) {
 
         $review = ( new ChunkReviewDao() )->findChunkReviews( new Jobs_JobStruct( [ 'id' => $event->id_job, 'password' => $event->password ] ) )[ 0 ];
 
@@ -372,12 +368,12 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param Chunks_ChunkCompletionEventStruct $event
+     * @param ChunkCompletionEventStruct        $event
      * @param                                   $undo_data
      *
      * @throws ValidationError
      */
-    protected function _validateUndoData( Chunks_ChunkCompletionEventStruct $event, $undo_data ) {
+    protected function _validateUndoData( ChunkCompletionEventStruct $event, $undo_data ) {
 
         try {
             Utils::ensure_keys( $undo_data, [

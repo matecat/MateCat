@@ -1,6 +1,6 @@
 <?php
 
-namespace Validator;
+namespace Validator\JSONSchema;
 
 use Validator\Contracts\ValidatorObject;
 

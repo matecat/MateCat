@@ -10,7 +10,6 @@
 namespace Controller\API\V2;
 
 
-use API\V2\Json\JobTranslator;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\JobPasswordValidator;
@@ -19,6 +18,7 @@ use InvalidArgumentException;
 use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
 use Translators\TranslatorsModel;
+use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController {
 

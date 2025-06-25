@@ -6,16 +6,16 @@
  * Time: 8:51 PM
  */
 
-namespace Features\ReviewExtended\Model;
+namespace QualityReport;
 
 use ArrayObject;
-use Chunks_ChunkCompletionEventDao;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
 use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
@@ -211,7 +211,7 @@ class QualityReportModel {
      * @return string
      */
     protected function getReviewerName() {
-        $completion_event = Chunks_ChunkCompletionEventDao::lastCompletionRecord(
+        $completion_event = ChunkCompletionEventDao::lastCompletionRecord(
                 $this->chunk, [ 'is_review' => true ]
         );
         $name             = '';

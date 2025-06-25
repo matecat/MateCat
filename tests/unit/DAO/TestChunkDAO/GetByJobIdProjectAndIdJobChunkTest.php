@@ -1,18 +1,19 @@
 <?php
 
+use Model\Jobs\ChunkDao;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Chunks_ChunkDao::getByIdProjectAndIdJob
+ * @covers ChunkDao::getByIdProjectAndIdJob
  * User: dinies
  * Date: 30/06/16
  * Time: 19.01
  */
 class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
     /**
-     * @var Chunks_ChunkDao
+     * @var ChunkDao
      */
     protected $chunk_Dao;
     /**
@@ -33,7 +34,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
+        $this->chunk_Dao         = new ChunkDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
@@ -73,7 +74,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getByIdProjectAndIdJob
+     * @covers ChunkDao::getByIdProjectAndIdJob
      */
     function test_getByJobId() {
 

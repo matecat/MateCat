@@ -5,7 +5,7 @@ use TestHelpers\AbstractTest;
 
 /**
  * @group  regression
- * @covers ApiKeys_ApiKeyStruct::validSecret
+ * @covers ApiKeyStruct::validSecret
  * User: dinies
  * Date: 21/06/16
  * Time: 15.50

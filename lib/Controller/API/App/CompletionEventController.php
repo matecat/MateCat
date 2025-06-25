@@ -7,15 +7,15 @@
  */
 
 
-namespace Features\ProjectCompletion\Controller;
+namespace Controller\API\App;
 
-use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkCompletionEventStruct;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Database;
 use Exception;
 use Jobs_JobStruct;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
 
 class CompletionEventController extends KleinController {
 
@@ -48,14 +48,14 @@ class CompletionEventController extends KleinController {
     }
 
     /**
-     * @var Chunks_ChunkCompletionEventStruct
+     * @var ChunkCompletionEventStruct
      */
     protected $event;
 
     /**
-     * @param Chunks_ChunkCompletionEventStruct $event
+     * @param ChunkCompletionEventStruct $event
      */
-    public function setEvent( Chunks_ChunkCompletionEventStruct $event ) {
+    public function setEvent( ChunkCompletionEventStruct $event ) {
         $this->event = $event;
     }
 
@@ -68,7 +68,7 @@ class CompletionEventController extends KleinController {
         $Validator  = new ChunkPasswordValidator( $this );
         $Validator->onSuccess( function () use ( $Controller, $Validator ) {
 
-            $event = ( new Chunks_ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
+            $event = ( new ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
 
             if ( !$event ) {
                 throw new \Exceptions\NotFoundException( "Event Not Found.", 404 );
@@ -88,9 +88,7 @@ class CompletionEventController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
      */
     public function delete() {
 
@@ -109,9 +107,7 @@ class CompletionEventController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
-     * @throws \API\Commons\Exceptions\AuthenticationError
-     * @throws \Exceptions\ValidationError
+     * @throws Exception
      */
     private function __performUndo() {
 
@@ -122,7 +118,7 @@ class CompletionEventController extends KleinController {
          */
         $this->featureSet->filter( 'alter_chunk_review_struct', $this->event );
 
-        ( new Chunks_ChunkCompletionEventDao() )->deleteEvent( $this->event );
+        ( new ChunkCompletionEventDao() )->deleteEvent( $this->event );
         Database::obtain()->commit();
 
     }

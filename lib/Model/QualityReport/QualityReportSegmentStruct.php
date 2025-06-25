@@ -6,13 +6,15 @@
  * Time: 12:46
  */
 
-use API\V2\Json\QALocalWarning;
+namespace Model\QualityReport;
+
 use DataAccess\AbstractDaoObjectStruct;
 use DataAccess\IDaoStruct;
 use LQA\QA;
+use View\API\V2\Json\QALocalWarning;
 
 
-class QualityReport_QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
 
     public $sid;

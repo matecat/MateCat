@@ -2,10 +2,10 @@
 
 namespace LQA;
 
-use Chunks_ChunkDao;
 use DataAccess\AbstractDaoSilentStruct;
 use DataAccess\IDaoStruct;
 use Jobs_JobStruct;
+use Model\Jobs\ChunkDao;
 use Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
@@ -41,7 +41,7 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         $review = clone $this;
 
         return $this->cachable( __FUNCTION__, $review, function ( $review ) {
-            return Chunks_ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
+            return ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
         } );
     }
 

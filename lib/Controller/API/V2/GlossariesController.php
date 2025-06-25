@@ -20,8 +20,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use TMS\TMSFile;
 use TMS\TMSService;
+use Validator\Contracts\ValidatorObject;
 use Validator\GlossaryCSVValidator;
-use Validator\GlossaryCSVValidatorObject;
 
 class GlossariesController extends AbstractStatefulKleinController {
 
@@ -178,10 +178,10 @@ class GlossariesController extends AbstractStatefulKleinController {
      */
     private function validateCSVFile( $file ) {
 
-        $validatorObject      = new GlossaryCSVValidatorObject();
-        $validatorObject->csv = $file;
-        $validator            = new GlossaryCSVValidator();
-        $validator->validate( $validatorObject );
+        $validator = new GlossaryCSVValidator();
+        $validator->validate( ValidatorObject::fromArray( [
+                'csv' => $file
+        ] ) );
 
         if ( count( $validator->getExceptions() ) > 0 ) {
             throw new ValidationError( $validator->getExceptions()[ 0 ] );

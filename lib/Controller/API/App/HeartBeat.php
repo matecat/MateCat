@@ -10,11 +10,11 @@
 namespace Controller\API\App;
 
 
-use API\App\Json\Ping;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\WhitelistAccessValidator;
 use INIT;
 use RuntimeException;
+use View\API\App\Json\Ping;
 
 class HeartBeat extends KleinController {
 

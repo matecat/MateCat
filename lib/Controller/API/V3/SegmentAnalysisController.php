@@ -3,7 +3,6 @@
 namespace Controller\API\V3;
 
 use CatUtils;
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use DataAccess\IDaoStruct;
@@ -16,6 +15,7 @@ use Jobs_JobStruct;
 use LQA\EntryDao;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
+use Model\Jobs\ChunkDao;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
@@ -63,7 +63,7 @@ class SegmentAnalysisController extends KleinController {
         $segmentsCount = Jobs_JobDao::getSegmentsCount( $idJob, $password );
 
         // raise exception if the job does not exist
-        $jobStruct     = Chunks_ChunkDao::getByIdAndPassword( $idJob, $password );
+        $jobStruct     = ChunkDao::getByIdAndPassword( $idJob, $password );
         $this->project = $jobStruct->getProject();
 
         $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;

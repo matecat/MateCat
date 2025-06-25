@@ -3,14 +3,8 @@
 namespace Model\Analysis;
 
 use AMQHandler;
-use API\App\Json\Analysis\AnalysisChunk;
-use API\App\Json\Analysis\AnalysisFile;
-use API\App\Json\Analysis\AnalysisJob;
-use API\App\Json\Analysis\AnalysisProject;
-use API\App\Json\Analysis\AnalysisProjectSummary;
-use Controller\API\Commons\Exceptions\AuthenticationError;
-use Chunks_ChunkDao;
 use Constants_ProjectStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
@@ -18,6 +12,7 @@ use FeatureSet;
 use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
+use Model\Jobs\ChunkDao;
 use OutsourceTo\OutsourceAvailable;
 use Projects_MetadataDao;
 use Projects_ProjectDao;
@@ -27,6 +22,11 @@ use Routes;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Users_UserStruct;
+use View\API\App\Json\Analysis\AnalysisChunk;
+use View\API\App\Json\Analysis\AnalysisFile;
+use View\API\App\Json\Analysis\AnalysisJob;
+use View\API\App\Json\Analysis\AnalysisProject;
+use View\API\App\Json\Analysis\AnalysisProjectSummary;
 
 /**
  * Created by PhpStorm.
@@ -198,7 +198,7 @@ abstract class AbstractStatus {
             }
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
-                $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
+                $chunkStruct = ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
                 $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );

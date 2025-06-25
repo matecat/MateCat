@@ -8,7 +8,7 @@
 
 namespace Email;
 
-use Comments_CommentStruct;
+use Model\Comments\CommentStruct;
 use Users_UserStruct;
 
 class BaseCommentEmail extends AbstractEmail {
@@ -19,9 +19,9 @@ class BaseCommentEmail extends AbstractEmail {
     protected $user;
 
     /**
-     * @var Comments_CommentStruct
+     * @var CommentStruct
      */
-    protected Comments_CommentStruct $comment;
+    protected CommentStruct $comment;
 
     /**
      * @var string
@@ -34,13 +34,14 @@ class BaseCommentEmail extends AbstractEmail {
 
     /**
      * BaseCommentEmail constructor.
+     *
      * @param Users_UserStruct $user
-     * @param Comments_CommentStruct $comment
+     * @param CommentStruct    $comment
      * @param $url
      * @param $project
      * @param $job
      */
-    public function __construct( Users_UserStruct $user, Comments_CommentStruct $comment, $url, $project, $job ) {
+    public function __construct( Users_UserStruct $user, CommentStruct $comment, $url, $project, $job ) {
 
         $this->project = $project;
         $this->user    = $user;
@@ -62,7 +63,7 @@ class BaseCommentEmail extends AbstractEmail {
     }
 
     protected function _getTemplateVariables(): array {
-        $content = \Comments_CommentDao::placeholdContent( $this->comment->message );
+        $content = \Model\Comments\CommentDao::placeholdContent( $this->comment->message );
 
         return [
                 'user'      => $this->user->toArray(),

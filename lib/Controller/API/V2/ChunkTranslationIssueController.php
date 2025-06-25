@@ -7,13 +7,13 @@
  */
 
 namespace Controller\API\V2;
-use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Jobs_JobStruct;
 use LQA\EntryDao;
+use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
 class ChunkTranslationIssueController extends KleinController {
     use ChunkNotFoundHandlerTrait;

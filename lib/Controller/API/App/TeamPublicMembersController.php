@@ -2,12 +2,12 @@
 
 namespace Controller\API\App;
 
-use API\V2\Json\Membership;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use ReflectionException;
 use Teams\MembershipDao;
+use View\API\V2\Json\Membership;
 
 class TeamPublicMembersController extends KleinController {
 

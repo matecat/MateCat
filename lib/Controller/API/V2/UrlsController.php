@@ -8,19 +8,12 @@
 
 namespace Controller\API\V2;
 
-use API\V2\Json\ProjectUrls;
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
-use DataAccess\ShapelessConcreteStruct;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use Projects_ProjectDao;
-use ReflectionException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use View\API\V2\Json\ProjectUrls;
 
 class UrlsController extends KleinController {
 

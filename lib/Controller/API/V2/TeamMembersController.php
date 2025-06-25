@@ -9,7 +9,6 @@
 
 namespace Controller\API\V2;
 
-use API\V2\Json\Membership;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
@@ -20,6 +19,7 @@ use ReflectionException;
 use TeamModel;
 use Teams\PendingInvitations;
 use Teams\TeamDao;
+use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController {
 

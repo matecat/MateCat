@@ -407,7 +407,7 @@ class Segments_SegmentDao extends AbstractDao {
      * @param $job_id
      * @param $job_password
      *
-     * @return \QualityReport_QualityReportSegmentStruct[]
+     * @return \QualityReportSegmentStruct[]
      */
 
     public function getSegmentsForQr( $segments_id, $job_id, $job_password ) {

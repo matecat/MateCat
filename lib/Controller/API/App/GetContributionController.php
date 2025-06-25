@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Chunks_ChunkDao;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Controller\Abstracts\KleinController;
@@ -16,6 +15,7 @@ use INIT;
 use InvalidArgumentException;
 use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use Projects_MetadataDao;
 use ReflectionException;
 use Segments_SegmentDao;
@@ -56,7 +56,7 @@ class GetContributionController extends KleinController {
             $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
-        $jobStruct  = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $jobStruct  = ChunkDao::getByIdAndPassword( $id_job, $password );
         $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
 
         $projectStruct = $jobStruct->getProject();

@@ -43,15 +43,15 @@ route( '/api/app/teams/members/invite/[:jwt]', 'GET', [ '\Controller\API\App\Tea
 
 route( '/api/app/outsource/confirm/[i:id_job]/[:password]', 'POST', [ '\Controller\API\App\OutsourceConfirmationController', 'confirm' ] );
 
-route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]', 'DELETE', [ 'Features\ProjectCompletion\Controller\CompletionEventController', 'delete' ] );
+route( '/api/app/jobs/[i:id_job]/[:password]/completion-events/[:id_event]', 'DELETE', [ 'Controller\API\App\CompletionEventController', 'delete' ] );
 
 //Health check
 route( '/api/app/heartbeat/ping', 'GET', [ '\Controller\API\App\HeartBeat', 'ping' ] );
 
 $klein->with( '/api/app/jobs/[:id_job]/[:password]', function () {
     route( '', 'GET', [ '\Controller\API\V3\ChunkController', 'show' ] );
-    route( '/quality-report', 'GET', [ '\Features\ReviewExtended\Controller\API\QualityReportController', 'show' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
-    route( '/quality-report/segments', 'GET', [ 'Features\ReviewExtended\Controller\API\QualityReportController', 'segments_for_ui' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
+    route( '/quality-report', 'GET', [ '\Controller\API\App\QualityReportControllerAPI', 'show' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report
+    route( '/quality-report/segments', 'GET', [ 'Controller\API\App\QualityReportControllerAPI', 'segments_for_ui' ] ); // alias of /api/v2/jobs/[:id_job]/[:password]/quality-report/segments
 } );
 
 route( '/api/app/jobs/[:id_job]/[:password]/stats', 'GET', [ 'Controller\API\V2\StatsController', 'stats' ] );

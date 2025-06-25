@@ -6,23 +6,24 @@
  * Time: 2:32 PM
  */
 
-namespace Features\ReviewExtended\Controller\API;
+namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
 use Jobs_JobStruct;
 use Model\Analysis\Constants\MatchConstantsFactory;
+use Model\QualityReport\QualityReportSegmentModel;
 use Projects_MetadataDao;
 use Projects_ProjectStruct;
-use QualityReport\QualityReportSegmentModel;
+use QualityReport\QualityReportModel;
 
-class QualityReportController extends KleinController {
+class QualityReportControllerAPI extends KleinController {
     use ChunkNotFoundHandlerTrait;
 
     const DEFAULT_PER_PAGE = 20;
@@ -31,32 +32,33 @@ class QualityReportController extends KleinController {
     /**
      * @var Projects_ProjectStruct
      */
-    protected $project;
+    protected Projects_ProjectStruct $project;
 
     /**
      * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( Jobs_JobStruct $chunk ): QualityReportControllerAPI {
         $this->chunk = $chunk;
 
         return $this;
     }
 
-    protected $model;
-
     public function show() {
 
         $this->return404IfTheJobWasDeleted();
-        $this->model = new QualityReportModel( $this->chunk );
-        $this->model->setDateFormat( 'c' );
+        $model = new QualityReportModel( $this->chunk );
+        $model->setDateFormat( 'c' );
 
         $this->response->json( [
-                'quality-report' => $this->model->getStructure()
+                'quality-report' => $model->getStructure()
         ] );
     }
 
+    /**
+     * @throws Exception
+     */
     public function segments( $isForUI = false ) {
         $this->return404IfTheJobWasDeleted();
         $this->renderSegments( $isForUI );
@@ -72,9 +74,9 @@ class QualityReportController extends KleinController {
     /**
      * @param bool $isForUI
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function renderSegments( $isForUI = false ) {
+    protected function renderSegments( bool $isForUI = false ) {
 
         $this->project = $this->chunk->getProject();
 
@@ -84,7 +86,9 @@ class QualityReportController extends KleinController {
         $ref_segment = (int)$this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
         $step        = (int)$this->request->param( 'step' );
-        $filter      = $this->request->param( 'filter' );
+
+        /** @var array $filter */
+        $filter = $this->request->param( 'filter', [] );
 
         if ( empty( $ref_segment ) ) {
             $ref_segment = 0;
@@ -144,7 +148,7 @@ class QualityReportController extends KleinController {
      *
      * @return array
      */
-    private function _getPaginationLinks( array $segments_id, $step, array $filter = null ) {
+    private function _getPaginationLinks( array $segments_id, int $step, array $filter = null ): array {
 
         $url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $total = count( $this->chunk->getSegments() );
@@ -176,20 +180,21 @@ class QualityReportController extends KleinController {
     }
 
     /**
-     * Change the response json to remove source_page property and change it to revision number.
+     * Change the response JSON to remove source_page property and change it to revision number.
      *
      * @param array $segments
      * @param array $ttlArray
      * @param array $filesInfo
+     * @param bool  $mt_qe_workflow_enabled
      *
      * @return array
      */
-    private function _formatSegments( $segments, array $ttlArray, array $filesInfo, bool $mt_qe_workflow_enabled = false ) {
+    private function _formatSegments( array $segments, array $ttlArray, array $filesInfo, bool $mt_qe_workflow_enabled = false ): array {
         $outputArray = [];
 
         $matchConstants = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
-        foreach ( $segments as $index => $segment ) {
+        foreach ( $segments as $segment ) {
 
             $seg                                 = [];
             $seg[ 'comments' ]                   = $segment->comments;
@@ -252,13 +257,14 @@ class QualityReportController extends KleinController {
      *
      * @return array
      */
-    private function getTteArrayForSegment( $tteArray, $sid ) {
+    private function getTteArrayForSegment( array $tteArray, int $sid ): array {
 
         $return = [];
 
         foreach ( $tteArray as $tte ) {
-            if ( (int)$sid === (int)$tte->id_segment ) {
+            if ( $sid === (int)$tte->id_segment ) {
                 switch ( $tte->source_page ) {
+                    default:
                     case '1':
                         $key = 'translation';
                         break;
@@ -270,7 +276,6 @@ class QualityReportController extends KleinController {
                     case '3':
                         $key = 'revise_2';
                         break;
-
                 }
 
                 $return[ $key ] = (int)$tte->tte;

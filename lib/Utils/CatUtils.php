@@ -8,8 +8,8 @@ use LQA\ChunkReviewDao;
 use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
-use Validator\IsJobRevisionValidatorObject;
 use WordCount\CounterModel;
 use WordCount\WordCountStruct;
 
@@ -691,11 +691,12 @@ class CatUtils {
 
         try {
 
-            $jobValidatorObject           = new IsJobRevisionValidatorObject();
-            $jobValidatorObject->jid      = $jid;
-            $jobValidatorObject->password = $password;
-
-            return $jobValidator->validate( $jobValidatorObject );
+            return !empty( $jobValidator->validate(
+                    ValidatorObject::fromArray( [
+                            'jid'      => $jid,
+                            'password' => $password
+                    ] )
+            ) );
 
         } catch ( Exception $ignore ) {
         }
@@ -874,31 +875,31 @@ class CatUtils {
 
         $extraction_parameters = null;
 
-        if($filtersTemplateId > 0){
-            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+        if ( $filtersTemplateId > 0 ) {
+            $filtersTemplateStruct = FiltersConfigTemplateDao::getById( $filtersTemplateId );
 
-            if($filtersTemplateStruct !== null){
-                $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
+            if ( $filtersTemplateStruct !== null ) {
+                $extraction_parameters = self::getRightExtractionParameter( $file_path, $filtersTemplateStruct );
             }
         }
 
         $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
 
         $hash_name_for_disk =
-            sha1_file( $file_path )
-            . "_" .
-            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
-            . "|" .
-            $source;
+                sha1_file( $file_path )
+                . "_" .
+                sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+                . "|" .
+                $source;
 
         if ( !$hash_name_for_disk ) {
             return;
         }
 
-        $path_parts = pathinfo($file_path);
-        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+        $path_parts     = pathinfo( $file_path );
+        $hash_file_path = $path_parts[ 'dirname' ] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
 
-        if(!file_exists($hash_file_path)){
+        if ( !file_exists( $hash_file_path ) ) {
             return;
         }
 
@@ -950,14 +951,15 @@ class CatUtils {
     }
 
     /**
-     * @param string $filePath
+     * @param string                      $filePath
      * @param FiltersConfigTemplateStruct $filters_extraction_parameters
+     *
      * @return IDto|null
      */
     private static function getRightExtractionParameter( string $filePath, FiltersConfigTemplateStruct $filters_extraction_parameters ): ?IDto {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
-        $params = null;
+        $params    = null;
 
         if ( $filters_extraction_parameters !== null ) {
 

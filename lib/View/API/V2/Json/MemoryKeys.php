@@ -6,7 +6,7 @@
  * Time: 12:56
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
 use TmKeyManagement_MemoryKeyStruct;

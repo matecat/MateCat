@@ -2,12 +2,12 @@
 
 namespace Controller\API\V2;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use Chunks_ChunkDao;
 use Controller\Abstracts\AbstractDownloadController;
 use Exception;
 use FeatureSet;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Jobs\ChunkDao;
 use SplTempFileObject;
 use TMS\TMSService;
 use Utils;
@@ -70,7 +70,7 @@ class DownloadJobTMXController extends AbstractDownloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = Chunks_ChunkDao::getByIdAndPassword( $this->jobID, $jobPass );
+        $jobData = $this->jobInfo = ChunkDao::getByIdAndPassword( $this->jobID, $jobPass );
         $this->featureSet->loadForProject( $this->jobInfo->getProject() );
 
         $projectData = $this->jobInfo->getProject();

@@ -2,9 +2,6 @@
 
 namespace Controller\API\App;
 
-use API\V2\Json\QAGlobalWarning;
-use API\V2\Json\QALocalWarning;
-use Chunks_ChunkDao;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -15,10 +12,13 @@ use InvalidArgumentException;
 use Jobs_JobStruct;
 use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
 use Segments_SegmentDao;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Translations\WarningDao;
+use View\API\V2\Json\QAGlobalWarning;
+use View\API\V2\Json\QALocalWarning;
 
 class GetWarningController extends KleinController {
 
@@ -196,7 +196,7 @@ class GetWarningController extends KleinController {
      * @throws Exception
      */
     private function getChunk( $id_job, $password ): ?Jobs_JobStruct {
-        $chunk   = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $chunk   = ChunkDao::getByIdAndPassword( $id_job, $password );
         $project = $chunk->getProject();
         $this->featureSet->loadForProject( $project );
 

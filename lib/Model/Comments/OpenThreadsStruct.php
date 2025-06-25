@@ -7,10 +7,13 @@
  *
  */
 
-namespace Comments;
+namespace Model\Comments;
 
 
-class OpenThreadsStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+
+class OpenThreadsStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public int $id_project;
     public string $password;

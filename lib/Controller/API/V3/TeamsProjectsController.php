@@ -9,7 +9,6 @@
 namespace Controller\API\V3;
 
 
-use API\V2\Json\Project;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -19,6 +18,7 @@ use INIT;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Teams\TeamStruct;
+use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {
 

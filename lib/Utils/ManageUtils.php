@@ -1,7 +1,7 @@
 <?php
 
-use API\V2\Json\Project;
 use Teams\TeamStruct;
+use View\API\V2\Json\Project;
 
 class ManageUtils {
 

@@ -8,11 +8,11 @@
 
 namespace Features\ProjectCompletion\Model ;
 
-use Chunks_ChunkCompletionEventDao;
-use Exception;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use Exception;
 use FeatureSet;
 use Jobs_JobStruct;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Projects_ProjectDao;
 
 
@@ -38,7 +38,7 @@ class EventModel {
     public function save() {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = Chunks_ChunkCompletionEventDao::createFromChunk(
+        $this->chunkCompletionEventId = ChunkCompletionEventDao::createFromChunk(
                 $this->chunk, $this->eventStruct
         );
 
@@ -52,12 +52,12 @@ class EventModel {
     }
 
     private function _checkStatusIsValid() {
-        $dao = new Chunks_ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase( $this->chunk );
 
         if (
-                (  $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
-                ( !$this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
+                (  $this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE ) ||
+                ( !$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE )
         ) {
             throw new Exception('Cannot save event, current status mismatch.') ;
         }
