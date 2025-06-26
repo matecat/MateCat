@@ -160,7 +160,9 @@ class FeatureSet implements FeatureSetInterface {
         $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
 
-            return $concreteClass->isForceableOnProject();
+            if($concreteClass !== null){
+                return $concreteClass->isForceableOnProject();
+            }
         } );
 
         $this->merge( $returnable );
@@ -338,7 +340,7 @@ class FeatureSet implements FeatureSetInterface {
 
         for ( $i = 1; $i < $length; $i++ ) {
 
-            if ( in_array( $featureStructsList[ $i ]->feature_code, $ObjectFeatureFirst::getDependencies() ) ) {
+            if ( $ObjectFeatureFirst !== null and in_array( $featureStructsList[ $i ]->feature_code, $ObjectFeatureFirst::getDependencies() ) ) {
                 $leftBucket[] = $featureStructsList[ $i ];
             } else {
                 $rightBucket[] = $featureStructsList[ $i ];
@@ -359,17 +361,18 @@ class FeatureSet implements FeatureSetInterface {
         $codes = $this->getCodes();
         foreach ( $this->features as $feature ) {
 
-            $baseFeature          = $feature->toNewObject();
-            $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes );
+            $baseFeature = $feature->toNewObject();
 
-            if ( !empty( $missing_dependencies ) ) {
-                foreach ( $missing_dependencies as $code ) {
-                    $this->features [ $code ] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
+            if($baseFeature !== null){
+                $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes );
+
+                if ( !empty( $missing_dependencies ) ) {
+                    foreach ( $missing_dependencies as $code ) {
+                        $this->features [ $code ] = new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                    }
                 }
             }
-
         }
-
     }
 
     /**
@@ -394,7 +397,9 @@ class FeatureSet implements FeatureSetInterface {
 
             $baseFeature = $feature->toNewObject();
 
-            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            if($baseFeature !== null){
+                $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            }
 
             $deps = [];
 
