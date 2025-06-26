@@ -160,7 +160,7 @@ class FeatureSet implements FeatureSetInterface {
         $returnable = array_filter( $this->__getAutoloadPlugins(), function ( BasicFeatureStruct $feature ) {
             $concreteClass = $feature->toNewObject();
 
-            if($concreteClass !== null){
+            if ( $concreteClass !== null ) {
                 return $concreteClass->isForceableOnProject();
             }
         } );
@@ -363,7 +363,7 @@ class FeatureSet implements FeatureSetInterface {
 
             $baseFeature = $feature->toNewObject();
 
-            if($baseFeature !== null){
+            if ( $baseFeature !== null ) {
                 $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes );
 
                 if ( !empty( $missing_dependencies ) ) {
@@ -396,17 +396,16 @@ class FeatureSet implements FeatureSetInterface {
             // flat dependency management
 
             $baseFeature = $feature->toNewObject();
+            $deps        = [];
 
-            if($baseFeature !== null){
+            if ( $baseFeature !== null ) {
                 $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
-            }
 
-            $deps = [];
-
-            if ( !$this->_ignoreDependencies ) {
-                $deps = array_map( function ( $code ) {
-                    return new BasicFeatureStruct( [ 'feature_code' => $code ] );
-                }, $baseFeature->getDependencies() );
+                if ( !$this->_ignoreDependencies ) {
+                    $deps = array_map( function ( $code ) {
+                        return new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                    }, $baseFeature->getDependencies() );
+                }
             }
 
             $all_features = array_merge( $all_features, $deps, [ $feature ] );
@@ -474,7 +473,8 @@ class FeatureSet implements FeatureSetInterface {
      */
     private function runOnFeature( string $method, BasicFeatureStruct $feature, array $args ): void {
         $name = Features::getPluginClass( $feature->feature_code );
-        if ( $name ) {
+        if ( $name and class_exists( $name ) ) {
+
             $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
