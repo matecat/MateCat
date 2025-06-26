@@ -6,6 +6,9 @@ import CatToolStore from '../../../../stores/CatToolStore'
 import SegmentFilterUtils from './segment_filter'
 import SegmentActions from '../../../../actions/SegmentActions'
 import {SEGMENTS_STATUS} from '../../../../constants/Constants'
+import {Select} from '../../../common/Select'
+import Switch from '../../../common/Switch'
+import {DataSampleDropdown} from './DataSampleDropdown'
 
 class SegmentsFilter extends React.Component {
   constructor(props) {
@@ -27,7 +30,6 @@ class SegmentsFilter extends React.Component {
     this.setFilter = this.setFilter.bind(this)
     this.moreFilterSelectChanged = this.moreFilterSelectChanged.bind(this)
     this.doSubmitFilter = this.doSubmitFilter.bind(this)
-    this.dropdownInitialized = false
 
     SegmentFilterUtils.initEvents()
   }
@@ -40,8 +42,8 @@ class SegmentsFilter extends React.Component {
       return storedState.reactState
     } else {
       return {
-        selectedStatus: '',
-        samplingType: '',
+        selectedStatus: undefined,
+        samplingType: undefined,
         samplingSize: 5,
         filtering: false,
         filteredCount: 0,
@@ -60,36 +62,34 @@ class SegmentsFilter extends React.Component {
   }
 
   resetStatusFilter() {
-    $(this.statusDropdown).dropdown('restore defaults')
+    this.setState({
+      selectedStatus: undefined,
+      revisionNumber: undefined,
+    })
   }
 
   resetMoreFilter() {
-    $(this.filtersDropdown).dropdown('restore defaults')
+    this.setState({
+      samplingType: undefined,
+    })
   }
 
   resetDataSampleFilter() {
-    $(this.dataSampleDropDown).dropdown('restore defaults')
+    this.setState({
+      samplingType: undefined,
+      samplingSize: 5,
+    })
   }
 
   clearClick(e) {
     e.preventDefault()
     SegmentFilterUtils.clearFilter()
     this.resetState()
-    $(this.filtersDropdown).dropdown('restore defaults')
-    $(this.dataSampleDropDown).dropdown('restore defaults')
-    $(this.statusDropdown).dropdown('restore defaults')
-    $(this.toggleFilters).checkbox('set unchecked')
-  }
-
-  closeClick(e) {
-    e.preventDefault()
-    this.dropdownInitialized = false
-    SegmentFilterUtils.closeFilter()
+    this.resetDataSampleFilter()
   }
 
   doSubmitFilter() {
     let sample
-    if (this.applyFilters) return //updating the dropdown
     if (this.state.samplingType) {
       if (this.state.dataSampleEnabled) {
         sample = {
@@ -102,7 +102,7 @@ class SegmentsFilter extends React.Component {
         }
       }
     }
-    if (sample || this.state.selectedStatus !== '') {
+    if (sample || this.state.selectedStatus) {
       SegmentFilterUtils.filterSubmit(
         {
           status: this.state.selectedStatus,
@@ -150,7 +150,7 @@ class SegmentsFilter extends React.Component {
 
       this.setState({
         selectedStatus: value,
-        samplingType: '',
+        samplingType: undefined,
         revisionNumber: revisionNumber,
       })
     } else {
@@ -193,10 +193,7 @@ class SegmentsFilter extends React.Component {
     setTimeout(this.doSubmitFilter, 100)
   }
 
-  samplingSizeChanged() {
-    let value = parseInt(this.sampleSizeInput.value)
-    if (value > 100 || value < 1) return false
-
+  samplingSizeChanged(value) {
     this.setState({
       samplingSize: value,
     })
@@ -233,13 +230,12 @@ class SegmentsFilter extends React.Component {
         filterSubmitted: false,
       })
     } else {
-      this.applyFilters = true
       state.filteredCount = data.count
       state.filtering = true
       state.segmentsArray = data.segment_ids
       state.filterSubmitted = false
       this.setState(state)
-      setTimeout(this.updateObjects.bind(this))
+      setTimeout(this.doSubmitFilter, 100)
     }
   }
 
@@ -249,67 +245,19 @@ class SegmentsFilter extends React.Component {
     })
   }
 
-  initDropDown() {
-    let self = this
-    if (this.props.active && !this.dropdownInitialized) {
-      this.dropdownInitialized = true
-      $(this.statusDropdown).dropdown({
-        onChange: function (value) {
-          self.filterSelectChanged(value)
-        },
+  onChangeToggle = (checked) => {
+    if (checked) {
+      this.setState({
+        filtersEnabled: false,
+        dataSampleEnabled: true,
+        samplingType: undefined,
       })
-      $(this.filtersDropdown).dropdown({
-        onChange: function (value) {
-          self.moreFilterSelectChanged(value)
-        },
+    } else {
+      this.setState({
+        filtersEnabled: true,
+        dataSampleEnabled: false,
+        samplingType: undefined,
       })
-      $(this.dataSampleDropDown).dropdown({
-        onChange: function (value) {
-          self.dataSampleChange(value)
-        },
-      })
-      $(this.toggleFilters).checkbox({
-        onChecked: function () {
-          $(self.filtersDropdown).dropdown('restore defaults')
-          self.setState({
-            filtersEnabled: false,
-            dataSampleEnabled: true,
-            samplingType: '',
-          })
-        },
-        onUnchecked: function () {
-          $(self.dataSampleDropDown).dropdown('restore defaults')
-          self.setState({
-            filtersEnabled: true,
-            dataSampleEnabled: false,
-            samplingType: '',
-          })
-        },
-      })
-    }
-
-    if (!this.props.active) {
-      this.dropdownInitialized = false
-    }
-  }
-
-  updateObjects() {
-    if (this.applyFilters) {
-      $(this.statusDropdown).dropdown('set selected', this.state.selectedStatus)
-      if (!this.state.dataSampleEnabled) {
-        $(this.filtersDropdown).dropdown(
-          'set selected',
-          this.state.samplingType,
-        )
-        $(this.toggleFilters).checkbox('set unchecked')
-      } else {
-        $(this.dataSampleDropDown).dropdown(
-          'set selected',
-          this.state.samplingType,
-        )
-        $(this.toggleFilters).checkbox('set checked')
-      }
-      this.applyFilters = false
     }
   }
 
@@ -333,11 +281,9 @@ class SegmentsFilter extends React.Component {
       CatToolConstants.RELOAD_SEGMENT_FILTER,
       this.doSubmitFilter,
     )
-    this.initDropDown()
   }
 
   componentDidUpdate() {
-    this.initDropDown()
     if (this.props.active) {
       $('#action-filter').addClass('open')
     } else {
@@ -362,38 +308,39 @@ class SegmentsFilter extends React.Component {
 
   render() {
     let buttonArrowsClass = 'qa-arrows-disbled'
-    let options = config.searchable_statuses.map((item, index) => {
-      return (
-        <React.Fragment key={index}>
-          <div className="item" key={index} data-value={item.value}>
+    let statusOptions = config.searchable_statuses.map((item) => {
+      return {
+        name: (
+          <>
             <div
               className={
                 'ui ' + item.label.toLowerCase() + '-color empty circular label'
               }
             />
             {item.label}
-          </div>
-          {config.secondRevisionsCount && item.value === 'APPROVED' ? (
-            <div className="item" key={index + '-2'} data-value={'APPROVED-2'}>
-              <div
-                className={
-                  'ui ' +
-                  item.label.toLowerCase() +
-                  '-2ndpass-color empty circular label'
-                }
-              />
-              {item.label}
-            </div>
-          ) : null}
-        </React.Fragment>
-      )
+          </>
+        ),
+        id: item.value,
+      }
     })
-    let moreOptions = this.state.moreFilters.map(function (item, index) {
-      return (
-        <div key={index} data-value={item.value} className="item">
-          {item.label}
-        </div>
-      )
+    if (config.secondRevisionsCount) {
+      statusOptions.push({
+        name: (
+          <>
+            <div
+              className={'ui ' + 'approved-2ndpass-color empty circular label'}
+            />
+            APPROVED
+          </>
+        ),
+        id: 'APPROVED-2',
+      })
+    }
+    let moreOptions = this.state.moreFilters.map((item, index) => {
+      return {
+        name: item.label,
+        id: item.value,
+      }
     })
 
     if (this.state.filtering && this.state.filteredCount > 1) {
@@ -401,17 +348,12 @@ class SegmentsFilter extends React.Component {
     }
 
     let filterClassEnabled = !this.state.dataSampleEnabled ? '' : 'disabled'
-    let dataSampleClassEnabled = this.state.dataSampleEnabled ? '' : 'disabled'
     let statusFilterClass =
       this.state.selectedStatus !== '' ? 'filtered' : 'not-filtered'
     filterClassEnabled =
-      !this.state.dataSampleEnabled && this.state.samplingType !== ''
+      !this.state.dataSampleEnabled && this.state.samplingType
         ? filterClassEnabled + ' filtered'
         : filterClassEnabled + ' not-filtered'
-    dataSampleClassEnabled =
-      this.state.dataSampleEnabled && this.state.samplingType !== ''
-        ? dataSampleClassEnabled + ' filtered'
-        : dataSampleClassEnabled + ' not-filtered'
 
     return this.props.active ? (
       <div className="filter-wrapper">
@@ -419,122 +361,68 @@ class SegmentsFilter extends React.Component {
           <div className="filter-container-inside">
             <div className="filter-list">
               <div className="filter-dropdown">
-                <div className={'filter-status ' + statusFilterClass}>
-                  <div
-                    className="ui top left pointing dropdown basic tiny button"
-                    ref={(dropdown) => (this.statusDropdown = dropdown)}
-                  >
-                    <div className="text">
-                      <div>Segment Status</div>
-                    </div>
-                    <div className="ui cancel label">
-                      <i
-                        className="icon-cancel3"
-                        onClick={this.resetStatusFilter.bind(this)}
-                      />
-                    </div>
-                    <div className="menu">{options}</div>
-                  </div>
-                </div>
+                <Select
+                  className={'filter-status ' + statusFilterClass}
+                  options={statusOptions}
+                  onSelect={(value) => {
+                    this.filterSelectChanged(value.id)
+                  }}
+                  activeOption={
+                    statusOptions.find(
+                      (item) => item.id === this.state.selectedStatus,
+                    ) || undefined
+                  }
+                  placeholder={'Segment status'}
+                  checkSpaceToReverse={false}
+                  showResetButton={true}
+                  resetFunction={() => {
+                    this.filterSelectChanged()
+                  }}
+                  maxHeightDroplist={200}
+                />
               </div>
               <div className="filter-dropdown">
-                <div className={'filter-activities ' + filterClassEnabled}>
-                  <div
-                    className="ui top left pointing dropdown basic tiny button"
-                    ref={(dropdown) => (this.filtersDropdown = dropdown)}
-                  >
-                    <div className="text">Others</div>
-                    <div className="ui cancel label">
-                      <i
-                        className="icon-cancel3"
-                        onClick={this.resetMoreFilter.bind(this)}
-                      />
-                    </div>
-                    <div className="menu">{moreOptions}</div>
-                  </div>
-                </div>
+                <Select
+                  className={'filter-activities ' + filterClassEnabled}
+                  options={moreOptions}
+                  onSelect={(value) => {
+                    this.moreFilterSelectChanged(value.id)
+                  }}
+                  activeOption={
+                    moreOptions.find(
+                      (item) => item.id === this.state.samplingType,
+                    ) || undefined
+                  }
+                  placeholder={'Others'}
+                  checkSpaceToReverse={false}
+                  showResetButton={true}
+                  resetFunction={() => {
+                    this.moreFilterSelectChanged()
+                  }}
+                  maxHeightDroplist={400}
+                  enabled={!this.state.dataSampleEnabled}
+                />
               </div>
 
               {config.isReview ? (
                 <div className="filter-dropdown">
-                  <div className="filter-toggle">
-                    <div
-                      className="ui toggle checkbox"
-                      ref={(checkbox) => (this.toggleFilters = checkbox)}
-                    >
-                      <input type="checkbox" name="public" />
-                    </div>
-                  </div>
-                  <div
-                    className={'filter-data-sample ' + dataSampleClassEnabled}
-                  >
-                    <div
-                      className="ui top left pointing dropdown basic tiny button"
-                      ref={(checkbox) => (this.dataSampleDropDown = checkbox)}
-                    >
-                      <div className="text">Data Sample</div>
-                      <div className="ui cancel label">
-                        <i
-                          className="icon-cancel3"
-                          onClick={this.resetDataSampleFilter.bind(this)}
-                        />
-                      </div>
-                      <div className="menu">
-                        <div className="head-dropdown">
-                          <div className="ui mini input">
-                            <label>
-                              Sample size <b>(%)</b>
-                            </label>
-                            <input
-                              type="number"
-                              placeholder="n°"
-                              value={this.state.samplingSize}
-                              onChange={this.samplingSizeChanged.bind(this)}
-                              ref={(input) => (this.sampleSizeInput = input)}
-                            />
-                          </div>
-                        </div>
-                        <div className="divider" />
-                        <div
-                          className="item"
-                          data-value="edit_distance_high_to_low"
-                        >
-                          <div className="type-item">Edit distance </div>
-                          <div className="order-item"> (A - Z)</div>
-                        </div>
-                        <div
-                          className="item"
-                          data-value="edit_distance_low_to_high"
-                        >
-                          <div className="type-item">Edit distance</div>
-                          <div className="order-item"> (Z - A)</div>
-                        </div>
-                        <div
-                          className="item"
-                          data-value="segment_length_high_to_low"
-                        >
-                          <div className="type-item">Segment length</div>
-                          <div className="order-item"> (A - Z)</div>
-                        </div>
-                        <div
-                          className="item"
-                          data-value="segment_length_low_to_high"
-                        >
-                          <div className="type-item">Segment length</div>
-                          <div className="order-item"> (Z - A)</div>
-                        </div>
-                        <div className="item" data-value="regular_intervals">
-                          Regular interval
-                        </div>
-                      </div>
-                    </div>
-                    {this.state.dataSampleEnabled &&
-                    this.state.samplingType !== '' ? (
-                      <div className="percent-item">
-                        {this.state.samplingSize}%
-                      </div>
-                    ) : null}
-                  </div>
+                  <Switch
+                    onChange={(value) => {
+                      this.onChangeToggle(value)
+                    }}
+                    active={this.state.dataSampleEnabled}
+                    showText={false}
+                  />
+                  <DataSampleDropdown
+                    onChange={(value) => this.dataSampleChange(value)}
+                    isDisabled={!this.state.dataSampleEnabled}
+                    onChangeSampleSize={(value) =>
+                      this.samplingSizeChanged(value)
+                    }
+                    samplingSize={this.state.samplingSize}
+                    samplingType={this.state.samplingType}
+                    resetFunction={() => this.resetDataSampleFilter()}
+                  />
                 </div>
               ) : null}
               {this.state.filtering ? (

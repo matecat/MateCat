@@ -1,7 +1,7 @@
 @use '../commons/divider';
 @use '../commons/shadows';
-@use "../commons/colors";
-@use "../commons/variables";
+@use '../commons/colors';
+@use '../commons/variables';
 h1,
 h2,
 h3,
@@ -381,4 +381,48 @@ section {
 .downloadtr-button.approved-2ndpass {
   background: colors.$approved2Green;
   color: #fff !important;
+}
+
+.severities-dropdown-trigger {
+  width: 24px !important;
+  height: 30px !important;
+
+  > * {
+    margin: 0 !important;
+  }
+}
+
+.review-extended-issues-tab-group {
+  .tabs-container {
+    display: flex;
+    position: absolute;
+    top: 10px;
+    z-index: 1;
+  }
+
+  .tab {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    font-size: 14px;
+    color: black;
+    padding: 0 15px;
+    cursor: pointer;
+
+    &.active {
+      background-color: white;
+      border-radius: 4px 4px 0 0;
+      border-bottom: unset;
+      font-weight: bold;
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+  }
+
+  .tab-content {
+    margin-top: 41px;
+  }
 }
