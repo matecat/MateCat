@@ -565,7 +565,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            return QAModelTemplateDao::createFromJSON( $json );
+            return QAModelTemplateDao::createFromJSON( $validatorObject->decoded );
         } elseif ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
             $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $qa_model_template_id,
@@ -670,7 +670,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = json_decode( $json );
+            $filters_extraction_parameters = $validatorObject->decoded;
         }
 
         return $filters_extraction_parameters;
