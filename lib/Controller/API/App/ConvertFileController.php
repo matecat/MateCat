@@ -175,7 +175,11 @@ class ConvertFileController extends KleinController {
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            return FiltersConfigTemplateDao::createFromJSON( $validatorObject->decoded, $this->getUser()->uid );
+            $filtersTemplate = new FiltersConfigTemplateStruct();
+            $filtersTemplate->hydrateFromJSON( $validatorObject->decoded );
+            $filtersTemplate->uid = $this->user->uid;
+
+            return $filtersTemplate;
         } elseif ( empty( $filters_extraction_parameters_template_id ) ) {
             return null;
         }
@@ -187,7 +191,6 @@ class ConvertFileController extends KleinController {
         }
 
         return $filtersTemplate;
-
     }
 
     /**
