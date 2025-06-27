@@ -565,7 +565,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            return QAModelTemplateDao::createFromJSON( $validatorObject->decoded );
+            $QAModelTemplateStruct = new QAModelTemplateStruct();
+            $QAModelTemplateStruct->hydrateFromJSON( $validatorObject->decoded );
+            $QAModelTemplateStruct->uid = $this->user->uid;
+
+            return $QAModelTemplateStruct;
         } elseif ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
             $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $qa_model_template_id,
@@ -603,7 +607,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            $payableRateModelTemplate = CustomPayableRateDao::createFromJSON( $json );
+            $payableRateModelTemplate = new CustomPayableRateStruct();
+            $payableRateModelTemplate->hydrateFromJSON( $validatorObject->decoded );
+            $payableRateModelTemplate->uid = $this->user->uid;
+
         } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
 
             $payableRateTemplateId = $payable_rate_template_id;
