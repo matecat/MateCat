@@ -1,15 +1,15 @@
 <?php
 
-namespace ConnectedServices\LinkedIn;
+namespace Utils\ConnectedServices\LinkedIn;
 
-use ConnectedServices\AbstractProvider;
-use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\LinkedIn;
 use League\OAuth2\Client\Token\AccessToken;
+use Utils\ConnectedServices\AbstractProvider;
+use Utils\ConnectedServices\ProviderUser;
 
 class LinkedInProvider extends AbstractProvider {
 
@@ -71,10 +71,10 @@ class LinkedInProvider extends AbstractProvider {
     /**
      * @param AccessToken $token
      *
-     * @return ConnectedServiceUserModel
+     * @return ProviderUser
      * @throws GuzzleException
      */
-    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ProviderUser {
         $linkedInClient = static::getClient( $this->redirectUrl );
         $response       = $linkedInClient->getHttpClient()->request(
                 'GET',
@@ -93,7 +93,7 @@ class LinkedInProvider extends AbstractProvider {
 //        $resourceOwner = $linkedInClient->getResourceOwner( $token );
 //        $fetched = $resourceOwner->toArray();
 
-        $user            = new ConnectedServiceUserModel();
+        $user            = new ProviderUser();
         $user->email     = $fetched->email;
         $user->name      = $fetched->given_name;
         $user->lastName  = $fetched->family_name;

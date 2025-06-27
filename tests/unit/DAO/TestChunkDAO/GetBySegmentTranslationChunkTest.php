@@ -1,6 +1,7 @@
 <?php
 
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -23,7 +24,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
     protected $database_instance;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
@@ -85,7 +86,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
 
         $result = $this->chunk_Dao->getBySegmentTranslation( $this->_translationsStruct );
 
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

@@ -2,9 +2,9 @@
 
 namespace Model\ChunksCompletion;
 
-use DataAccess\AbstractDao;
 use Database;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
 use PDO;
 
 class ChunkCompletionUpdateDao extends AbstractDao {
@@ -34,7 +34,7 @@ class ChunkCompletionUpdateDao extends AbstractDao {
         ];
     }
 
-    public static function findByChunk( Jobs_JobStruct $chunk, array $params = [] ) {
+    public static function findByChunk( JobStruct $chunk, array $params = [] ) {
 
         $sql = "SELECT * FROM chunk_completion_updates " .
                 " WHERE id_project = :id_project AND id_job = :id_job " .

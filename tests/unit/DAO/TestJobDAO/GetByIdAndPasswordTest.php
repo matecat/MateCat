@@ -1,23 +1,25 @@
 <?php
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Jobs_JobDao::getByIdAndPassword
+ * @covers JobDao::getByIdAndPassword
  * User: dinies
  * Date: 27/05/16
  * Time: 11.47
  */
 class GetByIdAndPasswordTest extends AbstractTest {
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
 
@@ -43,7 +45,7 @@ class GetByIdAndPasswordTest extends AbstractTest {
         $this->str_id_project = "888888";
         $this->str_password   = "7barandfoo71";
         $this->str_owner      = "barandfoo@translated.net";
-        $this->job_struct     = new Jobs_JobStruct(
+        $this->job_struct     = new JobStruct(
                 [
                         'id'                                  => null, //SET NULL FOR AUTOINCREMENT
                         'password'                            => $this->str_password,
@@ -93,7 +95,7 @@ class GetByIdAndPasswordTest extends AbstractTest {
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
-        $this->job_Dao = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao = new JobDao( $this->database_instance );
 
         $this->job_Dao->createFromStruct( $this->job_struct );
 

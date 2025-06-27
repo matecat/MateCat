@@ -1,4 +1,7 @@
 <?php
+
+use Model\Engines\EngineStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -55,9 +58,9 @@ interface Engines_EngineInterface {
     public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct;
+    public function getEngineRecord(): EngineStruct;
 
     /**
      * @return bool

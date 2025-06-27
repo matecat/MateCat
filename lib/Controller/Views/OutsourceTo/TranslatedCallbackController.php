@@ -4,7 +4,7 @@
  */
 namespace Controller\Views\OutsourceTo;
 
-use Outsource\TranslatedConfirmationStruct;
+use Model\Outsource\TranslatedConfirmationStruct;
 
 /**
  * Controller that handle the success return from login page

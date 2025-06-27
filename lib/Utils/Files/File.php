@@ -7,9 +7,9 @@
  *
  */
 
-namespace Files;
+namespace Utils\Files;
 
-use FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\AbstractFilesStorage;
 
 class File {
 

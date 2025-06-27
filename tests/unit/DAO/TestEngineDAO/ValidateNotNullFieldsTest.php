@@ -1,33 +1,35 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineDAO::_validateNotNullFields
+ * @covers EngineDAO::_validateNotNullFields
  * User: dinies
  * Date: 15/04/16
  * Time: 12.28
  */
 class ValidateNotNullFieldsTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineDAO
+     * @var EngineDAO
      */
     protected $method;
     protected $reflector;
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_validateNotNullFields" );
         $this->method->setAccessible( true );
-        $this->engine_struct_param = new EnginesModel_EngineStruct();
+        $this->engine_struct_param = new EngineStruct();
 
         $this->engine_struct_param->name                    = "Moses_bar_and_foo";
         $this->engine_struct_param->description             = "Machine translation from bar and foo.";
@@ -48,7 +50,7 @@ class ValidateNotNullFieldsTest extends AbstractTest {
      * It checks that the method will raise an expected
      * exception if there is the property 'base_url' uninitialized.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * @covers EngineDAO::_validateNotNullFields
      */
     public function test__validateNotNullFields_base_url_field() {
         $this->engine_struct_param->base_url = null;
@@ -57,21 +59,8 @@ class ValidateNotNullFieldsTest extends AbstractTest {
     }
 
     /**
-     * It unleashes an exception because the field type was initialized
-     * with an incompatible value ( an array instead of a string).
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
-     */
-    public function test__validateNotNullFields_type_field_not_allowed_value_array() {
-
-        $this->engine_struct_param->type = [ 20 => "bar" ];
-        $this->expectException( 'Exception' );
-        $this->method->invoke( $this->databaseInstance, $this->engine_struct_param );
-    }
-
-    /**
-     * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
      */
     public function test__validateNotNullFields_type_field_not_allowed_value_string() {
@@ -83,7 +72,7 @@ class ValidateNotNullFieldsTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * @covers EngineDAO::_validateNotNullFields
      */
     public function test__validateNotNullFields_type_field_int_not_present() {
 
@@ -94,7 +83,7 @@ class ValidateNotNullFieldsTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
      */
     public function test__validateNotNullFields_type_value_not_between_types1() {
@@ -106,7 +95,7 @@ class ValidateNotNullFieldsTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * @covers EngineDAO::_validateNotNullFields
      * TODO: this test fails until the source code will be fixed
      */
     public function test__validateNotNullFields_type_value_not_between_types2() {

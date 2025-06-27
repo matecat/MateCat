@@ -1,9 +1,9 @@
 <?php
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDao;
 use Database;
 use Exception;
+use Model\DataAccess\AbstractDao;
 use PDO;
 use ReflectionException;
 

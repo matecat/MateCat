@@ -1,8 +1,13 @@
 <?php
 
-class Segments_SegmentOriginalDataStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+namespace Model\Segments;
 
-    public $id;
-    public $id_segment;
-    public $map;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+
+class SegmentOriginalDataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+
+    public ?int   $id = null;
+    public int    $id_segment;
+    public string $map;
 }

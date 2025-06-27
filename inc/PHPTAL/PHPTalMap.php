@@ -1,6 +1,6 @@
 <?php
 
-use DataAccess\ArrayAccessTrait;
+use Model\DataAccess\ArrayAccessTrait;
 
 /**
  * Created by PhpStorm.

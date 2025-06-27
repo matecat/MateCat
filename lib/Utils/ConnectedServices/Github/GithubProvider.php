@@ -1,13 +1,13 @@
 <?php
 
-namespace ConnectedServices\Github;
+namespace Utils\ConnectedServices\Github;
 
-use ConnectedServices\AbstractProvider;
-use ConnectedServices\ConnectedServiceUserModel;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Github;
 use League\OAuth2\Client\Token\AccessToken;
+use Utils\ConnectedServices\AbstractProvider;
+use Utils\ConnectedServices\ProviderUser;
 
 class GithubProvider extends AbstractProvider {
 
@@ -65,9 +65,9 @@ class GithubProvider extends AbstractProvider {
     /**
      * @param AccessToken $token
      *
-     * @return ConnectedServiceUserModel
+     * @return ProviderUser
      */
-    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ProviderUser {
 
         $githubClient = static::getClient( $this->redirectUrl );
 
@@ -77,7 +77,7 @@ class GithubProvider extends AbstractProvider {
         // GitHub only returns the full name
         $name = explode( " ", $fetched[ 'name' ] );
 
-        $user            = new ConnectedServiceUserModel();
+        $user            = new ProviderUser();
         $user->email     = $fetched[ 'email' ];
         $user->name      = $name[ 0 ];
         $user->lastName  = $name[ 1 ];

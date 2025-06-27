@@ -8,14 +8,14 @@
  *
  */
 
-namespace ProjectManager;
+namespace Model\ProjectManager;
 
 use ArrayObject;
 use Database;
 use Exception;
 use Log;
+use Model\Projects\ProjectDao;
 use PDOException;
-use Projects_ProjectDao;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use Utils;
@@ -28,7 +28,7 @@ class ProjectManagerModel {
      *
      * @param ArrayObject $projectStructure
      *
-     * @return \Projects_ProjectStruct
+     * @return \Model\Projects\ProjectStruct
      */
     public static function createProjectRecord( ArrayObject $projectStructure ) {
 
@@ -49,7 +49,7 @@ class ProjectManagerModel {
         $db = Database::obtain();
         $db->begin();
         $projectId = $db->insert( 'projects', $data );
-        $project   = Projects_ProjectDao::findById( $projectId );
+        $project   = ProjectDao::findById( $projectId );
         $db->commit();
 
         return $project;
@@ -221,10 +221,8 @@ class ProjectManagerModel {
 
         } catch ( Exception $e ) {
             Log::doJsonLog( "Notes import - DB Error: " . $e->getMessage() );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Notes import - Statement: " . $stmt->queryString );
             Log::doJsonLog( "Notes Chunk Dump: " . var_export( $chunk, true ) );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Notes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
         }
@@ -298,10 +296,8 @@ class ProjectManagerModel {
 
         } catch ( Exception $e ) {
             Log::doJsonLog( "Notes attributes import - DB Error: " . $e->getMessage() );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Notes attributes import - Statement: " . $stmt->queryString );
             Log::doJsonLog( "Notes attributes Chunk Dump: " . var_export( $chunk, true ) );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Notes attributes Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes attributes import - DB Error: " . $e->getMessage(), 0, $e );
         }
@@ -366,10 +362,8 @@ class ProjectManagerModel {
 
         } catch ( Exception $e ) {
             Log::doJsonLog( "Trans-Unit Context Groups import - DB Error: " . $e->getMessage() );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Trans-Unit Context Groups import - Statement: " . $stmt->queryString );
             Log::doJsonLog( "Trans-Unit Context Groups Chunk Dump: " . var_export( $chunk, true ) );
-            /** @noinspection PhpUndefinedVariableInspection */
             Log::doJsonLog( "Trans-Unit Context Groups Flattened Values Dump: " . var_export( $flattened_values, true ) );
             throw new Exception( "Notes import - DB Error: " . $e->getMessage(), 0, $e );
         }

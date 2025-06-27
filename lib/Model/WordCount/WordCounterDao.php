@@ -10,9 +10,9 @@
 namespace WordCount;
 
 
-use DataAccess\AbstractDao;
 use Database;
 use Log;
+use Model\DataAccess\AbstractDao;
 use PDO;
 use PDOException;
 

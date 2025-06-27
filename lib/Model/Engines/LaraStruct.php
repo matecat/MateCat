@@ -7,9 +7,8 @@
  * Time: 14.54
  */
 
-namespace EnginesModel;
+namespace Model\Engines;
 
-use EnginesModel_EngineStruct;
 use Utils\Engines\Lara;
 
 /**
@@ -18,37 +17,37 @@ use Utils\Engines\Lara;
  * This class contains the default parameters for a Lara Engine CREATION
  *
  */
-class LaraStruct extends EnginesModel_EngineStruct {
+class LaraStruct extends EngineStruct {
 
     /**
      * @var string
      */
-    public $name = 'Lara';
+    public string $name = 'Lara';
 
     /**
      * @var string
      */
-    public $description = "LLM-based machine translation that understands context and learns from previously translated content, delivering high-quality, nuanced translations.";
+    public string $description = "LLM-based machine translation that understands context and learns from previously translated content, delivering high-quality, nuanced translations.";
 
     /**
      * @var string
      */
-    public $base_url = "http://Lara";
+    public string $base_url = "http://Lara";
 
     /**
      * @var string
      */
-    public $translate_relative_url = "translate";
+    public string $translate_relative_url = "translate";
 
     /**
      * @var string
      */
-    public $contribute_relative_url = "memories/content";
+    public string $contribute_relative_url = "memories/content";
 
     /**
      * @var string
      */
-    public $update_relative_url = "memories/content";
+    public string $update_relative_url = "memories/content";
 
     /**
      * @var array
@@ -61,7 +60,7 @@ class LaraStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $class_load = Lara::class;
+    public string $class_load = Lara::class;
 
 
     /**
@@ -76,12 +75,12 @@ class LaraStruct extends EnginesModel_EngineStruct {
     /**
      * @var int
      */
-    public $google_api_compliant_version = 2;
+    public int $google_api_compliant_version = 2;
 
     /**
      * @var int
      */
-    public $penalty = 14;
+    public int $penalty = 14;
 
     /**
      * An empty struct

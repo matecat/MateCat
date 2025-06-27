@@ -8,10 +8,10 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use Jobs_JobDao;
 use Langs\Languages;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\Jobs\JobDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Utils;
@@ -36,7 +36,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
         $request = $this->validateTheRequest();
 
-        $jobStruct = Jobs_JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
+        $jobStruct = JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
 
         if ( empty( $jobStruct ) ) {
             $this->setView( "project_not_found.html", [], 404 );

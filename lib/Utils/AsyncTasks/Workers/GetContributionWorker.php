@@ -17,8 +17,8 @@ use Engines_Results_MyMemory_TMS;
 use Exception;
 use FeatureSet;
 use INIT;
-use Jobs_JobStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\JobStruct;
 use PostProcess;
 use ReflectionException;
 use Stomp\Exception\StompException;
@@ -351,7 +351,7 @@ class GetContributionWorker extends AbstractWorker {
 
     /**
      * @param ContributionRequestStruct $contributionStruct
-     * @param Jobs_JobStruct            $jobStruct
+     * @param JobStruct                 $jobStruct
      * @param string                    $targetLang
      * @param FeatureSet                $featureSet
      * @param bool                      $isCrossLang
@@ -361,7 +361,7 @@ class GetContributionWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    protected function _getMatches( ContributionRequestStruct $contributionStruct, Jobs_JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
 
         $_config              = [];
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;

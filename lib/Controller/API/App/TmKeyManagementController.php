@@ -8,9 +8,9 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Engine;
-use EnginesModel_EngineStruct;
 use Exception;
 use Log;
+use Model\Engines\EngineStruct;
 use ReflectionException;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_ClientTmKeyStruct;
@@ -161,7 +161,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
             try {
 
-                $struct             = EnginesModel_EngineStruct::getStruct();
+                $struct             = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type       = Constants_Engines::MT;
                 $engine             = Engine::createTempInstance( $struct );

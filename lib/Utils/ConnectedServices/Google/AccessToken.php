@@ -7,7 +7,7 @@
  *
  */
 
-namespace ConnectedServices\Google;
+namespace Utils\ConnectedServices\Google;
 
 class AccessToken extends \League\OAuth2\Client\Token\AccessToken {
 

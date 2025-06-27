@@ -6,17 +6,17 @@
  * Time: 8:51 PM
  */
 
-namespace QualityReport;
+namespace Model\QualityReport;
 
 use ArrayObject;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
-use Jobs_JobStruct;
-use LQA\ChunkReviewDao;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Revise\FeedbackDAO;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\ReviseFeedback\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
 use Utils;
@@ -25,7 +25,7 @@ use Utils;
 class QualityReportModel {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $chunk;
 
@@ -54,9 +54,9 @@ class QualityReportModel {
     private $version;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      */
-    public function __construct( Jobs_JobStruct $chunk ) {
+    public function __construct( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 

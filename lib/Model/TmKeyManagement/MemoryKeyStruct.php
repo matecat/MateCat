@@ -6,8 +6,8 @@
  * Time: 18.07
  */
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * Class MemoryKeyStruct<br>
@@ -31,7 +31,7 @@ class TmKeyManagement_MemoryKeyStruct extends AbstractDaoObjectStruct implements
      * @param $mask array|null
      *
      * @return array
-     * @see \DataAccess\AbstractDaoObjectStruct::toArray
+     * @see \Model\DataAccess\AbstractDaoObjectStruct::toArray
      */
     public function toArray( array $mask = null ): array {
         $result = (array)$this;

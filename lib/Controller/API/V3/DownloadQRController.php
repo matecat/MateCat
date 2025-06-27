@@ -6,9 +6,9 @@ use Controller\Abstracts\KleinController;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use DOMDocument;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
 use ZipArchive;
@@ -108,12 +108,12 @@ class DownloadQRController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return bool|false|string
      * @throws Exception
      */
-    private function composeFileContent( Jobs_JobStruct $chunk ) {
+    private function composeFileContent( JobStruct $chunk ) {
 
         $data = [];
 

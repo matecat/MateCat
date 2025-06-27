@@ -9,8 +9,8 @@
 namespace Controller\Traits;
 
 
-use FilesStorage\AbstractFilesStorage;
 use Klein\Response;
+use Model\FilesStorage\AbstractFilesStorage;
 
 class KleinResponseFileStream {
 

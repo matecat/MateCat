@@ -1,4 +1,8 @@
 <?php
+
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -105,8 +109,8 @@ class TmKeyManagement_TmKeyManagement {
          * @see \AsyncTasks\Workers\SetContributionWorker
          * @see \Contribution\ContributionSetStruct
          */
-        $jobDao  = new \Jobs_JobDao( Database::obtain() );
-        $jStruct = new \Jobs_JobStruct( [ 'id' => $id_job, 'password' => $job_pass ] );
+        $jobDao  = new JobDao( Database::obtain() );
+        $jStruct = new JobStruct( [ 'id' => $id_job, 'password' => $job_pass ] );
         $jobDao->destroyCache( $jStruct );
 
         $jStruct->tm_keys = json_encode( $tm_keys );
@@ -658,7 +662,7 @@ class TmKeyManagement_TmKeyManagement {
     /**
      * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
      * @param TmKeyManagement_MemoryKeyDao $mkDao
-     * @return \DataAccess\IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @return \Model\DataAccess\IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
      * @throws Exception
      */
     protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){

@@ -16,7 +16,7 @@ use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -52,7 +52,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ] );
+        $chunk       = new JobStruct( $params[ 'chunk' ] );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
         $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );

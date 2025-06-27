@@ -2,17 +2,16 @@
 
 namespace Controller\API\V2;
 
-use Controller\API\V2\ChunkController;
 use CatUtils;
 use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use LQA\ChunkReviewDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Teams\MembershipDao;
 use Users_UserStruct;
 use Utils;
@@ -113,7 +112,7 @@ class ChangePasswordController extends ChunkController {
         // change project password
         if ( $res == "prj" ) {
 
-            $pStruct = Projects_ProjectDao::findByIdAndPassword( $id, $actual_pwd );
+            $pStruct = ProjectDao::findByIdAndPassword( $id, $actual_pwd );
 
             if ( $pStruct === null ) {
                 throw new Exception( 'Project not found' );
@@ -121,7 +120,7 @@ class ChangePasswordController extends ChunkController {
 
             $this->checkUserPermissions( $pStruct, $user );
 
-            $pDao = new Projects_ProjectDao();
+            $pDao = new ProjectDao();
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $id );
             $pDao->destroyCacheForProjectData( $pStruct->id, $pStruct->password );
@@ -151,8 +150,8 @@ class ChangePasswordController extends ChunkController {
 
 
             } else { // change job password
-                $jStruct = Jobs_JobDao::getByIdAndPassword( $id, $actual_pwd );
-                $jDao    = new Jobs_JobDao();
+                $jStruct = JobDao::getByIdAndPassword( $id, $actual_pwd );
+                $jDao    = new JobDao();
 
                 $this->checkUserPermissions( $jStruct->getProject(), $user );
 
@@ -163,13 +162,13 @@ class ChangePasswordController extends ChunkController {
             }
 
             // invalidate ChunkReviewDao cache for the job
-            if ( $jStruct instanceof Jobs_JobStruct ) {
+            if ( $jStruct instanceof JobStruct ) {
                 $chunkReviewDao = new ChunkReviewDao();
                 $chunkReviewDao->destroyCacheForFindChunkReviews( $jStruct );
             }
 
             // invalidate cache for ProjectData
-            $pDao = new Projects_ProjectDao();
+            $pDao = new ProjectDao();
             $pDao->destroyCacheForProjectData( $jStruct->getProject()->id, $jStruct->getProject()->password );
             $pDao->destroyCacheById( $jStruct->getProject()->id );
 
@@ -180,12 +179,12 @@ class ChangePasswordController extends ChunkController {
     /**
      * Check if the logged user has the permissions to change the password
      *
-     * @param Projects_ProjectStruct $project
-     * @param Users_UserStruct       $user
+     * @param ProjectStruct    $project
+     * @param Users_UserStruct $user
      *
      * @throws Exception
      */
-    private function checkUserPermissions( Projects_ProjectStruct $project, Users_UserStruct $user ) {
+    private function checkUserPermissions( ProjectStruct $project, Users_UserStruct $user ) {
         // check if user is belongs to the project team
         $team  = $project->getTeam();
         $check = ( new MembershipDao() )->findTeamByIdAndUser( $team->id, $user );

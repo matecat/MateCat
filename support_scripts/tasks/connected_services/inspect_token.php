@@ -37,7 +37,7 @@ if ( $user->oauth_access_token ) {
     var_dump ( $user->getDecodedOauthAccessToken() ) ;
 }
 
-$cs = new \ConnectedServices\ConnectedServiceDao() ;
+$cs = new \Model\ConnectedServices\ConnectedServiceDao() ;
 $services = $cs->findServicesByUser($user);
 
 foreach ( $services as $service ) {

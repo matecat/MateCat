@@ -1,11 +1,13 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineDAO::_buildResult
+ * @covers EngineDAO::_buildResult
  * User: dinies
  * Date: 15/04/16
  * Time: 15.59
@@ -19,7 +21,7 @@ class BuildResultEngineTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_buildResult" );
         $this->method->setAccessible( true );
@@ -30,7 +32,7 @@ class BuildResultEngineTest extends AbstractTest {
     /**
      * This test builds an engine object from an array that describes the properties
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_buildResult
+     * @covers EngineDAO::_buildResult
      */
     public function test_build_result_from_simple_array() {
 
@@ -49,7 +51,7 @@ class BuildResultEngineTest extends AbstractTest {
                                 'others'                       => "{}",
                                 'class_load'                   => "NONE",
                                 'extra_parameters'             => "",
-                                'google_api_compliant_version' => "1.1",
+                                'google_api_compliant_version' => "1",
                                 'penalty'                      => "100",
                                 'active'                       => "0",
                                 'uid'                          => "5678"
@@ -58,7 +60,7 @@ class BuildResultEngineTest extends AbstractTest {
 
         $actual_array_of_engine_structures = $this->method->invoke( $this->databaseInstance, $this->array_param );
         $actual_engine_struct              = $actual_array_of_engine_structures[ '0' ];
-        $this->assertTrue( $actual_engine_struct instanceof EnginesModel_EngineStruct );
+        $this->assertTrue( $actual_engine_struct instanceof EngineStruct );
 
         $this->assertEquals( "0", $actual_engine_struct->id );
         $this->assertEquals( "bar", $actual_engine_struct->name );
@@ -72,7 +74,7 @@ class BuildResultEngineTest extends AbstractTest {
         $this->assertEquals( [], $actual_engine_struct->others );
         $this->assertEquals( "NONE", $actual_engine_struct->class_load );
         $this->assertEquals( "", $actual_engine_struct->extra_parameters );
-        $this->assertEquals( "1.1", $actual_engine_struct->google_api_compliant_version );
+        $this->assertEquals( "1", $actual_engine_struct->google_api_compliant_version );
         $this->assertEquals( "100", $actual_engine_struct->penalty );
         $this->assertEquals( "0", $actual_engine_struct->active );
         $this->assertEquals( "5678", $actual_engine_struct->uid );

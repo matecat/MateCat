@@ -8,24 +8,24 @@ use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
-use Jobs_JobStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
 use Model\Jobs\ChunkDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use RevisionFactory;
 
 class ReviewsController extends KleinController {
     /**
-     * @var Projects_ProjectStruct $project
+     * @var ProjectStruct $project
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected Jobs_JobStruct $chunk;
+    protected JobStruct $chunk;
 
     protected int $nextSourcePage;
 
@@ -49,7 +49,7 @@ class ReviewsController extends KleinController {
         );
 
         // destroy project data cache
-        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
+        ( new ProjectDao() )->destroyCacheForProjectData( $this->project->id, $this->project->password );
 
         // destroy the 5 minutes chunk review cache
         $chunk = ( new ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );

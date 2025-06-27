@@ -7,12 +7,12 @@ use Constants_TranslationStatus;
 use Database;
 use Error;
 use Exception;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
-use LQA\EntryWithCategoryStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryWithCategoryStruct;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
 use RuntimeException;
-use Segments_SegmentDao;
-use Segments_SegmentStruct;
 use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 
@@ -51,9 +51,9 @@ class TranslationEvent {
     protected bool $_isPropagationSource = true;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var bool
@@ -159,10 +159,10 @@ class TranslationEvent {
     }
 
     /**
-     * @return Segments_SegmentStruct
+     * @return \Model\Segments\SegmentStruct
      */
-    public function getSegmentStruct(): ?Segments_SegmentStruct {
-        $dao = new Segments_SegmentDao( Database::obtain() );
+    public function getSegmentStruct(): ?SegmentStruct {
+        $dao = new SegmentDao( Database::obtain() );
 
         return $dao->getByChunkIdAndSegmentId(
                 $this->chunk->id,
@@ -172,9 +172,9 @@ class TranslationEvent {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
-    public function getChunk(): ?Jobs_JobStruct {
+    public function getChunk(): ?JobStruct {
         return $this->chunk;
     }
 

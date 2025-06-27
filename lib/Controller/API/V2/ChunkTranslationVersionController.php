@@ -13,14 +13,14 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
 use View\API\V2\Json\SegmentVersion as JsonFormatter;
 
 
 class ChunkTranslationVersionController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */

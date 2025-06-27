@@ -11,10 +11,10 @@ namespace Features\ReviewExtended;
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Features\TranslationEvents\Model\TranslationEvent;
-use Jobs_JobStruct;
 use Log;
-use LQA\ChunkReviewDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use RevisionFactory;
 use WordCount\CounterModel;
@@ -29,7 +29,7 @@ class BatchReviewProcessor {
     /**
      * @var mixed
      */
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var TranslationEvent[]
@@ -40,11 +40,11 @@ class BatchReviewProcessor {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): BatchReviewProcessor {
+    public function setChunk( JobStruct $chunk ): BatchReviewProcessor {
         $this->chunk          = $chunk;
         $old_wStruct          = WordCountStruct::loadFromJob( $chunk );
         $this->jobWordCounter = new CounterModel( $old_wStruct );
@@ -66,7 +66,7 @@ class BatchReviewProcessor {
     /**
      * @throws ReflectionException
      */
-    private function getOrCreateChunkReviews( Projects_ProjectStruct $project ): array {
+    private function getOrCreateChunkReviews( ProjectStruct $project ): array {
 
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
 

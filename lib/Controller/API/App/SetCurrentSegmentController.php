@@ -8,11 +8,11 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentDao;
 use ReflectionException;
-use Segments_SegmentDao;
 use TranslationsSplit_SplitDAO;
 use TranslationsSplit_SplitStruct;
 
@@ -74,7 +74,7 @@ class SetCurrentSegmentController extends KleinController {
          */
         if ( !$isASplittedSegment or $isLastSegmentChunk ) {
 
-            $segmentList = Segments_SegmentDao::getNextSegment( $id_segment, $id_job, $password, $revision_number );
+            $segmentList = SegmentDao::getNextSegment( $id_segment, $id_job, $password, (bool)$revision_number );
 
             if ( !$revision_number ) {
                 $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList );

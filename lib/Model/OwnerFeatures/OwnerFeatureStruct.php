@@ -1,6 +1,9 @@
 <?php
 
-class OwnerFeatures_OwnerFeatureStruct extends BasicFeatureStruct {
+namespace Model\OwnerFeatures;
+use BasicFeatureStruct;
+
+class OwnerFeatureStruct extends BasicFeatureStruct {
 
     public $id;
     public $uid;

@@ -1,11 +1,13 @@
 <?php
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Jobs_JobDao::createFromStruct
+ * @covers JobDao::createFromStruct
  * User: dinies
  * Date: 31/05/16
  * Time: 16.06
@@ -13,7 +15,7 @@ use TestHelpers\AbstractTest;
 class CreateFromStructJobTest extends AbstractTest {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
     /**
@@ -21,7 +23,7 @@ class CreateFromStructJobTest extends AbstractTest {
      */
     protected $database_instance;
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
     /**
@@ -44,7 +46,7 @@ class CreateFromStructJobTest extends AbstractTest {
         $this->job_password   = "7barandfoo71";
         $this->job_id_project = random_int( 100000, 99000000 );
         $this->job_owner      = "barandfoo@translated.net";
-        $this->job_struct     = new Jobs_JobStruct(
+        $this->job_struct     = new JobStruct(
                 [
                         'id'                      => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                         'password'                => $this->job_password,
@@ -83,7 +85,7 @@ class CreateFromStructJobTest extends AbstractTest {
         );
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao           = new JobDao( $this->database_instance );
 
 
     }
@@ -100,7 +102,7 @@ class CreateFromStructJobTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Jobs_JobDao::createFromStruct
+     * @covers JobDao::createFromStruct
      */
     public function test_createFromStructsJob() {
 

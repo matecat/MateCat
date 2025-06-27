@@ -1,8 +1,9 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Search\SearchModel;
-use Search\SearchQueryParamsStruct;
+use Model\Jobs\JobDao;
+use Model\Search\SearchModel;
+use Model\Search\SearchQueryParamsStruct;
 use TestHelpers\AbstractTest;
 
 /**
@@ -108,14 +109,13 @@ class SearchModelTest extends AbstractTest {
         $queryParamsStruct->job                                     = $this->jobId;
         $queryParamsStruct->password                                = $this->jobPwd;
         $queryParamsStruct->status                                  = 'all';
-        $queryParamsStruct->matchCase                               = false;
         $queryParamsStruct->isExactMatchRequested                   = $wholeWord;
         $queryParamsStruct->isMatchCaseRequested                    = $isMatchCaseRequested;
         $queryParamsStruct[ 'key' ]                                 = $key;
         $queryParamsStruct[ ( $key === 'target' ) ? 'trg' : 'src' ] = $word;
 
         // jobData
-        $jobData = Jobs_JobDao::getByIdAndPassword( $this->jobId, $this->jobPwd );
+        $jobData = JobDao::getByIdAndPassword( $this->jobId, $this->jobPwd );
 
         // instantiate the filters
         $featureSet = new FeatureSet();

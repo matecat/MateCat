@@ -15,21 +15,21 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\JobPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
-use Jobs_JobStruct;
-use Outsource\ConfirmationDao;
+use Model\Jobs\JobStruct;
+use Model\Outsource\ConfirmationDao;
 use Translators\TranslatorsModel;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      * @see JobsTranslatorsController::afterConstruct method
      */
     protected $jStruct;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     private $chunk;
 
@@ -125,9 +125,9 @@ class JobsTranslatorsController extends KleinController {
      * To maintain compatibility with JobPasswordValidator
      * (line 36)
      *
-     * @param Jobs_JobStruct $jobs_JobStruct
+     * @param JobStruct $jobs_JobStruct
      */
-    public function setChunk( \Jobs_JobStruct $jobs_JobStruct ) {
+    public function setChunk( \Model\Jobs\JobStruct $jobs_JobStruct ) {
         $this->chunk = $jobs_JobStruct;
     }
 }

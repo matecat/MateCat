@@ -9,9 +9,9 @@
 
 namespace WordCount;
 
-use Jobs_JobStruct;
 use JsonSerializable;
-use Projects_MetadataDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 
 class WordCountStruct implements JsonSerializable {
 
@@ -38,11 +38,11 @@ class WordCountStruct implements JsonSerializable {
     protected $total;
 
     /**
-     * @param Jobs_JobStruct $jobOrChunk
+     * @param JobStruct $jobOrChunk
      *
      * @return WordCountStruct
      */
-    public static function loadFromJob( Jobs_JobStruct $jobOrChunk ) {
+    public static function loadFromJob( JobStruct $jobOrChunk ) {
         $wordCountStruct                       = new WordCountStruct();
         $wordCountStruct->id_job               = (int)$jobOrChunk->id;
         $wordCountStruct->job_password         = $jobOrChunk->password;
@@ -407,7 +407,7 @@ class WordCountStruct implements JsonSerializable {
     public function jsonSerialize() {
 
         return [
-                Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                MetadataDao::WORD_COUNT_EQUIVALENT => [
                         'new'        => $this->new_words,
                         'draft'      => $this->draft_words,
                         'translated' => $this->translated_words,
@@ -415,7 +415,7 @@ class WordCountStruct implements JsonSerializable {
                         'approved2'  => $this->approved2_words,
                         'total'      => $this->getTotal()
                 ],
-                Projects_MetadataDao::WORD_COUNT_RAW        => [
+                MetadataDao::WORD_COUNT_RAW        => [
                         'new'        => $this->new_raw_words,
                         'draft'      => $this->draft_raw_words,
                         'translated' => $this->translated_raw_words,
@@ -431,7 +431,7 @@ class WordCountStruct implements JsonSerializable {
      */
     public function toArray() {
         return [
-                Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                MetadataDao::WORD_COUNT_EQUIVALENT => [
                         'new'        => $this->new_words,
                         'draft'      => $this->draft_words,
                         'translated' => $this->translated_words,
@@ -439,7 +439,7 @@ class WordCountStruct implements JsonSerializable {
                         'approved2'  => $this->approved2_words,
                         'total'      => $this->getTotal()
                 ],
-                Projects_MetadataDao::WORD_COUNT_RAW        => [
+                MetadataDao::WORD_COUNT_RAW        => [
                         'new'        => $this->new_raw_words,
                         'draft'      => $this->draft_raw_words,
                         'translated' => $this->translated_raw_words,

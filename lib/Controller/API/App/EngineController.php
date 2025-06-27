@@ -12,23 +12,23 @@ use DomainException;
 use Engine;
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
-use EnginesModel\DeepLStruct;
-use EnginesModel\LaraStruct;
-use EnginesModel_AltlangStruct;
-use EnginesModel_ApertiumStruct;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
-use EnginesModel_GoogleTranslateStruct;
-use EnginesModel_IntentoStruct;
-use EnginesModel_MicrosoftHubStruct;
-use EnginesModel_SmartMATEStruct;
-use EnginesModel_YandexTranslateStruct;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use INIT;
 use InvalidArgumentException;
 use Lara\LaraException;
+use Model\Engines\AltlangStruct;
+use Model\Engines\ApertiumStruct;
+use Model\Engines\DeepLStruct;
+use Model\Engines\EngineDAO;
+use Model\Engines\YandexTranslateStruct;
+use Model\Engines\EngineStruct;
+use Model\Engines\GoogleTranslateStruct;
+use Model\Engines\IntentoStruct;
+use Model\Engines\LaraStruct;
+use Model\Engines\MicrosoftHubStruct;
+use Model\Engines\SmartMATEStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use ReflectionException;
 use RuntimeException;
 use TaskRunner\Exceptions\EndQueueException;
@@ -93,7 +93,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type MicrosoftHub
                  */
-                $newEngineStruct = EnginesModel_MicrosoftHubStruct::getStruct();
+                $newEngineStruct = MicrosoftHubStruct::getStruct();
 
                 $newEngineStruct->name                            = $name;
                 $newEngineStruct->uid                             = $this->user->uid;
@@ -107,7 +107,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type APERTIUM
                  */
-                $newEngineStruct = EnginesModel_ApertiumStruct::getStruct();
+                $newEngineStruct = ApertiumStruct::getStruct();
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -121,7 +121,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type ALTLANG
                  */
-                $newEngineStruct = EnginesModel_AltlangStruct::getStruct();
+                $newEngineStruct = AltlangStruct::getStruct();
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -135,7 +135,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type SmartMate
                  */
-                $newEngineStruct = EnginesModel_SmartMATEStruct::getStruct();
+                $newEngineStruct = SmartMATEStruct::getStruct();
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -150,7 +150,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type YandexTranslate
                  */
-                $newEngineStruct = EnginesModel_YandexTranslateStruct::getStruct();
+                $newEngineStruct = YandexTranslateStruct::getStruct();
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -164,7 +164,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type GoogleTranslate
                  */
-                $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+                $newEngineStruct = GoogleTranslateStruct::getStruct();
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
@@ -177,7 +177,7 @@ class EngineController extends KleinController {
                 /**
                  * Create a record of type Intento
                  */
-                $newEngineStruct                                         = EnginesModel_IntentoStruct::getStruct();
+                $newEngineStruct                                         = IntentoStruct::getStruct();
                 $newEngineStruct->name                                   = $name;
                 $newEngineStruct->uid                                    = $this->user->uid;
                 $newEngineStruct->type                                   = Constants_Engines::MT;
@@ -225,7 +225,7 @@ class EngineController extends KleinController {
             unset( $engineList[ $newEngineStruct->class_load ] );
         }
 
-        $engineDAO             = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO             = new EngineDAO( Database::obtain() );
         $newCreatedDbRowStruct = null;
 
         if ( array_search( $newEngineStruct->class_load, $engineList ) ) {
@@ -234,7 +234,7 @@ class EngineController extends KleinController {
             $this->destroyUserEnginesCache();
         }
 
-        if ( !$newCreatedDbRowStruct instanceof EnginesModel_EngineStruct ) {
+        if ( !$newCreatedDbRowStruct instanceof EngineStruct ) {
 
             $engine_type = explode( "\\", $newEngineStruct->class_load );
             $engine_type = array_pop( $engine_type );
@@ -242,7 +242,7 @@ class EngineController extends KleinController {
             throw new AuthorizationError( "Creation failed. Only one $engine_type engine is allowed.", 403 );
         }
 
-        if ( $newEngineStruct instanceof EnginesModel_MicrosoftHubStruct ) {
+        if ( $newEngineStruct instanceof MicrosoftHubStruct ) {
 
             $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
@@ -259,7 +259,7 @@ class EngineController extends KleinController {
                 throw new DomainException( $mt_result[ 'error' ] );
             }
 
-        } elseif ( $newEngineStruct instanceof EnginesModel_IntentoStruct ) {
+        } elseif ( $newEngineStruct instanceof IntentoStruct ) {
 
             $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
@@ -297,7 +297,7 @@ class EngineController extends KleinController {
                 throw new DomainException( $message, $code );
             }
 
-        } elseif ( $newEngineStruct instanceof EnginesModel_GoogleTranslateStruct ) {
+        } elseif ( $newEngineStruct instanceof GoogleTranslateStruct ) {
 
             $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
@@ -397,15 +397,15 @@ class EngineController extends KleinController {
             throw new InvalidArgumentException( "Engine id required", -5 );
         }
 
-        $engineToBeDeleted      = EnginesModel_EngineStruct::getStruct();
+        $engineToBeDeleted      = EngineStruct::getStruct();
         $engineToBeDeleted->id  = $id;
         $engineToBeDeleted->uid = $this->user->uid;
 
-        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO = new EngineDAO( Database::obtain() );
         $result    = $engineDAO->disable( $engineToBeDeleted );
         $this->destroyUserEnginesCache();
 
-        if ( !$result instanceof EnginesModel_EngineStruct ) {
+        if ( !$result instanceof EngineStruct ) {
             throw new RuntimeException( "Deletion failed. Generic error", -9 );
         }
 
@@ -448,8 +448,8 @@ class EngineController extends KleinController {
      * @throws Exception
      */
     private function destroyUserEnginesCache() {
-        $engineDAO            = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct         = EnginesModel_EngineStruct::getStruct();
+        $engineDAO            = new EngineDAO( Database::obtain() );
+        $engineStruct         = EngineStruct::getStruct();
         $engineStruct->uid    = $this->user->uid;
         $engineStruct->active = true;
 

@@ -9,7 +9,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 use Log;
 use LogicException;
-use Outsource\ConfirmationStruct;
+use Model\Outsource\ConfirmationStruct;
 use Shop_Cart;
 use SimpleJWT;
 

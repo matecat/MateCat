@@ -7,28 +7,32 @@
  * Time: 14.54
  */
 
+namespace Model\Engines;
+
+use Constants_Engines;
+
 /**
  * Class Engine_MicrosoftHubStruct
  *
  * This class contains the default parameters for a Moses Engine CREATION
  *
  */
-class EnginesModel_SmartMATEStruct extends EnginesModel_EngineStruct {
+class SmartMATEStruct extends EngineStruct {
 
     /**
      * @var string
      */
-    public $description = "SmartMATE Engine by Capita";
+    public string $description = "SmartMATE Engine by Capita";
 
     /**
      * @var string
      */
-    public $base_url = "https://api.smartmate.co/translate/api/v2.1";
+    public string $base_url = "https://api.smartmate.co/translate/api/v2.1";
 
     /**
      * @var string
      */
-    public $translate_relative_url = "translate";
+    public string $translate_relative_url = "translate";
 
     /**
      * @var array
@@ -40,7 +44,7 @@ class EnginesModel_SmartMATEStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $contribute_relative_url = "";
+    public string $contribute_relative_url = "";
 
     /**
      * @var array
@@ -55,25 +59,25 @@ class EnginesModel_SmartMATEStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $class_load = Constants_Engines::SMART_MATE;
+    public string $class_load = Constants_Engines::SMART_MATE;
 
 
     /**
      * @var int
      */
-    public $google_api_compliant_version = 2;
+    public int $google_api_compliant_version = 2;
 
     /**
      * @var int
      */
-    public $penalty = 14;
+    public int $penalty = 14;
 
     /**
      * An empty struct
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public static function getStruct() {
-        return new EnginesModel_SmartMATEStruct();
+    public static function getStruct(): EngineStruct {
+        return new SmartMATEStruct();
     }
 
 }

@@ -14,8 +14,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Langs\Languages;
-use LQA\SizeRestriction\SizeRestriction;
 use Matecat\SubFiltering\MateCatFilter;
+use Utils\LQA\SizeRestriction\SizeRestriction;
 
 
 class CountWordController extends KleinController {

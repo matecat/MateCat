@@ -3,7 +3,7 @@
 namespace Controller\API\App;
 
 use Constants_TranslationStatus;
-use Controller\Abstracts\KleinController;
+use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
@@ -11,23 +11,24 @@ use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobStruct;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
-use Projects_ProjectDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Search\ReplaceEventStruct;
+use Model\Search\SearchModel;
+use Model\Search\SearchQueryParamsStruct;
+use Model\Segments\SegmentDao;
+use ReflectionException;
 use RuntimeException;
-use Search\ReplaceEventStruct;
-use Search\SearchModel;
-use Search\SearchQueryParamsStruct;
 use Search_ReplaceHistory;
 use Search_ReplaceHistoryFactory;
-use Segments_SegmentDao;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 use Utils;
 
-class GetSearchController extends KleinController {
+class GetSearchController extends AbstractStatefulKleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -48,6 +49,9 @@ class GetSearchController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function replaceAll(): void {
 
         $request        = $this->validateTheRequest();
@@ -63,7 +67,7 @@ class GetSearchController extends KleinController {
         $request[ 'queryParams' ][ 'replacement' ] = $request[ 'replace' ];
 
         // update segment translations
-        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ], $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
 
         // and save replace events
         $srh             = $this->getReplaceHistory( $request[ 'job' ] );
@@ -185,10 +189,10 @@ class GetSearchController extends KleinController {
      * @param $job_id
      * @param $password
      *
-     * @return Jobs_JobStruct|null
+     * @return JobStruct|null
      * @throws Exception
      */
-    private function getJobData( $job_id, $password ): ?Jobs_JobStruct {
+    private function getJobData( $job_id, $password ): ?JobStruct {
         return ChunkDao::getByIdAndPassword( (int)$job_id, $password );
     }
 
@@ -207,12 +211,12 @@ class GetSearchController extends KleinController {
 
     /**
      * @param SearchQueryParamsStruct $queryParams
-     * @param Jobs_JobStruct          $jobStruct
+     * @param JobStruct               $jobStruct
      *
      * @return SearchModel
      * @throws Exception
      */
-    private function getSearchModel( SearchQueryParamsStruct $queryParams, Jobs_JobStruct $jobStruct ): SearchModel {
+    private function getSearchModel( SearchQueryParamsStruct $queryParams, JobStruct $jobStruct ): SearchModel {
         /** @var MateCatFilter $filter */
         $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target );
 
@@ -320,7 +324,7 @@ class GetSearchController extends KleinController {
         $db = Database::obtain();
 
         $chunk           = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
-        $project         = Projects_ProjectDao::findByJobId( (int)$id_job );
+        $project         = ProjectDao::findByJobId( (int)$id_job );
         $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->user, $project, $id_segment );
 
         // loop all segments to replace
@@ -330,7 +334,7 @@ class GetSearchController extends KleinController {
             $db->begin();
 
             $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
-            $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
+            $segment         = ( new SegmentDao() )->getById( $tRow[ 'id_segment' ] );
 
             // Propagation
             $propagationTotal = [

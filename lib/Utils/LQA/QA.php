@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA;
+namespace Utils\LQA;
 
 use CatUtils;
 use DOMDocument;
@@ -11,11 +11,10 @@ use DOMNodeList;
 use DOMXPath;
 use Exception;
 use FeatureSet;
-use Jobs_JobStruct;
 use Log;
 use LogicException;
-use LQA\BxExG\Validator;
-use Segments_SegmentMetadataDao;
+use Model\Segments\SegmentMetadataDao;
+use Utils\LQA\BxExG\Validator;
 
 /**
  * Class errObject
@@ -61,7 +60,8 @@ class errObject {
         $errObj->outcome    = $errors[ 'outcome' ];
         $errObj->orig_debug = $errors[ 'debug' ];
         $errObj->debug      = $errors[ 'debug' ];
-        $errObj->tip        = $errors[ 'tip' ] ?? null;
+
+        ( !empty( $errors[ 'tip' ] ) ) ? $errObj->tip = $errors[ 'tip' ] : null;
 
         return $errObj;
     }
@@ -75,6 +75,7 @@ class errObject {
     }
 
 }
+
 
 /**
  * Translation string quality assurance.
@@ -131,7 +132,7 @@ class errObject {
 class QA {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk;
 
@@ -1068,7 +1069,7 @@ class QA {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -2593,7 +2594,7 @@ class QA {
             return true;
         }
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
+        $limit = SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 

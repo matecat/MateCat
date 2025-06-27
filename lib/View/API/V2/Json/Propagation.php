@@ -5,16 +5,16 @@ namespace View\API\V2\Json;
 class Propagation {
 
     /**
-     * @var \Propagation_PropagationTotalStruct
+     * @var \Model\Propagation\PropagationTotalStruct
      */
     private $propagation_PropagationTotalStruct;
 
     /**
      * Propagation constructor.
      *
-     * @param \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct
+     * @param \Model\Propagation\PropagationTotalStruct $propagation_PropagationTotalStruct
      */
-    public function __construct( \Propagation_PropagationTotalStruct $propagation_PropagationTotalStruct ) {
+    public function __construct( \Model\Propagation\PropagationTotalStruct $propagation_PropagationTotalStruct ) {
         $this->propagation_PropagationTotalStruct = $propagation_PropagationTotalStruct;
     }
 

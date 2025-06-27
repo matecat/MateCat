@@ -11,8 +11,8 @@ namespace Engines\Traits;
 
 
 use Exception;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use Predis\Client;
 use RedisHandler;
 use ReflectionException;
@@ -23,20 +23,20 @@ trait HotSwap {
      * To use this trait, in a plugin call this method in
      *
      * <code>
-     *     public function beforeInsertJobStruct( \Jobs_JobStruct $jobStruct ){
+     *     public function beforeInsertJobStruct( \JobStruct $jobStruct ){
      *             $this->swapOn( $jobStruct );
      *     }
      *</code>
      *
-     * @param Client         $redisConn
-     * @param Jobs_JobStruct $jobStruct
+     * @param Client                $redisConn
+     * @param \Model\Jobs\JobStruct $jobStruct
      *
-     * @param int            $newMT
+     * @param int                   $newMT
      *
-     * @param int            $newTM
+     * @param int                   $newTM
      *
      */
-    protected function swapOn( Client $redisConn, Jobs_JobStruct $jobStruct, int $newMT = 1, int $newTM = 1 ) { // 1 == MyMemory
+    protected function swapOn( Client $redisConn, JobStruct $jobStruct, int $newMT = 1, int $newTM = 1 ) { // 1 == MyMemory
 
         if ( $redisConn->setnx( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, $jobStruct->id_mt_engine ) ) {
             $redisConn->expire( "_old_mt_engine:" . $jobStruct->id_project . ":" . $jobStruct->password, 60 * 60 * 24 );
@@ -67,7 +67,7 @@ trait HotSwap {
     protected function swapOff( $project_id ) {
 
         //There should be more than one job per project, to be generic use a foreach
-        $jobDao     = new Jobs_JobDao();
+        $jobDao     = new JobDao();
         $jobStructs = $jobDao->getByProjectId( $project_id, 60 );
 
         $redisConn = ( new RedisHandler() )->getConnection();

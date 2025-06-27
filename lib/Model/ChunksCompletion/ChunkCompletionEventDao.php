@@ -3,13 +3,13 @@
 namespace Model\ChunksCompletion;
 
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
-use DataAccess\AbstractDao;
 use Database;
 use DateTime;
 use Exception;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Utils;
 
 class ChunkCompletionEventDao extends AbstractDao {
@@ -33,7 +33,7 @@ class ChunkCompletionEventDao extends AbstractDao {
         return $stmt->rowCount();
     }
 
-    public function getByIdAndChunk( $id_event, Jobs_JobStruct $chunk ) {
+    public function getByIdAndChunk( $id_event, JobStruct $chunk ) {
         $sql = "SELECT * FROM chunk_completion_events WHERE id = :id_event
                AND id_job = :id_job AND password = :password ";
 
@@ -104,7 +104,7 @@ class ChunkCompletionEventDao extends AbstractDao {
     /**
      * @throws Exception
      */
-    public function currentPhase( Jobs_JobStruct $chunk ): string {
+    public function currentPhase( JobStruct $chunk ): string {
         $lastTranslate = $this->lastCompletionRecord( $chunk, [ 'is_review' => false ] );
         if ( $lastTranslate ) {
             $lastRevise = $this->lastCompletionRecord( $chunk, [ 'is_review' => true ] );
@@ -132,14 +132,14 @@ class ChunkCompletionEventDao extends AbstractDao {
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  Jobs_JobStruct to examinate
+     * @param $chunk  \Model\Jobs\JobStruct to examinate
      * @param $params array of params for query: is_review
      *
      * @return array
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord( Jobs_JobStruct $chunk, array $params = [] ) {
+    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ) {
         $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
         $is_review = $params[ 'is_review' ];
 
@@ -175,22 +175,22 @@ class ChunkCompletionEventDao extends AbstractDao {
         return $stmt->fetch();
     }
 
-    public static function isChunkCompleted( Jobs_JobStruct $chunk, array $params = [] ) {
+    public static function isChunkCompleted( JobStruct $chunk, array $params = [] ) {
         $fetched = self::lastCompletionRecord( $chunk, $params );
 
         return $fetched != false;
     }
 
-    public static function isProjectCompleted( Projects_ProjectStruct $proj ) {
-        $uncompletedChunksByProjectId = Projects_ProjectDao::uncompletedChunksByProjectId( $proj->id );
+    public static function isProjectCompleted( ProjectStruct $proj ) {
+        $uncompletedChunksByProjectId = ProjectDao::uncompletedChunksByProjectId( $proj->id );
 
         return $uncompletedChunksByProjectId == false;
     }
 
     public static function isCompleted( $obj, array $params = [] ) {
-        if ( $obj instanceof Jobs_JobStruct ) {
+        if ( $obj instanceof JobStruct ) {
             return self::isChunkCompleted( $obj, $params );
-        } elseif ( $obj instanceof Projects_ProjectStruct ) {
+        } elseif ( $obj instanceof ProjectStruct ) {
             return self::isProjectCompleted( $obj );
         } else {
             throw new Exception( "Not a supported type" );

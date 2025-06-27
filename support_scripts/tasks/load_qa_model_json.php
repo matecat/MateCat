@@ -1,5 +1,7 @@
 <?php
 
+use Model\Projects\ProjectDao;
+
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
@@ -23,14 +25,14 @@ if (empty($options))                               usage() ;
 if (!array_key_exists('file', $options))           usage() ;
 if (!array_key_exists('id_project', $options))     usage() ;
 
-$project = Projects_ProjectDao::findById( $options['id_project']);
+$project = ProjectDao::findById( $options['id_project']);
 
 $content = file_get_contents( $options['file']);
 $json = json_decode( $content, true );
 
-$model_record = LQA\ModelDao::createModelFromJsonDefinition( $json );
+$model_record = Model\LQA\ModelDao::createModelFromJsonDefinition( $json );
 
-$dao = new \Projects_ProjectDao( \Database::obtain() );
+$dao = new \Model\Projects\ProjectDao( \Database::obtain() );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );
 
 echo "done \n";

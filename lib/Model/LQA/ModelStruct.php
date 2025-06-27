@@ -1,10 +1,10 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Exception;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface {
 

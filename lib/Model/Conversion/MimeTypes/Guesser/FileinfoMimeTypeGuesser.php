@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Conversion\MimeTypes\Guesser;
+namespace Model\Conversion\MimeTypes\Guesser;
 
 use finfo;
 use InvalidArgumentException;

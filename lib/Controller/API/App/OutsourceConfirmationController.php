@@ -10,11 +10,11 @@
 namespace Controller\API\App;
 
 
-use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Jobs_JobDao;
-use Outsource\ConfirmationDao;
-use Outsource\TranslatedConfirmationStruct;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Model\Jobs\JobDao;
+use Model\Outsource\ConfirmationDao;
+use Model\Outsource\TranslatedConfirmationStruct;
 use Translators\TranslatorsModel;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
@@ -33,7 +33,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
             throw new AuthorizationError( "Invalid Job" );
         }
 
-        $jStruct           = ( Jobs_JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
+        $jStruct           = ( JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
         $translatorModel   = new TranslatorsModel( $jStruct, 0 );
         $jTranslatorStruct = $translatorModel->getTranslator();
 

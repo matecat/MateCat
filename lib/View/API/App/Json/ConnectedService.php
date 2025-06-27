@@ -9,9 +9,9 @@
 namespace View\API\App\Json;
 
 
-use ConnectedServices\ConnectedServiceStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use Model\ConnectedServices\ConnectedServiceStruct;
 use Utils;
 
 class ConnectedService {

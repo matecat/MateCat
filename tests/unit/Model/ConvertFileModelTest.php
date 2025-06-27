@@ -1,7 +1,7 @@
 <?php
 
 use Constants\ConversionHandlerStatus;
-use Conversion\ConvertedFileModel;
+use Model\Conversion\ConvertedFileModel;
 use TestHelpers\AbstractTest;
 
 class ConvertFileModelTest extends AbstractTest {

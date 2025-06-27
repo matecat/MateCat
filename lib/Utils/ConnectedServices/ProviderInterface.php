@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices;
+namespace Utils\ConnectedServices;
 
 use Exception;
 use League\OAuth2\Client\Token\AccessToken;
@@ -35,13 +35,13 @@ interface ProviderInterface {
 
     /**
      * Return the user from the OAuth2 provider as
-     * ConnectedServiceUserModel instance
+     * ProviderUser instance
      *
      * @param AccessToken $token
      *
-     * @return ConnectedServiceUserModel
+     * @return ProviderUser
      */
-    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel;
+    public function getResourceOwner( AccessToken $token ): ProviderUser;
 
     /**
      * Get the low level client (below the abstraction)

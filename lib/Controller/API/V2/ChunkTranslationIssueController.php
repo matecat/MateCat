@@ -11,14 +11,13 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Jobs_JobStruct;
-use LQA\EntryDao;
+use Model\LQA\EntryDao;
 use View\API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 
 class ChunkTranslationIssueController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */

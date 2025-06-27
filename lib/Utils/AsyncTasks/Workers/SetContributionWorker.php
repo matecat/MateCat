@@ -13,8 +13,8 @@ use Contribution\ContributionSetStruct;
 use Engine;
 use Engines_EngineInterface;
 use Exception;
-use Exceptions\ValidationError;
-use Jobs_JobStruct;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -113,12 +113,12 @@ class SetContributionWorker extends AbstractWorker {
      * !Important Refresh the engine ID for each queueElement received
      * to avoid set contributions to the wrong engine ID
      *
-     * @param Jobs_JobStruct $jobStruct
+     * @param \Model\Jobs\JobStruct $jobStruct
      *
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
+    protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
             $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
@@ -199,12 +199,12 @@ class SetContributionWorker extends AbstractWorker {
 
     /**
      * @param ContributionSetStruct $contributionStruct
-     * @param Jobs_JobStruct        $jobStruct
+     * @param \Model\Jobs\JobStruct $jobStruct
      *
      * @return array
      * @throws Exception
      */
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, JobStruct $jobStruct ) {
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;

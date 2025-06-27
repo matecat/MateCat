@@ -1,10 +1,10 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Conversion\MimeTypes\MimeTypes;
 use Exception;
 use INIT;
+use Model\Conversion\MimeTypes\MimeTypes;
 use stdClass;
 use Utils;
 

@@ -11,10 +11,10 @@ use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
 use FeatureSet;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use RuntimeException;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
@@ -38,9 +38,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     private int $id_job;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $chunkStruct;
+    private JobStruct $chunkStruct;
 
     /**
      * @var int
@@ -50,18 +50,18 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * @var int
      */
-    private int                    $uid;
-    private Projects_ProjectStruct $projectStruct;
+    private int           $uid;
+    private ProjectStruct $projectStruct;
 
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param Jobs_JobStruct         $chunkStruct
-     * @param int|null               $id_segment
-     * @param Users_UserStruct       $userStruct
-     * @param Projects_ProjectStruct $projectStruct
+     * @param JobStruct        $chunkStruct
+     * @param int|null         $id_segment
+     * @param Users_UserStruct $userStruct
+     * @param ProjectStruct    $projectStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct, ?int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public function __construct( JobStruct $chunkStruct, ?int $id_segment, Users_UserStruct $userStruct, ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;
@@ -182,13 +182,13 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         $source_page_code = $params[ 'source_page_code' ];
 
-        /** @var Jobs_JobStruct $chunk */
+        /** @var JobStruct $chunk */
         $chunk = $params[ 'chunk' ];
 
         /** @var FeatureSet $features */
         $features = $params[ 'features' ];
 
-        /** @var Projects_ProjectStruct $project */
+        /** @var ProjectStruct $project */
         $project = $params[ 'project' ];
 
         $sourceEvent = new TranslationEvent(
@@ -241,8 +241,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         try {
             $translationEventsHandler->save( new BatchReviewProcessor() );
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
-            Projects_ProjectDao::destroyCacheById( $chunk->id_project );
+            ( new JobDao() )->destroyCacheByProjectId( $chunk->id_project );
+            ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( Exception $e ) {
             throw new RuntimeException( $e->getMessage(), -2000 );
         }

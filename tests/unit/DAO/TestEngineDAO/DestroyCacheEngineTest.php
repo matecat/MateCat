@@ -1,18 +1,20 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineDAO::destroyCache
+ * @covers EngineDAO::destroyCache
  * User: dinies
  * Date: 19/04/16
  * Time: 17.10
  */
 class DestroyCacheEngineTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineDAO
+     * @var EngineDAO
      */
     protected $engineDAO;
     /**
@@ -20,15 +22,15 @@ class DestroyCacheEngineTest extends AbstractTest {
      */
     protected $cache;
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct;
 
     public function setUp(): void {
         parent::setUp();
-        $this->engineDAO = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->engineDAO = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
 
-        $this->engine_struct = new EnginesModel_EngineStruct();
+        $this->engine_struct = new EngineStruct();
         $this->cache         = new Predis\Client( INIT::$REDIS_SERVERS );
     }
 
@@ -38,11 +40,11 @@ class DestroyCacheEngineTest extends AbstractTest {
     }
 
     /**
-     * @param EnginesModel_EngineStruct
+     * @param EngineStruct
      * It cleans the cache memory about an engine that corresponds to the struct with initialized id passed as @param
      *
      * @group  regression
-     * @covers EnginesModel_EngineDAO::destroyCache
+     * @covers EngineDAO::destroyCache
      */
     public function test_destroyCache_with_given_engine_struct_with_ID_type_active_inizialized() {
 
@@ -56,10 +58,10 @@ class DestroyCacheEngineTest extends AbstractTest {
         $this->cache->setex( $key, 20, $cache_value );
         $output_before_destruction = $this->cache->get( $key );
         $this->assertEquals( $cache_value, $output_before_destruction );
-        $this->assertTrue( unserialize( $output_before_destruction ) instanceof EnginesModel_EngineStruct );
+        $this->assertTrue( unserialize( $output_before_destruction ) instanceof EngineStruct );
         $this->engineDAO->destroyCache( $this->engine_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof EnginesModel_EngineStruct );
+        $this->assertFalse( unserialize( $output_after_destruction ) instanceof EngineStruct );
     }
 }

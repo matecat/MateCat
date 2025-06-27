@@ -15,16 +15,16 @@ use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use FeatureSet;
-use Jobs_JobStruct;
-use LQA\CategoryDao;
-use LQA\CategoryStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\EntryCommentDao;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\CommentDao;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\CategoryDao;
+use Model\LQA\CategoryStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryCommentDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
 
 class QualityReportSegmentModel {
 
@@ -32,7 +32,7 @@ class QualityReportSegmentModel {
 
     protected $_chunkReviews;
 
-    public function __construct( Jobs_JobStruct $chunk ) {
+    public function __construct( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -45,7 +45,7 @@ class QualityReportSegmentModel {
      * @return array
      * @throws Exception
      */
-    public function getSegmentsIdForQR( $step, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( $step, int $ref_segment, $where = "after", $options = [] ) {
         if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != 'all' ) {
             $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
                     $this->chunk->getProject()->id_qa_model,
@@ -75,7 +75,7 @@ class QualityReportSegmentModel {
             }
         }
 
-        $segmentsDao = new Segments_SegmentDao();
+        $segmentsDao = new SegmentDao();
         $segments_id = $segmentsDao->getSegmentsIdForQR(
                 $this->chunk, $step, $ref_segment, $where, $options
         );
@@ -87,12 +87,12 @@ class QualityReportSegmentModel {
      * @param QualityReportSegmentStruct $seg
      * @param MateCatFilter              $Filter
      * @param FeatureSet                 $featureSet
-     * @param Jobs_JobStruct             $chunk
+     * @param JobStruct                  $chunk
      * @param bool                       $isForUI
      *
      * @throws Exception
      */
-    protected function _commonSegmentAssignments( QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Jobs_JobStruct $chunk, $isForUI = false ) {
+    protected function _commonSegmentAssignments( QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, $isForUI = false ) {
         $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
@@ -150,7 +150,7 @@ class QualityReportSegmentModel {
      * @throws Exception
      */
     public function getSegmentsForQR( array $segment_ids, $isForUI = false ) {
-        $segmentsDao = new Segments_SegmentDao;
+        $segmentsDao = new SegmentDao;
         $data        = $segmentsDao->getSegmentsForQr( $segment_ids, $this->chunk->id, $this->chunk->password );
 
         $featureSet = new FeatureSet();
@@ -179,7 +179,7 @@ class QualityReportSegmentModel {
 
         foreach ( $data as $index => $seg ) {
 
-            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
+            $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap );

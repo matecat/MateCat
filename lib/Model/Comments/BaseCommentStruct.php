@@ -2,9 +2,9 @@
 
 namespace Model\Comments;
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 use ReflectionException;
 
 class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {

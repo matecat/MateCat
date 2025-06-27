@@ -159,7 +159,7 @@ class Bootstrap {
 
     public static function exceptionHandler( Throwable $exception ) {
 
-        Log::$fileName = 'fatal_errors.txt';
+        Log::setLogFileName( 'fatal_errors.txt' );
 
         switch ( get_class( $exception ) ) {
             case AuthenticationError::class: // authentication requested
@@ -168,16 +168,16 @@ class Bootstrap {
                 break;
             case InvalidArgumentException::class:
             case ValidationError:: class:
-            case Exceptions\ValidationError::class:
+            case Model\Exceptions\ValidationError::class:
                 $code = 400;
                 Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
-            case Exceptions\NotFoundException:: class:
+            case Model\Exceptions\NotFoundException:: class:
             case Controller\API\Commons\Exceptions\NotFoundException::class:
                 $code = 404;
                 Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
-            case Exceptions\AuthorizationError::class:
+            case Model\Exceptions\AuthorizationError::class:
             case Controller\API\Commons\Exceptions\AuthorizationError::class:
                 $code = 403;
                 Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
@@ -247,7 +247,7 @@ class Bootstrap {
                 case E_USER_ERROR:
                 case E_RECOVERABLE_ERROR:
 
-                    Log::$fileName = 'fatal_errors.txt';
+                    Log::setLogFileName( 'fatal_errors.txt' );
                     $exception     = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
                     try {

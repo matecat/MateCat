@@ -2,7 +2,7 @@
 
 namespace Model\ChunksCompletion;
 
-use DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
 
 class ChunkCompletionUpdateStruct extends AbstractDaoSilentStruct {
 

@@ -3,12 +3,6 @@
 namespace Controller\Abstracts;
 
 use Bootstrap;
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
-use ConnectedServices\OauthClient;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
 use FlashMessage;
@@ -17,11 +11,17 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
+use Utils\ConnectedServices\OauthClient;
 use PHPTAL;
 use PHPTalBoolean;
 use PHPTalMap;
 use PHPTALWithAppend;
 use Utils;
+use Utils\ConnectedServices\Facebook\FacebookProvider;
+use Utils\ConnectedServices\Github\GithubProvider;
+use Utils\ConnectedServices\Google\GoogleProvider;
+use Utils\ConnectedServices\LinkedIn\LinkedInProvider;
+use Utils\ConnectedServices\Microsoft\MicrosoftProvider;
 
 /**
  * Created by PhpStorm.

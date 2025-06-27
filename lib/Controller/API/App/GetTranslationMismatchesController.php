@@ -6,9 +6,9 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Projects_ProjectDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 use ReflectionException;
-use Segments_SegmentDao;
 use View\API\V2\Json\SegmentTranslationMismatches;
 
 class GetTranslationMismatchesController extends KleinController {
@@ -29,14 +29,14 @@ class GetTranslationMismatchesController extends KleinController {
         $id_segment = $request[ 'id_segment' ];
         $password   = $request[ 'password' ];
 
-        $this->featureSet->loadForProject( Projects_ProjectDao::findByJobId( $id_job, 60 * 60 ) );
+        $this->featureSet->loadForProject( ProjectDao::findByJobId( $id_job, 60 * 60 ) );
         $parsedIdSegment = $this->parseIdSegment( $id_segment );
 
         if ( $parsedIdSegment[ 'id_segment' ] == '' ) {
             $parsedIdSegment[ 'id_segment' ] = 0;
         }
 
-        $sDao                   = new Segments_SegmentDao();
+        $sDao                   = new SegmentDao();
         $Translation_mismatches = $sDao->setCacheTTL( 1 * 60 /* 1 minutes cache */ )->getTranslationsMismatches( $id_job, $password, $parsedIdSegment[ 'id_segment' ] );
 
         $this->response->json( [

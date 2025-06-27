@@ -1,12 +1,13 @@
 <?php
 
 
+use Model\Projects\MetadataDao;
 use TestHelpers\AbstractTest;
 
 class ProjectsMetadataDaoTest extends AbstractTest {
 
     function testCreateNewKey() {
-        $dao    = new Projects_MetadataDao( Database::obtain() );
+        $dao    = new MetadataDao( Database::obtain() );
         $record = $dao->get( 1, 'foo' );
         $this->assertEquals( $record, false );
 
@@ -18,7 +19,7 @@ class ProjectsMetadataDaoTest extends AbstractTest {
     }
 
     function testUpdate() {
-        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao = new MetadataDao( Database::obtain() );
         $dao->set( 1, 'foo', 'bar' );
         $dao->set( 1, 'foo', 'bar2' );
         $record = $dao->get( 1, 'foo' );
@@ -31,7 +32,7 @@ class ProjectsMetadataDaoTest extends AbstractTest {
     }
 
     function testDelete() {
-        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao = new MetadataDao( Database::obtain() );
         $dao->set( 1, 'foo', 'bar2' );
         $dao->delete( 1, 'foo' );
 

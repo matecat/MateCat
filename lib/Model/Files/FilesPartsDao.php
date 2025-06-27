@@ -1,10 +1,10 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
 use ReflectionException;
 
 class FilesPartsDao extends AbstractDao {

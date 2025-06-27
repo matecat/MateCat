@@ -3,8 +3,8 @@
 namespace View\API\V2\Json;
 
 use Features\ReviewExtended\ReviewUtils;
-use LQA\EntryCommentDao;
-use LQA\EntryStruct;
+use Model\LQA\EntryCommentDao;
+use Model\LQA\EntryStruct;
 use SplFileObject;
 
 class SegmentTranslationIssue {

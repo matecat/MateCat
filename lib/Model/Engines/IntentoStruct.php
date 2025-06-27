@@ -1,27 +1,31 @@
 <?php
 
+namespace Model\Engines;
+
+use Constants_Engines;
+
 /**
  * Class Engine_IntentoStruct
  *
  * This class contains the default parameters for a Intento Engine CREATION
  *
  */
-class EnginesModel_IntentoStruct extends EnginesModel_EngineStruct {
+class IntentoStruct extends EngineStruct {
 
     /**
      * @var string
      */
-    public $description = "Intento";
+    public string $description = "Intento";
 
     /**
      * @var string
      */
-    public $base_url = "https://api.inten.to/ai/text";
+    public string $base_url = "https://api.inten.to/ai/text";
 
     /**
      * @var string
      */
-    public $translate_relative_url = "translate";
+    public string $translate_relative_url = "translate";
 
     /**
      * @var array
@@ -36,20 +40,20 @@ class EnginesModel_IntentoStruct extends EnginesModel_EngineStruct {
     /**
      * @var string
      */
-    public $class_load = Constants_Engines::INTENTO;
+    public string $class_load = Constants_Engines::INTENTO;
 
 
     /**
      * @var int
      */
-    public $google_api_compliant_version = 2;
+    public int $google_api_compliant_version = 2;
 
     /**
      * An empty struct
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public static function getStruct() {
-        return new EnginesModel_IntentoStruct();
+    public static function getStruct(): EngineStruct {
+        return new IntentoStruct();
     }
 
 }

@@ -1,8 +1,11 @@
 <?php
 
-namespace QAModelTemplate;
+namespace Model\LQA\QAModelTemplate;
 
-class QAModelTemplateCategoryStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \JsonSerializable {
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+
+class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, \JsonSerializable {
     public $id;
     public $id_template;
     public $id_parent;

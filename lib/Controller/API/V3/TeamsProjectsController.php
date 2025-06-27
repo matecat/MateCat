@@ -15,8 +15,8 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
 use INIT;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Teams\TeamStruct;
 use View\API\V2\Json\Project;
 
@@ -33,7 +33,7 @@ class TeamsProjectsController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
      */
     public function getPaginated() {
@@ -54,11 +54,11 @@ class TeamsProjectsController extends KleinController {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 
-        /** @var Projects_ProjectStruct[] $projectsList */
-        $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter );
+        /** @var ProjectStruct[] $projectsList */
+        $projectsList = ProjectDao::findByTeamId( $id_team, $filter );
         $projectsList = ( new Project( $projectsList ) )->render();
 
-        $totals      = Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
+        $totals      = ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );
 
         if ( $totals == 0 ) {

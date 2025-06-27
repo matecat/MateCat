@@ -6,7 +6,7 @@ use Controller\Abstracts\AbstractDownloadController;
 use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
 use TMS\TMSService;
 use ZipArchive;

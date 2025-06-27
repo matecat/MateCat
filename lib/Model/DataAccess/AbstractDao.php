@@ -1,12 +1,12 @@
 <?php
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 use Database;
 use Exception;
-use Exceptions\ValidationError;
 use IDatabase;
 use Log;
+use Model\Exceptions\ValidationError;
 use PDO;
 use PDOStatement;
 use ReflectionException;
@@ -83,13 +83,6 @@ abstract class AbstractDao {
      * @throws Exception
      */
     public function updateList( array $obj_arr ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function deleteList( array $obj_arr ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
@@ -220,17 +213,19 @@ abstract class AbstractDao {
     }
 
     /**
-     * * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
+     * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
      *
-     *  Replacement for deprecated `AbstractDao::_fetchObject`
+     * Replacement for deprecated `AbstractDao::_fetchObject`
      *
-     * @param PDOStatement $stmt
-     * @param string       $fetchClass
-     * @param array        $bindParams
+     * @template T of IDaoStruct
      *
-     * @param string|null  $keyMap
+     * @param PDOStatement    $stmt
+     * @param class-string<T> $fetchClass
+     * @param array           $bindParams
      *
-     * @return IDaoStruct[]
+     * @param string|null     $keyMap
+     *
+     * @return T[]
      * @throws ReflectionException
      */
     protected function _fetchObjectMap( PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null ): array {
@@ -242,7 +237,7 @@ abstract class AbstractDao {
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 
-        if ( !empty( $_cacheResult ) ) {
+        if ( !is_null( $_cacheResult ) ) {
             return $_cacheResult;
         }
 

@@ -1,10 +1,14 @@
 <?php
 
 use Autopropagation\PropagationAnalyser;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Files\FileStruct;
-use Search\ReplaceEventStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Files\FileStruct;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationTotalStruct;
+use Model\Search\ReplaceEventStruct;
 use View\API\V2\Json\Propagation as PropagationApi;
 
 class Translations_SegmentTranslationDao extends AbstractDao {
@@ -218,7 +222,7 @@ class Translations_SegmentTranslationDao extends AbstractDao {
 
     }
 
-    public static function getUnchangeableStatus( Jobs_JobStruct $chunk, $segments_ids, $status, $source_page ) {
+    public static function getUnchangeableStatus( JobStruct $chunk, $segments_ids, $status, $source_page ) {
 
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
@@ -422,7 +426,7 @@ class Translations_SegmentTranslationDao extends AbstractDao {
      * @param $password
      * @param $source_page
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return \Model\DataAccess\IDaoStruct[]
      */
     public
     function getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page ) {
@@ -475,12 +479,12 @@ class Translations_SegmentTranslationDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $jStruct
+     * @param JobStruct $jStruct
      *
      * @return array
      */
     public
-    static function getMaxSegmentIdsFromJob( Jobs_JobStruct $jStruct ) {
+    static function getMaxSegmentIdsFromJob( JobStruct $jStruct ) {
 
         $conn = Database::obtain()->getConnection();
 
@@ -520,9 +524,9 @@ class Translations_SegmentTranslationDao extends AbstractDao {
      * This function propagates the translation to every identical sources in the chunk/job
      *
      * @param Translations_SegmentTranslationStruct $segmentTranslationStruct
-     * @param Jobs_JobStruct                        $chunkStruct
+     * @param JobStruct                             $chunkStruct
      * @param                                       $_idSegment
-     * @param Projects_ProjectStruct                $project
+     * @param ProjectStruct                         $project
      *
      * @param bool                                  $execute_update
      *
@@ -544,14 +548,14 @@ class Translations_SegmentTranslationDao extends AbstractDao {
     public
     static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
-            Jobs_JobStruct                        $chunkStruct,
+            JobStruct                             $chunkStruct,
             int                                   $_idSegment,
-            Projects_ProjectStruct                $project,
+            ProjectStruct                         $project,
             bool                                  $execute_update = true
     ): array {
         $db = Database::obtain();
 
-        if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
+        if ( $project->getWordCountType() == MetadataDao::WORD_COUNT_RAW ) {
             $sum_sql = "SUM( segments.raw_word_count )";
         } else {
             $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
@@ -674,7 +678,7 @@ class Translations_SegmentTranslationDao extends AbstractDao {
 
 
         if ( !isset( $propagationTotal ) ) {
-            $propagationTotal = new Propagation_PropagationTotalStruct();
+            $propagationTotal = new PropagationTotalStruct();
         }
 
         return ( new PropagationApi( $propagationTotal ) )->render();

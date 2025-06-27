@@ -7,9 +7,9 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
-use LQA\ChunkReviewStruct;
-use LQA\EntryDao;
-use LQA\EntryStruct;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryDao;
+use Model\LQA\EntryStruct;
 use Translations_SegmentTranslationStruct;
 
 class SegmentTranslationIssueValidator extends Base {

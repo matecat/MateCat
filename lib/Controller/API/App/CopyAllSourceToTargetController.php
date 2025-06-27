@@ -13,8 +13,8 @@ use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 use RuntimeException;
 use Translations_SegmentTranslationDao;
@@ -60,7 +60,7 @@ class CopyAllSourceToTargetController extends KleinController {
             throw new InvalidArgumentException( "Empty job password", -2 );
         }
 
-        $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $pass );
+        $job_data = JobDao::getByIdAndPassword( $id_job, $pass );
 
         if ( empty( $job_data ) ) {
             throw new InvalidArgumentException( "Wrong id_job-password couple. Job not found", -3 );
@@ -75,14 +75,14 @@ class CopyAllSourceToTargetController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct      $chunk
      * @param                $revision_number
      *
      * @return array
      * @throws ReflectionException
      * @throws Exception
      */
-    private function saveEventsAndUpdateTranslations( Jobs_JobStruct $chunk, $revision_number ): array {
+    private function saveEventsAndUpdateTranslations( JobStruct $chunk, $revision_number ): array {
 
         // BEGIN TRANSACTION
         $database = Database::obtain();

@@ -6,34 +6,34 @@
  * Time: 15:28
  */
 
-namespace ConnectedServices\Google\GDrive;
+namespace Utils\ConnectedServices\Google\GDrive;
 
 use ArrayObject;
 use CatUtils;
-use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\ConnectedServiceStruct;
 use Constants;
-use Conversion\FilesConverter;
 use DirectoryIterator;
 use Exception;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use FilesStorage\S3FilesStorage;
 use FilesystemIterator;
-use Filters\FiltersConfigTemplateStruct;
 use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use GuzzleHttp\Psr7\Response;
 use INIT;
-use Jobs_JobDao;
 use Log;
+use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Model\Conversion\FilesConverter;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\FilesStorage\S3FilesStorage;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobDao;
+use Model\RemoteFiles\RemoteFileDao;
 use Predis\Connection\ConnectionException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
-use RemoteFiles_RemoteFileDao;
 use RuntimeException;
 use Users_UserStruct;
 use Utils;
@@ -505,7 +505,7 @@ class Session {
      */
     public function createRemoteFile( int $fileId, string $remoteFileId, Google_Client $gClient ) {
         $this->getService( $gClient );
-        RemoteFiles_RemoteFileDao::insert( $fileId, 0, $remoteFileId, $this->serviceStruct->id, 1 );
+        RemoteFileDao::insert( $fileId, 0, $remoteFileId, $this->serviceStruct->id, 1 );
     }
 
     /**
@@ -526,19 +526,19 @@ class Session {
             throw new Exception( 'Cannot instantiate service' );
         }
 
-        $listRemoteFiles = RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
+        $listRemoteFiles = RemoteFileDao::getByFileId( $id_file, 1 );
         $remoteFile      = $listRemoteFiles[ 0 ];
 
         $gdriveFile = $service->files->get( $remoteFile->remote_id );
         $fileTitle  = $gdriveFile->getName();
 
-        $job                 = Jobs_JobDao::getById( $id_job )[ 0 ];
+        $job                 = JobDao::getById( $id_job )[ 0 ];
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
         $remoteFileService = $this->buildRemoteFile( $gClient );
         $copiedFile        = $remoteFileService->copyFile( $remoteFile->remote_id, $translatedFileTitle );
 
-        RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
+        RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id, $this->serviceStruct->id );
 
         $this->grantFileAccessByUrl( $copiedFile->id, $gClient );
     }

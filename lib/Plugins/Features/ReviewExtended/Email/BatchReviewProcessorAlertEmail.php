@@ -5,13 +5,13 @@ namespace Features\ReviewExtended\Email;
 use Email\AbstractEmail;
 use Exception;
 use INIT;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     private $chunk;
 
@@ -28,10 +28,10 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     /**
      * BatchEventCreatorAlertEmail constructor.
      *
-     * @param Jobs_JobStruct    $chunk
+     * @param JobStruct         $chunk
      * @param ChunkReviewStruct $chunkReview
      */
-    public function __construct( Jobs_JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
+    public function __construct( JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
         $this->chunk       = $chunk;
         $this->chunkReview = $chunkReview;
         $this->_setlayout( 'empty_skeleton.html' );

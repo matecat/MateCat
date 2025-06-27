@@ -1,14 +1,14 @@
 <?php
 
-namespace ConnectedServices\Facebook;
+namespace Utils\ConnectedServices\Facebook;
 
-use ConnectedServices\AbstractProvider;
-use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Facebook;
 use League\OAuth2\Client\Token\AccessToken;
+use Utils\ConnectedServices\AbstractProvider;
+use Utils\ConnectedServices\ProviderUser;
 
 class FacebookProvider extends AbstractProvider {
 
@@ -69,15 +69,15 @@ class FacebookProvider extends AbstractProvider {
     /**
      * @param AccessToken $token
      *
-     * @return ConnectedServiceUserModel
+     * @return ProviderUser
      */
-    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ProviderUser {
 
         $facebookClient = static::getClient( $this->redirectUrl );
 
         $fetched = $facebookClient->getResourceOwner( $token );
 
-        $user            = new ConnectedServiceUserModel();
+        $user            = new ProviderUser();
         $user->email     = $fetched->getEmail();
         $user->name      = $fetched->getFirstName();
         $user->lastName  = $fetched->getLastName();

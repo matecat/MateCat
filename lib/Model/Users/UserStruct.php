@@ -1,14 +1,14 @@
 <?php
 
-use ConnectedServices\OauthTokenEncryption;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Teams\TeamStruct;
 use Users\MetadataDao;
 use Users\MetadataStruct;
+use Utils\ConnectedServices\OauthTokenEncryption;
 
 /**
  * Created by PhpStorm.

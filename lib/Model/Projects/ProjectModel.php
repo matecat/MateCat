@@ -2,11 +2,14 @@
 
 namespace Projects;
 
-use Controller\API\Commons\Exceptions\AuthorizationError;
 use Constants_Teams;
-use Exceptions\ValidationError;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Email\ProjectAssignedEmail;
+use Exception;
+use Model\Exceptions\ValidationError;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;
@@ -21,42 +24,42 @@ use Users_UserStruct;
 class ProjectModel {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project_struct;
+    protected ProjectStruct $project_struct;
 
-    protected $willChange = array();
-    protected $changedFields = array();
+    protected array $willChange    = [];
+    protected array $changedFields = [];
 
-    protected $cacheTeamsToClean = [];
+    protected array $cacheTeamsToClean = [];
 
     /**
      * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
-    public function __construct( Projects_ProjectStruct $project ) {
+    public function __construct( ProjectStruct $project ) {
         $this->project_struct = $project;
     }
 
-    public function prepareUpdate( $field, $value ) {
+    public function prepareUpdate( string $field, $value ) {
         $this->willChange[ $field ] = $value;
     }
 
-    public function setUser( $user ) {
+    public function setUser( Users_UserStruct $user ) {
         $this->user = $user;
     }
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      * @throws AuthorizationError
      * @throws ValidationError
-     * @throws \ReflectionException
+     * @throws Exception
      */
-    public function update() {
+    public function update(): ProjectStruct {
         $this->changedFields = [];
 
-        $newStruct = new Projects_ProjectStruct( $this->project_struct->toArray() );
+        $newStruct = new ProjectStruct( $this->project_struct->toArray() );
 
         if ( isset( $this->willChange[ 'name' ] ) ) {
             $this->checkName();
@@ -80,7 +83,7 @@ class ProjectModel {
             $newStruct->$field = $value;
         }
 
-        $result = Projects_ProjectDao::updateStruct( $newStruct, [
+        $result = ProjectDao::updateStruct( $newStruct, [
                 'fields' => array_keys( $this->willChange )
         ] );
 
@@ -100,6 +103,10 @@ class ProjectModel {
         return $this->project_struct;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     protected function _sendNotificationEmails() {
         if (
                 $this->changedFields[ 'id_assignee' ] &&
@@ -107,7 +114,7 @@ class ProjectModel {
                 $this->user->uid != $this->changedFields[ 'id_assignee' ]
         ) {
             $assignee = ( new Users_UserDao )->getByUid( $this->changedFields[ 'id_assignee' ] );
-            $email    = new \Email\ProjectAssignedEmail( $this->user, $this->project_struct, $assignee );
+            $email    = new ProjectAssignedEmail( $this->user, $this->project_struct, $assignee );
             $email->send();
         }
     }
@@ -124,6 +131,7 @@ class ProjectModel {
     /**
      * @param $id_team
      *
+     * @throws ReflectionException
      * @throws ValidationError
      */
     private function checkAssigneeChangeInPersonalTeam( $id_team ) {
@@ -139,6 +147,7 @@ class ProjectModel {
     /**
      * @param $id_team
      *
+     * @throws ReflectionException
      * @throws ValidationError
      */
     private function checkIdAssignee( $id_team ) {
@@ -162,12 +171,13 @@ class ProjectModel {
 
     /**
      * @throws AuthorizationError
+     * @throws ReflectionException
      */
     private function checkIdTeam() {
 
         $memberShip = new MembershipDao();
 
-        //choose this method ( and use array_filter ) instead of findTeamByIdAndUser because the results of this one are cached
+        //choose this method (and use array_filter) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL( 60 )->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
 
         $found = array_filter( $memberList, function ( $values ) {
@@ -178,19 +188,16 @@ class ProjectModel {
             throw new AuthorizationError( "Not Authorized", 403 );
         }
 
-        /**
-         * @var $team \Teams\TeamStruct
-         */
         $team = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getPersonalByUid( $this->user->uid );
 
-        // check if the destination team is personal, in such case set the assignee to the user UID
+        // check if the destination team is personal, in such a case, set the assignee to the user UID
         if ( $team->id == $this->willChange[ 'id_team' ] && $team->type == Constants_Teams::PERSONAL ) {
             $this->willChange[ 'id_assignee' ] = $this->user->uid;
             $this->cacheTeamsToClean[]         = $this->willChange[ 'id_team' ];
             $this->cacheTeamsToClean[]         = $this->project_struct->id_team;
         }
 
-        // if the project has an assignee and the destination team is not personal,
+        // If the project has an assignee and the destination team isn't personal,
         // we have to check if the assignee_id exists in the other team. If not, reset the assignee
         elseif ( $this->project_struct->id_assignee ) {
 
@@ -214,6 +221,9 @@ class ProjectModel {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function cleanAssigneeCaches() {
 
         $teamDao                 = new TeamDao();
@@ -225,8 +235,11 @@ class ProjectModel {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function cleanProjectCache() {
-        $projectDao = new Projects_ProjectDao();
+        $projectDao = new ProjectDao();
         $projectDao->destroyCacheById( $this->project_struct->id );
     }
 

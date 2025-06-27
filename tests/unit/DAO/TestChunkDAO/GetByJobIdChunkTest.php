@@ -1,6 +1,7 @@
 <?php
 
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -17,7 +18,7 @@ class GetByJobIdChunkTest extends AbstractTest {
      */
     protected $chunk_Dao;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
@@ -64,7 +65,7 @@ class GetByJobIdChunkTest extends AbstractTest {
 
         $wrapped_result = $this->chunk_Dao->getByJobId( $this->job[ 'id' ] );
         $result         = $wrapped_result[ '0' ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

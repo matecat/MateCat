@@ -10,9 +10,9 @@
 namespace Features;
 
 
-use Controller\API\App\CreateProjectController;
 use BasicFeatureStruct;
 use Constants_Engines;
+use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
 use Database;
@@ -20,16 +20,16 @@ use Engine;
 use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_MMT;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
-use EnginesModel_MMTStruct;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
-use Jobs_JobStruct;
 use Log;
+use Model\Engines\EngineDAO;
+use Model\Engines\MMTStruct;
+use Model\Engines\EngineStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_MemoryKeyDao;
@@ -52,7 +52,7 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param EnginesModel_EngineStruct $newCreatedDbRowStruct
+     * Called in @param \Model\Engines\EngineStruct $newCreatedDbRowStruct
      *
      * @param Users_UserStruct $userStruct
      *
@@ -61,9 +61,9 @@ class Mmt extends BaseFeature {
      * @see engineController::add()
      *
      */
-    public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
+    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
 
-        if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
+        if ( !$newCreatedDbRowStruct instanceof MMTStruct ) {
             return $newCreatedDbRowStruct;
         }
 
@@ -89,7 +89,7 @@ class Mmt extends BaseFeature {
             }
 
         } catch ( Exception $e ) {
-            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
             throw new Exception( $e->getMessage(), $e->getCode() );
         }
@@ -104,7 +104,7 @@ class Mmt extends BaseFeature {
             }
 
         } catch ( Exception $e ) {
-            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
             throw $e;
         }
 
@@ -137,14 +137,14 @@ class Mmt extends BaseFeature {
      *
      * @param array                  $config
      * @param Engines_AbstractEngine $engine
-     * @param Jobs_JobStruct         $jobStruct
+     * @param JobStruct              $jobStruct
      *
      * @return array
      * @throws Exception
      * @see getContributionController::doAction()
      *
      */
-    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, Jobs_JobStruct $jobStruct ) {
+    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, JobStruct $jobStruct ) {
 
         if ( $engine instanceof Engines_MMT ) {
 
@@ -157,7 +157,7 @@ class Mmt extends BaseFeature {
                 return $tm_key->key;
             }, $tm_keys );
 
-            $jobsMetadataDao = new \Jobs\MetadataDao();
+            $jobsMetadataDao = new \Model\Jobs\MetadataDao();
             $contextRs       = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
             $mt_context      = @array_pop( $contextRs );
 
@@ -253,7 +253,7 @@ class Mmt extends BaseFeature {
      *                          'engineData'   => []
      *                          ]
      *
-     * @return EnginesModel_EngineStruct|bool
+     * @return \Model\Engines\EngineStruct|bool
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
@@ -279,7 +279,7 @@ class Mmt extends BaseFeature {
             /**
              * Create a record of type MMT
              */
-            $newEngineStruct = EnginesModel_MMTStruct::getStruct();
+            $newEngineStruct = MMTStruct::getStruct();
 
             $newEngineStruct->uid                                        = $logged_user->uid;
             $newEngineStruct->type                                       = Constants_Engines::MT;

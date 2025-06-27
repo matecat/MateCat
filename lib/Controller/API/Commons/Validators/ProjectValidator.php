@@ -5,8 +5,8 @@ namespace Controller\API\Commons\Validators;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Log;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Users_UserStruct;
 
@@ -51,19 +51,19 @@ class ProjectValidator extends Base {
     }
 
     /**
-     * @var ?Projects_ProjectStruct
+     * @var ?ProjectStruct
      */
-    private ?Projects_ProjectStruct $project = null;
-    private ?string                 $feature = null;
+    private ?ProjectStruct $project = null;
+    private ?string        $feature = null;
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      */
-    public function setProject( Projects_ProjectStruct $project ) {
+    public function setProject( ProjectStruct $project ) {
         $this->project = $project;
     }
 
-    public function getProject(): Projects_ProjectStruct {
+    public function getProject(): ProjectStruct {
         return $this->project;
     }
 
@@ -80,7 +80,7 @@ class ProjectValidator extends Base {
     protected function _validate(): void {
 
         if ( !$this->project ) {
-            $this->project = Projects_ProjectDao::findById( $this->id_project );
+            $this->project = ProjectDao::findById( $this->id_project );
         }
 
         if ( empty( $this->project ) ) {

@@ -9,16 +9,16 @@
 namespace Controller\ConnectedServices;
 
 
-use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\ConnectedServiceStruct;
-use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\Google\GoogleProvider;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use INIT;
+use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Model\ConnectedServices\GDriveTokenVerifyModel;
+use Model\Exceptions\NotFoundException;
 use Utils;
+use Utils\ConnectedServices\Google\GoogleProvider;
 use View\API\App\Json\ConnectedService;
 
 class ConnectedServicesController extends AbstractStatefulKleinController {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Jobs;
+namespace Model\Jobs;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {

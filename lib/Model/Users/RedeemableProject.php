@@ -9,8 +9,8 @@
 namespace Users;
 
 use Exception;
-use Jobs_JobDao;
-use Projects_ProjectDao;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use Routes;
 use Users_UserStruct;
 
@@ -22,7 +22,7 @@ class RedeemableProject {
     protected array            $session;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var \Model\Projects\ProjectStruct
      */
     protected $project;
 
@@ -38,7 +38,7 @@ class RedeemableProject {
     public function __getProject() {
         if ( !isset( $this->project ) ) {
             if ( isset( $this->session[ 'last_created_pid' ] ) ) {
-                $this->project = Projects_ProjectDao::findById( $this->session[ 'last_created_pid' ] );
+                $this->project = ProjectDao::findById( $this->session[ 'last_created_pid' ] );
             }
         }
 
@@ -56,11 +56,11 @@ class RedeemableProject {
             $this->project->id_team     = $this->user->getPersonalTeam()->id;
             $this->project->id_assignee = $this->user->getUid();
 
-            Projects_ProjectDao::updateStruct( $this->project, [
+            ProjectDao::updateStruct( $this->project, [
                     'fields' => [ 'id_team', 'id_customer', 'id_assignee' ]
             ] );
 
-            ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );
+            ( new JobDao() )->updateOwner( $this->project, $this->user );
         }
 
         $this->clear();

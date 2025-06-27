@@ -11,7 +11,6 @@ use Engines_EngineInterface;
 use Engines_MMT;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_Matches;
-use EnginesModel_MMTStruct;
 use Exception;
 use Features\Mmt;
 use INIT;
@@ -22,7 +21,8 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
-use Projects_ProjectDao;
+use Model\Engines\MMTStruct;
+use Model\Projects\ProjectDao;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
@@ -92,7 +92,7 @@ class Lara extends Engines_AbstractEngine {
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new LaraCredentials( $extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ] );
 
-        $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
+        $mmtStruct                   = MMTStruct::getStruct();
         $mmtStruct->type             = Constants_Engines::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: INIT::$DEFAULT_MMT_KEY,
@@ -102,7 +102,7 @@ class Lara extends Engines_AbstractEngine {
         $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
 
         if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-            $mmtStruct                    = EnginesModel_MMTStruct::getStruct();
+            $mmtStruct                    = MMTStruct::getStruct();
             $mmtStruct->type              = Constants_Engines::MT;
             $mmtStruct->extra_parameters  = [
                     'MMT-License'      => $extraParams[ 'MMT-License' ],
@@ -495,7 +495,7 @@ class Lara extends Engines_AbstractEngine {
         try {
 
             // get jobs keys
-            $project = Projects_ProjectDao::findById( $projectRow[ 'id' ] );
+            $project = ProjectDao::findById( $projectRow[ 'id' ] );
             $user    = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             foreach ( $project->getJobs() as $job ) {

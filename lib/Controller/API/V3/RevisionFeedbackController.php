@@ -6,19 +6,19 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
+use Model\ReviseFeedback\FeedbackDAO;
+use Model\ReviseFeedback\FeedbackStruct;
 use ReflectionException;
-use Revise\FeedbackDAO;
-use Revise\FeedbackStruct;
 
 class RevisionFeedbackController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): RevisionFeedbackController {
+    public function setChunk( JobStruct $chunk ): RevisionFeedbackController {
         $this->chunk = $chunk;
 
         return $this;

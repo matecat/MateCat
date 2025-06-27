@@ -2,28 +2,28 @@
 
 namespace Controller\Traits;
 
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use LQA\ChunkReviewDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
 use ReflectionException;
 
 trait ChunkNotFoundHandlerTrait {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
-    protected Jobs_JobStruct $chunk;
+    protected JobStruct $chunk;
 
     /**
      * @param $id_job
      * @param $password
      *
-     * @return ?Jobs_JobStruct
+     * @return ?JobStruct
      * @throws ReflectionException
      */
-    protected function getJob( $id_job, $password ): ?Jobs_JobStruct {
+    protected function getJob( $id_job, $password ): ?JobStruct {
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        $job = JobDao::getByIdAndPassword( $id_job, $password );
 
         if ( null === $job ) {
             $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );

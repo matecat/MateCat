@@ -12,20 +12,20 @@ namespace AsyncTasks\Workers;
 use Contribution\ContributionSetStruct;
 use Engine;
 use Exception;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TmKeyManagement_TmKeyManagement;
 
 class SetContributionMTWorker extends SetContributionWorker {
 
     /**
-     * @param Jobs_JobStruct $jobStruct
+     * @param \Model\Jobs\JobStruct $jobStruct
      *
      * @throws EndQueueException
      * @see SetContributionWorker::_loadEngine
      *
      */
-    protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
+    protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_mt_engine != $this->_engine->getEngineRecord()->id ) {
             try {
@@ -87,7 +87,7 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
+    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, JobStruct $jobStruct ) {
 
         //find all the job's TMs with write grants and make a contribution to them
         $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );

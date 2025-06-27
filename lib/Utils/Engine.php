@@ -1,4 +1,8 @@
 <?php
+
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -21,14 +25,14 @@ class Engine {
             throw new Exception( "Missing id engineRecord", -1 );
         }
 
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO        = new EngineDAO( Database::obtain() );
+        $engineStruct     = EngineStruct::getStruct();
         $engineStruct->id = $id;
 
         $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engineRecord = $eng[ 0 ] ?? null;
 
@@ -49,12 +53,12 @@ class Engine {
     }
 
     /**
-     * @param EnginesModel_EngineStruct $engineRecord
+     * @param EngineStruct $engineRecord
      *
      * @return Engines_EngineInterface
      * @throws Exception
      */
-    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ): Engines_EngineInterface {
+    public static function createTempInstance( EngineStruct $engineRecord ): Engines_EngineInterface {
 
         $className = 'Engines_' . $engineRecord->class_load;
         if ( !class_exists( $className ) ) {

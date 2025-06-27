@@ -7,12 +7,12 @@
  *
  */
 
-namespace Outsource;
+namespace Model\Outsource;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use Database;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
+use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;
 
@@ -42,12 +42,12 @@ class ConfirmationDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @return IDaoStruct|TranslatedConfirmationStruct
      * @throws ReflectionException
      */
-    public function getConfirmation( Jobs_JobStruct $jobStruct ) {
+    public function getConfirmation( JobStruct $jobStruct ) {
 
         $query = self::$_query_get_by_job_id_password;
         $data  = [ 'id_job' => $jobStruct->id, 'password' => $jobStruct->password ];
@@ -62,7 +62,7 @@ class ConfirmationDao extends AbstractDao {
 
     }
 
-    public function destroyConfirmationCache( Jobs_JobStruct $jobStruct ) {
+    public function destroyConfirmationCache( JobStruct $jobStruct ) {
         $query = self::$_query_get_by_job_id_password;
         $stmt  = $this->_getStatementForQuery( $query );
 

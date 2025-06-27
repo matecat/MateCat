@@ -1,6 +1,8 @@
 <?php
 
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -17,11 +19,11 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
      */
     protected $chunk_Dao;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
     /**
@@ -47,7 +49,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
                     )"
         );
         $pId           = $this->database_instance->getConnection()->lastInsertId();
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
+        $this->project = new ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -67,7 +69,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
         );
 
         $jobId     = $this->database_instance->getConnection()->lastInsertId();
-        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
+        $this->job = new JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
 
 
     }
@@ -80,7 +82,7 @@ class GetByIdProjectAndIdJobChunkTest extends AbstractTest {
 
         $wrapped_result = $this->chunk_Dao->getByIdProjectAndIdJob( $this->project[ 'id' ], $this->job[ 'id' ] );
         $result         = $wrapped_result[ '0' ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

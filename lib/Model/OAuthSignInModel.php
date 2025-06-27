@@ -1,9 +1,9 @@
 <?php
 
-use ConnectedServices\OauthTokenEncryption;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Email\WelcomeEmail;
+use Utils\ConnectedServices\OauthTokenEncryption;
 use Teams\TeamDao;
 use Users\MetadataDao;
 use Users\RedeemableProject;

@@ -2,7 +2,7 @@
 
 namespace Autopropagation;
 
-use Propagation_PropagationTotalStruct;
+use Model\Propagation\PropagationTotalStruct;
 use Translations_SegmentTranslationStruct;
 use Utils;
 
@@ -60,11 +60,11 @@ class PropagationAnalyser {
      * @param Translations_SegmentTranslationStruct   $parentSegmentTranslation
      * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
-     * @return Propagation_PropagationTotalStruct
+     * @return PropagationTotalStruct
      */
     public function analyse( Translations_SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
 
-        $propagation = new Propagation_PropagationTotalStruct();
+        $propagation = new PropagationTotalStruct();
 
         if ( $parentSegmentTranslation->match_type !== 'ICE' || $parentSegmentTranslation->locked != 1 ) { // check IF the parent segment is ICE
             foreach ( $arrayOfSegmentTranslationToPropagate as $segmentTranslation ) {

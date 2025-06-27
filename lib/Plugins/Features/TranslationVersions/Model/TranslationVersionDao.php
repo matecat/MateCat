@@ -3,12 +3,12 @@
 namespace Features\TranslationVersions\Model;
 
 use Constants;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\QualityReport\SegmentEventsStruct;
 use PDO;
-use QualityReport\SegmentEventsStruct;
 use Translations_SegmentTranslationStruct;
 use Utils;
 
@@ -46,7 +46,7 @@ class TranslationVersionDao extends AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public static function getVersionsForChunk( Jobs_JobStruct $chunk ) {
+    public static function getVersionsForChunk( JobStruct $chunk ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job " .
                 " ORDER BY creation_date DESC ";
@@ -133,7 +133,7 @@ class TranslationVersionDao extends AbstractDao {
      * @param $id_job
      * @param $id_segment
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return \Model\DataAccess\IDaoStruct[]
      */
     public function getVersionsForRevision( $id_job, $id_segment ) {
 
@@ -345,12 +345,12 @@ class TranslationVersionDao extends AbstractDao {
     /**
      * @param Translations_SegmentTranslationStruct $propagatorSegment
      * @param int                                   $id_segment
-     * @param Jobs_JobStruct                        $job_data
+     * @param JobStruct                             $job_data
      * @param Propagation_PropagationTotalStruct[]  $segmentsToUpdate
      *
      * @return void
      */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagatorSegment, int $id_segment, Jobs_JobStruct $job_data, array $segmentsToUpdate ) {
+    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagatorSegment, int $id_segment, JobStruct $job_data, array $segmentsToUpdate ) {
 
         $chunked_segments_list = array_chunk( $segmentsToUpdate, 20, true );
 

@@ -1,31 +1,30 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use Files\MetadataDao as Files_MetadataDao;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use View\API\V3\Json\FilesInfo;
 
 class FilesInfoUtility {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     private $chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     private $project;
 
     /**
      * FilesInfoUtility constructor.
      *
-     * @param Jobs_JobStruct $chunkStruct
+     * @param JobStruct $chunkStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct ) {
+    public function __construct( JobStruct $chunkStruct ) {
         $this->chunk   = $chunkStruct;
         $this->project = $chunkStruct->getProject();
     }
@@ -39,8 +38,8 @@ class FilesInfoUtility {
      */
     public function getInfo( $showMetadata = true ) {
 
-        $fileInfo        = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
-        $fileMetadataDao = new Files_MetadataDao();
+        $fileInfo        = JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
+        $fileMetadataDao = new MetadataDao();
         $filePartsDao    = new FilesPartsDao();
 
         // Show metadata
@@ -112,7 +111,7 @@ class FilesInfoUtility {
     public function getInstructions( $id_file, $filePartsId = null ) {
 
         if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
-            $metadataDao  = new Files_MetadataDao;
+            $metadataDao  = new MetadataDao;
             $instructions = $metadataDao->get( $this->project->id, $id_file, 'instructions', $filePartsId, 60 * 5 );
 
             if ( !$instructions ) {
@@ -138,7 +137,7 @@ class FilesInfoUtility {
     public function setInstructions( $id_file, $instructions ) {
 
         if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
-            $metadataDao = new Files_MetadataDao;
+            $metadataDao = new MetadataDao;
             if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 ) ) {
                 $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
             } else {

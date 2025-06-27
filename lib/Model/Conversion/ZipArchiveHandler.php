@@ -1,11 +1,11 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Conversion\MimeTypes\MimeTypes;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
 use INIT;
+use Model\Conversion\MimeTypes\MimeTypes;
+use Model\FilesStorage\AbstractFilesStorage;
 use RuntimeException;
 use ZipArchive;
 

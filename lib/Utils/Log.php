@@ -1,18 +1,13 @@
 <?php
-error_reporting( E_ALL );
-define( 'DEBUG', 1 );
 
 if ( !defined( 'LOG_REPOSITORY' ) ) {
     define( 'LOG_REPOSITORY', INIT::$LOG_REPOSITORY );
 }
 
-if ( !defined( 'LOG_FILENAME' ) ) {
-    define( 'LOG_FILENAME', 'log.txt' );
-}
-
 // Be sure Monolog is installed via composer
+const LOG_FILENAME = 'log.txt';
 if ( class_exists( 'Monolog\Logger' ) ) {
-    Log::$useMonolog = true;
+    Log::setUseMonolog();
 }
 
 use Monolog\Formatter\LineFormatter;
@@ -29,13 +24,28 @@ class Log {
     /**
      * @var bool
      */
-    public static bool $useMonolog = false;
+    protected static bool $useMonolog = false;
 
-    public static string $fileName = LOG_FILENAME;
+    public static string $fileName    = LOG_FILENAME;
+    public static string $oldFileName = LOG_FILENAME;
 
     public static ?string $uniqID = null;
 
     public static ?string $requestID = null;
+
+    public static function setLogFileName( string $fileName ) {
+        self::$oldFileName = self::$fileName;
+        self::$fileName    = $fileName;
+        self::resetLogger();
+    }
+
+    /**
+     * @param bool $useMonolog
+     *
+     */
+    public static function setUseMonolog( bool $useMonolog = true ) {
+        self::$useMonolog = $useMonolog;
+    }
 
     protected static function _writeTo( $stringData ) {
 
@@ -57,8 +67,8 @@ class Log {
     }
 
     protected static function initMonolog() {
-        if( empty( self::$logger ) ){
-            $streamHandler   = new StreamHandler( self::getFileNamePath() );
+        if ( empty( self::$logger ) ) {
+            $streamHandler = new StreamHandler( self::getFileNamePath() );
             $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
             $streamHandler->setFormatter( $fileFormatter );
             self::$logger = new Logger( 'Matecat', [ $streamHandler ] );
@@ -99,7 +109,7 @@ class Log {
 
     }
 
-    public static function getContext(): array {
+    protected static function getContext(): array {
 
         $trace = debug_backtrace( 2 );
         $_ip   = Utils::getRealIpAddr();
@@ -116,10 +126,10 @@ class Log {
 
     }
 
-    public static function doJsonLog( $content, $filename = null ) {
-        if ( !is_null( $filename ) ) {
-            $old_name      = Log::$fileName;
-            Log::$fileName = $filename;
+    public static function doJsonLog( $content, string $filename = null ) {
+
+        if ( !empty( $filename ) && self::$fileName != $filename ) {
+            self::setLogFileName( $filename );
         }
 
         $_logObject = [
@@ -134,9 +144,10 @@ class Log {
 
         self::_writeTo( json_encode( $_logObject ) );
 
-        if ( !is_null( $filename ) ) {
-            Log::$fileName = $old_name;
+        if ( self::$fileName != self::$oldFileName ) {
+            self::setLogFileName( self::$oldFileName );
         }
+
     }
 
     /**
@@ -221,6 +232,7 @@ class Log {
         // Output method
         if ( $return === false ) {
             self::_writeTo( self::_getHeader() . "\n" . $dump . "\n" );
+
             return null;
         } else {
             return $dump;

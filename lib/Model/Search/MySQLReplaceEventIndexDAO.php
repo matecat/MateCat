@@ -1,9 +1,11 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Search\ReplaceEventCurrentVersionStruct;
+namespace Model\Search;
 
-class Search_MySQLReplaceEventIndexDAO extends AbstractDao implements Search_ReplaceEventIndexDAOInterface {
+use Database;
+use Model\DataAccess\AbstractDao;
+
+class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface {
 
     const STRUCT_TYPE = ReplaceEventCurrentVersionStruct::class;
     const TABLE       = 'replace_events_current_version';
@@ -13,7 +15,7 @@ class Search_MySQLReplaceEventIndexDAO extends AbstractDao implements Search_Rep
      *
      * @return int
      */
-    public function getActualIndex( $idJob ) {
+    public function getActualIndex( $idJob ): int {
         $conn  = Database::obtain()->getConnection();
         $query = "SELECT version as v FROM " . self::TABLE . " WHERE id_job=:id_job";
         $stmt  = $conn->prepare( $query );
@@ -25,12 +27,12 @@ class Search_MySQLReplaceEventIndexDAO extends AbstractDao implements Search_Rep
     }
 
     /**
-     * @param $id_job
-     * @param $version
+     * @param int $id_job
+     * @param int $version
      *
      * @return int
      */
-    public function save( $id_job, $version ) {
+    public function save( int $id_job, int $version ): int {
         $conn = Database::obtain()->getConnection();
 
         if ( 0 !== $this->getActualIndex( $id_job ) ) {

@@ -3,30 +3,15 @@
 namespace Controller\API\V2;
 
 use CatUtils;
-use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\GDriveTokenVerifyModel;
-use ConnectedServices\Google\GDrive\RemoteFileService;
-use ConnectedServices\Google\GoogleProvider;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
-use Conversion\Filters;
-use Conversion\ZipArchiveHandler;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use FilesStorage\FsFilesStorage;
-use FilesStorage\S3FilesStorage;
 use Google_Service_Drive_DriveFile;
 use INIT;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Langs\Languages;
 use Log;
-use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -34,13 +19,28 @@ use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\ConnectedServices\ConnectedServiceDao;
+use Model\ConnectedServices\GDriveTokenVerifyModel;
+use Model\Conversion\Filters;
+use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\FilesStorage\FsFilesStorage;
+use Model\FilesStorage\S3FilesStorage;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\RemoteFiles\RemoteFileDao;
+use Model\Segments\SegmentDao;
 use Predis\Connection\ConnectionException;
-use Projects_ProjectDao;
 use RedisHandler;
 use ReflectionException;
-use RemoteFiles_RemoteFileDao;
-use Segments_SegmentDao;
 use Utils;
+use Utils\ConnectedServices\Google\GDrive\RemoteFileService;
+use Utils\ConnectedServices\Google\GoogleProvider;
 use XliffReplacer\XliffReplacerCallback;
 use ZipContentObject;
 
@@ -48,10 +48,10 @@ set_time_limit( 180 );
 
 class DownloadController extends AbstractDownloadController {
 
-    protected string         $download_type;
-    protected Jobs_JobStruct $job;
-    protected bool           $forceXliff = false;
-    protected                $downloadToken;
+    protected ?string   $download_type = null;
+    protected JobStruct $job;
+    protected bool      $forceXliff    = false;
+    protected           $downloadToken;
 
     /**
      * @var RemoteFileService
@@ -167,7 +167,7 @@ class DownloadController extends AbstractDownloadController {
      */
     private function processDownload() {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = $this->job = Jobs_JobDao::getByIdAndPassword( $this->id_job, $this->password );
+        $jobData = $this->job = JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
@@ -202,7 +202,7 @@ class DownloadController extends AbstractDownloadController {
             4) The temporary file is passed to the converter, which generates an updated version of the original file.
             5) Finally, the temporary file is deleted.
          */
-        $sDao = new Segments_SegmentDao();
+        $sDao = new SegmentDao();
 
         //File array is chunked. Each chunk will be used for a parallel conversion request.
         $files_job = array_chunk( $files_job, self::FILES_CHUNK_SIZE );
@@ -340,7 +340,7 @@ class DownloadController extends AbstractDownloadController {
             // check for errors and log them on fatal_errors.txt
             foreach ( $convertResult as $result ) {
                 if ( $result[ 'isSuccess' ] === false and isset( $result[ 'errorMessage' ] ) ) {
-                    Log::$fileName = 'fatal_errors.txt';
+                    Log::setLogFileName( 'fatal_errors.txt' );
                     Log::doJsonLog( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
                 }
             }
@@ -463,9 +463,9 @@ class DownloadController extends AbstractDownloadController {
 
             } catch ( Exception $e ) {
 
-                $msg           = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
-                $msg           .= "\n\n Request: " . var_export( $_REQUEST, true );
-                Log::$fileName = 'fatal_errors.txt';
+                $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
+                $msg .= "\n\n Request: " . var_export( $_REQUEST, true );
+                Log::setLogFileName( 'fatal_errors.txt' );
                 Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );
                 $this->unlockToken(
@@ -594,7 +594,7 @@ class DownloadController extends AbstractDownloadController {
      */
     private function anyRemoteFile(): bool {
         if ( is_null( $this->thereIsARemoteFile ) ) {
-            $this->thereIsARemoteFile = RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+            $this->thereIsARemoteFile = RemoteFileDao::jobHasRemoteFiles( $this->id_job );
         }
 
         return $this->thereIsARemoteFile;
@@ -674,7 +674,7 @@ class DownloadController extends AbstractDownloadController {
         $firstFileId = $keys[ 0 ];
 
         // find the proper remote file by id_job and file_id
-        $remoteFile = RemoteFiles_RemoteFileDao::getByFileAndJob( $firstFileId, $this->job->id );
+        $remoteFile = RemoteFileDao::getByFileAndJob( $firstFileId, $this->job->id );
 
         $dao              = new ConnectedServiceDao();
         $connectedService = $dao->findById( $remoteFile->connected_service_id );
@@ -699,7 +699,7 @@ class DownloadController extends AbstractDownloadController {
      * @throws Exception
      */
     private function outputResultForOriginalFiles() {
-        $files = RemoteFiles_RemoteFileDao::getOriginalsByJobId( $this->id_job );
+        $files = RemoteFileDao::getOriginalsByJobId( $this->id_job );
 
         $response = [ 'urls' => [] ];
 
@@ -742,7 +742,7 @@ class DownloadController extends AbstractDownloadController {
      */
     private function updateRemoteFiles( array $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
-            $remoteFile                           = RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
+            $remoteFile                           = RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );
         }
     }
@@ -845,7 +845,7 @@ class DownloadController extends AbstractDownloadController {
      */
     public function reBuildZipContent( string $zipFileName, array $newInternalZipFiles ): string {
 
-        $project = Projects_ProjectDao::findById( $this->job[ 'id_project' ] );
+        $project = ProjectDao::findById( $this->job[ 'id_project' ] );
 
         // this is the filesystem path
         $zipFile  = ( new FsFilesStorage() )->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );

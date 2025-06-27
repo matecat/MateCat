@@ -1,5 +1,7 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -57,13 +59,13 @@ Z;
                 ]
 
         ];
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
@@ -126,13 +128,13 @@ Z;
                 ]
 
         ];
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
@@ -236,13 +238,13 @@ Z;
         $array_paramemeter = "bar_and_foo";
 
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
@@ -305,8 +307,8 @@ Z;
 
         $url_mock_param = "https://analyze.mymemory.translated.net/api/v1/analyze";
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
@@ -322,7 +324,7 @@ Z;
 
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 

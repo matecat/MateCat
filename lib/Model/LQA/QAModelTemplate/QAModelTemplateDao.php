@@ -1,18 +1,18 @@
 <?php
 
-namespace QAModelTemplate;
+namespace Model\LQA\QAModelTemplate;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
 use Exception;
 use INIT;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\Projects\ProjectTemplateDao;
 use PDO;
-use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONSchema\JSONValidator;

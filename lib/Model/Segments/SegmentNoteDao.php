@@ -1,34 +1,39 @@
 <?php
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
+namespace Model\Segments;
 
-class Segments_SegmentNoteDao extends AbstractDao {
+use Database;
+use Model\DataAccess\AbstractDao;
+use PDO;
+use ReflectionException;
+
+class SegmentNoteDao extends AbstractDao {
 
     /**
-     * @param     $id_segment
+     * @param int $id_segment
      * @param int $ttl
      *
-     * @return IDaoStruct[]|Segments_SegmentNoteStruct[]
+     * @return SegmentNoteStruct[]
+     * @throws ReflectionException
      */
-    public static function getBySegmentId( $id_segment, $ttl = 86400 ) {
+    public static function getBySegmentId( int $id_segment, int $ttl = 86400 ): array {
 
         $thisDao = new self();
         $conn    = $thisDao->getDatabaseHandler();
         $stmt    = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment = ? " );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
-                new Segments_SegmentNoteStruct(),
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt,
+                SegmentNoteStruct::class,
                 [ $id_segment ]
         );
 
     }
 
     /**
-     * @param array    $ids
-     * @param int $ttl
+     * @param array $ids
+     * @param int   $ttl
      *
-     * @return Segments_SegmentNoteStruct[]
+     * @return SegmentNoteStruct[]
      * @throws ReflectionException
      */
     public static function getBySegmentIds( array $ids = [], int $ttl = 86400 ): array {
@@ -37,24 +42,11 @@ class Segments_SegmentNoteDao extends AbstractDao {
         $conn    = $thisDao->getDatabaseHandler();
         $stmt    = $conn->getConnection()->prepare( "SELECT * FROM segment_notes WHERE id_segment IN ( " . implode( ', ', $ids ) . " ) " );
 
-        /** @var  $result Segments_SegmentNoteStruct[] */
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt,
-                new Segments_SegmentNoteStruct(),
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt,
+                SegmentNoteStruct::class,
                 []
         );
 
-        return $result;
-
-    }
-
-    public static function insertRecord( $values ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "INSERT INTO segment_notes " .
-                " ( id_segment, internal_id, note ) VALUES " .
-                " ( :id_segment, :internal_id, :note ) "
-        );
-
-        $stmt->execute( $values );
     }
 
     /**
@@ -76,7 +68,13 @@ class Segments_SegmentNoteDao extends AbstractDao {
 
     }
 
-    public static function getAllAggregatedBySegmentIdInInterval( $start, $stop ) {
+    /**
+     * @param int $start
+     * @param int $stop
+     *
+     * @return array
+     */
+    public static function getAllAggregatedBySegmentIdInInterval( int $start, int $stop ): array {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT id_segment, id, note, json FROM segment_notes " .
@@ -89,20 +87,21 @@ class Segments_SegmentNoteDao extends AbstractDao {
 
 
     /**
-     * @param     $id_segment_start
-     * @param     $id_segment_stop
+     * @param int $id_segment_start
+     * @param int $id_segment_stop
      * @param int $ttl
      *
-     * @return IDaoStruct[]|Segments_SegmentNoteStruct[]
+     * @return SegmentNoteStruct[]
+     * @throws ReflectionException
      */
-    public static function getJsonNotesByRange( $id_segment_start, $id_segment_stop, $ttl = 0 ) {
+    public static function getJsonNotesByRange( int $id_segment_start, int $id_segment_stop, int $ttl = 0 ): array {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( "SELECT id_segment, json FROM segment_notes WHERE id_segment BETWEEN :start AND :stop AND note IS NULL " );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject(
-                $stmt, new Segments_SegmentNoteStruct(),
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap(
+                $stmt, SegmentNoteStruct::class,
                 [
                         'start' => $id_segment_start,
                         'stop'  => $id_segment_stop

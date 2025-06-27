@@ -7,7 +7,7 @@
  *
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 use Countable;
 use DomainException;

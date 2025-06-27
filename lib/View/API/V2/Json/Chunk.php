@@ -9,19 +9,19 @@
 namespace View\API\V2\Json;
 
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobStruct;
 
 class Chunk extends Job {
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return array
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ): array {
+    public function renderOne( JobStruct $chunk ): array {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 

@@ -14,7 +14,7 @@ use BadMethodCallException;
 use Constants_TranslationStatus;
 use Exception;
 use LogicException;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectStruct;
 use ReflectionClass;
 
 class CounterModel {
@@ -27,7 +27,7 @@ class CounterModel {
     protected $oldStatus;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     private $project;
 
@@ -75,9 +75,9 @@ class CounterModel {
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      */
-    public function setProject( Projects_ProjectStruct $project ) {
+    public function setProject( ProjectStruct $project ) {
         $this->project = $project;
     }
 

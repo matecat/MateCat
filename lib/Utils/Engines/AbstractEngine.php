@@ -1,5 +1,8 @@
 <?php
 
+use Model\Engines\GoogleTranslateStruct;
+use Model\Engines\EngineStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -10,9 +13,9 @@
 abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
-    protected EnginesModel_EngineStruct $engineRecord;
+    protected EngineStruct $engineRecord;
 
     protected string $className;
     protected array  $_config = [];
@@ -109,9 +112,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct {
+    public function getEngineRecord(): EngineStruct {
         return $this->engineRecord;
     }
 
@@ -338,7 +341,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         /**
          * Create a record of type GoogleTranslate
          */
-        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+        $newEngineStruct = GoogleTranslateStruct::getStruct();
 
         $newEngineStruct->name                                = "Generic";
         $newEngineStruct->uid                                 = 0;

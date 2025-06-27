@@ -4,24 +4,24 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Teams\MembershipDao;
 
 class ProjectAccessValidator extends Base {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private Projects_ProjectStruct $project;
+    private ProjectStruct $project;
 
     /**
      * Class constructor.
      *
-     * @param KleinController        $controller The KleinController object.
-     * @param Projects_ProjectStruct $project    The Projects_ProjectStruct object.
+     * @param KleinController $controller The KleinController object.
+     * @param ProjectStruct   $project    The ProjectStruct object.
      */
-    public function __construct( KleinController $controller, Projects_ProjectStruct $project ) {
+    public function __construct( KleinController $controller, ProjectStruct $project ) {
         parent::__construct( $controller );
         $this->project = $project;
     }

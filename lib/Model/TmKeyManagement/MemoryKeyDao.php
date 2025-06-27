@@ -6,9 +6,9 @@
  * Time: 18.45
  */
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 
 /**
  * Class DataAccess_MemoryKeyDao<br/>

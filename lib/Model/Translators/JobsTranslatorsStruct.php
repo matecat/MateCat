@@ -12,7 +12,7 @@ namespace Translators;
 use Users_UserDao;
 use Users_UserStruct;
 
-class JobsTranslatorsStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class JobsTranslatorsStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct {
 
     public $id_job;
     public $job_password;

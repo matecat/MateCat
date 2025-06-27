@@ -1,9 +1,9 @@
 <?php
-namespace Files;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
-use Jobs_JobStruct;
-use Segments_SegmentDao;
+namespace Model\Files;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Jobs\JobStruct;
+use Model\Segments\SegmentDao;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;
 
@@ -17,7 +17,7 @@ class FileStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public $is_converted;
 
     public function getSegmentsCount() {
-        return ( new Segments_SegmentDao() )->countByFile( $this );
+        return ( new SegmentDao() )->countByFile( $this );
     }
 
     /**
@@ -30,11 +30,11 @@ class FileStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return array
      */
-    public function getMaxMinSegmentBoundariesForChunk( Jobs_JobStruct $chunk ) {
+    public function getMaxMinSegmentBoundariesForChunk( JobStruct $chunk ) {
         return ( new FilesJobDao() )->getSegmentBoundariesForChunk( $this, $chunk );
     }
 

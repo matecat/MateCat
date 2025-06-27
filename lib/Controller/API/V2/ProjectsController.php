@@ -8,10 +8,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Utils;
@@ -26,9 +26,9 @@ use View\API\V2\Json\Project;
 class ProjectsController extends KleinController {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private Projects_ProjectStruct $project;
+    private ProjectStruct $project;
 
     /**
      * @return void
@@ -70,7 +70,7 @@ class ProjectsController extends KleinController {
         ) {
 
             $due_date    = Utils::mysqlTimestamp( $this->params[ 'due_date' ] );
-            $project_dao = new Projects_ProjectDao;
+            $project_dao = new ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
 
@@ -84,7 +84,7 @@ class ProjectsController extends KleinController {
      * @throws ReflectionException
      */
     public function deleteDueDate() {
-        $project_dao = new Projects_ProjectDao;
+        $project_dao = new ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
 
         $formatted = new Project();
@@ -125,7 +125,7 @@ class ProjectsController extends KleinController {
 
             // update a job only if it is NOT deleted
             if ( !$chunk->isDeleted() ) {
-                Jobs_JobDao::updateJobStatus( $chunk, $status );
+                JobDao::updateJobStatus( $chunk, $status );
 
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
                 Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );

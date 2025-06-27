@@ -5,13 +5,13 @@ namespace OutsourceTo;
 use Bootstrap;
 use Exception;
 use INIT;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Log;
 use Model\Analysis\Status;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use MultiCurlHandler;
-use Projects_ProjectDao;
 use ReflectionException;
 use Shop_Cart;
 use Shop_ItemHTSQuoteJob;
@@ -189,7 +189,7 @@ class Translated extends AbstractProvider {
          ************************** GET VOLUME ANALYSIS FIRST *************************
          */
 
-        $_project_data  = Projects_ProjectDao::getProjectAndJobData( $this->pid );
+        $_project_data  = ProjectDao::getProjectAndJobData( $this->pid );
         $analysisStatus = new Status( $_project_data, $this->features, $this->user );
         $volAnalysis = json_encode($analysisStatus->fetchData()->getResult());
 
@@ -197,10 +197,10 @@ class Translated extends AbstractProvider {
          *************************** GET SUBJECT **************************************
          */
         // `subject` is retrieved from the database: get the first job of the project and get its subject
-        $jStruct           = new Jobs_JobStruct();
+        $jStruct           = new JobStruct();
         $jStruct->id       = $this->jobList[ 0 ][ 'jid' ];
         $jStruct->password = $this->jobList[ 0 ][ 'jpassword' ];
-        $jobDao            = new Jobs_JobDao();
+        $jobDao            = new JobDao();
         $jobData           = $jobDao->setCacheTTL( 60 * 60 )->read( $jStruct )[ 0 ];
 
         return [ $jobData[ 'subject' ], json_decode( $volAnalysis, true ) ];

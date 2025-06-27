@@ -6,10 +6,10 @@ use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobDao;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
-use Projects_ProjectDao;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Utils;
@@ -32,7 +32,7 @@ class ChangeJobsStatusController extends KleinController {
         if ( $request[ 'res_type' ] == "prj" ) {
 
             try {
-                $project = Projects_ProjectDao::findByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
+                $project = ProjectDao::findByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
                 $this->log( $msg );
@@ -42,7 +42,7 @@ class ChangeJobsStatusController extends KleinController {
 
             $chunks = $project->getJobs();
 
-            Jobs_JobDao::updateAllJobsStatusesByProjectId( $project->id, $request[ 'new_status' ] );
+            JobDao::updateAllJobsStatusesByProjectId( $project->id, $request[ 'new_status' ] );
 
             foreach ( $chunks as $chunk ) {
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
@@ -60,7 +60,7 @@ class ChangeJobsStatusController extends KleinController {
                 throw new NotFoundException( "Job not found" );
             }
 
-            Jobs_JobDao::updateJobStatus( $firstChunk, $request[ 'new_status' ] );
+            JobDao::updateJobStatus( $firstChunk, $request[ 'new_status' ] );
             $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
             Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         }

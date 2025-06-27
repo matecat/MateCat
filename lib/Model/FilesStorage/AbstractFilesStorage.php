@@ -1,6 +1,6 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
 use Database;
 use DirectoryIterator;

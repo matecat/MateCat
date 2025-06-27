@@ -6,7 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Jobs\MetadataDao;
+use Model\Jobs\MetadataDao;
 use Utils;
 
 class JobMetadataController extends KleinController {

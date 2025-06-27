@@ -1,7 +1,7 @@
 <?php
 
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\S3FilesStorage;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\S3FilesStorage;
 use Predis\Connection\ConnectionException;
 
 /**

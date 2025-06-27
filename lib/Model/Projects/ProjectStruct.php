@@ -1,16 +1,25 @@
 <?php
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\ArrayAccessTrait;
-use DataAccess\IDaoStruct;
-use LQA\ModelDao;
-use LQA\ModelStruct;
+namespace Model\Projects;
+
+use ArrayAccess;
+use Constants_ProjectStatus;
+use Database;
+use FeatureSet;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
 use Model\Jobs\ChunkDao;
-use RemoteFiles\RemoteFileServiceNameStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\RemoteFiles\RemoteFileServiceNameStruct;
+use ReflectionException;
 use Teams\TeamDao;
 use Teams\TeamStruct;
 
-class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -45,11 +54,11 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
     /**
      * @param int $ttl
      *
-     * @return Jobs_JobStruct[]
+     * @return JobStruct[]
      */
     public function getJobs( int $ttl = 0 ): array {
         return $this->cachable( __function__, $this->id, function ( $id ) use ( $ttl ) {
-            return Jobs_JobDao::getByProjectId( $id, $ttl );
+            return JobDao::getByProjectId( $id, $ttl );
         } );
     }
 
@@ -63,7 +72,7 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @throws ReflectionException
      */
     public function setMetadata( string $key, string $value ): bool {
-        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao = new MetadataDao( Database::obtain() );
 
         return $dao->set( $this->id, $key, $value );
     }
@@ -98,11 +107,11 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @return null|Projects_MetadataStruct[]
+     * @return null|MetadataStruct[]
      */
     public function getMetadata(): array {
         return $this->cachable( __function__, $this, function ( $project ) {
-            $mDao = new Projects_MetadataDao();
+            $mDao = new MetadataDao();
 
             return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
         } );
@@ -115,9 +124,9 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
 
         return $this->cachable( __function__, $this, function () {
 
-            $dao = new Projects_ProjectDao();
+            $dao = new ProjectDao();
 
-            /** @var RemoteFileServiceNameStruct[] */
+            /** @var \Model\RemoteFiles\RemoteFileServiceNameStruct[] */
             return $dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[ 0 ] ?? null;
 
         } );
@@ -151,7 +160,7 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return FeatureSet
      */
     public function getFeaturesSet(): FeatureSet {
-        return $this->cachable( __METHOD__, $this, function ( Projects_ProjectStruct $project ) {
+        return $this->cachable( __METHOD__, $this, function ( ProjectStruct $project ) {
             $featureSet = new FeatureSet();
             $featureSet->loadForProject( $project );
 
@@ -162,7 +171,7 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
     /**
      * @param int $ttl
      *
-     * @return Jobs_JobStruct[]
+     * @return JobStruct[]
      */
     public function getChunks( int $ttl = 0 ): array {
         return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {
@@ -176,9 +185,9 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return string
      */
     public function getWordCountType(): string {
-        return $this->cachable( __METHOD__, $this->getMetadataValue( Projects_MetadataDao::WORD_COUNT_TYPE_KEY ), function ( $type ) {
+        return $this->cachable( __METHOD__, $this->getMetadataValue( MetadataDao::WORD_COUNT_TYPE_KEY ), function ( $type ) {
             if ( $type == null ) {
-                return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
+                return MetadataDao::WORD_COUNT_EQUIVALENT;
             } else {
                 return $type;
             }

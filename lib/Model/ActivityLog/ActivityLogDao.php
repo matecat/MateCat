@@ -8,9 +8,9 @@
 
 namespace Model\ActivityLog;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 use PDO;
 use ReflectionException;
 
@@ -25,7 +25,7 @@ class ActivityLogDao extends AbstractDao {
           JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
 
         $stmt->execute( [ 'id_project' => $id_project ] );
 
@@ -40,7 +40,7 @@ class ActivityLogDao extends AbstractDao {
           ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
 
         $stmt->execute( [ 'id_project' => $id_project ] );
 
@@ -123,7 +123,7 @@ class ActivityLogDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM activity_log WHERE id = ?" );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
         $stmt->execute( [ $activity_id ] );
 
         return $stmt->fetch();

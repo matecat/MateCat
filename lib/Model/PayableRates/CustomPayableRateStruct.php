@@ -1,15 +1,15 @@
 <?php
 
-namespace PayableRates;
+namespace Model\PayableRates;
 
 use Analysis\PayableRates;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use Langs\Languages;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;

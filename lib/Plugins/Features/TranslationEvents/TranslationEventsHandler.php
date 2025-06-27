@@ -11,14 +11,14 @@ namespace Features\TranslationEvents;
 use Constants;
 use Constants_TranslationStatus;
 use Exception;
-use Exceptions\ValidationError;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;
 use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TransactionalTrait;
 
 class TranslationEventsHandler {
@@ -36,21 +36,21 @@ class TranslationEventsHandler {
     protected FeatureSet $_featureSet;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected Jobs_JobStruct $_chunk;
+    protected JobStruct $_chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $_project;
+    protected ProjectStruct $_project;
 
     /**
      * TranslationEventsHandler constructor.
      *
-     * @param Jobs_JobStruct $chunkStruct
+     * @param JobStruct $chunkStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct ) {
+    public function __construct( JobStruct $chunkStruct ) {
         $this->_chunk = $chunkStruct;
     }
 
@@ -85,18 +85,18 @@ class TranslationEventsHandler {
     }
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
-    public function getProject(): Projects_ProjectStruct {
+    public function getProject(): ProjectStruct {
         return $this->_project;
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return $this
      */
-    public function setProject( Projects_ProjectStruct $project ): TranslationEventsHandler {
+    public function setProject( ProjectStruct $project ): TranslationEventsHandler {
         $this->_project = $project;
 
         return $this;
@@ -211,9 +211,9 @@ class TranslationEventsHandler {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getChunk(): Jobs_JobStruct {
+    public function getChunk(): JobStruct {
         return $this->_chunk;
     }
 

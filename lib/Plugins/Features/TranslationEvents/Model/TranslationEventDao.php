@@ -9,9 +9,9 @@
 namespace Features\TranslationEvents\Model;
 
 use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
 use PDO;
 use ReflectionException;
 
@@ -145,7 +145,7 @@ class TranslationEventDao extends AbstractDao {
      * @param array $id_segment_list
      * @param int   $id_job
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return \Model\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public function getTteForSegments( $id_segment_list, $id_job ) {

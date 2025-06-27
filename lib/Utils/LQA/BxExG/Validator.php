@@ -1,22 +1,22 @@
 <?php
 
-namespace LQA\BxExG;
+namespace Utils\LQA\BxExG;
 
-use LQA\QA;
+use Utils\LQA\QA;
 
 class Validator {
 
     /**
      * To get array map of QA
      *
-     * @var QA
+     * @var \Utils\LQA\QA
      */
     private $qa;
 
     /**
      * Validator constructor.
      *
-     * @param QA $qa
+     * @param \Utils\LQA\QA $qa
      */
     public function __construct( QA $qa ) {
         $this->qa = $qa;

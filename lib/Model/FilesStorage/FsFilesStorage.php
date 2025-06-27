@@ -1,13 +1,13 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
-use FilesStorage\Exceptions\FileSystemException;
 use FilesystemIterator;
 use INIT;
 use Log;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\FilesStorage\Exceptions\FileSystemException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use UnexpectedValueException;

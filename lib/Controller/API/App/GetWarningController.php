@@ -6,17 +6,17 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use InvalidArgumentException;
-use Jobs_JobStruct;
-use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
-use Segments_SegmentDao;
+use Model\Jobs\JobStruct;
+use Model\Segments\SegmentDao;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Translations\WarningDao;
+use Utils\LQA\QA;
 use View\API\V2\Json\QAGlobalWarning;
 use View\API\V2\Json\QALocalWarning;
 
@@ -44,7 +44,7 @@ class GetWarningController extends KleinController {
 
             $chunk     = $this->getChunk( $id_job, $password );
             $warnings  = WarningDao::getWarningsByJobIdAndPassword( $id_job, $password );
-            $tMismatch = ( new Segments_SegmentDao() )->setCacheTTL( 10 * 60 /* 10 minutes cache */ )->getTranslationsMismatches( $id_job, $password );
+            $tMismatch = ( new SegmentDao() )->setCacheTTL( 10 * 60 /* 10 minutes cache */ )->getTranslationsMismatches( $id_job, $password );
 
             $qa = new QAGlobalWarning( $warnings, $tMismatch );
 
@@ -192,10 +192,10 @@ class GetWarningController extends KleinController {
      * @param $id_job
      * @param $password
      *
-     * @return Jobs_JobStruct|null
+     * @return \Model\Jobs\JobStruct|null
      * @throws Exception
      */
-    private function getChunk( $id_job, $password ): ?Jobs_JobStruct {
+    private function getChunk( $id_job, $password ): ?JobStruct {
         $chunk   = ChunkDao::getByIdAndPassword( $id_job, $password );
         $project = $chunk->getProject();
         $this->featureSet->loadForProject( $project );
@@ -204,14 +204,14 @@ class GetWarningController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct      $chunk
      * @param                $src_content
      * @param                $trg_content
      *
      * @return array
      * @throws Exception
      */
-    private function invokeLocalWarningsOnFeatures( Jobs_JobStruct $chunk, $src_content, $trg_content ): array {
+    private function invokeLocalWarningsOnFeatures( JobStruct $chunk, $src_content, $trg_content ): array {
         $data = [];
         $data = $this->featureSet->filter( 'filterSegmentWarnings', $data, [
                 'src_content' => $src_content,

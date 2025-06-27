@@ -7,19 +7,24 @@
  *
  */
 
-namespace Segments;
+namespace Model\Segments;
 
 use ArrayAccess;
-use DataAccess\ArrayAccessTrait;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
 
-class ContextStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, ArrayAccess {
+class ContextStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
-    public $id;
-    public $id_project;
-    public $id_segment;
-    public $id_file;
+    public ?int  $id      = null;
+    public int   $id_project;
+    public int   $id_segment;
+    public ?int  $id_file = null;
+    /**
+     * @var mixed|array
+     */
     public $context_json;
 
     public function __construct( array $array_params = [], $decode = true ) {

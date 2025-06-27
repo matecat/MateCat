@@ -7,40 +7,44 @@
  * Time: 14.54
  */
 
+namespace Model\Engines;
+
+use Constants_Engines;
+
 /**
  * Class Engine_MicrosoftHubStruct
  *
  * This class contains the default parameters for a Microsoft Hub Engine CREATION
  *
  */
-class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
+class MicrosoftHubStruct extends EngineStruct {
 
     /**
      * @var string
      */
-    public $description = "Microsoft Translator Hub";
+    public string $description = "Microsoft Translator Hub";
 
     /**
      * @var string
      */
-    public $base_url = "https://api.microsofttranslator.com/v2/Http.svc/";
+    public string $base_url = "https://api.microsofttranslator.com/v2/Http.svc/";
 
     /**
      * @var string
      */
-    public $translate_relative_url = "Translate";
+    public string $translate_relative_url = "Translate";
 
     /**
      * @var array
      */
-    public $others = [
+    public array $others = [
             'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
     ];
 
     /**
      * @var string
      */
-    public $class_load = Constants_Engines::MICROSOFT_HUB;
+    public string $class_load = Constants_Engines::MICROSOFT_HUB;
 
 
     /**
@@ -57,19 +61,19 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
     /**
      * @var int
      */
-    public $google_api_compliant_version = 2;
+    public int $google_api_compliant_version = 2;
 
     /**
      * @var int
      */
-    public $penalty = 14;
+    public int $penalty = 14;
 
     /**
      * An empty struct
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public static function getStruct() {
-        return new EnginesModel_MicrosoftHubStruct();
+    public static function getStruct(): EngineStruct {
+        return new MicrosoftHubStruct();
     }
 
 }

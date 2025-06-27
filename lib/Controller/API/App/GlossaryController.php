@@ -7,10 +7,12 @@ use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
 use Langs\Languages;
+use Log;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_Filter;
+use Utils;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
 
@@ -420,8 +422,8 @@ class GlossaryController extends KleinController {
             $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
-            \Log::doJsonLog( $output );
-            \Utils::sendErrMailReport( $output );
+            Log::doJsonLog( $output );
+            Utils::sendErrMailReport( $output );
         }
     }
 }

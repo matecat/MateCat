@@ -1,23 +1,25 @@
 <?php
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Jobs_JobDao::destroyCache
+ * @covers JobDao::destroyCache
  * User: dinies
  * Date: 27/05/16
  * Time: 11.48
  */
 class DestroyCacheJobTest extends AbstractTest {
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
 
@@ -44,7 +46,7 @@ class DestroyCacheJobTest extends AbstractTest {
         $this->str_id_project = "888888";
         $this->str_password   = "7barandfoo71";
         $this->str_owner      = "barandfoo@translated.net";
-        $this->job_struct     = new Jobs_JobStruct(
+        $this->job_struct     = new JobStruct(
                 [
                         'id'                                  => $this->id, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                         'password'                            => $this->str_password,
@@ -93,7 +95,7 @@ class DestroyCacheJobTest extends AbstractTest {
         );
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao           = new JobDao( $this->database_instance );
         $this->cache             = new Predis\Client( INIT::$REDIS_SERVERS );
     }
 
@@ -105,7 +107,7 @@ class DestroyCacheJobTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Jobs_JobDao::destroyCache
+     * @covers JobDao::destroyCache
      */
     public function test_DestroyCache_with_ID_and_Password() {
 
@@ -117,16 +119,16 @@ class DestroyCacheJobTest extends AbstractTest {
         $this->cache->setex( $key, 20, $value );
         $output_before_destruction = $this->cache->get( $key );
         $this->assertEquals( $value, $output_before_destruction );
-        $this->assertTrue( unserialize( $output_before_destruction ) instanceof Jobs_JobStruct );
+        $this->assertTrue( unserialize( $output_before_destruction ) instanceof JobStruct );
         $this->job_Dao->destroyCache( $this->job_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof Jobs_JobStruct );
+        $this->assertFalse( unserialize( $output_after_destruction ) instanceof JobStruct );
     }
 
     /**
      * @group  regression
-     * @covers Jobs_JobDao::destroyCache
+     * @covers JobDao::destroyCache
      */
     public function test_DestroyCache_with_ID_Project() {
 
@@ -138,11 +140,11 @@ class DestroyCacheJobTest extends AbstractTest {
         $this->cache->setex( $key, 20, $value );
         $output_before_destruction = $this->cache->get( $key );
         $this->assertEquals( $value, $output_before_destruction );
-        $this->assertTrue( unserialize( $output_before_destruction ) instanceof Jobs_JobStruct );
+        $this->assertTrue( unserialize( $output_before_destruction ) instanceof JobStruct );
         $this->job_Dao->destroyCache( $this->job_struct );
         $output_after_destruction = $this->cache->get( $cache_key );
         $this->assertNull( $output_after_destruction );
-        $this->assertFalse( unserialize( $output_after_destruction ) instanceof Jobs_JobStruct );
+        $this->assertFalse( unserialize( $output_after_destruction ) instanceof JobStruct );
     }
 
 

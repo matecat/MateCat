@@ -8,18 +8,18 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use Exceptions\NotFoundException;
 use FeatureSet;
-use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Exceptions\NotFoundException;
+use Model\Files\FilesPartsDao;
 use Model\Jobs\ChunkDao;
-use Projects_MetadataDao;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
 use Users_UserDao;
 
@@ -57,7 +57,7 @@ class GetContributionController extends KleinController {
         }
 
         $jobStruct  = ChunkDao::getByIdAndPassword( $id_job, $password );
-        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
+        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
@@ -69,9 +69,9 @@ class GetContributionController extends KleinController {
             $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
 
             $contributionRequest->mt_evaluation =
-                    (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
+                    (bool)$projectStruct->getMetadataValue( ProjectsMetadataDao::MT_EVALUATION ) ??
                     //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                    (bool)( new MetadataDao() )->get( $id_job, $received_password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                    (bool)( new MetadataDao() )->get( $id_job, $received_password, ProjectsMetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                     false;
 
         }
@@ -101,8 +101,8 @@ class GetContributionController extends KleinController {
         $contributionRequest->fromTarget                 = $switch_languages;
         $contributionRequest->resultNum                  = $num_results;
         $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
 
         if ( $this->isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -259,7 +259,7 @@ class GetContributionController extends KleinController {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
-        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+        $segmentsList = ( new SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                 [
                         'id_before'  => $request[ 'id_before' ],
                         'id_segment' => $request[ 'id_segment' ],

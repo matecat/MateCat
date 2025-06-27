@@ -4,13 +4,13 @@ namespace Controller\Abstracts;
 
 use CookieManager;
 use Exception;
-use Files\FileDao;
-use FilesStorage\AbstractFilesStorage;
 use INIT;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Files\FileDao;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use ZipArchive;
 use ZipContentObject;
@@ -31,19 +31,19 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     protected ?string $_user_provided_filename = null;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected Jobs_JobStruct $job;
+    protected JobStruct $job;
 
     /**
      * @param int $ttl
      *
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      * @throws ReflectionException
      */
-    public function getJob( int $ttl = 0 ): Jobs_JobStruct {
+    public function getJob( int $ttl = 0 ): JobStruct {
         if ( empty( $this->job ) ) {
-            $this->job = Jobs_JobDao::getById( $this->id_job, $ttl )[ 0 ];
+            $this->job = JobDao::getById( $this->id_job, $ttl )[ 0 ];
         }
 
         return $this->job;
@@ -100,14 +100,14 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
-    public function getProject(): Projects_ProjectStruct {
+    public function getProject(): ProjectStruct {
         return $this->project;
     }
 
@@ -154,14 +154,14 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
             $this->unlockToken();
 
             if ( empty( $this->project ) ) {
-                $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
+                $this->project = ProjectDao::findByJobId( $this->id_job );
             }
 
             if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
+            $isGDriveProject = ProjectDao::isGDriveProject( $this->project->id );
 
             if ( !$isGDriveProject || $forceXliff === true ) {
                 ob_get_contents();
@@ -189,12 +189,12 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
      * If more than one file constitutes the project, then the filename is the project name.
      * If the project is made of just one file, then the filename for download is the file name itself.
      *
-     * @param $project Projects_ProjectStruct
+     * @param $project ProjectStruct
      *
      * @return string
      * @throws ReflectionException
      */
-    public function getDefaultFileName( Projects_ProjectStruct $project ): string {
+    public function getDefaultFileName( ProjectStruct $project ): string {
         $files = FileDao::getByProjectId( $project->id );
 
         if ( count( $files ) > 1 ) {

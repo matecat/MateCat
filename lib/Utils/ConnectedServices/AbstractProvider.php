@@ -7,7 +7,7 @@
  *
  */
 
-namespace ConnectedServices;
+namespace Utils\ConnectedServices;
 
 abstract class AbstractProvider implements ProviderInterface {
 

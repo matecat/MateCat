@@ -2,7 +2,7 @@
 
 namespace Controller\API\Commons\Validators;
 
-use Exceptions\NotFoundException;
+use Model\Exceptions\NotFoundException;
 use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Translations_SegmentTranslationStruct;

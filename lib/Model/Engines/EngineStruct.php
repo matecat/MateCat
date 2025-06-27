@@ -1,7 +1,10 @@
 <?php
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+namespace Model\Engines;
+
+use ArrayAccess;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -9,66 +12,66 @@ use DataAccess\IDaoStruct;
  * Date: 23/02/15
  * Time: 14.54
  */
-class EnginesModel_EngineStruct
+class EngineStruct
         extends AbstractDaoObjectStruct
         implements IDaoStruct, ArrayAccess {
 
     /**
-     * @var int
+     * @var int|null
      */
-    public $id;
+    public ?int $id = null;
 
     /**
      * @var string
      */
-    public $name;
+    public ?string $name = null;
 
 
     /**
-     * @var string A string from the ones in Constants_EngineType
+     * @var ?string A string from the ones in Constants_EngineType
      * @see Constants_EngineType
      */
-    public $type;
+    public ?string $type = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $description;
+    public ?string $description = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $base_url;
+    public ?string $base_url = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $translate_relative_url;
+    public ?string $translate_relative_url = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $contribute_relative_url;
+    public ?string $contribute_relative_url = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $update_relative_url;
+    public ?string $update_relative_url = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $delete_relative_url;
+    public ?string $delete_relative_url = null;
 
     /**
-     * @var array
+     * @var array|string
      */
     public $others;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $class_load;
+    public ?string $class_load = null;
 
 
     /**
@@ -77,31 +80,31 @@ class EnginesModel_EngineStruct
     public $extra_parameters;
 
     /**
-     * @var int
+     * @var int|null
      */
-    public $google_api_compliant_version;
+    public ?int $google_api_compliant_version = null;
 
     /**
-     * @var int
+     * @var int|null
      */
-    public $penalty;
+    public ?int $penalty = null;
 
     /**
-     * @var int 0 or 1
+     * @var ?bool
      */
-    public $active;
+    public ?bool $active = null;
 
     /**
-     * @var int
+     * @var int|null
      */
-    public $uid;
+    public ?int $uid = null;
 
     /**
      * An empty struct
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public static function getStruct() {
-        return new EnginesModel_EngineStruct();
+    public static function getStruct(): EngineStruct {
+        return new EngineStruct();
     }
 
     /**
@@ -118,7 +121,7 @@ class EnginesModel_EngineStruct
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
-    public function offsetExists( $offset ) {
+    public function offsetExists( $offset ): bool {
         return property_exists( $this, $offset );
     }
 

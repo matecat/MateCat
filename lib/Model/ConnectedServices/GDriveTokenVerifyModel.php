@@ -6,11 +6,11 @@
  * Time: 18:39
  */
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
-use ConnectedServices\Google\GDrive\GDriveTokenHandler;
 use Exception;
 use Google_Client;
+use Utils\ConnectedServices\Google\GDrive\GDriveTokenHandler;
 
 class GDriveTokenVerifyModel {
 

@@ -451,7 +451,7 @@ class TaskManager extends AbstractDaemon {
     protected function _updateConfiguration(): void {
 
         $configuration = $this->getConfiguration();
-        Log::$fileName = $configuration->getLoggerName();
+        Log::setLogFileName( $configuration->getLoggerName() );
 
         if ( empty( $this->_queueContextList->list ) ) {
 

@@ -7,11 +7,11 @@
  *
  */
 
-namespace MTQE\Templates\DTO;
+namespace Model\MTQE\Templates\DTO;
 
 use Constants_TranslationStatus;
-use DataAccess\AbstractDaoSilentStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
 
 class MTQEWorkflowParams extends AbstractDaoSilentStruct implements JsonSerializable {
 

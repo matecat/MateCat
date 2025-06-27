@@ -1,17 +1,17 @@
 <?php
 
-namespace PayableRates;
+namespace Model\PayableRates;
 
 use Analysis\PayableRates;
-use DataAccess\AbstractDao;
 use Database;
 use Date\DateTimeUtil;
 use DateTime;
 use Exception;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\Projects\ProjectTemplateDao;
 use PDO;
-use Projects\ProjectTemplateDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
@@ -96,7 +96,7 @@ class CustomPayableRateDao extends AbstractDao {
      */
     public static function getById( int $id, int $ttl = 60 ): ?CustomPayableRateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, CustomPayableRateStruct::class, [
                 'id' => $id,
         ] );
 
@@ -116,7 +116,7 @@ class CustomPayableRateDao extends AbstractDao {
      */
     public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?CustomPayableRateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id_and_user );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new CustomPayableRateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, CustomPayableRateStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
         ] );

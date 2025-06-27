@@ -1,6 +1,8 @@
 <?php
 
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 use WordCount\CounterModel;
 use WordCount\WordCountStruct;
@@ -25,7 +27,7 @@ class UpdateDBTest extends AbstractTest {
     protected $first_segment_id;
     protected $second_segment_id;
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
     protected $job_struct;
@@ -59,7 +61,7 @@ class UpdateDBTest extends AbstractTest {
          */
 
         $this->job_password = "7ec09d1cad61";
-        $this->job_struct   = new Jobs_JobStruct(
+        $this->job_struct   = new JobStruct(
                 [
                         'id'                                  => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                         'id_project'                          => random_int( 200000, 40000000 ),
@@ -107,7 +109,7 @@ class UpdateDBTest extends AbstractTest {
                 ]
         );
 
-        $this->job_Dao        = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao        = new JobDao( $this->database_instance );
         $jobStruct            = $this->job_Dao->createFromStruct( $this->job_struct );
         $this->job_id         = $jobStruct->id;
         $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
@@ -166,7 +168,7 @@ class UpdateDBTest extends AbstractTest {
         /**
          * Check in database before update
          */
-        $job_struct_param           = new Jobs_JobStruct( [] );
+        $job_struct_param           = new JobStruct( [] );
         $job_struct_param->id       = $this->job_id;
         $job_struct_param->password = $this->job_password;
 

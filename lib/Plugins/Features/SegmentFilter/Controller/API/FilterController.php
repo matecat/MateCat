@@ -9,7 +9,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\SegmentFilter\Model\FilterDefinition;
 use Features\SegmentFilter\Model\SegmentFilterModel;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
 
 
 class FilterController extends KleinController {
@@ -26,7 +26,7 @@ class FilterController extends KleinController {
     private $filter;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */

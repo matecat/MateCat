@@ -1,7 +1,7 @@
 <?php
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * Class BasicFeatureStruct

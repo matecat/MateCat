@@ -7,17 +7,17 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Jobs_JobStruct;
-use Projects\ChunkOptionsModel;
+use Model\Jobs\ChunkOptionsModel;
+use Model\Jobs\JobStruct;
 
 class ChunkOptionsController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): ChunkOptionsController {
+    public function setChunk( JobStruct $chunk ): ChunkOptionsController {
         $this->chunk = $chunk;
 
         return $this;

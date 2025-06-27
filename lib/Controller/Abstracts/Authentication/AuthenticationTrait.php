@@ -3,10 +3,10 @@
 namespace Controller\Abstracts\Authentication;
 
 use AMQHandler;
-use ApiKeyStruct;
 use Bootstrap;
 use Exception;
 use INIT;
+use Model\ApiKeys\ApiKeyStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
 use Users_UserStruct;
@@ -20,9 +20,8 @@ use Users_UserStruct;
  */
 trait AuthenticationTrait {
 
-    protected ?ApiKeyStruct $api_record = null;
-    protected bool          $userIsLogged;
-    protected Users_UserStruct      $user;
+    protected bool             $userIsLogged;
+    protected Users_UserStruct $user;
 
     /**
      * @var ?string

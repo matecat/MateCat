@@ -1,8 +1,8 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDao;
 use PDO;
 
 class CategoryDao extends AbstractDao {

@@ -1,8 +1,12 @@
 <?php
 
-namespace QAModelTemplate;
+namespace Model\LQA\QAModelTemplate;
 
-class QAModelTemplatePassfailStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \JsonSerializable {
+use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+
+class QAModelTemplatePassfailStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     public $id;
     public $id_template;
     public $passfail_type;

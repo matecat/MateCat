@@ -17,11 +17,11 @@ use Email\SendToTranslatorForNewJobEmail;
 use Exception;
 use FeatureSet;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Outsource\ConfirmationDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Outsource\ConfirmationDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use TransactionalTrait;
 use Users_UserDao;
 use Users_UserStruct;
@@ -37,7 +37,7 @@ class TranslatorsModel {
     protected $callingUser;
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $jStruct;
 
@@ -58,7 +58,7 @@ class TranslatorsModel {
     protected $job_password;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -132,10 +132,10 @@ class TranslatorsModel {
     /**
      * TranslatorsModel constructor.
      *
-     * @param Jobs_JobStruct $jStruct
-     * @param float|int      $project_cache_TTL
+     * @param \Model\Jobs\JobStruct $jStruct
+     * @param float|int             $project_cache_TTL
      */
-    public function __construct( Jobs_JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
+    public function __construct( JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
 
         //get the job
         $this->jStruct = $jStruct;
@@ -286,7 +286,7 @@ class TranslatorsModel {
         $oldPassword = $this->jStruct->password;
 
         $this->openTransaction();
-        $jobDao = new Jobs_JobDao();
+        $jobDao = new JobDao();
         $jobDao->changePassword( $this->jStruct, $newPassword );
         $jobDao->destroyCache( $this->jStruct );
         $this->featureSet->run( 'job_password_changed', $this->jStruct, $oldPassword );
@@ -300,7 +300,7 @@ class TranslatorsModel {
             throw new InvalidArgumentException( "Who invites can not be empty. Try TranslatorsModel::setUser() " );
         }
 
-        $project = Projects_ProjectDao::findByJobId( $this->jStruct->id );
+        $project = ProjectDao::findByJobId( $this->jStruct->id );
 
         foreach ( $this->mailsToBeSent as $type => $email ) {
 

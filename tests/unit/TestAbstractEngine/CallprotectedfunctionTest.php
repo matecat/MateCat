@@ -1,5 +1,7 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -12,7 +14,7 @@ use TestHelpers\AbstractTest;
  */
 class CallprotectedfunctionTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
@@ -58,13 +60,13 @@ class CallprotectedfunctionTest extends AbstractTest {
         $this->sql_delete_user   = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
         $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = $this->id_database;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = @$eng[ 0 ];
         $this->mock_engine         = $this->getMockBuilder( '\Engines_DeepLingo' )->setMethods( [ '_call' ] )->getMock();

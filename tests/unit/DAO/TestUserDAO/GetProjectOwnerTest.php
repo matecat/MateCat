@@ -1,5 +1,7 @@
 <?php
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -16,7 +18,7 @@ class GetProjectOwnerTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
 
@@ -37,7 +39,7 @@ class GetProjectOwnerTest extends AbstractTest {
     protected $id_job;
     protected $email_owner;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
 
@@ -63,7 +65,7 @@ class GetProjectOwnerTest extends AbstractTest {
          */
 
 
-        $this->job_struct = new Jobs_JobStruct(
+        $this->job_struct = new JobStruct(
                 [
                         'id'                                  => null, //SET NULL FOR AUTOINCREMENT
                         'password'                            => "7barandfoo71",
@@ -112,7 +114,7 @@ class GetProjectOwnerTest extends AbstractTest {
         );
 
 
-        $this->job_Dao = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao = new JobDao( $this->database_instance );
         $this->job_Dao->createFromStruct( $this->job_struct );
         $this->id_job = $this->getTheLastInsertIdByQuery( $this->database_instance );
 

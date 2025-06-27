@@ -7,17 +7,17 @@ use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
 use WordCount\WordCountStruct;
 
 class StatsController extends KleinController {
 
     /**
-     * @var ?Jobs_JobStruct
+     * @var ?\Model\Jobs\JobStruct
      */
-    protected ?Jobs_JobStruct $chunk = null;
+    protected ?JobStruct $chunk = null;
 
-    public function setChunk( Jobs_JobStruct $chunk ) {
+    public function setChunk( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 

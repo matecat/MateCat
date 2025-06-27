@@ -10,8 +10,8 @@
 namespace Translators;
 
 
-use DataAccess\AbstractDao;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class JobsTranslatorsDao extends AbstractDao {
@@ -27,7 +27,7 @@ class JobsTranslatorsDao extends AbstractDao {
 
     public function findByJobIdAndPassword( $id_job, $password ) {
 
-        $jobStruct           = new Jobs_JobStruct();
+        $jobStruct           = new JobStruct();
         $jobStruct->id       = $id_job;
         $jobStruct->password = $password;
 
@@ -37,7 +37,7 @@ class JobsTranslatorsDao extends AbstractDao {
 
     public function findByJobId( $id_job ) {
 
-        $jobStruct     = new Jobs_JobStruct();
+        $jobStruct     = new JobStruct();
         $jobStruct->id = $id_job;
 
         return $this->findByJobsStruct( $jobStruct );
@@ -45,12 +45,12 @@ class JobsTranslatorsDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $jobStruct
+     * @param \Model\Jobs\JobStruct $jobStruct
      *
      * @return JobsTranslatorsStruct[]
      * @throws ReflectionException
      */
-    public function findByJobsStruct( Jobs_JobStruct $jobStruct ): ?array {
+    public function findByJobsStruct( JobStruct $jobStruct ): ?array {
 
         if ( !empty( $jobStruct->password ) ) {
             $query = self::$_query_by_id_and_password;
@@ -70,7 +70,7 @@ class JobsTranslatorsDao extends AbstractDao {
 
     }
 
-    public function destroyCacheByJobStruct( Jobs_JobStruct $jobStruct ) {
+    public function destroyCacheByJobStruct( JobStruct $jobStruct ) {
 
         if ( !empty( $jobStruct->password ) ) {
             $query = self::$_query_by_id_and_password;

@@ -1,6 +1,6 @@
 <?php
 
-use DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDao;
 
 /**
  * Created by PhpStorm.
@@ -261,7 +261,7 @@ class Users_UserDao extends AbstractDao {
      * @return Users_UserStruct[]
      * @throws Exception
      */
-    public function read( \DataAccess\IDaoStruct $UserQuery ): array {
+    public function read( \Model\DataAccess\IDaoStruct $UserQuery ): array {
 
         [ $query, $where_parameters ] = $this->_buildReadQuery( $UserQuery );
         $stmt = $this->_getStatementForQuery( $query );
@@ -277,7 +277,7 @@ class Users_UserDao extends AbstractDao {
     /**
      * @throws Exception
      */
-    protected function _buildReadQuery( \DataAccess\IDaoStruct $UserQuery ): array {
+    protected function _buildReadQuery( \Model\DataAccess\IDaoStruct $UserQuery ): array {
         $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = [];
@@ -373,7 +373,7 @@ class Users_UserDao extends AbstractDao {
      * @return Users_UserStruct
      * @throws Exception
      */
-    public function sanitize( \DataAccess\IDaoStruct $input ) {
+    public function sanitize( \Model\DataAccess\IDaoStruct $input ) {
         $con = Database::obtain();
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 

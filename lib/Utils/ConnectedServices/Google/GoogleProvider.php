@@ -1,15 +1,15 @@
 <?php
 
-namespace ConnectedServices\Google;
+namespace Utils\ConnectedServices\Google;
 
-use ConnectedServices\AbstractProvider;
-use ConnectedServices\ConnectedServiceUserModel;
 use Exception;
 use Google_Client;
 use Google_Service_Oauth2;
 use INIT;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Utils\ConnectedServices\AbstractProvider;
+use Utils\ConnectedServices\ProviderUser;
 
 class GoogleProvider extends AbstractProvider {
 
@@ -102,11 +102,11 @@ class GoogleProvider extends AbstractProvider {
     /**
      * @param AccessToken $token
      *
-     * @return ConnectedServiceUserModel
+     * @return ProviderUser
      * @throws \Google\Service\Exception
      * @throws Exception
      */
-    public function getResourceOwner( \League\OAuth2\Client\Token\AccessToken $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( \League\OAuth2\Client\Token\AccessToken $token ): ProviderUser {
 
         $googleClient = self::getClient( $this->redirectUrl );
         $googleClient->setAccessType( "offline" );
@@ -115,7 +115,7 @@ class GoogleProvider extends AbstractProvider {
         $plus    = new Google_Service_Oauth2( $googleClient );
         $fetched = $plus->userinfo->get();
 
-        $user            = new ConnectedServiceUserModel();
+        $user            = new ProviderUser();
         $user->email     = $fetched->getEmail();
         $user->name      = $fetched->getName();
         $user->lastName  = $fetched->getFamilyName();

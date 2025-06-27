@@ -16,6 +16,8 @@
 
 
 use Langs\Languages;
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 error_reporting( ~E_DEPRECATED );
@@ -34,13 +36,13 @@ class GlossaryImportTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->key_param   = "a6043e606ac9b5d7ff24";
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = $eng[ 0 ];
 

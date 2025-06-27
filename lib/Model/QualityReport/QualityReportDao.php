@@ -6,11 +6,15 @@
  * Time: 2:39 PM
  */
 
-namespace QualityReport;
+namespace Model\QualityReport;
 
 use Constants;
-use DataAccess\AbstractDao;
+use Constants_TranslationStatus;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use PDO;
 
 class QualityReportDao extends AbstractDao {
 
@@ -19,7 +23,7 @@ class QualityReportDao extends AbstractDao {
     }
 
 
-    public function getAverages( \Jobs_JobStruct $chunk ) {
+    public function getAverages( JobStruct $chunk ) {
         $sql = <<<SQL
 
       SELECT
@@ -49,7 +53,7 @@ SQL;
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
         $stmt->execute( [
                 'id_job'   => $chunk->id,
@@ -61,11 +65,11 @@ SQL;
     }
 
     /**
-     * @param \Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return array
      */
-    public static function getSegmentsForQualityReport( \Jobs_JobStruct $chunk ) {
+    public static function getSegmentsForQualityReport( JobStruct $chunk ): array {
 
         $sql = <<<SQL
 
@@ -156,11 +160,11 @@ SQL;
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
         $stmt->execute( [
-                'approved' => \Constants_TranslationStatus::STATUS_APPROVED,
-                'rejected' => \Constants_TranslationStatus::STATUS_REJECTED,
+                'approved' => Constants_TranslationStatus::STATUS_APPROVED,
+                'rejected' => Constants_TranslationStatus::STATUS_REJECTED,
                 'id_job'   => $chunk->id,
                 'password' => $chunk->password
         ] );
@@ -175,7 +179,7 @@ SQL;
      *
      * @return array
      */
-    public static function getIssuesBySegments( $segments_id, $job_id ) {
+    public static function getIssuesBySegments( array $segments_id, int $job_id ): array {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
@@ -216,14 +220,14 @@ JOIN (
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ShapelessConcreteStruct::class );
 
         $stmt->execute( array_merge( $segments_id, [ $job_id ] ) );
 
         return $stmt->fetchAll();
     }
 
-    public function getReviseIssuesByChunk( $job_id, $password, $source_page = null ) {
+    public function getReviseIssuesByChunk( int $job_id, string $password, int $source_page = null ): array {
 
         if ( is_null( $source_page ) ) {
             $source_page = Constants::SOURCE_PAGE_REVISION;
@@ -251,7 +255,7 @@ JOIN jobs j ON issues.id_job = j.id
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\DataAccess\ShapelessConcreteStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ShapelessConcreteStruct::class );
 
         $stmt->execute( [ $job_id, $password, $source_page ] );
 

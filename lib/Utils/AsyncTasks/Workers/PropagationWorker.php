@@ -12,10 +12,10 @@ namespace AsyncTasks\Workers;
 use Database;
 use Exception;
 use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationTotalStruct;
 use PDOException;
-use Projects_ProjectStruct;
-use Propagation_PropagationTotalStruct;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Params;
@@ -52,7 +52,7 @@ class PropagationWorker extends AbstractWorker {
         $translationVersionsDao = new TranslationVersionDao();
 
         /**
-         * @var $propagationTotalStruct ?Propagation_PropagationTotalStruct
+         * @var $propagationTotalStruct ?\Model\Propagation\PropagationTotalStruct
          */
         $propagationTotalStruct = $structures[ 'propagationAnalysis' ];
 
@@ -179,9 +179,9 @@ class PropagationWorker extends AbstractWorker {
         return [
                 'translationStructTemplate' => new Translations_SegmentTranslationStruct( $paramsArray[ 'translationStructTemplate' ] ),
                 'id_segment'                => $params->id_segment,
-                'job'                       => new Jobs_JobStruct( $paramsArray[ 'job' ] ),
-                'project'                   => new Projects_ProjectStruct( $paramsArray[ 'project' ] ),
-                'propagationAnalysis'       => new Propagation_PropagationTotalStruct( $paramsArray[ 'propagationAnalysis' ] ),
+                'job'                       => new JobStruct( $paramsArray[ 'job' ] ),
+                'project'                   => new ProjectStruct( $paramsArray[ 'project' ] ),
+                'propagationAnalysis'       => new PropagationTotalStruct( $paramsArray[ 'propagationAnalysis' ] ),
                 'execute_update'            => $params->execute_update
         ];
     }

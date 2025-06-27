@@ -3,9 +3,9 @@
 namespace View\API\V2\Json;
 
 use FeatureSet;
-use Jobs_JobStruct;
-use LQA\EntryStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\JobStruct;
+use Model\LQA\EntryStruct;
 
 class SegmentVersion {
 
@@ -14,21 +14,21 @@ class SegmentVersion {
     private $with_issues;
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     private $chunk;
 
     /**
      * SegmentVersion constructor.
      *
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct          $chunk
      * @param                    $data
      * @param bool               $with_issues
      * @param FeatureSet|null    $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( Jobs_JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
+    public function __construct( JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
         $this->data        = $data;
         $this->with_issues = $with_issues;
         $this->chunk       = $chunk;

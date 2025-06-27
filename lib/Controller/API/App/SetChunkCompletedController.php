@@ -8,8 +8,8 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
-use Jobs_JobDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Jobs\JobDao;
 use ReflectionException;
 use Utils;
 
@@ -65,7 +65,7 @@ class SetChunkCompletedController extends KleinController {
             throw new InvalidArgumentException( "Missing id password", -2 );
         }
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        $job = JobDao::getByIdAndPassword( $id_job, $password );
 
         if ( empty( $job ) ) {
             throw new InvalidArgumentException( "wrong password", -10 );

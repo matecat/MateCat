@@ -17,11 +17,11 @@ use Controller\API\Commons\Validators\ProjectExistsInTeamValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
-use Exceptions\ValidationError;
 use ManageUtils;
+use Model\Exceptions\ValidationError;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Projects\ProjectModel;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
 use ReflectionException;
 use Teams\TeamStruct;
 use View\API\V2\Json\Project;
@@ -29,9 +29,9 @@ use View\API\V2\Json\Project;
 class TeamsProjectsController extends KleinController {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     /** @var TeamStruct */
     protected TeamStruct $team;
@@ -78,7 +78,7 @@ class TeamsProjectsController extends KleinController {
      * @throws ReflectionException
      */
     protected function _appendSingleProjectTeamValidators(): TeamsProjectsController {
-        $this->project = Projects_ProjectDao::findById( $this->request->param( 'id_project' ) ); //check login and auth before request the project info
+        $this->project = ProjectDao::findById( $this->request->param( 'id_project' ) ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
 
@@ -96,7 +96,7 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
      * @throws ReflectionException
      */
@@ -134,8 +134,8 @@ class TeamsProjectsController extends KleinController {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 
-        /** @var Projects_ProjectStruct[] $projectsList */
-        $projectsList = Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
+        /** @var ProjectStruct[] $projectsList */
+        $projectsList = ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
 
         $projectsList = ( new Project( $projectsList ) )->render();
         $this->response->json( [ 'projects' => $projectsList ] );

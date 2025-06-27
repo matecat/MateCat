@@ -7,9 +7,9 @@
  *
  */
 
-use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
 use TestHelpers\AbstractTest;
+use Utils\LQA\QA;
 
 
 /**

@@ -1,5 +1,6 @@
 <?php
 
+use Model\Projects\ProjectDao;
 use Teams\TeamStruct;
 use View\API\V2\Json\Project;
 
@@ -134,7 +135,7 @@ class ManageUtils {
                 $no_assignee
         );
 
-        $_projects = new Projects_ProjectDao();
+        $_projects = new ProjectDao();
         $projects  = $_projects->getByIdList( $id_list );
 
         $projectRenderer = new Project( $projects, $search_status );

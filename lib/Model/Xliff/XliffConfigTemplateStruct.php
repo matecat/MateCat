@@ -2,11 +2,11 @@
 
 namespace Xliff;
 
-use DataAccess\AbstractDaoSilentStruct;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
 use stdClass;
 use Xliff\DTO\Xliff12Rule;
 use Xliff\DTO\Xliff20Rule;

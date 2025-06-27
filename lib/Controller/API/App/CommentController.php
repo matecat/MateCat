@@ -11,12 +11,12 @@ use Email\CommentMentionEmail;
 use Email\CommentResolveEmail;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Log;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
-use Projects_ProjectDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
@@ -237,7 +237,7 @@ class CommentController extends KleinController {
         $message         = filter_var( $this->request->param( 'message' ), FILTER_UNSAFE_RAW );
         $message         = htmlspecialchars( $message );
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
+        $job = JobDao::getByIdAndPassword( $id_job, $password, 60 * 60 * 24 );
 
         if ( empty( $job ) ) {
             throw new InvalidArgumentException( -10, "wrong password" );
@@ -323,13 +323,13 @@ class CommentController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param JobStruct      $job
      * @param                $message
      *
      * @return array
      * @throws ReflectionException
      */
-    private function resolveTeamMentions( Jobs_JobStruct $job, $message ): array {
+    private function resolveTeamMentions( JobStruct $job, $message ): array {
         $users = [];
 
         if ( strstr( $message, "{@team@}" ) ) {
@@ -373,13 +373,13 @@ class CommentController extends KleinController {
 
     /**
      * @param CommentStruct          $comment
-     * @param Jobs_JobStruct         $job
+     * @param JobStruct              $job
      * @param                        $users_mentioned_id
      *
      * @return array
      * @throws ReflectionException
      */
-    private function resolveUsers( CommentStruct $comment, Jobs_JobStruct $job, $users_mentioned_id ): array {
+    private function resolveUsers( CommentStruct $comment, JobStruct $job, $users_mentioned_id ): array {
         $commentDao = new CommentDao( Database::obtain() );
         $result     = $commentDao->getThreadContributorUids( $comment );
 
@@ -433,11 +433,11 @@ class CommentController extends KleinController {
     /**
      * @param $id_project
      *
-     * @return array|\DataAccess\ShapelessConcreteStruct[]
+     * @return array|\Model\DataAccess\ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
     private function projectData( $id_project ) {
-        return ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
+        return ( new ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
     }
 
     /**
@@ -496,15 +496,15 @@ class CommentController extends KleinController {
     }
 
     /**
-     * @param CommentStruct  $comment
-     * @param Jobs_JobStruct $job
-     * @param array          $users
-     * @param array          $users_mentioned
+     * @param CommentStruct $comment
+     * @param JobStruct     $job
+     * @param array         $users
+     * @param array         $users_mentioned
      *
      * @return \Klein\Response
      * @throws ReflectionException
      */
-    private function sendEmail( CommentStruct $comment, Jobs_JobStruct $job, array $users, array $users_mentioned ) {
+    private function sendEmail( CommentStruct $comment, JobStruct $job, array $users, array $users_mentioned ) {
 
         $jobUrlStruct = JobUrlBuilder::createFromJobStruct( $job, [
                 'id_segment'         => $comment->id_segment,

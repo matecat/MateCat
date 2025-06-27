@@ -1,17 +1,16 @@
 <?php
 
 
-namespace Projects;
+namespace Model\Jobs;
 
 use Exception;
-use Jobs_JobStruct;
+use Model\Projects\MetadataDao;
 use ProjectOptionsSanitizer;
-use Projects_MetadataDao;
 use ReflectionException;
 
 class ChunkOptionsModel {
 
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     public static array $valid_keys = [
             'speech2text', 'tag_projection', 'lexiqa'
@@ -20,7 +19,7 @@ class ChunkOptionsModel {
     private array $received_options = [];
     public array  $project_metadata = [];
 
-    public function __construct( Jobs_JobStruct $chunk ) {
+    public function __construct( JobStruct $chunk ) {
         $this->chunk            = $chunk;
         $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue();
     }
@@ -65,10 +64,10 @@ class ChunkOptionsModel {
             return;
         }
 
-        $dao = new Projects_MetadataDao();
+        $dao = new MetadataDao();
 
         foreach ( $this->received_options as $key => $value ) {
-            $dao->set( $this->chunk->id_project, Projects_MetadataDao::buildChunkKey( $key, $this->chunk ), $value );
+            $dao->set( $this->chunk->id_project, MetadataDao::buildChunkKey( $key, $this->chunk ), $value );
         }
 
         $this->project_metadata = $this->chunk->getProject()->getMetadataAsKeyValue();
@@ -93,7 +92,7 @@ class ChunkOptionsModel {
      * @return bool
      */
     private function getByChunkOrProjectOption( $key ): bool {
-        $chunk_key = Projects_MetadataDao::buildChunkKey( $key, $this->chunk );
+        $chunk_key = MetadataDao::buildChunkKey( $key, $this->chunk );
 
         if ( isset( $this->project_metadata[ $chunk_key ] ) ) {
             return !!$this->project_metadata[ $chunk_key ];

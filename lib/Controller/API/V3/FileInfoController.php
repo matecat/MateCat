@@ -14,10 +14,10 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Exceptions\ValidationError;
-use Files\FilesInfoUtility;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Model\Exceptions\ValidationError;
+use Model\Files\FilesInfoUtility;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
@@ -25,7 +25,7 @@ use TaskRunner\Exceptions\ReQueueException;
 class FileInfoController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -43,11 +43,11 @@ class FileInfoController extends KleinController {
 
     }
 
-    private function setChunk( Jobs_JobStruct $chunk ) {
+    private function setChunk( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
-    private function setProject( Projects_ProjectStruct $project ) {
+    private function setProject( ProjectStruct $project ) {
         $this->project = $project;
     }
 
@@ -105,7 +105,7 @@ class FileInfoController extends KleinController {
      *
      * @throws NotFoundException
      * @throws AuthenticationError
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException

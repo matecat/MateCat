@@ -1,6 +1,6 @@
 <?php
 
-namespace Filters\DTO;
+namespace Model\Filters\DTO;
 
 use JsonSerializable;
 

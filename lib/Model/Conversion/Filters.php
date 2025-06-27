@@ -1,15 +1,15 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use Filters\DTO\IDto;
 use INIT;
-use Jobs_JobStruct;
 use Langs\Languages;
 use Log;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\DTO\IDto;
+use Model\Jobs\JobStruct;
 use MultiCurlHandler;
 use PDO;
 use Utils;
@@ -230,12 +230,12 @@ class Filters {
      *
      * @param                $response
      * @param string         $sentFile
-     * @param Jobs_JobStruct $jobData
+     * @param JobStruct      $jobData
      * @param array          $sourceFileData
      *
      * @throws Exception
      */
-    public static function logConversionToTarget( $response, string $sentFile, Jobs_JobStruct $jobData, array $sourceFileData ) {
+    public static function logConversionToTarget( $response, string $sentFile, JobStruct $jobData, array $sourceFileData ) {
         self::logConversion( $response, false, $sentFile, $jobData->toArray(), $sourceFileData );
     }
 

@@ -13,31 +13,31 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Database;
 use Exception;
-use Jobs_JobStruct;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Jobs\JobStruct;
 
 class CompletionEventController extends KleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $chunk;
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var \Model\Projects\ProjectStruct
      */
     protected $project;
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param \Model\Projects\ProjectStruct $project
      */
-    public function setProject( \Projects_ProjectStruct $project ){
+    public function setProject( \Model\Projects\ProjectStruct $project ){
         $this->project = $project;
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */
@@ -71,7 +71,7 @@ class CompletionEventController extends KleinController {
             $event = ( new ChunkCompletionEventDao() )->getByIdAndChunk( $Controller->getParams()[ 'id_event' ], $Validator->getChunk() );
 
             if ( !$event ) {
-                throw new \Exceptions\NotFoundException( "Event Not Found.", 404 );
+                throw new \Model\Exceptions\NotFoundException( "Event Not Found.", 404 );
             }
 
             $Controller->setChunk( $Validator->getChunk() );

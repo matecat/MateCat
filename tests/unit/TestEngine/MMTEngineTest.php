@@ -1,5 +1,6 @@
 <?php
 
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
 
@@ -75,7 +76,7 @@ H;
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
         $mmtEngine = @$this->getMockBuilder( '\Engines_MMT' )
-                ->setConstructorArgs( [ new EnginesModel_EngineStruct( $record ) ] )
+                ->setConstructorArgs( [ new EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 
         $mmtEngine->expects( $this->once() )

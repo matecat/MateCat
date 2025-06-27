@@ -33,7 +33,7 @@ trait TimeLoggerTrait {
      */
     protected function logPageCall() {
 
-        Log::$fileName = $this->timingLogFileName;
+        Log::setLogFileName( $this->timingLogFileName );
 
         /** @var $this IController|TimeLoggerTrait */
 

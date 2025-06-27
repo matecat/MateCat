@@ -1,8 +1,9 @@
 <?php
 
-namespace Files;
+namespace Utils\Files;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use stdClass;
 
 class CSV {
@@ -11,7 +12,7 @@ class CSV {
      * @param string   $prefix
      *
      * @return false|string
-     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
+     * @throws Exception
      */
     public static function extract( $file, $prefix = '' ) {
         if ( !isset( $file->file_path ) ) {

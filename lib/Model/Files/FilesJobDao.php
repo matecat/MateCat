@@ -1,22 +1,22 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDao;
 use Database;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
 use PDO;
 
 class FilesJobDao extends AbstractDao {
     const TABLE = 'files_job';
 
     /**
-     * @param FileStruct   $file
-     * @param Jobs_JobStruct $chunk
+     * @param FileStruct            $file
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return array
      */
-    public function getSegmentBoundariesForChunk( FileStruct $file, Jobs_JobStruct $chunk ) {
+    public function getSegmentBoundariesForChunk( FileStruct $file, JobStruct $chunk ) {
         $sql = "SELECT MIN(st.id_segment) AS MIN, MAX(st.id_segment) as MAX
           FROM files_job
             JOIN jobs

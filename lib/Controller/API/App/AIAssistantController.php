@@ -6,6 +6,8 @@ use AsyncTasks\Workers\AIAssistantWorker;
 use Controller\Abstracts\KleinController;
 use INIT;
 use Langs\Languages;
+use Log;
+use Utils;
 
 class AIAssistantController extends KleinController {
 
@@ -130,8 +132,8 @@ class AIAssistantController extends KleinController {
             $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
-            \Log::doJsonLog( $output );
-            \Utils::sendErrMailReport( $output );
+            Log::doJsonLog( $output );
+            Utils::sendErrMailReport( $output );
         }
     }
 }

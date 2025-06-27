@@ -29,7 +29,7 @@ class DeleteContributionController extends KleinController {
     /**
      * @throws NotFoundException
      * @throws ReflectionException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
      */
     public function delete(): void {

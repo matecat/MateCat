@@ -10,7 +10,7 @@
 namespace Translators;
 
 
-use DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDao;
 use ReflectionException;
 
 class TranslatorsProfilesDao extends AbstractDao {

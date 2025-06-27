@@ -10,15 +10,15 @@ namespace Controller\API\Commons\Validators;
 
 
 use Controller\Abstracts\KleinController;
-use Exceptions\NotFoundException;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 
 class ProjectPasswordValidator extends Base {
     /**
-     * @var ?Projects_ProjectStruct
+     * @var ?ProjectStruct
      */
-    private ?Projects_ProjectStruct $project = null;
+    private ?ProjectStruct $project = null;
 
     private int    $id_project;
     private string $password;
@@ -51,7 +51,7 @@ class ProjectPasswordValidator extends Base {
      */
     public function _validate(): void {
 
-        $this->project = Projects_ProjectDao::findByIdAndPassword(
+        $this->project = ProjectDao::findByIdAndPassword(
                 $this->id_project,
                 $this->password
         );
@@ -63,9 +63,9 @@ class ProjectPasswordValidator extends Base {
     }
 
     /**
-     * @return ?Projects_ProjectStruct
+     * @return ?ProjectStruct
      */
-    public function getProject(): ?Projects_ProjectStruct {
+    public function getProject(): ?ProjectStruct {
         return $this->project;
     }
 

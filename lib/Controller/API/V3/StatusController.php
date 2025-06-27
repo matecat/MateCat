@@ -8,7 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Analysis\Status;
-use Projects_ProjectDao;
+use Model\Projects\ProjectDao;
 
 class StatusController extends KleinController {
 
@@ -22,12 +22,12 @@ class StatusController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
      */
     public function index() {
 
-        $_project_data  = Projects_ProjectDao::getProjectAndJobData( $this->request->param( 'id_project' ) );
+        $_project_data  = ProjectDao::getProjectAndJobData( $this->request->param( 'id_project' ) );
         $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
         $result = $analysisStatus->fetchData()->getResult();
 

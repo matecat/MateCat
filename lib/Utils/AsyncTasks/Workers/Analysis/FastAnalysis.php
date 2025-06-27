@@ -14,18 +14,18 @@ use Engines_NONE;
 use Engines_Results_MyMemory_AnalyzeResponse;
 use Exception;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use INIT;
-use Jobs\MetadataDao;
-use Jobs_JobDao;
 use Log;
 use Model\Analysis\AnalysisDao;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use PDO;
 use PDOException;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\AbstractDaemon;
@@ -113,7 +113,7 @@ class FastAnalysis extends AbstractDaemon {
         $this->_contextIndex = $contextIndex;
 
         Log::resetLogger();
-        Log::$fileName = 'fastAnalysis.log';
+        Log::setLogFileName( 'fastAnalysis.log' );
 
         try {
             $this->queueHandler = new AMQHandler();
@@ -246,7 +246,7 @@ class FastAnalysis extends AbstractDaemon {
                 $this->_logTimeStampedMsg( "Inserting segments..." );
 
                 // define variable for the sake of the code, even if empty
-                $projectStruct = new Projects_ProjectStruct();
+                $projectStruct = new ProjectStruct();
 
                 try {
 
@@ -254,12 +254,12 @@ class FastAnalysis extends AbstractDaemon {
                      * Ensure we have fresh data from the master node
                      */
                     Database::obtain()->getConnection()->beginTransaction();
-                    $projectStruct              = Projects_ProjectDao::findById( $pid );
-                    $projectFeaturesString      = $projectStruct->getMetadataValue( Projects_MetadataDao::FEATURES_KEY );
-                    $mt_evaluation              = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION );
-                    $mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED );
-                    $mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS );
-                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
+                    $projectStruct              = ProjectDao::findById( $pid );
+                    $projectFeaturesString      = $projectStruct->getMetadataValue( ProjectsMetadataDao::FEATURES_KEY );
+                    $mt_evaluation              = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_EVALUATION );
+                    $mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED );
+                    $mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
+                    $mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
                     Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -296,9 +296,9 @@ class FastAnalysis extends AbstractDaemon {
                 $fs = $this->files_storage;
                 $fs::deleteFastAnalysisFile( $pid );
 
-                ( new Jobs_JobDao() )->destroyCacheByProjectId( $pid );
-                Projects_ProjectDao::destroyCacheById( $pid );
-                Projects_ProjectDao::destroyCacheByIdAndPassword( $pid, $projectStruct->password );
+                ( new JobDao() )->destroyCacheByProjectId( $pid );
+                ProjectDao::destroyCacheById( $pid );
+                ProjectDao::destroyCacheByIdAndPassword( $pid, $projectStruct->password );
                 AnalysisDao::destroyCacheByProjectId( $pid );
 
             }
@@ -413,13 +413,16 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _updateProject( $pid, $status ) {
 
         Database::obtain()->begin();
-        $project = Projects_ProjectDao::findById( $pid );
+        $project = ProjectDao::findById( $pid );
         if ( $project->status_analysis != ProjectStatus::STATUS_DONE ) { // avoid concurrency between fast and tm daemons ( they set DONE when complete )
             $this->_logTimeStampedMsg( "*** Project $pid: Changing status..." );
-            Projects_ProjectDao::changeProjectStatus( $pid, $status );
+            ProjectDao::changeProjectStatus( $pid, $status );
             $this->_logTimeStampedMsg( "*** Project $pid: $status" );
         } else {
             $this->_logTimeStampedMsg( "*** Project $pid: TM Analysis already completed. Skip update..." );
@@ -460,25 +463,29 @@ class FastAnalysis extends AbstractDaemon {
     }
 
     /**
-     * @param Projects_ProjectStruct $projectStruct
-     * @param string                 $projectFeaturesString
-     * @param array                  $equivalentWordMapping
-     * @param FeatureSet             $featureSet
-     * @param bool                   $perform_Tms_Analysis
+     * @param ProjectStruct $projectStruct
+     * @param string        $projectFeaturesString
+     * @param array         $equivalentWordMapping
+     * @param FeatureSet    $featureSet
+     * @param bool          $perform_Tms_Analysis
+     * @param bool|null     $mt_evaluation
+     * @param bool|null     $mt_qe_workflow_enabled
+     * @param string|null   $mt_qe_workflow_parameters
+     * @param int|null      $mt_quality_value_in_editor
      *
      * @return int
      * @throws Exception
      */
     protected function _insertFastAnalysis(
-            Projects_ProjectStruct $projectStruct,
-            string                 $projectFeaturesString,
-            array                  $equivalentWordMapping,
-            FeatureSet             $featureSet,
-            bool                   $perform_Tms_Analysis = true,
-            ?bool                  $mt_evaluation = false,
-            ?bool                  $mt_qe_workflow_enabled = false,
-            ?string                $mt_qe_workflow_parameters = "",
-            ?int                   $mt_quality_value_in_editor = 85
+            ProjectStruct $projectStruct,
+            string        $projectFeaturesString,
+            array         $equivalentWordMapping,
+            FeatureSet    $featureSet,
+            bool          $perform_Tms_Analysis = true,
+            ?bool         $mt_evaluation = false,
+            ?bool         $mt_qe_workflow_enabled = false,
+            ?string       $mt_qe_workflow_parameters = "",
+            ?int          $mt_quality_value_in_editor = 85
     ): int {
 
         $pid               = $projectStruct->id;

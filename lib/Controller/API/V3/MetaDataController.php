@@ -4,10 +4,10 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Files\MetadataDao as FileMetadataDao;
-use Jobs\MetadataDao;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Model\Files\MetadataDao as FileMetadataDao;
+use Model\Jobs\JobStruct;
+use Model\Jobs\MetadataDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use stdClass;
 
@@ -43,11 +43,11 @@ class MetaDataController extends KleinController {
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return stdClass
      */
-    private function getProjectInfo( Projects_ProjectStruct $project ): stdClass {
+    private function getProjectInfo( ProjectStruct $project ): stdClass {
 
         $metadata = new stdClass();
 
@@ -60,12 +60,12 @@ class MetaDataController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param \Model\Jobs\JobStruct $job
      *
      * @return stdClass
      * @throws ReflectionException
      */
-    private function getJobMetaData( Jobs_JobStruct $job ): object {
+    private function getJobMetaData( JobStruct $job ): object {
 
         $metadata       = new stdClass();
         $jobMetaDataDao = new MetadataDao();
@@ -79,12 +79,12 @@ class MetaDataController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param \Model\Jobs\JobStruct $job
      *
      * @return array
      * @throws ReflectionException
      */
-    private function getJobFilesMetaData( Jobs_JobStruct $job ): array {
+    private function getJobFilesMetaData( JobStruct $job ): array {
 
         $metadata         = [];
         $filesMetaDataDao = new FileMetadataDao();

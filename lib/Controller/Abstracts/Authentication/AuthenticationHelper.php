@@ -2,10 +2,10 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use ConnectedServices\ConnectedServiceDao;
 use Log;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\ConnectedServices\ConnectedServiceDao;
 use ReflectionException;
 use TeamModel;
 use Teams\MembershipDao;

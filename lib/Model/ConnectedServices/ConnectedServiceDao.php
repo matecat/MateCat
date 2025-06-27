@@ -1,11 +1,11 @@
 <?php
 
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
-use DataAccess\AbstractDao;
 use Exception;
-use Exceptions\ValidationError;
+use Model\DataAccess\AbstractDao;
+use Model\Exceptions\ValidationError;
 use PDO;
 use Users_UserStruct;
 use Utils;

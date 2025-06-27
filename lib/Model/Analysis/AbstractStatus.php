@@ -6,17 +6,17 @@ use AMQHandler;
 use Constants_ProjectStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
-use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use OutsourceTo\OutsourceAvailable;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
 use ReflectionException;
 use Routes;
 use TaskRunner\Exceptions\EndQueueException;
@@ -53,9 +53,9 @@ abstract class AbstractStatus {
 
     protected FeatureSet $featureSet;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
     /**
      * @var Users_UserStruct|null
      */
@@ -78,7 +78,7 @@ abstract class AbstractStatus {
             $user->uid = -1;
         }
         $this->user          = $user;
-        $this->project       = Projects_ProjectDao::findById( $_project_data[ 0 ][ 'pid' ], 60 * 60 );
+        $this->project       = ProjectDao::findById( $_project_data[ 0 ][ 'pid' ], 60 * 60 );
         $this->_project_data = $_project_data;
         $this->featureSet    = $features;
     }
@@ -165,7 +165,7 @@ abstract class AbstractStatus {
     protected function loadObjects(): AbstractStatus {
 
         $target                 = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         $this->result = $project = new AnalysisProject(
@@ -278,7 +278,7 @@ abstract class AbstractStatus {
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ?? 0 ) );  //backward compatibility, some old projects may have this field set as null
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
 
-                $chunkStruct                = new Jobs_JobStruct();
+                $chunkStruct                = new JobStruct();
                 $chunkStruct->id            = $_job_fallback[ 'jid' ];
                 $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
                 $chunkStruct->source        = $lang_pair[ 0 ];

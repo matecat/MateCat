@@ -1,7 +1,7 @@
 <?php
 
 use Langs\Languages;
-use PayableRates\CustomPayableRateStruct;
+use Model\PayableRates\CustomPayableRateStruct;
 use TestHelpers\AbstractTest;
 
 /**

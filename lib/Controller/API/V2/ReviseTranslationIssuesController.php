@@ -14,10 +14,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslation;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Exceptions\NotFoundException;
 use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion;
 
@@ -59,9 +59,9 @@ class ReviseTranslationIssuesController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct|null $chunk
+     * @param JobStruct|null $chunk
      */
-    public function setChunk( Jobs_JobStruct $chunk = null ) {
+    public function setChunk( JobStruct $chunk = null ) {
         $this->chunk = $chunk;
     }
 }

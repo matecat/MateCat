@@ -3,12 +3,9 @@
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
-use Features\ReviewExtended\TranslationIssueModel;
 use Features\SecondPassReview;
-use Features\ReviewExtended\ReviewedWordCountModel;
-use Features\TranslationEvents\Model\TranslationEvent;
-use LQA\ChunkReviewStruct;
-use WordCount\CounterModel;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectStruct;
 
 /**
  * Class RevisionFactory
@@ -75,12 +72,12 @@ class RevisionFactory {
      *
      * This works because revision plugins are by default not forcedly injected on projects ( $forceOnProject == false ).
      *
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return static
      * @throws Exception
      */
-    public static function initFromProject( Projects_ProjectStruct $project ): RevisionFactory {
+    public static function initFromProject( ProjectStruct $project ): RevisionFactory {
         foreach ( $project->getFeaturesSet()->getFeaturesStructs() as $featureStruct ) {
             $feature = $featureStruct->toNewObject();
             if ( $feature instanceof AbstractRevisionFeature ) { //only one revision type can be present

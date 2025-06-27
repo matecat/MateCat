@@ -10,14 +10,15 @@
 namespace Contribution;
 
 use Constants_TranslationStatus;
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
 use Database;
-use Exceptions\ValidationError;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_MetadataDao;
-use Projects_MetadataStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\MetadataStruct;
+use Model\Segments\SegmentNoteDao;
 use TaskRunner\Commons\Params;
 
 /**
@@ -123,7 +124,7 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
      * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
      * because we want control the cache eviction from other entrypoints.
      *
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      *
      * @throws ValidationError
      */
@@ -134,8 +135,8 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
         }
 
         return $this->cachable( '_contributionJob', $this, function () {
-            $JobDao              = new Jobs_JobDao( Database::obtain() );
-            $jobStruct           = new Jobs_JobStruct();
+            $JobDao              = new JobDao( Database::obtain() );
+            $jobStruct           = new JobStruct();
             $jobStruct->id       = $this->id_job;
             $jobStruct->password = $this->job_password;
 
@@ -199,13 +200,13 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
     /**
      * Get all project Metadata not related to features
      *
-     * @return Projects_MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws ValidationError
      */
     public function getProjectMetaData() {
         $jobStruct   = $this->getJobStruct();
         $projectMeta = array_filter( $jobStruct->getProjectMetadata(), function ( $metadataStruct ) {
-            return $metadataStruct->key != Projects_MetadataDao::FEATURES_KEY;
+            return $metadataStruct->key != MetadataDao::FEATURES_KEY;
         } );
 
         return $projectMeta;
@@ -213,7 +214,7 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
 
     public function getSegmentNotes() {
         return $this->cachable( '_segmentNote', $this, function () {
-            return \Segments_SegmentNoteDao::getBySegmentId( $this->id_segment );
+            return SegmentNoteDao::getBySegmentId( $this->id_segment );
         } );
     }
 

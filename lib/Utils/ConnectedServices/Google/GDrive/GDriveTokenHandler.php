@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ConnectedServices\Google\GDrive;
+namespace Utils\ConnectedServices\Google\GDrive;
 
 use Exception;
 

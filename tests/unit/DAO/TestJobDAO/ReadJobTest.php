@@ -1,11 +1,13 @@
 <?php
 
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Jobs_JobDao::read
+ * @covers JobDao::read
  * User: dinies
  * Date: 31/05/16
  * Time: 12.32
@@ -16,7 +18,7 @@ class ReadJobTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
     protected $sql_delete_job;
@@ -28,7 +30,7 @@ class ReadJobTest extends AbstractTest {
     protected $job_password;
     protected $job_owner;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
     protected $job_struct_param;
@@ -37,7 +39,7 @@ class ReadJobTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->job_Dao           = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao           = new JobDao( $this->database_instance );
 
 
         /**
@@ -45,7 +47,7 @@ class ReadJobTest extends AbstractTest {
          */
         $this->job_password = "7barandfoo71";
         $this->job_owner    = "barandfoo@translated.net";
-        $this->job_struct   = new Jobs_JobStruct(
+        $this->job_struct   = new JobStruct(
                 [
                         'id'                      => null, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                         'password'                => $this->job_password,
@@ -99,10 +101,10 @@ class ReadJobTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Jobs_JobDao::read
+     * @covers JobDao::read
      */
     public function test_read_job_without_params() {
-        $this->job_struct_param = new Jobs_JobStruct( [ 'password' => '' ] );
+        $this->job_struct_param = new JobStruct( [ 'password' => '' ] );
         $result                 = $this->job_Dao->read( $this->job_struct_param );
         $this->assertEmpty( $result );
 
@@ -110,15 +112,15 @@ class ReadJobTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Jobs_JobDao::read
+     * @covers JobDao::read
      */
     public function test_read__job_with_success_id_and_password_given() {
-        $this->job_struct_param           = new Jobs_JobStruct( [] );
+        $this->job_struct_param           = new JobStruct( [] );
         $this->job_struct_param->id       = $this->job_id;
         $this->job_struct_param->password = $this->job_password;
         $result_wrapped                   = $this->job_Dao->read( $this->job_struct_param );
         $result                           = $result_wrapped[ '0' ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job_id, $result->id );
         $this->assertEquals( $this->job_password, $result->password );
         $this->assertEquals( "432999999", $result->id_project );

@@ -6,16 +6,16 @@
  * Time: 11:54
  */
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
-use ConnectedServices\Google\GDrive\GDriveTokenHandler;
-use ConnectedServices\Google\GoogleProvider;
 use Exception;
-use Exceptions\ValidationError;
 use Google_Service_Oauth2;
 use INIT;
 use Log;
+use Model\Exceptions\ValidationError;
 use Utils;
+use Utils\ConnectedServices\Google\GDrive\GDriveTokenHandler;
+use Utils\ConnectedServices\Google\GoogleProvider;
 
 class GDriveUserAuthorizationModel {
 

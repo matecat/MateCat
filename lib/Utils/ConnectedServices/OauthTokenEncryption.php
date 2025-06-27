@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices;
+namespace Utils\ConnectedServices;
 
 use Constants;
 use DefuseEncryption;

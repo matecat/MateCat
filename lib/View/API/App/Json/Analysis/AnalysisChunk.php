@@ -11,9 +11,9 @@ namespace View\API\App\Json\Analysis;
 
 use Engine;
 use Exception;
-use Jobs_JobStruct;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
+use Model\Jobs\JobStruct;
 use TmKeyManagement_Filter;
 use Url\JobUrlBuilder;
 use Users_UserStruct;
@@ -30,9 +30,9 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected array $files = [];
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
-    protected Jobs_JobStruct $chunkStruct;
+    protected JobStruct $chunkStruct;
     /**
      * @var string
      */
@@ -55,7 +55,7 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected float $total_industry = 0;
 
-    public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user, ConstantsInterface $matchConstantsClass ) {
+    public function __construct( JobStruct $chunkStruct, $projectName, Users_UserStruct $user, ConstantsInterface $matchConstantsClass ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user        = $user;
@@ -92,9 +92,9 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
-    public function getChunkStruct(): Jobs_JobStruct {
+    public function getChunkStruct(): JobStruct {
         return $this->chunkStruct;
     }
 

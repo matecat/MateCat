@@ -3,19 +3,19 @@
 namespace Controller\Views;
 
 use Controller\Abstracts\BaseKleinViewController;
-use ConnectedServices\ConnectedServiceUserModel;
-use ConnectedServices\OauthClient;
 use Exception;
 use INIT;
 use OAuthSignInModel;
 use ReflectionException;
+use Utils\ConnectedServices\ProviderUser;
+use Utils\ConnectedServices\OauthClient;
 
 class OauthResponseHandlerController extends BaseKleinViewController {
 
     /**
-     * @var ConnectedServiceUserModel
+     * @var ProviderUser
      */
-    private ConnectedServiceUserModel $remoteUser;
+    private ProviderUser $remoteUser;
 
     /**
      * @throws ReflectionException

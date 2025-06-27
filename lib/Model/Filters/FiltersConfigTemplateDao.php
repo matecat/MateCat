@@ -1,17 +1,17 @@
 <?php
 
-namespace Filters;
+namespace Model\Filters;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
 use DateTime;
 use Exception;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\Projects\ProjectTemplateDao;
+use Model\Projects\ProjectTemplateStruct;
 use PDO;
-use Projects\ProjectTemplateDao;
-use Projects\ProjectTemplateStruct;
 use ReflectionException;
 use Utils;
 

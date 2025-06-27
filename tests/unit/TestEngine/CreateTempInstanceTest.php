@@ -1,5 +1,6 @@
 <?php
 
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -13,7 +14,7 @@ use TestHelpers\AbstractTest;
 class CreateTempInstanceTest extends AbstractTest {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
@@ -25,7 +26,7 @@ class CreateTempInstanceTest extends AbstractTest {
      */
     public function test_createTempInstance_of_constructed_engine() {
 
-        $this->engine_struct_param = new EnginesModel_EngineStruct();
+        $this->engine_struct_param = new EngineStruct();
 
         $this->engine_struct_param->type       = Constants_Engines::MT;
         $this->engine_struct_param->class_load = "DeepL";

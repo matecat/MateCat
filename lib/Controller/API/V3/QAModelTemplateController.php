@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
-use QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONSchema\Errors\JSONValidatorException;
 use Validator\JSONSchema\Errors\JsonValidatorGenericException;

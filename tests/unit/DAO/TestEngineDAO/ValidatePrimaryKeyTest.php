@@ -1,11 +1,13 @@
 <?php
 
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineDAO::_validatePrimaryKey
+ * @covers EngineDAO::_validatePrimaryKey
  * User: dinies
  * Date: 20/04/16
  * Time: 17.30
@@ -13,22 +15,22 @@ use TestHelpers\AbstractTest;
 class ValidatePrimaryKeyTest extends AbstractTest {
 
     /**
-     * @var EnginesModel_EngineDAO
+     * @var EngineDAO
      */
     protected $method;
     protected $reflector;
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_validatePrimaryKey" );
         $this->method->setAccessible( true );
-        $this->engine_struct_param = new EnginesModel_EngineStruct();
+        $this->engine_struct_param = new EngineStruct();
 
     }
 
@@ -36,7 +38,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
      * It checks that 'id' and 'uid' aren't null values.
      * Test that no exceptions are thrown
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validatePrimaryKey
+     * @covers EngineDAO::_validatePrimaryKey
      * @doesNotPerformAssertions
      */
     public function test__validatePrimaryKey_valid_fields() {
@@ -51,7 +53,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
     /**
      * It will raise an exception when it checks that 'id' field is NULL.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validatePrimaryKey
+     * @covers EngineDAO::_validatePrimaryKey
      */
     public function test__validatePrimaryKey_invalid_id() {
 
@@ -65,7 +67,7 @@ class ValidatePrimaryKeyTest extends AbstractTest {
     /**
      * It will raise an exception when it checks that 'uid' field is NULL.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::_validatePrimaryKey
+     * @covers EngineDAO::_validatePrimaryKey
      */
     public function test__validatePrimaryKey_invalid_uid() {
 

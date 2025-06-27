@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts;
 
-use ApiKeyStruct;
 use Bootstrap;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
@@ -15,6 +14,7 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Log;
+use Model\ApiKeys\ApiKeyStruct;
 use ReflectionException;
 
 abstract class KleinController implements IController {

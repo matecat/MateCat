@@ -3,9 +3,9 @@
 namespace Validator;
 
 use Controller\API\Commons\Exceptions\ValidationError;
-use DataAccess\ShapelessConcreteStruct;
 use DomainException;
-use LQA\ChunkReviewDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\LQA\ChunkReviewDao;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
 

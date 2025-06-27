@@ -17,7 +17,7 @@ class Activity {
     /**
      * @var ActivityLogStruct[]
      */
-    private $data;
+    private array $data;
 
     public function __construct( $data ) {
         $this->data = $data;

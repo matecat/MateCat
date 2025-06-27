@@ -7,15 +7,15 @@
  *
  */
 
-namespace MTQE\PayableRate;
+namespace Model\MTQE\PayableRate;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
 use DateTime;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
 use PDO;
 use ReflectionException;
 use Utils;

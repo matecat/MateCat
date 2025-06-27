@@ -13,8 +13,8 @@ use DomainException;
 use Exception;
 use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
-use Jobs_JobDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement_ClientTmKeyStruct;
@@ -148,7 +148,7 @@ class UpdateJobKeysController extends KleinController {
         $request[ 'jobData' ]->tm_keys     = json_encode( $totalTmKeys );
         $request[ 'jobData' ]->last_update = date( "Y-m-d H:i:s" );
 
-        $jobDao = new Jobs_JobDao( Database::obtain() );
+        $jobDao = new JobDao( Database::obtain() );
         $jobDao->updateStruct( $request[ 'jobData' ], [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
         $jobDao->destroyCache( $request[ 'jobData' ] );
 
@@ -202,7 +202,7 @@ class UpdateJobKeysController extends KleinController {
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = Jobs_JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
+        $jobData = JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
 
         // Check if user can access the job
         $pCheck = new AjaxPasswordCheck();

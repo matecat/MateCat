@@ -10,10 +10,10 @@
 namespace Controller\Traits;
 
 use Exception;
-use FilesStorage\AbstractFilesStorage;
 use INIT;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\FilesStorage\AbstractFilesStorage;
 
 trait ScanDirectoryForConvertedFiles {
 

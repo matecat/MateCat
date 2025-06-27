@@ -2,14 +2,17 @@
 
 use Controller\Abstracts\IController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use Features\BaseFeature;
-use Matecat\SubFiltering\Contracts\FeatureSetInterface;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
+use Features\BaseFeature;
+use Matecat\SubFiltering\Contracts\FeatureSetInterface;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -101,17 +104,17 @@ class FeatureSet implements FeatureSetInterface {
      * 1. The ones explicitly defined `project_metadata`;
      * 2. The ones in the autoloaded array that can be forcedly enabled on a project.
      *
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return void
      * @throws Exception
      */
-    public function loadForProject( Projects_ProjectStruct $project ) {
+    public function loadForProject( ProjectStruct $project ) {
         $this->clear();
         $this->_setIgnoreDependencies( true );
         $this->loadForceableProjectFeatures();
         $this->loadFromCodes(
-                FeatureSet::splitString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) )
+                FeatureSet::splitString( $project->getMetadataValue( MetadataDao::FEATURES_KEY ) )
         );
         $this->_setIgnoreDependencies( false );
     }
@@ -155,7 +158,7 @@ class FeatureSet implements FeatureSetInterface {
      * @throws Exception If an error occurs during the merging process.
      */
     public function loadFromUserEmail( string $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $features = OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->clear();
         $this->_setIgnoreDependencies( false );
         $this->loadFromMandatory();
@@ -190,14 +193,14 @@ class FeatureSet implements FeatureSetInterface {
      * 1. Find all owner_features for the given user
      * 2. Instantiate a concrete feature class for each record
      * 3. Filter the list based on the return of autoActivateOnProject()
-     * 4. Populate the featureSet with the resulting OwnerFeatures_OwnerFeatureStruct
+     * 4. Populate the featureSet with the resulting OwnerFeatureStruct
      *
      * @param $id_customer
      *
      * @throws Exception
      */
     public function loadAutoActivableOwnerFeatures( $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $features = OwnerFeatureDao::getByIdCustomer( $id_customer );
 
         $objs = array_map( function ( $feature ) {
             /* @var $feature BasicFeatureStruct */

@@ -1,5 +1,10 @@
 <?php
 
+use Model\Search\MySQLReplaceEventDAO;
+use Model\Search\MySQLReplaceEventIndexDAO;
+use Model\Search\RedisReplaceEventDAO;
+use Model\Search\RedisReplaceEventIndexDAO;
+
 class Search_ReplaceHistoryFactory {
 
     /**
@@ -15,16 +20,16 @@ class Search_ReplaceHistoryFactory {
         if ( $driver === 'redis' ) {
             return new Search_ReplaceHistory(
                     $id_job,
-                    new Search_RedisReplaceEventDAO(),
-                    new Search_RedisReplaceEventIndexDAO(),
+                    new RedisReplaceEventDAO(),
+                    new RedisReplaceEventIndexDAO(),
                     $ttl
             );
         }
 
         return new Search_ReplaceHistory(
                 $id_job,
-                new Search_MySQLReplaceEventDAO(),
-                new Search_MySQLReplaceEventIndexDAO(),
+                new MySQLReplaceEventDAO(),
+                new MySQLReplaceEventIndexDAO(),
                 $ttl
         );
     }

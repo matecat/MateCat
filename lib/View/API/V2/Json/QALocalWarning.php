@@ -10,8 +10,8 @@
 namespace View\API\V2\Json;
 
 
-use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
+use Utils\LQA\QA;
 
 class QALocalWarning extends QAWarning {
 
@@ -78,7 +78,7 @@ class QALocalWarning extends QAWarning {
             }
 
             $malformedStructs = $this->QA->getMalformedXmlStructs();
-            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Segments_SegmentOriginalDataDao::getSegmentDataRefMap
+            $Filter           = MateCatFilter::getInstance( $this->QA->getFeatureSet(), $this->QA->getSourceSegLang(), $this->QA->getTargetSegLang(), \Model\Segments\SegmentOriginalDataDao::getSegmentDataRefMap
             ( $this->id_segment ) );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {

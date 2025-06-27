@@ -3,6 +3,7 @@
 use Email\InvitedToTeamEmail;
 use Email\MembershipCreatedEmail;
 use Email\MembershipDeletedEmail;
+use Model\Projects\ProjectDao;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\PendingInvitations;
@@ -94,7 +95,7 @@ class TeamModel {
             //check if this is the last user of the team
             $memberList = $membershipDao->getMemberListByTeamId( $this->struct->id );
 
-            $projectDao = new Projects_ProjectDao();
+            $projectDao = new ProjectDao();
 
             foreach ( $this->uids_to_remove as $uid ) {
                 $user = $membershipDao->deleteUserFromTeam( $uid, $this->struct->id );

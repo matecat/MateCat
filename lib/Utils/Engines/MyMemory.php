@@ -1,9 +1,9 @@
 <?php
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 

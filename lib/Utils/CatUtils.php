@@ -1,13 +1,16 @@
 <?php
 
-use FilesStorage\AbstractFilesStorage;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectStruct;
 use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
 use WordCount\CounterModel;
@@ -564,14 +567,14 @@ class CatUtils {
     }
 
     /**
-     * @param Jobs_JobStruct         $job
+     * @param JobStruct     $job
      *
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return WordCountStruct
      * @throws Exception
      */
-    public static function getWStructFromJobArray( Jobs_JobStruct $job, Projects_ProjectStruct $projectStruct ): WordCountStruct {
+    public static function getWStructFromJobArray( JobStruct $job, ProjectStruct $projectStruct ): WordCountStruct {
 
         $wStruct = WordCountStruct::loadFromJob( $job );
 
@@ -590,14 +593,14 @@ class CatUtils {
     /**
      * Returns the string representing the overall quality for a job,
      *
-     * @param Jobs_JobStruct $job
+     * @param JobStruct $job
      *
-     * @param array          $chunkReviews
+     * @param array     $chunkReviews
      *
      * @return string
      * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ): ?string {
+    public static function getQualityOverallFromJobStruct( JobStruct $job, array $chunkReviews = [] ): ?string {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
         if ( !isset( $values ) ) {
@@ -618,13 +621,13 @@ class CatUtils {
     }
 
     /**
-     * @param Jobs_JobStruct $job
-     * @param array          $chunkReviews
+     * @param JobStruct $job
+     * @param array     $chunkReviews
      *
      * @return ChunkReviewStruct|null
      * @throws ReflectionException
      */
-    public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ): ?ChunkReviewStruct {
+    public static function getChunkReviewStructFromJobStruct( JobStruct $job, array $chunkReviews = [] ): ?ChunkReviewStruct {
         return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( $job )[ 0 ] ?? null;
     }
 
@@ -755,11 +758,11 @@ class CatUtils {
      * @param $jobId
      * @param $jobPassword
      *
-     * @return null|Jobs_JobStruct
+     * @return null|JobStruct
      * @throws ReflectionException
      */
-    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ): ?Jobs_JobStruct {
-        $job = Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
+    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ): ?JobStruct {
+        $job = JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
 
@@ -783,12 +786,12 @@ class CatUtils {
      * Otherwise the function try to return the corresponding review_password
      *      *
      *
-     * @param Jobs_JobStruct $job
-     * @param int            $sourcePage
+     * @param JobStruct $job
+     * @param int       $sourcePage
      *
      * @return string|null
      */
-    public static function getJobPassword( Jobs_JobStruct $job, int $sourcePage = 1 ): ?string {
+    public static function getJobPassword( JobStruct $job, int $sourcePage = 1 ): ?string {
         if ( $sourcePage <= 1 ) {
             return $job->password;
         }
@@ -814,12 +817,12 @@ class CatUtils {
     }
 
     /**
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return int|null
      * @throws ReflectionException
      */
-    public static function getSegmentTranslationsCount( Projects_ProjectStruct $projectStruct ): ?int {
+    public static function getSegmentTranslationsCount( ProjectStruct $projectStruct ): ?int {
         $idJobs = [];
 
         foreach ( $projectStruct->getJobs() as $job ) {
@@ -828,7 +831,7 @@ class CatUtils {
 
         $idJobs = array_unique( $idJobs );
 
-        return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
+        return JobDao::getSegmentTranslationsCount( $idJobs );
     }
 
     /**

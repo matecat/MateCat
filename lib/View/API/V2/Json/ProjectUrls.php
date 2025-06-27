@@ -8,8 +8,8 @@
 
 namespace View\API\V2\Json;
 
-use DataAccess\ShapelessConcreteStruct;
 use Exception;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Routes;
 
 class ProjectUrls {

@@ -15,14 +15,14 @@ use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use INIT;
-use Jobs_JobDao;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
 use PHPTalBoolean;
 use PHPTalMap;
-use Projects_ProjectDao;
 use Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
@@ -72,7 +72,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
         $jid  = $postInput[ 'jid' ];
         $pass = $postInput[ 'password' ];
 
-        $projectStruct = Projects_ProjectDao::findById( $pid, 60 * 60 );
+        $projectStruct = ProjectDao::findById( $pid, 60 * 60 );
 
         if ( empty( $projectStruct ) ) {
             $this->setView( "project_not_found.html", [], 404 );
@@ -82,7 +82,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
         if ( !empty( $jid ) ) {
 
             // we are looking for a chunk
-            $chunkStruct = Jobs_JobDao::getByIdAndPassword( $jid, $pass );
+            $chunkStruct = JobDao::getByIdAndPassword( $jid, $pass );
             if ( empty( $chunkStruct ) || $chunkStruct->isDeleted() ) {
                 $this->setView( "project_not_found.html", [], 404 );
                 $this->render();
@@ -117,7 +117,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
             $this->featureSet->loadForProject( $projectStruct );
         }
 
-        $projectData    = Projects_ProjectDao::getProjectAndJobData( $pid );
+        $projectData    = ProjectDao::getProjectAndJobData( $pid );
         $analysisStatus = new Status( $projectData, $this->featureSet, $this->user );
 
         $model = $analysisStatus->fetchData()->getResult();

@@ -15,14 +15,14 @@ use Constants;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use FeatureSet;
-use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Langs\Languages;
-use LQA\ChunkReviewDao;
 use ManageUtils;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use OutsourceTo\OutsourceAvailable;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use Users_UserStruct;
@@ -82,11 +82,11 @@ class Job {
     }
 
     /**
-     * @param Jobs_JobStruct $jStruct
+     * @param \Model\Jobs\JobStruct $jStruct
      *
      * @return array
      */
-    protected function getKeyList( Jobs_JobStruct $jStruct ): array {
+    protected function getKeyList( JobStruct $jStruct ): array {
 
         if ( empty( $this->user ) ) {
             return [];
@@ -103,15 +103,15 @@ class Job {
     }
 
     /**
-     * @param                         $chunk Jobs_JobStruct
+     * @param                         $chunk \Model\Jobs\JobStruct
      *
-     * @param Projects_ProjectStruct  $project
+     * @param ProjectStruct           $project
      * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    public function renderItem( JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $outsourceInfo = $chunk->getOutsource();
         $tStruct       = $chunk->getTranslator();
@@ -209,9 +209,9 @@ class Job {
     }
 
 
-    protected function fillUrls( array $result, Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    protected function fillUrls( array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
-        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $projectData = ( new ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );
 

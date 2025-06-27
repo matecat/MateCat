@@ -6,11 +6,11 @@
  * Time: 19:34
  */
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {

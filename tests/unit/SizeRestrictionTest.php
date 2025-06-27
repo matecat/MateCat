@@ -3,8 +3,8 @@
 namespace unit;
 
 use FeatureSet;
-use LQA\SizeRestriction\SizeRestriction;
 use TestHelpers\AbstractTest;
+use Utils\LQA\SizeRestriction\SizeRestriction;
 
 class SizeRestrictionTest extends AbstractTest {
 

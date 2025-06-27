@@ -11,14 +11,14 @@ namespace Controller\API\Commons\Validators;
 
 
 use Controller\API\Commons\Exceptions\NotFoundException;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectStruct;
 
 class ProjectExistsInTeamValidator extends Base {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     public function _validate(): void {
 
@@ -29,11 +29,11 @@ class ProjectExistsInTeamValidator extends Base {
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return ProjectExistsInTeamValidator
      */
-    public function setProject( Projects_ProjectStruct $project ): ProjectExistsInTeamValidator {
+    public function setProject( ProjectStruct $project ): ProjectExistsInTeamValidator {
         $this->project = $project;
 
         return $this;

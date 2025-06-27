@@ -1,10 +1,10 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
-use Exceptions\ValidationError;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\ValidationError;
 
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

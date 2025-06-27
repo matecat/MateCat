@@ -8,9 +8,9 @@
 
 namespace Users;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 
 class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, JsonSerializable {
     public string $id;

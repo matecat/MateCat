@@ -2,11 +2,11 @@
 
 namespace Model\Comments;
 
-use DataAccess\AbstractDao;
 use Database;
 use Exception;
-use Jobs_JobStruct;
 use Log;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;
 use Users_UserDao;
@@ -255,13 +255,13 @@ class CommentDao extends AbstractDao {
 
     /**
      *
-     * @param Jobs_JobStruct $chunk
-     * @param array          $options
+     * @param \Model\Jobs\JobStruct $chunk
+     * @param array                 $options
      *
      * @return BaseCommentStruct[]
      */
 
-    public static function getCommentsForChunk( Jobs_JobStruct $chunk, array $options = [] ): array {
+    public static function getCommentsForChunk( JobStruct $chunk, array $options = [] ): array {
 
         $sql = "SELECT 
                   id, 

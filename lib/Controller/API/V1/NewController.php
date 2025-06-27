@@ -10,36 +10,36 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
-use Conversion\FilesConverter;
-use Conversion\Upload;
 use Database;
 use Engine;
 use Engines_DeepL;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
 use INIT;
 use InvalidArgumentException;
 use Langs\LanguageDomains;
 use Langs\Languages;
 use Log;
-use LQA\ModelDao;
-use LQA\ModelStruct;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
-use MTQE\PayableRate\MTQEPayableRateTemplateDao;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
-use MTQE\Templates\MTQEWorkflowTemplateDao;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
-use ProjectManager;
+use Model\Conversion\FilesConverter;
+use Model\Conversion\Upload;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\MTQE\PayableRate\MTQEPayableRateTemplateDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectManager;
+use Model\Projects\MetadataDao;
 use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use TaskRunner\Exceptions\EndQueueException;
@@ -368,8 +368,8 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
             }
 
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
             // does not put this in the options, we do not want to save it in the DB as metadata
             $mt_qe_PayableRate = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
             $mt_evaluation     = true; // force mt_evaluation because it is the default for mt_qe_workflows
@@ -403,10 +403,10 @@ class NewController extends KleinController {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
         }
 
-        $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
+        $metadata[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
 
         if ( $mt_evaluation ) {
-            $metadata[ Projects_MetadataDao::MT_EVALUATION ] = true;
+            $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
 
         return [
@@ -492,7 +492,7 @@ class NewController extends KleinController {
         }
 
         // new raw counter model
-        $metadata[ Projects_MetadataDao::WORD_COUNT_TYPE_KEY ] = Projects_MetadataDao::WORD_COUNT_RAW;
+        $metadata[ MetadataDao::WORD_COUNT_TYPE_KEY ] = MetadataDao::WORD_COUNT_RAW;
 
         return $metadata;
 

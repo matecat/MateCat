@@ -7,9 +7,9 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
-use Exceptions\ValidationError as Model_ValidationError;
 use Klein\Klein;
 use Langs\InvalidLanguageException;
+use Model\Exceptions\ValidationError as Model_ValidationError;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONSchema\Errors\JSONValidatorException;
 use Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -67,7 +67,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
     if ( !$isView ) {
 
         $klein->response()->noCache();
-        Log::$fileName = 'fatal_errors.txt';
+        Log::setLogFileName( 'fatal_errors.txt' );
 
         switch ( get_class( $exception ) ) {
             case \Swaggest\JsonSchema\Exception::class:
@@ -87,12 +87,12 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
             case AuthorizationError::class: // invalid permissions to access the resource
-            case \Exceptions\AuthorizationError::class:
+            case \Model\Exceptions\AuthorizationError::class:
                 $klein->response()->code( 403 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
             case NotFoundException::class:
-            case Exceptions\NotFoundException::class:
+            case Model\Exceptions\NotFoundException::class:
                 Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
                 Log::doJsonLog( json_encode( ( new Error( $exception ) )->render( true ) ) );
                 $klein->response()->code( 404 );

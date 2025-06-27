@@ -11,8 +11,8 @@ namespace AsyncTasks\Workers;
 
 
 use Exception;
-use PDOException;
 use ProjectManager;
+use PDOException;
 use ProjectQueue\Queue;
 use RecursiveArrayObject;
 use TaskRunner\Commons\AbstractElement;

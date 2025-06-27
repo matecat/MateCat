@@ -16,25 +16,25 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Engines_Intento;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
-use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use INIT;
-use Jobs_JobStruct;
 use Langs\Languages;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\ModelStruct;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\ModelStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
 use ReflectionException;
 use stdClass;
 use TeamModel;
@@ -122,7 +122,7 @@ class CattoolController extends BaseKleinViewController {
             $this->notFound();
         }
 
-        /** @var $chunkStruct Jobs_JobStruct */
+        /** @var $chunkStruct JobStruct */
         $chunkStruct = $chunkAndPasswords->chunk;
 
         /** @var  $chunkReviewStruct ?ChunkReviewStruct */
@@ -160,7 +160,7 @@ class CattoolController extends BaseKleinViewController {
                 'id_project'                            => $chunkStruct->getProject()->id,
                 'id_team'                               => $chunkStruct->getProject()->id_team,
                 'isCJK'                                 => new PHPTalBoolean( CatUtils::isCJK( $chunkStruct->source ) ),
-                'isGDriveProject'                       => new PHPTalBoolean( Projects_ProjectDao::isGDriveProject( $chunkStruct->id_project ) ),
+                'isGDriveProject'                       => new PHPTalBoolean( ProjectDao::isGDriveProject( $chunkStruct->id_project ) ),
                 'isOpenAiEnabled'                       => new PHPTalBoolean( !empty( INIT::$OPENAI_API_KEY ) ),
                 'isReview'                              => new PHPTalBoolean( $isRevision ),
                 'isSourceRTL'                           => new PHPTalBoolean( Languages::getInstance()->isRTL( $chunkStruct->source ) ),
@@ -268,8 +268,8 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     protected function getActiveEngine( int $mt_engine_id ): array {
-        $engine           = new EnginesModel_EngineDao();
-        $engineQuery      = new EnginesModel_EngineStruct();
+        $engine           = new EngineDAO();
+        $engineQuery      = new EngineStruct();
         $engineQuery->id  = $mt_engine_id;
         $active_mt_engine = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
         if ( !empty( $active_mt_engine ) ) {
@@ -321,7 +321,7 @@ class CattoolController extends BaseKleinViewController {
     /**
      * @throws ReflectionException
      */
-    private function findOwnerEmailAndTeam( Projects_ProjectStruct $project ): array {
+    private function findOwnerEmailAndTeam( ProjectStruct $project ): array {
 
         $ownerMail    = INIT::$SUPPORT_MAIL;
         $jobOwnerIsMe = false;
@@ -420,12 +420,12 @@ class CattoolController extends BaseKleinViewController {
     }
 
     /**
-     * @param ?int           $revisionNumber
-     * @param Jobs_JobStruct $jobStruct
+     * @param ?int      $revisionNumber
+     * @param JobStruct $jobStruct
      *
      * @return string
      */
-    protected function buildPageTitle( ?int $revisionNumber, Jobs_JobStruct $jobStruct ): string {
+    protected function buildPageTitle( ?int $revisionNumber, JobStruct $jobStruct ): string {
         if ( $revisionNumber > 1 ) {
             $pageTitle = 'Revise ' . $revisionNumber . ' - ';
         } elseif ( $revisionNumber === 1 ) {

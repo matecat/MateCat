@@ -2,8 +2,8 @@
 
 namespace Users;
 
-use DataAccess\AbstractDao;
 use Database;
+use Model\DataAccess\AbstractDao;
 use PDO;
 use ReflectionException;
 

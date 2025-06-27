@@ -11,11 +11,11 @@ namespace View\API\V2\Json;
 
 use Constants_JobStatus;
 use Exception;
-use Jobs_JobStruct;
 use Model\Analysis\Status;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Users_UserStruct;
 use Utils;
@@ -28,7 +28,7 @@ class Project {
     protected Job $jRenderer;
 
     /**
-     * @var Projects_ProjectStruct[]
+     * @var ProjectStruct[]
      */
     protected array $data = [];
 
@@ -72,8 +72,8 @@ class Project {
     /**
      * Project constructor.
      *
-     * @param Projects_ProjectStruct[] $data
-     * @param string|null              $search_status
+     * @param ProjectStruct[] $data
+     * @param string|null     $search_status
      */
     public function __construct( array $data = [], ?string $search_status = null ) {
 
@@ -89,13 +89,13 @@ class Project {
     }
 
     /**
-     * @param       $project Projects_ProjectStruct
+     * @param       $project ProjectStruct
      *
      * @return array
      * @throws ReflectionException
      * @throws Exception
      */
-    public function renderItem( Projects_ProjectStruct $project ): array {
+    public function renderItem( ProjectStruct $project ): array {
 
         $featureSet = $project->getFeaturesSet();
         $jobs       = $project->getJobs( 60 * 10 ); //cached
@@ -126,23 +126,23 @@ class Project {
                 // if status is set, then filter off the jobs by owner_status
                 if ( $this->status ) {
                     if ( $job->status_owner === $this->status and !$job->isDeleted() ) {
-                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
+                        $jobJSONs[]    = $jobJSON->renderItem( new JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 } else {
                     if ( !$job->isDeleted() ) {
-                        $jobJSONs[]    = $jobJSON->renderItem( new Jobs_JobStruct( $job->getArrayCopy() ), $project, $featureSet );
+                        $jobJSONs[]    = $jobJSON->renderItem( new JobStruct( $job->getArrayCopy() ), $project, $featureSet );
                         $jobStatuses[] = $job->status_owner;
                     }
                 }
             }
         }
 
-        $metadataDao = new Projects_MetadataDao();
+        $metadataDao = new MetadataDao();
         $projectInfo = $metadataDao->get( (int)$project->id, 'project_info' );
         $fromApi     = $metadataDao->get( (int)$project->id, 'from_api' );
 
-        $_project_data  = Projects_ProjectDao::getProjectAndJobData( $project->id );
+        $_project_data  = ProjectDao::getProjectAndJobData( $project->id );
         $analysisStatus = new Status( $_project_data, $featureSet, $this->user );
 
         return [

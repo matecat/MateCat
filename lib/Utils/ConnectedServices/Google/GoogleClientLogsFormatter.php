@@ -1,6 +1,6 @@
 <?php
 
-namespace ConnectedServices\Google;
+namespace Utils\ConnectedServices\Google;
 
 use Monolog\Formatter\FormatterInterface;
 

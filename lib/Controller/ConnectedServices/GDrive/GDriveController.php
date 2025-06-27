@@ -2,21 +2,21 @@
 
 namespace Controller\ConnectedServices\GDrive;
 
-use Controller\Abstracts\AbstractStatefulKleinController;
 use Aws\S3\Exception\S3Exception;
-use ConnectedServices\Google\GDrive\Session;
-use ConnectedServices\Google\GoogleProvider;
 use Constants;
+use Controller\Abstracts\AbstractStatefulKleinController;
 use CookieManager;
 use Exception;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
 use Google_Service_Exception;
 use INIT;
 use Langs\InvalidLanguageException;
 use Langs\Languages;
 use Log;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
 use Utils;
+use Utils\ConnectedServices\Google\GDrive\Session;
+use Utils\ConnectedServices\Google\GoogleProvider;
 
 class GDriveController extends AbstractStatefulKleinController {
 

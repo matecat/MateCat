@@ -5,21 +5,20 @@ namespace TMS;
 use Constants_Engines;
 use Constants_TranslationStatus;
 use Controller\API\Commons\Exceptions\UnprocessableException;
-use Conversion\Upload;
 use DateTime;
 use DateTimeZone;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
-use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobStruct;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Conversion\Upload;
+use Model\Engines\EngineStruct;
 use Model\Jobs\ChunkDao;
 use SplTempFileObject;
 use stdClass;
@@ -182,7 +181,7 @@ class TMSService {
 
                 try {
 
-                    $struct             = EnginesModel_EngineStruct::getStruct();
+                    $struct             = EngineStruct::getStruct();
                     $struct->class_load = $engineName;
                     $struct->type       = Constants_Engines::MT;
                     $engine             = Engine::createTempInstance( $struct );
@@ -477,7 +476,7 @@ class TMSService {
         }
 
         /**
-         * @var $chunks Jobs_JobStruct[]
+         * @var $chunks \Model\Jobs\JobStruct[]
          */
         $chunks = ChunkDao::getByJobID( $jid );
 

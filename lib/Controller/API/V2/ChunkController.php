@@ -15,10 +15,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use Translations_SegmentTranslationDao;
 use Utils;
 use View\API\V2\Json\Chunk;
@@ -27,19 +27,19 @@ class ChunkController extends KleinController {
     use ChunkNotFoundHandlerTrait;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     private $project;
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
     public function getProject() {
         return $this->project;
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
@@ -108,7 +108,7 @@ class ChunkController extends KleinController {
 
         ( new ProjectAccessValidator( $this, $this->project ) )->validate();
 
-        Jobs_JobDao::updateJobStatus( $this->chunk, $status );
+        JobDao::updateJobStatus( $this->chunk, $status );
         $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
         Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );

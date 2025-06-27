@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA\BxExG;
+namespace Utils\LQA\BxExG;
 
 use DOMDocument;
 use DOMElement;

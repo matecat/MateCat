@@ -8,7 +8,7 @@ use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Projects_MetadataDao;
+use Model\Projects\MetadataDao;
 
 class CatDecorator extends AbstractDecorator {
 
@@ -80,7 +80,7 @@ class CatDecorator extends AbstractDecorator {
 
     private function completable(): bool {
 
-        if ( $this->arguments->getJob()->getProject()->getWordCountType() != Projects_MetadataDao::WORD_COUNT_RAW ) {
+        if ( $this->arguments->getJob()->getProject()->getWordCountType() != MetadataDao::WORD_COUNT_RAW ) {
 
             if ( $this->arguments->isRevision() ) {
                 $completable = $this->current_phase == ChunkCompletionEventDao::REVISE &&

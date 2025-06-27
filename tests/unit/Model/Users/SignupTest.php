@@ -1,6 +1,6 @@
 <?php
 
-use Exceptions\ValidationError;
+use Model\Exceptions\ValidationError;
 use TestHelpers\AbstractTest;
 use Users\Authentication\SignupModel;
 

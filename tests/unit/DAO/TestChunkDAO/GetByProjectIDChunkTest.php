@@ -1,6 +1,8 @@
 <?php
 
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -18,7 +20,7 @@ class GetByProjectIdChunkTest extends AbstractTest {
      */
     protected $chunk_Dao;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -28,7 +30,7 @@ class GetByProjectIdChunkTest extends AbstractTest {
     protected $database_instance;
 
 
-    /** @var Jobs_JobStruct */
+    /** @var JobStruct */
     protected $job;
 
     public function setUp(): void {
@@ -49,7 +51,7 @@ class GetByProjectIdChunkTest extends AbstractTest {
         );
 
         $pId           = $this->database_instance->getConnection()->lastInsertId();
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
+        $this->project = new ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -82,7 +84,7 @@ class GetByProjectIdChunkTest extends AbstractTest {
 
         $wrapped_result = $this->chunk_Dao->getByProjectID( $this->project[ 'id' ] );
         $result         = $wrapped_result[ 0 ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

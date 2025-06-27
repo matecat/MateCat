@@ -7,12 +7,12 @@
  *
  */
 
-namespace MTQE\Templates;
+namespace Model\MTQE\Templates;
 
-use DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 
 class MTQEWorkflowTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 

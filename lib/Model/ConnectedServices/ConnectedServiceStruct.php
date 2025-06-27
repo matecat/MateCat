@@ -6,13 +6,14 @@
  * Time: 16:50
  */
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Utils\ConnectedServices\OauthTokenEncryption;
 
 class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

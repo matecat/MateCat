@@ -1,7 +1,7 @@
 <?php
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 
 
 /**

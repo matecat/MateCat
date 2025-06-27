@@ -2,8 +2,8 @@
 
 namespace Model\Comments;
 
-use DataAccess\IDaoStruct;
 use JsonSerializable;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * This is NOT a database Entity, this is a utility vector to transport info.

@@ -14,14 +14,15 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
-use Files\FilesInfoUtility;
 use INIT;
-use Jobs_JobStruct;
 use Model\Analysis\Constants\MatchConstantsFactory;
+use Model\Files\FilesInfoUtility;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectStruct;
+use Model\QualityReport\QualityReportModel;
 use Model\QualityReport\QualityReportSegmentModel;
-use Projects_MetadataDao;
-use Projects_ProjectStruct;
-use QualityReport\QualityReportModel;
+use Model\QualityReport\QualityReportSegmentStruct;
 
 class QualityReportControllerAPI extends KleinController {
     use ChunkNotFoundHandlerTrait;
@@ -30,16 +31,16 @@ class QualityReportControllerAPI extends KleinController {
     const MAX_PER_PAGE     = 200;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): QualityReportControllerAPI {
+    public function setChunk( JobStruct $chunk ): QualityReportControllerAPI {
         $this->chunk = $chunk;
 
         return $this;
@@ -65,13 +66,6 @@ class QualityReportControllerAPI extends KleinController {
     }
 
     /**
-     * @throws Exception
-     */
-    public function segments_for_ui() {
-        $this->segments( true );
-    }
-
-    /**
      * @param bool $isForUI
      *
      * @throws Exception
@@ -80,7 +74,7 @@ class QualityReportControllerAPI extends KleinController {
 
         $this->project = $this->chunk->getProject();
 
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         $ref_segment = (int)$this->request->param( 'ref_segment' );
@@ -119,7 +113,7 @@ class QualityReportControllerAPI extends KleinController {
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
             $filesInfo        = $filesInfoUtility->getInfo( false );
 
-            $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+            $mt_qe_workflow_enabled = $this->project->getMetadataValue( MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
             $segments               = $this->_formatSegments( $segments, $ttlArray, $filesInfo, $mt_qe_workflow_enabled );
 
             $this->response->json( [
@@ -182,7 +176,7 @@ class QualityReportControllerAPI extends KleinController {
     /**
      * Change the response JSON to remove source_page property and change it to revision number.
      *
-     * @param array $segments
+     * @param QualityReportSegmentStruct[] $segments
      * @param array $ttlArray
      * @param array $filesInfo
      * @param bool  $mt_qe_workflow_enabled
@@ -215,7 +209,7 @@ class QualityReportControllerAPI extends KleinController {
             $seg[ 'raw_word_count' ]             = $segment->raw_word_count;
             $seg[ 'segment' ]                    = $segment->segment;
             $seg[ 'segment_hash' ]               = $segment->segment_hash;
-            $seg[ 'id' ]                         = (int)$segment->sid;
+            $seg[ 'id' ]                         = $segment->sid;
             $seg[ 'source_page' ]                = $segment->source_page;
             $seg[ 'status' ]                     = $segment->status;
             $seg[ 'suggestion' ]                 = $segment->suggestion;

@@ -8,10 +8,10 @@
 
 namespace Teams;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
 use Database;
 use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 use PDO;
 use ReflectionException;
 use Users\MetadataDao;

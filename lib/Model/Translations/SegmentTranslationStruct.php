@@ -1,9 +1,11 @@
 <?php
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\ArrayAccessTrait;
-use DataAccess\IDaoStruct;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 
 class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
@@ -58,20 +60,20 @@ class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct impl
     }
 
     /**
-     * @return Jobs_JobStruct|null
+     * @return JobStruct|null
      */
-    public function getJob(): ?Jobs_JobStruct {
+    public function getJob(): ?JobStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return Jobs_JobDao::getById( $id_job )[ 0 ] ?? null;
+            return JobDao::getById( $id_job )[ 0 ] ?? null;
         } );
     }
 
     /**
-     * @return Jobs_JobStruct[]|null
+     * @return JobStruct[]|null
      */
-    public function getChunk(): ?Jobs_JobStruct {
+    public function getChunk(): ?JobStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return Jobs_JobDao::getById( $id_job, 0 )[ 0 ] ?? null;
+            return JobDao::getById( $id_job, 0 )[ 0 ] ?? null;
         } );
     }
 

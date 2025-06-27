@@ -10,10 +10,10 @@
 namespace Model\Analysis;
 
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
 use Log;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
 use ReflectionException;
 
 class AnalysisDao extends AbstractDao {

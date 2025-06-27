@@ -1,10 +1,10 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Conversion\MimeTypes\MimeTypes;
 use INIT;
 use Langs\Languages;
+use Model\Conversion\MimeTypes\MimeTypes;
 
 /**
  * Created by PhpStorm.

@@ -8,13 +8,13 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
 use Engines_MyMemory;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
-use Segments_SegmentOriginalDataDao;
 use Utils;
 
 class GetTagProjectionController extends KleinController {
@@ -30,7 +30,7 @@ class GetTagProjectionController extends KleinController {
      */
     public function call(): void {
 
-        Log::$fileName = 'tagProjection.log';
+        Log::setLogFileName( 'tagProjection.log' );
 
         $request   = $this->validateTheRequest();
         $jobStruct = ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
@@ -42,7 +42,7 @@ class GetTagProjectionController extends KleinController {
         $engine = Engine::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );
 
-        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $request[ 'id_segment' ] );
+        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $request[ 'id_segment' ] );
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $this->getFeatureSet(), $request[ 'source_lang' ], $request[ 'target_lang' ], $dataRefMap );
 

@@ -11,30 +11,30 @@ use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Database;
 use Exception;
-use Exceptions\NotFoundException;
 use Features;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEventDao;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use INIT;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Klein\Klein;
 use Log;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\ModelDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Exceptions\NotFoundException;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\ModelDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\QualityReport\QualityReportModel;
+use Model\ReviseFeedback\FeedbackDAO;
 use Predis\Connection\ConnectionException;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use QualityReport\QualityReportModel;
 use RecursiveArrayObject;
 use ReflectionException;
-use Revise\FeedbackDAO;
 use Utils;
 use View\API\V2\Json\Json\ProjectUrls;
 use ZipArchive;
@@ -72,7 +72,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         return new ProjectUrls( $formatted->getData() );
     }
 
-    public function filterGetSegmentsResult( $data, Jobs_JobStruct $chunk ) {
+    public function filterGetSegmentsResult( $data, JobStruct $chunk ) {
 
         if ( empty( $data[ 'files' ] ) ) {
             // this means that there are no more segments after
@@ -122,7 +122,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     public function filter_job_password_to_review_password( $password, $id_job ) {
 
-        $chunk_review = ( new ChunkReviewDao() )->findChunkReviews( new Jobs_JobStruct( [ 'id' => $id_job, 'password' => $password ] ) )[ 0 ];
+        $chunk_review = ( new ChunkReviewDao() )->findChunkReviews( new JobStruct( [ 'id' => $id_job, 'password' => $password ] ) )[ 0 ];
 
         if ( !$chunk_review ) {
             $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId( $password, $id_job );
@@ -156,14 +156,14 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param Jobs_JobStruct[]|ChunkReviewStruct[] $chunksArray
-     * @param Projects_ProjectStruct               $project
-     * @param array                                $options
+     * @param \Model\Jobs\JobStruct[]|ChunkReviewStruct[] $chunksArray
+     * @param ProjectStruct                               $project
+     * @param array                                       $options
      *
      * @return array
      * @throws Exception
      */
-    public function createQaChunkReviewRecords( array $chunksArray, Projects_ProjectStruct $project, $options = [] ) {
+    public function createQaChunkReviewRecords( array $chunksArray, ProjectStruct $project, $options = [] ) {
 
         $createdRecords = [];
 
@@ -198,10 +198,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @throws Exception
      */
     protected function createChunkReviewRecords( $projectStructure ) {
-        $project = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
+        $project = ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
         foreach ( $projectStructure[ 'array_jobs' ][ 'job_list' ] as $id_job ) {
 
-            $chunkStruct = Jobs_JobDao::getById( $id_job, 0 );
+            $chunkStruct = JobDao::getById( $id_job, 0 );
 
             $iMax = 3;
 
@@ -237,17 +237,17 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         $id_job                  = $projectStructure[ 'job_to_split' ];
         $previousRevisionRecords = ChunkReviewDao::findByIdJob( $id_job );
-        $project                 = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
+        $project                 = ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0 );
+        $chunksStructArray = JobDao::getById( $id_job, 0 );
 
         $reviews = [];
         foreach ( $previousRevisionRecords as $review ) {
 
             // check if $review belongs to a deleted job
-            $chunk = Jobs_JobDao::getByIdAndPassword( $review->id_job, $review->password );
+            $chunk = JobDao::getByIdAndPassword( $review->id_job, $review->password );
 
             if ( !$chunk->isDeleted() ) {
                 $reviews = array_merge( $reviews, $this->createQaChunkReviewRecords( $chunksStructArray, $project,
@@ -280,7 +280,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         $id_job      = $projectStructure[ 'job_to_merge' ];
         $old_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $project     = Projects_ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
+        $project     = ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
 
         $reviewGroupedData = [];
 
@@ -294,7 +294,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $chunksStructArray = Jobs_JobDao::getById( $id_job, 0 );
+        $chunksStructArray = JobDao::getById( $id_job, 0 );
 
         $reviews = [];
         foreach ( $reviewGroupedData as $source_page => $data ) {
@@ -319,13 +319,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * project_completion_event_saved
      *
-     * @param Jobs_JobStruct        $chunk
+     * @param JobStruct             $chunk
      * @param CompletionEventStruct $event
      * @param                       $completion_event_id
      *
      * @throws Exception
      */
-    public function project_completion_event_saved( Jobs_JobStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
+    public function project_completion_event_saved( JobStruct $chunk, CompletionEventStruct $event, $completion_event_id ) {
         $model = new QualityReportModel( $chunk );
         $model->resetScore( $completion_event_id );
     }
@@ -339,7 +339,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     public function alter_chunk_review_struct( ChunkCompletionEventStruct $event ) {
 
-        $review = ( new ChunkReviewDao() )->findChunkReviews( new Jobs_JobStruct( [ 'id' => $event->id_job, 'password' => $event->password ] ) )[ 0 ];
+        $review = ( new ChunkReviewDao() )->findChunkReviews( new JobStruct( [ 'id' => $event->id_job, 'password' => $event->password ] ) )[ 0 ];
 
         $undo_data = $review->getUndoData();
 
@@ -402,10 +402,10 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param Jobs_JobStruct $job
+     * @param \Model\Jobs\JobStruct $job
      * @param                $old_password
      */
-    public function job_password_changed( Jobs_JobStruct $job, $old_password ) {
+    public function job_password_changed( JobStruct $job, $old_password ) {
         $dao = new ChunkReviewDao();
         $dao->updatePassword( $job->id, $old_password, $job->password );
     }
@@ -426,11 +426,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json->toArray() );
 
-        $project = Projects_ProjectDao::findById(
+        $project = ProjectDao::findById(
                 $projectStructure[ 'id_project' ]
         );
 
-        $dao = new Projects_ProjectDao( Database::obtain() );
+        $dao = new ProjectDao( Database::obtain() );
         $dao->updateField( $project, 'id_qa_model', $model_record->id );
     }
 

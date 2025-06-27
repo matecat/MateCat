@@ -1,10 +1,10 @@
 <?php
 
-namespace Revise;
+namespace Model\ReviseFeedback;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use ReflectionException;
 
 class FeedbackDAO extends AbstractDao {
 
@@ -17,7 +17,7 @@ class FeedbackDAO extends AbstractDao {
      *
      * @return int
      */
-    public function insertOrUpdate( FeedbackStruct $feedbackStruct ) {
+    public function insertOrUpdate( FeedbackStruct $feedbackStruct ): int {
 
         $query = "INSERT INTO  " . self::TABLE . " (id_job, password, revision_number, feedback) 
                 VALUES (:id_job, :password, :revision_number, :feedback)
@@ -46,7 +46,7 @@ class FeedbackDAO extends AbstractDao {
      *
      * @return int
      */
-    public function updateFeedbackPassword( $id_job, $old_password, $new_password, $revision_number ) {
+    public function updateFeedbackPassword( $id_job, $old_password, $new_password, $revision_number ): int {
         $query = "UPDATE " . self::TABLE . " 
                 SET password = :new_password
                 WHERE
@@ -73,9 +73,10 @@ class FeedbackDAO extends AbstractDao {
      * @param $password
      * @param $revision_number
      *
-     * @return IDaoStruct
+     * @return ShapelessConcreteStruct
+     * @throws ReflectionException
      */
-    public function getFeedback( $id_job, $password, $revision_number ) {
+    public function getFeedback( $id_job, $password, $revision_number ): ?ShapelessConcreteStruct {
         $query = "SELECT feedback FROM  " . self::TABLE . " 
                 WHERE
                 id_job = :id_job AND 
@@ -90,10 +91,9 @@ class FeedbackDAO extends AbstractDao {
         ];
 
         $stmt   = $this->database->getConnection()->prepare( $query );
-        $object = $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), $values );
+        $object = $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $values );
 
-        if ( isset( $object[ 0 ] ) ) {
-            return $object[ 0 ];
-        }
+        return $object[ 0 ] ?? null;
+
     }
 }

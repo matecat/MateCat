@@ -1,21 +1,21 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use Constants\ConversionHandlerStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\Exceptions\FileSystemException;
-use FilesStorage\FilesStorageFactory;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateStruct;
 use INIT;
 use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\Exceptions\FileSystemException;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 

@@ -9,12 +9,12 @@
 
 namespace AsyncTasks\Workers\Analysis;
 
-use Controller\API\Commons\Exceptions\AuthenticationError;
 use AsyncTasks\Workers\Traits\ProjectWordCount;
 use AsyncTasks\Workers\Traits\SortMatchesTrait;
 use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Database;
 use Engine;
 use Engines_AbstractEngine;
@@ -22,18 +22,18 @@ use Engines_MyMemory;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_TMS;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
 use INIT;
-use Jobs_JobDao;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\ProjectDao;
 use PDOException;
 use PostProcess;
-use Projects_ProjectDao;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -987,7 +987,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_doLog( "--- (Worker $this->_workerPid) : analysis project $_project_id finished : change status to DONE" );
 
-            Projects_ProjectDao::updateFields(
+            ProjectDao::updateFields(
                     [
                             'status_analysis'      => Constants_ProjectStatus::STATUS_DONE,
                             'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
@@ -997,11 +997,11 @@ class TMAnalysisWorker extends AbstractWorker {
             );
 
             // update chunks' standard_analysis_wc
-            $jobs         = Projects_ProjectDao::findById( $_project_id )->getChunks();
+            $jobs         = ProjectDao::findById( $_project_id )->getChunks();
             $numberOfJobs = count( $jobs );
 
             foreach ( $jobs as $job ) {
-                Jobs_JobDao::updateFields( [
+                JobDao::updateFields( [
                         'standard_analysis_wc' => round( $project_totals[ 'st_wc' ] / $numberOfJobs )
                 ], [
                         'id' => $job->id
@@ -1022,9 +1022,9 @@ class TMAnalysisWorker extends AbstractWorker {
                 $this->_doLog( "Ending project_id $_project_id with error {$e->getMessage()} . COMPLETED." );
             }
 
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $_project_id );
-            Projects_ProjectDao::destroyCacheById( $_project_id );
-            Projects_ProjectDao::destroyCacheByIdAndPassword( $_project_id, $_params->ppassword );
+            ( new JobDao() )->destroyCacheByProjectId( $_project_id );
+            ProjectDao::destroyCacheById( $_project_id );
+            ProjectDao::destroyCacheByIdAndPassword( $_project_id, $_params->ppassword );
             AnalysisDao::destroyCacheByProjectId( $_project_id );
 
         }

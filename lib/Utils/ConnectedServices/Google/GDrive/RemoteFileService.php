@@ -6,14 +6,14 @@
  * Time: 15:28
  */
 
-namespace ConnectedServices\Google\GDrive;
+namespace Utils\ConnectedServices\Google\GDrive;
 
 use Exception;
 use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
 use Log;
-use RemoteFiles_RemoteFileStruct;
+use Model\RemoteFiles\RemoteFileStruct;
 
 class RemoteFileService {
 
@@ -58,13 +58,13 @@ class RemoteFileService {
     }
 
     /**
-     * @param RemoteFiles_RemoteFileStruct $remoteFile
-     * @param string                       $content
+     * @param RemoteFileStruct $remoteFile
+     * @param string           $content
      *
      * @return Google_Service_Drive_DriveFile
      * @throws Exception
      */
-    public function updateFile( RemoteFiles_RemoteFileStruct $remoteFile, string $content ): Google_Service_Drive_DriveFile {
+    public function updateFile( RemoteFileStruct $remoteFile, string $content ): Google_Service_Drive_DriveFile {
 
         $optParams = [
                 'fields' => 'capabilities, webViewLink',

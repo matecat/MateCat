@@ -9,7 +9,7 @@
 namespace Features\TranslationEvents\Model;
 
 
-class TranslationEventStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct  {
+class TranslationEventStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct  {
 
     public $id ;
     public $uid ;

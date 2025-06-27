@@ -1,6 +1,6 @@
 <?php
 
-use ConnectedServices\Google\GoogleProvider;
+use Utils\ConnectedServices\Google\GoogleProvider;
 
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
 include_once $root . "/inc/Bootstrap.php";
@@ -32,13 +32,13 @@ if ( !array_key_exists( 'id_service', $options ) ) {
 }
 
 
-$dao     = new \ConnectedServices\ConnectedServiceDao();
+$dao     = new \Model\ConnectedServices\ConnectedServiceDao();
 $service = $dao->findById( $options[ 'id_service' ] );
 
 //FIX
 $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
-$verifier = new \ConnectedServices\GDriveTokenVerifyModel( $service );
+$verifier = new \Model\ConnectedServices\GDriveTokenVerifyModel( $service );
 $verifier->validOrRefreshed( $client );
 var_dump( $verifier );
 

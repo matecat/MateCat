@@ -1,8 +1,8 @@
 <?php
 
-use Conversion\MimeTypes\MimeTypes;
-use Conversion\ZipArchiveHandler;
-use FilesStorage\AbstractFilesStorage;
+use Model\Conversion\MimeTypes\MimeTypes;
+use Model\Conversion\ZipArchiveHandler;
+use Model\FilesStorage\AbstractFilesStorage;
 
 const DIRSEP = "//";
 
@@ -233,7 +233,7 @@ class UploadHandler {
 
     protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ) {
 
-        Log::$fileName = "upload.log";
+        Log::setLogFileName( "upload.log" );
         Log::doJsonLog( $uploaded_file );
 
         $file           = new stdClass();

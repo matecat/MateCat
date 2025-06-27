@@ -1,6 +1,6 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
 use Constants\ConversionHandlerStatus;
 use Exception;

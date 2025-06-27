@@ -1,13 +1,13 @@
 <?php
 
-namespace ConnectedServices\Microsoft;
+namespace Utils\ConnectedServices\Microsoft;
 
-use ConnectedServices\AbstractProvider;
-use ConnectedServices\ConnectedServiceUserModel;
 use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
+use Utils\ConnectedServices\AbstractProvider;
+use Utils\ConnectedServices\ProviderUser;
 
 class MicrosoftProvider extends AbstractProvider {
 
@@ -65,11 +65,11 @@ class MicrosoftProvider extends AbstractProvider {
      *
      * @return mixed
      */
-    public function getResourceOwner( AccessToken $token ): ConnectedServiceUserModel {
+    public function getResourceOwner( AccessToken $token ): ProviderUser {
         $microsoftClient = static::getClient( $this->redirectUrl );
         $fetched         = $microsoftClient->getResourceOwner( $token );
 
-        $user            = new ConnectedServiceUserModel();
+        $user            = new ProviderUser();
         $user->email     = $fetched->getEmail();
         $user->name      = $fetched->getFirstname();
         $user->lastName  = $fetched->getLastname();

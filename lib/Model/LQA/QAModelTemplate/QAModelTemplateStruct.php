@@ -1,13 +1,13 @@
 <?php
 
-namespace QAModelTemplate;
+namespace Model\LQA\QAModelTemplate;
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Date\DateTimeUtil;
 use Exception;
 use JsonSerializable;
-use LQA\QAModelInterface;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\LQA\QAModelInterface;
 
 class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable, QAModelInterface {
     public int     $id          = 0;

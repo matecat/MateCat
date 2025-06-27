@@ -1,16 +1,16 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
 use Constants;
 use Constants\ConversionHandlerStatus;
 use DomainException;
 use Exception;
 use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use Filters\FiltersConfigTemplateStruct;
 use InvalidArgumentException;
 use Langs\Languages;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\FiltersConfigTemplateStruct;
 use RuntimeException;
 use Utils;
 

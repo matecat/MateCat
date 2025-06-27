@@ -11,12 +11,12 @@ namespace Features\ProjectCompletion\Model;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
 use FeatureSet;
-use Jobs_JobStruct;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Utils;
@@ -24,13 +24,13 @@ use Utils;
 class ProjectCompletionStatusModel {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project ;
 
     protected $cachedStatus;
 
-    public function __construct( Projects_ProjectStruct $project ) {
+    public function __construct( ProjectStruct $project ) {
         $this->project = $project ;
     }
 
@@ -92,7 +92,7 @@ class ProjectCompletionStatusModel {
     /**
      * @throws Exception
      */
-    private function dataForChunkStatus ( Jobs_JobStruct $chunk, $is_review ) {
+    private function dataForChunkStatus ( JobStruct $chunk, $is_review ) {
         $record = ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
                 'is_review' => $is_review
         ) );

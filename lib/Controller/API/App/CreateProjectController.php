@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use BasicFeatureStruct;
-use ConnectedServices\Google\GDrive\Session;
 use Constants;
 use Constants_ProjectStatus;
 use Controller\Abstracts\AbstractStatefulKleinController;
@@ -15,22 +14,23 @@ use Engine;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
-use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
 use Langs\Languages;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\Projects\MetadataDao;
 use ProjectManager;
 use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Utils;
+use Utils\ConnectedServices\Google\GDrive\Session;
 use Validator\Contracts\ValidatorObject;
 use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
@@ -378,7 +378,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function setMetadataFromPostInput( array $data = [] ) {
         // new raw counter model
-        $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
+        $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
 
         if ( isset( $data[ 'lexiqa' ] ) ) {
             $options[ 'lexiqa' ] = $data[ 'lexiqa' ];

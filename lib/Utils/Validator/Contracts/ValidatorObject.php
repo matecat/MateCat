@@ -3,7 +3,7 @@
 namespace Validator\Contracts;
 
 use ArrayAccess;
-use DataAccess\ArrayAccessTrait;
+use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
 class ValidatorObject implements ArrayAccess {

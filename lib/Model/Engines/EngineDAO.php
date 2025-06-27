@@ -1,7 +1,12 @@
 <?php
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
+namespace Model\Engines;
+
+use Constants_Engines;
+use DomainException;
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -9,11 +14,11 @@ use DataAccess\IDaoStruct;
  * Date: 23/02/15
  * Time: 14.55
  */
-class EnginesModel_EngineDAO extends AbstractDao {
+class EngineDAO extends AbstractDao {
 
     const TABLE = "engines";
 
-    const STRUCT_TYPE = "EnginesModel_EngineStruct";
+    const STRUCT_TYPE = EngineStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
@@ -22,12 +27,12 @@ class EnginesModel_EngineDAO extends AbstractDao {
      * Build the query,
      * needed for get the exact query when invalidating cache
      *
-     * @param EnginesModel_EngineStruct $obj
+     * @param EngineStruct $obj
      *
      * @return array
      * @throws Exception
      */
-    protected function _buildQueryForEngine( EnginesModel_EngineStruct $obj ) {
+    protected function _buildQueryForEngine( EngineStruct $obj ): array {
 
         $where_conditions = [];
         $query            = "SELECT * FROM " . self::TABLE . " WHERE %s";
@@ -35,7 +40,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
         $bind_values = [];
 
         if ( $obj->id !== null ) {
-            $bind_values[ 'id' ] = (int)$obj->id;
+            $bind_values[ 'id' ] = $obj->id;
             $where_conditions[]  = "id = :id";
         }
 
@@ -52,8 +57,8 @@ class EnginesModel_EngineDAO extends AbstractDao {
 
         }
 
-        if ( $obj->active !== null ) {
-            $bind_values[ 'active' ] = (int)$obj->active;
+        if ( $obj->active ) {
+            $bind_values[ 'active' ] = $obj->active;
             $where_conditions[]      = "active = :active";
         }
 
@@ -68,19 +73,17 @@ class EnginesModel_EngineDAO extends AbstractDao {
             throw new Exception( "Where condition needed." );
         }
 
-//        Log::doJsonLog( sprintf( $query, $where_string ) );
-
         return [ sprintf( $query, $where_string ), $bind_values ];
 
     }
 
     /**
-     * @param EnginesModel_EngineStruct $obj
+     * @param EngineStruct $obj
      *
-     * @return EnginesModel_EngineStruct|null
+     * @return EngineStruct|null
      * @throws Exception
      */
-    public function create( EnginesModel_EngineStruct $obj ) {
+    public function create( EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validateNotNullFields( $obj );
@@ -126,12 +129,12 @@ class EnginesModel_EngineDAO extends AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct $obj
+     * @param EngineStruct $obj
      *
-     * @return array
+     * @return EngineStruct[]
      * @throws Exception
      */
-    public function read( EnginesModel_EngineStruct $obj ) {
+    public function read( EngineStruct $obj ): array {
 
         $obj = $this->sanitize( $obj );
 
@@ -148,7 +151,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
 
 
         $stmt      = $this->database->getConnection()->prepare( $query );
-        $resultSet = $this->_fetchObject( $stmt, new EnginesModel_EngineStruct(), $bind_values );
+        $resultSet = $this->_fetchObjectMap( $stmt, EngineStruct::class, $bind_values );
 
         return $this->_buildResult( $resultSet, Constants_Engines::getAvailableEnginesList() );
 
@@ -157,12 +160,12 @@ class EnginesModel_EngineDAO extends AbstractDao {
     /**
      * Destroy a cached object
      *
-     * @param EnginesModel_EngineStruct $obj
+     * @param EngineStruct $obj
      *
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( EnginesModel_EngineStruct $obj ) {
+    public function destroyCache( EngineStruct $obj ): bool {
 
         $obj = $this->sanitize( $obj );
 
@@ -178,14 +181,14 @@ class EnginesModel_EngineDAO extends AbstractDao {
         [ $query, $bind_values ] = $query_and_bindValues;
         $stmt = $this->database->getConnection()->prepare( $query );
 
-        return $this->_destroyObjectCache( $stmt, EnginesModel_EngineStruct::class, $bind_values );
+        return $this->_destroyObjectCache( $stmt, EngineStruct::class, $bind_values );
 
     }
 
     /**
      * @throws Exception
      */
-    public function updateByStruct( EnginesModel_EngineStruct $obj ) {
+    public function updateByStruct( EngineStruct $obj ): int {
         $obj = $this->sanitize( clone $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -212,16 +215,14 @@ class EnginesModel_EngineDAO extends AbstractDao {
             throw new Exception( "Array given is empty. Please set at least one value." );
         }
 
-        $res = static::updateStruct( $obj, [ 'fields' => $fieldsToUpdate ] );
+        return static::updateStruct( $obj, [ 'fields' => $fieldsToUpdate ] );
 
-        if ( $res ) {
-            return $obj;
-        }
-
-        return null;
     }
 
-    public function delete( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function delete( EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -242,7 +243,10 @@ class EnginesModel_EngineDAO extends AbstractDao {
         return null;
     }
 
-    public function disable( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function disable( EngineStruct $obj ): ?EngineStruct {
 
         $obj = $this->sanitize( $obj );
 
@@ -266,7 +270,10 @@ class EnginesModel_EngineDAO extends AbstractDao {
         return null;
     }
 
-    public function enable( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function enable( EngineStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -291,9 +298,9 @@ class EnginesModel_EngineDAO extends AbstractDao {
      *
      * @param array $array_result
      *
-     * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
+     * @return EngineStruct[]
      */
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult( array $array_result ): array {
         $result = [];
 
         foreach ( $array_result as $item ) {
@@ -302,7 +309,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
                 $availableEngines = func_get_arg( 1 );
 
                 if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
-                    $result[] = new EnginesModel_NONEStruct();
+                    $result[] = new NONEStruct();
                     continue;
                 }
             }
@@ -326,7 +333,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
                     'uid'                          => $item[ 'uid' ]
             ];
 
-            $obj = new EnginesModel_EngineStruct( $build_arr );
+            $obj = new EngineStruct( $build_arr );
 
             $result[] = $obj;
         }
@@ -335,9 +342,9 @@ class EnginesModel_EngineDAO extends AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct $input
+     * @param EngineStruct $input
      *
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      * @throws Exception
      */
     public function sanitize( IDaoStruct $input ) {
@@ -368,7 +375,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
      */
     protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
-         * @var $obj EnginesModel_EngineStruct
+         * @var $obj EngineStruct
          */
         if ( empty( $obj->base_url ) ) {
             throw new Exception( "Base URL cannot be null" );
@@ -381,7 +388,7 @@ class EnginesModel_EngineDAO extends AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct|IDaoStruct $obj
+     * @param EngineStruct|IDaoStruct $obj
      *
      * @return void
      * @throws Exception
@@ -396,7 +403,10 @@ class EnginesModel_EngineDAO extends AbstractDao {
         }
     }
 
-    public function validateForUser( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function validateForUser( EngineStruct $obj ) {
         $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid and active = :active";
 
         $stmt = $this->database->getConnection()->prepare( $query );

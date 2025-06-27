@@ -2,13 +2,12 @@
 
 namespace Controller\API\V2;
 
-use Controller\API\V2\ChunkController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Teams\MembershipDao;
 use Users_UserStruct;
 use Utils;
@@ -84,7 +83,7 @@ class ChangeProjectNameController extends ChunkController {
      * @throws Exception
      */
     private function changeProjectName( $id, $password, $name ) {
-        $pStruct = Projects_ProjectDao::findByIdAndPassword( $id, $password );
+        $pStruct = ProjectDao::findByIdAndPassword( $id, $password );
 
         if ( $pStruct === null ) {
             throw new Exception( 'Project not found' );
@@ -92,7 +91,7 @@ class ChangeProjectNameController extends ChunkController {
 
         $this->checkUserPermissions( $pStruct, $this->getUser() );
 
-        $pDao = new Projects_ProjectDao();
+        $pDao = new ProjectDao();
         $pDao->changeName( $pStruct, $name );
         $pDao->destroyCacheById( $id );
         $pDao->destroyCacheForProjectData( $pStruct->id, $pStruct->password );
@@ -101,12 +100,12 @@ class ChangeProjectNameController extends ChunkController {
     /**
      * Check if the logged user has the permissions to change the password
      *
-     * @param Projects_ProjectStruct $project
-     * @param Users_UserStruct       $user
+     * @param ProjectStruct    $project
+     * @param Users_UserStruct $user
      *
      * @throws Exception
      */
-    private function checkUserPermissions( Projects_ProjectStruct $project, Users_UserStruct $user ) {
+    private function checkUserPermissions( ProjectStruct $project, Users_UserStruct $user ) {
         // check if user is belongs to the project team
         $team  = $project->getTeam();
         $check = ( new MembershipDao() )->findTeamByIdAndUser( $team->id, $user );

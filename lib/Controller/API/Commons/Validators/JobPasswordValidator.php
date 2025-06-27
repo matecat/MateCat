@@ -8,19 +8,19 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
-use Jobs_JobStruct;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class JobPasswordValidator extends Base {
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
-    private Jobs_JobStruct $jStruct;
+    private JobStruct $jStruct;
 
     /**
      * @throws ReflectionException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      */
     public function __construct( KleinController $controller ) {
 
@@ -44,9 +44,9 @@ class JobPasswordValidator extends Base {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getJob(): Jobs_JobStruct {
+    public function getJob(): JobStruct {
         return $this->jStruct;
     }
 

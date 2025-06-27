@@ -114,7 +114,7 @@ class Executor implements SplObserver {
         $this->_executorPID          = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . INIT::$INSTANCE_ID;
 
-        Log::$fileName = $_context->loggerName;
+        Log::setLogFileName( $_context->loggerName );
 
         $this->_executionContext = $_context;
 
@@ -365,9 +365,9 @@ class Executor implements SplObserver {
         /**
          * @var $subject AbstractWorker
          */
-        Log::$fileName = $subject->getLoggerName();
+        Log::setLogFileName( $subject->getLoggerName() );
         $this->_logMsg( $subject->getLogMsg() );
-        Log::$fileName = $this->_executionContext->loggerName;
+        Log::setLogFileName( $this->_executionContext->loggerName );
 
     }
 

@@ -11,9 +11,9 @@ namespace Features\ProjectCompletion\Model ;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
 use FeatureSet;
-use Jobs_JobStruct;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Projects_ProjectDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 
 
 class EventModel {
@@ -23,14 +23,14 @@ class EventModel {
      */
     protected $eventStruct ;
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
 
 
-    public function __construct( Jobs_JobStruct $chunk, CompletionEventStruct $eventStruct ) {
+    public function __construct( JobStruct $chunk, CompletionEventStruct $eventStruct ) {
         $this->eventStruct = $eventStruct ;
         $this->chunk = $chunk ;
     }
@@ -43,7 +43,7 @@ class EventModel {
         );
 
         $featureSet = new FeatureSet() ;
-        $featureSet->loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
+        $featureSet->loadForProject( ProjectDao::findById($this->chunk->id_project ) );
         $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
     }
 

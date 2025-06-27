@@ -2,8 +2,8 @@
 
 namespace Controller\Views\TemplateDecorator\Arguments;
 
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
 use WordCount\WordCountStruct;
 
 /**
@@ -15,25 +15,25 @@ use WordCount\WordCountStruct;
  */
 class CatDecoratorArguments implements ArgumentInterface {
 
-    private Jobs_JobStruct     $job;
+    private JobStruct          $job;
     private ?ChunkReviewStruct $chunkReview;
     private bool               $isRevision;
     private WordCountStruct    $wordCountStruct;
 
     /**
-     * @param Jobs_JobStruct         $job
+     * @param JobStruct              $job
      * @param bool                   $isRevision
      * @param WordCountStruct        $wordCountStruct
      * @param ChunkReviewStruct|null $chunkReview
      */
-    public function __construct( Jobs_JobStruct $job, bool $isRevision, WordCountStruct $wordCountStruct, ?ChunkReviewStruct $chunkReview = null ) {
+    public function __construct( JobStruct $job, bool $isRevision, WordCountStruct $wordCountStruct, ?ChunkReviewStruct $chunkReview = null ) {
         $this->job             = $job;
         $this->chunkReview     = $chunkReview;
         $this->isRevision      = $isRevision;
         $this->wordCountStruct = $wordCountStruct;
     }
 
-    public function getJob(): Jobs_JobStruct {
+    public function getJob(): JobStruct {
         return $this->job;
     }
 

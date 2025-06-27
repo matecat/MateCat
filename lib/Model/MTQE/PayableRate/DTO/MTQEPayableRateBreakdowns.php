@@ -12,10 +12,10 @@
  *
  */
 
-namespace MTQE\PayableRate\DTO;
+namespace Model\MTQE\PayableRate\DTO;
 
-use DataAccess\AbstractDaoSilentStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
 
 class MTQEPayableRateBreakdowns extends AbstractDaoSilentStruct implements JsonSerializable {
 

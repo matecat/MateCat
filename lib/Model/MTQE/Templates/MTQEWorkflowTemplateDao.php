@@ -7,16 +7,16 @@
  *
  */
 
-namespace MTQE\Templates;
+namespace Model\MTQE\Templates;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
 use Database;
 use DateTime;
 use Exception;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
 use PDO;
 use ReflectionException;
 use Utils;

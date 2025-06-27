@@ -4,7 +4,9 @@ use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
 use Features\Mmt;
-use Jobs\MetadataDao;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectDao;
 
 /**
  * Created by PhpStorm.
@@ -102,7 +104,7 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $metadata = null;
         if ( !empty( $_config[ 'project_id' ] ) ) {
-            $metadataDao = new Projects_MetadataDao();
+            $metadataDao = new ProjectsMetadataDao();
             $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
         }
 
@@ -362,7 +364,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             if ( $preImportIsDisabled ) {
 
                 // get jobs keys
-                $project = Projects_ProjectDao::findById( $pid );
+                $project = ProjectDao::findById( $pid );
 
                 foreach ( $project->getJobs() as $job ) {
 

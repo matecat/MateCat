@@ -4,14 +4,14 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
-use Conversion\Upload;
 use CURLFile;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use Exception;
-use Files\CSV as CSVParser;
+use Model\Conversion\Upload;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use Utils\Files\CSV as CSVParser;
 use Validator\EngineValidator;
 
 

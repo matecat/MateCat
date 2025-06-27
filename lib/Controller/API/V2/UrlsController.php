@@ -12,7 +12,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Projects_ProjectDao;
+use Model\Projects\ProjectDao;
 use View\API\V2\Json\ProjectUrls;
 
 class UrlsController extends KleinController {
@@ -48,7 +48,7 @@ class UrlsController extends KleinController {
             exit();
         }
 
-        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->validator->getProject()->id );
+        $projectData = ( new ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $this->validator->getProject()->id );
 
         $formatted = new ProjectUrls( $projectData );
 

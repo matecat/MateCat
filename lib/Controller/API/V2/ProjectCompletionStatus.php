@@ -7,14 +7,14 @@ use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\ProjectValidator;
 use Exception;
 use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
-use Projects_ProjectStruct;
+use Model\Projects\ProjectStruct;
 
 class ProjectCompletionStatus extends KleinController {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private Projects_ProjectStruct $project;
+    private ProjectStruct $project;
 
     public function afterConstruct() {
 

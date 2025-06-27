@@ -2,10 +2,10 @@
 
 namespace Features;
 
-use Jobs_JobStruct;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
+use Model\Jobs\JobStruct;
 use Utils;
 
 class ProjectCompletion extends BaseFeature {
@@ -19,7 +19,7 @@ class ProjectCompletion extends BaseFeature {
         // to register the event of the segment translation being updated
         // from a review page or a translate page.
 
-        /** @var Jobs_JobStruct $chunk */
+        /** @var JobStruct $chunk */
         $chunk                                     = $params[ 'chunk' ];
         $chunk_completion_update_struct            = new ChunkCompletionUpdateStruct( $chunk->toArray() );
         $chunk_completion_update_struct->is_review = $params[ 'is_review' ];
@@ -47,7 +47,7 @@ class ProjectCompletion extends BaseFeature {
 
     }
 
-    public function job_password_changed( Jobs_JobStruct $job, $old_password ) {
+    public function job_password_changed( JobStruct $job, $old_password ) {
         $dao = new ChunkCompletionUpdateDao();
         $dao->updatePassword( $job->id, $job->password, $old_password );
 

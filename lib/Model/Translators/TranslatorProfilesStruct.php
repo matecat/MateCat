@@ -10,7 +10,7 @@
 namespace Translators;
 
 
-class TranslatorProfilesStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class TranslatorProfilesStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct {
 
     public $id;
     public $uid_translator;

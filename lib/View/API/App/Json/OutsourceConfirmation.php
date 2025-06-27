@@ -10,7 +10,7 @@
 namespace View\API\App\Json;
 
 
-use Outsource\ConfirmationStruct;
+use Model\Outsource\ConfirmationStruct;
 
 class OutsourceConfirmation {
 

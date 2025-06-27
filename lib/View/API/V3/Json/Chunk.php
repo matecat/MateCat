@@ -10,16 +10,16 @@ namespace View\API\V3\Json;
 
 use Constants;
 use Exception;
-use Exceptions\NotFoundException;
 use Features\ReviewExtended\ReviewUtils;
 use FeatureSet;
-use Jobs_JobDao;
-use Jobs_JobStruct;
 use Langs\LanguageDomains;
 use Langs\Languages;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectStruct;
 use ReflectionException;
 use Utils;
 use View\API\App\Json\OutsourceConfirmation;
@@ -28,17 +28,17 @@ use WordCount\WordCountStruct;
 
 class Chunk extends \View\API\V2\Json\Chunk {
 
-    protected array          $chunk_reviews = [];
-    protected Jobs_JobStruct $chunk;
+    protected array     $chunk_reviews = [];
+    protected JobStruct $chunk;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return array
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ): array {
+    public function renderOne( JobStruct $chunk ): array {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
@@ -51,15 +51,15 @@ class Chunk extends \View\API\V2\Json\Chunk {
     }
 
     /**
-     * @param                         $chunk Jobs_JobStruct
+     * @param                         $chunk JobStruct
      *
-     * @param Projects_ProjectStruct  $project
+     * @param ProjectStruct           $project
      * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    public function renderItem( JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $this->chunk   = $chunk;
         $outsourceInfo = $chunk->getOutsource();
@@ -152,7 +152,7 @@ class Chunk extends \View\API\V2\Json\Chunk {
      */
     protected function getTimeToEditArray( $chunk_id ): array {
 
-        $jobDao   = new Jobs_JobDao();
+        $jobDao   = new JobDao();
         $tteT     = (int)$jobDao->getTimeToEdit( $chunk_id, 1 )[ 'tte' ];
         $tteR1    = (int)$jobDao->getTimeToEdit( $chunk_id, 2 )[ 'tte' ];
         $tteR2    = (int)$jobDao->getTimeToEdit( $chunk_id, 3 )[ 'tte' ];

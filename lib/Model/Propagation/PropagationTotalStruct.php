@@ -1,9 +1,13 @@
 <?php
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
+namespace Model\Propagation;
 
-class Propagation_PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
+use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Translations_SegmentTranslationStruct;
+
+class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
 
     /**
      * @var array

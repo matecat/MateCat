@@ -1,9 +1,9 @@
 <?php
 
-namespace EditLog;
+namespace Model\EditLog;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 use MyMemory;
 
 /**

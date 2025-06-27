@@ -11,7 +11,7 @@ use InvalidArgumentException;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\XTRFStatus;
-use Projects_ProjectDao;
+use Model\Projects\ProjectDao;
 use ReflectionException;
 use RuntimeException;
 use Utils;
@@ -31,7 +31,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
 
         $this->featureSet = new FeatureSet();
         $request          = $this->validateTheRequest();
-        $_project_data    = Projects_ProjectDao::getProjectAndJobData( $request[ 'id_project' ] );
+        $_project_data    = ProjectDao::getProjectAndJobData( $request[ 'id_project' ] );
         $this->id_job     = (int)$_project_data[ 0 ][ 'jid' ];
 
         $pCheck = new AjaxPasswordCheck();
@@ -46,7 +46,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
             throw new RuntimeException( $msg );
         }
 
-        $this->featureSet->loadForProject( Projects_ProjectDao::findById( $request[ 'id_project' ], 60 * 60 * 24 ) );
+        $this->featureSet->loadForProject( ProjectDao::findById( $request[ 'id_project' ], 60 * 60 * 24 ) );
 
         $analysisStatus = new XTRFStatus( $_project_data, $this->featureSet );
         $outputContent  = $analysisStatus->fetchData()->getResultArray();
@@ -89,7 +89,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
             throw new InvalidArgumentException( "Id project not provided" );
         }
 
-        $project = Projects_ProjectDao::findById( $id_project );
+        $project = ProjectDao::findById( $id_project );
 
         if ( empty( $project ) ) {
             throw new InvalidArgumentException( -10, "Wrong Id project provided" );

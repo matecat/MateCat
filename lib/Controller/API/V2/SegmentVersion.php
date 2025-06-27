@@ -7,10 +7,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Exceptions\NotFoundException;
 use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion as JsonFormatter;
 
@@ -83,9 +83,9 @@ class SegmentVersion extends KleinController {
      * To maintain compatibility with JobPasswordValidator
      * (line 36)
      *
-     * @param Jobs_JobStruct $jobs_JobStruct
+     * @param JobStruct $jobs_JobStruct
      */
-    public function setChunk( Jobs_JobStruct $jobs_JobStruct ) {
+    public function setChunk( JobStruct $jobs_JobStruct ) {
         $this->chunk = $jobs_JobStruct;
     }
 }

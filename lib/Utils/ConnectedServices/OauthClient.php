@@ -7,16 +7,16 @@
  *
  */
 
-namespace ConnectedServices;
+namespace Utils\ConnectedServices;
 
-use ConnectedServices\Facebook\FacebookProvider;
-use ConnectedServices\Github\GithubProvider;
-use ConnectedServices\Google\GoogleProvider;
-use ConnectedServices\LinkedIn\LinkedInProvider;
-use ConnectedServices\Microsoft\MicrosoftProvider;
 use Exception;
 use INIT;
 use Utils;
+use Utils\ConnectedServices\Facebook\FacebookProvider;
+use Utils\ConnectedServices\Github\GithubProvider;
+use Utils\ConnectedServices\Google\GoogleProvider;
+use Utils\ConnectedServices\LinkedIn\LinkedInProvider;
+use Utils\ConnectedServices\Microsoft\MicrosoftProvider;
 
 class OauthClient {
 

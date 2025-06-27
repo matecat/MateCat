@@ -1,19 +1,19 @@
 <?php
 
-namespace Projects;
+namespace Model\Projects;
 
-use DataAccess\AbstractDao;
 use Database;
 use DateTime;
 use Engine;
 use Exception;
-use Filters\FiltersConfigTemplateDao;
 use Langs\Languages;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
-use PayableRates\CustomPayableRateDao;
+use Model\DataAccess\AbstractDao;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\PayableRates\CustomPayableRateDao;
 use PDO;
-use QAModelTemplate\QAModelTemplateDao;
 use ReflectionException;
 use stdClass;
 use Teams\MembershipDao;

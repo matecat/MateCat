@@ -13,9 +13,9 @@ namespace Controller\API\V2;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
-use Exceptions\NotFoundException;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
 use ProjectQueue\Queue;
-use Projects_ProjectDao;
 use View\API\V2\Json\CreationStatus;
 use View\API\V2\Json\WaitCreation;
 
@@ -47,7 +47,7 @@ class ProjectCreationStatusController extends KleinController {
 
             // project is created, find it with password
             try {
-                $project = Projects_ProjectDao::findByIdAndPassword( $this->request->param( 'id_project' ), $this->request->param( 'password' ) );
+                $project = ProjectDao::findByIdAndPassword( $this->request->param( 'id_project' ), $this->request->param( 'password' ) );
             } catch ( NotFoundException $e ) {
                 throw new AuthorizationError( 'Not Authorized.' );
             }

@@ -9,10 +9,10 @@
 namespace Controller\ConnectedServices\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use ConnectedServices\GDriveUserAuthorizationModel;
 use Exception;
-use Exceptions\ValidationError;
 use INIT;
+use Model\ConnectedServices\GDriveUserAuthorizationModel;
+use Model\Exceptions\ValidationError;
 use ReflectionException;
 
 class OAuthController extends AbstractStatefulKleinController {
