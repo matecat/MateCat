@@ -166,7 +166,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
         // GDrive session instance
-        if(isset($_SESSION[ "gdrive_session" ])){
+        if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
             $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
             $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
         }
@@ -272,7 +272,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $xliff_parameters              = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING );
         $xliff_parameters_template_id  = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $qa_model_template_id          = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $qa_model_template             = filter_var( $this->request->param( 'qa_model_template' ), FILTER_SANITIZE_STRING );
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $payable_rate_template         = filter_var( $this->request->param( 'payable_rate_template' ), FILTER_SANITIZE_STRING );
 
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
@@ -340,7 +342,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
                 'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
                 'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template'             => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
                 'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
                 'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
                 'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
                 'postPrivateTmKey'              => $postPrivateTmKey,
@@ -378,8 +382,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
         $data[ 'mmt_glossaries' ]                        = $this->validateMMTGlossaries( $data[ 'mmt_glossaries' ] );
         $data[ 'deepl_formality' ]                       = $this->validateDeepLFormalityParams( $data[ 'deepl_formality' ] );
-        $data[ 'qa_model_template' ]                     = $this->validateQaModelTemplate( $data[ 'qa_model_template_id' ] );
-        $data[ 'payable_rate_model_template' ]           = $this->validatePayableRateTemplate( $data[ 'payable_rate_template_id' ] );
+        $data[ 'qa_model_template' ]                     = $this->validateQaModelTemplate( $data[ 'qa_model_template' ], $data[ 'qa_model_template_id' ] );
+        $data[ 'payable_rate_model_template' ]           = $this->validatePayableRateTemplate( $data[ 'payable_rate_template' ], $data[ 'payable_rate_template_id' ] );
         $data[ 'dialect_strict' ]                        = $this->validateDialectStrictParam( $data[ 'target_lang' ], $data[ 'dialect_strict' ] );
         $data[ 'filters_extraction_parameters' ]         = $this->validateFiltersExtractionParameters( $data[ 'filters_extraction_parameters' ] );
         $data[ 'xliff_parameters' ]                      = $this->validateXliffParameters( $data[ 'xliff_parameters' ], $data[ 'xliff_parameters_template_id' ] );
@@ -544,13 +548,29 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
+     * @param null $qa_model_template
      * @param null $qa_model_template_id
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
      */
-    private function validateQaModelTemplate( $qa_model_template_id = null ): ?QAModelTemplateStruct {
-        if ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
+    private function validateQaModelTemplate( $qa_model_template = null, $qa_model_template_id = null ): ?QAModelTemplateStruct {
+        if ( !empty( $qa_model_template ) ) {
+            $json   = html_entity_decode( $qa_model_template );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+
+            $QAModelTemplateStruct = new QAModelTemplateStruct();
+            $QAModelTemplateStruct->hydrateFromJSON( $validatorObject->decoded );
+            $QAModelTemplateStruct->uid = $this->user->uid;
+
+            return $QAModelTemplateStruct;
+        } elseif ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
             $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $qa_model_template_id,
                     'uid' => $this->getUser()->uid
@@ -568,15 +588,30 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
+     * @param null $payable_rate_template
      * @param null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
      * @throws Exception
      */
-    private function validatePayableRateTemplate( $payable_rate_template_id = null ): ?CustomPayableRateStruct {
+    private function validatePayableRateTemplate( $payable_rate_template = null, $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
 
-        if ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
+        if ( !empty( $payable_rate_template ) ) {
+            $json   = html_entity_decode( $payable_rate_template );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+
+            $payableRateModelTemplate = new CustomPayableRateStruct();
+            $payableRateModelTemplate->hydrateFromJSON( $validatorObject->decoded );
+            $payableRateModelTemplate->uid = $this->user->uid;
+
+        } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
 
             $payableRateTemplateId = $payable_rate_template_id;
             $userId                = $this->getUser()->uid;
@@ -642,7 +677,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = json_decode( $json );
+            $filters_extraction_parameters = $validatorObject->decoded;
         }
 
         return $filters_extraction_parameters;
