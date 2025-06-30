@@ -9,8 +9,8 @@
 namespace View\API\V2\Json;
 
 
-use Teams\PendingInvitations;
-use Teams\TeamStruct;
+use Model\Teams\PendingInvitations;
+use Model\Teams\TeamStruct;
 
 class Team {
 

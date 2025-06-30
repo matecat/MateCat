@@ -20,19 +20,19 @@ use Constants_Engines;
 class SmartMATEStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "SmartMATE Engine by Capita";
+    public ?string $description = "SmartMATE Engine by Capita";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "https://api.smartmate.co/translate/api/v2.1";
+    public ?string $base_url = "https://api.smartmate.co/translate/api/v2.1";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "translate";
+    public ?string $translate_relative_url = "translate";
 
     /**
      * @var array
@@ -42,9 +42,9 @@ class SmartMATEStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $contribute_relative_url = "";
+    public ?string $contribute_relative_url = "";
 
     /**
      * @var array
@@ -57,20 +57,20 @@ class SmartMATEStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::SMART_MATE;
+    public ?string $class_load = Constants_Engines::SMART_MATE;
 
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

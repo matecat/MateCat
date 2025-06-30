@@ -9,10 +9,10 @@ use Exception;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
+use Model\Teams\TeamDao;
 use ReflectionException;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\TeamDao;
 use Users_UserDao;
 use Users_UserStruct;
 

@@ -1,6 +1,7 @@
 <?php
 
 use Model\Engines\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -83,12 +84,12 @@ interface Engines_EngineInterface {
     public function syncMemories( array $projectRow, ?array $segments = [] );
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return ?array
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * Deletes a specific memory key.
@@ -104,12 +105,12 @@ interface Engines_EngineInterface {
     /**
      * Determines if the provided memory belongs to the caller.
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      * @throws Exception
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * @param string $source

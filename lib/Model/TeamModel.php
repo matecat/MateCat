@@ -4,18 +4,18 @@ use Email\InvitedToTeamEmail;
 use Email\MembershipCreatedEmail;
 use Email\MembershipDeletedEmail;
 use Model\Projects\ProjectDao;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\PendingInvitations;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
+use Model\Teams\PendingInvitations;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
 
 class TeamModel {
 
     protected $member_emails = [];
 
     /**
-     * @var \Teams\TeamStruct
+     * @var \Model\Teams\TeamStruct
      */
     protected $struct;
 
@@ -25,7 +25,7 @@ class TeamModel {
     protected $user;
 
     /**
-     * @var \Teams\MembershipStruct[]
+     * @var \Model\Teams\MembershipStruct[]
      */
     protected $new_memberships;
 
@@ -42,7 +42,7 @@ class TeamModel {
     protected $emails_to_invite;
 
     /**
-     * @var \Teams\MembershipStruct[]
+     * @var \Model\Teams\MembershipStruct[]
      */
     protected $all_memberships;
 
@@ -71,7 +71,7 @@ class TeamModel {
     /**
      * Updated member list.
      *
-     * @return \Teams\MembershipStruct[] the full list of members after the update.
+     * @return \Model\Teams\MembershipStruct[] the full list of members after the update.
      */
     public function updateMembers() {
         $this->removed_users = [];
@@ -181,7 +181,7 @@ class TeamModel {
     }
 
     /**
-     * @return \Teams\MembershipStruct[]
+     * @return \Model\Teams\MembershipStruct[]
      */
     protected function _getNewMembershipEmailList() {
         $notify_list = [];

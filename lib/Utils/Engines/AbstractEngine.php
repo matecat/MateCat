@@ -1,7 +1,8 @@
 <?php
 
-use Model\Engines\GoogleTranslateStruct;
 use Model\Engines\EngineStruct;
+use Model\Engines\GoogleTranslateStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -380,12 +381,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     * @param MemoryKeyStruct $memoryKey The memory key structure to be checked.
      *
      * @return ?array Returns the memory, otherwise null.
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 
@@ -403,11 +404,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * Determines if the provided memory belongs to the caller.
      *
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey *
+     * @param MemoryKeyStruct $memoryKey *
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 

@@ -6,44 +6,47 @@
  * Time: 10:45
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use ReflectionException;
+use Users_UserDao;
+use Users_UserStruct;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $id_team;
-    public $uid;
-    public $is_admin;
+    public ?int $id = null;
+    public int $id_team;
+    public int $uid;
+    public bool $is_admin;
 
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
-    private $user;
+    private Users_UserStruct $user;
 
     /**
      * @var TeamStruct
      */
-    private $team;
+    private TeamStruct $team;
 
 
     /**
      * @var
      */
-    private $user_metadata = [];
+    private array $user_metadata = [];
 
     /**
      * @var int
      */
-    private $projects = 0;
+    private int $projects = 0;
 
-    public function setUser( \Users_UserStruct $user ) {
+    public function setUser( Users_UserStruct $user ) {
         $this->user = $user;
     }
 
-    public function setUserMetadata( $user_metadata ) {
+    public function setUserMetadata( array $user_metadata ) {
         if ( $user_metadata == null ) {
             $user_metadata = [];
         }
@@ -55,11 +58,12 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @return \Users_UserStruct|null
+     * @return Users_UserStruct|null
+     * @throws ReflectionException
      */
     public function getUser() {
         if ( is_null( $this->user ) ) {
-            $this->user = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
+            $this->user = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
         }
 
         return $this->user;
@@ -67,6 +71,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     /**
      * @return TeamStruct
+     * @throws ReflectionException
      */
     public function getTeam() {
         if ( is_null( $this->team ) ) {
@@ -88,7 +93,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return $this
      */
-    public function setAssignedProjects( $projects ) {
+    public function setAssignedProjects( int $projects ): MembershipStruct {
         $this->projects = $projects;
 
         return $this;

@@ -11,9 +11,9 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
+use Model\Teams\TeamStruct;
 use PDO;
 use ReflectionException;
-use Teams\TeamStruct;
 use Users_UserStruct;
 use Utils;
 

@@ -2,6 +2,8 @@
 
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -509,8 +511,8 @@ class TmKeyManagement_TmKeyManagement {
                         /*
                          * Take the keys of the user
                          */
-                        $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                        $dh      = new TmKeyManagement_MemoryKeyStruct( array(
+                        $_keyDao = new MemoryKeyDao( Database::obtain() );
+                        $dh      = new MemoryKeyStruct( array(
                             'uid'    => $uid,
                             'tm_key' => new TmKeyManagement_TmKeyStruct( array(
                                 'key' => $justCreatedKey->key
@@ -609,14 +611,15 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param array $emailList
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
+     * @param array            $emailList
+     * @param MemoryKeyStruct  $memoryKeyToUpdate
      * @param Users_UserStruct $user
+     *
      * @throws Exception
      */
-    public function shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
+    public function shareKey( Array $emailList, MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
 
-        $mkDao = new TmKeyManagement_MemoryKeyDao();
+        $mkDao = new MemoryKeyDao();
         $userDao = new Users_UserDao();
 
         foreach ( $emailList as $pos => $email ) {
@@ -660,12 +663,13 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
-     * @param TmKeyManagement_MemoryKeyDao $mkDao
-     * @return \Model\DataAccess\IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @param MemoryKeyStruct $memoryKeyToUpdate
+     * @param MemoryKeyDao    $mkDao
+     *
+     * @return \Model\DataAccess\IDaoStruct|MemoryKeyStruct|null
      * @throws Exception
      */
-    protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){
+    protected function _addToUserKeyRing( MemoryKeyStruct $memoryKeyToUpdate, MemoryKeyDao $mkDao ){
 
         try {
             $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );

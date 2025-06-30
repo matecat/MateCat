@@ -1,6 +1,6 @@
 <?php
 
-use Teams\TeamDao;
+use Model\Teams\TeamDao;
 
 class Factory_User extends Factory_Base {
 

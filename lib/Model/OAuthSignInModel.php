@@ -3,10 +3,10 @@
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Email\WelcomeEmail;
-use Utils\ConnectedServices\OauthTokenEncryption;
-use Teams\TeamDao;
+use Model\Teams\TeamDao;
 use Users\MetadataDao;
 use Users\RedeemableProject;
+use Utils\ConnectedServices\OauthTokenEncryption;
 
 /**
  * Created by PhpStorm.

@@ -20,34 +20,34 @@ use Constants_Engines;
 class MMTStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $name = 'ModernMT Full';
+    public ?string $name = 'ModernMT Full';
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $description = "ModernMT for subscribers, includes adaptive suggestions for entire documents, integrated glossary support and TM usage optimization.";
+    public ?string $description = "ModernMT for subscribers, includes adaptive suggestions for entire documents, integrated glossary support and TM usage optimization.";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $base_url = "http://MMT";
+    public ?string $base_url = "http://MMT";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $translate_relative_url = "translate";
+    public ?string $translate_relative_url = "translate";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $contribute_relative_url = "memories/content";
+    public ?string $contribute_relative_url = "memories/content";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $update_relative_url = "memories/content";
+    public ?string $update_relative_url = "memories/content";
 
     /**
      * @var array
@@ -60,9 +60,9 @@ class MMTStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $class_load = Constants_Engines::MMT;
+    public ?string $class_load = Constants_Engines::MMT;
 
 
     /**
@@ -75,14 +75,14 @@ class MMTStruct extends EngineStruct {
     ];
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var int|null
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

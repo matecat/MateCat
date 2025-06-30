@@ -7,6 +7,7 @@ use Features\Mmt;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -176,7 +177,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $keyList TmKeyManagement_MemoryKeyStruct[]
+     * @param $keyList MemoryKeyStruct[]
      *
      * @return array
      */
@@ -243,7 +244,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * @throws MMTServiceApiException
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         $client = $this->_getClient();
 
         try {
@@ -372,7 +373,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
 
                     foreach ( $jobKeyList as $memKey ) {
-                        $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                        $memoryKeyStructs[] = new MemoryKeyStruct(
                                 [
                                         'uid'    => $user->uid,
                                         'tm_key' => $memKey
@@ -457,7 +458,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * Activate the account and also update/add keys to User MMT data
      *
-     * @param $keyList TmKeyManagement_MemoryKeyStruct[]
+     * @param $keyList MemoryKeyStruct[]
      *
      * @return mixed
      * @throws MMTServiceApiException
@@ -597,7 +598,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * @throws MMTServiceApiException
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         //Get the user account, check if the memory exists and, if so, check if the key owner's ID is mine.
         $me     = $this->checkAccount();
         $memory = $this->memoryExists( $memoryKey );

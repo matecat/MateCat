@@ -13,19 +13,19 @@ use Constants_Engines;
 class IntentoStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "Intento";
+    public ?string $description = "Intento";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "https://api.inten.to/ai/text";
+    public ?string $base_url = "https://api.inten.to/ai/text";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "translate";
+    public ?string $translate_relative_url = "translate";
 
     /**
      * @var array
@@ -38,15 +38,15 @@ class IntentoStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::INTENTO;
+    public ?string $class_load = Constants_Engines::INTENTO;
 
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
      * An empty struct

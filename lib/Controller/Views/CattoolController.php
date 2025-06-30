@@ -32,13 +32,13 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Teams\MembershipStruct;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
 use TeamModel;
-use Teams\MembershipStruct;
 use Users_UserDao;
 use Utils;
 

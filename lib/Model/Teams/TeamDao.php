@@ -6,7 +6,7 @@
  * Time: 10:04
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 use Constants_Teams;
 use Database;
@@ -67,14 +67,12 @@ class TeamDao extends AbstractDao {
     public function findById( $id ): ?TeamStruct {
 
         $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
-        $teamQuery     = new TeamStruct();
-        $teamQuery->id = $id;
 
         /** @var $res TeamStruct */
-        $res = $this->_fetchObject( $stmt,
-                $teamQuery,
+        $res = $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'id' => $teamQuery->id,
+                        'id' => $id,
                 ]
         )[ 0 ] ?? null;
 
@@ -151,8 +149,8 @@ class TeamDao extends AbstractDao {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
 
-        return $this->_fetchObject( $stmt,
-                new MembershipStruct(),
+        return $this->_fetchObjectMap( $stmt,
+                MembershipStruct::class,
                 [
                         'id_team' => $team->id,
                 ]
@@ -214,16 +212,14 @@ class TeamDao extends AbstractDao {
      */
     public function getPersonalByUid( int $uid ): TeamStruct {
         $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
-        $teamQuery             = new TeamStruct();
-        $teamQuery->created_by = $uid;
 
         /**
          * @var TeamStruct
          */
-        return $this->_fetchObject( $stmt,
-                $teamQuery,
+        return $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'created_by' => $teamQuery->created_by,
+                        'created_by' => $uid,
                         'type'       => Constants_Teams::PERSONAL
                 ]
         )[ 0 ];
@@ -259,13 +255,10 @@ class TeamDao extends AbstractDao {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
-        $teamQuery             = new TeamStruct();
-        $teamQuery->created_by = $user->uid;
-
-        return static::resultOrNull( $this->_fetchObject( $stmt,
-                $teamQuery,
+        return static::resultOrNull( $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'created_by' => $teamQuery->created_by,
+                        'created_by' => $user->uid,
                 ]
         )[ 0 ] );
 

@@ -9,8 +9,8 @@ use Exception;
 use INIT;
 use InvalidArgumentException;
 use Model\FilesStorage\AbstractFilesStorage;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSFile;
 use TMS\TMSService;
@@ -59,8 +59,8 @@ class LoadTMXController extends KleinController {
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
+                $mkDao           = new MemoryKeyDao( Database::obtain() );
+                $searchMemoryKey = new MemoryKeyStruct();
                 $key             = new TmKeyManagement_TmKeyStruct();
                 $key->key        = $request[ 'tm_key' ];
 

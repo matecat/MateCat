@@ -20,40 +20,40 @@ use Constants_Engines;
 class ApertiumStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "Apertium Engine";
+    public ?string $description = "Apertium Engine";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "http://api.prompsit.com";
+    public ?string $base_url = "http://api.prompsit.com";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "apertiumws/";
+    public ?string $translate_relative_url = "apertiumws/";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $contribute_relative_url = "";
+    public ?string $contribute_relative_url = "";
 
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::APERTIUM;
+    public ?string $class_load = Constants_Engines::APERTIUM;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

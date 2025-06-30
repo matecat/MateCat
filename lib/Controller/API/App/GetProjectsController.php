@@ -10,10 +10,10 @@ use Exception;
 use InvalidArgumentException;
 use ManageUtils;
 use Model\Exceptions\NotFoundException;
+use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
+use Model\Teams\TeamStruct;
 use ReflectionException;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\TeamStruct;
 use Users_UserStruct;
 
 class GetProjectsController extends KleinController {

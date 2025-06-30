@@ -25,15 +25,15 @@ use FeatureSet;
 use INIT;
 use Log;
 use Model\Engines\EngineDAO;
-use Model\Engines\MMTStruct;
 use Model\Engines\EngineStruct;
+use Model\Engines\MMTStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use Users\MetadataDao;
 use Users_UserStruct;
@@ -152,7 +152,7 @@ class Mmt extends BaseFeature {
             $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'r' );
             $config[ 'keys' ] = array_map( function ( $tm_key ) {
                 /**
-                 * @var $tm_key TmKeyManagement_MemoryKeyStruct
+                 * @var $tm_key MemoryKeyStruct
                  */
                 return $tm_key->key;
             }, $tm_keys );
@@ -188,7 +188,7 @@ class Mmt extends BaseFeature {
     /**
      * @param $uid
      *
-     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @return MemoryKeyStruct[]
      * @throws Exception
      */
     private static function _getKeyringOwnerKeysByUid( $uid ) {
@@ -197,8 +197,8 @@ class Mmt extends BaseFeature {
          * Take the keys of the user
          */
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [ 'uid' => $uid ] );
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
@@ -211,7 +211,7 @@ class Mmt extends BaseFeature {
     /**
      * @param Users_UserStruct $LoggedUser
      *
-     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @return MemoryKeyStruct[]
      * @throws Exception
      */
     protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
@@ -299,7 +299,7 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
+     * Called in @param                  $memoryKeyStructs MemoryKeyStruct[]
      *
      * @param                  $uid              integer
      *

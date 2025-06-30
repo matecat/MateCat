@@ -1,5 +1,7 @@
 <?php
 
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
 
@@ -1539,8 +1541,8 @@ class TmKeyManagementTest extends AbstractTest {
                 123
         );
 
-        $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-        $dh        = new TmKeyManagement_MemoryKeyStruct( [
+        $MemoryDao = new MemoryKeyDao( Database::obtain() );
+        $dh        = new MemoryKeyStruct( [
                 'uid' => 123
         ] );
 

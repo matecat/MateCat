@@ -39,15 +39,15 @@ use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Model\ProjectManager;
 use Model\Projects\MetadataDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use ProjectQueue\Queue;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
@@ -793,13 +793,13 @@ class NewController extends KleinController {
                  * Get the key description/name from the user keyring
                  */
                 if ( $uid ) {
-                    $mkDao = new TmKeyManagement_MemoryKeyDao();
+                    $mkDao = new MemoryKeyDao();
 
                     /**
-                     * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
+                     * @var $keyRing MemoryKeyStruct[]
                      */
                     $keyRing = $mkDao->read(
-                            ( new TmKeyManagement_MemoryKeyStruct( [
+                            ( new MemoryKeyStruct( [
                                     'uid'    => $uid,
                                     'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
                             ] )

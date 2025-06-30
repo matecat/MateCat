@@ -6,38 +6,42 @@
  * Time: 14:50
  */
 
-namespace TmKeyManagement;
+namespace Model\TmKeyManagement;
 
 use Database;
 use Exception;
 use Log;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use Users_UserStruct;
 
 class UserKeysModel {
 
-    protected $_user_keys = [ 'totals' => [], 'job_keys' => [] ];
+    protected array $_user_keys = [ 'totals' => [], 'job_keys' => [] ];
 
-    protected $user;
+    protected Users_UserStruct $user;
 
-    protected $userRole;
+    protected string $userRole;
 
     public function __construct( Users_UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
         $this->user     = $user;
         $this->userRole = $role;
     }
 
-    public function getKeys( $jobKeys, $ttl = 0 ) {
+    /**
+     * @param string $jobKeys
+     * @param int    $ttl
+     *
+     * @return array
+     */
+    public function getKeys( string $jobKeys, int $ttl = 0 ): array {
         /*
          * Take the keys of the user
          */
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
             $keyList = $_keyDao->read( $dh, false, $ttl );
 
         } catch ( Exception $e ) {
@@ -50,7 +54,7 @@ class UserKeysModel {
         /**
          * Set these keys as editable for the client
          *
-         * @var $keyList TmKeyManagement_MemoryKeyStruct[]
+         * @var $keyList MemoryKeyStruct[]
          */
 
         foreach ( $keyList as $_j => $key ) {

@@ -2,6 +2,8 @@
 
 use Behat\Transliterator\Transliterator;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 class Utils {
 
@@ -696,12 +698,12 @@ class Utils {
         }
 
         //check if the user can see the key.
-        $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKey              = new MemoryKeyStruct();
         $memoryKey->uid         = $uid;
         $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $memoryKeyDao         = new MemoryKeyDao( Database::obtain() );
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
         if ( count( $currentUserMemoryKey ) > 0 ) {
             $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];

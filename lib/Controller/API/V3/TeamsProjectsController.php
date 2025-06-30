@@ -17,7 +17,7 @@ use Exception;
 use INIT;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
 use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {

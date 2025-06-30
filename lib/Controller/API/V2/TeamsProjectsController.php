@@ -21,9 +21,9 @@ use ManageUtils;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Teams\TeamStruct;
 use Projects\ProjectModel;
 use ReflectionException;
-use Teams\TeamStruct;
 use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {

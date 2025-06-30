@@ -40,10 +40,12 @@ use Model\Segments\SegmentMetadataStruct;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentOriginalDataStruct;
 use Model\Segments\SegmentStruct;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Teams\TeamDao;
-use Teams\TeamStruct;
 use TMS\TMSFile;
 use TMS\TMSService;
 use Translators\TranslatorsModel;
@@ -3062,9 +3064,9 @@ class ProjectManager {
         //check if the MyMemory keys provided by the user are already associated to him.
         if ( $this->projectStructure[ 'userIsLogged' ] ) {
 
-            $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
+            $mkDao = new MemoryKeyDao( $this->dbHandler );
 
-            $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
+            $searchMemoryKey      = new MemoryKeyStruct();
             $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
 
             $userMemoryKeys = $mkDao->read( $searchMemoryKey );
@@ -3075,7 +3077,7 @@ class ProjectManager {
             //extract user tm keys
             foreach ( $userMemoryKeys as $_memoKey ) {
                 /**
-                 * @var $_memoKey TmKeyManagement_MemoryKeyStruct
+                 * @var $_memoKey MemoryKeyStruct
                  */
                 $userTmKeys[] = $_memoKey->tm_key->key;
             }
@@ -3084,7 +3086,7 @@ class ProjectManager {
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
                 if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
-                    $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
+                    $newMemoryKey   = new MemoryKeyStruct();
                     $newTmKey       = new TmKeyManagement_TmKeyStruct();
                     $newTmKey->key  = $_tmKey[ 'key' ];
                     $newTmKey->tm   = true;

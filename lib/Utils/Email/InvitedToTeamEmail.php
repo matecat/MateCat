@@ -10,8 +10,8 @@ namespace Email;
 
 
 use Exception;
+use Model\Teams\TeamStruct;
 use Routes;
-use Teams\TeamStruct;
 
 class InvitedToTeamEmail extends AbstractEmail {
 

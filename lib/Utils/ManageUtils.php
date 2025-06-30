@@ -1,7 +1,7 @@
 <?php
 
 use Model\Projects\ProjectDao;
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
 use View\API\V2\Json\Project;
 
 class ManageUtils {

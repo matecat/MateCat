@@ -23,13 +23,13 @@ use Lara\Translator;
 use Log;
 use Model\Engines\MMTStruct;
 use Model\Projects\ProjectDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Users_UserDao;
@@ -177,7 +177,7 @@ class Lara extends Engines_AbstractEngine {
         $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
-             * @var $tm_key TmKeyManagement_MemoryKeyStruct
+             * @var $tm_key \Model\TmKeyManagement\MemoryKeyStruct
              */
             return $tm_key->key;
         }, $tm_keys );
@@ -392,13 +392,13 @@ class Lara extends Engines_AbstractEngine {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param \Model\TmKeyManagement\MemoryKeyStruct $memoryKey
      *
      * @return array|null
      * @throws LaraException
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         $clientMemories = $this->_getClient()->memories;
         $memory         = $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) );
         if ( $memory ) {
@@ -417,7 +417,7 @@ class Lara extends Engines_AbstractEngine {
         try {
 
             if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-                $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+                $memoryKeyToUpdate         = new MemoryKeyStruct();
                 $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
 
                 $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
@@ -440,7 +440,7 @@ class Lara extends Engines_AbstractEngine {
      * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
      * @throws LaraException
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         return $this->memoryExists( $memoryKey );
     }
 

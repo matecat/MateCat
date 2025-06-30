@@ -12,7 +12,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use Teams\MembershipDao;
+use Model\Teams\MembershipDao;
 use Users_UserStruct;
 use Utils;
 

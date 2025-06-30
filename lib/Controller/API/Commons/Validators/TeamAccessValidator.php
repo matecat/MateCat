@@ -11,8 +11,8 @@ namespace Controller\API\Commons\Validators;
 
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
 
 class TeamAccessValidator extends Base {
 

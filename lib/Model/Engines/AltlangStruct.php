@@ -14,46 +14,46 @@ use Constants_Engines;
 /**
  * Class Engine_AltlangStruct
  *
- * This class contains the default parameters for a Altlang Engine CREATION
+ * This class contains the default parameters for an Altlang Engine CREATION
  *
  */
 class AltlangStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "AltLang Engine";
+    public ?string $description = "AltLang Engine";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "https://api2.prompsit.com";
+    public ?string $base_url = "https://api2.prompsit.com";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "wsprompsit/";
+    public ?string $translate_relative_url = "wsprompsit/";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $contribute_relative_url = "";
+    public ?string $contribute_relative_url = "";
 
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::ALTLANG;
+    public ?string $class_load = Constants_Engines::ALTLANG;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

@@ -10,7 +10,7 @@
 namespace View\API\App\Json;
 
 use Model\ConnectedServices\ConnectedServiceStruct;
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
 use Users_UserStruct;
 use View\API\V2\Json\Team;
 use View\API\V2\Json\User;

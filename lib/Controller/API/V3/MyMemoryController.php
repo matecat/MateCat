@@ -8,8 +8,8 @@ use Engine;
 use Engines_MyMemory;
 use Exception;
 use InvalidArgumentException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
 
@@ -111,9 +111,9 @@ class MyMemoryController extends KleinController {
         $tmKeyStruct->tm   = true;
         $tmKeyStruct->glos = true;
 
-        $mkDao = new TmKeyManagement_MemoryKeyDao();
+        $mkDao = new MemoryKeyDao();
 
-        $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+        $newMemoryKey         = new MemoryKeyStruct();
         $newMemoryKey->uid    = $this->user->uid;
         $newMemoryKey->tm_key = $tmKeyStruct;
 

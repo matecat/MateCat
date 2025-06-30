@@ -12,7 +12,7 @@ use Exception;
 use FlashMessage;
 use INIT;
 use Klein\Response;
-use Teams\InvitedUser;
+use Model\Teams\InvitedUser;
 use Users\Authentication\SignupModel;
 use Users\RedeemableProject;
 use Utils;

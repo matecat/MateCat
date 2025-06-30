@@ -15,9 +15,9 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ModelDao;
 use Model\LQA\ModelStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
 use ReflectionException;
-use Teams\TeamDao;
-use Teams\TeamStruct;
 
 class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 

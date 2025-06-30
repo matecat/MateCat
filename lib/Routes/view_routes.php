@@ -19,9 +19,9 @@ route( '/revise-summary/[i:jid]-[:password]', 'GET', [ 'Controller\Views\Quality
 route( '/activityLog/[i:id_project]/[:password]', 'GET', [ 'Controller\Views\ActivityLogController', 'renderView' ] );
 route( '/utils/xliff-to-target', 'GET', [ 'Controller\Views\XliffToTargetController', 'renderView' ] );
 
-route( '/translate/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
-route( '/revise/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
-route( '/revise2/[:project_name]/[:lang_pair]/[i:jid]-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
+route( '/translate/[:project_name]/[:lang_pair]/[i:jid]-[i:split]?-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
+route( '/revise/[:project_name]/[:lang_pair]/[i:jid]-[i:split]?-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
+route( '/revise2/[:project_name]/[:lang_pair]/[i:jid]-[i:split]?-[:password]', 'GET', [ 'Controller\Views\CattoolController', 'renderView' ] );
 
 // outsource authentication callbacks
 route( '/webhooks/outsource/success', 'GET', [ 'Controller\Views\OutsourceTo\TranslatedCallbackController', 'renderView' ] );

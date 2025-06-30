@@ -8,8 +8,8 @@ use Database;
 use Exception;
 use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
@@ -165,20 +165,20 @@ class UserKeysController extends KleinController {
     }
 
     /**
-     * @return TmKeyManagement_MemoryKeyDao
+     * @return \Model\TmKeyManagement\MemoryKeyDao
      */
-    private function getMkDao(): TmKeyManagement_MemoryKeyDao {
-        return new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+    private function getMkDao(): MemoryKeyDao {
+        return new MemoryKeyDao( Database::obtain() );
     }
 
     /**
      * @param      $key
      * @param null $description
      *
-     * @return TmKeyManagement_MemoryKeyStruct
+     * @return MemoryKeyStruct
      * @throws Exception
      */
-    private function getMemoryToUpdate( $key, $description = null ): TmKeyManagement_MemoryKeyStruct {
+    private function getMemoryToUpdate( $key, $description = null ): MemoryKeyStruct {
         $tmService = new TMSService();
 
         //validate the key
@@ -190,7 +190,7 @@ class UserKeysController extends KleinController {
         $tmKeyStruct->tm   = true;
         $tmKeyStruct->glos = true;
 
-        $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKeyToUpdate         = new MemoryKeyStruct();
         $memoryKeyToUpdate->uid    = $this->user->uid;
         $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 

@@ -5,8 +5,8 @@ namespace Controller\API\Commons\Validators;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Model\Projects\ProjectStruct;
+use Model\Teams\MembershipDao;
 use ReflectionException;
-use Teams\MembershipDao;
 
 class ProjectAccessValidator extends Base {
 

@@ -10,7 +10,7 @@ namespace Email;
 
 
 use Exception;
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
 use Users_UserStruct;
 
 class MembershipDeletedEmail extends AbstractEmail {

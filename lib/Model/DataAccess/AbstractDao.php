@@ -87,9 +87,10 @@ abstract class AbstractDao {
     }
 
     /**
+     * @template T of IDaoStruct
      * @param $input IDaoStruct The input object
      *
-     * @return IDaoStruct The input object, sanitized.
+     * @return T The input object, sanitized.
      * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
     public function sanitize( IDaoStruct $input ) {

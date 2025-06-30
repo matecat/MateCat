@@ -10,10 +10,10 @@
 namespace Controller\API\App;
 
 
-use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Model\Teams\InvitedUser;
 use Routes;
-use Teams\InvitedUser;
 
 /**
  * Endpoint to get the call from emails link in the invitation emails

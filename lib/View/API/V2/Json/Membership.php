@@ -9,7 +9,7 @@
 namespace View\API\V2\Json;
 
 
-use Teams\MembershipStruct;
+use Model\Teams\MembershipStruct;
 
 class Membership {
 

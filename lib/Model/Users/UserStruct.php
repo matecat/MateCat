@@ -3,9 +3,9 @@
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
 use Users\MetadataDao;
 use Users\MetadataStruct;
 use Utils\ConnectedServices\OauthTokenEncryption;

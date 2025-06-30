@@ -20,34 +20,34 @@ use Utils\Engines\Lara;
 class LaraStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $name = 'Lara';
+    public ?string $name = 'Lara';
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $description = "LLM-based machine translation that understands context and learns from previously translated content, delivering high-quality, nuanced translations.";
+    public ?string $description = "LLM-based machine translation that understands context and learns from previously translated content, delivering high-quality, nuanced translations.";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $base_url = "http://Lara";
+    public ?string $base_url = "http://Lara";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $translate_relative_url = "translate";
+    public ?string $translate_relative_url = "translate";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $contribute_relative_url = "memories/content";
+    public ?string $contribute_relative_url = "memories/content";
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $update_relative_url = "memories/content";
+    public ?string $update_relative_url = "memories/content";
 
     /**
      * @var array
@@ -58,9 +58,9 @@ class LaraStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var string|null
      */
-    public string $class_load = Lara::class;
+    public ?string $class_load = Lara::class;
 
 
     /**
@@ -75,12 +75,12 @@ class LaraStruct extends EngineStruct {
     /**
      * @var int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
      * @var int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

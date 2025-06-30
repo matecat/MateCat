@@ -9,8 +9,8 @@
 namespace Email;
 
 use Exception;
+use Model\Teams\MembershipStruct;
 use Routes;
-use Teams\MembershipStruct;
 use Users_UserStruct;
 
 class MembershipCreatedEmail extends AbstractEmail {

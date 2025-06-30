@@ -14,11 +14,11 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Database;
 use Exception;
+use Model\Teams\PendingInvitations;
+use Model\Teams\TeamDao;
 use RedisHandler;
 use ReflectionException;
 use TeamModel;
-use Teams\PendingInvitations;
-use Teams\TeamDao;
 use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController {

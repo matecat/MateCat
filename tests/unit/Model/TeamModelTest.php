@@ -1,6 +1,6 @@
 <?php
 
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
 use TestHelpers\AbstractTest;
 
 /**

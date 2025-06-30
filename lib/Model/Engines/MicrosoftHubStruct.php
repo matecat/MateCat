@@ -20,19 +20,19 @@ use Constants_Engines;
 class MicrosoftHubStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "Microsoft Translator Hub";
+    public ?string $description = "Microsoft Translator Hub";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "https://api.microsofttranslator.com/v2/Http.svc/";
+    public ?string $base_url = "https://api.microsofttranslator.com/v2/Http.svc/";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "Translate";
+    public ?string $translate_relative_url = "Translate";
 
     /**
      * @var array
@@ -42,9 +42,9 @@ class MicrosoftHubStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::MICROSOFT_HUB;
+    public ?string $class_load = Constants_Engines::MICROSOFT_HUB;
 
 
     /**
@@ -59,14 +59,14 @@ class MicrosoftHubStruct extends EngineStruct {
     ];
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

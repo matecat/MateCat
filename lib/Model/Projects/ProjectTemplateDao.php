@@ -13,13 +13,13 @@ use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\PayableRates\CustomPayableRateDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use PDO;
 use ReflectionException;
 use stdClass;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use Users_UserStruct;
 use Utils;
@@ -266,11 +266,11 @@ class ProjectTemplateDao extends AbstractDao {
         // check tm
         if ( $projectTemplateStruct->tm !== null ) {
             $tmKeys = $projectTemplateStruct->getTm();
-            $mkDao  = new TmKeyManagement_MemoryKeyDao();
+            $mkDao  = new MemoryKeyDao();
 
             foreach ( $tmKeys as $tmKey ) {
                 $keyRing = $mkDao->read(
-                        ( new TmKeyManagement_MemoryKeyStruct( [
+                        ( new MemoryKeyStruct( [
                                 'uid'    => $projectTemplateStruct->uid,
                                 'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey->key )
                         ] )

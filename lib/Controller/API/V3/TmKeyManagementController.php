@@ -6,8 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Database;
 use Exception;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 class TmKeyManagementController extends KleinController {
 
@@ -21,8 +21,8 @@ class TmKeyManagementController extends KleinController {
     public function getByUser() {
 
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
             $keyList = $_keyDao->read( $dh );
 
             $list = [ 'tm_keys' => [] ];

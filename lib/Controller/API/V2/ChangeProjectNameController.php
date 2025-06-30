@@ -8,7 +8,7 @@ use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use Teams\MembershipDao;
+use Model\Teams\MembershipDao;
 use Users_UserStruct;
 use Utils;
 

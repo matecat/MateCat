@@ -19,19 +19,19 @@ use Constants_Engines;
 class GoogleTranslateStruct extends EngineStruct {
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $description = "Google Translate";
+    public ?string $description = "Google Translate";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $base_url = "https://translation.googleapis.com";
+    public ?string $base_url = "https://translation.googleapis.com";
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $translate_relative_url = "language/translate/v2";
+    public ?string $translate_relative_url = "language/translate/v2";
 
     /**
      * @var array
@@ -41,20 +41,20 @@ class GoogleTranslateStruct extends EngineStruct {
     ];
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $class_load = Constants_Engines::GOOGLE_TRANSLATE;
+    public ?string $class_load = Constants_Engines::GOOGLE_TRANSLATE;
 
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $google_api_compliant_version = 2;
+    public ?int $google_api_compliant_version = 2;
 
     /**
-     * @var int
+     * @var ?int
      */
-    public int $penalty = 14;
+    public ?int $penalty = 14;
 
     /**
      * An empty struct

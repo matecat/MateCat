@@ -18,19 +18,19 @@ class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, \Ar
 
     use ArrayAccessTrait;
 
-    public string $jid;
-    public int    $id_file;
-    public ?int   $id_file_part        = null;
-    public string $filename;
-    public string $sid;
-    public string $segment;
-    public string $segment_hash;
-    public string $translation;
-    public bool   $ice_locked;
-    public string $status;
-    public int    $time_to_edit;
-    public array  $parsed_time_to_edit = [];
-    public bool   $warning             = false;
+    public string  $jid;
+    public int     $id_file;
+    public ?int    $id_file_part        = null;
+    public string  $filename;
+    public string  $sid;
+    public string  $segment;
+    public string  $segment_hash;
+    public ?string $translation         = null;
+    public bool    $ice_locked;
+    public string  $status;
+    public int     $time_to_edit;
+    public array   $parsed_time_to_edit = [];
+    public bool    $warning             = false;
     /**
      * @var array|string
      */
