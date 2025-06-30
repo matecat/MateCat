@@ -8,8 +8,8 @@ const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const fs = require('fs')
 const ini = require('ini')
-// const BundleAnalyzerPlugin =
-//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+const BundleAnalyzerPlugin =
+  require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 function getDirectories(path) {
   return fs.readdirSync(path).filter(function (file) {
@@ -96,8 +96,8 @@ const matecatConfig = async ({env}, {mode}) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
-        minSize: 20000, // Minimum size in bytes for a chunk to be generated
-        maxSize: 244000, // Maximum size in bytes for a chunk before it is split
+        minSize: 20 * 1024, // Minimum size in bytes for a chunk to be generated
+        maxSize: 200 * 1024, // Maximum size in bytes for a chunk before it is split
         maxInitialRequests: Infinity,
         automaticNameDelimiter: '-',
         cacheGroups: {
@@ -105,6 +105,18 @@ const matecatConfig = async ({env}, {mode}) => {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+          },
+          lodash: {
+            test: /[\\/]node_modules[\\/](lodash)[\\/]/,
+            name: 'lodash',
+            chunks: 'all',
+            priority: 10,
+          },
+          immutable: {
+            test: /[\\/]node_modules[\\/](immutable)[\\/]/,
+            name: 'immutable',
+            chunks: 'all',
+            priority: 10,
           },
         },
       },
@@ -287,7 +299,7 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
     },
     plugins: [
-      // new BundleAnalyzerPlugin({analyzerMode: 'static'}),
+      new BundleAnalyzerPlugin({analyzerMode: 'static'}),
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
