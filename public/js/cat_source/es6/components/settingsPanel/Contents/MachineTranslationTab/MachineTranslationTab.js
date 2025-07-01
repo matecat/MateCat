@@ -360,7 +360,7 @@ export const MachineTranslationTab = () => {
                 <div className="mt-quality-value-label">
                   <h4>Application threshold</h4>
                   <a
-                    href="https://guides.matecat.com/mt-settings"
+                    href="https://guides.matecat.com/mt-settings#MT-application-threshold"
                     target="_blank"
                   >
                     <InfoIcon />
