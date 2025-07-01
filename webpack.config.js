@@ -8,8 +8,8 @@ const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const fs = require('fs')
 const ini = require('ini')
-const BundleAnalyzerPlugin =
-  require('webpack-bundle-analyzer').BundleAnalyzerPlugin
+// const BundleAnalyzerPlugin =
+//   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 function getDirectories(path) {
   return fs.readdirSync(path).filter(function (file) {
@@ -299,7 +299,7 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
     },
     plugins: [
-      new BundleAnalyzerPlugin({analyzerMode: 'static'}),
+      // new BundleAnalyzerPlugin({analyzerMode: 'static'}),
       new webpack.DefinePlugin({
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
