@@ -33,15 +33,15 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\TranslationsSplit\SplitDAO;
+use Model\TranslationsSplit\SegmentSplitStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
 use Utils;
 use Utils\LQA\QA;
 use WordCount\WordCountStruct;
@@ -148,7 +148,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $old_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
             $old_suggestion       = $this->data[ 'chosen_suggestion_index' ] !== null ? $old_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
-            $new_translation                         = new Translations_SegmentTranslationStruct();
+            $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $this->data[ 'id_segment' ];
             $new_translation->id_job                 = $this->data[ 'id_job' ];
             $new_translation->status                 = $this->data[ 'status' ];
@@ -217,7 +217,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                     $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED or
                     $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED2
             ) {
-                $new_translation->autopropagated_from = 'NULL';
+                $new_translation->autopropagated_from = null;
             }
 
             /**
@@ -248,7 +248,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                     ] )
             ) {
                 //propagate translations
-                $TPropagation                             = new Translations_SegmentTranslationStruct();
+                $TPropagation                             = new SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $this->data[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $this->data[ 'id_job' ];
                 $TPropagation[ 'translation' ]            = $translation;
@@ -266,7 +266,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             if ( $this->isSplittedSegment() ) {
                 /* put the split inside the transaction if they are present */
-                $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+                $translationStruct             = SegmentSplitStruct::getStruct();
                 $translationStruct->id_segment = $this->data[ 'id_segment' ];
                 $translationStruct->id_job     = $this->data[ 'id_job' ];
 
@@ -275,7 +275,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                         'statuses' => $this->data[ 'split_statuses' ]
                 ];
 
-                $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+                $translationDao = new SplitDAO( Database::obtain() );
                 $translationDao->atomicUpdate( $translationStruct );
             }
 
@@ -600,20 +600,20 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return \Model\Translations\SegmentTranslationStruct
      * @throws Exception
      */
-    private function getOldTranslation(): ?Translations_SegmentTranslationStruct {
-        $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->data[ 'id_segment' ], $this->data[ 'id_job' ] );
+    private function getOldTranslation(): ?SegmentTranslationStruct {
+        $old_translation = SegmentTranslationDao::findBySegmentAndJob( $this->data[ 'id_segment' ], $this->data[ 'id_job' ] );
 
         if ( empty( $old_translation ) ) {
-            $old_translation = new Translations_SegmentTranslationStruct();
+            $old_translation = new SegmentTranslationStruct();
         } // $old_translation if `false` sometimes
 
 
         // If volume analysis is not enabled and no translation rows exist, create the row
         if ( !INIT::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
-            $translation             = new Translations_SegmentTranslationStruct();
+            $translation             = new SegmentTranslationStruct();
             $translation->id_segment = (int)$this->data[ 'id_segment' ];
             $translation->id_job     = (int)$this->data[ 'id_job' ];
             $translation->status     = Constants_TranslationStatus::STATUS_NEW;
@@ -652,16 +652,16 @@ class SetTranslationController extends AbstractStatefulKleinController {
      *      - NEW
      *      - DRAFT
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
-     * @param null                                  $old_suggestion
+     * @param \Model\Translations\SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct                     $old_translation
+     * @param null                                         $old_suggestion
      *
      * @return bool
      */
     private function canUpdateSuggestion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation,
-                                                  $old_suggestion = null ): bool {
+            SegmentTranslationStruct $new_translation,
+            SegmentTranslationStruct $old_translation,
+                                     $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }

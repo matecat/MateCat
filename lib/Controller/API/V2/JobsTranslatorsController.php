@@ -17,7 +17,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
-use Translators\TranslatorsModel;
+use Model\Translators\TranslatorsModel;
 use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController {

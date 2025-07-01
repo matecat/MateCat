@@ -1,8 +1,9 @@
 <?php
 
 use Model\Search\ReplaceEventDAOInterface;
-use Model\Search\ReplaceEventStruct;
 use Model\Search\ReplaceEventIndexDAOInterface;
+use Model\Search\ReplaceEventStruct;
+use Model\Translations\SegmentTranslationDao;
 
 class Search_ReplaceHistory {
 
@@ -92,7 +93,7 @@ class Search_ReplaceHistory {
         $events = $this->get( $versionToMove );
 
         if ( count( $events ) > 0 ) {
-            $replacedEvents = Translations_SegmentTranslationDao::rebuildFromReplaceEvents( $events );
+            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents( $events );
 
             $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
 

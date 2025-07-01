@@ -12,39 +12,39 @@ use Model\Teams\TeamStruct;
 
 class TeamModel {
 
-    protected $member_emails = [];
+    protected array $member_emails = [];
 
     /**
-     * @var \Model\Teams\TeamStruct
+     * @var TeamStruct
      */
-    protected $struct;
+    protected TeamStruct $struct;
 
     /**
      * @var Users_UserStruct
      */
-    protected $user;
+    protected Users_UserStruct $user;
 
     /**
-     * @var \Model\Teams\MembershipStruct[]
+     * @var MembershipStruct[]
      */
-    protected $new_memberships;
+    protected array $new_memberships;
 
     /**
      * @var array
      */
-    protected $uids_to_remove = [];
+    protected array $uids_to_remove = [];
 
     /**
      * @var Users_UserStruct[]
      */
-    protected $removed_users = [];
+    protected array $removed_users = [];
 
     protected $emails_to_invite;
 
     /**
-     * @var \Model\Teams\MembershipStruct[]
+     * @var MembershipStruct[]
      */
-    protected $all_memberships;
+    protected array $all_memberships;
 
     public function __construct( TeamStruct $struct ) {
         $this->struct = $struct;
@@ -71,7 +71,8 @@ class TeamModel {
     /**
      * Updated member list.
      *
-     * @return \Model\Teams\MembershipStruct[] the full list of members after the update.
+     * @return MembershipStruct[] the full list of members after the update.
+     * @throws ReflectionException
      */
     public function updateMembers() {
         $this->removed_users = [];
@@ -181,7 +182,7 @@ class TeamModel {
     }
 
     /**
-     * @return \Model\Teams\MembershipStruct[]
+     * @return MembershipStruct[]
      */
     protected function _getNewMembershipEmailList() {
         $notify_list = [];

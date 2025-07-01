@@ -12,9 +12,9 @@ use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentDao;
+use Model\TranslationsSplit\SplitDAO;
+use Model\TranslationsSplit\SegmentSplitStruct;
 use ReflectionException;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
 
 class SetCurrentSegmentController extends KleinController {
 
@@ -43,11 +43,11 @@ class SetCurrentSegmentController extends KleinController {
             throw new InvalidArgumentException( "missing segment id", -1 );
         }
 
-        $segmentStruct             = new TranslationsSplit_SplitStruct();
+        $segmentStruct             = new SegmentSplitStruct();
         $segmentStruct->id_segment = (int)$id_segment;
         $segmentStruct->id_job     = $id_job;
 
-        $translationDao  = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $translationDao  = new SplitDAO( Database::obtain() );
         $currSegmentInfo = $translationDao->read( $segmentStruct );
 
         /**

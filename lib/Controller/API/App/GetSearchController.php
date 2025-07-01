@@ -20,12 +20,12 @@ use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
 use Model\Segments\SegmentDao;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use ReflectionException;
 use RuntimeException;
 use Search_ReplaceHistory;
 use Search_ReplaceHistoryFactory;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
 use Utils;
 
 class GetSearchController extends AbstractStatefulKleinController {
@@ -60,7 +60,7 @@ class GetSearchController extends AbstractStatefulKleinController {
 
         // and then hydrate the $search_results array
         foreach ( $res[ 'sid_list' ] as $segmentId ) {
-            $search_results[] = Translations_SegmentTranslationDao::findBySegmentAndJob( $segmentId, $request[ 'queryParams' ][ 'job' ] )->toArray();
+            $search_results[] = SegmentTranslationDao::findBySegmentAndJob( $segmentId, $request[ 'queryParams' ][ 'job' ] )->toArray();
         }
 
         // set the replacement in queryParams
@@ -333,7 +333,7 @@ class GetSearchController extends AbstractStatefulKleinController {
             // start the transaction
             $db->begin();
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
+            $old_translation = SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
             $segment         = ( new SegmentDao() )->getById( $tRow[ 'id_segment' ] );
 
             // Propagation
@@ -348,7 +348,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                             Constants_TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
-                $TPropagation                             = new Translations_SegmentTranslationStruct();
+                $TPropagation                             = new SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $id_job;
                 $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
@@ -358,7 +358,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                 $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
                 try {
-                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
+                    $propagationTotal = SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $chunk,
                             $id_segment,
@@ -380,7 +380,7 @@ class GetSearchController extends AbstractStatefulKleinController {
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
             // Setup $new_translation
-            $new_translation                         = new Translations_SegmentTranslationStruct();
+            $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
             $new_translation->id_job                 = $chunk->id;
             $new_translation->status                 = $this->getNewStatus( $old_translation, $revisionNumber );
@@ -417,7 +417,7 @@ class GetSearchController extends AbstractStatefulKleinController {
 
             // commit the transaction
             try {
-                Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+                SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $db->commit();
             } catch ( Exception $e ) {
                 $this->log( "Lock: Transaction Aborted. " . $e->getMessage() );
@@ -446,12 +446,12 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translationStruct
-     * @param bool                                  $revisionNumber
+     * @param \Model\Translations\SegmentTranslationStruct $translationStruct
+     * @param bool                                         $revisionNumber
      *
      * @return string
      */
-    private function getNewStatus( Translations_SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
+    private function getNewStatus( SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
         if ( false === $revisionNumber ) {
             return Constants_TranslationStatus::STATUS_TRANSLATED;
         }

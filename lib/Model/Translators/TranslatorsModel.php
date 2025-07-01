@@ -7,7 +7,7 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
 use Controller\Abstracts\KleinController;
@@ -22,6 +22,7 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 use TransactionalTrait;
 use Users_UserDao;
 use Users_UserStruct;
@@ -32,40 +33,40 @@ class TranslatorsModel {
     use TransactionalTrait;
 
     /**
-     * @var Users_UserStruct
+     * @var ?Users_UserStruct
      */
-    protected $callingUser;
+    protected ?Users_UserStruct $callingUser = null;
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
-    protected $jStruct;
+    protected JobStruct $jStruct;
 
     /**
      * @var KleinController
      */
-    protected $controller;
+    protected KleinController $controller;
 
     /**
      * @var array
      */
-    protected $mailsToBeSent = [ 'new' => null, 'update' => null, 'split' => null ];
+    protected array $mailsToBeSent = [ 'new' => null, 'update' => null, 'split' => null ];
 
-    protected $delivery_date;
-    protected $job_owner_timezone = 0;
-    protected $id_job;
-    protected $email;
-    protected $job_password;
+    protected int    $delivery_date;
+    protected int    $job_owner_timezone = 0;
+    protected ?int   $id_job;
+    protected string $email;
+    protected string $job_password;
 
     /**
      * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
     /**
      * @var FeatureSet
      */
-    protected $featureSet;
+    protected FeatureSet $featureSet;
 
     /**
      * Override the Job Password from Outside
@@ -74,23 +75,23 @@ class TranslatorsModel {
      *
      * @return $this
      */
-    public function setNewJobPassword( $job_password ) {
+    public function setNewJobPassword( string $job_password ): TranslatorsModel {
         $this->job_password = $job_password;
 
         return $this;
     }
 
     /**
-     * @var JobsTranslatorsStruct
+     * @var JobsTranslatorsStruct|null
      */
-    protected $jobTranslator;
+    protected ?JobsTranslatorsStruct $jobTranslator = null;
 
     /**
-     * @param mixed $delivery_date
+     * @param string|int $delivery_date
      *
      * @return $this
      */
-    public function setDeliveryDate( $delivery_date ) {
+    public function setDeliveryDate( $delivery_date ): TranslatorsModel {
 
         if ( is_numeric( $delivery_date ) && (int)$delivery_date == $delivery_date ) {
             $this->delivery_date = $delivery_date;
@@ -106,24 +107,24 @@ class TranslatorsModel {
      *
      * @return $this
      */
-    public function setJobOwnerTimezone( $job_owner_timezone ) {
+    public function setJobOwnerTimezone( int $job_owner_timezone ): TranslatorsModel {
         $this->job_owner_timezone = $job_owner_timezone;
 
         return $this;
     }
 
     /**
-     * @param mixed $email
+     * @param string $email
      *
      * @return $this
      */
-    public function setEmail( $email ) {
+    public function setEmail( string $email ): TranslatorsModel {
         $this->email = $email;
 
         return $this;
     }
 
-    public function setUserInvite( Users_UserStruct $user ) {
+    public function setUserInvite( Users_UserStruct $user ): TranslatorsModel {
         $this->callingUser = $user;
 
         return $this;
@@ -132,8 +133,8 @@ class TranslatorsModel {
     /**
      * TranslatorsModel constructor.
      *
-     * @param \Model\Jobs\JobStruct $jStruct
-     * @param float|int             $project_cache_TTL
+     * @param JobStruct $jStruct
+     * @param float|int $project_cache_TTL
      */
     public function __construct( JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
 
@@ -148,7 +149,10 @@ class TranslatorsModel {
 
     }
 
-    public function getTranslator( $cache = 86400 ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function getTranslator( int $cache = 86400 ) {
 
         $jTranslatorsDao = new JobsTranslatorsDao();
 
@@ -160,7 +164,7 @@ class TranslatorsModel {
      * @return JobsTranslatorsStruct
      * @throws Exception
      */
-    public function update() {
+    public function update(): JobsTranslatorsStruct {
 
         $confDao            = new ConfirmationDao();
         $confirmationStruct = $confDao->getConfirmation( $this->jStruct );
@@ -248,7 +252,7 @@ class TranslatorsModel {
     /**
      * @throws Exception
      */
-    protected function saveProfile( Users_UserStruct $existentUser ) {
+    protected function saveProfile( Users_UserStruct $existentUser ): int {
 
         //associate the translator with an existent user and create a profile
         $profileStruct                 = new TranslatorProfilesStruct();
@@ -277,7 +281,7 @@ class TranslatorsModel {
     /**
      * @throws Exception
      */
-    public function changeJobPassword( $newPassword = null ) {
+    public function changeJobPassword( ?string $newPassword = null ) {
 
         if ( empty( $newPassword ) ) {
             $newPassword = Utils::randomString();
@@ -294,6 +298,9 @@ class TranslatorsModel {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function sendEmail() {
 
         if ( empty( $this->callingUser ) ) {

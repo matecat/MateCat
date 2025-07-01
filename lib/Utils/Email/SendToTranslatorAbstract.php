@@ -12,7 +12,7 @@ namespace Email;
 
 use DateTime;
 use DateTimeZone;
-use Translators\JobsTranslatorsStruct;
+use Model\Translators\JobsTranslatorsStruct;
 use Users_UserStruct;
 
 abstract class SendToTranslatorAbstract extends AbstractEmail {

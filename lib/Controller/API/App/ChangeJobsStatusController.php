@@ -10,8 +10,8 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Translations_SegmentTranslationDao;
 use Utils;
 
 class ChangeJobsStatusController extends KleinController {
@@ -45,8 +45,8 @@ class ChangeJobsStatusController extends KleinController {
             JobDao::updateAllJobsStatusesByProjectId( $project->id, $request[ 'new_status' ] );
 
             foreach ( $chunks as $chunk ) {
-                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
-                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+                SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
             }
 
         } else {
@@ -61,8 +61,8 @@ class ChangeJobsStatusController extends KleinController {
             }
 
             JobDao::updateJobStatus( $firstChunk, $request[ 'new_status' ] );
-            $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
-            Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+            $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
+            SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         }
 
         $this->response->json( [

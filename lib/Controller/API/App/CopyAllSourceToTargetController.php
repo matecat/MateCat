@@ -15,9 +15,9 @@ use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use RuntimeException;
-use Translations_SegmentTranslationDao;
 use WordCount\CounterModel;
 
 class CopyAllSourceToTargetController extends KleinController {
@@ -104,7 +104,7 @@ class CopyAllSourceToTargetController extends KleinController {
             $segment_id = (int)$segment->id;
             $chunk_id   = (int)$chunk->id;
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
+            $old_translation = SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
             if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
                 //no segment found
@@ -117,7 +117,7 @@ class CopyAllSourceToTargetController extends KleinController {
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
             try {
-                $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+                $affected_rows += SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
             } catch ( Exception $e ) {
                 $database->rollback();
 

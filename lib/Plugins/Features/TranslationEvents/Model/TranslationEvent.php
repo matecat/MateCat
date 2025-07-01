@@ -12,21 +12,21 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
+use Model\Translations\SegmentTranslationStruct;
 use RuntimeException;
-use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 
 class TranslationEvent {
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct
      */
-    protected Translations_SegmentTranslationStruct $old_translation;
+    protected SegmentTranslationStruct $old_translation;
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct
      */
-    protected Translations_SegmentTranslationStruct $wanted_translation;
+    protected SegmentTranslationStruct $wanted_translation;
 
     /**
      * @var Users_UserStruct|null
@@ -81,16 +81,16 @@ class TranslationEvent {
     private array $issues_to_delete = [];
 
     /**
-     * @param Translations_SegmentTranslationStruct $old_translation
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param Users_UserStruct|null                 $user
-     * @param int                                   $source_page_code
+     * @param \Model\Translations\SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct                     $translation
+     * @param Users_UserStruct|null                        $user
+     * @param int                                          $source_page_code
      *
      */
-    public function __construct( Translations_SegmentTranslationStruct $old_translation,
-                                 Translations_SegmentTranslationStruct $translation,
-                                 ?Users_UserStruct                     $user,
-                                 int                                   $source_page_code
+    public function __construct( SegmentTranslationStruct $old_translation,
+                                 SegmentTranslationStruct $translation,
+                                 ?Users_UserStruct        $user,
+                                 int                      $source_page_code
     ) {
 
         $this->old_translation    = $old_translation;
@@ -109,9 +109,9 @@ class TranslationEvent {
 
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return \Model\Translations\SegmentTranslationStruct
      */
-    public function getWantedTranslation(): Translations_SegmentTranslationStruct {
+    public function getWantedTranslation(): SegmentTranslationStruct {
         return $this->wanted_translation;
     }
 
@@ -133,10 +133,10 @@ class TranslationEvent {
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return SegmentTranslationStruct
      * @throws Exception
      */
-    public function getOldTranslation(): Translations_SegmentTranslationStruct {
+    public function getOldTranslation(): SegmentTranslationStruct {
         return $this->old_translation;
     }
 

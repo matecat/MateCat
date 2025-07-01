@@ -5,6 +5,7 @@ namespace Model\Files;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 use View\API\V3\Json\FilesInfo;
 
 class FilesInfoUtility {
@@ -12,12 +13,12 @@ class FilesInfoUtility {
     /**
      * @var JobStruct
      */
-    private $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var ProjectStruct
      */
-    private $project;
+    private ProjectStruct $project;
 
     /**
      * FilesInfoUtility constructor.
@@ -35,8 +36,9 @@ class FilesInfoUtility {
      * @param bool $showMetadata
      *
      * @return array
+     * @throws ReflectionException
      */
-    public function getInfo( $showMetadata = true ) {
+    public function getInfo( bool $showMetadata = true ): array {
 
         $fileInfo        = JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
         $fileMetadataDao = new MetadataDao();
@@ -103,12 +105,13 @@ class FilesInfoUtility {
     }
 
     /**
-     * @param      $id_file
-     * @param null $filePartsId
+     * @param int      $id_file
+     * @param int|null $filePartsId
      *
      * @return array|null
+     * @throws ReflectionException
      */
-    public function getInstructions( $id_file, $filePartsId = null ) {
+    public function getInstructions( int $id_file, ?int $filePartsId = null ): ?array {
 
         if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao  = new MetadataDao;
@@ -129,16 +132,17 @@ class FilesInfoUtility {
     }
 
     /**
-     * @param $id_file
-     * @param $instructions
+     * @param int    $id_file
+     * @param string $instructions
      *
      * @return bool
+     * @throws ReflectionException
      */
-    public function setInstructions( $id_file, $instructions ) {
+    public function setInstructions( int $id_file, string $instructions ): bool {
 
         if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao = new MetadataDao;
-            if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', 60 * 5 ) ) {
+            if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', null, 60 * 5 ) ) {
                 $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
             } else {
                 $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );

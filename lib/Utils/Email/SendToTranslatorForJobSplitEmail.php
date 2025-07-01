@@ -9,7 +9,7 @@
 namespace Email;
 
 
-use Translators\JobsTranslatorsStruct;
+use Model\Translators\JobsTranslatorsStruct;
 use Users_UserStruct;
 
 class SendToTranslatorForJobSplitEmail extends SendToTranslatorAbstract {

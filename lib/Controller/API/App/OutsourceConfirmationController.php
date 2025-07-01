@@ -15,7 +15,7 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use Model\Jobs\JobDao;
 use Model\Outsource\ConfirmationDao;
 use Model\Outsource\TranslatedConfirmationStruct;
-use Translators\TranslatorsModel;
+use Model\Translators\TranslatorsModel;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
 

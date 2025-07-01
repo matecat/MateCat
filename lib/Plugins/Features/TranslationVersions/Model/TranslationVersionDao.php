@@ -8,8 +8,8 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\SegmentEventsStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDO;
-use Translations_SegmentTranslationStruct;
 use Utils;
 
 class TranslationVersionDao extends AbstractDao {
@@ -343,14 +343,14 @@ class TranslationVersionDao extends AbstractDao {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $propagatorSegment
-     * @param int                                   $id_segment
-     * @param JobStruct                             $job_data
-     * @param Propagation_PropagationTotalStruct[]  $segmentsToUpdate
+     * @param \Model\Translations\SegmentTranslationStruct $propagatorSegment
+     * @param int                                          $id_segment
+     * @param JobStruct                                    $job_data
+     * @param Propagation_PropagationTotalStruct[]         $segmentsToUpdate
      *
      * @return void
      */
-    public function savePropagationVersions( Translations_SegmentTranslationStruct $propagatorSegment, int $id_segment, JobStruct $job_data, array $segmentsToUpdate ) {
+    public function savePropagationVersions( SegmentTranslationStruct $propagatorSegment, int $id_segment, JobStruct $job_data, array $segmentsToUpdate ) {
 
         $chunked_segments_list = array_chunk( $segmentsToUpdate, 20, true );
 

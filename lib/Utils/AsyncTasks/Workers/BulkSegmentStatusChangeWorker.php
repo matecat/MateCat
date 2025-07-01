@@ -17,12 +17,12 @@ use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
-use Translations_SegmentTranslationDao;
 use Users_UserDao;
 
 
@@ -66,7 +66,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        $old_translations = Translations_SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
+        $old_translations = SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
 
         $new_translations = [];
 
@@ -97,7 +97,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         }
 
-        Translations_SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
+        SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
 
         $batchEventCreator->save( new BatchReviewProcessor() );
 

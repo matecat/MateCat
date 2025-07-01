@@ -5,7 +5,7 @@ namespace Model\Propagation;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
 
 class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
 
@@ -95,35 +95,35 @@ class PropagationTotalStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      */
-    public function addPropagatedIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
+    public function addPropagatedIce( SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'id' ][]            = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'object' ][]        = $segmentTranslation;
         $this->segments_for_propagation[ 'propagated' ][ 'ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      */
-    public function addNotPropagatedIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
+    public function addNotPropagatedIce( SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'not_propagated' ][ 'ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'not_propagated' ][ 'ice' ][ 'object' ][] = $segmentTranslation;
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      */
-    public function addPropagatedNotIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
+    public function addPropagatedNotIce( SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'id' ][]            = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'object' ][]        = $segmentTranslation;
         $this->segments_for_propagation[ 'propagated' ][ 'not_ice' ][ 'eq_word_count' ][] = $segmentTranslation->eq_word_count;
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      */
-    public function addNotPropagatedNotIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
+    public function addNotPropagatedNotIce( SegmentTranslationStruct $segmentTranslation ) {
         $this->segments_for_propagation[ 'not_propagated' ][ 'not_ice' ][ 'id' ][]     = $segmentTranslation->id_segment;
         $this->segments_for_propagation[ 'not_propagated' ][ 'not_ice' ][ 'object' ][] = $segmentTranslation;
     }

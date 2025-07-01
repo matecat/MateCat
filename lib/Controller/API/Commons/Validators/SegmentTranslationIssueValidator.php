@@ -10,7 +10,7 @@ use Features\TranslationEvents\Model\TranslationEventDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
 
 class SegmentTranslationIssueValidator extends Base {
 
@@ -19,9 +19,9 @@ class SegmentTranslationIssueValidator extends Base {
      */
     public ?EntryStruct $issue;
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct
      */
-    public Translations_SegmentTranslationStruct $translation;
+    public SegmentTranslationStruct $translation;
 
     /**
      * @var ChunkReviewStruct

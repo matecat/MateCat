@@ -14,7 +14,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use Translations_SegmentTranslationDao;
+use Model\Translations\SegmentTranslationDao;
 use WorkerClient;
 
 
@@ -59,7 +59,7 @@ class JobStatusController extends KleinController {
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
         ] ) ) {
-            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangeableStatus(
+            $unchangeable_segments = SegmentTranslationDao::getUnchangeableStatus(
                     $this->chunk, $segments_id, $status, $source_page
             );
             $segments_id           = array_diff( $segments_id, $unchangeable_segments );

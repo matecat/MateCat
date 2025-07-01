@@ -2,6 +2,7 @@
 
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -28,7 +29,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
      */
     protected $job;
 
-    /** @var Translations_SegmentTranslationStruct */
+    /** @var SegmentTranslationStruct */
     protected $_translationsStruct;
 
     public function setUp(): void {
@@ -72,7 +73,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
               )"
         );
 
-        $this->_translationsStruct = new Translations_SegmentTranslationStruct( $this->database_instance->getConnection()->query(
+        $this->_translationsStruct = new SegmentTranslationStruct( $this->database_instance->getConnection()->query(
                 "SELECT * FROM segment_translations WHERE id_job = $jobId LIMIT 1"
         )->fetch() );
 

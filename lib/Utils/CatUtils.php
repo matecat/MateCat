@@ -11,6 +11,8 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
 use WordCount\CounterModel;
@@ -189,14 +191,14 @@ class CatUtils {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param bool                                  $is_revision
+     * @param SegmentTranslationStruct $translation
+     * @param bool                     $is_revision
      *
      * @return void
      * @throws Exception
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, bool $is_revision ) {
-        Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
+    public static function addSegmentTranslation( SegmentTranslationStruct $translation, bool $is_revision ) {
+        SegmentTranslationDao::addTranslation( $translation, $is_revision );
     }
 
     /**
@@ -209,11 +211,11 @@ class CatUtils {
      */
     protected static function _performanceEstimationTime( array $job_stats, int $id_job ): array {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour( $id_job );
+        $last_10_worked_ids = SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour( $id_job );
         if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
             // Calculating words per hour and estimated completion
-            $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
+            $estimation_temp  = SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
             $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
             $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + ( $job_stats[ 'raw' ][ 'rejected' ] ?? 0 );

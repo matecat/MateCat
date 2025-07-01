@@ -4,8 +4,8 @@ namespace Model\Jobs;
 
 use Model\DataAccess\AbstractDao;
 use Model\Exceptions\NotFoundException;
+use Model\Translations\SegmentTranslationStruct;
 use ReflectionException;
-use Translations_SegmentTranslationStruct;
 
 class ChunkDao extends AbstractDao {
 
@@ -31,13 +31,13 @@ class ChunkDao extends AbstractDao {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param int                                   $ttl
+     * @param SegmentTranslationStruct $translation
+     * @param int                      $ttl
      *
      * @return JobStruct
      * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
+    public static function getBySegmentTranslation( SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
         return JobDao::getBySegmentTranslation( $translation, $ttl );
     }
 

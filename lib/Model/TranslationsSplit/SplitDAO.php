@@ -1,5 +1,9 @@
 <?php
 
+namespace Model\TranslationsSplit;
+
+use Database;
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 
@@ -10,19 +14,19 @@ use Model\DataAccess\IDaoStruct;
  * Date: 24/03/15
  * Time: 13.21
  */
-class TranslationsSplit_SplitDAO extends AbstractDao {
+class SplitDAO extends AbstractDao {
 
     const TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = "TranslationsSplit_SplitStruct";
+    const STRUCT_TYPE = SegmentSplitStruct::class;
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
-     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return SegmentSplitStruct[]
      * @throws Exception
      */
-    public function read( TranslationsSplit_SplitStruct $obj ) {
+    public function read( SegmentSplitStruct $obj ): array {
 
         $where_conditions = [];
         $values           = [];
@@ -53,19 +57,19 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $query );
 
-        $result = $this->_fetchObject( $stmt, $obj, $values );
+        $result = $this->_fetchObjectMap( $stmt, SegmentSplitStruct::class, $values );
 
         return $this->_buildResult( $result );
 
     }
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
-     * @return null|TranslationsSplit_SplitStruct
+     * @return null|SegmentSplitStruct
      * @throws Exception
      */
-    public function atomicUpdate( TranslationsSplit_SplitStruct $obj ): ?TranslationsSplit_SplitStruct {
+    public function atomicUpdate( SegmentSplitStruct $obj ): ?SegmentSplitStruct {
 
         $obj = $this->sanitize( $obj );
 
@@ -90,9 +94,9 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
     }
 
     /**
-     * @param TranslationsSplit_SplitStruct $input
+     * @param SegmentSplitStruct $input
      *
-     * @return TranslationsSplit_SplitStruct
+     * @return SegmentSplitStruct
      * @throws Exception
      */
     public function sanitize( IDaoStruct $input ) {
@@ -109,7 +113,7 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
 
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
      * @return void
      * @throws Exception
@@ -117,7 +121,7 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
         /**
-         * @var $obj TranslationsSplit_SplitStruct
+         * @var $obj SegmentSplitStruct
          */
         if ( $obj->id_segment === null ) {
             throw new Exception( "ID segment required" );
@@ -130,11 +134,11 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
 
 
     /**
-     * @param $array_result IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @param $array_result SegmentSplitStruct[]
      *
-     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return SegmentSplitStruct[]
      */
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult( array $array_result ): array {
         foreach ( $array_result as $item ) {
             $item->source_chunk_lengths = json_decode( $item->source_chunk_lengths, true );
             $item->target_chunk_lengths = json_decode( $item->target_chunk_lengths, true );

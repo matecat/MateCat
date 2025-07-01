@@ -11,10 +11,10 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
-use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 
 class JobDao extends AbstractDao {
@@ -93,13 +93,13 @@ class JobDao extends AbstractDao {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param int                                   $ttl
+     * @param SegmentTranslationStruct $translation
+     * @param int                      $ttl
      *
      * @return JobStruct
      * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
+    public static function getBySegmentTranslation( SegmentTranslationStruct $translation, int $ttl = 0 ): JobStruct {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();

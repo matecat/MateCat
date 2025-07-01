@@ -32,6 +32,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectDao;
+use Model\Translations\SegmentTranslationDao;
 use PDOException;
 use PostProcess;
 use ReflectionException;
@@ -44,7 +45,6 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use Translations_SegmentTranslationDao;
 use WordCount\CounterModel;
 
 /**
@@ -261,7 +261,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data                       = $this->_lockAndPreTranslateStatusCheck( $tm_data, $queueElement->params );
 
         try {
-            $updateRes = Translations_SegmentTranslationDao::setAnalysisValue( $tm_data );
+            $updateRes = SegmentTranslationDao::setAnalysisValue( $tm_data );
             $message   = ( $updateRes == 0 ) ? "No row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] : "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.";
             $this->_doLog( $message );
         } catch ( Exception $exception ) {

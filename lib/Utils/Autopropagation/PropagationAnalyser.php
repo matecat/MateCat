@@ -3,7 +3,7 @@
 namespace Autopropagation;
 
 use Model\Propagation\PropagationTotalStruct;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
 use Utils;
 
 class PropagationAnalyser {
@@ -57,12 +57,12 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct   $parentSegmentTranslation
-     * @param Translations_SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
+     * @param \Model\Translations\SegmentTranslationStruct   $parentSegmentTranslation
+     * @param \Model\Translations\SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
      * @return PropagationTotalStruct
      */
-    public function analyse( Translations_SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
+    public function analyse( SegmentTranslationStruct $parentSegmentTranslation, $arrayOfSegmentTranslationToPropagate ) {
 
         $propagation = new PropagationTotalStruct();
 
@@ -115,21 +115,21 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param \Model\Translations\SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectIce( Translations_SegmentTranslationStruct $segmentTranslation ) {
+    private function detectIce( SegmentTranslationStruct $segmentTranslation ) {
         return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->id_segment !== null );
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $parentSegmentTranslation
-     * @param Translations_SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct                     $parentSegmentTranslation
+     * @param \Model\Translations\SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectMatchingIce( Translations_SegmentTranslationStruct $parentSegmentTranslation, Translations_SegmentTranslationStruct $segmentTranslation ) {
+    private function detectMatchingIce( SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation ) {
         return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash and
                 $segmentTranslation->id_segment !== null );
     }

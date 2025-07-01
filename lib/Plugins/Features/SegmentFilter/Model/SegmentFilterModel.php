@@ -10,7 +10,7 @@ namespace Features\SegmentFilter\Model;
 
 use Exception;
 use Model\Jobs\JobStruct;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
 
 class SegmentFilterModel {
 
@@ -38,7 +38,7 @@ class SegmentFilterModel {
     }
 
     /**
-     * @return null|Translations_SegmentTranslationStruct[]
+     * @return null|\Model\Translations\SegmentTranslationStruct[]
      * @throws Exception
      */
     public function getSegmentList() {

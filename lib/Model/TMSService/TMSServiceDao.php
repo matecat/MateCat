@@ -7,7 +7,7 @@
  *
  */
 
-namespace TMSService;
+namespace Model\TMSService;
 
 
 use Constants_TranslationStatus;
@@ -15,16 +15,17 @@ use Database;
 use Log;
 use PDO;
 use PDOException;
+use RuntimeException;
 
 class TMSServiceDao {
 
     /**
-     * @param $jid
-     * @param $jPassword
+     * @param int    $jid
+     * @param string $jPassword
      *
      * @return array
      */
-    public static function getTranslationsForTMXExport( $jid, $jPassword ): array {
+    public static function getTranslationsForTMXExport( int $jid, string $jPassword ): array {
 
         $db = Database::obtain();
 
@@ -56,7 +57,13 @@ class TMSServiceDao {
 
     }
 
-    public static function getMTForTMXExport( $jid, $jPassword ) {
+    /**
+     * @param int    $jid
+     * @param string $jPassword
+     *
+     * @return array
+     */
+    public static function getMTForTMXExport( int $jid, string $jPassword ): array {
 
         $db = Database::obtain();
 
@@ -89,13 +96,19 @@ class TMSServiceDao {
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
 
-            return $e->getCode() * -1;
+            throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
         }
 
         return $results;
     }
 
-    public static function getTMForTMXExport( $jid, $jPassword ) {
+    /**
+     * @param int    $jid
+     * @param string $jPassword
+     *
+     * @return array
+     */
+    public static function getTMForTMXExport( int $jid, string $jPassword ): array {
 
         $db = Database::obtain();
 
@@ -132,8 +145,7 @@ class TMSServiceDao {
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
             Log::doJsonLog( $e->getMessage() );
-
-            return $e->getCode() * -1;
+            throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
         }
 
         foreach ( $results as $key => $value ) {
@@ -149,7 +161,7 @@ class TMSServiceDao {
             }
 
             $suggestions_array = json_decode( $value[ 'suggestions_array' ] );
-            foreach ( $suggestions_array as $_k => $_sugg ) {
+            foreach ( $suggestions_array as $_sugg ) {
 
                 //we want the highest value of TM and we must exclude the MT
                 if ( strpos( $_sugg->created_by, 'MT' ) !== false ) {

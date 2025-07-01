@@ -1,4 +1,5 @@
 <?php
+
 namespace Model\Files;
 
 use Database;
@@ -31,7 +32,7 @@ class FileDao extends AbstractDao {
         );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_job' => $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_job' => $id_job ] );
 
     }
 
@@ -49,7 +50,7 @@ class FileDao extends AbstractDao {
         $stmt    = $conn->prepare( "SELECT * FROM files where id_project = :id_project " );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_project' => $id_project ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_project' => $id_project ] );
     }
 
     public static function updateField( $file, $field, $value ): bool {

@@ -1,5 +1,9 @@
 <?php
 
+namespace Model\Translations;
+
+use ArrayAccess;
+use Constants_TranslationStatus;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
@@ -7,33 +11,33 @@ use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 
-class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
-    public $id_segment;
-    public $id_job;
-    public $segment_hash;
-    public $autopropagated_from;
-    public $status;
-    public $translation;
-    public $translation_date;
-    public $time_to_edit;
-    public $match_type;
-    public $context_hash;
-    public $eq_word_count;
-    public $standard_word_count;
-    public $suggestions_array;
-    public $suggestion;
-    public $suggestion_match;
-    public $suggestion_source;
-    public $suggestion_position;
-    public $mt_qe;
-    public $tm_analysis_status;
-    public $locked;
-    public $warning;
-    public $serialized_errors_list;
-    public $version_number = 0; // this value should be not null
+    public int     $id_segment;
+    public int     $id_job;
+    public string  $segment_hash;
+    public ?int    $autopropagated_from    = null;
+    public string  $status;
+    public ?string $translation            = null;
+    public ?string $translation_date       = null;
+    public int     $time_to_edit           = 0;
+    public ?string $match_type             = null;
+    public ?string $context_hash           = null;
+    public float   $eq_word_count          = 0;
+    public float   $standard_word_count    = 0;
+    public ?string $suggestions_array      = null;
+    public ?string $suggestion             = null;
+    public ?string $suggestion_match       = null;
+    public ?string $suggestion_source      = null;
+    public ?int    $suggestion_position    = null;
+    public int     $mt_qe                  = 0;
+    public ?string $tm_analysis_status     = null;
+    public bool    $locked                 = false;
+    public bool    $warning                = false;
+    public ?string $serialized_errors_list = null;
+    public ?int    $version_number         = 0; // this value should be not null
 
     public function isReviewedStatus(): bool {
         return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES );
@@ -73,7 +77,7 @@ class Translations_SegmentTranslationStruct extends AbstractDaoSilentStruct impl
      */
     public function getChunk(): ?JobStruct {
         return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return JobDao::getById( $id_job, 0 )[ 0 ] ?? null;
+            return JobDao::getById( $id_job )[ 0 ] ?? null;
         } );
     }
 

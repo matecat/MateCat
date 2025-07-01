@@ -12,11 +12,11 @@ use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
@@ -194,7 +194,7 @@ class DeleteContributionController extends KleinController {
      * @throws  Exception
      */
     private function updateSuggestionsArray( $id_segment, $id_job, $id_match ): void {
-        $segmentTranslation  = Translations_SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
+        $segmentTranslation  = SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
         $oldSuggestionsArray = json_decode( $segmentTranslation->suggestions_array );
 
         if ( !empty( $oldSuggestionsArray ) ) {
@@ -206,7 +206,7 @@ class DeleteContributionController extends KleinController {
                 }
             }
 
-            Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
+            SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
         }
     }
 }

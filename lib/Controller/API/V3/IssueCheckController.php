@@ -5,8 +5,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Translations_SegmentTranslationDao;
 
 class IssueCheckController extends KleinController {
     use ChunkNotFoundHandlerTrait;
@@ -38,7 +38,7 @@ class IssueCheckController extends KleinController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = ( new Translations_SegmentTranslationDao() )
+        $modifiedSegments = ( new SegmentTranslationDao() )
                 ->setCacheTTL( 60 * 5 )
                 ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
 

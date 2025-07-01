@@ -12,8 +12,8 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Translations_SegmentTranslationDao;
 use Utils;
 use View\API\V2\Json\Project;
 
@@ -127,8 +127,8 @@ class ProjectsController extends KleinController {
             if ( !$chunk->isDeleted() ) {
                 JobDao::updateJobStatus( $chunk, $status );
 
-                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
-                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+                SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
             }
         }
 

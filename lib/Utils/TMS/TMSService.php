@@ -20,9 +20,9 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
 use Model\Engines\EngineStruct;
 use Model\Jobs\ChunkDao;
+use Model\TMSService\TMSServiceDao;
 use SplTempFileObject;
 use stdClass;
-use TMSService\TMSServiceDao;
 use Users\MetadataDao;
 use Users_UserStruct;
 use Utils;
@@ -475,9 +475,6 @@ class TMSService {
                 break;
         }
 
-        /**
-         * @var $chunks \Model\Jobs\JobStruct[]
-         */
         $chunks = ChunkDao::getByJobID( $jid );
 
         foreach ( $result as $k => $row ) {

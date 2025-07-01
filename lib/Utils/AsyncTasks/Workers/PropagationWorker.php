@@ -15,13 +15,13 @@ use Features\TranslationVersions\Model\TranslationVersionDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDOException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
-use Translations_SegmentTranslationStruct;
 
 class PropagationWorker extends AbstractWorker {
 
@@ -57,7 +57,7 @@ class PropagationWorker extends AbstractWorker {
         $propagationTotalStruct = $structures[ 'propagationAnalysis' ];
 
         /**
-         * @var $propagatorSegment Translations_SegmentTranslationStruct
+         * @var $propagatorSegment \Model\Translations\SegmentTranslationStruct
          */
         $propagatorSegment = $structures[ 'translationStructTemplate' ];
 
@@ -177,7 +177,7 @@ class PropagationWorker extends AbstractWorker {
         $paramsArray = $params->toArray();
 
         return [
-                'translationStructTemplate' => new Translations_SegmentTranslationStruct( $paramsArray[ 'translationStructTemplate' ] ),
+                'translationStructTemplate' => new SegmentTranslationStruct( $paramsArray[ 'translationStructTemplate' ] ),
                 'id_segment'                => $params->id_segment,
                 'job'                       => new JobStruct( $paramsArray[ 'job' ] ),
                 'project'                   => new ProjectStruct( $paramsArray[ 'project' ] ),

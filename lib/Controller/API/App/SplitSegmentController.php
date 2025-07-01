@@ -10,11 +10,10 @@ use Database;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
+use Model\TranslationsSplit\SplitDAO;
+use Model\TranslationsSplit\SegmentSplitStruct;
 use RuntimeException;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
 
 class SplitSegmentController extends KleinController {
 
@@ -29,15 +28,15 @@ class SplitSegmentController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-        $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+        $translationStruct             = SegmentSplitStruct::getStruct();
         $translationStruct->id_segment = $request[ 'id_segment' ];
         $translationStruct->id_job     = $request[ 'id_job' ];
 
         $featureSet = $this->getFeatureSet();
 
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $request[ 'jobStruct' ]->source, $request[ 'jobStruct' ]->target, [] );
-        [ $request[ 'segment' ], $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request[ 'segment' ], '', $Filter );
+        $Filter = MateCatFilter::getInstance( $featureSet, $request[ 'jobStruct' ]->source, $request[ 'jobStruct' ]->target );
+        [ , $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request[ 'segment' ], '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );
@@ -46,7 +45,7 @@ class SplitSegmentController extends KleinController {
                 'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT )
         ];
 
-        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $translationDao = new SplitDAO( Database::obtain() );
         $result         = $translationDao->atomicUpdate( $translationStruct );
 
         if ( !$result ) {
@@ -92,10 +91,6 @@ class SplitSegmentController extends KleinController {
 
         // check Job password
         $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
-
-        if ( is_null( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found" );
-        }
 
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 

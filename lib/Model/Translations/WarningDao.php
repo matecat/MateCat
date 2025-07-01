@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Translations;
+namespace Model\Translations;
 
 use Constants_TranslationStatus;
 use Jobs\WarningsCountStruct;
@@ -52,12 +52,12 @@ class WarningDao extends AbstractDao {
 
         $stmt = $con->prepare( $sql );
 
-        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+        return $this->_fetchObjectMap( $stmt, WarningsCountStruct::class, $params );
 
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return int
      */
@@ -103,7 +103,7 @@ class WarningDao extends AbstractDao {
 
         $stmt = $db->getConnection()->prepare( $query );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $jid,
                 'password'       => $jpassword,
                 'segment_status' => Constants_TranslationStatus::STATUS_NEW

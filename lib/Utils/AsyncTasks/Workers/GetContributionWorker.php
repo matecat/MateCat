@@ -19,6 +19,7 @@ use FeatureSet;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
 use PostProcess;
 use ReflectionException;
 use Stomp\Exception\StompException;
@@ -28,7 +29,6 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use Translations_SegmentTranslationDao;
 use Users_UserStruct;
 use Utils;
 
@@ -569,7 +569,7 @@ class GetContributionWorker extends AbstractWorker {
                 !empty( $contributionStruct->getJobStruct()->id )
         ) {
 
-            $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
+            $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
 
             // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
             if ( $segmentTranslation->status === Constants_TranslationStatus::STATUS_NEW ) {
@@ -616,7 +616,7 @@ class GetContributionWorker extends AbstractWorker {
                         'status'     => Constants_TranslationStatus::STATUS_NEW
                 ];
 
-                Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
+                SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
             }
         }
     }

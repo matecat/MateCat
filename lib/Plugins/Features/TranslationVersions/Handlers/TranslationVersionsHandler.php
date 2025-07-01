@@ -15,9 +15,9 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use RuntimeException;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
 use Users_UserStruct;
 use Utils;
 
@@ -77,12 +77,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
      *
      * If returns true it means that a new version of the parent segment was persisted
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return false|int
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation ) {
 
         $version_saved = $this->saveVersion( $new_translation, $old_translation );
 
@@ -98,8 +98,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * @throws Exception
      */
-    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array {
-        return Translations_SegmentTranslationDao::propagateTranslation(
+    public function propagateTranslation( SegmentTranslationStruct $translationStruct ): array {
+        return SegmentTranslationDao::propagateTranslation(
                 $translationStruct,
                 $this->chunkStruct,
                 $this->id_segment,
@@ -110,14 +110,14 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * Evaluates the need to save a new translation version to the database.
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return bool|int
      */
     private function saveVersion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
+            SegmentTranslationStruct $new_translation,
+            SegmentTranslationStruct $old_translation
     ) {
 
         if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
@@ -174,10 +174,10 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         // status changed, or the translation changed
         $user = $params[ 'user' ];
 
-        /** @var Translations_SegmentTranslationStruct $translation */
+        /** @var SegmentTranslationStruct $translation */
         $translation = $params[ 'translation' ];
 
-        /** @var Translations_SegmentTranslationStruct $old_translation */
+        /** @var SegmentTranslationStruct $old_translation */
         $old_translation = $params[ 'old_translation' ];
 
         $source_page_code = $params[ 'source_page_code' ];
@@ -220,7 +220,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
             foreach ( $segmentTranslations as $segmentTranslationBeforeChange ) {
 
-                /** @var Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
+                /** @var SegmentTranslationStruct $propagatedSegmentAfterChange */
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
                 $propagatedSegmentAfterChange->translation         = $translation->translation;
                 $propagatedSegmentAfterChange->status              = $translation->status;

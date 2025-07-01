@@ -19,7 +19,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Translations_SegmentTranslationDao;
+use Model\Translations\SegmentTranslationDao;
 use Utils;
 use View\API\V2\Json\Chunk;
 
@@ -109,8 +109,8 @@ class ChunkController extends KleinController {
         ( new ProjectAccessValidator( $this, $this->project ) )->validate();
 
         JobDao::updateJobStatus( $this->chunk, $status );
-        $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
-        Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
+        SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
 
     }

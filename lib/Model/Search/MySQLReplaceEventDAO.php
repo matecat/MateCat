@@ -4,8 +4,8 @@ namespace Model\Search;
 
 use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Translations\SegmentTranslationDao;
 use PDO;
-use Translations_SegmentTranslationDao;
 
 class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
 
@@ -42,7 +42,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if ( null === $eventStruct->segment_version ) {
-            $segment                      = ( new Translations_SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
+            $segment                      = ( new SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
             $eventStruct->segment_version = $segment->version_number;
         }
 

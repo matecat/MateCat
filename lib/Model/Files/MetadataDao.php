@@ -10,7 +10,6 @@ namespace Model\Files;
 
 use Database;
 use Model\DataAccess\AbstractDao;
-use Model\DataAccess\IDaoStruct;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {
@@ -18,39 +17,37 @@ class MetadataDao extends AbstractDao {
     const TABLE = 'file_metadata';
 
     /**
-     * @param     $id_project
-     * @param     $id_file
+     * @param int $id_project
+     * @param int $id_file
      * @param int $ttl
      *
-     * @return IDaoStruct[]
+     * @return MetadataStruct[]
      * @throws ReflectionException
      */
-    public function getByJobIdProjectAndIdFile( $id_project, $id_file, $ttl = 0 ) {
+    public function getByJobIdProjectAndIdFile( int $id_project, int $id_file, int $ttl = 0 ): ?array {
         $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM " . self::TABLE . " WHERE " .
                 " id_project = :id_project " .
                 " AND id_file = :id_file "
         );
 
-        $result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), [
+        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, [
                 'id_project' => $id_project,
                 'id_file'    => $id_file,
         ] );
-
-        /** @var $result MetadataStruct[] */
-        return isset( $result ) ? $result : null;
     }
 
     /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param null $filePartsId
-     * @param int  $ttl
+     * @param int      $id_project
+     * @param int      $id_file
+     * @param string   $key
+     * @param int|null $filePartsId
+     * @param int      $ttl
      *
      * @return MetadataStruct
+     * @throws ReflectionException
      */
-    public function get( $id_project, $id_file, $key, $filePartsId = null, $ttl = 0 ) {
+    public function get( int $id_project, int $id_file, string $key, ?int $filePartsId = null, int $ttl = 0 ): ?MetadataStruct {
 
         $query = "SELECT * FROM " . self::TABLE . " WHERE " .
                 " id_project = :id_project " .
@@ -70,22 +67,21 @@ class MetadataDao extends AbstractDao {
 
         $stmt = $this->_getStatementForQuery( $query );
 
-        /** @var $metadataStruct MetadataStruct[] */
-        $metadataStruct = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new MetadataStruct(), $params );
+        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, MetadataStruct::class, $params )[ 0 ] ?? null;
 
-        return !empty( $metadataStruct ) ? $metadataStruct[ 0 ] : null;
     }
 
     /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param      $value
-     * @param null $filePartsId
+     * @param int      $id_project
+     * @param int      $id_file
+     * @param string   $key
+     * @param string   $value
+     * @param int|null $filePartsId
      *
      * @return MetadataStruct
+     * @throws ReflectionException
      */
-    public function insert( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+    public function insert( int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null ): ?MetadataStruct {
 
         $sql = "INSERT INTO file_metadata " .
                 " ( id_project, id_file, `key`, `value`, `files_parts_id` ) " .
@@ -106,15 +102,16 @@ class MetadataDao extends AbstractDao {
     }
 
     /**
-     * @param      $id_project
-     * @param      $id_file
-     * @param      $key
-     * @param      $value
-     * @param null $filePartsId
+     * @param int      $id_project
+     * @param int      $id_file
+     * @param string   $key
+     * @param string   $value
+     * @param int|null $filePartsId
      *
      * @return MetadataStruct
+     * @throws ReflectionException
      */
-    public function update( $id_project, $id_file, $key, $value, $filePartsId = null ) {
+    public function update( int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null ): ?MetadataStruct {
 
         $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
 
@@ -132,14 +129,14 @@ class MetadataDao extends AbstractDao {
     }
 
     /**
-     * @param       $id_project
-     * @param       $id_file
-     * @param array $metadata
-     * @param null  $filePartsId
+     * @param int      $id_project
+     * @param int      $id_file
+     * @param array    $metadata
+     * @param int|null $filePartsId
      *
      * @return bool|void
      */
-    public function bulkInsert( $id_project, $id_file, array $metadata = [], $filePartsId = null ) {
+    public function bulkInsert( int $id_project, int $id_file, array $metadata = [], ?int $filePartsId = null ) {
 
         $sql         = "INSERT INTO file_metadata ( id_project, id_file, `key`, `value`, `files_parts_id` ) VALUES ";
         $bind_values = [];
