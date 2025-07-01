@@ -566,7 +566,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
-            $QAModelTemplateStruct->hydrateFromJSON( $validatorObject->decoded );
+            $QAModelTemplateStruct->hydrateFromJSON( html_entity_decode( $validatorObject->decoded ) );
             $QAModelTemplateStruct->uid = $this->user->uid;
 
             return $QAModelTemplateStruct;
@@ -608,7 +608,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
-            $payableRateModelTemplate->hydrateFromJSON( $validatorObject->decoded );
+            $payableRateModelTemplate->hydrateFromJSON( html_entity_decode( $validatorObject->decoded ) );
             $payableRateModelTemplate->uid = $this->user->uid;
 
         } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {

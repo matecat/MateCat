@@ -176,7 +176,7 @@ class ConvertFileController extends KleinController {
             $validator->validate( $validatorObject );
 
             $filtersTemplate = new FiltersConfigTemplateStruct();
-            $filtersTemplate->hydrateFromJSON( $validatorObject->decoded );
+            $filtersTemplate->hydrateFromJSON( html_entity_decode( $validatorObject->decoded ) );
             $filtersTemplate->uid = $this->user->uid;
 
             return $filtersTemplate;

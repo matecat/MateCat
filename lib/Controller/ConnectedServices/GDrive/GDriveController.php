@@ -59,7 +59,7 @@ class GDriveController extends AbstractStatefulKleinController {
             if ( !empty( $filtersTemplateString ) ) {
 
                 $filtersTemplate = new FiltersConfigTemplateStruct();
-                $filtersTemplate->hydrateFromJSON( $filtersTemplateString );
+                $filtersTemplate->hydrateFromJSON( html_entity_decode($filtersTemplateString) );
 
                 if ( $filtersTemplate === null ) {
                     throw new Exception( "filters_extraction_parameters_template not valid" );
@@ -365,7 +365,7 @@ class GDriveController extends AbstractStatefulKleinController {
             if ( !empty( $newFiltersExtractionTemplate ) ) {
 
                 $filtersExtractionParameters = new FiltersConfigTemplateStruct();
-                $filtersExtractionParameters->hydrateFromJSON( $newFiltersExtractionTemplate );
+                $filtersExtractionParameters->hydrateFromJSON( html_entity_decode($newFiltersExtractionTemplate) );
 
                 if ( $filtersExtractionParameters === null ) {
                     throw new Exception( "filters_extraction_parameters_template not valid" );
