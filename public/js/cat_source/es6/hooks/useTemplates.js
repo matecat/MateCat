@@ -1,6 +1,19 @@
 import {useCallback, useRef, useState} from 'react'
-import {isEqual} from 'lodash'
+import {cloneDeep, isEqual, mergeWith} from 'lodash'
 import PropTypes from 'prop-types'
+
+export const normalizeTemplatesWithNullProps = (templates, defaultTemplate) => {
+  return templates.map((template) =>
+    mergeWith(
+      cloneDeep(defaultTemplate),
+      cloneDeep(template),
+      (objValue, srcValue) =>
+        typeof srcValue === 'undefined' || srcValue === null
+          ? objValue
+          : srcValue,
+    ),
+  )
+}
 
 const normalizeKeys = ({template, schema}) =>
   Object.entries(template).reduce((acc, cur) => {

@@ -42,14 +42,20 @@ export const NumericStepper = ({
       setValueInput(value)
 
       const newValue = parseInt(value)
-      onChange(
-        newValue > maximumValue
-          ? maximumValue
-          : newValue < minimumValue
-            ? minimumValue
-            : newValue,
-      )
+      onChange(newValue)
     } else if (value === '') setValueInput(value)
+  }
+
+  const handlerBlur = () => {
+    const newValue = parseInt(value)
+    onChange(
+      newValue > maximumValue
+        ? maximumValue
+        : newValue < minimumValue
+          ? minimumValue
+          : newValue,
+    )
+    setIsInFocus(false)
   }
 
   const debounceSelectAll = debounce((event) => event.target.select(), 100)
@@ -67,14 +73,22 @@ export const NumericStepper = ({
           debounceSelectAll(event)
           setIsInFocus(true)
         }}
-        onBlur={() => setIsInFocus(false)}
+        onBlur={handlerBlur}
         onKeyUp={({key}) => key === 'Enter' && ref.current.blur()}
       />
       <div className="container-controls">
-        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={increase}>
+        <Button
+          size={BUTTON_SIZE.ICON_SMALL}
+          disabled={disabled}
+          onClick={increase}
+        >
           <ArrowDown />
         </Button>
-        <Button size={BUTTON_SIZE.ICON_SMALL} onClick={decrease}>
+        <Button
+          size={BUTTON_SIZE.ICON_SMALL}
+          disabled={disabled}
+          onClick={decrease}
+        >
           <ArrowDown />
         </Button>
       </div>

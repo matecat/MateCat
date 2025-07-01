@@ -33,6 +33,7 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
     public ?string $target_language              = null;
     public bool    $character_counter_count_tags = false;
     public ?string $character_counter_mode       = null;
+    public ?int    $mt_quality_value_in_editor   = null;
 
     /**
      * @param string   $json
@@ -49,14 +50,14 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
         $this->name                         = $json->name;
         $this->is_default                   = ( isset( $json->is_default ) ) ? $json->is_default : false;
         $this->id_team                      = $json->id_team;
-        $this->segmentation_rule            = (!empty($json->segmentation_rule)) ? json_encode( $json->segmentation_rule ) : null;
+        $this->segmentation_rule            = ( !empty( $json->segmentation_rule ) ) ? json_encode( $json->segmentation_rule ) : null;
         $this->pretranslate_100             = $json->pretranslate_100;
         $this->pretranslate_101             = $json->pretranslate_101;
         $this->tm_prioritization            = $json->tm_prioritization;
         $this->dialect_strict               = $json->dialect_strict;
         $this->get_public_matches           = $json->get_public_matches;
         $this->mt                           = json_encode( $json->mt );
-        $this->tm                           = (!empty($json->tm)) ? json_encode( $json->tm ) : null;
+        $this->tm                           = ( !empty( $json->tm ) ) ? json_encode( $json->tm ) : null;
         $this->payable_rate_template_id     = $json->payable_rate_template_id;
         $this->qa_model_template_id         = $json->qa_model_template_id;
         $this->filters_template_id          = $json->filters_template_id;
@@ -65,7 +66,8 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
         $this->character_counter_mode       = $json->character_counter_mode;
         $this->subject                      = $json->subject;
         $this->source_language              = $json->source_language;
-        $this->target_language              = (!empty($json->target_language)) ? serialize($json->target_language) : null;
+        $this->target_language              = ( !empty( $json->target_language ) ) ? serialize( $json->target_language ) : null;
+        $this->mt_quality_value_in_editor   = ( !empty( $json->mt_quality_value_in_editor ) ) ? (int)$json->mt_quality_value_in_editor : null;
 
         return $this;
     }
@@ -103,13 +105,16 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
         return [];
     }
 
+    /**
+     * @return array
+     */
     public function getTargetLanguage(): array {
 
-        if(empty($this->target_language)){
+        if ( empty( $this->target_language ) ) {
             return [];
         }
 
-        return unserialize($this->target_language);
+        return unserialize( $this->target_language );
     }
 
     /**
@@ -134,6 +139,7 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
                 'pretranslate_101'             => $this->pretranslate_101,
                 'tm_prioritization'            => $this->tm_prioritization,
                 'dialect_strict'               => $this->dialect_strict,
+                'mt_quality_value_in_editor'   => $this->mt_quality_value_in_editor,
                 'character_counter_count_tags' => $this->character_counter_count_tags,
                 'character_counter_mode'       => $this->character_counter_mode,
                 'subject'                      => $this->subject,

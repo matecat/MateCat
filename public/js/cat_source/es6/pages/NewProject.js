@@ -426,6 +426,7 @@ const NewProject = () => {
       characterCounterCountTags,
       characterCounterMode,
       dialectStrict,
+      mtQualityValueInEditor,
     } = currentProjectTemplate
 
     // update store recently used target languages
@@ -477,7 +478,9 @@ const NewProject = () => {
           ),
         ),
       }),
+      mt_quality_value_in_editor: mtQualityValueInEditor,
     })
+
     if (!projectSent) {
       setErrors()
       setWarnings()

@@ -423,9 +423,15 @@ function CatTool() {
             : isValidPresetCharacterMode
               ? cattoolInterface.getCharacterCounterMode()
               : undefined,
+        mtQualityValueInEditor: jobMetadata.project.mt_quality_value_in_editor,
       }))
     }
-  }, [jobMetadata?.job, isFakeCurrentTemplateReady, modifyingCurrentTemplate])
+  }, [
+    jobMetadata?.job,
+    jobMetadata?.project,
+    isFakeCurrentTemplateReady,
+    modifyingCurrentTemplate,
+  ])
 
   return (
     <>
