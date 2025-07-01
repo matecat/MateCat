@@ -27,12 +27,7 @@ import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
-import {
-  BUTTON_MODE,
-  BUTTON_SIZE,
-  BUTTON_TYPE,
-  Button,
-} from '../../../common/Button/Button'
+import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import Tooltip from '../../../common/Tooltip'
@@ -115,8 +110,6 @@ export const MachineTranslationTab = () => {
   const [error, setError] = useState()
   const [MTRows, setMTRows] = useState([])
   const [deleteMTRequest, setDeleteMTRequest] = useState()
-
-  const appThresholdInfoRef = useRef()
 
   const COLUMNS_TABLE = config.is_cattool
     ? [{name: 'Engine Name'}, {name: 'Description'}]
@@ -368,7 +361,7 @@ export const MachineTranslationTab = () => {
                 <div className="mt-quality-value-label">
                   <h4>Application threshold</h4>
                   <a
-                    href="https://guides.matecat.com/mt-settings"
+                    href="https://guides.matecat.com/mt-settings#MT-application-threshold"
                     target="_blank"
                   >
                     <InfoIcon />
