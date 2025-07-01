@@ -4,6 +4,7 @@ export const openGDriveFiles = async ({
   targetLang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
+  filters_extraction_parameters_template,
 }) => {
   let url = `/webhooks/gdrive/open?isAsync=true&state=${encodedJson}&source=${sourceLang}&target=${targetLang}&segmentation_rule=${segmentation_rule}&filters_extraction_parameters_template_id=${filters_extraction_parameters_template_id}`
 

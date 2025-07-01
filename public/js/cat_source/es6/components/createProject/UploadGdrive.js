@@ -15,6 +15,7 @@ import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
 import DriveIcon from '../../../../../img/icons/DriveIcon'
+import {isEqual} from 'lodash'
 
 export const UploadGdrive = () => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
@@ -29,11 +30,26 @@ export const UploadGdrive = () => {
     setUploadedFilesNames,
     setOpenGDrive,
     setIsGDriveEnabled,
+    fileImportFiltersParamsTemplates,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
   const openGDrivePrev = usePrevious(openGDrive)
+
+  const currentFiltersExtractionParameters = useMemo(() => {
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
+      (template) =>
+        template.id === extractionParameterTemplateId && template.isTemporary,
+    )
+
+    return unsavedTemplate
+  }, [
+    extractionParameterTemplateId,
+    fileImportFiltersParamsTemplates?.templates,
+  ])
+
+  const previousFiltersExtrationParameters = useRef()
 
   useEffect(() => {
     try {
@@ -68,6 +84,20 @@ export const UploadGdrive = () => {
   useEffect(() => {
     restartGDriveConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+
+  useEffect(() => {
+    if (
+      typeof currentFiltersExtractionParameters === 'object' &&
+      !isEqual(
+        currentFiltersExtractionParameters,
+        previousFiltersExtrationParameters.current,
+      )
+    )
+      restartGDriveConversions()
+
+    previousFiltersExtrationParameters.current =
+      currentFiltersExtractionParameters
+  }, [currentFiltersExtractionParameters])
 
   const gdriveInitComplete = () => {
     return pickerApiLoaded && authApiLoaded
