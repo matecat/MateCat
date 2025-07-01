@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import UserStore from '../../stores/UserStore'
 import ModalsActions from '../../actions/ModalsActions'
 import {getUserConnectedService} from '../../api/getUserConnectedService'
@@ -175,8 +175,16 @@ export const UploadGdrive = () => {
         sourceLang: sourceLang.code,
         targetLang: targetLangs.map((lang) => lang.id).join(),
         segmentation_rule: segmentationRule,
-        filters_extraction_parameters_template_id:
-          extractionParameterTemplateId,
+        ...(typeof currentFiltersExtractionParameters === 'object'
+          ? {
+              filters_extraction_parameters_template: JSON.stringify(
+                currentFiltersExtractionParameters,
+              ),
+            }
+          : {
+              filters_extraction_parameters_template_id:
+                extractionParameterTemplateId,
+            }),
       }).then((response) => {
         CreateProjectActions.hideErrors()
         if (response.success) {
@@ -276,8 +284,16 @@ export const UploadGdrive = () => {
       changeGDriveSourceLang({
         sourceLang: sourceLang.code,
         segmentation_rule: segmentationRule,
-        filters_extraction_parameters_template_id:
-          extractionParameterTemplateId,
+        ...(typeof currentFiltersExtractionParameters === 'object'
+          ? {
+              filters_extraction_parameters_template: JSON.stringify(
+                currentFiltersExtractionParameters,
+              ),
+            }
+          : {
+              filters_extraction_parameters_template_id:
+                extractionParameterTemplateId,
+            }),
       }).then((response) => {
         setLoading(false)
         if (response.success) {
