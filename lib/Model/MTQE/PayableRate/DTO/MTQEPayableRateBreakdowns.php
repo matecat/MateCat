@@ -23,13 +23,13 @@ class MTQEPayableRateBreakdowns extends \DataAccess\AbstractDaoSilentStruct impl
     public int $ice = 0;
 
     /** @var int $tm_100 The rate for 100% TM matches. Default is 30. */
-    public int $tm_100 = 30;
+    public int $tm_100 = 0;
 
     /** @var int $tm_100_public The rate for 100% public TM matches. Default is 30. */
-    public int $tm_100_public = 30;
+    public int $tm_100_public = 0;
 
     /** @var int $repetitions The rate for repetitions. Default is 30. */
-    public int $repetitions = 30;
+    public int $repetitions = 27;
 
     /** @var int $ice_mt The rate for ICE matches with MT. Default is 0. */
     public int $ice_mt = 0;
