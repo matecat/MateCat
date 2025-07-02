@@ -86,10 +86,10 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoS
 
     public bool $tm_prioritization = false;
 
-    public bool   $mt_evaluation              = false;
-    public int    $mt_quality_value_in_editor = 86;
-    public bool   $mt_qe_workflow_enabled     = false;
-    public string $mt_qe_workflow_parameters  = '{}';
+    public bool    $mt_evaluation              = false;
+    public int     $mt_quality_value_in_editor = 86;
+    public bool    $mt_qe_workflow_enabled     = false;
+    public ?string $mt_qe_workflow_parameters  = null;
 
     public array $penalty_key = [];
 
