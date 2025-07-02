@@ -79,7 +79,6 @@ function UploadFileLocal() {
 
   useEffect(() => {
     if (
-      typeof currentFiltersExtractionParameters === 'object' &&
       !isEqual(
         currentFiltersExtractionParameters,
         previousFiltersExtrationParameters.current,

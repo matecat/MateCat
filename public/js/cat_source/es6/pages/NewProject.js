@@ -528,9 +528,6 @@ const NewProject = () => {
       }),
     })
 
-    console.log('new project params:', getParams())
-    return
-
     if (!projectSent) {
       setErrors()
       setWarnings()

@@ -87,7 +87,6 @@ export const UploadGdrive = () => {
 
   useEffect(() => {
     if (
-      typeof currentFiltersExtractionParameters === 'object' &&
       !isEqual(
         currentFiltersExtractionParameters,
         previousFiltersExtrationParameters.current,
