@@ -57,6 +57,12 @@ import {
 import {UploadFile} from '../components/createProject/UploadFile'
 import {flushSync} from 'react-dom'
 import DriveIcon from '../../img/icons/DriveIcon'
+import useTemplates from '../hooks/useTemplates'
+import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFrameworkTab'
+import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'
+import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
+import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
+
 
 const SELECT_HEIGHT = 324
 
@@ -103,6 +109,17 @@ const NewProject = () => {
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
   } = useProjectTemplates(tmKeys)
+
+  // templates quality framework
+  const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
+  const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
+  const fileImportFiltersParamsTemplates = useTemplates(
+    FILTERS_PARAMS_SCHEMA_KEYS,
+  )
+  const fileImportXliffSettingsTemplates = useTemplates(
+    XLIFF_SETTINGS_SCHEMA_KEYS,
+  )
+
   const isDeviceCompatible = useDeviceCompatibility()
 
   const {isUserLogged, userInfo} = useContext(ApplicationWrapperContext)
@@ -429,6 +446,33 @@ const NewProject = () => {
       mtQualityValueInEditor,
     } = currentProjectTemplate
 
+    const getTemplateUnsavedById = (id, templates) => {
+      const unsavedTemplate = templates.find(
+        (template) => template.id === id && template.isTemporary,
+      )
+
+      return unsavedTemplate
+    }
+
+    const qaModelTemplate = JSON.stringify(
+      getTemplateUnsavedById(
+        qaModelTemplateId,
+        qualityFrameworkTemplates.templates,
+      ),
+    )
+    const payableRateTemplate = JSON.stringify(
+      getTemplateUnsavedById(
+        payableRateTemplateId,
+        analysisTemplates.templates,
+      ),
+    )
+    const xliffParametersTemplate = JSON.stringify(
+      getTemplateUnsavedById(
+        XliffConfigTemplateId,
+        fileImportXliffSettingsTemplates.templates,
+      ),
+    )
+
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
@@ -448,8 +492,12 @@ const NewProject = () => {
       pretranslate_101: pretranslate101 ? 1 : 0,
       segmentation_rule: segmentationRule.id === '1' ? '' : segmentationRule.id,
       id_team: idTeam,
-      qa_model_template_id: qaModelTemplateId,
-      payable_rate_template_id: payableRateTemplateId,
+      ...(typeof qaModelTemplate !== 'undefined'
+        ? {qa_model_template: qaModelTemplate}
+        : {qa_model_template_id: qaModelTemplateId}),
+      ...(typeof payableRateTemplate !== 'undefined'
+        ? {payable_rate_template: payableRateTemplate}
+        : {payable_rate_template_id: payableRateTemplateId}),
       get_public_matches: getPublicMatches,
       ...(mt?.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
@@ -463,7 +511,9 @@ const NewProject = () => {
       ...(mt?.extra?.deepl_formality && {
         deepl_formality: mt.extra.deepl_formality,
       }),
-      xliff_parameters_template_id: XliffConfigTemplateId,
+      ...(typeof xliffParametersTemplate !== 'undefined'
+        ? {xliff_parameters: xliffParametersTemplate}
+        : {xliff_parameters_template_id: XliffConfigTemplateId}),
       tm_prioritization: tmPrioritization ? 1 : 0,
       character_counter_mode: characterCounterMode,
       character_counter_count_tags: characterCounterCountTags,
@@ -814,6 +864,10 @@ const NewProject = () => {
         currentProjectTemplate,
         uploadedFilesNames,
         setUploadedFilesNames,
+        qualityFrameworkTemplates,
+        analysisTemplates,
+        fileImportFiltersParamsTemplates,
+        fileImportXliffSettingsTemplates,
       }}
     >
       <HeaderPortal>
@@ -1052,6 +1106,10 @@ const NewProject = () => {
             modifyingCurrentTemplate,
             currentProjectTemplate,
             checkSpecificTemplatePropsAreModified,
+            qualityFrameworkTemplates,
+            analysisTemplates,
+            fileImportFiltersParamsTemplates,
+            fileImportXliffSettingsTemplates,
           }}
         />
       )}

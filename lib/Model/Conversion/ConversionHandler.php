@@ -83,7 +83,7 @@ class ConversionHandler {
             return;
         }
 
-        //XLIFF Conversion management
+        // XLIFF Conversion management
         $fileMustBeConverted = $this->fileMustBeConverted();
 
         if ( $fileMustBeConverted === false ) {
@@ -120,118 +120,96 @@ class ConversionHandler {
 
         $short_hash = sha1( $hash_name_for_disk );
 
-        //initialize path variable
+        // Initialize path variable
         $cachedXliffPath = null;
 
-        //don't load from cache when a specified filter version is forced
-        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
-            INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
+        // Convert the file
+        $ocrCheck = new OCRCheck( $this->source_lang );
+        if ( $ocrCheck->thereIsError( $file_path ) ) {
+            $this->result->setErrorCode( ConversionHandlerStatus::OCR_ERROR );
+            $this->result->setErrorMessage( "File is not valid. OCR for RTL languages is not supported." );
+
+            return null; //break project creation
+        }
+        if ( $ocrCheck->thereIsWarning( $file_path ) ) {
+            $this->result->setErrorCode( ConversionHandlerStatus::OCR_WARNING );
+            $this->result->setErrorMessage( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
         }
 
-        //if already present in the database cache, get the converted without convert it again
-        if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
-
-            //move the file in the right directory from the packages to the file dir
-            $cachedXliffPath = $fs->getXliffFromCache( $short_hash, $this->source_lang );
-
-            if ( !$cachedXliffPath ) {
-                Log::doJsonLog( "Failed to fetch xliff for $short_hash from disk cache (is file there?)" );
-            }
+        if ( strpos( $this->target_lang, ',' ) !== false ) {
+            $single_language = explode( ',', $this->target_lang );
+            $single_language = $single_language[ 0 ];
+        } else {
+            $single_language = $this->target_lang;
         }
 
-        //if invalid or no cached version
-        if ( empty( $cachedXliffPath ) ) {
-            //we have to convert it
+        $convertResult = Filters::sourceToXliff(
+                $file_path,
+                $this->source_lang,
+                $single_language,
+                $this->segmentation_rule,
+                $extraction_parameters
+        );
+        Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
 
-            $ocrCheck = new OCRCheck( $this->source_lang );
-            if ( $ocrCheck->thereIsError( $file_path ) ) {
-                $this->result->setErrorCode( ConversionHandlerStatus::OCR_ERROR );
-                $this->result->setErrorMessage( "File is not valid. OCR for RTL languages is not supported." );
+        if ( $convertResult[ 'successful' ] == 1 ) {
 
-                return; //break project creation
-            }
-            if ( $ocrCheck->thereIsWarning( $file_path ) ) {
-                $this->result->setErrorCode( ConversionHandlerStatus::OCR_WARNING );
-                $this->result->setErrorMessage( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
-            }
+            //store converted content on a temporary path on disk (and off RAM)
+            $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
+            file_put_contents( $cachedXliffPath, $convertResult[ 'xliff' ] );
+            unset( $convertResult[ 'xliff' ] );
 
-            if ( strpos( $this->target_lang, ',' ) !== false ) {
-                $single_language = explode( ',', $this->target_lang );
-                $single_language = $single_language[ 0 ];
-            } else {
-                $single_language = $this->target_lang;
-            }
+            /*
+               store the converted file in the cache
+               put a reference in the upload dir to the cache dir, so that from the UUID we can reach the converted file in the cache
+               (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk)
+             */
+            //save in cache
+            try {
+                $res_insert = $fs->makeCachePackage( $short_hash, $this->source_lang, $file_path, $cachedXliffPath );
 
-            $convertResult = Filters::sourceToXliff(
-                    $file_path,
-                    $this->source_lang,
-                    $single_language,
-                    $this->segmentation_rule,
-                    $extraction_parameters
-            );
-            Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
-
-            if ( $convertResult[ 'successful' ] == 1 ) {
-
-                //store converted content on a temporary path on disk (and off RAM)
-                $cachedXliffPath = tempnam( "/tmp", "MAT_XLF" );
-                file_put_contents( $cachedXliffPath, $convertResult[ 'xliff' ] );
-                unset( $convertResult[ 'xliff' ] );
-
-                /*
-                   Store the converted file in the cache and put a reference in the upload dir to the cache dir,
-                    so that from the UUID we can reach the converted file in the cache;
-                   (this is independent by the "save xliff for caching" options, since we always end up storing original and xliff on disk).
-                 */
-                //save in cache
-                try {
-                    $res_insert = $fs->makeCachePackage( $short_hash, $this->source_lang, $file_path, $cachedXliffPath );
-
-                    if ( !$res_insert ) {
-                        //custom error message passed directly to JavaScript client and displayed as is
-                        $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
-
-                        $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
-                        $this->result->setErrorMessage( $convertResult[ 'errorMessage' ] );
-                        unset( $cachedXliffPath );
-
-                        return;
-                    }
-
-                } catch ( FileSystemException $e ) {
-
-                    Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+                if ( !$res_insert ) {
+                    //custom error message passed directly to JavaScript client and displayed as is
+                    $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
 
                     $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
-                    $this->result->setErrorMessage( $e->getMessage() );
+                    $this->result->setErrorMessage( $convertResult[ 'errorMessage' ] );
 
-                    return;
-
-                } catch ( Exception $e ) {
-
-                    Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
-
-                    $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
-                    $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
-
+                    unset( $cachedXliffPath );
                     return;
                 }
 
-            } else {
+            } catch ( FileSystemException $e ) {
 
-                $this->result->setErrorCode( ConversionHandlerStatus::GENERIC_ERROR );
-                $this->result->setErrorMessage( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ) );
+                Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+                $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
+                $this->result->setErrorMessage( $e->getMessage() );
 
+                return null;
+
+            } catch ( Exception $e ) {
+
+                Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
+
+                $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
+                $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
                 return;
             }
 
+        } else {
+
+            $this->result->setErrorCode( ConversionHandlerStatus::GENERIC_ERROR );
+            $this->result->setErrorMessage( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ) );
+
+            return null;
         }
 
-        //if everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
+        // If everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
         if ( !empty( $cachedXliffPath ) ) {
 
-            //FILE Found in cache, destroy the already present shasum for other languages (if user swapped languages)
+            //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
             $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
+
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
@@ -255,7 +233,6 @@ class ConversionHandler {
         );
 
         $this->result->setSize( filesize( $file_path ) );
-
     }
 
 
