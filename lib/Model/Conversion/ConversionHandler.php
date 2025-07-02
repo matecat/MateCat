@@ -129,7 +129,7 @@ class ConversionHandler {
             $this->result->setErrorCode( ConversionHandlerStatus::OCR_ERROR );
             $this->result->setErrorMessage( "File is not valid. OCR for RTL languages is not supported." );
 
-            return null; //break project creation
+            return; //break project creation
         }
         if ( $ocrCheck->thereIsWarning( $file_path ) ) {
             $this->result->setErrorCode( ConversionHandlerStatus::OCR_WARNING );
@@ -185,7 +185,7 @@ class ConversionHandler {
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
 
-                return null;
+                return;
 
             } catch ( Exception $e ) {
 
@@ -201,7 +201,7 @@ class ConversionHandler {
             $this->result->setErrorCode( ConversionHandlerStatus::GENERIC_ERROR );
             $this->result->setErrorMessage( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ) );
 
-            return null;
+            return;
         }
 
         // If everything went well, and we've got a path toward a valid package (original+xliff), either via cache or conversion
