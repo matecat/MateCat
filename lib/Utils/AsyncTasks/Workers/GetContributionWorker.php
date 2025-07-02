@@ -418,13 +418,8 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        if ( $contributionStruct->dialect_strict !== null ) {
-            $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
-        }
-
-        if ( $contributionStruct->tm_prioritization !== null ) {
-            $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
-        }
+        $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
 
         if ( !empty( $contributionStruct->penalty_key ) ) {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
