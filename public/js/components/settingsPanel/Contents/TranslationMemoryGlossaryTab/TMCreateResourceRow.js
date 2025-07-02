@@ -112,7 +112,7 @@ export const TMCreateResourceRow = ({row}) => {
     }))
   }
 
-  const getNewItem = (key) => ({
+  const getNewItem = (key, shared = false) => ({
     r: isLookup,
     w: isUpdating,
     tm: true,
@@ -120,7 +120,7 @@ export const TMCreateResourceRow = ({row}) => {
     owner: true,
     name,
     key,
-    is_shared: false,
+    is_shared: shared,
     id: key,
     isActive: isLookup ? isLookup : !isLookup && !isUpdating ? false : true,
   })
@@ -167,7 +167,7 @@ export const TMCreateResourceRow = ({row}) => {
         description: name,
       })
         .then(() => {
-          const updatedKeys = [getNewItem(key), ...tmKeys]
+          const updatedKeys = [getNewItem(key, true), ...tmKeys]
           setTmKeys(updatedKeys)
           executeModifyCurrentTemplate(updatedKeys)
           onReset()
