@@ -2,6 +2,8 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
@@ -27,8 +29,8 @@ if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
 if (!array_key_exists('email', $options))     usage() ; 
 
-$dao = new Users_UserDao( Database::obtain() ) ; 
-$result = $dao->read( new Users_UserStruct(array('email' => $options['email']))); 
+$dao = new UserDao( Database::obtain() ) ;
+$result = $dao->read( new UserStruct(array( 'email' => $options['email'])));
 $user = $result[0]; 
 
 $dao = new ApiKeyDao( Database::obtain() );

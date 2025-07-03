@@ -7,9 +7,9 @@ use Exception;
 use Log;
 use Model\DataAccess\AbstractDao;
 use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
 use PDO;
 use ReflectionException;
-use Users_UserDao;
 
 class CommentDao extends AbstractDao {
 
@@ -348,7 +348,7 @@ class CommentDao extends AbstractDao {
      */
     public static function placeholdContent( $content ) {
         $users_ids = self::getUsersIdFromContent( $content );
-        $userDao   = new Users_UserDao( Database::obtain() );
+        $userDao   = new UserDao( Database::obtain() );
         $users     = $userDao->getByUids( $users_ids );
         foreach ( $users as $user ) {
             $content = str_replace( "{@" . $user->uid . "@}", "@" . $user->first_name, $content );

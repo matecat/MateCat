@@ -25,6 +25,7 @@ use Model\PayableRates\CustomPayableRateStruct;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
+use Model\Xliff\XliffConfigTemplateDao;
 use ProjectManager;
 use ProjectQueue\Queue;
 use TmKeyManagement_TmKeyManagement;
@@ -36,7 +37,6 @@ use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
 use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
 
 class CreateProjectController extends AbstractStatefulKleinController {
 

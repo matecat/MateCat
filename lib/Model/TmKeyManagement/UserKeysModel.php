@@ -11,20 +11,20 @@ namespace Model\TmKeyManagement;
 use Database;
 use Exception;
 use Log;
+use Model\Users\UserStruct;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyStruct;
-use Users_UserStruct;
 
 class UserKeysModel {
 
     protected array $_user_keys = [ 'totals' => [], 'job_keys' => [] ];
 
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     protected string $userRole;
 
-    public function __construct( Users_UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+    public function __construct( UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
         $this->user     = $user;
         $this->userRole = $role;
     }

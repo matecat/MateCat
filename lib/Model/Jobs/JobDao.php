@@ -12,10 +12,10 @@ use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
-use Users_UserStruct;
 
 class JobDao extends AbstractDao {
 
@@ -377,12 +377,12 @@ class JobDao extends AbstractDao {
     }
 
     /**
-     * @param ProjectStruct    $project
-     * @param Users_UserStruct $user
+     * @param ProjectStruct $project
+     * @param UserStruct    $user
      *
      * @return int the number of rows affected by the statement
      */
-    public function updateOwner( ProjectStruct $project, Users_UserStruct $user ): int {
+    public function updateOwner( ProjectStruct $project, UserStruct $user ): int {
         $sql = " UPDATE jobs SET owner = :email, last_update = :last_update WHERE id_project = :id_project ";
 
         $stmt = $this->database->getConnection()->prepare( $sql );

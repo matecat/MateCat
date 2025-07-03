@@ -1,11 +1,13 @@
 <?php
 
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::_buildResult
+ * @covers UserDao::_buildResult
  * User: dinies
  * Date: 27/05/16
  * Time: 18.50
@@ -18,7 +20,7 @@ class BuildResultUserTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new Users_UserDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new UserDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_buildResult" );
         $this->method->setAccessible( true );
@@ -29,7 +31,7 @@ class BuildResultUserTest extends AbstractTest {
     /**
      * This test builds an user object from an array that describes the properties
      * @group  regression
-     * @covers Users_UserDao::_buildResult
+     * @covers UserDao::_buildResult
      */
     public function test_build_result_from_simple_array() {
 
@@ -50,7 +52,7 @@ class BuildResultUserTest extends AbstractTest {
 
         $actual_array_of_user_structures = $this->method->invoke( $this->databaseInstance, $this->array_param );
         $actual_user_struct              = $actual_array_of_user_structures[ '0' ];
-        $this->assertTrue( $actual_user_struct instanceof Users_UserStruct );
+        $this->assertTrue( $actual_user_struct instanceof UserStruct );
 
         $this->assertEquals( "barandfoo@translated.net", $actual_user_struct->email );
 

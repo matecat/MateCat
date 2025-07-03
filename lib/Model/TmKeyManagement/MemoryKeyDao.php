@@ -13,9 +13,9 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Users\UserDao;
 use ReflectionException;
 use TmKeyManagement_TmKeyStruct;
-use Users_UserDao;
 
 /**
  * Class DataAccess_MemoryKeyDao<br/>
@@ -137,7 +137,7 @@ class MemoryKeyDao extends AbstractDao {
 
         if ( $traverse ) {
 
-            $userDao = new Users_UserDao( Database::obtain() );
+            $userDao = new UserDao( Database::obtain() );
 
             foreach ( $arr_result as $k => $row ) {
                 $users                          = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );

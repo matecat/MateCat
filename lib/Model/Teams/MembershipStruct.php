@@ -10,9 +10,9 @@ namespace Model\Teams;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserDao;
-use Users_UserStruct;
 
 class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
@@ -22,18 +22,18 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public bool $is_admin;
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct|null
      */
-    private Users_UserStruct $user;
+    private ?UserStruct $user = null;
 
     /**
-     * @var TeamStruct
+     * @var TeamStruct|null
      */
-    private TeamStruct $team;
+    private ?TeamStruct $team = null;
 
 
     /**
-     * @var
+     * @var array
      */
     private array $user_metadata = [];
 
@@ -42,7 +42,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      */
     private int $projects = 0;
 
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser( UserStruct $user ) {
         $this->user = $user;
     }
 
@@ -53,17 +53,17 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         $this->user_metadata = $user_metadata;
     }
 
-    public function getUserMetadata() {
+    public function getUserMetadata(): array {
         return $this->user_metadata;
     }
 
     /**
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws ReflectionException
      */
-    public function getUser() {
+    public function getUser(): UserStruct {
         if ( is_null( $this->user ) ) {
-            $this->user = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
+            $this->user = ( new UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->uid );
         }
 
         return $this->user;
@@ -73,7 +73,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getTeam() {
+    public function getTeam(): TeamStruct {
         if ( is_null( $this->team ) ) {
             $this->team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->id_team );
         }
@@ -84,7 +84,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return int
      */
-    public function getAssignedProjects() {
+    public function getAssignedProjects(): int {
         return $this->projects;
     }
 

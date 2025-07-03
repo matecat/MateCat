@@ -6,8 +6,8 @@ use CookieManager;
 use DomainException;
 use INIT;
 use Log;
+use Model\Users\UserStruct;
 use SimpleJWT;
-use Users_UserStruct;
 
 class AuthCookie {
 
@@ -30,10 +30,10 @@ class AuthCookie {
     /**
      * Set a cookie with a username
      *
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      */
-    public static function setCredentials( Users_UserStruct $user ) {
+    public static function setCredentials( UserStruct $user ) {
 
         [ $new_cookie_data, $new_expire_date ] = static::generateSignedAuthCookie( $user );
         CookieManager::setCookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
@@ -49,11 +49,11 @@ class AuthCookie {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return array
      */
-    protected static function generateSignedAuthCookie( Users_UserStruct $user ): array {
+    protected static function generateSignedAuthCookie( UserStruct $user ): array {
 
         $JWT = new SimpleJWT( [
                 'user' => [

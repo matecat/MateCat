@@ -2,6 +2,7 @@
 
 use Model\Engines\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -73,7 +74,7 @@ interface Engines_EngineInterface {
     /**
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user );
 
     /**
      * @param array      $projectRow

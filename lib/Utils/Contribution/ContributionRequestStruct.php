@@ -18,7 +18,7 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
@@ -129,11 +129,11 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
     }
 
     /**
-     * @param Users_UserStruct|null $user
+     * @param \Model\Users\UserStruct|null $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): ContributionRequestStruct {
+    public function setUser( UserStruct $user ): ContributionRequestStruct {
         $this->user = $user->toArray();
 
         return $this;
@@ -189,10 +189,10 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
     }
 
     /**
-     * @return ?Users_UserStruct
+     * @return ?\Model\Users\UserStruct
      */
-    public function getUser(): ?Users_UserStruct {
-        return new Users_UserStruct( $this->user );
+    public function getUser(): ?UserStruct {
+        return new UserStruct( $this->user );
     }
 
     /**

@@ -24,6 +24,8 @@ use Log;
 use Model\Engines\MMTStruct;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
@@ -32,8 +34,6 @@ use Stomp\Transport\Message;
 use Throwable;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Users_UserDao;
-use Users_UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -449,7 +449,7 @@ class Lara extends Engines_AbstractEngine {
      * @throws LaraException
      * @throws Exception
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $clientMemories = $this->_getClient()->memories;
 
@@ -496,7 +496,7 @@ class Lara extends Engines_AbstractEngine {
 
             // get jobs keys
             $project = ProjectDao::findById( $projectRow[ 'id' ] );
-            $user    = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $user    = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             foreach ( $project->getJobs() as $job ) {
 

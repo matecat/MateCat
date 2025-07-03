@@ -4,6 +4,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Users\UserStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
@@ -687,13 +688,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      *
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user * Not used
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user * Not used
      *
      * @return array|mixed
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $postFields = [
                 'tmx' => $this->getCurlFile( $filePath ),

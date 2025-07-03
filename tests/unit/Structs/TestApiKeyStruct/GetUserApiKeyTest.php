@@ -1,6 +1,7 @@
 <?php
 
 
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 /**
@@ -30,7 +31,7 @@ class GetUserApiKeyTest extends AbstractTest {
 
     public function test_getUser_success() {
         $user = $this->test_data->api_key->getUser();
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( "{$this->test_data->user->uid}", $user->uid );
         $this->assertEquals( "{$this->test_data->user->email}", $user->email );
         $this->assertEquals( "{$this->test_data->user->salt}", $user->salt );

@@ -9,6 +9,7 @@ use Model\Teams\MembershipStruct;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 
 class TeamModel {
 
@@ -20,9 +21,9 @@ class TeamModel {
     protected TeamStruct $struct;
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
      * @var MembershipStruct[]
@@ -35,7 +36,7 @@ class TeamModel {
     protected array $uids_to_remove = [];
 
     /**
-     * @var Users_UserStruct[]
+     * @var UserStruct[]
      */
     protected array $removed_users = [];
 
@@ -54,7 +55,7 @@ class TeamModel {
         $this->member_emails[] = $email;
     }
 
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser( UserStruct $user ) {
         $this->user = $user;
     }
 

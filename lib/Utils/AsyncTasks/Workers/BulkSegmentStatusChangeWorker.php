@@ -18,12 +18,12 @@ use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
+use Model\Users\UserDao;
 use ReflectionException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
-use Users_UserDao;
 
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
@@ -55,7 +55,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $chunk       = new JobStruct( $params[ 'chunk' ] );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
-        $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );
+        $user        = ( new UserDao() )->getByUid( $params[ 'id_user' ] );
         $source_page = ReviewUtils::revisionNumberToSourcePage( $params[ 'revision_number' ] );
 
 

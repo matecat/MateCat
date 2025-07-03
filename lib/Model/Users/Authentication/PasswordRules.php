@@ -1,15 +1,22 @@
 <?php
+/**
+ * Created by PhpStorm.
+ * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com
+ * Date: 03/07/25
+ * Time: 17:06
+ *
+ */
 
-namespace Users\Authentication;
+namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 
-class UserPasswordValidator {
+trait PasswordRules {
 
     /**
      * @throws ValidationError
      */
-    public static function validatePassword( $password, $password_confirmation ) {
+    public function validatePasswordRequirements( string $password, string $password_confirmation ): void {
 
         if ( mb_substr( $password, 0, 50 ) != $password ) {
             throw new ValidationError( 'The password must be a maximum of 50 characters long' );

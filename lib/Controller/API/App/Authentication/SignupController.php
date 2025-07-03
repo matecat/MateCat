@@ -6,6 +6,7 @@ use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Controller\Views\CustomPageView;
 use Exception;
@@ -13,18 +14,54 @@ use FlashMessage;
 use INIT;
 use Klein\Response;
 use Model\Teams\InvitedUser;
-use Users\Authentication\SignupModel;
-use Users\RedeemableProject;
+use Model\Users\Authentication\PasswordRules;
+use Model\Users\Authentication\SignupModel;
+use Model\Users\RedeemableProject;
 use Utils;
 
 class SignupController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * @throws Exception
      */
     public function create() {
+
+        $user = $this->validateCreationRequest();
+
+        $userIp = Utils::getRealIpAddr();
+
+        // rate limit on email
+        $checkRateLimitOnEmail = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user', 3 );
+        if ( $checkRateLimitOnEmail instanceof Response ) {
+            $this->response = $checkRateLimitOnEmail;
+
+            return;
+        }
+
+        // rate limit on IP
+        $checkRateLimitOnIp = $this->checkRateLimitResponse( $this->response, $userIp, '/api/app/user', 3 );
+        if ( $checkRateLimitOnIp instanceof Response ) {
+            $this->response = $checkRateLimitOnIp;
+
+            return;
+        }
+
+        $signup = new SignupModel( $user, $_SESSION );
+        $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
+        $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
+
+        $signup->processSignup();
+        $this->response->code( 200 );
+
+    }
+
+    /**
+     * @throws ValidationError
+     */
+    private function validateCreationRequest(): array {
 
         $user = filter_var_array(
                 (array)$this->request->param( 'user' ),
@@ -53,69 +90,21 @@ class SignupController extends AbstractStatefulKleinController {
         );
 
         if ( empty( $user[ 'email' ] ) ) {
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => "Missing email"
-                    ]
-            ] );
-            exit();
+            throw new ValidationError( 'Missing email' );
         }
 
         if ( empty( $user[ 'first_name' ] ) ) {
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => "First name must contain at least one letter"
-                    ]
-            ] );
-            exit();
+            throw new ValidationError( "First name must contain at least one letter" );
         }
 
         if ( empty( $user[ 'last_name' ] ) ) {
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => "Last name must contain at least one letter"
-                    ]
-            ] );
-            exit();
+            throw new ValidationError( "Last name must contain at least one letter" );
         }
 
-        $userIp = Utils::getRealIpAddr();
+        $this->validatePasswordRequirements( $user[ 'password' ], $user[ 'password_confirmation' ] );
 
-        // rate limit on email
-        $checkRateLimitOnEmail = $this->checkRateLimitResponse( $this->response, $user[ 'email' ], '/api/app/user', 3 );
-        if ( $checkRateLimitOnEmail instanceof Response ) {
-            $this->response = $checkRateLimitOnEmail;
+        return $user;
 
-            return;
-        }
-
-        // rate limit on IP
-        $checkRateLimitOnIp = $this->checkRateLimitResponse( $this->response, $userIp, '/api/app/user', 3 );
-        if ( $checkRateLimitOnIp instanceof Response ) {
-            $this->response = $checkRateLimitOnIp;
-
-            return;
-        }
-
-        $signup = new SignupModel( $user, $_SESSION );
-        $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
-        $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
-
-        // email
-        if ( $signup->valid() ) {
-            $signup->processSignup();
-            $this->response->code( 200 );
-        } else {
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => $signup->getError()
-                    ]
-            ] );
-        }
     }
 
     /**
@@ -123,7 +112,9 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function confirm() {
 
-        $signupModel = new SignupModel( [ 'token' => $this->request->param( 'token' ) ], $_SESSION );
+        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+
+        $signupModel = new SignupModel( [ 'token' => $token ], $_SESSION );
 
         try {
 

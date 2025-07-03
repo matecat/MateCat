@@ -14,11 +14,11 @@ use Model\Engines\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\TmKeyManagement\UserKeysModel;
+use Model\Users\MetadataDao;
 use ReflectionException;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyStruct;
-use Users\MetadataDao;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
 

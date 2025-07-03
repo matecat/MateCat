@@ -2,13 +2,14 @@
 
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use View\API\V2\Json\Project;
 
 class ManageUtils {
 
 
     /**
-     * @param Users_UserStruct      $user
+     * @param UserStruct            $user
      * @param                       $start                int
      * @param                       $step                 int
      * @param                       $search_in_pname      string
@@ -18,26 +19,26 @@ class ManageUtils {
      * @param                       $search_only_completed
      * @param                       $project_id           int
      *
-     * @param TeamStruct     $team
+     * @param TeamStruct            $team
      *
-     * @param Users_UserStruct|null $assignee
+     * @param UserStruct|null       $assignee
      * @param                       $no_assignee
      *
      * @return array
      */
     protected static function _getProjects(
-            Users_UserStruct $user,
-                             $start,
-                             $step,
-                             $search_in_pname,
-                             $search_source,
-                             $search_target,
-                             $search_status,
-                             $search_only_completed,
-                             $project_id,
-            TeamStruct       $team = null,
-            Users_UserStruct $assignee = null,
-                             $no_assignee = false
+            UserStruct $user,
+                       $start,
+                       $step,
+                       $search_in_pname,
+                       $search_source,
+                       $search_target,
+                       $search_status,
+                       $search_only_completed,
+                       $project_id,
+            TeamStruct $team = null,
+            UserStruct $assignee = null,
+                       $no_assignee = false
     ) {
 
         [ $conditions, $data ] = static::conditionsForProjectsQuery(
@@ -90,7 +91,7 @@ class ManageUtils {
     }
 
     /**
-     * @param Users_UserStruct       $user
+     * @param UserStruct             $user
      * @param                        $start
      * @param                        $step
      * @param                        $search_in_pname
@@ -100,25 +101,25 @@ class ManageUtils {
      * @param                        $search_only_completed
      * @param                        $project_id
      * @param TeamStruct|null        $team
-     * @param Users_UserStruct|null  $assignee
+     * @param UserStruct|null        $assignee
      * @param bool                   $no_assignee
      *
      * @return array
      * @throws ReflectionException
      */
     public static function getProjects(
-            Users_UserStruct  $user,
-                              $start,
-                              $step,
-                              $search_in_pname,
-                              $search_source,
-                              $search_target,
-                              $search_status,
-                              $search_only_completed,
-                              $project_id,
+            UserStruct $user,
+                       $start,
+                       $step,
+                       $search_in_pname,
+                       $search_source,
+                       $search_target,
+                       $search_status,
+                       $search_only_completed,
+                       $project_id,
             TeamStruct $team = null,
-            Users_UserStruct  $assignee = null,
-                              $no_assignee = false
+            UserStruct $assignee = null,
+                       $no_assignee = false
     ): array {
         $id_list = static::_getProjects(
                 $user,
@@ -194,23 +195,23 @@ class ManageUtils {
     }
 
     /**
-     * @param Users_UserStruct       $user
+     * @param UserStruct             $user
      * @param                        $search_in_pname
      * @param                        $search_source
      * @param                        $search_target
      * @param                        $search_status
      * @param                        $search_only_completed
-     * @param TeamStruct|null $team
-     * @param Users_UserStruct|null  $assignee
+     * @param TeamStruct|null        $team
+     * @param UserStruct|null        $assignee
      * @param bool                   $no_assignee
      *
      * @return array
      */
-    public static function getProjectsNumber( Users_UserStruct  $user, $search_in_pname, $search_source, $search_target, $search_status,
-                                                                $search_only_completed,
+    public static function getProjectsNumber( UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status,
+                                                         $search_only_completed,
                                               TeamStruct $team = null,
-                                              Users_UserStruct  $assignee = null,
-                                                                $no_assignee = false
+                                              UserStruct $assignee = null,
+                                                         $no_assignee = false
     ) {
 
         [ $conditions, $data ] = static::conditionsForProjectsQuery(

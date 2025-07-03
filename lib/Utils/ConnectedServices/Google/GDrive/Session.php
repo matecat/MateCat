@@ -30,12 +30,12 @@ use Model\FilesStorage\S3FilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Model\Jobs\JobDao;
 use Model\RemoteFiles\RemoteFileDao;
+use Model\Users\UserStruct;
 use Predis\Connection\ConnectionException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
-use Users_UserStruct;
 use Utils;
 
 /**
@@ -218,7 +218,7 @@ class Session {
         if ( is_null( $this->token ) ) {
             if ( $this->session[ 'user' ] !== null ) {
                 if ( $this->session[ 'user' ] instanceof ArrayObject ) { // comes from CLI (ProjectManager)
-                    $this->session[ 'user' ] = new Users_UserStruct( $this->session[ 'user' ]->getArrayCopy() );
+                    $this->session[ 'user' ] = new UserStruct( $this->session[ 'user' ]->getArrayCopy() );
                 }
                 $this->token = $this->getTokenByUser( $this->session[ 'user' ] );
             }
@@ -228,12 +228,12 @@ class Session {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      *
      * @return array|null
      * @throws Exception
      */
-    public function getTokenByUser( Users_UserStruct $user ): ?array {
+    public function getTokenByUser( UserStruct $user ): ?array {
         $serviceDao          = new ConnectedServiceDao();
         $this->serviceStruct = $serviceDao->findDefaultServiceByUserAndName( $user, 'gdrive' );
 

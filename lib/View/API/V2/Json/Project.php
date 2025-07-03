@@ -16,8 +16,8 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserStruct;
 use Utils;
 
 class Project {
@@ -43,16 +43,16 @@ class Project {
     protected bool $called_from_api = false;
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): Project {
+    public function setUser( UserStruct $user ): Project {
         $this->user = $user;
 
         return $this;

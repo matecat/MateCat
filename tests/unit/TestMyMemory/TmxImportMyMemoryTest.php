@@ -20,6 +20,7 @@
 use Langs\Languages;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 error_reporting( ~E_DEPRECATED );
@@ -79,7 +80,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
         /**
          * Importing
          */
-        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new Users_UserStruct() );
+        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new UserStruct() );
 
 
         $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );

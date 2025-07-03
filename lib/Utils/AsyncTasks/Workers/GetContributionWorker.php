@@ -18,9 +18,10 @@ use Exception;
 use FeatureSet;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Jobs\JobStruct;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Translations\SegmentTranslationDao;
+use Model\Users\UserStruct;
 use PostProcess;
 use ReflectionException;
 use Stomp\Exception\StompException;
@@ -30,7 +31,6 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use Users_UserStruct;
 use Utils;
 
 class GetContributionWorker extends AbstractWorker {
@@ -225,7 +225,7 @@ class GetContributionWorker extends AbstractWorker {
 
             } else {
 
-                $user = new Users_UserStruct();
+                $user = new UserStruct();
 
                 if ( !$contributionStruct->getUser()->isAnonymous() ) {
                     $user = $contributionStruct->getUser();
@@ -583,7 +583,7 @@ class GetContributionWorker extends AbstractWorker {
                     if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
-                        $user = new Users_UserStruct();
+                        $user = new UserStruct();
 
                         if ( !$contributionStruct->getUser()->isAnonymous() ) {
                             $user = $contributionStruct->getUser();

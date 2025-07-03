@@ -13,11 +13,11 @@ use Engines_Results_MyMemory_SetGlossaryResponse;
 use Engines_Results_MyMemory_UpdateGlossaryResponse;
 use Exception;
 use FeatureSet;
+use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Exceptions\EndQueueException;
-use Users_UserStruct;
 
 class GlossaryWorker extends AbstractWorker {
 
@@ -490,10 +490,10 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param $array
      *
-     * @return Users_UserStruct
+     * @return \Model\Users\UserStruct
      */
     private function getUser( $array ) {
-        return new Users_UserStruct( [
+        return new UserStruct( [
                 'uid'         => $array[ 'uid' ],
                 'email'       => $array[ 'email' ],
                 '$first_name' => $array[ 'first_name' ],

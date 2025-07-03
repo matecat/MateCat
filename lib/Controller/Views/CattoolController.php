@@ -33,13 +33,13 @@ use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
+use Model\Users\UserDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
 use TeamModel;
-use Users_UserDao;
 use Utils;
 
 class CattoolController extends BaseKleinViewController {
@@ -336,7 +336,7 @@ class CattoolController extends BaseKleinViewController {
             if ( $team->type == Constants_Teams::PERSONAL ) {
                 $ownerMail = $team->getMembers()[ 0 ]->getUser()->getEmail();
             } else {
-                $assignee = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $project->id_assignee );
+                $assignee = ( new UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $project->id_assignee );
 
                 if ( $assignee ) {
                     $ownerMail = $assignee->getEmail();

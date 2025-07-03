@@ -12,9 +12,9 @@ use Constants_Teams;
 use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Users_UserStruct;
 use Utils;
 
 class TeamDao extends AbstractDao {
@@ -81,12 +81,12 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function createPersonalTeam( Users_UserStruct $user ): TeamStruct {
+    public function createPersonalTeam( UserStruct $user ): TeamStruct {
         return $this->createUserTeam( $user, [
                 'name' => 'Personal',
                 'type' => Constants_Teams::PERSONAL
@@ -94,14 +94,14 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $orgCreatorUser
-     * @param array            $params
+     * @param UserStruct $orgCreatorUser
+     * @param array      $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
      * @throws Exception
      */
-    public function createUserTeam( Users_UserStruct $orgCreatorUser, array $params = [] ): TeamStruct {
+    public function createUserTeam( UserStruct $orgCreatorUser, array $params = [] ): TeamStruct {
 
         $teamStruct = new TeamStruct( [
                 'name'       => $params[ 'name' ],
@@ -195,12 +195,12 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getPersonalByUser( Users_UserStruct $user ): TeamStruct {
+    public function getPersonalByUser( UserStruct $user ): TeamStruct {
         return $this->getPersonalByUid( $user->uid );
     }
 
@@ -246,12 +246,12 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct|null
      * @throws ReflectionException
      */
-    public function findUserCreatedTeams( Users_UserStruct $user ) {
+    public function findUserCreatedTeams( UserStruct $user ) {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
@@ -265,12 +265,12 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheUserCreatedTeams( Users_UserStruct $user ) {
+    public function destroyCacheUserCreatedTeams( UserStruct $user ) {
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();

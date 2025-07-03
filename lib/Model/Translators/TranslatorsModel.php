@@ -22,10 +22,10 @@ use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
 use TransactionalTrait;
-use Users_UserDao;
-use Users_UserStruct;
 use Utils;
 
 class TranslatorsModel {
@@ -33,9 +33,9 @@ class TranslatorsModel {
     use TransactionalTrait;
 
     /**
-     * @var ?Users_UserStruct
+     * @var ?\Model\Users\UserStruct
      */
-    protected ?Users_UserStruct $callingUser = null;
+    protected ?UserStruct $callingUser = null;
 
     /**
      * @var JobStruct
@@ -124,7 +124,7 @@ class TranslatorsModel {
         return $this;
     }
 
-    public function setUserInvite( Users_UserStruct $user ): TranslatorsModel {
+    public function setUserInvite( UserStruct $user ): TranslatorsModel {
         $this->callingUser = $user;
 
         return $this;
@@ -176,7 +176,7 @@ class TranslatorsModel {
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+        $translatorUser = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
         if ( !empty( $translatorUser ) ) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile( $translatorUser );
@@ -252,7 +252,7 @@ class TranslatorsModel {
     /**
      * @throws Exception
      */
-    protected function saveProfile( Users_UserStruct $existentUser ): int {
+    protected function saveProfile( UserStruct $existentUser ): int {
 
         //associate the translator with an existent user and create a profile
         $profileStruct                 = new TranslatorProfilesStruct();

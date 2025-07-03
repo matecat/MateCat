@@ -20,7 +20,7 @@ class InvitedToTeamEmail extends AbstractEmail {
     protected $invited_email;
     protected $team;
 
-    public function __construct( \Users_UserStruct $user, $invited_email, TeamStruct $team ) {
+    public function __construct( \Model\Users\UserStruct $user, $invited_email, TeamStruct $team ) {
         $this->user          = $user;
         $this->invited_email = $invited_email;
         $this->team          = $team;

@@ -23,7 +23,7 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use ReflectionException;
-use Url\JobUrlStruct;
+use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController {
 
@@ -355,13 +355,13 @@ class SegmentAnalysisController extends KleinController {
                     $segmentForAnalysis->id_job == $map[ 'id_job' ] and
                     $segmentForAnalysis->job_password == $map[ 't_password' ]
             ) {
-                $passwords[ JobUrlStruct::LABEL_T ]  = $map[ 't_password' ];
-                $passwords[ JobUrlStruct::LABEL_R1 ] = $map[ 'r_password' ];
-                $passwords[ JobUrlStruct::LABEL_R2 ] = $map[ 'r2_password' ];
+                $passwords[ JobUrls::LABEL_T ]  = $map[ 't_password' ];
+                $passwords[ JobUrls::LABEL_R1 ] = $map[ 'r_password' ];
+                $passwords[ JobUrls::LABEL_R2 ] = $map[ 'r2_password' ];
             }
         }
 
-        $jobUrlStruct = new JobUrlStruct(
+        $jobUrlStruct = new JobUrls(
                 $segmentForAnalysis->id_job,
                 $segmentForAnalysis->project_name,
                 $segmentForAnalysis->source,

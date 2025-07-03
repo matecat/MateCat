@@ -1,11 +1,13 @@
 <?php
 
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::getByEmail
+ * @covers UserDao::getByEmail
  * User: dinies
  * Date: 27/05/16
  * Time: 17.46
@@ -18,7 +20,7 @@ class GetByEmailUserTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Users_UserDao
+     * @var UserDao
      */
     protected $user_Dao;
     protected $user_struct_param;
@@ -35,7 +37,7 @@ class GetByEmailUserTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->user_Dao          = new Users_UserDao( $this->database_instance );
+        $this->user_Dao          = new UserDao( $this->database_instance );
 
         /**
          * user insertion
@@ -61,7 +63,7 @@ class GetByEmailUserTest extends AbstractTest {
     public function test_getByEmail() {
         $user = $this->user_Dao->getByEmail( $this->email );
 
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( "{$this->uid}", $user->uid );
         $this->assertEquals( "bar@foo.net", $user->email );
         $this->assertEquals( "12345", $user->salt );

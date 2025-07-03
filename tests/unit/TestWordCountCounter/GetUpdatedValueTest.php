@@ -58,7 +58,7 @@ class GetUpdatedValueTest extends AbstractTest {
         $this->word_counter->setOldStatus( "TRANSLATED" );
         $this->word_counter->setNewStatus( "TRANSLATED" );
 
-        $result = $this->word_counter->getUpdatedValues( "15.00", null );
+        $result = $this->word_counter->getUpdatedValues( "15.00", 0 );
         $this->assertTrue( $result instanceof WordCountStruct );
         $this->assertEquals( $this->job_id, $result->getIdJob() );
         $this->assertEquals( $this->job_password, $result->getJobPassword() );
@@ -141,7 +141,7 @@ class GetUpdatedValueTest extends AbstractTest {
         $this->word_counter->setOldStatus( "DRAFT" );
         $this->word_counter->setNewStatus( "APPROVED" );
 
-        $result = $this->word_counter->getUpdatedValues( 15, null );
+        $result = $this->word_counter->getUpdatedValues( 15, 0 );
 
         $this->assertTrue( $result instanceof WordCountStruct );
         $this->assertEquals( $this->job_id, $result->getIdJob() );
@@ -164,7 +164,7 @@ class GetUpdatedValueTest extends AbstractTest {
 
         $this->word_counter = new CounterModel();
         $this->expectException( LogicException::class );
-        $this->word_counter->getUpdatedValues( 15, null );
+        $this->word_counter->getUpdatedValues( 15, 0 );
 
 
     }

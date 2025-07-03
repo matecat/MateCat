@@ -10,13 +10,13 @@ namespace Email;
 
 use Exception;
 use Model\Teams\MembershipStruct;
+use Model\Users\UserStruct;
 use Routes;
-use Users_UserStruct;
 
 class MembershipCreatedEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
     protected $user;
 
@@ -28,17 +28,17 @@ class MembershipCreatedEmail extends AbstractEmail {
     protected $title;
 
     /**
-     * @var  Users_UserStruct
+     * @var  \Model\Users\UserStruct
      */
     protected $sender;
 
     /**
      * MembershipCreatedEmail constructor.
      *
-     * @param Users_UserStruct $sender
+     * @param UserStruct       $sender
      * @param MembershipStruct $membership
      */
-    public function __construct( Users_UserStruct $sender, MembershipStruct $membership ) {
+    public function __construct( UserStruct $sender, MembershipStruct $membership ) {
         $this->user = $membership->getUser();
         $this->_setlayout( 'skeleton.html' );
         $this->_settemplate( 'Team/membership_created_content.html' );

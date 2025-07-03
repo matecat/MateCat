@@ -1,11 +1,13 @@
 <?php
 
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::getByUids
+ * @covers UserDao::getByUids
  * User: dinies
  * Date: 27/05/16
  * Time: 20.23
@@ -18,7 +20,7 @@ class GetByUidsUserTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Users_UserDao
+     * @var UserDao
      */
     protected $user_Dao;
     protected $user_struct_param;
@@ -40,7 +42,7 @@ class GetByUidsUserTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->user_Dao          = new Users_UserDao( $this->database_instance );
+        $this->user_Dao          = new UserDao( $this->database_instance );
 
         /**
          * users insertion
@@ -84,7 +86,7 @@ class GetByUidsUserTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Users_UserDao::getByUids
+     * @covers UserDao::getByUids
      */
     public function test_getByUids_with_success() {
         $array_param  = [
@@ -104,7 +106,7 @@ class GetByUidsUserTest extends AbstractTest {
         $array_result = array_values( $array_result );
 
         $user = $array_result[ '0' ];
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( "{$this->uid_1}", $user->uid );
         $this->assertEquals( "bar_first@foo.net", $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
@@ -115,7 +117,7 @@ class GetByUidsUserTest extends AbstractTest {
         $this->assertNull( $user->oauth_access_token );
 
         $user = $array_result[ '1' ];
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( "{$this->uid_2}", $user->uid );
         $this->assertEquals( "bar_second@foo.net", $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
@@ -127,7 +129,7 @@ class GetByUidsUserTest extends AbstractTest {
 
 
         $user = $array_result[ '2' ];
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( "{$this->uid_3}", $user->uid );
         $this->assertEquals( "bar_third@foo.net", $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
@@ -141,7 +143,7 @@ class GetByUidsUserTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Users_UserDao::getByUids
+     * @covers UserDao::getByUids
      */
     public function test_getByUids_with_empty_param_for_code_coverage_purpose() {
         $this->assertEquals( [], $this->user_Dao->getByUids( [] ) );

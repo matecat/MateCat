@@ -10,17 +10,17 @@ namespace Features\ReviewExtended\Email ;
 
 use Email\AbstractEmail;
 use Exception;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class RevisionChangedNotificationEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     protected $changeAuthor ;
     protected $segmentUrl ;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     protected $recipientUser ;
 
@@ -60,12 +60,12 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
     }
 
     /**
-     * @param string                $email
-     * @param Users_UserStruct|null $user
+     * @param string          $email
+     * @param UserStruct|null $user
      *
      * @return bool
      */
-    private function isRecipientTheChangeAuthor( $email, Users_UserStruct $user = null ): bool {
+    private function isRecipientTheChangeAuthor( $email, UserStruct $user = null ): bool {
         if ( null === $user ) {
             return false;
         }

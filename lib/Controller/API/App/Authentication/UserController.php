@@ -8,11 +8,13 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
-use Users\Authentication\ChangePasswordModel;
+use Model\Users\Authentication\ChangePasswordModel;
+use Model\Users\Authentication\PasswordRules;
 
 class UserController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * @return void
@@ -57,8 +59,11 @@ class UserController extends AbstractStatefulKleinController {
         $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
 
         try {
+
+            $this->validatePasswordRequirements( $new_password, $new_password_confirmation );
+
             $cpModel = new ChangePasswordModel( $this->user );
-            $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
+            $cpModel->changePassword( $old_password, $new_password );
 
             $this->broadcastLogout();
 

@@ -12,9 +12,9 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserDao;
-use Users_UserStruct;
 
 /**
  * Class ProjectModel
@@ -34,9 +34,9 @@ class ProjectModel {
     protected array $cacheTeamsToClean = [];
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     public function __construct( ProjectStruct $project ) {
         $this->project_struct = $project;
@@ -46,7 +46,7 @@ class ProjectModel {
         $this->willChange[ $field ] = $value;
     }
 
-    public function setUser( Users_UserStruct $user ) {
+    public function setUser( UserStruct $user ) {
         $this->user = $user;
     }
 
@@ -113,7 +113,7 @@ class ProjectModel {
                 !is_null( $this->changedFields[ 'id_assignee' ] ) &&
                 $this->user->uid != $this->changedFields[ 'id_assignee' ]
         ) {
-            $assignee = ( new Users_UserDao )->getByUid( $this->changedFields[ 'id_assignee' ] );
+            $assignee = ( new UserDao )->getByUid( $this->changedFields[ 'id_assignee' ] );
             $email    = new ProjectAssignedEmail( $this->user, $this->project_struct, $assignee );
             $email->send();
         }

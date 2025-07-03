@@ -9,7 +9,7 @@ use Exception;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 use Utils;
 
 class ChangeProjectNameController extends ChunkController {
@@ -100,12 +100,12 @@ class ChangeProjectNameController extends ChunkController {
     /**
      * Check if the logged user has the permissions to change the password
      *
-     * @param ProjectStruct    $project
-     * @param Users_UserStruct $user
+     * @param ProjectStruct           $project
+     * @param \Model\Users\UserStruct $user
      *
      * @throws Exception
      */
-    private function checkUserPermissions( ProjectStruct $project, Users_UserStruct $user ) {
+    private function checkUserPermissions( ProjectStruct $project, UserStruct $user ) {
         // check if user is belongs to the project team
         $team  = $project->getTeam();
         $check = ( new MembershipDao() )->findTeamByIdAndUser( $team->id, $user );

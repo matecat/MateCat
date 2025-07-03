@@ -7,9 +7,9 @@ use Bootstrap;
 use Exception;
 use INIT;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
-use Users_UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -20,8 +20,8 @@ use Users_UserStruct;
  */
 trait AuthenticationTrait {
 
-    protected bool             $userIsLogged;
-    protected Users_UserStruct $user;
+    protected bool       $userIsLogged;
+    protected UserStruct $user;
 
     /**
      * @var ?string
@@ -85,9 +85,9 @@ trait AuthenticationTrait {
     }
 
     /**
-     * @return ?Users_UserStruct
+     * @return ?\Model\Users\UserStruct
      */
-    public function getUser(): Users_UserStruct {
+    public function getUser(): UserStruct {
         return $this->user;
     }
 

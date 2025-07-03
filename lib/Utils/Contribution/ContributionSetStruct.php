@@ -178,8 +178,8 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
         }
 
         return $this->cachable( '_userCredentials', $this, function ( $contributionStruct ) {
-            $userDao              = new \Users_UserDao( Database::obtain() );
-            $userCredentials      = new \Users_UserStruct();
+            $userDao              = new \Model\Users\UserDao( Database::obtain() );
+            $userCredentials      = new \Model\Users\UserStruct();
             $userCredentials->uid = $contributionStruct->uid;
 
             return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );

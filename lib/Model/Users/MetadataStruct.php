@@ -6,7 +6,7 @@
  * Time: 22:51
  */
 
-namespace Users;
+namespace Model\Users;
 
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoObjectStruct;
@@ -16,6 +16,10 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
     public string $id;
     public string $uid;
     public string $key;
+
+    /**
+     * @var int|object|string
+     */
     public        $value;
 
     /**
@@ -25,13 +29,13 @@ class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct, Json
         return [
                 'id'    => (int)$this->id,
                 'uid'   => (int)$this->uid,
-                'key'   => (string)$this->key,
+                'key'   => $this->key,
                 'value' => $this->getValue()
         ];
     }
 
     /**
-     * @return mixed
+     * @return int|object|string
      */
     public function getValue() {
         // in case of numeric value, return a integer

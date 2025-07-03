@@ -1,11 +1,13 @@
 <?php
 
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::createUser
+ * @covers UserDao::createUser
  * User: dinies
  * Date: 27/05/16
  * Time: 16.37
@@ -16,7 +18,7 @@ class CreateUserTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Users_UserDao
+     * @var UserDao
      */
     protected $user_Dao;
     protected $user_struct_param;
@@ -33,11 +35,11 @@ class CreateUserTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->user_Dao          = new Users_UserDao( $this->database_instance );
+        $this->user_Dao          = new UserDao( $this->database_instance );
         /**
          * user initialization
          */
-        $this->user_struct_param                     = new Users_UserStruct();
+        $this->user_struct_param                     = new UserStruct();
         $this->user_struct_param->uid                = null;  //SET NULL FOR AUTOINCREMENT
         $this->user_struct_param->email              = "barandfoo@translated.net";
         $this->user_struct_param->create_date        = "2016-04-29 18:06:42";
@@ -71,7 +73,7 @@ class CreateUserTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Users_UserDao::createUser
+     * @covers UserDao::createUser
      */
     public function test_create_with_success() {
 

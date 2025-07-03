@@ -88,14 +88,6 @@ class KeyCheckController extends KleinController {
 
             if ( $api_record && $api_record->validSecret( $user_api_secret ) ) {
 
-                /*
-                    //for now the response is really simple, if more info are needed use the DAO
-                    $dao = new Users_UserDao();
-                    $dao->setCacheTTL( 3600 );
-                    $user = $dao->getByUid( $api_record->uid ) ;
-                    $userJson = [ 'user' => User::renderItem( $user ) ]:
-                */
-
                 $userJson = [ 'user' => [ 'uid' => $api_record->uid ] ];
                 $this->response->json( $userJson );
 

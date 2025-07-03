@@ -28,7 +28,7 @@ class GDriveUserAuthorizationModel {
     protected $user_remote_id;
     protected $user_name;
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( \Model\Users\UserStruct $user ) {
         $this->user = $user;
     }
 

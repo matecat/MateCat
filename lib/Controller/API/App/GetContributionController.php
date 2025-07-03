@@ -19,9 +19,9 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
+use Model\Users\UserDao;
 use ReflectionException;
 use TmKeyManagement_Filter;
-use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
@@ -77,7 +77,7 @@ class GetContributionController extends KleinController {
         }
 
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
-        $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
+        $owner = ( new UserDao() )->getProjectOwner( $id_job );
 
         $contributionRequest->id_file    = $file->id_file ?? null;
         $contributionRequest->id_job     = $id_job;

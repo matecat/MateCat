@@ -13,7 +13,7 @@ namespace Email;
 use DateTime;
 use DateTimeZone;
 use Model\Translators\JobsTranslatorsStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 abstract class SendToTranslatorAbstract extends AbstractEmail {
 
@@ -22,7 +22,7 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
     protected $translator;
     protected $_RoutesMethod;
 
-    public function __construct( Users_UserStruct $user, JobsTranslatorsStruct $translator, $projectName ) {
+    public function __construct( UserStruct $user, JobsTranslatorsStruct $translator, $projectName ) {
 
         $this->user        = $user;
         $this->translator  = $translator;

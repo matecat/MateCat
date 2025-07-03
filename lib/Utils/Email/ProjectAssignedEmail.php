@@ -14,8 +14,8 @@ use Exception;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use Routes;
-use Users_UserStruct;
 use WordCount\WordCountStruct;
 
 class ProjectAssignedEmail extends AbstractEmail {
@@ -25,7 +25,7 @@ class ProjectAssignedEmail extends AbstractEmail {
     protected $assignee;
     protected $title;
 
-    public function __construct( Users_UserStruct $user, ProjectStruct $project, Users_UserStruct $assignee ) {
+    public function __construct( UserStruct $user, ProjectStruct $project, UserStruct $assignee ) {
         $this->user     = $user;
         $this->project  = $project;
         $this->assignee = $assignee;
@@ -44,6 +44,7 @@ class ProjectAssignedEmail extends AbstractEmail {
             $jStruct  = new JobStruct( $job->getArrayCopy() );
             $jobStats = new WordCountStruct();
             $jobStats->setIdJob( $jStruct->id );
+            $jobStats->setJobPassword( $jStruct->password );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords( $jStruct->rejected_words );
             $jobStats->setTranslatedWords( $jStruct->translated_words );

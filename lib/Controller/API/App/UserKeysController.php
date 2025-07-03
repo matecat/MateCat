@@ -10,10 +10,10 @@ use InvalidArgumentException;
 use Model\Exceptions\NotFoundException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\ClientUserFacade;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Users_ClientUserFacade;
 use Utils;
 
 class UserKeysController extends KleinController {
@@ -124,7 +124,7 @@ class UserKeysController extends KleinController {
     protected function getKeyUsersInfo( array $userMemoryKeys ): array {
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
-            $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+            $_userStructs[] = new ClientUserFacade( $userStruct );
         }
 
         return [

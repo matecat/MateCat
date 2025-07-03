@@ -32,11 +32,11 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use Users\MetadataDao;
-use Users_UserStruct;
 
 class Mmt extends BaseFeature {
 
@@ -54,14 +54,14 @@ class Mmt extends BaseFeature {
     /**
      * Called in @param \Model\Engines\EngineStruct $newCreatedDbRowStruct
      *
-     * @param Users_UserStruct $userStruct
+     * @param \Model\Users\UserStruct $userStruct
      *
      * @return null
      * @throws Exception
      * @see engineController::add()
      *
      */
-    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
+    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, UserStruct $userStruct ) {
 
         if ( !$newCreatedDbRowStruct instanceof MMTStruct ) {
             return $newCreatedDbRowStruct;
@@ -209,12 +209,12 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param Users_UserStruct $LoggedUser
+     * @param UserStruct $LoggedUser
      *
      * @return MemoryKeyStruct[]
      * @throws Exception
      */
-    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+    protected static function _getKeyringOwnerKeys( UserStruct $LoggedUser ) {
 
         return self::_getKeyringOwnerKeysByUid( $LoggedUser->uid );
     }
@@ -249,7 +249,7 @@ class Mmt extends BaseFeature {
      *
      * @param $data             (object)[
      *                          'providerName' => '',
-     *                          'logged_user'  => Users_UserStruct,
+     *                          'logged_user'  => UserStruct,
      *                          'engineData'   => []
      *                          ]
      *
@@ -272,7 +272,7 @@ class Mmt extends BaseFeature {
             $featureSet = $data->featureSet;
 
             /**
-             * @var $logged_user Users_UserStruct
+             * @var $logged_user \Model\Users\UserStruct
              */
             $logged_user = $data->logged_user;
 
@@ -308,7 +308,7 @@ class Mmt extends BaseFeature {
      * @see      \ProjectManager::setPrivateTMKeys()
      * Called in @see \userKeysController::doAction()
      *
-     * @internal param Users_UserStruct $userStruct
+     * @internal param UserStruct $userStruct
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
 

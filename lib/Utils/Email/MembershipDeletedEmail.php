@@ -11,18 +11,18 @@ namespace Email;
 
 use Exception;
 use Model\Teams\TeamStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class MembershipDeletedEmail extends AbstractEmail {
 
     protected $title;
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     protected $user;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     protected $sender;
 
@@ -34,11 +34,11 @@ class MembershipDeletedEmail extends AbstractEmail {
     /**
      * MembershipDeletedEmail constructor.
      *
-     * @param Users_UserStruct $sender
-     * @param Users_UserStruct $removed_user
-     * @param TeamStruct       $team
+     * @param UserStruct $sender
+     * @param UserStruct $removed_user
+     * @param TeamStruct $team
      */
-    public function __construct( Users_UserStruct $sender, Users_UserStruct $removed_user, TeamStruct $team ) {
+    public function __construct( UserStruct $sender, UserStruct $removed_user, TeamStruct $team ) {
         $this->user   = $removed_user;
         $this->sender = $sender;
         $this->title  = "You've been removed from team " . $team->name;

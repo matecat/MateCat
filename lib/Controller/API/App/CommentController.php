@@ -18,14 +18,14 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Teams\MembershipDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
-use Url\JobUrlBuilder;
-use Users_UserDao;
-use Users_UserStruct;
 use Utils;
+use Utils\Url\JobUrlBuilder;
 
 class CommentController extends KleinController {
 
@@ -281,7 +281,7 @@ class CommentController extends KleinController {
 
         $user_mentions      = $this->resolveUserMentions( $struct->message );
         $user_team_mentions = $this->resolveTeamMentions( $request[ 'job' ], $struct->message );
-        $userDao            = new Users_UserDao( Database::obtain() );
+        $userDao            = new UserDao( Database::obtain() );
         $users_mentioned_id = array_unique( array_merge( $user_mentions, $user_team_mentions ) );
         $users_mentioned    = $this->filterUsers( $userDao->getByUids( $users_mentioned_id ) );
 
@@ -294,11 +294,11 @@ class CommentController extends KleinController {
 
     /**
      * @param                  $request
-     * @param Users_UserStruct $user
+     * @param UserStruct       $user
      *
      * @return CommentStruct
      */
-    private function prepareMentionCommentData( $request, Users_UserStruct $user ): CommentStruct {
+    private function prepareMentionCommentData( $request, UserStruct $user ): CommentStruct {
         $struct = new CommentStruct();
 
         $struct->id_segment   = $request[ 'id_segment' ];
@@ -383,7 +383,7 @@ class CommentController extends KleinController {
         $commentDao = new CommentDao( Database::obtain() );
         $result     = $commentDao->getThreadContributorUids( $comment );
 
-        $userDao = new Users_UserDao( Database::obtain() );
+        $userDao = new UserDao( Database::obtain() );
         $users   = $userDao->getByUids( $result );
         $userDao->setCacheTTL( 60 * 60 * 24 );
         $owner = $userDao->getProjectOwner( $job->id );

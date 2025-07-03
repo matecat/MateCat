@@ -1,5 +1,8 @@
 <?php
 
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -96,7 +99,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     /**
      * User Structs of key owners
      *
-     * @var Users_UserStruct[]
+     * @var UserStruct[]
      */
     protected $in_users;
 
@@ -212,13 +215,13 @@ class TmKeyManagement_TmKeyStruct extends stdClass implements JsonSerializable {
     }
 
     /**
-     * @return array|Users_UserStruct[]
+     * @return array|UserStruct[]
      * @throws ReflectionException
      */
     public function getInUsers() {
 
         if( is_string( $this->in_users ) ){
-            $userDao = new Users_UserDao( Database::obtain() );
+            $userDao = new UserDao( Database::obtain() );
             $users = $userDao->getByUids( explode( ",", $this->in_users ) );
             $this->in_users = $users;
         } elseif( $this->in_users == null ){

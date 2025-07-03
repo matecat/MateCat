@@ -2,12 +2,14 @@
 
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::getProjectOwner
+ * @covers UserDao::getProjectOwner
  * User: dinies
  * Date: 27/05/16
  * Time: 18.21
@@ -23,7 +25,7 @@ class GetProjectOwnerTest extends AbstractTest {
     protected $job_Dao;
 
     /**
-     * @var Users_UserDao
+     * @var UserDao
      */
     protected $user_Dao;
     protected $user_struct_param;
@@ -47,7 +49,7 @@ class GetProjectOwnerTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->user_Dao          = new Users_UserDao( $this->database_instance );
+        $this->user_Dao          = new UserDao( $this->database_instance );
 
         /**
          * user insertion
@@ -133,9 +135,9 @@ class GetProjectOwnerTest extends AbstractTest {
     }
 
     public function test_getProjectOwner() {
-        /** @var Users_UserStruct $user */
+        /** @var UserStruct $user */
         $user = $this->user_Dao->getProjectOwner( $this->id_job );
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );
         $this->assertEquals( $this->email_owner, $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
@@ -149,9 +151,9 @@ class GetProjectOwnerTest extends AbstractTest {
     public function test_getProjectOwner_mocked() {
 
         /**
-         * @var Users_UserDao
+         * @var UserDao
          */
-        $mock_user_Dao = $this->getMockBuilder( Users_UserDao::class )
+        $mock_user_Dao = $this->getMockBuilder( UserDao::class )
                 ->setConstructorArgs( [ $this->database_instance ] )
                 ->setMethods( [ '_buildResult', '_fetch_array' ] )
                 ->getMock();
@@ -162,10 +164,10 @@ class GetProjectOwnerTest extends AbstractTest {
 //        $mock_user_Dao->expects( $this->exactly( 1 ) )
 //                ->method( '_buildResult' );
 
-        /** @var Users_UserStruct $user */
+        /** @var UserStruct $user */
         $user = $mock_user_Dao->getProjectOwner( $this->id_job );
 
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );
         $this->assertEquals( $this->email_owner, $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );

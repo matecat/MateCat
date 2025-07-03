@@ -17,13 +17,13 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
 use ReflectionException;
 use stdClass;
 use TmKeyManagement_TmKeyStruct;
-use Users_UserStruct;
 use Utils;
-use Xliff\XliffConfigTemplateDao;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -106,13 +106,13 @@ class ProjectTemplateDao extends AbstractDao {
     }
 
     /**
-     * @param string           $json
-     * @param Users_UserStruct $user
+     * @param string     $json
+     * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( string $json, Users_UserStruct $user ): ProjectTemplateStruct {
+    public static function createFromJSON( string $json, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct = new ProjectTemplateStruct();
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid );
@@ -126,12 +126,12 @@ class ProjectTemplateDao extends AbstractDao {
      * @param ProjectTemplateStruct $projectTemplateStruct
      * @param string                $json
      * @param int                   $id
-     * @param Users_UserStruct      $user
+     * @param UserStruct            $user
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, Users_UserStruct $user ): ProjectTemplateStruct {
+    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
@@ -152,12 +152,12 @@ class ProjectTemplateDao extends AbstractDao {
      * - tm
      *
      * @param ProjectTemplateStruct $projectTemplateStruct
-     * @param Users_UserStruct      $user
+     * @param UserStruct            $user
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, Users_UserStruct $user ) {
+    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(

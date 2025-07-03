@@ -43,6 +43,7 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Xliff\XliffConfigTemplateDao;
 use ProjectQueue\Queue;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
@@ -57,7 +58,6 @@ use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
 use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
 
 class NewController extends KleinController {
 

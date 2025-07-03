@@ -9,7 +9,7 @@
 namespace View\API\V2\Json;
 
 
-use Users\MetadataStruct;
+use Model\Users\MetadataStruct;
 
 class UserMetadata {
 

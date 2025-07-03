@@ -16,9 +16,9 @@ use CookieManager;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Users\RedeemableProject;
+use Model\Users\UserDao;
 use SimpleJWT;
-use Users\RedeemableProject;
-use Users_UserDao;
 use Utils;
 
 class LoginController extends AbstractStatefulKleinController {
@@ -84,7 +84,7 @@ class LoginController extends AbstractStatefulKleinController {
                 ]
         );
 
-        $dao  = new Users_UserDao();
+        $dao  = new UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
         if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) ) {

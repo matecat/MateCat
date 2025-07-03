@@ -4,6 +4,8 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -611,20 +613,20 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param array            $emailList
-     * @param MemoryKeyStruct  $memoryKeyToUpdate
-     * @param Users_UserStruct $user
+     * @param array           $emailList
+     * @param MemoryKeyStruct $memoryKeyToUpdate
+     * @param UserStruct      $user
      *
      * @throws Exception
      */
-    public function shareKey( Array $emailList, MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
+    public function shareKey( Array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user ) {
 
         $mkDao = new MemoryKeyDao();
-        $userDao = new Users_UserDao();
+        $userDao = new UserDao();
 
         foreach ( $emailList as $pos => $email ) {
 
-            $userQuery                  = Users_UserStruct::getStruct();
+            $userQuery                  = UserStruct::getStruct();
             $userQuery->email           = $email;
             $alreadyRegisteredRecipient = $userDao->setCacheTTL( 60 * 10 )->read( $userQuery );
 
@@ -639,7 +641,7 @@ class TmKeyManagement_TmKeyManagement {
                 $this->_addToUserKeyRing( $memoryKeyToUpdate, $mkDao );
 
                 /**
-                 * @var Users_UserStruct[] $alreadyRegisteredRecipient
+                 * @var UserStruct[] $alreadyRegisteredRecipient
                  */
                 $email = new TmKeyManagement_ShareKeyEmail(
                     $user,

@@ -8,11 +8,11 @@ use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
 use TeamModel;
 use Throwable;
-use Users_UserDao;
-use Users_UserStruct;
 use View\API\App\Json\UserProfile;
 
 /**
@@ -24,7 +24,7 @@ use View\API\App\Json\UserProfile;
  */
 class AuthenticationHelper {
 
-    private Users_UserStruct $user;
+    private UserStruct $user;
     /**
      * @var true
      */
@@ -57,7 +57,7 @@ class AuthenticationHelper {
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
         $this->session =& $session;
-        $this->user    = new Users_UserStruct();
+        $this->user    = new UserStruct();
 
         try {
 
@@ -69,11 +69,11 @@ class AuthenticationHelper {
             } else {
                 // Credentials from AuthCookie
                 /**
-                 * @var $user Users_UserStruct
+                 * @var $user \Model\Users\UserStruct
                  */
                 $user_cookie_credentials = AuthCookie::getCredentials();
                 if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
-                    $userDao = new Users_UserDao();
+                    $userDao = new UserDao();
                     $userDao->setCacheTTL( 60 * 60 * 24 );
                     $this->user = $userDao->getByUid( $user_cookie_credentials[ 'user' ][ 'uid' ] );
                     $this->setUserSession();
@@ -119,7 +119,7 @@ class AuthenticationHelper {
     /**
      * @throws ReflectionException
      */
-    protected static function getUserProfile( Users_UserStruct $user ): array {
+    protected static function getUserProfile( UserStruct $user ): array {
 
         $metadata   = $user->getMetadataAsKeyValue();
         $membersDao = new MembershipDao();
@@ -169,7 +169,7 @@ class AuthenticationHelper {
         return false;
     }
 
-    public function getUser(): Users_UserStruct {
+    public function getUser(): UserStruct {
         return $this->user;
     }
 

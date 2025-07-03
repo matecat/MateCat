@@ -1,6 +1,6 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
 use DomainException;
 use Exception;

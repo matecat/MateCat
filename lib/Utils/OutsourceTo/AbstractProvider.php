@@ -6,8 +6,8 @@
 namespace OutsourceTo;
 
 use FeatureSet;
+use Model\Users\UserStruct;
 use Shop_AbstractItem;
-use Users_UserStruct;
 
 /**
  * Abstract class of a Provider to extend to implement a login/review/confirm communication
@@ -96,7 +96,7 @@ abstract class AbstractProvider {
 
     protected ?FeatureSet $features = null;
 
-    protected ?Users_UserStruct $user = null;
+    protected ?UserStruct $user = null;
 
     /**
      * List of job Ids and relative passwords that will be sent to the provider for quoting
@@ -194,11 +194,11 @@ abstract class AbstractProvider {
     }
 
     /**
-     * @param Users_UserStruct|null $user
+     * @param \Model\Users\UserStruct|null $user
      *
      * @return $this
      */
-    public function setUser( ?Users_UserStruct $user ): AbstractProvider {
+    public function setUser( ?UserStruct $user ): AbstractProvider {
         if ( !empty( $user ) ) {
             $this->user = $user;
         }

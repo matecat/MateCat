@@ -12,9 +12,9 @@ use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Users_UserStruct;
 use Utils;
 
 class ProjectDao extends AbstractDao {
@@ -142,12 +142,12 @@ class ProjectDao extends AbstractDao {
      * This update can easily become massive in case of long lived teams.
      * TODO: make this update chunked.
      *
-     * @param TeamStruct       $team
-     * @param Users_UserStruct $user
+     * @param TeamStruct $team
+     * @param UserStruct $user
      *
      * @return int
      */
-    public function unassignProjects( TeamStruct $team, Users_UserStruct $user ): int {
+    public function unassignProjects( TeamStruct $team, UserStruct $user ): int {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( static::$_sql_for_project_unassignment );
         $stmt->execute( [
@@ -159,13 +159,13 @@ class ProjectDao extends AbstractDao {
     }
 
     /**
-     * @param TeamStruct       $team
-     * @param Users_UserStruct $user
-     * @param TeamStruct       $personalTeam
+     * @param TeamStruct $team
+     * @param UserStruct $user
+     * @param TeamStruct $personalTeam
      *
      * @return int
      */
-    public function massiveSelfAssignment( TeamStruct $team, Users_UserStruct $user, TeamStruct $personalTeam ): int {
+    public function massiveSelfAssignment( TeamStruct $team, UserStruct $user, TeamStruct $personalTeam ): int {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( static::$_sql_massive_self_assignment );
         $stmt->execute( [

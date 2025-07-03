@@ -8,6 +8,8 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -259,15 +261,15 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      *
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user *
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user *
      *
      * @return void
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $client   = $this->_getClient();
         $response = $client->getMemory( 'x_mm-' . trim( $memoryKey ) );
@@ -360,7 +362,7 @@ class Engines_MMT extends Engines_AbstractEngine {
             // ==============================================
             //
             $preImportIsDisabled = empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
-            $user                = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $user                = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             if ( $preImportIsDisabled ) {
 

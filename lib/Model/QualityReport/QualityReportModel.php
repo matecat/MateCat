@@ -17,8 +17,8 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\ReviseFeedback\FeedbackDAO;
+use Model\Users\UserDao;
 use RevisionFactory;
-use Users_UserDao;
 use Utils;
 
 
@@ -217,7 +217,7 @@ class QualityReportModel {
         $name             = '';
 
         if ( !empty( $completion_event ) && isset( $completion_event[ 'uid' ] ) ) {
-            $userDao = new Users_UserDao( Database::obtain() );
+            $userDao = new UserDao( Database::obtain() );
             $user    = $userDao->getByUid( $completion_event[ 'uid' ] );
             $name    = $user->fullName();
         }

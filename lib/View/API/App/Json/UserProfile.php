@@ -11,21 +11,21 @@ namespace View\API\App\Json;
 
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Teams\TeamStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 use View\API\V2\Json\Team;
 use View\API\V2\Json\User;
 
 class UserProfile {
 
     /**
-     * @param Users_UserStruct              $user
+     * @param UserStruct                    $user
      * @param TeamStruct[]                  $teams
      * @param ConnectedServiceStruct[]|null $servicesStruct
      * @param array                         $userMetadata
      *
      * @return array
      */
-    public function renderItem( Users_UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = [] ) {
+    public function renderItem( UserStruct $user, array $teams, array $servicesStruct = null, array $userMetadata = [] ) {
 
         return [
                 'user'               => User::renderItem( $user ),

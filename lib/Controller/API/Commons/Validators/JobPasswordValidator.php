@@ -14,7 +14,7 @@ use ReflectionException;
 
 class JobPasswordValidator extends Base {
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     private JobStruct $jStruct;
 

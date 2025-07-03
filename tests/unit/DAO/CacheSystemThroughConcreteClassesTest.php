@@ -12,11 +12,11 @@ namespace unit\DAO;
 use Database;
 use Exception;
 use INIT;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use RedisHandler;
 use ReflectionException;
 use TestHelpers\AbstractTest;
-use Users_UserDao;
-use Users_UserStruct;
 use Utils;
 
 class CacheSystemThroughConcreteClassesTest extends AbstractTest {
@@ -59,16 +59,16 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     public function test_shouldSetAndGetFromCache() {
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( "UserDao::getByUid-" . self::$uid );
         $this->assertEmpty( $map );
 
-        $underTest = new Users_UserDao();
+        $underTest = new UserDao();
 
         $underTest->setCacheTTL( 600 );
 
         $user = $underTest->getByUid( self::$uid );
 
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( self::$uid, $user->uid );
         $this->assertEquals( self::$email, $user->email );
         $this->assertEquals( "12345", $user->salt );
@@ -78,7 +78,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
         $this->assertEquals( "Foo", $user->last_name );
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( "UserDao::getByUid-" . self::$uid );
         $this->assertNotEmpty( $map );
         $this->assertTrue( is_array( $map ) );
 
@@ -87,7 +87,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
 
         $key    = array_keys( $map )[ 0 ];
         $keyMap = $client->get( $key );
-        $this->assertEquals( "Users_UserDao::getByUid-" . self::$uid, $keyMap );
+        $this->assertEquals( "UserDao::getByUid-" . self::$uid, $keyMap );
 
     }
 
@@ -99,19 +99,19 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     public function test_shouldDestroyCache() {
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( "UserDao::getByUid-" . self::$uid );
         $this->assertNotEmpty( $map );
 
         $key    = array_keys( $map )[ 0 ];
         $keyMap = $client->get( $key );
-        $this->assertEquals( "Users_UserDao::getByUid-" . self::$uid, $keyMap );
+        $this->assertEquals( "UserDao::getByUid-" . self::$uid, $keyMap );
 
 
-        $underTest = new Users_UserDao();
+        $underTest = new UserDao();
         $underTest->destroyCacheByUid( self::$uid );
 
 
-        $map = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map = $client->hgetall( "UserDao::getByUid-" . self::$uid );
         $this->assertEmpty( $map );
 
     }

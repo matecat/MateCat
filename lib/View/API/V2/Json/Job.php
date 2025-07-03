@@ -22,10 +22,10 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use OutsourceTo\OutsourceAvailable;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
-use Users_UserStruct;
 use Utils;
 use View\API\App\Json\OutsourceConfirmation;
 use WordCount\WordCountStruct;
@@ -38,9 +38,9 @@ class Job {
     protected ?string $status = null;
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
      * @var bool
@@ -60,11 +60,11 @@ class Job {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): Job {
+    public function setUser( UserStruct $user ): Job {
         $this->user = $user;
 
         return $this;

@@ -33,8 +33,8 @@ class ConstructorTest extends AbstractTest {
         parent::setUp();
 
         $this->word_count_struct = new WordCountStruct();
-        $this->word_count_struct->setIdJob( $this->job_id );
-        $this->word_count_struct->setJobPassword( $this->job_password );
+        $this->word_count_struct->setIdJob( 1 );
+        $this->word_count_struct->setJobPassword( 'string');
         $this->word_count_struct->setNewWords( 0 );
         $this->word_count_struct->setDraftWords( 0 );
         $this->word_count_struct->setTranslatedWords( 30 );

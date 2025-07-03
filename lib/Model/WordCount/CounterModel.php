@@ -14,43 +14,36 @@ use BadMethodCallException;
 use Constants_TranslationStatus;
 use Exception;
 use LogicException;
-use Model\Projects\ProjectStruct;
 use ReflectionClass;
 
 class CounterModel {
 
     /**
-     * @var WordCountStruct
+     * @var WordCountStruct|null
      */
-    protected $oldWCount;
-    protected $newStatus;
-    protected $oldStatus;
+    protected ?WordCountStruct $oldWCount = null;
+    protected string           $newStatus;
+    protected string           $oldStatus;
 
-    /**
-     * @var ProjectStruct
-     */
-    private $project;
-
-    protected static $constCache = [];
+    protected static array $constCache = [];
     /**
      * @var WordCountStruct[]
      */
-    private $values;
+    private array $values = [];
 
     /**
      * @return WordCountStruct[]
      */
-    public function getValues() {
+    public function getValues(): array {
         return $this->values;
     }
 
     /**
-     * @param WordCountStruct $oldWCount
-     *
+     * @param WordCountStruct|null $oldWCount
      */
     public function __construct( WordCountStruct $oldWCount = null ) {
 
-        $reflect          = new ReflectionClass( 'Constants_TranslationStatus' );
+        $reflect          = new ReflectionClass( Constants_TranslationStatus::class );
         self::$constCache = array_flip( $reflect->getConstants() );
 
         if ( $oldWCount !== null ) {
@@ -60,11 +53,10 @@ class CounterModel {
     }
 
     /**
-     * @param $status
+     * @param string $status
      *
-     * @throws BadMethodCallException
      */
-    protected function _verifyStatus( $status ) {
+    protected function _verifyStatus( string $status ) {
         if ( !array_key_exists( $status, self::$constCache ) ) {
             throw new BadMethodCallException( __METHOD__ . " Error: " . $status . " status is not defined." );
         }
@@ -74,34 +66,27 @@ class CounterModel {
         $this->oldWCount = $oldWCount;
     }
 
-    /**
-     * @param ProjectStruct $project
-     */
-    public function setProject( ProjectStruct $project ) {
-        $this->project = $project;
-    }
-
-    public function setNewStatus( $new_status ) {
+    public function setNewStatus( string $new_status ) {
         $this->_verifyStatus( $new_status );
         $this->newStatus = $new_status;
     }
 
-    public function setOldStatus( $old_status ) {
+    public function setOldStatus( string $old_status ) {
         $this->_verifyStatus( $old_status );
         $this->oldStatus = $old_status;
     }
 
-    public function setUpdatedValues( $weighted_words_amount, $raw_words_amount ) {
+    public function setUpdatedValues( float $weighted_words_amount, int $raw_words_amount ) {
         $this->values[] = $this->getUpdatedValues( $weighted_words_amount, $raw_words_amount );
     }
 
     /**
-     * @param $weighted_words_amount int the new status
+     * @param float $weighted_words_amount the new status
+     * @param int   $raw_words_amount
      *
      * @return WordCountStruct
-     * @throws LogicException
      */
-    public function getUpdatedValues( $weighted_words_amount, $raw_words_amount ) {
+    public function getUpdatedValues( float $weighted_words_amount, int $raw_words_amount ): WordCountStruct {
 
         if ( $this->oldWCount === null ) {
             throw new LogicException( __METHOD__ . " Error: old word count is not defined." );
@@ -143,7 +128,7 @@ class CounterModel {
      * @return WordCountStruct
      * @throws Exception
      */
-    public function updateDB( array $_wordCount_Struct_Array ) {
+    public function updateDB( array $_wordCount_Struct_Array ): WordCountStruct {
 
         $differentialCountStruct = $this->sumDifferentials( $_wordCount_Struct_Array );
 
@@ -183,7 +168,7 @@ class CounterModel {
      *
      * @return WordCountStruct
      */
-    public function sumDifferentials( $wordCount_Struct ) {
+    public function sumDifferentials( array $wordCount_Struct ): WordCountStruct {
 
         $newWCount = new WordCountStruct();
         $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
@@ -213,7 +198,7 @@ class CounterModel {
 
     }
 
-    public function initializeJobWordCount( $id_job, $jPassword, WordCounterDao $wordCounterDao = null ) {
+    public function initializeJobWordCount( int $id_job, string $jPassword, WordCounterDao $wordCounterDao = null ): WordCountStruct {
 
         if ( !$wordCounterDao ) {
             $wordCounterDao = new WordCounterDao();

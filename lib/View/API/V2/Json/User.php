@@ -9,10 +9,10 @@
 namespace View\API\V2\Json;
 
 
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class User {
-    public static function renderItem( Users_UserStruct $user ) {
+    public static function renderItem( UserStruct $user ) {
         return [
                 'uid'          => (int)$user->uid,
                 'first_name'   => $user->first_name,
@@ -22,7 +22,7 @@ class User {
         ];
     }
 
-    public static function renderItemPublic( Users_UserStruct $user ) {
+    public static function renderItemPublic( UserStruct $user ) {
         return [
                 'uid'        => (int)$user->uid,
                 'first_name' => $user->first_name,

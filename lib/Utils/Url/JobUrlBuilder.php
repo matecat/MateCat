@@ -1,6 +1,6 @@
 <?php
 
-namespace Url;
+namespace Utils\Url;
 
 use CatUtils;
 use Model\Jobs\JobStruct;
@@ -22,16 +22,16 @@ class JobUrlBuilder {
      * @param string                $projectName
      * @param array                 $options
      *
-     * @return JobUrlStruct
+     * @return JobUrls
      */
     public static function createFromJobStructAndProjectName( JobStruct $job, $projectName, $options = [] ) {
 
         // 3. get passwords array
         $passwords   = [];
         $sourcePages = [
-                JobUrlStruct::LABEL_T  => 1,
-                JobUrlStruct::LABEL_R1 => 2,
-                JobUrlStruct::LABEL_R2 => 3
+                JobUrls::LABEL_T  => 1,
+                JobUrls::LABEL_R1 => 2,
+                JobUrls::LABEL_R2 => 3
         ];
 
         foreach ( $sourcePages as $label => $sourcePage ) {
@@ -53,7 +53,7 @@ class JobUrlBuilder {
             }
         }
 
-        return new JobUrlStruct(
+        return new JobUrls(
                 $job->id,
                 $projectName,
                 $job->source,
@@ -78,7 +78,7 @@ class JobUrlBuilder {
      * @param array                 $options
      * @param ProjectStruct|null    $project
      *
-     * @return JobUrlStruct
+     * @return JobUrls
      */
     public static function createFromJobStruct( JobStruct $job, $options = [], ProjectStruct $project = null ) {
 

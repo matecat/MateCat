@@ -17,8 +17,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 use RuntimeException;
-use Users_UserStruct;
 use Utils;
 
 /**
@@ -56,12 +56,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param JobStruct        $chunkStruct
-     * @param int|null         $id_segment
-     * @param Users_UserStruct $userStruct
-     * @param ProjectStruct    $projectStruct
+     * @param JobStruct               $chunkStruct
+     * @param int|null                $id_segment
+     * @param \Model\Users\UserStruct $userStruct
+     * @param ProjectStruct           $projectStruct
      */
-    public function __construct( JobStruct $chunkStruct, ?int $id_segment, Users_UserStruct $userStruct, ProjectStruct $projectStruct ) {
+    public function __construct( JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;

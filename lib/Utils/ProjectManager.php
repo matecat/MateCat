@@ -45,6 +45,10 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translators\TranslatorsModel;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use Model\Xliff\DTO\XliffRulesModel;
+use Model\Xliff\XliffConfigTemplateStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TMS\TMSFile;
@@ -54,8 +58,6 @@ use Utils\ConnectedServices\Google\GoogleProvider;
 use Utils\LQA\QA;
 use View\API\Commons\Error;
 use WordCount\CounterModel;
-use Xliff\DTO\XliffRulesModel;
-use Xliff\XliffConfigTemplateStruct;
 
 class ProjectManager {
 
@@ -110,7 +112,7 @@ class ProjectManager {
     const TRANSLATED_USER = 'translated_user';
 
     /**
-     * @var Users_UserStruct ;
+     * @var UserStruct ;
      */
     protected $user;
 
@@ -1222,7 +1224,7 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
                     $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
@@ -1651,7 +1653,7 @@ class ProjectManager {
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
 
             $translatorModel
-                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
+                    ->setUserInvite( ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )

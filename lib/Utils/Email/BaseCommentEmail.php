@@ -9,12 +9,12 @@
 namespace Email;
 
 use Model\Comments\CommentStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class BaseCommentEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     protected $user;
 
@@ -35,13 +35,13 @@ class BaseCommentEmail extends AbstractEmail {
     /**
      * BaseCommentEmail constructor.
      *
-     * @param Users_UserStruct $user
-     * @param CommentStruct    $comment
+     * @param \Model\Users\UserStruct $user
+     * @param CommentStruct           $comment
      * @param $url
      * @param $project
      * @param $job
      */
-    public function __construct( Users_UserStruct $user, CommentStruct $comment, $url, $project, $job ) {
+    public function __construct( UserStruct $user, CommentStruct $comment, $url, $project, $job ) {
 
         $this->project = $project;
         $this->user    = $user;

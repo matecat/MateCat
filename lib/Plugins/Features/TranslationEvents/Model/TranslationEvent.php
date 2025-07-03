@@ -13,8 +13,8 @@ use Model\LQA\EntryWithCategoryStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 use RuntimeException;
-use Users_UserStruct;
 
 class TranslationEvent {
 
@@ -29,9 +29,9 @@ class TranslationEvent {
     protected SegmentTranslationStruct $wanted_translation;
 
     /**
-     * @var Users_UserStruct|null
+     * @var \Model\Users\UserStruct|null
      */
-    protected ?Users_UserStruct $user;
+    protected ?UserStruct $user;
 
     /**
      * @var int
@@ -83,13 +83,13 @@ class TranslationEvent {
     /**
      * @param \Model\Translations\SegmentTranslationStruct $old_translation
      * @param SegmentTranslationStruct                     $translation
-     * @param Users_UserStruct|null                        $user
+     * @param \Model\Users\UserStruct|null                 $user
      * @param int                                          $source_page_code
      *
      */
     public function __construct( SegmentTranslationStruct $old_translation,
                                  SegmentTranslationStruct $translation,
-                                 ?Users_UserStruct        $user,
+                                 ?UserStruct              $user,
                                  int                      $source_page_code
     ) {
 
@@ -116,10 +116,10 @@ class TranslationEvent {
     }
 
     /**
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws Exception
      */
-    public function getUser(): ?Users_UserStruct {
+    public function getUser(): ?UserStruct {
 
         if ( isset( $this->user ) && $this->user->uid ) {
             return $this->user;

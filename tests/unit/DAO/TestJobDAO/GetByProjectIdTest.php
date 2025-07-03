@@ -35,6 +35,9 @@ class GetByProjectIdTest extends AbstractTest {
     protected $sql_delete_job;
     protected $flusher;
 
+    /**
+     * @throws ReflectionException
+     */
     public function setUp(): void {
         parent::setUp();
 
@@ -42,7 +45,7 @@ class GetByProjectIdTest extends AbstractTest {
          * job initialization
          */
 
-        $this->str_id_project = "888888";
+        $this->str_id_project = 888888;
         $this->str_password   = "7barandfoo71";
         $this->str_owner      = "barandfoo@translated.net";
         $this->job_struct     = new JobStruct(
@@ -115,6 +118,9 @@ class GetByProjectIdTest extends AbstractTest {
         parent::tearDown();
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function test_GetByProjectId() {
         $actual_result = $this->job_Dao->getByProjectId( $this->str_id_project );
         $id            = $actual_result[ '0' ][ 'id' ];

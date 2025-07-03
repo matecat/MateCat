@@ -16,13 +16,13 @@ use Routes;
 class SignupEmail extends AbstractEmail {
 
     /**
-     * @var \Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
     private $user;
 
     protected $title = 'Confirm your registration with Matecat';
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( \Model\Users\UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );

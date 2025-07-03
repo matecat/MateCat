@@ -7,7 +7,7 @@ use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use Features\TranslationVersions\VersionHandlerInterface;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class TranslationVersions extends BaseFeature {
 
@@ -15,13 +15,13 @@ class TranslationVersions extends BaseFeature {
 
     /**
      * @param \Model\Jobs\JobStruct $chunkStruct
-     * @param Users_UserStruct      $userStruct
+     * @param UserStruct            $userStruct
      * @param ProjectStruct         $projectStruct
      * @param int|null              $id_segment
      *
      * @return VersionHandlerInterface
      */
-    public static function getVersionHandlerNewInstance( JobStruct $chunkStruct, Users_UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null ) {
+    public static function getVersionHandlerNewInstance( JobStruct $chunkStruct, UserStruct $userStruct, ProjectStruct $projectStruct, ?int $id_segment = null ) {
 
         if ( $id_segment && $projectStruct->isFeatureEnabled( self::FEATURE_CODE ) ) {
             return new TranslationVersionsHandler(

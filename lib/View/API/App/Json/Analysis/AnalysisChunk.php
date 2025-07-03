@@ -14,9 +14,9 @@ use Exception;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Jobs\JobStruct;
+use Model\Users\UserStruct;
 use TmKeyManagement_Filter;
-use Url\JobUrlBuilder;
-use Users_UserStruct;
+use Utils\Url\JobUrlBuilder;
 
 class AnalysisChunk implements JsonSerializable {
 
@@ -38,9 +38,9 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected string $projectName;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
      * @var int
@@ -55,7 +55,7 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected float $total_industry = 0;
 
-    public function __construct( JobStruct $chunkStruct, $projectName, Users_UserStruct $user, ConstantsInterface $matchConstantsClass ) {
+    public function __construct( JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user        = $user;

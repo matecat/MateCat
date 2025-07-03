@@ -3,6 +3,7 @@
 use Model\Engines\EngineStruct;
 use Model\Engines\GoogleTranslateStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -360,13 +361,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user
      *
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
     }
 

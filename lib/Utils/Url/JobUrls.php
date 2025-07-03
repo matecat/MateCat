@@ -1,11 +1,11 @@
 <?php
 
-namespace Url;
+namespace Utils\Url;
 
 use Features\ReviewExtended\ReviewUtils;
 use INIT;
 
-class JobUrlStruct {
+class JobUrls {
 
     // STATUS LABELS
     const LABEL_T  = 't';
@@ -48,7 +48,7 @@ class JobUrlStruct {
     private $urls = [];
 
     /**
-     * JobUrlStruct constructor.
+     * JobUrls constructor.
      *
      * @param int    $jid
      * @param string $projectName

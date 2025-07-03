@@ -9,9 +9,8 @@ use Controller\API\Commons\Validators\JSONRequestValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Klein\Response;
-use Users\MetadataDao;
-use Users_UserDao;
+use Model\Users\MetadataDao;
+use Model\Users\UserDao;
 
 class UserController extends AbstractStatefulKleinController {
     public function afterConstruct() {
@@ -58,7 +57,7 @@ class UserController extends AbstractStatefulKleinController {
             $user->first_name = $data[ 'first_name' ];
             $user->last_name  = $data[ 'last_name' ];
 
-            $userDao = new Users_UserDao();
+            $userDao = new UserDao();
             $userDao->updateUser( $user );
             $userDao->destroyCacheByUid( $user->uid );
 

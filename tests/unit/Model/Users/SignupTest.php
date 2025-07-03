@@ -1,8 +1,9 @@
 <?php
 
 use Model\Exceptions\ValidationError;
+use Model\Users\Authentication\SignupModel;
+use Model\Users\UserDao;
 use TestHelpers\AbstractTest;
-use Users\Authentication\SignupModel;
 
 class SignupTest extends AbstractTest {
 
@@ -27,7 +28,7 @@ class SignupTest extends AbstractTest {
 
         $signup->processSignup();
 
-        $dao  = new Users_UserDao();
+        $dao  = new UserDao();
         $user = $dao->getByEmail( 'foo@example.org' );
         $this->assertNotEmpty( $user );
         $this->assertEquals( 'https://fake.example.com', $session[ 'wanted_url' ] );

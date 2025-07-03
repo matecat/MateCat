@@ -4,8 +4,8 @@
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
-use Url\JobUrlBuilder;
-use Url\JobUrlStruct;
+use Utils\Url\JobUrlBuilder;
+use Utils\Url\JobUrls;
 
 class JobUrlBuilderTest extends AbstractTest {
 
@@ -41,7 +41,7 @@ class JobUrlBuilderTest extends AbstractTest {
                 'id_segment' => 1
         ] );
 
-        $this->assertInstanceOf( JobUrlStruct::class, $jobUrlStruct );
+        $this->assertInstanceOf( JobUrls::class, $jobUrlStruct );
         $this->assertNotNull( $jobUrlStruct->getTranslationUrl() );
         $this->assertEquals( $jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl() );
         $this->assertNull( $jobUrlStruct->getReviseUrl() );
@@ -60,7 +60,7 @@ class JobUrlBuilderTest extends AbstractTest {
                 'id_segment' => 1
         ] );
 
-        $this->assertInstanceOf( JobUrlStruct::class, $jobUrlStruct );
+        $this->assertInstanceOf( JobUrls::class, $jobUrlStruct );
         $this->assertNotNull( $jobUrlStruct->getTranslationUrl() );
         $this->assertTrue( strpos( $jobUrlStruct->getTranslationUrl(), 'fake_name' ) !== false );
         $this->assertEquals( $jobUrlStruct->getUrlByRevisionNumber(), $jobUrlStruct->getTranslationUrl() );

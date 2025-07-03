@@ -7,12 +7,12 @@
  *
  */
 
+use Model\Xliff\DTO\AbstractXliffRule;
+use Model\Xliff\DTO\DefaultRule;
+use Model\Xliff\DTO\Xliff12Rule;
+use Model\Xliff\DTO\Xliff20Rule;
+use Model\Xliff\DTO\XliffRulesModel;
 use TestHelpers\AbstractTest;
-use Xliff\DTO\AbstractXliffRule;
-use Xliff\DTO\DefaultRule;
-use Xliff\DTO\Xliff12Rule;
-use Xliff\DTO\Xliff20Rule;
-use Xliff\DTO\XliffRulesModel;
 
 class XliffRulesModelTest extends AbstractTest {
 

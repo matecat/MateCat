@@ -19,9 +19,9 @@ use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
 use Routes;
 use TransactionalTrait;
-use Users_UserDao;
 use Utils;
 use WordCount\CounterModel;
 
@@ -57,7 +57,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @var array
      */
-    private $_finalRevisions;
+    private array $_finalRevisions;
     /**
      * @var CounterModel
      */
@@ -322,7 +322,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
                 continue;
             }
 
-            $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
+            $user = ( new UserDao() )->getByUid( $finalRevision->uid );
             if ( $user ) {
                 $emails[] = [
                         'isPreviousChangeAuthor' => true,
@@ -331,7 +331,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
             }
         }
 
-        $projectOwner = ( new Users_UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer );
+        $projectOwner = ( new UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer );
         if ( $projectOwner ) {
             $emails[] = [
                     'isPreviousChangeAuthor' => false,
@@ -339,7 +339,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
             ];
         }
 
-        $projectAssignee = ( new Users_UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee );
+        $projectAssignee = ( new UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee );
         if ( $projectAssignee ) {
             $emails[] = [
                     'isPreviousChangeAuthor' => false,

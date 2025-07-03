@@ -1,16 +1,16 @@
 <?php
 
-namespace Xliff;
+namespace Model\Xliff;
 
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\Xliff\DTO\Xliff12Rule;
+use Model\Xliff\DTO\Xliff20Rule;
+use Model\Xliff\DTO\XliffRulesModel;
 use stdClass;
-use Xliff\DTO\Xliff12Rule;
-use Xliff\DTO\Xliff20Rule;
-use Xliff\DTO\XliffRulesModel;
 
 class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 
@@ -31,6 +31,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      * @param null   $uid
      *
      * @return $this
+     * @throws Exception
      */
     public function hydrateFromJSON( string $json, $uid = null ): XliffConfigTemplateStruct {
 
@@ -72,6 +73,9 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function hydrateRulesFromDataArray( array $rules ): XliffConfigTemplateStruct {
 
         $this->rules = new XliffRulesModel();
@@ -100,6 +104,7 @@ class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonS
      * @param string $jsonRules
      *
      * @return XliffConfigTemplateStruct
+     * @throws Exception
      */
     public function hydrateRulesFromJson( string $jsonRules ): XliffConfigTemplateStruct {
         $rules = json_decode( $jsonRules, true );

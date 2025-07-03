@@ -13,8 +13,8 @@ use Model\Exceptions\NotFoundException;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserStruct;
 
 class GetProjectsController extends KleinController {
 
@@ -136,10 +136,10 @@ class GetProjectsController extends KleinController {
      * @param TeamStruct $team
      * @param            $id_assignee
      *
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws Exception
      */
-    private function filterAssignee( TeamStruct $team, $id_assignee ): ?Users_UserStruct {
+    private function filterAssignee( TeamStruct $team, $id_assignee ): ?UserStruct {
         if ( is_null( $id_assignee ) ) {
             return null;
         }

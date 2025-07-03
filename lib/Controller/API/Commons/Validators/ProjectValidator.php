@@ -7,8 +7,8 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Log;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserStruct;
 
 /**
  * @daprecated this should extend Base
@@ -19,9 +19,9 @@ use Users_UserStruct;
 class ProjectValidator extends Base {
 
     /**
-     * @var ?Users_UserStruct
+     * @var ?UserStruct
      */
-    private ?Users_UserStruct $user = null;
+    private ?UserStruct $user = null;
 
     /**
      * @var int
@@ -29,11 +29,11 @@ class ProjectValidator extends Base {
     private int $id_project;
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): ProjectValidator {
+    public function setUser( UserStruct $user ): ProjectValidator {
         $this->user = $user;
 
         return $this;

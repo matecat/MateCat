@@ -9,18 +9,18 @@
 namespace Email;
 
 
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class WelcomeEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
     protected $user;
 
     protected $title = 'Welcome to Matecat! Get Started with Your First Project Today';
 
-    public function __construct( Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
         $this->user = $user;
 
         $this->_setLayout( 'skeleton.html' );

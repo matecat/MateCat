@@ -16,12 +16,12 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use OutsourceTo\OutsourceAvailable;
 use ReflectionException;
 use Routes;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use Users_UserStruct;
 use View\API\App\Json\Analysis\AnalysisChunk;
 use View\API\App\Json\Analysis\AnalysisFile;
 use View\API\App\Json\Analysis\AnalysisJob;
@@ -57,24 +57,24 @@ abstract class AbstractStatus {
      */
     protected ProjectStruct $project;
     /**
-     * @var Users_UserStruct|null
+     * @var \Model\Users\UserStruct|null
      */
-    protected ?Users_UserStruct $user;
+    protected ?UserStruct $user;
     /**
      * @var mixed
      */
     protected $subject;
 
     /**
-     * @param array                 $_project_data
-     * @param FeatureSet            $features
-     * @param Users_UserStruct|null $user
+     * @param array                        $_project_data
+     * @param FeatureSet                   $features
+     * @param \Model\Users\UserStruct|null $user
      *
      * @throws ReflectionException
      */
-    public function __construct( array $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
+    public function __construct( array $_project_data, FeatureSet $features, UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
-            $user      = new Users_UserStruct();
+            $user      = new UserStruct();
             $user->uid = -1;
         }
         $this->user          = $user;

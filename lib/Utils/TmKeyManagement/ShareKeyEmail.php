@@ -2,6 +2,7 @@
 
 use Email\AbstractEmail;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -22,7 +23,7 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
 
     protected $alreadyRegistered = false;
 
-    public function __construct( Users_UserStruct $sender, Array $userMail, MemoryKeyStruct $keyStruct ) {
+    public function __construct( UserStruct $sender, Array $userMail, MemoryKeyStruct $keyStruct ) {
 
         $this->userMail  = $userMail;
         $this->keyStruct = $keyStruct;

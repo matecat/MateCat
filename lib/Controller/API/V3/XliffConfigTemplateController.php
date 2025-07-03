@@ -7,13 +7,13 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONSchema\Errors\JSONValidatorException;
 use Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
-use Xliff\XliffConfigTemplateDao;
 
 class XliffConfigTemplateController extends KleinController {
     protected function afterConstruct() {

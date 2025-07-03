@@ -21,10 +21,10 @@ use Model\Conversion\Upload;
 use Model\Engines\EngineStruct;
 use Model\Jobs\ChunkDao;
 use Model\TMSService\TMSServiceDao;
+use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use SplTempFileObject;
 use stdClass;
-use Users\MetadataDao;
-use Users_UserStruct;
 use Utils;
 
 class TMSService {
@@ -146,7 +146,7 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
+    public function addTmxInMyMemory( TMSFile $file, UserStruct $user ): array {
 
         try {
 

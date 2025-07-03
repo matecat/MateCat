@@ -10,14 +10,14 @@ namespace Controller\Abstracts;
 
 
 use FeatureSet;
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 interface IController {
 
     /**
-     * @return null|Users_UserStruct
+     * @return null|\Model\Users\UserStruct
      */
-    public function getUser(): ?Users_UserStruct;
+    public function getUser(): ?UserStruct;
 
     public function isLoggedIn(): bool;
 

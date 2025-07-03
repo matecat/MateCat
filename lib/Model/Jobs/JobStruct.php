@@ -28,8 +28,8 @@ use Model\TmKeyManagement\UserKeysModel;
 use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\JobsTranslatorsStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Users_UserStruct;
 use Utils;
 use WordCount\WordCountStruct;
 
@@ -274,12 +274,12 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      * @param                  $role
      *
      * @return array
      */
-    public function getClientKeys( Users_UserStruct $user, $role ): array {
+    public function getClientKeys( UserStruct $user, $role ): array {
         $uKModel = new UserKeysModel( $user, $role );
 
         return $uKModel->getKeys( $this->tm_keys, 60 * 10 );
