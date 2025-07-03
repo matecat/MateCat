@@ -18,6 +18,7 @@ use Exception;
 use FeatureSet;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
 use PostProcess;
@@ -377,13 +378,8 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        if ( $contributionStruct->dialect_strict !== null ) {
-            $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
-        }
-
-        if ( $contributionStruct->tm_prioritization !== null ) {
-            $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
-        }
+        $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
 
         if ( !empty( $contributionStruct->penalty_key ) ) {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
@@ -503,6 +499,12 @@ class GetContributionWorker extends AbstractWorker {
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ] = $contributionStruct->mt_evaluation;
+                }
+
+                if ( $contributionStruct->mt_qe_workflow_enabled ) {
+                    // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
+                    $mt_qe_config                = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters ?? null, true ) ?? [] ); // params or default configuration (NULL safe)
+                    $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_version;
                 }
 
                 $mt_engine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)

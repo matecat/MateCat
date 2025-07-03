@@ -103,6 +103,7 @@ class GetContributionController extends KleinController {
         $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
         $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
         $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
 
         if ( $this->isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
