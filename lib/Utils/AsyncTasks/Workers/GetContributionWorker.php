@@ -435,12 +435,11 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'get_mt' ] = false;
         }
 
+        $tms_match = [];
+
         /**
          * if No TM server and No MT selected $_TMS is not defined,
          * so we want not to perform TMS Call
-         */
-        /**
-         *
          * This calls the TMEngine to get memories
          */
         if ( isset( $_TMS ) ) {
@@ -512,12 +511,7 @@ class GetContributionWorker extends AbstractWorker {
             }
         }
 
-        $matches = [];
-        if ( !empty( $tms_match ) ) {
-            $matches = $tms_match;
-        }
-
-        return [ $mt_result, $matches ];
+        return [ $mt_result, $tms_match ];
     }
 
     /**
