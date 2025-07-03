@@ -147,7 +147,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const updateKeyName = () => {
     if (valueChange.current) {
-      if (name) {
+      if (name.trim() !== '') {
         updateTmKey({
           key: row.key,
           penalty: row.penalty,
@@ -180,6 +180,21 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             dataTm: getTmDataStructureToSendServer({tmKeys}),
           }).then(() => CatToolActions.onTMKeysChangeStatus())
         }
+      } else {
+        CatToolActions.addNotification({
+          title: 'Error updating resource',
+          type: 'error',
+          text: 'Resource name cannot be empty. Please provide a valid name.',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+        setTmKeys((prevState) =>
+          prevState.map((tm) =>
+            tm.id === row.id ? {...tm, name: valueName.current} : tm,
+          ),
+        )
+        setName(valueName.current)
       }
 
       valueChange.current = false
