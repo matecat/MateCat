@@ -8,7 +8,7 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
 use BadMethodCallException;
 use Constants_TranslationStatus;

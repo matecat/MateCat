@@ -9,8 +9,8 @@ use Exception;
 use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
 use TMS\TMSService;
+use View\API\Commons\ZipContentObject;
 use ZipArchive;
-use ZipContentObject;
 
 /**
  * Created by PhpStorm.

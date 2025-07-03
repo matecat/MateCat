@@ -2,12 +2,12 @@
 
 namespace Model\PayableRates;
 
-use Analysis\PayableRates;
-use Database;
 use Date\DateTimeUtil;
 use DateTime;
 use Exception;
+use Model\Analysis\PayableRates;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;

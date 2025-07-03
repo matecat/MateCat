@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Projects\ProjectDao;
 
 $root = realpath(dirname(__FILE__) . '/../../');
@@ -32,7 +33,7 @@ $json = json_decode( $content, true );
 
 $model_record = Model\LQA\ModelDao::createModelFromJsonDefinition( $json );
 
-$dao = new \Model\Projects\ProjectDao( \Database::obtain() );
+$dao = new \Model\Projects\ProjectDao( Model\Database::obtain() );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );
 
 echo "done \n";

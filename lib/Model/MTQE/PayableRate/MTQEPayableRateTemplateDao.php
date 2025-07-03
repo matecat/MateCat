@@ -9,10 +9,10 @@
 
 namespace Model\MTQE\PayableRate;
 
-use Database;
 use DateTime;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;

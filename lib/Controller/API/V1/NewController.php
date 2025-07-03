@@ -2,7 +2,6 @@
 
 namespace Controller\API\V1;
 
-use BasicFeatureStruct;
 use Constants;
 use Constants_ProjectStatus;
 use Constants_TmKeyPermissions;
@@ -10,10 +9,10 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
-use Database;
 use Engine;
 use Engines_DeepL;
 use Exception;
+use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
 use Langs\LanguageDomains;
@@ -21,8 +20,10 @@ use Langs\Languages;
 use Log;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -628,7 +629,7 @@ class NewController extends KleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 

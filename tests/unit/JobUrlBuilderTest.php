@@ -1,6 +1,7 @@
 <?php
 
 
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;

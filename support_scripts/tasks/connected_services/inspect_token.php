@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Users\UserDao;
 
 $root = realpath(dirname(__FILE__) . '/../../../');

@@ -1,6 +1,7 @@
 <?php
 
-use Utils\ConnectedServices\Google\GoogleProvider;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\Database;
 
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
 include_once $root . "/inc/Bootstrap.php";
@@ -38,7 +39,7 @@ $service = $dao->findById( $options[ 'id_service' ] );
 //FIX
 $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
 
-$verifier = new \Model\ConnectedServices\GDriveTokenVerifyModel( $service );
+$verifier = new \Model\ConnectedServices\GDrive\GDriveTokenVerifyModel( $service );
 $verifier->validOrRefreshed( $client );
 var_dump( $verifier );
 

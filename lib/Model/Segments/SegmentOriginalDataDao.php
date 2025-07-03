@@ -2,8 +2,8 @@
 
 namespace Model\Segments;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use ReflectionException;
 
 class SegmentOriginalDataDao extends AbstractDao {

@@ -15,9 +15,9 @@ use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Engines_Results_MyMemory_TMS;
 use Exception;
-use FeatureSet;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Translations\SegmentTranslationDao;
@@ -549,9 +549,9 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                     $matches
-     * @param ContributionRequestStruct $contributionStruct
-     * @param FeatureSet                $featureSet
+     * @param array                          $matches
+     * @param ContributionRequestStruct      $contributionStruct
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @throws ReflectionException
      * @throws Exception

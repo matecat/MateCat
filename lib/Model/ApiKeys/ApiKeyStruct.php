@@ -1,9 +1,9 @@
 <?php
 namespace Model\ApiKeys;
 
-use Database;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use Model\Users\UserDao;
 use ReflectionException;
 

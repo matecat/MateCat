@@ -7,7 +7,6 @@ use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
-use FeatureSet;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Langs\Languages;
@@ -20,11 +19,14 @@ use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
-use Model\ConnectedServices\GDriveTokenVerifyModel;
+use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
+use Model\ConnectedServices\GDrive\RemoteFileService;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Conversion\Filters;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\FsFilesStorage;
@@ -39,10 +41,8 @@ use Predis\Connection\ConnectionException;
 use RedisHandler;
 use ReflectionException;
 use Utils;
-use Utils\ConnectedServices\Google\GDrive\RemoteFileService;
-use Utils\ConnectedServices\Google\GoogleProvider;
+use View\API\Commons\ZipContentObject;
 use XliffReplacer\XliffReplacerCallback;
-use ZipContentObject;
 
 set_time_limit( 180 );
 
@@ -736,7 +736,7 @@ class DownloadController extends AbstractDownloadController {
     }
 
     /**
-     * @param ZipContentObject[] $output_content
+     * @param \View\API\Commons\ZipContentObject[] $output_content
      *
      * @throws Exception
      */

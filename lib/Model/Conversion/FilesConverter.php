@@ -6,9 +6,9 @@ use Constants;
 use Constants\ConversionHandlerStatus;
 use DomainException;
 use Exception;
-use FeatureSet;
 use InvalidArgumentException;
 use Langs\Languages;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use RuntimeException;
@@ -50,7 +50,7 @@ class FilesConverter {
      * @param string                           $errDir
      * @param string                           $uploadTokenValue
      * @param string|null                      $segmentation_rule
-     * @param FeatureSet                       $featureSet
+     * @param \Model\FeaturesBase\FeatureSet   $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
     public function __construct(

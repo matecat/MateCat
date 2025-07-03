@@ -9,9 +9,9 @@
 
 namespace Controller\Views;
 
-use Controller\Abstracts\BaseKleinViewController;
-use Controller\ConnectedServices\GDrive\GDriveController;
 use Constants;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\API\GDrive\GDriveController;
 use CookieManager;
 use Engines_Intento;
 use Exception;

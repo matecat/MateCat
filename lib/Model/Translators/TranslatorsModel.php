@@ -15,17 +15,17 @@ use Email\SendToTranslatorForDeliveryChangeEmail;
 use Email\SendToTranslatorForJobSplitEmail;
 use Email\SendToTranslatorForNewJobEmail;
 use Exception;
-use FeatureSet;
 use InvalidArgumentException;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Outsource\ConfirmationDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\TransactionalTrait;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use TransactionalTrait;
 use Utils;
 
 class TranslatorsModel {

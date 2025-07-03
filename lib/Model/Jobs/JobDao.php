@@ -4,10 +4,10 @@ namespace Model\Jobs;
 
 use Constants_JobStatus;
 use Constants_TranslationStatus;
-use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectStruct;

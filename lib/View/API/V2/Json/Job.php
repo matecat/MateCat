@@ -14,21 +14,21 @@ use CatUtils;
 use Constants;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
-use FeatureSet;
 use Langs\LanguageDomains;
 use Langs\Languages;
 use ManageUtils;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use Model\WordCount\WordCountStruct;
 use OutsourceTo\OutsourceAvailable;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use Utils;
 use View\API\App\Json\OutsourceConfirmation;
-use WordCount\WordCountStruct;
 
 class Job {
 

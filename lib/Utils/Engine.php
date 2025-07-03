@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 

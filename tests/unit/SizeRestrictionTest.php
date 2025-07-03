@@ -2,7 +2,7 @@
 
 namespace unit;
 
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
 use Utils\LQA\SizeRestriction\SizeRestriction;
 

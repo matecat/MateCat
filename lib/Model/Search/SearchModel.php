@@ -9,12 +9,12 @@
 
 namespace Model\Search;
 
-use Database;
 use Exception;
-use IDatabase;
 use Log;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Database;
+use Model\IDatabase;
 use PDO;
 use PDOException;
 use stdClass;
@@ -27,7 +27,7 @@ class SearchModel {
     protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var Database
+     * @var \Model\Database
      */
     protected IDatabase $db;
 

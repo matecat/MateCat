@@ -14,10 +14,10 @@ class TranslationVersions extends BaseFeature {
     const FEATURE_CODE = 'translation_versions';
 
     /**
-     * @param \Model\Jobs\JobStruct $chunkStruct
-     * @param UserStruct            $userStruct
-     * @param ProjectStruct         $projectStruct
-     * @param int|null              $id_segment
+     * @param JobStruct     $chunkStruct
+     * @param UserStruct    $userStruct
+     * @param ProjectStruct $projectStruct
+     * @param int|null      $id_segment
      *
      * @return VersionHandlerInterface
      */

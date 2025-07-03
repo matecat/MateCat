@@ -9,9 +9,9 @@
 
 namespace Model\Outsource;
 
-use Database;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;

@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;

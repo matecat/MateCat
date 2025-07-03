@@ -11,10 +11,10 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
-use Database;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 
 class CompletionEventController extends KleinController {

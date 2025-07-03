@@ -12,13 +12,13 @@ use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
 use Exception;
-use FeatureSet;
 use INIT;
 use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
 use Model\Engines\EngineStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
@@ -30,7 +30,7 @@ use Utils;
 class TMSService {
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     protected $featureSet;
 
@@ -53,7 +53,7 @@ class TMSService {
 
     /**
      *
-     * @param FeatureSet|null $featureSet
+     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws Exception
      */

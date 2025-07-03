@@ -10,8 +10,8 @@
 namespace View\API\V2\Json;
 
 
-use FeatureSet;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\FeaturesBase\FeatureSet;
 
 class Activity {
     /**

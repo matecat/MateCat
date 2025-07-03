@@ -6,16 +6,16 @@ use AjaxPasswordCheck;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use FeatureSet;
 use InvalidArgumentException;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\XTRFStatus;
+use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use ReflectionException;
 use RuntimeException;
 use Utils;
-use ZipContentObject;
+use View\API\Commons\ZipContentObject;
 
 class DownloadAnalysisReportController extends AbstractDownloadController {
 

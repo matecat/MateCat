@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use TestHelpers\AbstractTest;

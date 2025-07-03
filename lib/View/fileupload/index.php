@@ -1,6 +1,6 @@
 <?php
 
-use Utils\ConnectedServices\Google\GDrive\Session;
+use Model\ConnectedServices\GDrive\Session;
 
 error_reporting( E_ALL | E_STRICT );
 

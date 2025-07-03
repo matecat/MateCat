@@ -4,11 +4,11 @@ namespace Model\Projects;
 
 use ArrayAccess;
 use Constants_ProjectStatus;
-use Database;
-use FeatureSet;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -157,7 +157,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     }
 
     /**
-     * @return FeatureSet
+     * @return \Model\FeaturesBase\FeatureSet
      */
     public function getFeaturesSet(): FeatureSet {
         return $this->cachable( __METHOD__, $this, function ( ProjectStruct $project ) {

@@ -2,6 +2,7 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\Database;
 
 class Factory_ApiKey extends Factory_Base {
 

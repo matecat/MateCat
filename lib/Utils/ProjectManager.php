@@ -7,7 +7,6 @@
  *
  */
 
-use Analysis\PayableRates;
 use Constants\XliffTranslationStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Langs\Languages;
@@ -17,8 +16,14 @@ use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\AnalysisDao;
+use Model\Analysis\PayableRates;
+use Model\ConnectedServices\GDrive\Session;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Files\FileDao;
 use Model\Files\FilesPartsDao;
 use Model\Files\FilesPartsStruct;
@@ -26,6 +31,7 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\S3FilesStorage;
+use Model\IDatabase;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -47,17 +53,15 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Translators\TranslatorsModel;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Model\WordCount\CounterModel;
 use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TMS\TMSFile;
 use TMS\TMSService;
-use Utils\ConnectedServices\Google\GDrive\Session;
-use Utils\ConnectedServices\Google\GoogleProvider;
 use Utils\LQA\QA;
 use View\API\Commons\Error;
-use WordCount\CounterModel;
 
 class ProjectManager {
 

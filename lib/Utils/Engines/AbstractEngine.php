@@ -2,6 +2,7 @@
 
 use Model\Engines\EngineStruct;
 use Model\Engines\GoogleTranslateStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 

@@ -2,8 +2,8 @@
 
 namespace View\API\V2\Json;
 
-use FeatureSet;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\EntryStruct;
 
@@ -21,10 +21,10 @@ class SegmentVersion {
     /**
      * SegmentVersion constructor.
      *
-     * @param JobStruct          $chunk
+     * @param JobStruct                           $chunk
      * @param                    $data
-     * @param bool               $with_issues
-     * @param FeatureSet|null    $featureSet
+     * @param bool                                $with_issues
+     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws \Exception
      */
@@ -144,7 +144,7 @@ class SegmentVersion {
      */
     public function renderItem( $version ) {
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \Model\FeaturesBase\FeatureSet();
         $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         return [

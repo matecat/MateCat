@@ -9,12 +9,12 @@
 namespace Features\SegmentFilter\Model;
 
 use Constants_TranslationStatus;
-use Database;
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 
 class SegmentFilterDao extends AbstractDao {

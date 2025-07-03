@@ -14,9 +14,9 @@ use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
-use FeatureSet;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\CommentDao;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\CategoryDao;
 use Model\LQA\CategoryStruct;
@@ -84,11 +84,11 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param QualityReportSegmentStruct $seg
-     * @param MateCatFilter              $Filter
-     * @param FeatureSet                 $featureSet
-     * @param JobStruct                  $chunk
-     * @param bool                       $isForUI
+     * @param QualityReportSegmentStruct     $seg
+     * @param MateCatFilter                  $Filter
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
+     * @param JobStruct                      $chunk
+     * @param bool                           $isForUI
      *
      * @throws Exception
      */

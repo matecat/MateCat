@@ -4,6 +4,7 @@ namespace Model\Users;
 
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Teams\MembershipDao;
@@ -12,7 +13,6 @@ use Model\Teams\TeamStruct;
 use ReflectionException;
 use stdClass;
 use Utils;
-use Utils\ConnectedServices\OauthTokenEncryption;
 
 /**
  * Created by PhpStorm.

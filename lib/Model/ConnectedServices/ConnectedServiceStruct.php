@@ -11,9 +11,9 @@ namespace Model\ConnectedServices;
 
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
-use Utils\ConnectedServices\OauthTokenEncryption;
 
 class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

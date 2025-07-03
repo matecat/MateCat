@@ -3,6 +3,9 @@
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
+use Model\Database;
+use Model\FeaturesBase\FeatureSet;
+use Model\FeaturesBase\FeaturesFactory;
 
 /**
  * Created by PhpStorm.
@@ -288,8 +291,6 @@ class Bootstrap {
                 self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib",
                 self::$_ROOT . "/lib/Utils",
-                self::$_ROOT . "/lib/Model",
-                self::$_ROOT . "/lib/View",
                 self::$_ROOT . "/lib/Plugins",
 
         ];
@@ -404,7 +405,7 @@ class Bootstrap {
 
         INIT::obtain(); //load configurations
 
-        Features::setIncludePath();
+        FeaturesFactory::setIncludePath();
 
     }
 

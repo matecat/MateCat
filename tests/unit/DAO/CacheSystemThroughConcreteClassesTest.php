@@ -9,9 +9,9 @@
 
 namespace unit\DAO;
 
-use Database;
 use Exception;
 use INIT;
+use Model\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use RedisHandler;

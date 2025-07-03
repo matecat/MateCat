@@ -12,8 +12,8 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use View\API\Commons\ZipContentObject;
 use ZipArchive;
-use ZipContentObject;
 
 abstract class AbstractDownloadController extends AbstractStatefulKleinController {
     public int    $id_job;
@@ -50,7 +50,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param ZipContentObject $content
+     * @param \View\API\Commons\ZipContentObject $content
      *
      * @return $this
      * @throws Exception
@@ -205,10 +205,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param ZipContentObject[] $output_content
-     * @param string|null        $outputFile
+     * @param \View\API\Commons\ZipContentObject[] $output_content
+     * @param string|null                          $outputFile
      *
-     * @param ?bool              $isOriginalFile
+     * @param ?bool                                $isOriginalFile
      *
      * @return string The zip binary
      * @throws Exception

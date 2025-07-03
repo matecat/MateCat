@@ -2,9 +2,9 @@
 
 namespace Model\Jobs;
 
-use Database;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {

@@ -3,11 +3,10 @@
 namespace XliffReplacer;
 
 use Exception;
-use Features;
-use FeatureSet;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
+use Model\FeaturesBase\FeatureSet;
 use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
@@ -29,7 +28,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     private $targetLang;
 
     /**
-     * @var Features
+     * @var \Model\FeaturesBase\FeaturesFactory
      */
     private $featureSet;
 

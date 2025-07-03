@@ -12,6 +12,7 @@ namespace View\API\V3\Json;
 
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
+use Features\RevisionFactory;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
@@ -20,7 +21,6 @@ use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportDao;
 use Model\ReviseFeedback\FeedbackDAO;
 use ReflectionException;
-use RevisionFactory;
 
 class QualitySummary {
 

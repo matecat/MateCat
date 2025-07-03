@@ -9,8 +9,8 @@
 
 namespace AsyncTasks\Workers\Traits;
 
-use Database;
 use Log;
+use Model\Database;
 use PDO;
 use PDOException;
 use RuntimeException;

@@ -5,12 +5,12 @@ namespace Model\Conversion;
 use Constants\ConversionHandlerStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use FeatureSet;
 use INIT;
 use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\Exceptions\FileSystemException;
 use Model\FilesStorage\FilesStorageFactory;
@@ -39,7 +39,7 @@ class ConversionHandler {
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     public FeatureSet $features;
 
@@ -519,7 +519,7 @@ class ConversionHandler {
     }
 
     /**
-     * @param FeatureSet $features
+     * @param \Model\FeaturesBase\FeatureSet $features
      *
      * @return $this
      */

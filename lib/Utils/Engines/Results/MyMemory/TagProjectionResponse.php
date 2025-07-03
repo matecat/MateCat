@@ -8,6 +8,7 @@
  */
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 
 class Engines_Results_MyMemory_TagProjectionResponse extends Engines_Results_AbstractResponse {
 

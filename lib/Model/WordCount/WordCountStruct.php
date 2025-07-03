@@ -7,7 +7,7 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
 use JsonSerializable;
 use Model\Jobs\JobStruct;

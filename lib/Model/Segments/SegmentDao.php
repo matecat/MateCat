@@ -3,11 +3,11 @@
 namespace Model\Segments;
 
 use Constants_TranslationStatus;
-use Database;
 use Exception;
 use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Files\FileStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;

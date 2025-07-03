@@ -10,6 +10,7 @@ use Controller\Views\CustomPageView;
 use Klein\Klein;
 use Langs\InvalidLanguageException;
 use Model\Exceptions\ValidationError as Model_ValidationError;
+use Model\FeaturesBase\FeaturesFactory;
 use Swaggest\JsonSchema\InvalidValue;
 use Validator\JSONSchema\Errors\JSONValidatorException;
 use Validator\JSONSchema\Errors\JsonValidatorGenericException;
@@ -128,6 +129,6 @@ require './lib/Routes/api_v3_routes.php';
 require './lib/Routes/gdrive_routes.php';
 require './lib/Routes/oauth_routes.php';
 require './lib/Routes/app_routes.php';
-Features::loadRoutes( $klein );
+FeaturesFactory::loadRoutes( $klein );
 
 $klein->dispatch();

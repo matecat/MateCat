@@ -2,10 +2,9 @@
 
 namespace Model\Files;
 
-use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use PDO;
+use Model\Database;
 use ReflectionException;
 
 class FileDao extends AbstractDao {
@@ -81,17 +80,21 @@ class FileDao extends AbstractDao {
     }
 
     /**
-     * @param $id
+     * @param int      $id
+     * @param int|null $ttl
      *
      * @return FileStruct
+     * @throws ReflectionException
      */
-    public static function getById( $id ): FileStruct {
+    public static function getById( int $id, ?int $ttl = 0 ): ?FileStruct {
+        $thisDao = new self();
+
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM files where id = :id " );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, FileStruct::class );
 
-        return $stmt->fetch();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+
     }
 
     /**

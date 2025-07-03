@@ -6,14 +6,14 @@ use CatUtils;
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Database;
 use Exception;
 use InvalidArgumentException;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentDao;
-use Model\TranslationsSplit\SplitDAO;
 use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
 
 class SetCurrentSegmentController extends KleinController {

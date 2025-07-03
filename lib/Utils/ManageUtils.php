@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;

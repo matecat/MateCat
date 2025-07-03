@@ -9,9 +9,9 @@
 namespace Model\QualityReport;
 
 use Exception;
-use FeatureSet;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use MyMemory;
 use Utils\LQA\QA;

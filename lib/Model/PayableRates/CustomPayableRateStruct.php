@@ -2,12 +2,12 @@
 
 namespace Model\PayableRates;
 
-use Analysis\PayableRates;
 use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use Langs\Languages;
+use Model\Analysis\PayableRates;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 

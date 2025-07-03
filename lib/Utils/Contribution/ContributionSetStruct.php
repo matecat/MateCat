@@ -10,9 +10,9 @@
 namespace Contribution;
 
 use Constants_TranslationStatus;
-use Database;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;

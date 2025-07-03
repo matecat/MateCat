@@ -2,12 +2,12 @@
 
 namespace Model\Projects;
 
-use Database;
 use Exception;
 use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;

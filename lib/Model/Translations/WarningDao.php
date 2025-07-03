@@ -4,10 +4,10 @@
 namespace Model\Translations;
 
 use Constants_TranslationStatus;
-use Jobs\WarningsCountStruct;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
+use Model\Jobs\WarningsCountStruct;
 use ReflectionException;
 
 class WarningDao extends AbstractDao {

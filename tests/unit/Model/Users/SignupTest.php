@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Exceptions\ValidationError;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\UserDao;

@@ -3,20 +3,20 @@
 namespace AsyncTasks\Workers\Analysis;
 
 use AMQHandler;
-use Analysis\PayableRates as PayableRates;
 use AsyncTasks\Workers\Traits\ProjectWordCount;
 use Constants_ProjectStatus as ProjectStatus;
-use Database;
 use Engine;
 use Engines_MMT;
 use Engines_MyMemory;
 use Engines_NONE;
 use Engines_Results_MyMemory_AnalyzeResponse;
 use Exception;
-use FeatureSet;
 use INIT;
 use Log;
 use Model\Analysis\AnalysisDao;
+use Model\Analysis\PayableRates as PayableRates;
+use Model\Database;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
@@ -24,6 +24,7 @@ use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use Model\WordCount\CounterModel;
 use PDO;
 use PDOException;
 use ReflectionException;
@@ -34,7 +35,6 @@ use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
-use WordCount\CounterModel;
 
 /**
  * Created by PhpStorm.

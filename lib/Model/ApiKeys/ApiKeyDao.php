@@ -2,8 +2,8 @@
 
 namespace Model\ApiKeys;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use PDO;
 
 class ApiKeyDao extends AbstractDao {

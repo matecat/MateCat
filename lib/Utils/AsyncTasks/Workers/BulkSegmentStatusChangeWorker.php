@@ -9,13 +9,13 @@
 namespace AsyncTasks\Workers;
 
 
-use Database;
 use Exception;
-use Features;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
+use Model\Database;
+use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserDao;
@@ -83,7 +83,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
             $new_translations[] = $new_translation;
 
-            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+            if ( $chunk->getProject()->hasFeature( FeatureCodes::TRANSLATION_VERSIONS ) ) {
 
                 try {
                     $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );

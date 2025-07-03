@@ -3,11 +3,11 @@
 namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
-use Database;
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exception;
+use Model\Database;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;

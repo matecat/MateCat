@@ -4,12 +4,12 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Database;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
+use Model\ConnectedServices\GDrive\Session;
+use Model\Database;
 use TMS\TMSService;
-use Utils\ConnectedServices\Google\GDrive\Session;
 
 class AjaxUtilsController extends KleinController {
 

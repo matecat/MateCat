@@ -8,13 +8,13 @@
 
 namespace Features;
 
-use Features;
+use Model\FeaturesBase\FeatureCodes;
 
 class SecondPassReview extends AbstractRevisionFeature {
     const FEATURE_CODE = 'second_pass_review';
 
     protected static $dependencies = [
-            Features::REVIEW_EXTENDED
+            FeatureCodes::REVIEW_EXTENDED
     ];
 
 }

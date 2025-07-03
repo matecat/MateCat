@@ -2,8 +2,8 @@
 
 namespace Model\Search;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Translations\SegmentTranslationDao;
 use PDO;
 

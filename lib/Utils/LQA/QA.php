@@ -10,9 +10,9 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use FeatureSet;
 use Log;
 use LogicException;
+use Model\FeaturesBase\FeatureSet;
 use Model\Segments\SegmentMetadataDao;
 use Utils\LQA\BxExG\Validator;
 
@@ -137,7 +137,7 @@ class QA {
     protected $chunk;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     protected $featureSet;
 
@@ -1088,7 +1088,7 @@ class QA {
 
 
     /**
-     * @param FeatureSet $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @return $this
      */
@@ -1099,7 +1099,7 @@ class QA {
     }
 
     /**
-     * @return FeatureSet
+     * @return \Model\FeaturesBase\FeatureSet
      * @throws Exception
      */
     public function getFeatureSet() {

@@ -1,4 +1,7 @@
 <?php
+
+use Model\Database;
+
 /**
  * Created by PhpStorm.
  * User: domenico

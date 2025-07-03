@@ -15,11 +15,11 @@ use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationEvents\Model\TranslationEventStruct;
-use FeatureSet;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use TransactionalTrait;
+use Model\TransactionalTrait;
 
 class TranslationEventsHandler {
 

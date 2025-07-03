@@ -9,16 +9,16 @@
 namespace Model\QualityReport;
 
 use ArrayObject;
-use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
+use Features\RevisionFactory;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\Users\UserDao;
-use RevisionFactory;
 use Utils;
 
 

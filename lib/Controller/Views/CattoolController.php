@@ -33,13 +33,13 @@ use Model\LQA\ModelStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
+use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
-use TeamModel;
 use Utils;
 
 class CattoolController extends BaseKleinViewController {

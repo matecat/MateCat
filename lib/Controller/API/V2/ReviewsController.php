@@ -8,13 +8,13 @@ use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
+use Features\RevisionFactory;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use RevisionFactory;
 
 class ReviewsController extends KleinController {
     /**

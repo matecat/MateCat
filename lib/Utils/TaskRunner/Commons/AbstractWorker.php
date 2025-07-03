@@ -10,9 +10,9 @@
 namespace TaskRunner\Commons;
 
 use AMQHandler;
-use Database;
 use Exception;
 use INIT;
+use Model\Database;
 use PDOException;
 use SplObserver;
 use SplSubject;

@@ -10,9 +10,9 @@ namespace Model\QualityReport;
 
 use Constants;
 use Constants_TranslationStatus;
-use Database;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 

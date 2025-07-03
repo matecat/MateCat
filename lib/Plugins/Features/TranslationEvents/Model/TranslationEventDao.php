@@ -9,9 +9,9 @@
 namespace Features\TranslationEvents\Model;
 
 use Constants_TranslationStatus;
-use Database;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use PDO;
 use ReflectionException;
 

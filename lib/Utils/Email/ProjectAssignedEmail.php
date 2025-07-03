@@ -15,8 +15,8 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use Model\WordCount\WordCountStruct;
 use Routes;
-use WordCount\WordCountStruct;
 
 class ProjectAssignedEmail extends AbstractEmail {
 

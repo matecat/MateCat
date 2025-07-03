@@ -2,21 +2,23 @@
 
 namespace Controller\API\App;
 
-use BasicFeatureStruct;
 use Constants;
 use Constants_ProjectStatus;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use CookieManager;
-use Database;
 use Engine;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
+use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
 use Langs\Languages;
+use Model\ConnectedServices\GDrive\Session;
+use Model\Database;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
@@ -31,7 +33,6 @@ use ProjectQueue\Queue;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Utils;
-use Utils\ConnectedServices\Google\GDrive\Session;
 use Validator\Contracts\ValidatorObject;
 use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
@@ -663,7 +664,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 

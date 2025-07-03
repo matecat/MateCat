@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\OwnerFeatures\OwnerFeatureStruct;
 

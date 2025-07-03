@@ -11,17 +11,17 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
-use Utils\ConnectedServices\OauthClient;
+use Model\ConnectedServices\Oauth\Facebook\FacebookProvider;
+use Model\ConnectedServices\Oauth\Github\GithubProvider;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
+use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
+use Model\ConnectedServices\Oauth\OauthClient;
 use PHPTAL;
 use PHPTalBoolean;
 use PHPTalMap;
 use PHPTALWithAppend;
 use Utils;
-use Utils\ConnectedServices\Facebook\FacebookProvider;
-use Utils\ConnectedServices\Github\GithubProvider;
-use Utils\ConnectedServices\Google\GoogleProvider;
-use Utils\ConnectedServices\LinkedIn\LinkedInProvider;
-use Utils\ConnectedServices\Microsoft\MicrosoftProvider;
 
 /**
  * Created by PhpStorm.

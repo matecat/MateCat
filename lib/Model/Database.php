@@ -1,5 +1,10 @@
 <?php
 
+namespace Model;
+use Exception;
+use PDO;
+use PDOException;
+
 /**
  * Class which implements a database using PDO
  *

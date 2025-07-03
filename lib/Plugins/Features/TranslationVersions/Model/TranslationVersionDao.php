@@ -3,9 +3,9 @@
 namespace Features\TranslationVersions\Model;
 
 use Constants;
-use Database;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;

@@ -15,24 +15,25 @@ use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Database;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_MyMemory;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_TMS;
 use Exception;
-use FeatureSet;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
+use Model\WordCount\CounterModel;
 use PDOException;
 use PostProcess;
 use ReflectionException;
@@ -45,7 +46,6 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use WordCount\CounterModel;
 
 /**
  * Class TMAnalysisWorker

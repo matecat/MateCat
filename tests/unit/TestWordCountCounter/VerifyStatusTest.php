@@ -1,8 +1,8 @@
 <?php
 
 
+use Model\WordCount\CounterModel;
 use TestHelpers\AbstractTest;
-use WordCount\CounterModel;
 
 /**
  * @group  regression

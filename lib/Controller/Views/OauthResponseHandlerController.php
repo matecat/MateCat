@@ -6,10 +6,10 @@ use Controller\Abstracts\BaseKleinViewController;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use INIT;
+use Model\ConnectedServices\Oauth\OauthClient;
+use Model\ConnectedServices\Oauth\ProviderUser;
 use Model\Users\Authentication\OAuthSignInModel;
 use ReflectionException;
-use Utils\ConnectedServices\OauthClient;
-use Utils\ConnectedServices\ProviderUser;
 
 class OauthResponseHandlerController extends BaseKleinViewController {
 

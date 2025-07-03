@@ -11,8 +11,8 @@ namespace Model\TMSService;
 
 
 use Constants_TranslationStatus;
-use Database;
 use Log;
+use Model\Database;
 use PDO;
 use PDOException;
 use RuntimeException;

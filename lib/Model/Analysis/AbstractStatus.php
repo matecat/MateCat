@@ -6,11 +6,11 @@ use AMQHandler;
 use Constants_ProjectStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use FeatureSet;
 use Langs\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
@@ -66,9 +66,9 @@ abstract class AbstractStatus {
     protected $subject;
 
     /**
-     * @param array                        $_project_data
-     * @param FeatureSet                   $features
-     * @param \Model\Users\UserStruct|null $user
+     * @param array                          $_project_data
+     * @param \Model\FeaturesBase\FeatureSet $features
+     * @param \Model\Users\UserStruct|null   $user
      *
      * @throws ReflectionException
      */

@@ -5,7 +5,7 @@
 
 namespace OutsourceTo;
 
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use Shop_AbstractItem;
 
@@ -181,7 +181,7 @@ abstract class AbstractProvider {
     }
 
     /**
-     * @param FeatureSet|null $features
+     * @param \Model\FeaturesBase\FeatureSet|null $features
      *
      * @return $this
      */

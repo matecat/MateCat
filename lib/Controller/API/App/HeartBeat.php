@@ -23,7 +23,7 @@ class HeartBeat extends KleinController {
     }
 
     public function ping() {
-        \Database::obtain()->ping();
+        \Model\Database::obtain()->ping();
         if ( !touch( INIT::$ROOT . DIRECTORY_SEPARATOR . "touch" ) ) {
             throw new RuntimeException( "Storage unavailable." );
         }

@@ -11,20 +11,20 @@ namespace View\API\V3\Json;
 use Constants;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
-use FeatureSet;
 use Langs\LanguageDomains;
 use Langs\Languages;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
+use Model\WordCount\WordCountStruct;
 use ReflectionException;
 use Utils;
 use View\API\App\Json\OutsourceConfirmation;
 use View\API\V2\Json\JobTranslator;
-use WordCount\WordCountStruct;
 
 class Chunk extends \View\API\V2\Json\Chunk {
 
@@ -54,7 +54,7 @@ class Chunk extends \View\API\V2\Json\Chunk {
      * @param                         $chunk JobStruct
      *
      * @param ProjectStruct           $project
-     * @param FeatureSet              $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @return array
      * @throws Exception

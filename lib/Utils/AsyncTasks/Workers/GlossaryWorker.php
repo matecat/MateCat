@@ -12,7 +12,7 @@ use Engines_Results_MyMemory_SearchGlossaryResponse;
 use Engines_Results_MyMemory_SetGlossaryResponse;
 use Engines_Results_MyMemory_UpdateGlossaryResponse;
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;

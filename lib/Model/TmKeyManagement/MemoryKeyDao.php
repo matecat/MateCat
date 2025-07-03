@@ -8,11 +8,11 @@
 
 namespace Model\TmKeyManagement;
 
-use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Users\UserDao;
 use ReflectionException;
 use TmKeyManagement_TmKeyStruct;

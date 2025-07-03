@@ -11,10 +11,10 @@ namespace TaskRunner;
 
 use AMQHandler;
 use Bootstrap;
-use Database;
 use Exception;
 use INIT;
 use Log;
+use Model\Database;
 use PDOException;
 use ReflectionException;
 use SplObserver;

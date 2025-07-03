@@ -2,10 +2,10 @@
 
 namespace Model\Comments;
 
-use Database;
 use Exception;
 use Log;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;

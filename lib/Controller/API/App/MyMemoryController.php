@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
 use Engines_MyMemory;
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 
 class MyMemoryController extends KleinController {
 

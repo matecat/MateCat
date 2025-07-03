@@ -23,15 +23,15 @@ class SegmentTranslationMismatches {
      *
      * @param                  $Translation_mismatches
      * @param                  $thereArePropagations
-     * @param \FeatureSet|null $featureSet
+     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( $Translation_mismatches, $thereArePropagations, \FeatureSet $featureSet = null ) {
+    public function __construct( $Translation_mismatches, $thereArePropagations, \Model\FeaturesBase\FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
         if ( $featureSet == null ) {
-            $featureSet = new \FeatureSet();
+            $featureSet = new \Model\FeaturesBase\FeatureSet();
         }
         $this->featureSet = $featureSet;
     }
@@ -48,7 +48,7 @@ class SegmentTranslationMismatches {
                 'prop_available' => $this->thereArePropagations
         ];
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \Model\FeaturesBase\FeatureSet();
 
         foreach ( $this->data as $position => $row ) {
 

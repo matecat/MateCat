@@ -10,8 +10,8 @@ namespace Features\ProjectCompletion\Model ;
 
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use FeatureSet;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 

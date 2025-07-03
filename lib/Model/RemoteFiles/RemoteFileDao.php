@@ -2,8 +2,8 @@
 
 namespace Model\RemoteFiles;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use PDO;
 
 class RemoteFileDao extends AbstractDao {

@@ -4,7 +4,7 @@ namespace Controller\Views\TemplateDecorator\Arguments;
 
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
-use WordCount\WordCountStruct;
+use Model\WordCount\WordCountStruct;
 
 /**
  * Created by PhpStorm.

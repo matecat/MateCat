@@ -11,10 +11,10 @@ namespace Features\ProjectCompletion\Model;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use FeatureSet;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use TaskRunner\Exceptions\EndQueueException;

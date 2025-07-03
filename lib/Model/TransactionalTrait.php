@@ -6,6 +6,8 @@
  * Time: 10:50
  */
 
+namespace Model;
+
 /**
  * Trait TransactionalTrait
  *

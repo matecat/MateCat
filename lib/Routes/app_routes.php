@@ -36,8 +36,8 @@ $klein->with( '/api/app/user', function () {
 
 } );
 
-route( '/api/app/connected_services/[:id_service]/verify', 'GET', [ 'Controller\ConnectedServices\ConnectedServicesController', 'verify' ] );
-route( '/api/app/connected_services/[:id_service]', 'POST', [ 'Controller\ConnectedServices\ConnectedServicesController', 'update' ] );
+route( '/api/app/connected_services/[:id_service]/verify', 'GET', [ 'Controller\API\App\ConnectedServicesController', 'verify' ] );
+route( '/api/app/connected_services/[:id_service]', 'POST', [ 'Controller\API\App\ConnectedServicesController', 'update' ] );
 
 route( '/api/app/teams/members/invite/[:jwt]', 'GET', [ '\Controller\API\App\TeamsInvitationsController', 'collectBackInvitation' ] );
 

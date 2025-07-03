@@ -3,15 +3,12 @@
 namespace Features;
 
 use ArrayObject;
-use BasicFeatureStruct;
 use Constants;
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
-use Database;
 use Exception;
-use Features;
 use Features\ReviewExtended\ChunkReviewModel;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
@@ -20,7 +17,10 @@ use INIT;
 use Klein\Klein;
 use Log;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureCodes;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
@@ -44,7 +44,7 @@ use ZipArchive;
 abstract class AbstractRevisionFeature extends BaseFeature {
 
     protected static $dependencies = [
-            Features::TRANSLATION_VERSIONS
+            FeatureCodes::TRANSLATION_VERSIONS
     ];
 
     public function __construct( BasicFeatureStruct $feature ) {

@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Users\UserDao;
 use TestHelpers\AbstractTest;
 

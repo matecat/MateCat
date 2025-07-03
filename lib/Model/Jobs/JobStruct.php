@@ -5,13 +5,13 @@ namespace Model\Jobs;
 use ArrayAccess;
 use CatUtils;
 use Constants_JobStatus;
-use Database;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Comments\CommentDao;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Files\FileDao;
 use Model\Files\FileStruct;
@@ -29,9 +29,9 @@ use Model\Translations\WarningDao;
 use Model\Translators\JobsTranslatorsDao;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use Model\WordCount\WordCountStruct;
 use ReflectionException;
 use Utils;
-use WordCount\WordCountStruct;
 
 class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 

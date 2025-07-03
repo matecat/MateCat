@@ -14,7 +14,7 @@ use Model\Jobs\JobDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Utils;
-use ZipContentObject;
+use View\API\Commons\ZipContentObject;
 
 set_time_limit( 180 );
 

@@ -18,6 +18,7 @@
 
 
 use Langs\Languages;
+use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use Model\Users\UserStruct;

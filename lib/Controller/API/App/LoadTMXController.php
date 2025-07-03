@@ -4,10 +4,10 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Database;
 use Exception;
 use INIT;
 use InvalidArgumentException;
+use Model\Database;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;

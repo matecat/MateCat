@@ -2,8 +2,8 @@
 
 namespace Model\Projects;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\ChunkOptionsModel;

@@ -9,7 +9,7 @@
 namespace Controller\Abstracts;
 
 
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 
 interface IController {

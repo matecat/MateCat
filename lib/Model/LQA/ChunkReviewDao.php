@@ -3,12 +3,12 @@
 namespace Model\LQA;
 
 use Constants;
-use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;

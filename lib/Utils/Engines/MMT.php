@@ -4,6 +4,7 @@ use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
 use Features\Mmt;
+use Model\Database;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;

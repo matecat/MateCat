@@ -4,6 +4,7 @@ use AsyncTasks\Workers\SetContributionWorker;
 use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\EngineStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\Params;

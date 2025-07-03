@@ -2,6 +2,7 @@
 
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -13,10 +14,10 @@ use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
 use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
 
 class CatUtils {
 

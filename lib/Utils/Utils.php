@@ -2,6 +2,7 @@
 
 use Behat\Transliterator\Transliterator;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 

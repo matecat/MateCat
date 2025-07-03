@@ -1,11 +1,12 @@
 <?php
 
 
+use Model\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
 
 /**
  * @group  regression

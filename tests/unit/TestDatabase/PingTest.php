@@ -1,5 +1,7 @@
 <?php
 
+use Model\Database;
+use Model\IDatabase;
 use TestHelpers\AbstractTest;
 
 

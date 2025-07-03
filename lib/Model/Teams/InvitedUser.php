@@ -17,7 +17,6 @@ use Klein\Response;
 use RedisHandler;
 use ReflectionException;
 use SimpleJWT;
-use TeamModel;
 
 class InvitedUser {
 

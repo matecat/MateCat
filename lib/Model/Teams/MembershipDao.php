@@ -8,10 +8,10 @@
 
 namespace Model\Teams;
 
-use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;

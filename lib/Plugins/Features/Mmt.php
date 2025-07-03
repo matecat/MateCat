@@ -10,25 +10,25 @@
 namespace Features;
 
 
-use BasicFeatureStruct;
 use Constants_Engines;
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
-use Database;
 use Engine;
 use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_MMT;
 use Exception;
-use FeatureSet;
 use INIT;
 use Log;
+use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use Model\Engines\MMTStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -267,7 +267,7 @@ class Mmt extends BaseFeature {
         if ( strtolower( Constants_Engines::MMT ) == $data->providerName ) {
 
             /**
-             * @var $featureSet FeatureSet
+             * @var $featureSet \Model\FeaturesBase\FeatureSet
              */
             $featureSet = $data->featureSet;
 

@@ -12,7 +12,7 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Database;
+use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use View\API\V2\Json\Engine;

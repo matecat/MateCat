@@ -8,13 +8,13 @@ use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
 use Controller\Traits\TimeLoggerTrait;
 use Exception;
-use FeatureSet;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Log;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
 
 abstract class KleinController implements IController {
@@ -53,7 +53,7 @@ abstract class KleinController implements IController {
     public array $params = [];
 
     /**
-     * @var ?FeatureSet
+     * @var ?\Model\FeaturesBase\FeatureSet
      */
     protected ?FeatureSet $featureSet = null;
 

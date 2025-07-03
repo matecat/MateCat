@@ -3,10 +3,10 @@
 namespace Model\ChunksCompletion;
 
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
-use Database;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;

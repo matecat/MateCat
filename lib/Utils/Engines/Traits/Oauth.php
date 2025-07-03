@@ -10,8 +10,8 @@
 namespace Engines\Traits;
 
 
-use Database;
 use Exception;
+use Model\Database;
 use Model\Engines\EngineDAO;
 
 trait Oauth {

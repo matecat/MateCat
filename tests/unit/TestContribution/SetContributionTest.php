@@ -10,6 +10,7 @@
 
 use Contribution\ContributionSetStruct;
 use Contribution\Set;
+use Model\Database;
 use TaskRunner\Commons\ContextList;
 use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;

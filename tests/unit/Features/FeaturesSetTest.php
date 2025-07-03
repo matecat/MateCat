@@ -1,6 +1,8 @@
 <?php
 
 use Features\Airbnb;
+use Model\FeaturesBase\FeatureCodes;
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
 
 
@@ -14,12 +16,12 @@ use TestHelpers\AbstractTest;
 class FeaturesSetTest extends AbstractTest {
 
     protected static $airbnbDependencies = [
-            Features::TRANSLATION_VERSIONS,
-//            Features::REVIEW_EXTENDED  // FIX: Undefined index: review_extended
+            FeatureCodes::TRANSLATION_VERSIONS,
+//            FeatureCodes::REVIEW_EXTENDED  // FIX: Undefined index: review_extended
     ];
 
-    protected static $abstractReviewDependencies = [
-            Features::TRANSLATION_VERSIONS
+    protected static array $abstractReviewDependencies = [
+            FeatureCodes::TRANSLATION_VERSIONS
     ];
 
     protected function _testForDependenciesOrder( $dependenciesSet ) {

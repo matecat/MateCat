@@ -10,15 +10,15 @@ namespace Features\ReviewExtended;
 
 use Exception;
 use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
+use Features\RevisionFactory;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Log;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
 use ReflectionException;
-use RevisionFactory;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
 
 class BatchReviewProcessor {
 

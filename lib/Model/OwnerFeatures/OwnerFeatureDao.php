@@ -2,10 +2,11 @@
 
 namespace Model\OwnerFeatures;
 
-use Database;
 use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\Database;
+use PDO;
 use ReflectionException;
 
 class OwnerFeatureDao extends AbstractDao {

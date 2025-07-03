@@ -2,6 +2,7 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
+use Model\Database;
 use TestHelpers\AbstractTest;
 
 

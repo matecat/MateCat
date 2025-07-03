@@ -9,9 +9,9 @@
 namespace Model\Teams;
 
 use Constants_Teams;
-use Database;
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;

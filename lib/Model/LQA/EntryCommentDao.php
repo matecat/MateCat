@@ -2,8 +2,8 @@
 
 namespace Model\LQA;
 
-use Database;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use PDO;
 
 class EntryCommentDao extends AbstractDao {

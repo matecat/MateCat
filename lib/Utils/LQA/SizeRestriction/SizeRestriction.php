@@ -3,7 +3,7 @@
 namespace Utils\LQA\SizeRestriction;
 
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 
 class SizeRestriction {
 
@@ -13,7 +13,7 @@ class SizeRestriction {
     private $cleanedString;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     private $featureSet;
 
@@ -21,7 +21,7 @@ class SizeRestriction {
      * SizeRestriction constructor.
      *
      * @param            $string
-     * @param FeatureSet $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      */
     public function __construct( $string, FeatureSet $featureSet ) {
 

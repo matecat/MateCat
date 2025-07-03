@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;

@@ -11,9 +11,9 @@
 namespace Model\ProjectManager;
 
 use ArrayObject;
-use Database;
 use Exception;
 use Log;
+use Model\Database;
 use Model\Projects\ProjectDao;
 use PDOException;
 use RecursiveArrayIterator;

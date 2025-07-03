@@ -4,9 +4,9 @@ namespace Features\TranslationEvents\Model;
 
 use Constants;
 use Constants_TranslationStatus;
-use Database;
 use Error;
 use Exception;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;

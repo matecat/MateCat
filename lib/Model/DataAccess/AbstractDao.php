@@ -2,11 +2,11 @@
 
 namespace Model\DataAccess;
 
-use Database;
 use Exception;
-use IDatabase;
 use Log;
+use Model\Database;
 use Model\Exceptions\ValidationError;
+use Model\IDatabase;
 use PDO;
 use PDOStatement;
 use ReflectionException;
@@ -23,7 +23,7 @@ abstract class AbstractDao {
 
     /**
      * The connection object
-     * @var Database
+     * @var \Model\Database
      */
     protected IDatabase $database;
 
@@ -54,7 +54,7 @@ abstract class AbstractDao {
 
     public function __construct( IDatabase $con = null ) {
         /**
-         * @var $con IDatabase
+         * @var $con \Model\IDatabase
          */
 
         if ( $con == null ) {
@@ -66,7 +66,7 @@ abstract class AbstractDao {
     }
 
     /**
-     * @return Database|IDatabase
+     * @return \Model\Database|IDatabase
      */
     public function getDatabaseHandler() {
         return $this->database;

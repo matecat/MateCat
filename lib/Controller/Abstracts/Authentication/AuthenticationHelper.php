@@ -7,11 +7,11 @@ use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\Teams\MembershipDao;
+use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use TeamModel;
 use Throwable;
 use View\API\App\Json\UserProfile;
 

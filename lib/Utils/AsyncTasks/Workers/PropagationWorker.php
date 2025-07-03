@@ -9,9 +9,9 @@
 
 namespace AsyncTasks\Workers;
 
-use Database;
 use Exception;
 use Features\TranslationVersions\Model\TranslationVersionDao;
+use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;

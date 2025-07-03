@@ -13,7 +13,6 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
-use Database;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
@@ -21,6 +20,7 @@ use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Database;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -35,8 +35,9 @@ use Model\Segments\SegmentOriginalDataDao;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
-use Model\TranslationsSplit\SplitDAO;
 use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
+use Model\WordCount\WordCountStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
@@ -44,7 +45,6 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Utils;
 use Utils\LQA\QA;
-use WordCount\WordCountStruct;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 

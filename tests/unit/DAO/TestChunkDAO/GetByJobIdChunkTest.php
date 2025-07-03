@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;

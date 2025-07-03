@@ -2,11 +2,11 @@
 
 namespace Model\Filters;
 
-use Database;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;

@@ -10,7 +10,7 @@ use Features\TranslationEvents\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -185,7 +185,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         /** @var JobStruct $chunk */
         $chunk = $params[ 'chunk' ];
 
-        /** @var FeatureSet $features */
+        /** @var \Model\FeaturesBase\FeatureSet $features */
         $features = $params[ 'features' ];
 
         /** @var ProjectStruct $project */

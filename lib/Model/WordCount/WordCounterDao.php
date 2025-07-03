@@ -7,12 +7,12 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
 
-use Database;
 use Log;
 use Model\DataAccess\AbstractDao;
+use Model\Database;
 use PDO;
 use PDOException;
 

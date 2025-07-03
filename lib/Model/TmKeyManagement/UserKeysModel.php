@@ -8,9 +8,9 @@
 
 namespace Model\TmKeyManagement;
 
-use Database;
 use Exception;
 use Log;
+use Model\Database;
 use Model\Users\UserStruct;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;

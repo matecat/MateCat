@@ -18,9 +18,9 @@ use Exception;
 use InvalidArgumentException;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamDao;
+use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
 use ReflectionException;
-use TeamModel;
 use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController {

@@ -1,4 +1,7 @@
 <?php
+
+use Model\FeaturesBase\FeatureSet;
+
 /**
  * Created by PhpStorm.
  * User: roberto

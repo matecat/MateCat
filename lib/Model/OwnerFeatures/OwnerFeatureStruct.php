@@ -1,17 +1,21 @@
 <?php
 
 namespace Model\OwnerFeatures;
-use BasicFeatureStruct;
+use Model\FeaturesBase\BasicFeatureStruct;
 
 class OwnerFeatureStruct extends BasicFeatureStruct {
 
-    public $id;
-    public $uid;
-    public $id_team;
+    public int $id;
+    public int $uid;
+    public ?int $id_team = null;
+
+    /**
+     * @var array|string
+     */
     public $options;
-    public $last_update;
-    public $create_date;
-    public $enabled;
+    public ?string $last_update = null;
+    public ?string $create_date = null;
+    public bool $enabled;
 
     public function getOptions() {
         return json_decode( $this->options, true );

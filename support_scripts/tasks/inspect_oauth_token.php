@@ -1,7 +1,8 @@
 <?php
 
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\Database;
 use Model\Users\UserDao;
-use Utils\ConnectedServices\OauthTokenEncryption;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";

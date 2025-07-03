@@ -10,16 +10,15 @@
 namespace Model\Analysis;
 
 
-use Database;
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
 use ReflectionException;
 
 class AnalysisDao extends AbstractDao {
 
 
-    protected static $_sql_get_project_Stats_volume_analysis = "
+    protected static string $_sql_get_project_Stats_volume_analysis = "
         SELECT
                 st.id_job AS jid,
                 j.password as jpassword,
@@ -68,27 +67,20 @@ class AnalysisDao extends AbstractDao {
      *
      * REALLY HEAVY
      *
-     * @param     $pid
+     * @param int $pid
      * @param int $ttl
      *
-     * @return array|int|mixed
+     * @return array
      * @throws ReflectionException
      */
-    public static function getProjectStatsVolumeAnalysis( $pid, int $ttl = 0 ) {
+    public static function getProjectStatsVolumeAnalysis( int $pid, int $ttl = 0 ): array {
 
-        $db = Database::obtain();
-        try {
-            $thisDao = new self();
-            $stmt    = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
-            $results = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'pid' => $pid ] );
+        $db      = Database::obtain();
+        $thisDao = new self();
+        $stmt    = $db->getConnection()->prepare( self::$_sql_get_project_Stats_volume_analysis );
+        $results = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [ 'pid' => $pid ] );
 
-            $stmt->closeCursor();
-        } catch ( \PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-
-            return $e->getCode() * -1;
-        }
-
+        $stmt->closeCursor();
 
         return $results;
     }

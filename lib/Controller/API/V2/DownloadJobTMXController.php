@@ -4,9 +4,9 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Exception;
-use FeatureSet;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use SplTempFileObject;
 use TMS\TMSService;

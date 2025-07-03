@@ -12,13 +12,13 @@ namespace Controller\API\V2;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
-use Database;
 use Exception;
+use Model\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
+use Model\Teams\TeamModel;
 use RedisHandler;
 use ReflectionException;
-use TeamModel;
 use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController {

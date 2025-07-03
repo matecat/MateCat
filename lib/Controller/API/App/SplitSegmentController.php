@@ -6,13 +6,13 @@ use CatUtils;
 use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Database;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Database;
 use Model\Jobs\ChunkDao;
-use Model\TranslationsSplit\SplitDAO;
 use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
 
 class SplitSegmentController extends KleinController {

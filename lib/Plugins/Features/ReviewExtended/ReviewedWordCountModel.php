@@ -19,11 +19,11 @@ use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
+use Model\TransactionalTrait;
 use Model\Users\UserDao;
+use Model\WordCount\CounterModel;
 use Routes;
-use TransactionalTrait;
 use Utils;
-use WordCount\CounterModel;
 
 class ReviewedWordCountModel implements IReviewedWordCountModel {
 

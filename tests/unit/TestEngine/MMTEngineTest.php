@@ -1,5 +1,6 @@
 <?php
 
+use Model\Database;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;

@@ -1,6 +1,8 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Database;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Search\SearchModel;
 use Model\Search\SearchQueryParamsStruct;
