@@ -1,35 +1,14 @@
 const path = require('path')
 const webpack = require('webpack')
 const {globSync} = require('glob')
-const terser = require('terser')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const HtmlWebPackPlugin = require('html-webpack-plugin')
-const WebpackConcatPlugin = require('webpack-concat-files-plugin')
 const {sentryWebpackPlugin} = require('@sentry/webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
-const https = require('https')
 const fs = require('fs')
 const ini = require('ini')
 // const BundleAnalyzerPlugin =
 //   require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-
-const buildPath = './public/build/'
-const lxqDownload = './public/buildResources/'
-
-const downloadFile = async (url, dest, cb) => {
-  const file = fs.createWriteStream(dest)
-  return new Promise((resolve, reject) => {
-    https.get(url, function (response) {
-      response.pipe(file)
-      file.on('finish', function () {
-        resolve()
-      })
-      file.on('error', function (response) {
-        reject()
-      })
-    })
-  })
-}
 
 function getDirectories(path) {
   return fs.readdirSync(path).filter(function (file) {
@@ -40,22 +19,6 @@ function getDirectories(path) {
 const matecatConfig = async ({env}, {mode}) => {
   const isDev = mode === 'development'
   const config = ini.parse(fs.readFileSync('./inc/config.ini', 'utf-8'))
-  const lxqLicence = config[config.ENV]?.LXQ_LICENSE
-  if (lxqLicence) {
-    const lxqServer = config[config.ENV].LXQ_SERVER
-    if (!fs.existsSync(lxqDownload)) {
-      fs.mkdirSync(lxqDownload)
-    }
-    await downloadFile(
-      lxqServer + '/js/lxqlicense.js',
-      lxqDownload + 'lxqlicense.js',
-    )
-  } else {
-    if (!fs.existsSync(lxqDownload)) {
-      fs.mkdirSync(lxqDownload)
-    }
-    fs.closeSync(fs.openSync(lxqDownload + 'lxqlicense.js', 'w'))
-  }
   let pluginsCattoolFiles = []
   let pluginsUploadFiles = []
   let pluginsAllPagesFiles = []
@@ -132,8 +95,8 @@ const matecatConfig = async ({env}, {mode}) => {
       runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
-        minSize: 20000, // Minimum size in bytes for a chunk to be generated
-        maxSize: 244000, // Maximum size in bytes for a chunk before it is split
+        minSize: 20 * 1024, // Minimum size in bytes for a chunk to be generated
+        maxSize: 200 * 1024, // Maximum size in bytes for a chunk before it is split
         maxInitialRequests: Infinity,
         automaticNameDelimiter: '-',
         cacheGroups: {
@@ -141,6 +104,18 @@ const matecatConfig = async ({env}, {mode}) => {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+          },
+          lodash: {
+            test: /[\\/]node_modules[\\/](lodash)[\\/]/,
+            name: 'lodash',
+            chunks: 'all',
+            priority: 10,
+          },
+          immutable: {
+            test: /[\\/]node_modules[\\/](immutable)[\\/]/,
+            name: 'immutable',
+            chunks: 'all',
+            priority: 10,
           },
         },
       },
@@ -242,17 +217,14 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     entry: {
       'qa-report': [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/QualityReport.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/QualityReport.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/QualityReportPage.scss',
         ),
       ],
       upload: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/NewProject.js'),
+        path.resolve(__dirname, 'public/js/pages/NewProject.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/NewProjectPage.scss',
@@ -260,53 +232,43 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       ...entryPoints,
       cattool: [
-        path.resolve(__dirname, lxqDownload + 'lxqlicense.js'),
-        path.resolve(__dirname, 'public/js/cat_source/ui.core.js'),
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/CatTool.js'),
+        path.resolve(__dirname, 'public/js/ui.core.js'),
+        path.resolve(__dirname, 'public/js/pages/CatTool.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/CattoolPage.scss',
         ),
       ],
       dashboard: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/Dashboard.js'),
+        path.resolve(__dirname, 'public/js/pages/Dashboard.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/DashboardPage.scss',
         ),
       ],
       analyze: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/AnalyzePage.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/AnalyzePage.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/AnalyzePage.scss',
         ),
       ],
       signin: [
-        path.resolve(__dirname, 'public/js/cat_source/es6/pages/SignIn.js'),
+        path.resolve(__dirname, 'public/js/pages/SignIn.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/SignInPage.scss',
         ),
       ],
       xliffToTarget: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/XliffToTarget.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/XliffToTarget.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/NewProjectPage.scss',
         ),
       ],
       activityLog: [
-        path.resolve(
-          __dirname,
-          'public/js/cat_source/es6/pages/ActivityLog.js',
-        ),
+        path.resolve(__dirname, 'public/js/pages/ActivityLog.js'),
         path.resolve(
           __dirname,
           'public/css/sass/components/pages/ActivityLogPage.scss',
@@ -341,40 +303,6 @@ const matecatConfig = async ({env}, {mode}) => {
         'process.env._ENV': JSON.stringify(config.ENV),
         'process.env.version': JSON.stringify(config.BUILD_NUMBER),
         'process.env.MODE': JSON.stringify(mode),
-      }),
-      /*new WebpackConcatPlugin({
-        bundles: [
-          {
-            src: [
-              './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/semantic.min.js',
-            ],
-            dest: './public/build/lib_upload.min.js',
-            transforms: {
-              after: async (code) => {
-                const minifiedCode = await terser.minify(code)
-                return minifiedCode.code
-              },
-            },
-          },
-        ],
-      }),*/
-      new WebpackConcatPlugin({
-        bundles: [
-          {
-            src: [
-              './public/js/lib/jquery-3.7.1.min.js',
-              './public/js/lib/semantic.min.js',
-            ],
-            dest: './public/build/libs.js',
-            transforms: {
-              after: async (code) => {
-                const minifiedCode = await terser.minify(code)
-                return minifiedCode.code
-              },
-            },
-          },
-        ],
       }),
       new MiniCssExtractPlugin({
         filename: '[name].[contenthash].css',
