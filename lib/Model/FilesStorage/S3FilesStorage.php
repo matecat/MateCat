@@ -2,6 +2,7 @@
 
 namespace FilesStorage;
 
+use CatUtils;
 use DirectoryIterator;
 use DomainException;
 use Exception;
@@ -237,6 +238,11 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         $raw_file_path   = explode( DIRECTORY_SEPARATOR, $originalPath );
         $file_name       = array_pop( $raw_file_path );
+
+        // encode filename
+        $file_info = AbstractFilesStorage::pathinfo_fix($file_name);
+        $file_name = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+
         $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
         $this->s3Client->uploadItem( [
@@ -466,6 +472,8 @@ class S3FilesStorage extends AbstractFilesStorage {
             if ( !$item->isDir() ) {
 
                 $subPathName = $iterator->getSubPathName();
+//                $file_info = AbstractFilesStorage::pathinfo_fix($subPathName);
+//                $encodedSubPathName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
 
                 // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
                 $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
@@ -479,11 +487,12 @@ class S3FilesStorage extends AbstractFilesStorage {
                 }
 
                 $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
+                // $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
 
                 // upload file
                 $s3Client->uploadItem( [
                         'bucket' => static::$FILES_STORAGE_BUCKET,
-                        'key'    => $subPathName,
+                        'key'    => $subPathName, // encode filename
                         'source' => $item->getPathName()
                 ] );
 
