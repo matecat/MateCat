@@ -1328,8 +1328,6 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            \Log::doJsonLog("PIPPO ---> " . json_encode($projectStructure[ 'payable_rate_model' ]));
-
             // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
@@ -1340,7 +1338,7 @@ class ProjectManager {
                 $payableRatesTemplate = new CustomPayableRateStruct();
                 $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
-                $payableRates         = json_encode( $payableRates );
+                $payableRates         = json_encode( $payableRatgies );
 
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
