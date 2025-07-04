@@ -192,8 +192,10 @@ class FeatureSet implements FeatureSetInterface {
             return $feature->toNewObject();
         }, $features );
 
-        $returnable = array_filter( $objs, function ( BaseFeature $obj ) {
-            return $obj->isAutoActivableOnProject();
+        $returnable = array_filter( $objs, function ( ?BaseFeature $obj ) {
+            if($obj !== null){
+                return $obj->isAutoActivableOnProject();
+            }
         } );
 
         $this->merge( array_map( function ( BaseFeature $feature ) {
