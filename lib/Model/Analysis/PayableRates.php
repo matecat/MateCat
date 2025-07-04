@@ -1,5 +1,5 @@
 <?php
-namespace Analysis;
+namespace Model\Analysis;
 use Langs\Languages;
 
 /**

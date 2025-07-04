@@ -1,5 +1,7 @@
 <?php
 //TODO:estendere
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -47,10 +49,10 @@ class CallAbstractMyMemoryTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $engine_struct_MyMemory     = EnginesModel_EngineStruct::getStruct();
+        $engine_struct_MyMemory     = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EnginesModel_EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
+        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
 
         /** @var $engine_MyMemory PHPUnit_Framework_MockObject_MockObject | Engines_MyMemory */
         $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_MyMemory ] )->setMethods( [ '_call' ] )->getMock();
@@ -357,10 +359,10 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $url_mock_param = 'https://api.mymemory.translated.net/get';
 
-        $engine_struct_MyMemory     = EnginesModel_EngineStruct::getStruct();
+        $engine_struct_MyMemory     = EngineStruct::getStruct();
         $engine_struct_MyMemory->id = 1;
 
-        $engine_struct_MyMemory = ( new EnginesModel_EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
+        $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
         $engine_MyMemory        = new Engines_MyMemory( $engine_struct_MyMemory );
 
         $engine_MyMemory->call( "translate_relative_url", $params, true );

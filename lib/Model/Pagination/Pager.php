@@ -1,8 +1,8 @@
 <?php
 
-namespace Pagination;
+namespace Model\Pagination;
 
-use DataAccess\DaoCacheTrait;
+use Model\DataAccess\DaoCacheTrait;
 use PDO;
 use ReflectionException;
 

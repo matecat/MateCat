@@ -2,11 +2,11 @@
 
 namespace Features;
 
-use BasicFeatureStruct;
 use Exception;
 use INIT;
 use Klein\Klein;
 use LogicException;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -139,7 +139,7 @@ abstract class BaseFeature implements IBaseFeature {
     /**
      * @param Klein $klein
      *
-     * @see \Features::loadRoutes
+     * @see \Model\FeaturesBase\FeaturesFactory::loadRoutes
      */
     public static function loadRoutes( Klein $klein ) {
     }

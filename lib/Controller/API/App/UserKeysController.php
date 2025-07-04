@@ -1,19 +1,19 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\Database;
+use Model\Exceptions\NotFoundException;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\ClientUserFacade;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Users_ClientUserFacade;
 use Utils;
 
 class UserKeysController extends KleinController {
@@ -124,7 +124,7 @@ class UserKeysController extends KleinController {
     protected function getKeyUsersInfo( array $userMemoryKeys ): array {
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
-            $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+            $_userStructs[] = new ClientUserFacade( $userStruct );
         }
 
         return [
@@ -165,20 +165,20 @@ class UserKeysController extends KleinController {
     }
 
     /**
-     * @return TmKeyManagement_MemoryKeyDao
+     * @return \Model\TmKeyManagement\MemoryKeyDao
      */
-    private function getMkDao(): TmKeyManagement_MemoryKeyDao {
-        return new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+    private function getMkDao(): MemoryKeyDao {
+        return new MemoryKeyDao( Database::obtain() );
     }
 
     /**
      * @param      $key
      * @param null $description
      *
-     * @return TmKeyManagement_MemoryKeyStruct
+     * @return MemoryKeyStruct
      * @throws Exception
      */
-    private function getMemoryToUpdate( $key, $description = null ): TmKeyManagement_MemoryKeyStruct {
+    private function getMemoryToUpdate( $key, $description = null ): MemoryKeyStruct {
         $tmService = new TMSService();
 
         //validate the key
@@ -190,7 +190,7 @@ class UserKeysController extends KleinController {
         $tmKeyStruct->tm   = true;
         $tmKeyStruct->glos = true;
 
-        $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKeyToUpdate         = new MemoryKeyStruct();
         $memoryKeyToUpdate->uid    = $this->user->uid;
         $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 

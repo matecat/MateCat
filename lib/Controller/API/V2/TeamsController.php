@@ -7,21 +7,21 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\V2\Json\Team;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamModel;
+use Model\Teams\TeamStruct;
 use ReflectionException;
-use TeamModel;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController {
 

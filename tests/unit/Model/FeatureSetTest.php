@@ -1,5 +1,6 @@
 <?php
 
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
 
 /**

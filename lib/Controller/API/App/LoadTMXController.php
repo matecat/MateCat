@@ -1,16 +1,16 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
 use INIT;
 use InvalidArgumentException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\Database;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSFile;
 use TMS\TMSService;
@@ -59,8 +59,8 @@ class LoadTMXController extends KleinController {
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
+                $mkDao           = new MemoryKeyDao( Database::obtain() );
+                $searchMemoryKey = new MemoryKeyStruct();
                 $key             = new TmKeyManagement_TmKeyStruct();
                 $key->key        = $request[ 'tm_key' ];
 

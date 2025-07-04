@@ -1,6 +1,9 @@
 <?php
 
-use Teams\TeamDao;
+use Model\Database;
+use Model\Teams\TeamDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 
 class Factory_User extends Factory_Base {
 
@@ -8,7 +11,7 @@ class Factory_User extends Factory_Base {
 
         $userStruct = static::getNewUser( $values );
 
-        $dao  = new Users_UserDao( Database::obtain() );
+        $dao  = new UserDao( Database::obtain() );
         $user = $dao->createUser( $userStruct );
 
         $orgDao = new TeamDao();
@@ -31,7 +34,7 @@ class Factory_User extends Factory_Base {
                 'api_key'    => '1234abcd'
         ], $values );
 
-        return new Users_UserStruct( $values );
+        return new UserStruct( $values );
 
     }
 

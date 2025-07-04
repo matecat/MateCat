@@ -1,5 +1,7 @@
 <?php
 
+use Model\Engines\SmartMATEStruct;
+
 /**
  * Created by PhpStorm.
  * @property string client_secret
@@ -82,7 +84,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     protected function _getEngineStruct() {
 
-        return EnginesModel_SmartMATEStruct::getStruct();
+        return SmartMATEStruct::getStruct();
 
     }
 

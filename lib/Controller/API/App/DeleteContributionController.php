@@ -1,26 +1,26 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Engine;
 use Exception;
 use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Translations_SegmentTranslationDao;
 
 class DeleteContributionController extends KleinController {
 
-    protected        $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -29,7 +29,7 @@ class DeleteContributionController extends KleinController {
     /**
      * @throws NotFoundException
      * @throws ReflectionException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
      */
     public function delete(): void {
@@ -47,7 +47,7 @@ class DeleteContributionController extends KleinController {
         $received_password = $request[ 'received_password' ];
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         $tm_keys = $jobStruct[ 'tm_keys' ];
@@ -167,8 +167,8 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing job password", -6 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_segment'        => $id_segment,
@@ -194,7 +194,7 @@ class DeleteContributionController extends KleinController {
      * @throws  Exception
      */
     private function updateSuggestionsArray( $id_segment, $id_job, $id_match ): void {
-        $segmentTranslation  = Translations_SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
+        $segmentTranslation  = SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
         $oldSuggestionsArray = json_decode( $segmentTranslation->suggestions_array );
 
         if ( !empty( $oldSuggestionsArray ) ) {
@@ -206,7 +206,7 @@ class DeleteContributionController extends KleinController {
                 }
             }
 
-            Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
+            SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
         }
     }
 }

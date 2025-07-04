@@ -4,7 +4,13 @@ use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
 use Features\Mmt;
-use Jobs\MetadataDao;
+use Model\Database;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -102,7 +108,7 @@ class Engines_MMT extends Engines_AbstractEngine {
 
         $metadata = null;
         if ( !empty( $_config[ 'project_id' ] ) ) {
-            $metadataDao = new Projects_MetadataDao();
+            $metadataDao = new ProjectsMetadataDao();
             $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
         }
 
@@ -174,7 +180,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $keyList TmKeyManagement_MemoryKeyStruct[]
+     * @param $keyList MemoryKeyStruct[]
      *
      * @return array
      */
@@ -241,7 +247,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * @throws MMTServiceApiException
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         $client = $this->_getClient();
 
         try {
@@ -256,15 +262,15 @@ class Engines_MMT extends Engines_AbstractEngine {
 
     /**
      *
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user *
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user *
      *
      * @return void
      * @throws MMTServiceApiException
      * @throws Exception
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $client   = $this->_getClient();
         $response = $client->getMemory( 'x_mm-' . trim( $memoryKey ) );
@@ -357,12 +363,12 @@ class Engines_MMT extends Engines_AbstractEngine {
             // ==============================================
             //
             $preImportIsDisabled = empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
-            $user                = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $user                = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             if ( $preImportIsDisabled ) {
 
                 // get jobs keys
-                $project = Projects_ProjectDao::findById( $pid );
+                $project = ProjectDao::findById( $pid );
 
                 foreach ( $project->getJobs() as $job ) {
 
@@ -370,7 +376,7 @@ class Engines_MMT extends Engines_AbstractEngine {
                     $jobKeyList       = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
 
                     foreach ( $jobKeyList as $memKey ) {
-                        $memoryKeyStructs[] = new TmKeyManagement_MemoryKeyStruct(
+                        $memoryKeyStructs[] = new MemoryKeyStruct(
                                 [
                                         'uid'    => $user->uid,
                                         'tm_key' => $memKey
@@ -455,7 +461,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * Activate the account and also update/add keys to User MMT data
      *
-     * @param $keyList TmKeyManagement_MemoryKeyStruct[]
+     * @param $keyList MemoryKeyStruct[]
      *
      * @return mixed
      * @throws MMTServiceApiException
@@ -595,7 +601,7 @@ class Engines_MMT extends Engines_AbstractEngine {
     /**
      * @throws MMTServiceApiException
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         //Get the user account, check if the memory exists and, if so, check if the key owner's ID is mine.
         $me     = $this->checkAccount();
         $memory = $this->memoryExists( $memoryKey );

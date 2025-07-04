@@ -1,18 +1,22 @@
 <?php
 
+use Model\Database;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Chunks_ChunkDao::getBySegmentTranslation
+ * @covers ChunkDao::getBySegmentTranslation
  * User: dinies
  * Date: 30/06/16
  * Time: 16.41
  */
 class GetBySegmentTranslationChunkTest extends AbstractTest {
     /**
-     * @var Chunks_ChunkDao
+     * @var ChunkDao
      */
     protected $chunk_Dao;
 
@@ -22,18 +26,18 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
     protected $database_instance;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
-    /** @var Translations_SegmentTranslationStruct */
+    /** @var SegmentTranslationStruct */
     protected $_translationsStruct;
 
     public function setUp(): void {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao();
+        $this->chunk_Dao         = new ChunkDao();
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -70,7 +74,7 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
               )"
         );
 
-        $this->_translationsStruct = new Translations_SegmentTranslationStruct( $this->database_instance->getConnection()->query(
+        $this->_translationsStruct = new SegmentTranslationStruct( $this->database_instance->getConnection()->query(
                 "SELECT * FROM segment_translations WHERE id_job = $jobId LIMIT 1"
         )->fetch() );
 
@@ -78,13 +82,13 @@ class GetBySegmentTranslationChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getBySegmentTranslation
+     * @covers ChunkDao::getBySegmentTranslation
      */
     function test_getBySegmentTranslation() {
 
         $result = $this->chunk_Dao->getBySegmentTranslation( $this->_translationsStruct );
 
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

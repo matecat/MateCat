@@ -7,7 +7,7 @@
  *
  */
 
-namespace Filters\DTO;
+namespace Model\Filters\DTO;
 
 interface IDto {
 

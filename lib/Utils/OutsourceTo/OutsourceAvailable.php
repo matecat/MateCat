@@ -1,12 +1,14 @@
 <?php
+namespace OutsourceTo;
 
-class OutsourceTo_OutsourceAvailable {
+
+class OutsourceAvailable {
     /**
      * @param $outsourceAvailableInfo
      *
      * @return bool
      */
-    public static function isOutsourceAvailable( $outsourceAvailableInfo ) {
+    public static function isOutsourceAvailable( $outsourceAvailableInfo ): bool {
 
         if ( !is_array( $outsourceAvailableInfo ) ) {
             return false;

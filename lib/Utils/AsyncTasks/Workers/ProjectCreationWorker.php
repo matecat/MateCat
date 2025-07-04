@@ -7,7 +7,7 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 
 use Exception;
@@ -84,7 +84,7 @@ class ProjectCreationWorker extends AbstractWorker {
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  empty params found.", self::ERR_REQUEUE_END );
         }
 
-        $this->projectStructure = new RecursiveArrayObject( json_decode( $queueElement->params, true ) );
+        $this->projectStructure = new RecursiveArrayObject( $queueElement->params->toArray() );
         $projectManager         = new ProjectManager( $this->projectStructure );
         $projectManager->createProject();
 

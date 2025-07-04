@@ -1,6 +1,9 @@
 <?php
 
-use Search\ReplaceEventStruct;
+use Model\Search\ReplaceEventDAOInterface;
+use Model\Search\ReplaceEventIndexDAOInterface;
+use Model\Search\ReplaceEventStruct;
+use Model\Translations\SegmentTranslationDao;
 
 class Search_ReplaceHistory {
 
@@ -10,12 +13,12 @@ class Search_ReplaceHistory {
     private $idJob;
 
     /**
-     * @var Search_ReplaceEventDAOInterface
+     * @var ReplaceEventDAOInterface
      */
     private $replaceEventDAO;
 
     /**
-     * @var Search_ReplaceEventIndexDAOInterface
+     * @var ReplaceEventIndexDAOInterface
      */
     private $replaceEventIndexDAO;
 
@@ -23,11 +26,11 @@ class Search_ReplaceHistory {
      * Search_ReplaceHistory constructor.
      *
      * @param                                      $idJob
-     * @param Search_ReplaceEventDAOInterface      $replaceEventDAO
-     * @param Search_ReplaceEventIndexDAOInterface $replaceEventIndexDAO
+     * @param ReplaceEventDAOInterface             $replaceEventDAO
+     * @param ReplaceEventIndexDAOInterface        $replaceEventIndexDAO
      * @param null                                 $ttl
      */
-    public function __construct( $idJob, Search_ReplaceEventDAOInterface $replaceEventDAO, Search_ReplaceEventIndexDAOInterface $replaceEventIndexDAO, $ttl = null ) {
+    public function __construct( $idJob, ReplaceEventDAOInterface $replaceEventDAO, ReplaceEventIndexDAOInterface $replaceEventIndexDAO, $ttl = null ) {
         $this->idJob                = $idJob;
         $this->replaceEventDAO      = $replaceEventDAO;
         $this->replaceEventIndexDAO = $replaceEventIndexDAO;
@@ -90,7 +93,7 @@ class Search_ReplaceHistory {
         $events = $this->get( $versionToMove );
 
         if ( count( $events ) > 0 ) {
-            $replacedEvents = Translations_SegmentTranslationDao::rebuildFromReplaceEvents( $events );
+            $replacedEvents = SegmentTranslationDao::rebuildFromReplaceEvents( $events );
 
             $this->replaceEventIndexDAO->save( $this->idJob, $versionToMove );
 

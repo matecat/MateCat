@@ -1,20 +1,20 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
 use Constants_JobStatus;
 use Constants_Teams;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use ManageUtils;
+use Model\Exceptions\NotFoundException;
+use Model\Teams\MembershipDao;
+use Model\Teams\MembershipStruct;
+use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\TeamStruct;
-use Users_UserStruct;
 
 class GetProjectsController extends KleinController {
 
@@ -136,10 +136,10 @@ class GetProjectsController extends KleinController {
      * @param TeamStruct $team
      * @param            $id_assignee
      *
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws Exception
      */
-    private function filterAssignee( TeamStruct $team, $id_assignee ): ?Users_UserStruct {
+    private function filterAssignee( TeamStruct $team, $id_assignee ): ?UserStruct {
         if ( is_null( $id_assignee ) ) {
             return null;
         }

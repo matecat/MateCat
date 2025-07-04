@@ -1,9 +1,9 @@
 <?php
 
-namespace LQA\SizeRestriction;
+namespace Utils\LQA\SizeRestriction;
 
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
 
 class SizeRestriction {
 
@@ -13,7 +13,7 @@ class SizeRestriction {
     private $cleanedString;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     private $featureSet;
 
@@ -21,7 +21,7 @@ class SizeRestriction {
      * SizeRestriction constructor.
      *
      * @param            $string
-     * @param FeatureSet $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      */
     public function __construct( $string, FeatureSet $featureSet ) {
 
@@ -38,11 +38,11 @@ class SizeRestriction {
      * @return string
      */
     private function clearStringFromTags( $string ) {
-        $cleanedText = preg_replace( '/&lt;ph(?:(?:(?!id).)*?)id="(?:[^"].*?)"(?:(?:(?!equiv-text).)*?)equiv-text="base64:((?:(?!&gt;).)*?)"\/&gt;/iu', '', $string );
+        $cleanedText = preg_replace( '#&lt;ph(?:(?!id).)*?id="[^"].*?"(?:(?!equiv-text).)*?equiv-text="base64:((?:(?!&gt;).)*?)"/&gt;#iu', '', $string );
         $cleanedText = preg_replace( '/&lt;g .*?id="(.*?)".*?&gt;/iu', '', $cleanedText );
-        $cleanedText = preg_replace( '/&lt;(\/g)&gt;/iu', '', $cleanedText );
-        $cleanedText = preg_replace( '/&lt;bx .*?id="(.*?)".*?\/&gt;/iu', '', $cleanedText );
-        $cleanedText = preg_replace( '/&lt;ex .*?id="(.*?)".*?\/&gt;/iu', '', $cleanedText );
+        $cleanedText = preg_replace( '#&lt;(/g)&gt;#iu', '', $cleanedText );
+        $cleanedText = preg_replace( '#&lt;bx .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText );
+        $cleanedText = preg_replace( '#&lt;ex .*?id="(.*?)".*?/&gt;#iu', '', $cleanedText );
         $cleanedText = preg_replace( '/&lt;x .*?id="(.*?)".*?&gt;/iu', '', $cleanedText );
         $cleanedText = preg_replace( '/##\$(_A0)\$##/iu', ' ', $cleanedText );
         $cleanedText = preg_replace( '/##\$(_09)\$##/iu', ' ', $cleanedText );

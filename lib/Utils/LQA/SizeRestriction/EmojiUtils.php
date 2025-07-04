@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA\SizeRestriction;
+namespace Utils\LQA\SizeRestriction;
 class EmojiUtils {
     /**
      * @see https://github.com/spatie/emoji/blob/main/src/Emoji.php

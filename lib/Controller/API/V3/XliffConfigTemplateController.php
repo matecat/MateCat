@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Xliff\XliffConfigTemplateDao;
+use Validator\JSONSchema\Errors\JSONValidatorException;
+use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 
 class XliffConfigTemplateController extends KleinController {
     protected function afterConstruct() {
@@ -203,7 +203,7 @@ class XliffConfigTemplateController extends KleinController {
 
         try {
 
-            $id  = (int)$this->request->paramsNamed()->get('id');
+            $id  = (int)$this->request->paramsNamed()->get( 'id' );
             $uid = $this->getUser()->uid;
 
             $count = XliffConfigTemplateDao::remove( $id, $uid );

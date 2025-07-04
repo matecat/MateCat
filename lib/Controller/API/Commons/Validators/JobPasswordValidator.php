@@ -1,34 +1,31 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 /**
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class JobPasswordValidator extends Base {
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $jStruct;
+    private JobStruct $jStruct;
 
     /**
      * @throws ReflectionException
+     * @throws \Model\Exceptions\NotFoundException
      */
     public function __construct( KleinController $controller ) {
 
         parent::__construct( $controller );
-
-        $this->jStruct           = new Jobs_JobStruct();
-        $this->jStruct->id       = $this->controller->params[ 'id_job' ];
-        $this->jStruct->password = $this->controller->params[ 'password' ];
-        $this->jStruct           = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
+        $this->jStruct = ChunkDao::getByIdAndPassword( $this->controller->params[ 'id_job' ], $this->controller->params[ 'password' ] );
 
         $this->controller->setChunk( $this->jStruct );
 
@@ -47,9 +44,9 @@ class JobPasswordValidator extends Base {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getJob(): Jobs_JobStruct {
+    public function getJob(): JobStruct {
         return $this->jStruct;
     }
 

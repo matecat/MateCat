@@ -1,24 +1,26 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use ConnectedServices\ConnectedServiceUserModel;
-use ConnectedServices\OauthClient;
+use Controller\Abstracts\BaseKleinViewController;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use INIT;
-use OAuthSignInModel;
+use Model\ConnectedServices\Oauth\OauthClient;
+use Model\ConnectedServices\Oauth\ProviderUser;
+use Model\Users\Authentication\OAuthSignInModel;
 use ReflectionException;
 
 class OauthResponseHandlerController extends BaseKleinViewController {
 
     /**
-     * @var ConnectedServiceUserModel
+     * @var ProviderUser
      */
-    private ConnectedServiceUserModel $remoteUser;
+    private ProviderUser $remoteUser;
 
     /**
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
     public function response() {
 
@@ -56,6 +58,7 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @param null $provider
      *
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
     protected function _processSuccessfulOAuth( $code, $provider = null ) {
 
@@ -63,9 +66,9 @@ class OauthResponseHandlerController extends BaseKleinViewController {
         $this->_initRemoteUser( $code, $provider );
 
         $model = new OAuthSignInModel(
+                $this->remoteUser->email,
                 $this->remoteUser->name,
-                $this->remoteUser->lastName,
-                $this->remoteUser->email
+                $this->remoteUser->lastName
         );
 
         $model->setProvider( $this->remoteUser->provider );

@@ -1,31 +1,31 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use Exceptions\NotFoundException;
-use FeatureSet;
-use Files\FilesPartsDao;
 use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
 use Matecat\SubFiltering\MateCatFilter;
-use Projects_MetadataDao;
+use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\Files\FilesPartsDao;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\MetadataDao;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
+use Model\Users\UserDao;
 use ReflectionException;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
 use TmKeyManagement_Filter;
-use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    protected int $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -56,8 +56,8 @@ class GetContributionController extends KleinController {
             $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
-        $jobStruct  = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
-        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
+        $jobStruct  = ChunkDao::getByIdAndPassword( $id_job, $password );
+        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment );
 
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
@@ -69,15 +69,15 @@ class GetContributionController extends KleinController {
             $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
 
             $contributionRequest->mt_evaluation =
-                    (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
+                    (bool)$projectStruct->getMetadataValue( ProjectsMetadataDao::MT_EVALUATION ) ??
                     //TODO REMOVE after a reasonable amount of time, this is for back compatibility, previously the mt_evaluation flag was on jobs metadata
-                    (bool)( new MetadataDao() )->get( $id_job, $received_password, Projects_MetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
+                    (bool)( new MetadataDao() )->get( $id_job, $received_password, ProjectsMetadataDao::MT_EVALUATION, 60 * 60 ) ?? // for back compatibility, the mt_evaluation flag was on job metadata
                     false;
 
         }
 
         $file  = ( new FilesPartsDao() )->getBySegmentId( $id_segment );
-        $owner = ( new Users_UserDao() )->getProjectOwner( $id_job );
+        $owner = ( new UserDao() )->getProjectOwner( $id_job );
 
         $contributionRequest->id_file    = $file->id_file ?? null;
         $contributionRequest->id_job     = $id_job;
@@ -101,9 +101,9 @@ class GetContributionController extends KleinController {
         $contributionRequest->fromTarget                 = $switch_languages;
         $contributionRequest->resultNum                  = $num_results;
         $contributionRequest->crossLangTargets           = $this->getCrossLanguages( $cross_language );
-        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
-        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
-        $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS );
+        $contributionRequest->mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 86;
+        $contributionRequest->mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
 
         if ( $this->isRevision() ) {
             $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -204,7 +204,7 @@ class GetContributionController extends KleinController {
         if ( !$concordance_search ) {
             //execute these lines only in segment contribution search,
             //in case of user concordance search skip these lines
-            //because segment can be optional
+            //because the segment can be optional
             if ( empty( $id_segment ) ) {
                 throw new InvalidArgumentException( "missing id_segment", -1 );
             }
@@ -226,8 +226,8 @@ class GetContributionController extends KleinController {
             throw new InvalidArgumentException( "missing id_client", -5 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_client'           => $id_client,
@@ -260,7 +260,7 @@ class GetContributionController extends KleinController {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
-        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+        $segmentsList = ( new SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                 [
                         'id_before'  => $request[ 'id_before' ],
                         'id_segment' => $request[ 'id_segment' ],

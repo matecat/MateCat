@@ -7,25 +7,27 @@
  *
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
 use FlashMessage;
 use INIT;
 use Klein\Response;
 use Log;
+use Model\Users\Authentication\PasswordResetModel;
+use Model\Users\Authentication\PasswordRules;
+use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
 use Routes;
-use Traits\RateLimiterTrait;
-use Users\Authentication\PasswordResetModel;
-use Users\Authentication\SignupModel;
 use Utils;
 
 class ForgotPasswordController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * Step 1
@@ -134,7 +136,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         $reset                 = new PasswordResetModel( $_SESSION );
         $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
         $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
-        $reset->resetPassword( $new_password, $password_confirmation );
+        $this->validatePasswordRequirements( $new_password, $password_confirmation );
+        $reset->resetPassword( $new_password );
         $this->user = $reset->getUser();
         $this->broadcastLogout();
 

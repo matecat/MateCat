@@ -1,15 +1,19 @@
 <?php
 
-use AsyncTasks\Workers\SetContributionMTWorker;
-use AsyncTasks\Workers\SetContributionWorker;
 use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Engines\EngineStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
 use Stomp\Transport\Frame;
 use TaskRunner\Commons\ContextList;
+use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\AsyncTasks\Workers\SetContributionMTWorker;
+use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Engines\Lara;
 
 
@@ -95,7 +99,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
 
 
         $this->queueElement            = new QueueElement();
-        $this->queueElement->params    = $this->contributionStruct;
+        $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
         $this->queueElement->classLoad = '\AsyncTasks\Workers\SetContributionMTWorker';
 
         $this->contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
@@ -125,7 +129,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
                 ->onlyMethods(['update', 'getEngineRecord' ])
                 ->getMock();
 
-        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct       = new EngineStruct();
         $engineStruct->id   = 1111;
         $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
@@ -146,7 +150,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
-                        new Jobs_JobStruct(
+                        new JobStruct(
                                 [
                                         'id'           => $this->contributionStruct->id_job,
                                         'password'     => $this->contributionStruct->job_password,
@@ -211,7 +215,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
             ->disableOriginalConstructor()
             ->getMock();
 
-        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct       = new EngineStruct();
         $engineStruct->id   = 1111;
         $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
@@ -232,7 +236,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
-                        new Jobs_JobStruct(
+                        new JobStruct(
                                 [
                                         'id'           => $this->contributionStruct->id_job,
                                         'password'     => $this->contributionStruct->job_password,
@@ -300,7 +304,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
-                        new Jobs_JobStruct(
+                        new JobStruct(
                                 [
                                         'id'           => $this->contributionStruct->id_job,
                                         'password'     => $this->contributionStruct->job_password,
@@ -344,7 +348,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
             ->disableOriginalConstructor()
             ->getMock();
 
-        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct       = new EngineStruct();
         $engineStruct->id   = 0;
         $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
@@ -365,7 +369,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
-                        new Jobs_JobStruct(
+                        new JobStruct(
                                 [
                                         'id'           => $this->contributionStruct->id_job,
                                         'password'     => $this->contributionStruct->job_password,
@@ -405,7 +409,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
                 ->disableOriginalConstructor()
                 ->getMock();
 
-        $engineStruct       = new EnginesModel_EngineStruct();
+        $engineStruct       = new EngineStruct();
         $engineStruct->id   = 0;
         $engineStruct->type = Constants_Engines::MT;
         $stubEngine->expects( $this->once() )
@@ -426,7 +430,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
-                        new Jobs_JobStruct(
+                        new JobStruct(
                                 [
                                         'id'           => $this->contributionStruct->id_job,
                                         'password'     => $this->contributionStruct->job_password,
@@ -462,7 +466,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [
-                new Jobs_JobStruct(
+                new JobStruct(
                         [
                                 'id_tms'       => 1,
                                 'id_mt_engine' => 2,
@@ -497,7 +501,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );
         $reflectedMethod->setAccessible( true );
         $reflectedMethod->invokeArgs( $_worker, [
-                new Jobs_JobStruct(
+                new JobStruct(
                         [
                                 'id_tms'       => 1,
                                 'id_mt_engine' => 91827364, // fake

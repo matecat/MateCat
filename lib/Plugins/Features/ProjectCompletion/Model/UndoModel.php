@@ -12,7 +12,7 @@ namespace Features\ProjectCompletion\Model;
 class UndoModel {
 
     /**
-     * @var \Chunks_ChunkCompletionEventStruct
+     * @var \Model\ChunksCompletion\ChunkCompletionEventStruct
      */
     protected $event ;
 

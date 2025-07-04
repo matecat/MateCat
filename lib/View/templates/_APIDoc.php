@@ -2,6 +2,7 @@
 
 use Langs\LanguageDomains;
 use Langs\Languages;
+use Model\FeaturesBase\FeatureSet;
 
 require_once '../../inc/Bootstrap.php';
 try {

@@ -1,4 +1,9 @@
 <?php
+
+use Model\Engines\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -55,9 +60,9 @@ interface Engines_EngineInterface {
     public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct;
+    public function getEngineRecord(): EngineStruct;
 
     /**
      * @return bool
@@ -69,7 +74,7 @@ interface Engines_EngineInterface {
     /**
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user );
 
     /**
      * @param array      $projectRow
@@ -80,12 +85,12 @@ interface Engines_EngineInterface {
     public function syncMemories( array $projectRow, ?array $segments = [] );
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return ?array
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * Deletes a specific memory key.
@@ -101,12 +106,12 @@ interface Engines_EngineInterface {
     /**
      * Determines if the provided memory belongs to the caller.
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      * @throws Exception
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * @param string $source

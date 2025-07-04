@@ -1,8 +1,8 @@
 <?php
 
-use FilesStorage\FilesStorageFactory;
-use FilesStorage\FsFilesStorage;
-use FilesStorage\S3FilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\FilesStorage\FsFilesStorage;
+use Model\FilesStorage\S3FilesStorage;
 use TestHelpers\AbstractTest;
 
 class FilesStorageFactoryTest extends AbstractTest {

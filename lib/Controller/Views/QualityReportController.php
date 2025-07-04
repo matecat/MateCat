@@ -1,17 +1,19 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use CatUtils;
 use Constants_TranslationStatus;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use Jobs_JobDao;
 use Langs\Languages;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Jobs\JobDao;
+use PHPTalBoolean;
+use PHPTalMap;
 use Utils;
 
 /**
@@ -34,7 +36,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
         $request = $this->validateTheRequest();
 
-        $jobStruct = Jobs_JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
+        $jobStruct = JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
 
         if ( empty( $jobStruct ) ) {
             $this->setView( "project_not_found.html", [], 404 );
@@ -65,9 +67,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
                 'source_code'         => $jobStruct[ 'source' ],
                 'target_code'         => $jobStruct[ 'target' ],
-                'source_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ),
-                'target_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ),
-                'searchable_statuses' => $this->searchableStatuses(),
+                'source_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ) ),
+                'target_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ) ),
+                'searchable_statuses' => new PHPTalMap( $this->searchableStatuses() ),
 
         ] );
 

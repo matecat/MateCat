@@ -1,5 +1,11 @@
 <?php
 
+use Model\Engines\EngineStruct;
+use Model\Engines\GoogleTranslateStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -10,9 +16,9 @@
 abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
-    protected EnginesModel_EngineStruct $engineRecord;
+    protected EngineStruct $engineRecord;
 
     protected string $className;
     protected array  $_config = [];
@@ -109,9 +115,9 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct {
+    public function getEngineRecord(): EngineStruct {
         return $this->engineRecord;
     }
 
@@ -338,7 +344,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         /**
          * Create a record of type GoogleTranslate
          */
-        $newEngineStruct = EnginesModel_GoogleTranslateStruct::getStruct();
+        $newEngineStruct = GoogleTranslateStruct::getStruct();
 
         $newEngineStruct->name                                = "Generic";
         $newEngineStruct->uid                                 = 0;
@@ -356,13 +362,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user
      *
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
     }
 
@@ -377,12 +383,12 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey The memory key structure to be checked.
+     * @param MemoryKeyStruct $memoryKey The memory key structure to be checked.
      *
      * @return ?array Returns the memory, otherwise null.
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 
@@ -400,11 +406,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      * Determines if the provided memory belongs to the caller.
      *
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey *
+     * @param MemoryKeyStruct $memoryKey *
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         return null;
     }
 

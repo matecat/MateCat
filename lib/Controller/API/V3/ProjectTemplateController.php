@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Projects\ProjectTemplateDao;
 use PDOException;
-use Projects\ProjectTemplateDao;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Validator\JSONSchema\Errors\JSONValidatorException;
+use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 
 class ProjectTemplateController extends KleinController {
     protected function afterConstruct() {

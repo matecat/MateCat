@@ -1,22 +1,25 @@
 <?php
 
+use Model\Database;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Chunks_ChunkDao::getByJobId
+ * @covers ChunkDao::getByJobId
  * User: dinies
  * Date: 30/06/16
  * Time: 18.17
  */
 class GetByJobIdChunkTest extends AbstractTest {
     /**
-     * @var Chunks_ChunkDao
+     * @var ChunkDao
      */
     protected $chunk_Dao;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
@@ -30,7 +33,7 @@ class GetByJobIdChunkTest extends AbstractTest {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
+        $this->chunk_Dao         = new ChunkDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -57,13 +60,13 @@ class GetByJobIdChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getByJobId
+     * @covers ChunkDao::getByJobId
      */
     function test_getByJobId() {
 
         $wrapped_result = $this->chunk_Dao->getByJobId( $this->job[ 'id' ] );
         $result         = $wrapped_result[ '0' ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

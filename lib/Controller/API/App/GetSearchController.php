@@ -1,34 +1,34 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
 use Constants_TranslationStatus;
-use Database;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobStruct;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Projects_ProjectDao;
+use Model\Database;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Search\ReplaceEventStruct;
+use Model\Search\SearchModel;
+use Model\Search\SearchQueryParamsStruct;
+use Model\Segments\SegmentDao;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use ReflectionException;
 use RuntimeException;
-use Search\ReplaceEventStruct;
-use Search\SearchModel;
-use Search\SearchQueryParamsStruct;
 use Search_ReplaceHistory;
 use Search_ReplaceHistoryFactory;
-use Segments_SegmentDao;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
 use Utils;
 
-class GetSearchController extends KleinController {
+class GetSearchController extends AbstractStatefulKleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -49,6 +49,9 @@ class GetSearchController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function replaceAll(): void {
 
         $request        = $this->validateTheRequest();
@@ -57,14 +60,14 @@ class GetSearchController extends KleinController {
 
         // and then hydrate the $search_results array
         foreach ( $res[ 'sid_list' ] as $segmentId ) {
-            $search_results[] = Translations_SegmentTranslationDao::findBySegmentAndJob( $segmentId, $request[ 'queryParams' ][ 'job' ] )->toArray();
+            $search_results[] = SegmentTranslationDao::findBySegmentAndJob( $segmentId, $request[ 'queryParams' ][ 'job' ] )->toArray();
         }
 
         // set the replacement in queryParams
         $request[ 'queryParams' ][ 'replacement' ] = $request[ 'replace' ];
 
         // update segment translations
-        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ], $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
+        $this->updateSegments( $search_results, $request[ 'job' ], $request[ 'password' ], $request[ 'id_segment' ] ?? null, $request[ 'queryParams' ], $request[ 'revisionNumber' ] );
 
         // and save replace events
         $srh             = $this->getReplaceHistory( $request[ 'job' ] );
@@ -186,11 +189,11 @@ class GetSearchController extends KleinController {
      * @param $job_id
      * @param $password
      *
-     * @return Jobs_JobStruct|null
+     * @return JobStruct|null
      * @throws Exception
      */
-    private function getJobData( $job_id, $password ): ?Jobs_JobStruct {
-        return Chunks_ChunkDao::getByIdAndPassword( (int)$job_id, $password );
+    private function getJobData( $job_id, $password ): ?JobStruct {
+        return ChunkDao::getByIdAndPassword( (int)$job_id, $password );
     }
 
     /**
@@ -208,12 +211,12 @@ class GetSearchController extends KleinController {
 
     /**
      * @param SearchQueryParamsStruct $queryParams
-     * @param Jobs_JobStruct          $jobStruct
+     * @param JobStruct               $jobStruct
      *
      * @return SearchModel
      * @throws Exception
      */
-    private function getSearchModel( SearchQueryParamsStruct $queryParams, Jobs_JobStruct $jobStruct ): SearchModel {
+    private function getSearchModel( SearchQueryParamsStruct $queryParams, JobStruct $jobStruct ): SearchModel {
         /** @var MateCatFilter $filter */
         $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target );
 
@@ -320,8 +323,8 @@ class GetSearchController extends KleinController {
     private function updateSegments( $search_results, $id_job, $password, $id_segment, SearchQueryParamsStruct $queryParams, $revisionNumber = false ): void {
         $db = Database::obtain();
 
-        $chunk           = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
-        $project         = Projects_ProjectDao::findByJobId( (int)$id_job );
+        $chunk           = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
+        $project         = ProjectDao::findByJobId( (int)$id_job );
         $versionsHandler = TranslationVersions::getVersionHandlerNewInstance( $chunk, $this->user, $project, $id_segment );
 
         // loop all segments to replace
@@ -330,8 +333,8 @@ class GetSearchController extends KleinController {
             // start the transaction
             $db->begin();
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
-            $segment         = ( new Segments_SegmentDao() )->getById( $tRow[ 'id_segment' ] );
+            $old_translation = SegmentTranslationDao::findBySegmentAndJob( (int)$tRow[ 'id_segment' ], (int)$tRow[ 'id_job' ] );
+            $segment         = ( new SegmentDao() )->getById( $tRow[ 'id_segment' ] );
 
             // Propagation
             $propagationTotal = [
@@ -345,7 +348,7 @@ class GetSearchController extends KleinController {
                             Constants_TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
-                $TPropagation                             = new Translations_SegmentTranslationStruct();
+                $TPropagation                             = new SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $tRow[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $id_job;
                 $TPropagation[ 'translation' ]            = $tRow[ 'translation' ];
@@ -355,7 +358,7 @@ class GetSearchController extends KleinController {
                 $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
                 try {
-                    $propagationTotal = Translations_SegmentTranslationDao::propagateTranslation(
+                    $propagationTotal = SegmentTranslationDao::propagateTranslation(
                             $TPropagation,
                             $chunk,
                             $id_segment,
@@ -377,7 +380,7 @@ class GetSearchController extends KleinController {
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 
             // Setup $new_translation
-            $new_translation                         = new Translations_SegmentTranslationStruct();
+            $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $tRow[ 'id_segment' ];
             $new_translation->id_job                 = $chunk->id;
             $new_translation->status                 = $this->getNewStatus( $old_translation, $revisionNumber );
@@ -414,7 +417,7 @@ class GetSearchController extends KleinController {
 
             // commit the transaction
             try {
-                Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+                SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $db->commit();
             } catch ( Exception $e ) {
                 $this->log( "Lock: Transaction Aborted. " . $e->getMessage() );
@@ -443,12 +446,12 @@ class GetSearchController extends KleinController {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translationStruct
-     * @param bool                                  $revisionNumber
+     * @param \Model\Translations\SegmentTranslationStruct $translationStruct
+     * @param bool                                         $revisionNumber
      *
      * @return string
      */
-    private function getNewStatus( Translations_SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
+    private function getNewStatus( SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
         if ( false === $revisionNumber ) {
             return Constants_TranslationStatus::STATUS_TRANSLATED;
         }

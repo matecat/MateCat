@@ -9,6 +9,7 @@
  */
 
 use Engines\Traits\Oauth;
+use Model\Engines\MicrosoftHubStruct;
 
 /**
  * Class Engines_MicrosoftHub
@@ -182,7 +183,7 @@ TAG;
 
     protected function _getEngineStruct() {
 
-        return EnginesModel_MicrosoftHubStruct::getStruct();
+        return MicrosoftHubStruct::getStruct();
 
     }
 

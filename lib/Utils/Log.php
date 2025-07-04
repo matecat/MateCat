@@ -1,18 +1,13 @@
 <?php
-error_reporting( E_ALL );
-define( 'DEBUG', 1 );
 
 if ( !defined( 'LOG_REPOSITORY' ) ) {
     define( 'LOG_REPOSITORY', INIT::$LOG_REPOSITORY );
 }
 
-if ( !defined( 'LOG_FILENAME' ) ) {
-    define( 'LOG_FILENAME', 'log.txt' );
-}
-
 // Be sure Monolog is installed via composer
-if ( @include 'vendor/autoload.php' ) {
-    Log::$useMonolog = true;
+const LOG_FILENAME = 'log.txt';
+if ( class_exists( 'Monolog\Logger' ) ) {
+    Log::setUseMonolog();
 }
 
 use Monolog\Formatter\LineFormatter;
@@ -21,23 +16,36 @@ use Monolog\Logger;
 
 class Log {
 
-    protected static $fileNamePath;
-
     /**
-     * @var Monolog\Logger
+     * @var ?Logger
      */
-    protected static $logger;
+    protected static ?Logger $logger = null;
 
     /**
      * @var bool
      */
-    public static $useMonolog = false;
+    protected static bool $useMonolog = false;
 
-    public static $fileName;
+    public static string $fileName    = LOG_FILENAME;
+    public static string $oldFileName = LOG_FILENAME;
 
-    public static $uniqID;
+    public static ?string $uniqID = null;
 
-    public static $requestID;
+    public static ?string $requestID = null;
+
+    public static function setLogFileName( string $fileName ) {
+        self::$oldFileName = self::$fileName;
+        self::$fileName    = $fileName;
+        self::resetLogger();
+    }
+
+    /**
+     * @param bool $useMonolog
+     *
+     */
+    public static function setUseMonolog( bool $useMonolog = true ) {
+        self::$useMonolog = $useMonolog;
+    }
 
     protected static function _writeTo( $stringData ) {
 
@@ -59,18 +67,16 @@ class Log {
     }
 
     protected static function initMonolog() {
-        $fileHandler   = new StreamHandler( self::getFileNamePath() );
-        $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
-        $fileHandler->setFormatter( $fileFormatter );
-        self::$logger = new Logger( 'Matecat', [ $fileHandler ] );
+        if ( empty( self::$logger ) ) {
+            $streamHandler = new StreamHandler( self::getFileNamePath() );
+            $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
+            $streamHandler->setFormatter( $fileFormatter );
+            self::$logger = new Logger( 'Matecat', [ $streamHandler ] );
+        }
     }
 
-    protected static function getFileNamePath() {
+    protected static function getFileNamePath(): string {
         if ( !empty( self::$fileName ) ) {
-            if ( is_array( self::$fileName ) ) {
-                self::$fileName = implode( self::$fileName );
-            }
-
             $name = LOG_REPOSITORY . "/" . self::$fileName;
         } else {
             $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
@@ -79,7 +85,7 @@ class Log {
         return $name;
     }
 
-    protected static function _getHeader() {
+    protected static function _getHeader(): string {
 
         $trace = debug_backtrace( 2 );
 
@@ -103,7 +109,7 @@ class Log {
 
     }
 
-    public static function getContext() {
+    protected static function getContext(): array {
 
         $trace = debug_backtrace( 2 );
         $_ip   = Utils::getRealIpAddr();
@@ -120,19 +126,10 @@ class Log {
 
     }
 
-    /**
-     * @return void
-     * @deprecated
-     * @see        Log::doJsonLog()
-     */
-    public static function doLog() {
-        Log::doJsonLog( func_get_arg( 0 ) );
-    }
+    public static function doJsonLog( $content, string $filename = null ) {
 
-    public static function doJsonLog( $content, $filename = null ) {
-        if ( !is_null( $filename ) ) {
-            $old_name      = Log::$fileName;
-            Log::$fileName = $filename;
+        if ( !empty( $filename ) && self::$fileName != $filename ) {
+            self::setLogFileName( $filename );
         }
 
         $_logObject = [
@@ -147,12 +144,16 @@ class Log {
 
         self::_writeTo( json_encode( $_logObject ) );
 
-        if ( !is_null( $filename ) ) {
-            Log::$fileName = $old_name;
+        if ( self::$fileName != self::$oldFileName ) {
+            self::setLogFileName( self::$oldFileName );
         }
+
     }
 
-    public static function getLogger() {
+    /**
+     * @throws Exception
+     */
+    public static function getLogger(): Logger {
         if ( !self::$useMonolog ) {
             throw new Exception( 'Logger is not set. Is monolog available?' );
         }
@@ -174,7 +175,7 @@ class Log {
      * with non-viewable characters.
      *
      */
-    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ) {
+    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ): ?string {
 
         if ( is_array( $data ) ) {
             $data = print_r( $data, true );
@@ -231,6 +232,8 @@ class Log {
         // Output method
         if ( $return === false ) {
             self::_writeTo( self::_getHeader() . "\n" . $dump . "\n" );
+
+            return null;
         } else {
             return $dump;
         }
@@ -245,7 +248,7 @@ class Log {
         self::$logger = null;
     }
 
-    public static function getRequestID() {
+    public static function getRequestID(): string {
         if ( self::$requestID == null ) {
             self::$requestID = uniqid();
         }

@@ -10,9 +10,9 @@
 namespace Engines\Traits;
 
 
-use Database;
-use EnginesModel_EngineDAO;
 use Exception;
+use Model\Database;
+use Model\Engines\EngineDAO;
 
 trait Oauth {
 
@@ -69,7 +69,7 @@ trait Oauth {
 
         $record = clone( $this->getEngineRecord() );
 
-        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO = new EngineDAO( Database::obtain() );
 
         /**
          * Use a generic Engine and not Engine_MicrosoftHubStruct

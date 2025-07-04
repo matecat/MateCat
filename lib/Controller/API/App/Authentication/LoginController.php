@@ -6,19 +6,19 @@
  * Time: 09:38
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use Controller\Authentication\AuthCookie;
-use Controller\Authentication\AuthenticationHelper;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\AuthCookie;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Traits\RateLimiterTrait;
 use CookieManager;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Users\RedeemableProject;
+use Model\Users\UserDao;
 use SimpleJWT;
-use Traits\RateLimiterTrait;
-use Users\RedeemableProject;
-use Users_UserDao;
 use Utils;
 
 class LoginController extends AbstractStatefulKleinController {
@@ -84,7 +84,7 @@ class LoginController extends AbstractStatefulKleinController {
                 ]
         );
 
-        $dao  = new Users_UserDao();
+        $dao  = new UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
         if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) ) {
@@ -140,6 +140,7 @@ class LoginController extends AbstractStatefulKleinController {
 
         if ( empty( $_SESSION[ 'user' ] ) ) {
             $this->response->code( 406 );
+
             return;
         }
 

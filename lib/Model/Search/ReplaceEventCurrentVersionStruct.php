@@ -1,13 +1,13 @@
 <?php
 
-namespace Search;
+namespace Model\Search;
 
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 
 class ReplaceEventCurrentVersionStruct extends ShapelessConcreteStruct {
 
     // DATABASE FIELDS
-    public $id;
-    public $id_job;
-    public $version;
+    public ?int $id = null;
+    public int $id_job;
+    public int $version;
 }

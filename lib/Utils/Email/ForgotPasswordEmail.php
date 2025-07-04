@@ -17,11 +17,11 @@ class  ForgotPasswordEmail extends AbstractEmail {
     protected $title = 'Password reset';
 
     /**
-     * @var \Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
     private $user;
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( \Model\Users\UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );

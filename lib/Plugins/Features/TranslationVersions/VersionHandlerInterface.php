@@ -10,7 +10,7 @@
 namespace Features\TranslationVersions;
 
 
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
 
 interface VersionHandlerInterface {
 
@@ -18,15 +18,15 @@ interface VersionHandlerInterface {
      * Evaluates the need to save a new translation version to database.
      * If so, sets the new version number on $new_translation.
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param \Model\Translations\SegmentTranslationStruct $new_translation
+     * @param \Model\Translations\SegmentTranslationStruct $old_translation
      *
      * @return mixed
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation );
+    public function saveVersionAndIncrement( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation );
 
     public function storeTranslationEvent( $params );
 
-    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array;
+    public function propagateTranslation( SegmentTranslationStruct $translationStruct ): array;
 
 }

@@ -4,35 +4,34 @@ namespace Features\TranslationEvents\Model;
 
 use Constants;
 use Constants_TranslationStatus;
-use Database;
 use Error;
 use Exception;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
-use LQA\EntryWithCategoryStruct;
+use Model\Database;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryWithCategoryStruct;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
+use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
 use RuntimeException;
-use Segments_SegmentDao;
-use Segments_SegmentStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use Translations_SegmentTranslationStruct;
-use Users_UserStruct;
 
 class TranslationEvent {
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct
      */
-    protected Translations_SegmentTranslationStruct $old_translation;
+    protected SegmentTranslationStruct $old_translation;
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct
      */
-    protected Translations_SegmentTranslationStruct $wanted_translation;
+    protected SegmentTranslationStruct $wanted_translation;
 
     /**
-     * @var Users_UserStruct|null
+     * @var \Model\Users\UserStruct|null
      */
-    protected ?Users_UserStruct $user;
+    protected ?UserStruct $user;
 
     /**
      * @var int
@@ -52,9 +51,9 @@ class TranslationEvent {
     protected bool $_isPropagationSource = true;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var bool
@@ -82,16 +81,16 @@ class TranslationEvent {
     private array $issues_to_delete = [];
 
     /**
-     * @param Translations_SegmentTranslationStruct $old_translation
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param Users_UserStruct|null                 $user
-     * @param int                                   $source_page_code
+     * @param \Model\Translations\SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct                     $translation
+     * @param \Model\Users\UserStruct|null                 $user
+     * @param int                                          $source_page_code
      *
      */
-    public function __construct( Translations_SegmentTranslationStruct $old_translation,
-                                 Translations_SegmentTranslationStruct $translation,
-                                 ?Users_UserStruct                     $user,
-                                 int                                   $source_page_code
+    public function __construct( SegmentTranslationStruct $old_translation,
+                                 SegmentTranslationStruct $translation,
+                                 ?UserStruct              $user,
+                                 int                      $source_page_code
     ) {
 
         $this->old_translation    = $old_translation;
@@ -110,17 +109,17 @@ class TranslationEvent {
 
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return \Model\Translations\SegmentTranslationStruct
      */
-    public function getWantedTranslation(): Translations_SegmentTranslationStruct {
+    public function getWantedTranslation(): SegmentTranslationStruct {
         return $this->wanted_translation;
     }
 
     /**
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
      * @throws Exception
      */
-    public function getUser(): ?Users_UserStruct {
+    public function getUser(): ?UserStruct {
 
         if ( isset( $this->user ) && $this->user->uid ) {
             return $this->user;
@@ -134,10 +133,10 @@ class TranslationEvent {
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return SegmentTranslationStruct
      * @throws Exception
      */
-    public function getOldTranslation(): Translations_SegmentTranslationStruct {
+    public function getOldTranslation(): SegmentTranslationStruct {
         return $this->old_translation;
     }
 
@@ -160,10 +159,10 @@ class TranslationEvent {
     }
 
     /**
-     * @return Segments_SegmentStruct
+     * @return \Model\Segments\SegmentStruct
      */
-    public function getSegmentStruct(): ?Segments_SegmentStruct {
-        $dao = new Segments_SegmentDao( Database::obtain() );
+    public function getSegmentStruct(): ?SegmentStruct {
+        $dao = new SegmentDao( Database::obtain() );
 
         return $dao->getByChunkIdAndSegmentId(
                 $this->chunk->id,
@@ -173,9 +172,9 @@ class TranslationEvent {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
-    public function getChunk(): ?Jobs_JobStruct {
+    public function getChunk(): ?JobStruct {
         return $this->chunk;
     }
 

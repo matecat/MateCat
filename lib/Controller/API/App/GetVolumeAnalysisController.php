@@ -1,16 +1,16 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
 use AjaxPasswordCheck;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
 use Model\Analysis\Status;
-use Projects_ProjectDao;
+use Model\Projects\ProjectDao;
 
 class GetVolumeAnalysisController extends KleinController {
 
@@ -25,7 +25,7 @@ class GetVolumeAnalysisController extends KleinController {
     public function analysis(): Response {
 
         $request       = $this->validateTheRequest();
-        $_project_data = Projects_ProjectDao::getProjectAndJobData( $request[ 'pid' ] );
+        $_project_data = ProjectDao::getProjectAndJobData( $request[ 'pid' ] );
         $passCheck     = new AjaxPasswordCheck();
         $access        = $passCheck->grantProjectAccess( $_project_data, $request[ 'ppassword' ] ) || $passCheck->grantProjectJobAccessOnJobPass( $_project_data, null, $request[ 'jpassword' ] );
 

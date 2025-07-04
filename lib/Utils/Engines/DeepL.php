@@ -2,6 +2,7 @@
 
 use Engines\DeepL\DeepLApiClient;
 use Engines\DeepL\DeepLApiException;
+use Model\Projects\MetadataDao;
 
 class Engines_DeepL extends Engines_AbstractEngine {
     private $apiKey;
@@ -64,7 +65,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
             }
 
             // glossaries (only for DeepL)
-            $metadataDao     = new Projects_MetadataDao();
+            $metadataDao     = new MetadataDao();
             $deepLFormality  = $metadataDao->get( $_config[ 'pid' ], 'deepl_formality', 86400 );
             $deepLIdGlossary = $metadataDao->get( $_config[ 'pid' ], 'deepl_id_glossary', 86400 );
 

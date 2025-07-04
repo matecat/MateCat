@@ -10,33 +10,33 @@
 namespace Features;
 
 
-use API\App\CreateProjectController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\V1\NewController;
-use BasicFeatureStruct;
 use Constants_Engines;
-use Database;
+use Controller\API\App\CreateProjectController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\V1\NewController;
 use Engine;
 use Engines\MMT\MMTServiceApiException;
 use Engines_AbstractEngine;
 use Engines_MMT;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
-use EnginesModel_MMTStruct;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FeatureSet;
 use INIT;
-use Jobs_JobStruct;
 use Log;
+use Model\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\EngineStruct;
+use Model\Engines\MMTStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
-use Users\MetadataDao;
-use Users_UserStruct;
 
 class Mmt extends BaseFeature {
 
@@ -52,18 +52,18 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param EnginesModel_EngineStruct $newCreatedDbRowStruct
+     * Called in @param \Model\Engines\EngineStruct $newCreatedDbRowStruct
      *
-     * @param Users_UserStruct $userStruct
+     * @param \Model\Users\UserStruct $userStruct
      *
      * @return null
      * @throws Exception
      * @see engineController::add()
      *
      */
-    public static function postEngineCreation( EnginesModel_EngineStruct $newCreatedDbRowStruct, Users_UserStruct $userStruct ) {
+    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, UserStruct $userStruct ) {
 
-        if ( !$newCreatedDbRowStruct instanceof EnginesModel_MMTStruct ) {
+        if ( !$newCreatedDbRowStruct instanceof MMTStruct ) {
             return $newCreatedDbRowStruct;
         }
 
@@ -89,7 +89,7 @@ class Mmt extends BaseFeature {
             }
 
         } catch ( Exception $e ) {
-            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
 
             throw new Exception( $e->getMessage(), $e->getCode() );
         }
@@ -104,7 +104,7 @@ class Mmt extends BaseFeature {
             }
 
         } catch ( Exception $e ) {
-            ( new EnginesModel_EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
+            ( new EngineDAO( Database::obtain() ) )->delete( $newCreatedDbRowStruct );
             throw $e;
         }
 
@@ -137,14 +137,14 @@ class Mmt extends BaseFeature {
      *
      * @param array                  $config
      * @param Engines_AbstractEngine $engine
-     * @param Jobs_JobStruct         $jobStruct
+     * @param JobStruct              $jobStruct
      *
      * @return array
      * @throws Exception
      * @see getContributionController::doAction()
      *
      */
-    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, Jobs_JobStruct $jobStruct ) {
+    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, JobStruct $jobStruct ) {
 
         if ( $engine instanceof Engines_MMT ) {
 
@@ -152,12 +152,12 @@ class Mmt extends BaseFeature {
             $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'r' );
             $config[ 'keys' ] = array_map( function ( $tm_key ) {
                 /**
-                 * @var $tm_key TmKeyManagement_MemoryKeyStruct
+                 * @var $tm_key MemoryKeyStruct
                  */
                 return $tm_key->key;
             }, $tm_keys );
 
-            $jobsMetadataDao = new \Jobs\MetadataDao();
+            $jobsMetadataDao = new \Model\Jobs\MetadataDao();
             $contextRs       = $jobsMetadataDao->setCacheTTL( 60 * 60 * 24 * 30 )->getByIdJob( $jobStruct->id, 'mt_context' );
             $mt_context      = @array_pop( $contextRs );
 
@@ -188,7 +188,7 @@ class Mmt extends BaseFeature {
     /**
      * @param $uid
      *
-     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @return MemoryKeyStruct[]
      * @throws Exception
      */
     private static function _getKeyringOwnerKeysByUid( $uid ) {
@@ -197,8 +197,8 @@ class Mmt extends BaseFeature {
          * Take the keys of the user
          */
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $uid ] );
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [ 'uid' => $uid ] );
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
@@ -209,12 +209,12 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param Users_UserStruct $LoggedUser
+     * @param UserStruct $LoggedUser
      *
-     * @return TmKeyManagement_MemoryKeyStruct[]
+     * @return MemoryKeyStruct[]
      * @throws Exception
      */
-    protected static function _getKeyringOwnerKeys( Users_UserStruct $LoggedUser ) {
+    protected static function _getKeyringOwnerKeys( UserStruct $LoggedUser ) {
 
         return self::_getKeyringOwnerKeysByUid( $LoggedUser->uid );
     }
@@ -249,11 +249,11 @@ class Mmt extends BaseFeature {
      *
      * @param $data             (object)[
      *                          'providerName' => '',
-     *                          'logged_user'  => Users_UserStruct,
+     *                          'logged_user'  => UserStruct,
      *                          'engineData'   => []
      *                          ]
      *
-     * @return EnginesModel_EngineStruct|bool
+     * @return \Model\Engines\EngineStruct|bool
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
@@ -267,19 +267,19 @@ class Mmt extends BaseFeature {
         if ( strtolower( Constants_Engines::MMT ) == $data->providerName ) {
 
             /**
-             * @var $featureSet FeatureSet
+             * @var $featureSet \Model\FeaturesBase\FeatureSet
              */
             $featureSet = $data->featureSet;
 
             /**
-             * @var $logged_user Users_UserStruct
+             * @var $logged_user \Model\Users\UserStruct
              */
             $logged_user = $data->logged_user;
 
             /**
              * Create a record of type MMT
              */
-            $newEngineStruct = EnginesModel_MMTStruct::getStruct();
+            $newEngineStruct = MMTStruct::getStruct();
 
             $newEngineStruct->uid                                        = $logged_user->uid;
             $newEngineStruct->type                                       = Constants_Engines::MT;
@@ -299,7 +299,7 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param                  $memoryKeyStructs TmKeyManagement_MemoryKeyStruct[]
+     * Called in @param                  $memoryKeyStructs MemoryKeyStruct[]
      *
      * @param                  $uid              integer
      *
@@ -308,7 +308,7 @@ class Mmt extends BaseFeature {
      * @see      \ProjectManager::setPrivateTMKeys()
      * Called in @see \userKeysController::doAction()
      *
-     * @internal param Users_UserStruct $userStruct
+     * @internal param UserStruct $userStruct
      */
     public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
 

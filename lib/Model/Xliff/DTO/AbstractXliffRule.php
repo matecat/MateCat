@@ -1,6 +1,6 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
 use Constants_TranslationStatus;
 use DomainException;
@@ -66,7 +66,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param string|null $editor
      * @param string|null $matchCategory
      */
-    public function __construct( array $states, string $analysis, string $editor = null, string $matchCategory = null ) {
+    public function __construct( array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null ) {
         // follow exact assignment order
         $this->setStates( $states );
         $this->setAnalysis( $analysis );
@@ -98,9 +98,9 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param $analysis
+     * @param string $analysis
      */
-    protected function setAnalysis( $analysis ): void {
+    protected function setAnalysis( string $analysis ): void {
         if ( !in_array( $analysis, static::ALLOWED_ANALYSIS_VALUES ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
         }
@@ -183,7 +183,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return string|array
      */
-    public function getStates( $type = null ): array {
+    public function getStates( ?string $type = null ): array {
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];
@@ -233,12 +233,12 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param string|null $source
-     * @param string|null $target
+     * @param string $source
+     * @param string $target
      *
      * @return bool
      */
-    public function isTranslated( string $source = null, string $target = null ): bool {
+    public function isTranslated( string $source, string $target ): bool {
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW ) {
             return false;
         } else {

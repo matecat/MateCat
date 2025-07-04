@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
 use Constants_ProjectStatus;
 use INIT;

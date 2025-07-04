@@ -1,6 +1,13 @@
 <?php
 
-class Comments_BaseCommentStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
+namespace Model\Comments;
+
+use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use ReflectionException;
+
+class BaseCommentStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
 
     public int     $id;
     public int     $id_job;
@@ -23,7 +30,7 @@ class Comments_BaseCommentStruct extends \DataAccess\AbstractDaoSilentStruct imp
      * @throws ReflectionException
      */
     public function templateMessage() {
-        $this->message = Comments_CommentDao::placeholdContent( $this->message );
+        $this->message = CommentDao::placeholdContent( $this->message );
     }
 
     /**
@@ -47,30 +54,30 @@ class Comments_BaseCommentStruct extends \DataAccess\AbstractDaoSilentStruct imp
         ];
     }
 
-    public function toCommentStruct(): Comments_CommentStruct {
-        return new Comments_CommentStruct( $this->toArray() );
+    public function toCommentStruct(): CommentStruct {
+        return new CommentStruct( $this->toArray() );
     }
 
     /**
      * @param bool $article
+     *
      * @return string
      */
-    public function getFullName($article = false)
-    {
-        if($this->is_anonymous == true){
+    public function getFullName( bool $article = false ): string {
+        if ( $this->is_anonymous ) {
 
-            $source_page = (int)$this->source_page;
+            $source_page = $this->source_page;
 
-            switch ($source_page){
+            switch ( $source_page ) {
                 default:
                 case 1:
-                    return ($article == true) ? "the translator" : "Translator";
+                    return $article ? "the translator" : "Translator";
 
                 case 2:
-                    return ($article == true) ? "the revisor" : "Revisor";
+                    return $article ? "the revisor" : "Revisor";
 
                 case 3:
-                    return ($article == true) ? "the 2nd pass revisor" : "2nd pass revisor";
+                    return $article ? "the 2nd pass revisor" : "2nd pass revisor";
             }
         }
 

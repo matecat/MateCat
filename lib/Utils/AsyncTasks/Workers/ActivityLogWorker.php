@@ -1,10 +1,10 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use ActivityLog\ActivityLogDao;
-use ActivityLog\ActivityLogStruct;
-use Database;
+use Model\ActivityLog\ActivityLogDao;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Database;
 use PDOException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;

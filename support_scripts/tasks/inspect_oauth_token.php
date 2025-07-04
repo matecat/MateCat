@@ -1,6 +1,8 @@
 <?php
 
-use ConnectedServices\OauthTokenEncryption;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\Database;
+use Model\Users\UserDao;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
@@ -26,7 +28,7 @@ if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
 if (!array_key_exists('email', $options))     usage() ;
 
-$dao = new Users_UserDao( Database::obtain() ) ;
+$dao = new UserDao( Database::obtain() ) ;
 $user = $dao->getByEmail( $options['email'] ) ;
 
 $oauthTokenEncryption = OauthTokenEncryption::getInstance();

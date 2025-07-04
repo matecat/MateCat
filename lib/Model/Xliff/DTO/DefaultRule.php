@@ -1,6 +1,6 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
 use Constants\XliffTranslationStatus;
 use Constants_TranslationStatus;
@@ -65,12 +65,12 @@ class DefaultRule extends AbstractXliffRule {
     }
 
     /**
-     * @param string|null $source
-     * @param string|null $target
+     * @param string $source
+     * @param string $target
      *
      * @return bool
      */
-    public function isTranslated( string $source = null, string $target = null ): bool {
+    public function isTranslated( string $source, string $target ): bool {
 
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) { // default behavior
             // Ignore translations for fuzzy matches (xliff 1.2)

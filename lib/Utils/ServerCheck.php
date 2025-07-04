@@ -1,4 +1,7 @@
 <?php
+
+use Model\Database;
+
 /**
  * Created by PhpStorm.
  * User: domenico
@@ -42,7 +45,7 @@ class ServerCheck {
 
     protected function checkUploadParams(){
 
-        $regexp = '/([0-9]+)(G|M)?/';
+        $regexp = '/([0-9]+)([GM])?/';
         preg_match( $regexp, ini_get('post_max_size'), $matches );
         if( isset( $matches[2] ) ){
             switch( $matches[2] ){

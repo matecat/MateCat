@@ -1,5 +1,6 @@
 <?php
 
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -12,7 +13,7 @@ use TestHelpers\AbstractTest;
  */
 class MagicGetTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
     protected $reflector;
@@ -23,7 +24,7 @@ class MagicGetTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->engine_struct_param                   = new EnginesModel_EngineStruct();
+        $this->engine_struct_param                   = new EngineStruct();
         $this->engine_struct_param->type             = Constants_Engines::MT;
         $this->engine_struct_param->name             = "DeepLingoTestEngine";
         $this->engine_struct_param->others           = [ 'alfa' => "one", 'beta' => "two" ];

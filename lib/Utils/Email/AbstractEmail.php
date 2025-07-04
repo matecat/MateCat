@@ -11,6 +11,7 @@ namespace Email;
 use Exception;
 use INIT;
 use Log;
+use Utils\AsyncTasks\Workers\MailWorker;
 use WorkerClient;
 
 abstract class AbstractEmail {
@@ -56,7 +57,7 @@ abstract class AbstractEmail {
     protected function _enqueueEmailDelivery( $mailConf ) {
         WorkerClient::enqueue(
                 'MAIL',
-                '\AsyncTasks\Workers\MailWorker',
+                MailWorker::class,
                 $mailConf,
                 [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
         );

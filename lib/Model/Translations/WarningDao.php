@@ -1,13 +1,13 @@
 <?php
 
 
-namespace Translations;
+namespace Model\Translations;
 
 use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Jobs\WarningsCountStruct;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\Jobs\WarningsCountStruct;
 use ReflectionException;
 
 class WarningDao extends AbstractDao {
@@ -52,16 +52,16 @@ class WarningDao extends AbstractDao {
 
         $stmt = $con->prepare( $sql );
 
-        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+        return $this->_fetchObjectMap( $stmt, WarningsCountStruct::class, $params );
 
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( Jobs_JobStruct $chunk ): int {
+    public function getErrorsByChunk( JobStruct $chunk ): int {
         $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk );
@@ -103,7 +103,7 @@ class WarningDao extends AbstractDao {
 
         $stmt = $db->getConnection()->prepare( $query );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $jid,
                 'password'       => $jpassword,
                 'segment_status' => Constants_TranslationStatus::STATUS_NEW

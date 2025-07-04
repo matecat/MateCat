@@ -4,21 +4,21 @@ namespace Features\TranslationVersions\Handlers;
 
 use Constants_TranslationStatus;
 use Exception;
-use Exceptions\ControllerReturnException;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
 use Features\TranslationEvents\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
-use FeatureSet;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
-use Users_UserStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\Users\UserStruct;
+use RuntimeException;
 use Utils;
 
 /**
@@ -38,9 +38,9 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     private int $id_job;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $chunkStruct;
+    private JobStruct $chunkStruct;
 
     /**
      * @var int
@@ -50,18 +50,18 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * @var int
      */
-    private int                    $uid;
-    private Projects_ProjectStruct $projectStruct;
+    private int           $uid;
+    private ProjectStruct $projectStruct;
 
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param Jobs_JobStruct         $chunkStruct
-     * @param int|null               $id_segment
-     * @param Users_UserStruct       $userStruct
-     * @param Projects_ProjectStruct $projectStruct
+     * @param JobStruct               $chunkStruct
+     * @param int|null                $id_segment
+     * @param \Model\Users\UserStruct $userStruct
+     * @param ProjectStruct           $projectStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct, ?int $id_segment, Users_UserStruct $userStruct, Projects_ProjectStruct $projectStruct ) {
+    public function __construct( JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct ) {
 
         $this->chunkStruct = $chunkStruct;
         $this->id_job      = $chunkStruct->id;
@@ -77,12 +77,12 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
      *
      * If returns true it means that a new version of the parent segment was persisted
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return false|int
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ) {
+    public function saveVersionAndIncrement( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation ) {
 
         $version_saved = $this->saveVersion( $new_translation, $old_translation );
 
@@ -98,8 +98,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * @throws Exception
      */
-    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array {
-        return Translations_SegmentTranslationDao::propagateTranslation(
+    public function propagateTranslation( SegmentTranslationStruct $translationStruct ): array {
+        return SegmentTranslationDao::propagateTranslation(
                 $translationStruct,
                 $this->chunkStruct,
                 $this->id_segment,
@@ -110,14 +110,14 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * Evaluates the need to save a new translation version to the database.
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return bool|int
      */
     private function saveVersion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation
+            SegmentTranslationStruct $new_translation,
+            SegmentTranslationStruct $old_translation
     ) {
 
         if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
@@ -166,7 +166,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
 
     /**
-     * @throws ControllerReturnException
+     * @throws Exception
      */
     public function storeTranslationEvent( $params ) {
 
@@ -174,21 +174,21 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         // status changed, or the translation changed
         $user = $params[ 'user' ];
 
-        /** @var Translations_SegmentTranslationStruct $translation */
+        /** @var SegmentTranslationStruct $translation */
         $translation = $params[ 'translation' ];
 
-        /** @var Translations_SegmentTranslationStruct $old_translation */
+        /** @var SegmentTranslationStruct $old_translation */
         $old_translation = $params[ 'old_translation' ];
 
         $source_page_code = $params[ 'source_page_code' ];
 
-        /** @var Jobs_JobStruct $chunk */
+        /** @var JobStruct $chunk */
         $chunk = $params[ 'chunk' ];
 
-        /** @var FeatureSet $features */
+        /** @var \Model\FeaturesBase\FeatureSet $features */
         $features = $params[ 'features' ];
 
-        /** @var Projects_ProjectStruct $project */
+        /** @var ProjectStruct $project */
         $project = $params[ 'project' ];
 
         $sourceEvent = new TranslationEvent(
@@ -220,7 +220,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
             foreach ( $segmentTranslations as $segmentTranslationBeforeChange ) {
 
-                /** @var Translations_SegmentTranslationStruct $propagatedSegmentAfterChange */
+                /** @var SegmentTranslationStruct $propagatedSegmentAfterChange */
                 $propagatedSegmentAfterChange                      = clone $segmentTranslationBeforeChange;
                 $propagatedSegmentAfterChange->translation         = $translation->translation;
                 $propagatedSegmentAfterChange->status              = $translation->status;
@@ -241,10 +241,10 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
 
         try {
             $translationEventsHandler->save( new BatchReviewProcessor() );
-            ( new Jobs_JobDao() )->destroyCacheByProjectId( $chunk->id_project );
-            Projects_ProjectDao::destroyCacheById( $chunk->id_project );
+            ( new JobDao() )->destroyCacheByProjectId( $chunk->id_project );
+            ProjectDao::destroyCacheById( $chunk->id_project );
         } catch ( Exception $e ) {
-            throw new ControllerReturnException( $e->getMessage(), -2000 );
+            throw new RuntimeException( $e->getMessage(), -2000 );
         }
 
 

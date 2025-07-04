@@ -1,4 +1,13 @@
 <?php
+
+use Model\Database;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -102,11 +111,11 @@ class TmKeyManagement_TmKeyManagement {
         /**
          * The setContribution is async and the jobs metadata are cached.
          * Destroy the cache so the async processes can reload the new key data
-         * @see \AsyncTasks\Workers\SetContributionWorker
+         * @see \Utils\AsyncTasks\Workers\SetContributionWorker
          * @see \Contribution\ContributionSetStruct
          */
-        $jobDao  = new \Jobs_JobDao( Database::obtain() );
-        $jStruct = new \Jobs_JobStruct( [ 'id' => $id_job, 'password' => $job_pass ] );
+        $jobDao  = new JobDao( Database::obtain() );
+        $jStruct = new JobStruct( [ 'id' => $id_job, 'password' => $job_pass ] );
         $jobDao->destroyCache( $jStruct );
 
         $jStruct->tm_keys = json_encode( $tm_keys );
@@ -505,8 +514,8 @@ class TmKeyManagement_TmKeyManagement {
                         /*
                          * Take the keys of the user
                          */
-                        $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                        $dh      = new TmKeyManagement_MemoryKeyStruct( array(
+                        $_keyDao = new MemoryKeyDao( Database::obtain() );
+                        $dh      = new MemoryKeyStruct( array(
                             'uid'    => $uid,
                             'tm_key' => new TmKeyManagement_TmKeyStruct( array(
                                 'key' => $justCreatedKey->key
@@ -605,19 +614,20 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param array $emailList
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
-     * @param Users_UserStruct $user
+     * @param array           $emailList
+     * @param MemoryKeyStruct $memoryKeyToUpdate
+     * @param UserStruct      $user
+     *
      * @throws Exception
      */
-    public function shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, Users_UserStruct $user ) {
+    public function shareKey( Array $emailList, MemoryKeyStruct $memoryKeyToUpdate, UserStruct $user ) {
 
-        $mkDao = new TmKeyManagement_MemoryKeyDao();
-        $userDao = new Users_UserDao();
+        $mkDao = new MemoryKeyDao();
+        $userDao = new UserDao();
 
         foreach ( $emailList as $pos => $email ) {
 
-            $userQuery                  = Users_UserStruct::getStruct();
+            $userQuery                  = UserStruct::getStruct();
             $userQuery->email           = $email;
             $alreadyRegisteredRecipient = $userDao->setCacheTTL( 60 * 10 )->read( $userQuery );
 
@@ -632,7 +642,7 @@ class TmKeyManagement_TmKeyManagement {
                 $this->_addToUserKeyRing( $memoryKeyToUpdate, $mkDao );
 
                 /**
-                 * @var Users_UserStruct[] $alreadyRegisteredRecipient
+                 * @var UserStruct[] $alreadyRegisteredRecipient
                  */
                 $email = new TmKeyManagement_ShareKeyEmail(
                     $user,
@@ -656,12 +666,13 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
-     * @param TmKeyManagement_MemoryKeyDao $mkDao
-     * @return \DataAccess\IDaoStruct|TmKeyManagement_MemoryKeyStruct|null
+     * @param MemoryKeyStruct $memoryKeyToUpdate
+     * @param MemoryKeyDao    $mkDao
+     *
+     * @return \Model\DataAccess\IDaoStruct|MemoryKeyStruct|null
      * @throws Exception
      */
-    protected function _addToUserKeyRing( TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){
+    protected function _addToUserKeyRing( MemoryKeyStruct $memoryKeyToUpdate, MemoryKeyDao $mkDao ){
 
         try {
             $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );

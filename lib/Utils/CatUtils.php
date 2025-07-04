@@ -1,17 +1,23 @@
 <?php
 
-use FilesStorage\AbstractFilesStorage;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
+use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
-use Validator\IsJobRevisionValidatorObject;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
 
 class CatUtils {
 
@@ -113,13 +119,6 @@ class CatUtils {
         return [ $hours, $minutes, $seconds, $usec ];
     }
 
-    public static function dos2unix( string $dosString ): string {
-        $dosString = str_replace( "\r\n", "\r", $dosString );
-        $dosString = str_replace( "\n", "\r", $dosString );
-
-        return str_replace( "\r", "\n", $dosString );
-    }
-
     /**
      * Perform a computation on the string to find the length of the strings separated by the placeholder
      *
@@ -193,14 +192,14 @@ class CatUtils {
     }
 
     /**
-     * @param Translations_SegmentTranslationStruct $translation
-     * @param bool                                  $is_revision
+     * @param SegmentTranslationStruct $translation
+     * @param bool                     $is_revision
      *
      * @return void
      * @throws Exception
      */
-    public static function addSegmentTranslation( Translations_SegmentTranslationStruct $translation, bool $is_revision ) {
-        Translations_SegmentTranslationDao::addTranslation( $translation, $is_revision );
+    public static function addSegmentTranslation( SegmentTranslationStruct $translation, bool $is_revision ) {
+        SegmentTranslationDao::addTranslation( $translation, $is_revision );
     }
 
     /**
@@ -213,11 +212,11 @@ class CatUtils {
      */
     protected static function _performanceEstimationTime( array $job_stats, int $id_job ): array {
 
-        $last_10_worked_ids = Translations_SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour( $id_job );
+        $last_10_worked_ids = SegmentTranslationDao::getLast10TranslatedSegmentIDsInLastHour( $id_job );
         if ( !empty( $last_10_worked_ids ) and count( $last_10_worked_ids ) === 10 ) {
 
             // Calculating words per hour and estimated completion
-            $estimation_temp  = Translations_SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
+            $estimation_temp  = SegmentTranslationDao::getWordsPerSecond( $id_job, $last_10_worked_ids );
             $words_per_second = ( !empty( $estimation_temp[ 0 ][ 'words_per_second' ] ) ? $estimation_temp[ 0 ][ 'words_per_second' ] : 1 ); // avoid division by zero
 
             $totalWordsToDo = $job_stats[ 'raw' ][ 'new' ] + $job_stats[ 'raw' ][ 'draft' ] + ( $job_stats[ 'raw' ][ 'rejected' ] ?? 0 );
@@ -294,7 +293,6 @@ class CatUtils {
          * @see https://regex101.com/r/oQFKn8/5
          *
          */
-        $linkRegexp = '%(?:[a-z]+://|//)?(?:\S+(?::\S*)?@)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|(?:(?:\S\S{0,62})?\S\.)+\S{2,}\.?)(?::\d{2,5})?(?:[/?#]\S*)?\b%ui';
         $linkRegexp = '%(?:[a-z]+://|//)?(?:[\p{Latin}\d\-_]+)?[\p{Latin}\d\-_]+\.[\p{Latin}\d\-_]+\.[\p{Latin}\d#?=.\-_]+%ui';
 
         $link_placeholder      = ' L ';
@@ -560,7 +558,7 @@ class CatUtils {
         $entityDecoded = html_entity_decode( $str, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
         // parse and extract CDATA
-        preg_match_all( '/<!\[CDATA\[((?:[^]]|\](?!\]>))*)\]\]>/', $entityDecoded, $cdataMatches );
+        preg_match_all( '/<!\[CDATA\[((?:[^]]|](?!]>))*)]]>/', $entityDecoded, $cdataMatches );
 
         if ( isset( $cdataMatches[ 1 ] ) and !empty( $cdataMatches[ 1 ] ) ) {
             foreach ( $cdataMatches[ 1 ] as $k => $m ) {
@@ -572,14 +570,14 @@ class CatUtils {
     }
 
     /**
-     * @param Jobs_JobStruct         $job
+     * @param JobStruct     $job
      *
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return WordCountStruct
      * @throws Exception
      */
-    public static function getWStructFromJobArray( Jobs_JobStruct $job, Projects_ProjectStruct $projectStruct ): WordCountStruct {
+    public static function getWStructFromJobArray( JobStruct $job, ProjectStruct $projectStruct ): WordCountStruct {
 
         $wStruct = WordCountStruct::loadFromJob( $job );
 
@@ -598,14 +596,14 @@ class CatUtils {
     /**
      * Returns the string representing the overall quality for a job,
      *
-     * @param Jobs_JobStruct $job
+     * @param JobStruct $job
      *
-     * @param array          $chunkReviews
+     * @param array     $chunkReviews
      *
      * @return string
      * @throws ReflectionException
      */
-    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ): ?string {
+    public static function getQualityOverallFromJobStruct( JobStruct $job, array $chunkReviews = [] ): ?string {
         $values = self::getChunkReviewStructFromJobStruct( $job, $chunkReviews );
 
         if ( !isset( $values ) ) {
@@ -618,25 +616,21 @@ class CatUtils {
 
         $is_pass = $values->is_pass;
 
-        if ( $is_pass == true ) {
+        if ( $is_pass ) {
             return 'excellent';
         }
 
-        if ( $is_pass == false ) {
-            return 'fail';
-        }
-
-        return null;
+        return 'fail';
     }
 
     /**
-     * @param Jobs_JobStruct $job
-     * @param array          $chunkReviews
+     * @param JobStruct $job
+     * @param array     $chunkReviews
      *
      * @return ChunkReviewStruct|null
      * @throws ReflectionException
      */
-    public static function getChunkReviewStructFromJobStruct( Jobs_JobStruct $job, array $chunkReviews = [] ): ?ChunkReviewStruct {
+    public static function getChunkReviewStructFromJobStruct( JobStruct $job, array $chunkReviews = [] ): ?ChunkReviewStruct {
         return ( !empty( $chunkReviews ) ) ? $chunkReviews[ 0 ] : ( new ChunkReviewDao() )->findChunkReviews( $job )[ 0 ] ?? null;
     }
 
@@ -703,11 +697,12 @@ class CatUtils {
 
         try {
 
-            $jobValidatorObject           = new IsJobRevisionValidatorObject();
-            $jobValidatorObject->jid      = $jid;
-            $jobValidatorObject->password = $password;
-
-            return $jobValidator->validate( $jobValidatorObject );
+            return !empty( $jobValidator->validate(
+                    ValidatorObject::fromArray( [
+                            'jid'      => $jid,
+                            'password' => $password
+                    ] )
+            ) );
 
         } catch ( Exception $ignore ) {
         }
@@ -730,16 +725,24 @@ class CatUtils {
     }
 
     /**
-     * @return bool
+     * Determines if the current request originates from a "revise" path based on the HTTP referer.
+     *
+     * This function checks the `HTTP_REFERER` server variable to parse the URL and
+     * determine if the path corresponds to a "revise" operation.
+     *
+     * @return bool Returns `true` if the referer path is a "revise" path, otherwise `false`.
      */
     public static function getIsRevisionFromReferer(): bool {
 
+        // Check if the HTTP_REFERER server variable is set
         if ( !isset( $_SERVER[ 'HTTP_REFERER' ] ) ) {
             return false;
         }
 
-        $_from_url = parse_url( @$_SERVER[ 'HTTP_REFERER' ] );
+        // Parse the referer URL to extract its components
+        $_from_url = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
 
+        // Check if the path corresponds to a "revise" operation
         return self::isARevisePath( $_from_url[ 'path' ] );
     }
 
@@ -758,11 +761,11 @@ class CatUtils {
      * @param $jobId
      * @param $jobPassword
      *
-     * @return null|Jobs_JobStruct
+     * @return null|JobStruct
      * @throws ReflectionException
      */
-    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ): ?Jobs_JobStruct {
-        $job = Jobs_JobDao::getByIdAndPassword( $jobId, $jobPassword );
+    public static function getJobFromIdAndAnyPassword( $jobId, $jobPassword ): ?JobStruct {
+        $job = JobDao::getByIdAndPassword( $jobId, $jobPassword );
 
         if ( !$job ) {
 
@@ -786,12 +789,12 @@ class CatUtils {
      * Otherwise the function try to return the corresponding review_password
      *      *
      *
-     * @param Jobs_JobStruct $job
-     * @param int            $sourcePage
+     * @param JobStruct $job
+     * @param int       $sourcePage
      *
      * @return string|null
      */
-    public static function getJobPassword( Jobs_JobStruct $job, int $sourcePage = 1 ): ?string {
+    public static function getJobPassword( JobStruct $job, int $sourcePage = 1 ): ?string {
         if ( $sourcePage <= 1 ) {
             return $job->password;
         }
@@ -817,12 +820,12 @@ class CatUtils {
     }
 
     /**
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return int|null
      * @throws ReflectionException
      */
-    public static function getSegmentTranslationsCount( Projects_ProjectStruct $projectStruct ): ?int {
+    public static function getSegmentTranslationsCount( ProjectStruct $projectStruct ): ?int {
         $idJobs = [];
 
         foreach ( $projectStruct->getJobs() as $job ) {
@@ -831,38 +834,7 @@ class CatUtils {
 
         $idJobs = array_unique( $idJobs );
 
-        return Jobs_JobDao::getSegmentTranslationsCount( $idJobs );
-    }
-
-    /**
-     * This function appends _{x} to a string.
-     *
-     * Example: house   ---> house_1
-     *          house_1 ---> house_2
-     *
-     * @param string $string
-     *
-     * @return string
-     */
-    public static function upCountName( string $string ): string {
-
-        if ( empty( $string ) ) {
-            return Utils::randomString();
-        }
-
-        $a   = explode( "_", $string );
-        $end = (int)end( $a );
-
-        if ( ( $end > 0 ) and count( $a ) > 1 ) {
-            array_pop( $a );
-        }
-
-        $name = implode( '_', $a );
-
-        $return = $name;
-        $return .= '_' . ( $end + 1 );
-
-        return $return;
+        return JobDao::getSegmentTranslationsCount( $idJobs );
     }
 
     /**
@@ -909,31 +881,31 @@ class CatUtils {
 
         $extraction_parameters = null;
 
-        if($filtersTemplateId > 0){
-            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+        if ( $filtersTemplateId > 0 ) {
+            $filtersTemplateStruct = FiltersConfigTemplateDao::getById( $filtersTemplateId );
 
-            if($filtersTemplateStruct !== null){
-                $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
+            if ( $filtersTemplateStruct !== null ) {
+                $extraction_parameters = self::getRightExtractionParameter( $file_path, $filtersTemplateStruct );
             }
         }
 
         $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
 
         $hash_name_for_disk =
-            sha1_file( $file_path )
-            . "_" .
-            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
-            . "|" .
-            $source;
+                sha1_file( $file_path )
+                . "_" .
+                sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+                . "|" .
+                $source;
 
         if ( !$hash_name_for_disk ) {
             return;
         }
 
-        $path_parts = pathinfo($file_path);
-        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+        $path_parts     = pathinfo( $file_path );
+        $hash_file_path = $path_parts[ 'dirname' ] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
 
-        if(!file_exists($hash_file_path)){
+        if ( !file_exists( $hash_file_path ) ) {
             return;
         }
 
@@ -985,14 +957,15 @@ class CatUtils {
     }
 
     /**
-     * @param string $filePath
+     * @param string                      $filePath
      * @param FiltersConfigTemplateStruct $filters_extraction_parameters
+     *
      * @return IDto|null
      */
     private static function getRightExtractionParameter( string $filePath, FiltersConfigTemplateStruct $filters_extraction_parameters ): ?IDto {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
-        $params = null;
+        $params    = null;
 
         if ( $filters_extraction_parameters !== null ) {
 

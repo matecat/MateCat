@@ -2,36 +2,35 @@
 
 namespace TMS;
 
-use API\Commons\Exceptions\UnprocessableException;
-use Chunks_ChunkDao;
 use Constants_Engines;
 use Constants_TranslationStatus;
+use Controller\API\Commons\Exceptions\UnprocessableException;
 use DateTime;
 use DateTimeZone;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
-use EnginesModel_EngineStruct;
 use Exception;
-use FeatureSet;
 use INIT;
 use InvalidArgumentException;
-use Jobs_JobStruct;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Conversion\Upload;
+use Model\Engines\EngineStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\TMSService\TMSServiceDao;
+use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
 use SplTempFileObject;
 use stdClass;
-use TMSService\TMSServiceDao;
-use Upload;
-use Users\MetadataDao;
-use Users_UserStruct;
 use Utils;
 
 class TMSService {
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     protected $featureSet;
 
@@ -54,7 +53,7 @@ class TMSService {
 
     /**
      *
-     * @param FeatureSet|null $featureSet
+     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws Exception
      */
@@ -147,7 +146,7 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
+    public function addTmxInMyMemory( TMSFile $file, UserStruct $user ): array {
 
         try {
 
@@ -182,7 +181,7 @@ class TMSService {
 
                 try {
 
-                    $struct             = EnginesModel_EngineStruct::getStruct();
+                    $struct             = EngineStruct::getStruct();
                     $struct->class_load = $engineName;
                     $struct->type       = Constants_Engines::MT;
                     $engine             = Engine::createTempInstance( $struct );
@@ -319,10 +318,12 @@ class TMSService {
     }
 
     /**
+     * @param $uuid
+     *
      * @return array
      * @throws Exception
      */
-    public function tmxUploadStatus( $uuid ) {
+    public function tmxUploadStatus( $uuid ): array {
 
         $allMemories = $this->mymemory_engine->getStatus( $uuid );
 
@@ -474,10 +475,7 @@ class TMSService {
                 break;
         }
 
-        /**
-         * @var $chunks Jobs_JobStruct[]
-         */
-        $chunks = Chunks_ChunkDao::getByJobID( $jid );
+        $chunks = ChunkDao::getByJobID( $jid );
 
         foreach ( $result as $k => $row ) {
 

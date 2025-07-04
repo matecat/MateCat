@@ -6,6 +6,8 @@
  * Time: 15.52
  */
 
+use Model\Users\ClientUserFacade;
+
 /**
  * This object is meant to wrap an internal structure to expose only some values to the client and obfuscate others
  *
@@ -50,7 +52,7 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
     public function loadInUsers( TmKeyManagement_TmKeyStruct $keyToClone ){
         $_userStructs = [];
         foreach( $keyToClone->getInUsers() as $userStruct ){
-            $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+            $_userStructs[] = new ClientUserFacade( $userStruct );
         }
         $this->in_users = $_userStructs;
 

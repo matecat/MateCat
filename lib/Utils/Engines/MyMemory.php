@@ -1,9 +1,10 @@
 <?php
 
-use API\Commons\Exceptions\AuthenticationError;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Users\UserStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
@@ -398,18 +399,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @param string $uuid
      *
-     * @return array
+     * @return Engines_Results_MyMemory_TmxResponse
      */
     public function entryStatus( string $uuid ) {
-        $this->call( "entry_status_relative_url", [
-                'uuid' => $uuid
-        ], false );
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
                         CURLOPT_TIMEOUT => 1
                 ]
         );
+
+        $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
 
         /**
          * @var Engines_Results_MyMemory_TmxResponse
@@ -688,13 +688,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      *
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user * Not used
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user * Not used
      *
      * @return array|mixed
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $postFields = [
                 'tmx' => $this->getCurlFile( $filePath ),
@@ -867,7 +867,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 //        }
 
         //formatting strip
-        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
         preg_match( "/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE );
         preg_match( "/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE );

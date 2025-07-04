@@ -1,9 +1,9 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class FilesJobStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

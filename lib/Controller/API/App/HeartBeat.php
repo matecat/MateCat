@@ -7,14 +7,14 @@
  *
  */
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use AbstractControllers\KleinController;
-use API\App\Json\Ping;
-use API\Commons\Validators\WhitelistAccessValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\WhitelistAccessValidator;
 use INIT;
 use RuntimeException;
+use View\API\App\Json\Ping;
 
 class HeartBeat extends KleinController {
 
@@ -23,7 +23,7 @@ class HeartBeat extends KleinController {
     }
 
     public function ping() {
-        \Database::obtain()->ping();
+        \Model\Database::obtain()->ping();
         if ( !touch( INIT::$ROOT . DIRECTORY_SEPARATOR . "touch" ) ) {
             throw new RuntimeException( "Storage unavailable." );
         }

@@ -5,6 +5,8 @@
  * Time: 15.31
  */
 
+use Model\Jobs\JobStruct;
+
 /**
  * Job Password Check Tool for ajax requests
  *
@@ -48,9 +50,9 @@ class AjaxPasswordCheck {
      * );
      * </pre>
      *
-     * @param array|Jobs_JobStruct    $jobData
-     * @param string   $password
-     * @param null|int $segmentID
+     * @param array|JobStruct $jobData
+     * @param string          $password
+     * @param null|int        $segmentID
      *
      * @return bool
      */
@@ -60,8 +62,8 @@ class AjaxPasswordCheck {
         //array of jobs permitted because of job split
         if( isset( $this->jobData[0] ) &&
                 ( is_array( $this->jobData[0] )
-                        || $this->jobData[0] instanceof Jobs_JobStruct
-                        || $this->jobData[0] instanceof Jobs_JobStruct )
+                        || $this->jobData[0] instanceof JobStruct
+                        || $this->jobData[0] instanceof JobStruct )
         ){
 
             //we have to find at least one job with the correct password inside the job array

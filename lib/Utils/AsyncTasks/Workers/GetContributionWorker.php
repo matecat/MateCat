@@ -7,18 +7,20 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 use Constants_Engines;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
 use Engines_Results_MyMemory_TMS;
 use Exception;
-use FeatureSet;
 use INIT;
-use Jobs_JobStruct;
 use Matecat\SubFiltering\MateCatFilter;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Translations\SegmentTranslationDao;
+use Model\Users\UserStruct;
 use PostProcess;
 use ReflectionException;
 use Stomp\Exception\StompException;
@@ -28,11 +30,12 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
-use Translations_SegmentTranslationDao;
-use Users_UserStruct;
 use Utils;
+use Utils\AsyncTasks\Workers\Traits\SortMatchesTrait;
 
 class GetContributionWorker extends AbstractWorker {
+
+    use SortMatchesTrait;
 
     /**
      * @param AbstractElement $queueElement
@@ -172,49 +175,6 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * Compares two associative arrays based on their 'match' and 'ICE' values.
-     *
-     * The function first evaluates the 'match' values of the two arrays:
-     * - If the 'match' values are equal, it prioritizes arrays with the 'ICE' key set to true:
-     *   - Returns -1 if the first array has 'ICE' set to true and the second does not.
-     *   - Returns 1 if the second array has 'ICE' set to true and the first does not.
-     *   - Returns 0 if both or neither have the 'ICE' key set to true.
-     * - If the 'match' values are not equal, it returns:
-     *   - 1 if the 'match' value of the first array is less than the second.
-     *   - -1 if the 'match' value of the first array is greater than the second.
-     *
-     * @param array $a The first array to compare, containing 'match' and optionally 'ICE'.
-     * @param array $b The second array to compare, containing 'match' and optionally 'ICE'.
-     *
-     * @return int Returns -1, 0, or 1 based on the comparison logic.
-     */
-    private static function __compareScoreDesc( array $a, array $b ): int {
-
-        // Check if the 'ICE' key is set and cast it to a boolean
-        $aIsICE = (bool)( $a[ 'ICE' ] ?? false );
-        $bIsICE = (bool)( $b[ 'ICE' ] ?? false );
-
-        // Convert 'match' values to float for comparison
-        $aMatch = floatval( $a[ 'match' ] );
-        $bMatch = floatval( $b[ 'match' ] );
-
-        // If 'match' values are equal, compare based on 'ICE' values
-        if ( $aMatch == $bMatch ) {
-            if ( $aIsICE && !$bIsICE ) {
-                return -1; // The First array has 'ICE' set to true, the second does not
-            }
-            if ( !$aIsICE && $bIsICE ) {
-                return 1; // The Second array has 'ICE' set to true, the first does not
-            }
-
-            return 0; // Both or neither have 'ICE' set to true
-        }
-
-        // If 'match' values are not equal, return based on their comparison
-        return ( $aMatch < $bMatch ? 1 : -1 );
-    }
-
-    /**
      * @param array                     $matches
      * @param ContributionRequestStruct $contributionStruct
      * @param FeatureSet                $featureSet
@@ -265,7 +225,7 @@ class GetContributionWorker extends AbstractWorker {
 
             } else {
 
-                $user = new Users_UserStruct();
+                $user = new UserStruct();
 
                 if ( !$contributionStruct->getUser()->isAnonymous() ) {
                     $user = $contributionStruct->getUser();
@@ -392,7 +352,7 @@ class GetContributionWorker extends AbstractWorker {
 
     /**
      * @param ContributionRequestStruct $contributionStruct
-     * @param Jobs_JobStruct            $jobStruct
+     * @param JobStruct                 $jobStruct
      * @param string                    $targetLang
      * @param FeatureSet                $featureSet
      * @param bool                      $isCrossLang
@@ -402,7 +362,7 @@ class GetContributionWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    protected function _getMatches( ContributionRequestStruct $contributionStruct, Jobs_JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
+    protected function _getMatches( ContributionRequestStruct $contributionStruct, JobStruct $jobStruct, string $targetLang, FeatureSet $featureSet, bool $isCrossLang = false ): array {
 
         $_config              = [];
         $_config[ 'segment' ] = $contributionStruct->getContexts()->segment;
@@ -471,12 +431,11 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'get_mt' ] = false;
         }
 
+        $tms_match = [];
+
         /**
          * if No TM server and No MT selected $_TMS is not defined,
          * so we want not to perform TMS Call
-         */
-        /**
-         *
          * This calls the TMEngine to get memories
          */
         if ( isset( $_TMS ) ) {
@@ -554,12 +513,7 @@ class GetContributionWorker extends AbstractWorker {
             }
         }
 
-        $matches = [];
-        if ( !empty( $tms_match ) ) {
-            $matches = $tms_match;
-        }
-
-        return [ $mt_result, $matches ];
+        return [ $mt_result, $tms_match ];
     }
 
     /**
@@ -580,7 +534,7 @@ class GetContributionWorker extends AbstractWorker {
     protected function _sortMatches( $mt_result, $matches ): array {
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
-            usort( $matches, [ "self", "__compareScoreDesc" ] );
+            usort( $matches, [ "self", "compareScoreDesc" ] );
         }
 
         return $matches;
@@ -595,9 +549,9 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                     $matches
-     * @param ContributionRequestStruct $contributionStruct
-     * @param FeatureSet                $featureSet
+     * @param array                          $matches
+     * @param ContributionRequestStruct      $contributionStruct
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @throws ReflectionException
      * @throws Exception
@@ -611,7 +565,7 @@ class GetContributionWorker extends AbstractWorker {
                 !empty( $contributionStruct->getJobStruct()->id )
         ) {
 
-            $segmentTranslation = Translations_SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
+            $segmentTranslation = SegmentTranslationDao::findBySegmentAndJob( $contributionStruct->segmentId, $contributionStruct->getJobStruct()->id );
 
             // Run updateFirstTimeOpenedContribution ONLY on translations in NEW status
             if ( $segmentTranslation->status === Constants_TranslationStatus::STATUS_NEW ) {
@@ -629,7 +583,7 @@ class GetContributionWorker extends AbstractWorker {
                     if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
-                        $user = new Users_UserStruct();
+                        $user = new UserStruct();
 
                         if ( !$contributionStruct->getUser()->isAnonymous() ) {
                             $user = $contributionStruct->getUser();
@@ -658,7 +612,7 @@ class GetContributionWorker extends AbstractWorker {
                         'status'     => Constants_TranslationStatus::STATUS_NEW
                 ];
 
-                Translations_SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
+                SegmentTranslationDao::updateFirstTimeOpenedContribution( $data, $where );
             }
         }
     }

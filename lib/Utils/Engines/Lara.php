@@ -11,7 +11,6 @@ use Engines_EngineInterface;
 use Engines_MMT;
 use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_Matches;
-use EnginesModel_MMTStruct;
 use Exception;
 use Features\Mmt;
 use INIT;
@@ -22,18 +21,19 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
-use Projects_ProjectDao;
+use Model\Engines\MMTStruct;
+use Model\Projects\ProjectDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Users_UserDao;
-use Users_UserStruct;
 
 /**
  * Created by PhpStorm.
@@ -92,7 +92,7 @@ class Lara extends Engines_AbstractEngine {
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $credentials = new LaraCredentials( $extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ] );
 
-        $mmtStruct                   = EnginesModel_MMTStruct::getStruct();
+        $mmtStruct                   = MMTStruct::getStruct();
         $mmtStruct->type             = Constants_Engines::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: INIT::$DEFAULT_MMT_KEY,
@@ -102,7 +102,7 @@ class Lara extends Engines_AbstractEngine {
         $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
 
         if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-            $mmtStruct                    = EnginesModel_MMTStruct::getStruct();
+            $mmtStruct                    = MMTStruct::getStruct();
             $mmtStruct->type              = Constants_Engines::MT;
             $mmtStruct->extra_parameters  = [
                     'MMT-License'      => $extraParams[ 'MMT-License' ],
@@ -177,7 +177,7 @@ class Lara extends Engines_AbstractEngine {
         $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
-             * @var $tm_key TmKeyManagement_MemoryKeyStruct
+             * @var $tm_key \Model\TmKeyManagement\MemoryKeyStruct
              */
             return $tm_key->key;
         }, $tm_keys );
@@ -392,13 +392,13 @@ class Lara extends Engines_AbstractEngine {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param \Model\TmKeyManagement\MemoryKeyStruct $memoryKey
      *
      * @return array|null
      * @throws LaraException
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array {
         $clientMemories = $this->_getClient()->memories;
         $memory         = $clientMemories->get( 'ext_my_' . trim( $memoryKey->tm_key->key ) );
         if ( $memory ) {
@@ -417,7 +417,7 @@ class Lara extends Engines_AbstractEngine {
         try {
 
             if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
-                $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+                $memoryKeyToUpdate         = new MemoryKeyStruct();
                 $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
 
                 $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
@@ -440,7 +440,7 @@ class Lara extends Engines_AbstractEngine {
      * Therefore, unlike ModernMT, this method is simply an alias of the memoryExists method.
      * @throws LaraException
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array {
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array {
         return $this->memoryExists( $memoryKey );
     }
 
@@ -449,7 +449,7 @@ class Lara extends Engines_AbstractEngine {
      * @throws LaraException
      * @throws Exception
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $clientMemories = $this->_getClient()->memories;
 
@@ -495,8 +495,8 @@ class Lara extends Engines_AbstractEngine {
         try {
 
             // get jobs keys
-            $project = Projects_ProjectDao::findById( $projectRow[ 'id' ] );
-            $user    = ( new Users_UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
+            $project = ProjectDao::findById( $projectRow[ 'id' ] );
+            $user    = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             foreach ( $project->getJobs() as $job ) {
 

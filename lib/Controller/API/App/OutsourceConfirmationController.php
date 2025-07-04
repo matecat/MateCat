@@ -7,24 +7,24 @@
  *
  */
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\AuthorizationError;
-use Jobs_JobDao;
-use Outsource\ConfirmationDao;
-use Outsource\TranslatedConfirmationStruct;
-use Translators\TranslatorsModel;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Model\Jobs\JobDao;
+use Model\Outsource\ConfirmationDao;
+use Model\Outsource\TranslatedConfirmationStruct;
+use Model\Translators\TranslatorsModel;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
 
     public function confirm() {
 
         $params = filter_var_array( $this->request->params(), [
-            'id_job'   => FILTER_SANITIZE_STRING,
-            'password' => FILTER_SANITIZE_STRING,
-            'payload'  => FILTER_SANITIZE_STRING,
+                'id_job'   => FILTER_SANITIZE_STRING,
+                'password' => FILTER_SANITIZE_STRING,
+                'payload'  => FILTER_SANITIZE_STRING,
         ] );
 
         $payload = \SimpleJWT::getValidPayload( $params[ 'payload' ] );
@@ -33,8 +33,8 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
             throw new AuthorizationError( "Invalid Job" );
         }
 
-        $jStruct = ( Jobs_JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
-        $translatorModel = new TranslatorsModel( $jStruct, 0 );
+        $jStruct           = ( JobDao::getByIdAndPassword( $params[ 'id_job' ], $params[ 'password' ] ) );
+        $translatorModel   = new TranslatorsModel( $jStruct, 0 );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
@@ -45,16 +45,16 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         }
 
         $confirmationStruct->create_date = date( DATE_ISO8601, time() );
-        $cDao = new ConfirmationDao();
+        $cDao                            = new ConfirmationDao();
         $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
         $cDao->destroyConfirmationCache( $jStruct );
 
         $confirmationArray = $confirmationStruct->toArray();
-        unset( $confirmationArray['id'] );
+        unset( $confirmationArray[ 'id' ] );
 
         $this->response->json( [
-            'errors' => [],
-            'confirm' => $confirmationArray
+                'errors'  => [],
+                'confirm' => $confirmationArray
         ] );
     }
 

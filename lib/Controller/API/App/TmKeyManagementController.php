@@ -1,24 +1,24 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Constants_Engines;
-use Database;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
-use EnginesModel_EngineStruct;
 use Exception;
 use Log;
+use Model\Database;
+use Model\Engines\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\TmKeyManagement\UserKeysModel;
+use Model\Users\MetadataDao;
 use ReflectionException;
-use TmKeyManagement\UserKeysModel;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyStruct;
-use Users\MetadataDao;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
 
@@ -34,8 +34,8 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
      */
     public function getByJob() {
 
-        $idJob    = $this->request->id_job;
-        $password = $this->request->password;
+        $idJob    = $this->request->param( 'id_job' );
+        $password = $this->request->param( 'password' );
 
         $chunk = CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 
@@ -121,8 +121,8 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
         try {
 
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [
                     'uid'    => $this->getUser()->uid,
                     'tm_key' => new TmKeyManagement_TmKeyStruct( [
                                     'key' => $this->request->param( 'key' )
@@ -146,11 +146,11 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param \Model\TmKeyManagement\MemoryKeyStruct $memoryKey
      *
      * @return array
      */
-    private function _checkForAdaptiveEngines( TmKeyManagement_MemoryKeyStruct $memoryKey ): array {
+    private function _checkForAdaptiveEngines( MemoryKeyStruct $memoryKey ): array {
 
         // load tmx in engines with adaptivity
         $engineList = Constants_Engines::getAvailableEnginesList();
@@ -161,7 +161,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
             try {
 
-                $struct             = EnginesModel_EngineStruct::getStruct();
+                $struct             = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type       = Constants_Engines::MT;
                 $engine             = Engine::createTempInstance( $struct );

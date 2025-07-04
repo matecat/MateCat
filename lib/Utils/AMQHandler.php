@@ -7,7 +7,6 @@
  *
  */
 
-use Analysis\Queue\RedisKeys;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
@@ -15,6 +14,7 @@ use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\Context;
+use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 
 class AMQHandler {
 
@@ -167,9 +167,15 @@ class AMQHandler {
      * Clean connections
      */
     public function __destruct() {
-        $this->statefulStomp->getClient()->disconnect();
+        $this->close();
     }
 
+    /**
+     * Clean connections
+     */
+    public function close(){
+        $this->statefulStomp->getClient()->disconnect();
+    }
 
     /**
      * @param string  $destination

@@ -1,6 +1,6 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 use Exception;
 
@@ -12,7 +12,7 @@ class JSONRequestValidator extends Base {
      */
     protected function _validate(): void {
         if ( !preg_match( '~^application/json~', $this->request->headers()->get( 'Content-Type' ) ) ) {
-            throw new Exception('Content type provided not valid (application/json expected)', 405);
+            throw new Exception( 'Content type provided not valid (application/json expected)', 405 );
         }
     }
 }

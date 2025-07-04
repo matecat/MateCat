@@ -1,34 +1,34 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
 use AjaxPasswordCheck;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
 use CatUtils;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use DomainException;
 use Exception;
 use INIT;
 use InvalidArgumentException;
-use Jobs\MetadataDao;
-use Jobs_JobDao;
+use Model\Database;
+use Model\Jobs\JobDao;
+use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement_ClientTmKeyStruct;
 use TmKeyManagement_Filter;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Validator\JSONSchema\Errors\JSONValidatorException;
+use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Validator\JSONSchema\JSONValidator;
+use Validator\JSONSchema\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 
-    protected $id_job;
-    protected $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -45,6 +45,7 @@ class UpdateJobKeysController extends KleinController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
+        $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
         if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
             $userRole = TmKeyManagement_Filter::OWNER;
         } elseif ( $this->isRevision() ) {
@@ -147,7 +148,7 @@ class UpdateJobKeysController extends KleinController {
         $request[ 'jobData' ]->tm_keys     = json_encode( $totalTmKeys );
         $request[ 'jobData' ]->last_update = date( "Y-m-d H:i:s" );
 
-        $jobDao = new Jobs_JobDao( Database::obtain() );
+        $jobDao = new JobDao( Database::obtain() );
         $jobDao->updateStruct( $request[ 'jobData' ], [ 'fields' => [ 'only_private_tm', 'tm_keys', 'last_update' ] ] );
         $jobDao->destroyCache( $request[ 'jobData' ] );
 
@@ -201,7 +202,7 @@ class UpdateJobKeysController extends KleinController {
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = Jobs_JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
+        $jobData = JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
 
         // Check if user can access the job
         $pCheck = new AjaxPasswordCheck();
@@ -218,8 +219,8 @@ class UpdateJobKeysController extends KleinController {
             throw new DomainException( $exception->getMessage() );
         }
 
-        $this->id_job            = $job_id;
-        $this->received_password = $current_password;
+        $this->id_job           = $job_id;
+        $this->request_password = $current_password;
 
         return [
                 'job_id'                       => $job_id,

@@ -10,17 +10,17 @@
 namespace Contribution;
 
 
-use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
 use Engine;
 use Engines_AbstractEngine;
 use Exception;
-use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
-use Users_UserStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 
-class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoStruct {
+class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     // Needed by getSessionId()
     public ?int    $id_file  = null;
@@ -107,33 +107,33 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoS
     private ?Engines_AbstractEngine $mt_engine = null;
 
     /**
-     * @param Jobs_JobStruct $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @return $this
      */
-    public function setJobStruct( Jobs_JobStruct $jobStruct ): ContributionRequestStruct {
+    public function setJobStruct( JobStruct $jobStruct ): ContributionRequestStruct {
         $this->jobStruct = $jobStruct->toArray();
 
         return $this;
     }
 
     /**
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return $this
      */
-    public function setProjectStruct( Projects_ProjectStruct $projectStruct ): ContributionRequestStruct {
+    public function setProjectStruct( ProjectStruct $projectStruct ): ContributionRequestStruct {
         $this->projectStruct = $projectStruct->toArray();
 
         return $this;
     }
 
     /**
-     * @param Users_UserStruct|null $user
+     * @param \Model\Users\UserStruct|null $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): ContributionRequestStruct {
+    public function setUser( UserStruct $user ): ContributionRequestStruct {
         $this->user = $user->toArray();
 
         return $this;
@@ -141,17 +141,17 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoS
 
 
     /**
-     * @return ?Jobs_JobStruct
+     * @return ?JobStruct
      */
-    public function getJobStruct(): ?Jobs_JobStruct {
-        return new Jobs_JobStruct( $this->jobStruct );
+    public function getJobStruct(): ?JobStruct {
+        return new JobStruct( $this->jobStruct );
     }
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
-    public function getProjectStruct(): ?Projects_ProjectStruct {
-        return new Projects_ProjectStruct( $this->projectStruct );
+    public function getProjectStruct(): ?ProjectStruct {
+        return new ProjectStruct( $this->projectStruct );
     }
 
     /**
@@ -189,10 +189,10 @@ class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoS
     }
 
     /**
-     * @return ?Users_UserStruct
+     * @return ?\Model\Users\UserStruct
      */
-    public function getUser(): ?Users_UserStruct {
-        return new Users_UserStruct( $this->user );
+    public function getUser(): ?UserStruct {
+        return new UserStruct( $this->user );
     }
 
     /**

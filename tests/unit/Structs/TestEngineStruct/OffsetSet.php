@@ -1,11 +1,12 @@
 <?php
 
+use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineStruct::offsetSet
+ * @covers EngineStruct::offsetSet
  * User: dinies
  * Date: 20/04/16
  * Time: 19.18
@@ -13,13 +14,13 @@ use TestHelpers\AbstractTest;
 class OffsetSet extends AbstractTest {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
     public function setUp(): void {
         parent::setUp();
-        $this->engine_struct_param     = new EnginesModel_EngineStruct();
+        $this->engine_struct_param     = new EngineStruct();
         $this->engine_struct_param->id = 999; //sample value
     }
 
@@ -27,7 +28,7 @@ class OffsetSet extends AbstractTest {
     /**
      * It sets the value of the variable that correspond to the first parameter with the value stored in the second parameter
      * @group  regression
-     * @covers EnginesModel_EngineStruct::offsetSet
+     * @covers EngineStruct::offsetSet
      */
     public function test_offsetSet_id_field() {
 

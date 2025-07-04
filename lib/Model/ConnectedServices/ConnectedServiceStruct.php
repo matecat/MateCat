@@ -6,13 +6,14 @@
  * Time: 16:50
  */
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
@@ -34,6 +35,7 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
      *
      * @return string|null
      * @throws EnvironmentIsBrokenException
+     * @throws Exception
      */
     public function getDecryptedOauthAccessToken(): ?string {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
@@ -43,6 +45,8 @@ class ConnectedServiceStruct extends AbstractDaoSilentStruct implements IDaoStru
 
     /**
      * @param $token
+     *
+     * @throws Exception
      */
     public function setEncryptedAccessToken( $token ) {
         $oauthTokenEncryption     = OauthTokenEncryption::getInstance();

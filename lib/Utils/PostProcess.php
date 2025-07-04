@@ -1,6 +1,6 @@
 <?php
 
-use LQA\QA;
+use Utils\LQA\QA;
 
 class PostProcess extends QA {
 

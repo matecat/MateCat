@@ -1,8 +1,13 @@
 <?php
 
-class Segments_SegmentMetadataStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+namespace Model\Segments;
 
-    public $id_segment;
-    public $meta_key;
-    public $meta_value;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+
+class SegmentMetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+
+    public ?int   $id_segment = null;
+    public string $meta_key;
+    public string $meta_value;
 }

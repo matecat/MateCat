@@ -6,10 +6,10 @@
  * Time: 19:35
  */
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use ConnectedServices\Google\GDrive\Session;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
+use Model\ConnectedServices\GDrive\Session;
+use Model\Database;
 use TMS\TMSService;
 
 class AjaxUtilsController extends KleinController {

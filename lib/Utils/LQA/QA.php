@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA;
+namespace Utils\LQA;
 
 use CatUtils;
 use DOMDocument;
@@ -10,12 +10,11 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use FeatureSet;
-use Jobs_JobStruct;
 use Log;
 use LogicException;
-use LQA\BxExG\Validator;
-use Segments_SegmentMetadataDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Segments\SegmentMetadataDao;
+use Utils\LQA\BxExG\Validator;
 
 /**
  * Class errObject
@@ -77,6 +76,7 @@ class errObject {
 
 }
 
+
 /**
  * Translation string quality assurance.
  *
@@ -132,12 +132,12 @@ class errObject {
 class QA {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     protected $featureSet;
 
@@ -1069,7 +1069,7 @@ class QA {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -1088,7 +1088,7 @@ class QA {
 
 
     /**
-     * @param FeatureSet $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @return $this
      */
@@ -1099,7 +1099,7 @@ class QA {
     }
 
     /**
-     * @return FeatureSet
+     * @return \Model\FeaturesBase\FeatureSet
      * @throws Exception
      */
     public function getFeatureSet() {
@@ -1473,16 +1473,16 @@ class QA {
      */
     protected function _getTagDiff() {
 
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
         //this is for </g>
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->source_seg, $matches );
         $_closingSrcTag = $matches[ 1 ];
 
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->target_seg, $matches );
         $_closingTrgTag = $matches[ 1 ];
 
         $clonedSrc = $malformedXmlSrcStruct;
@@ -1885,7 +1885,7 @@ class QA {
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // check if source has a trailing space at the end
-            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
+            $sourceHasTrailingSpace = ( strlen( $this->source_seg ) !== strlen( rtrim( $this->source_seg ) ) );
 
             if ( $sourceHasTrailingSpace ) {
 
@@ -2594,7 +2594,7 @@ class QA {
             return true;
         }
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
+        $limit = SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 

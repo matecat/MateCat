@@ -7,30 +7,27 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use ActivityLog\ActivityLogStruct;
-use FeatureSet;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\FeaturesBase\FeatureSet;
 
 class Activity {
     /**
-     * @var \ActivityLog\ActivityLogStruct[]
+     * @var ActivityLogStruct[]
      */
-    private $data;
+    private array $data;
 
     public function __construct( $data ) {
         $this->data = $data;
     }
 
-    public function render() {
+    public function render(): array {
         $out = [];
 
         $featureSet = new FeatureSet();
 
-        /**
-         * @var $record ActivityLogStruct
-         */
         foreach ( $this->data as $record ) {
 
             $record->action = $record->getAction( $record->action );
