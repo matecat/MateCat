@@ -86,7 +86,7 @@ class ActivityLogDao extends AbstractDao {
      *
      * @return IDaoStruct[]
      * @throws ReflectionException
-     * @see      \AsyncTasks\Workers\ActivityLogWorker
+     * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
      */
     public function read( IDaoStruct $activityQuery, array $whereKeys = [ 'id_project' => 0 ] ): array {

@@ -7,7 +7,7 @@
  *
  */
 
-namespace AsyncTasks\Workers\Traits;
+namespace Utils\AsyncTasks\Workers\Traits;
 
 use Log;
 use Model\Database;

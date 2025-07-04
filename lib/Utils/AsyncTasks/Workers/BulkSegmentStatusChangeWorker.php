@@ -6,7 +6,7 @@
  * Time: 10:57
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 
 use Exception;

@@ -1,6 +1,6 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 use Engine;
 use Engines_MyMemory;

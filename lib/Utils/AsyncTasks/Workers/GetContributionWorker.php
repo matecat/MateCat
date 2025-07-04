@@ -7,9 +7,8 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use AsyncTasks\Workers\Traits\SortMatchesTrait;
 use Constants_Engines;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
@@ -32,6 +31,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
 use Utils;
+use Utils\AsyncTasks\Workers\Traits\SortMatchesTrait;
 
 class GetContributionWorker extends AbstractWorker {
 

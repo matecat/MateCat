@@ -199,7 +199,7 @@ class Executor implements SplObserver {
             try {
 
                 /**
-                 * Do not re-instantiate an already existent object
+                 * Don't re-instantiate an already existent object
                  */
                 if ( $this->_worker == null || ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );

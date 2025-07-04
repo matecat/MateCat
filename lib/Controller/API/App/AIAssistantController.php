@@ -2,12 +2,12 @@
 
 namespace Controller\API\App;
 
-use AsyncTasks\Workers\AIAssistantWorker;
 use Controller\Abstracts\KleinController;
 use INIT;
 use Langs\Languages;
 use Log;
 use Utils;
+use Utils\AsyncTasks\Workers\AIAssistantWorker;
 
 class AIAssistantController extends KleinController {
 
@@ -126,7 +126,7 @@ class AIAssistantController extends KleinController {
      */
     private function enqueueWorker( $queue, $params ) {
         try {
-            \WorkerClient::enqueue( $queue, '\AsyncTasks\Workers\AIAssistantWorker', $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+            \WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
         } catch ( \Exception $e ) {
             # Handle the error, logging, ...
             $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";

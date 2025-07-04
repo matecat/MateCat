@@ -1,9 +1,8 @@
 <?php
 
-namespace AsyncTasks\Workers\Analysis;
+namespace Utils\AsyncTasks\Workers\Analysis;
 
 use AMQHandler;
-use AsyncTasks\Workers\Traits\ProjectWordCount;
 use Constants_ProjectStatus as ProjectStatus;
 use Engine;
 use Engines_MMT;
@@ -35,6 +34,7 @@ use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
+use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 
 /**
  * Created by PhpStorm.
@@ -65,13 +65,12 @@ class FastAnalysis extends AbstractDaemon {
     /**
      * @var AbstractFilesStorage
      */
-    protected $files_storage;
+    protected AbstractFilesStorage $files_storage;
 
     const ERR_NO_SEGMENTS    = 127;
     const ERR_TOO_LARGE      = 128;
     const ERR_500            = 129;
     const ERR_EMPTY_RESPONSE = 130;
-    const ERR_FILE_NOT_FOUND = 131;
 
     /**
      * Reload Configuration every cycle
@@ -731,7 +730,7 @@ class FastAnalysis extends AbstractDaemon {
 
                         $element            = new QueueElement();
                         $element->params    = new Params( $queue_element );
-                        $element->classLoad = '\AsyncTasks\Workers\Analysis\TMAnalysisWorker';
+                        $element->classLoad = TMAnalysisWorker::class;
 
                         $this->queueHandler->publishToQueues( $queueInfo->queue_name, new Message( $element, [ 'persistent' => $this->queueHandler->persistent ] ) );
                         $this->_logTimeStampedMsg( "AMQ Set Executed " . ( $k + 1 ) . " Language: $language" );
@@ -917,10 +916,10 @@ HD;
     /**
      * @param int $limit
      *
-     * @return array|false
+     * @return array
      * @throws ReflectionException
      */
-    protected function _getLockProjectForVolumeAnalysis( int $limit = 1 ) {
+    protected function _getLockProjectForVolumeAnalysis( int $limit = 1 ): array {
 
         $bindParams = [ 'project_status' => ProjectStatus::STATUS_NEW ];
 

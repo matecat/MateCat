@@ -7,7 +7,7 @@
  *
  */
 
-namespace AsyncTasks\Workers\Analysis;
+namespace Utils\AsyncTasks\Workers\Analysis;
 
 /**
  * Class RedisKeys

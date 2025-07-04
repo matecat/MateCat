@@ -4,6 +4,7 @@ namespace Model\ActivityLog;
 
 use Exception;
 use Log;
+use Utils\AsyncTasks\Workers\ActivityLogWorker;
 use WorkerClient;
 
 /**
@@ -17,7 +18,7 @@ class Activity {
     public static function save( ActivityLogStruct $activityLog ) {
 
         try {
-            WorkerClient::enqueue( 'ACTIVITYLOG', '\AsyncTasks\Workers\ActivityLogWorker', $activityLog->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( 'ACTIVITYLOG', ActivityLogWorker::class, $activityLog->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
 
             # Handle the error, logging, ...

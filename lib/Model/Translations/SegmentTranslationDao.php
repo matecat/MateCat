@@ -18,6 +18,7 @@ use Model\Search\ReplaceEventStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Utils\AsyncTasks\Workers\PropagationWorker;
 use View\API\V2\Json\Propagation as PropagationApi;
 use WorkerClient;
 
@@ -686,7 +687,7 @@ class SegmentTranslationDao extends AbstractDao {
                         'execute_update'            => $execute_update
                 ];
 
-                WorkerClient::enqueue( 'PROPAGATION', '\AsyncTasks\Workers\PropagationWorker', $propagationObject, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+                WorkerClient::enqueue( 'PROPAGATION', PropagationWorker::class, $propagationObject, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
             }
 

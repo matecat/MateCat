@@ -60,6 +60,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use TMS\TMSFile;
 use TMS\TMSService;
+use Utils\AsyncTasks\Workers\JobsWorker;
 use Utils\LQA\QA;
 use View\API\Commons\Error;
 
@@ -1728,7 +1729,7 @@ class ProjectManager {
              * Async worker to re-count avg-PEE and total-TTE for split jobs
              */
             try {
-                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+                WorkerClient::enqueue( 'JOBS', JobsWorker::class, $job->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
             } catch ( Exception $e ) {
                 # Handle the error, logging, ...
                 $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";

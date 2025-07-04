@@ -11,6 +11,7 @@
 namespace Contribution;
 use Exception;
 use Log;
+use Utils\AsyncTasks\Workers\GetContributionWorker;
 use WorkerClient;
 
 /**
@@ -28,11 +29,11 @@ class Request {
     public static function contribution( ContributionRequestStruct $contribution ){
 
         try{
-            WorkerClient::enqueue( 'CONTRIBUTION_GET', '\AsyncTasks\Workers\GetContributionWorker', $contribution->getArrayCopy(), array( 'persistent' => false ) );
+            WorkerClient::enqueue( 'CONTRIBUTION_GET', GetContributionWorker::class, $contribution->getArrayCopy(), array( 'persistent' => false ) );
         } catch ( Exception $e ){
 
             # Handle the error, logging, ...
-            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output  = "**** GetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
             Log::doJsonLog( $output );

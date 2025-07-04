@@ -7,14 +7,14 @@
  *
  */
 
-namespace Analysis;
+namespace Utils\Analysis;
 
-use AsyncTasks\Workers\Analysis\RedisKeys;
 use Exception;
 use INIT;
 use Log;
 use Predis\Client;
 use RedisHandler;
+use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 
 /**
  * Class Analysis_Manager

@@ -44,7 +44,7 @@ class JobDao extends AbstractDao {
      * @throws ReflectionException
      * @see \Contribution\ContributionSetStruct
      *
-     * @see \AsyncTasks\Workers\SetContributionWorker
+     * @see \Utils\AsyncTasks\Workers\SetContributionWorker
      */
     public function read( JobStruct $jobQuery ): array {
 

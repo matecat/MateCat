@@ -1,6 +1,6 @@
 <?php
 
-namespace AIAssistant;
+namespace Utils\AIAssistant;
 
 use Exception;
 use INIT;

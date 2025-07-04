@@ -1,6 +1,6 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;

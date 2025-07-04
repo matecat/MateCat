@@ -13,8 +13,10 @@ use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use TmKeyManagement_Filter;
 use Utils;
+use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
+use WorkerClient;
 
 class GlossaryController extends KleinController {
 
@@ -416,7 +418,7 @@ class GlossaryController extends KleinController {
      */
     private function enqueueWorker( $queue, $params ) {
         try {
-            \WorkerClient::enqueue( $queue, '\AsyncTasks\Workers\GlossaryWorker', $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( \Exception $e ) {
             # Handle the error, logging, ...
             $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";

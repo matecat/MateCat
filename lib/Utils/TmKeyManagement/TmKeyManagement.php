@@ -111,7 +111,7 @@ class TmKeyManagement_TmKeyManagement {
         /**
          * The setContribution is async and the jobs metadata are cached.
          * Destroy the cache so the async processes can reload the new key data
-         * @see \AsyncTasks\Workers\SetContributionWorker
+         * @see \Utils\AsyncTasks\Workers\SetContributionWorker
          * @see \Contribution\ContributionSetStruct
          */
         $jobDao  = new JobDao( Database::obtain() );

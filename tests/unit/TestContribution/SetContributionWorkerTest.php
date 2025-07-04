@@ -1,6 +1,5 @@
 <?php
 
-use AsyncTasks\Workers\SetContributionWorker;
 use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\EngineStruct;
@@ -11,6 +10,7 @@ use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\AsyncTasks\Workers\SetContributionWorker;
 
 
 /**

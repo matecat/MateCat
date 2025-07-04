@@ -1,8 +1,7 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use AIAssistant\Client as AIAssistantClient;
 use AMQHandler;
 use Exception;
 use INIT;
@@ -15,6 +14,7 @@ use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Exceptions\EndQueueException;
 use Utils;
+use Utils\AIAssistant\Client as AIAssistantClient;
 
 class AIAssistantWorker extends AbstractWorker {
     const EXPLAIN_MEANING_ACTION = 'explain_meaning';

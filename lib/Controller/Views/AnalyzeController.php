@@ -9,7 +9,6 @@
 
 namespace Controller\Views;
 
-use Analysis\Health;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
@@ -24,6 +23,7 @@ use Model\Projects\ProjectDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Utils;
+use Utils\Analysis\Health;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
 

@@ -65,13 +65,4 @@ EOF;
         $this->refreshClientSessionIfNotApi();
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function afterConstruct() {
-        if ( !$this->user ) {
-            throw new Exception( 'Logged user not found.' );
-        }
-    }
-
 }

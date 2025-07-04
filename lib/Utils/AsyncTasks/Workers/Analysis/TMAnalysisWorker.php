@@ -7,10 +7,8 @@
  *
  */
 
-namespace AsyncTasks\Workers\Analysis;
+namespace Utils\AsyncTasks\Workers\Analysis;
 
-use AsyncTasks\Workers\Traits\ProjectWordCount;
-use AsyncTasks\Workers\Traits\SortMatchesTrait;
 use Constants\Ices;
 use Constants_ProjectStatus;
 use Constants_TranslationStatus;
@@ -46,6 +44,8 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
+use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
+use Utils\AsyncTasks\Workers\Traits\SortMatchesTrait;
 
 /**
  * Class TMAnalysisWorker

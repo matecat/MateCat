@@ -12,6 +12,8 @@ namespace Contribution;
 
 use Exception;
 use Log;
+use Utils\AsyncTasks\Workers\SetContributionMTWorker;
+use Utils\AsyncTasks\Workers\SetContributionWorker;
 use WorkerClient;
 
 /**
@@ -29,7 +31,7 @@ class Set {
     public static function contribution( ContributionSetStruct $contribution ) {
 
         try {
-            WorkerClient::enqueue( 'CONTRIBUTION', '\AsyncTasks\Workers\SetContributionWorker', $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( 'CONTRIBUTION', SetContributionWorker::class, $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
 
             # Handle the error, logging, ...
@@ -53,7 +55,7 @@ class Set {
                 return;
             }
 
-            WorkerClient::enqueue( 'CONTRIBUTION_MT', '\AsyncTasks\Workers\SetContributionMTWorker', $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( 'CONTRIBUTION_MT', SetContributionMTWorker::class, $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
 
             # Handle the error, logging, ...

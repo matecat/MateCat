@@ -5,6 +5,7 @@ use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\AsyncTasks\Workers\ErrMailWorker;
 
 class Utils {
 
@@ -391,7 +392,7 @@ class Utils {
         $queue_element[ 'subject' ] = $subject;
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-        WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        WorkerClient::enqueue( 'MAIL', ErrMailWorker::class, $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
         Log::doJsonLog( 'Message has been sent' );
 
@@ -866,39 +867,12 @@ class Utils {
      * @param array $arr
      * @return bool
      */
-    public static function arrayIsList(array $arr)
-    {
+    public static function arrayIsList(array $arr): bool {
         if ($arr === []) {
             return true;
         }
 
         return array_keys($arr) === range(0, count($arr) - 1);
-    }
-
-    /**
-     * @param string $haystack
-     * @param string $needle
-     *
-     * @return bool
-     */
-    public static function stringEndsWith( string $haystack, string $needle ): bool {
-        $length = strlen( $needle );
-        if ( $length == 0 ) {
-            return true;
-        }
-
-        return ( substr( $haystack, -$length ) === $needle );
-    }
-
-    /**
-     * @param string    $haystack
-     * @param string    $needle
-     * @param bool|null $caseSensitive
-     *
-     * @return bool
-     */
-    public static function stringStartsWith( string $haystack, string $needle, ?bool $caseSensitive = true ): bool {
-        return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
     }
 
     /**

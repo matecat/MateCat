@@ -7,7 +7,6 @@
  *
  */
 
-use AsyncTasks\Workers\Analysis\RedisKeys;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
@@ -15,6 +14,7 @@ use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
 use TaskRunner\Commons\Context;
+use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 
 class AMQHandler {
 

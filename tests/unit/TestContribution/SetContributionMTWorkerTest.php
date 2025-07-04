@@ -1,7 +1,5 @@
 <?php
 
-use AsyncTasks\Workers\SetContributionMTWorker;
-use AsyncTasks\Workers\SetContributionWorker;
 use Contribution\ContributionSetStruct;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Engines\EngineStruct;
@@ -14,6 +12,8 @@ use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\AsyncTasks\Workers\SetContributionMTWorker;
+use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Engines\Lara;
 
 

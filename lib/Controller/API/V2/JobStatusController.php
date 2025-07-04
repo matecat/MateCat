@@ -15,6 +15,7 @@ use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Model\Translations\SegmentTranslationDao;
+use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
 use WorkerClient;
 
 
@@ -67,7 +68,7 @@ class JobStatusController extends KleinController {
             if ( !empty( $segments_id ) ) {
 
                 try {
-                    WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\BulkSegmentStatusChangeWorker',
+                    WorkerClient::enqueue( 'JOBS', BulkSegmentStatusChangeWorker::class,
                             [
                                     'segment_ids'        => $segments_id,
                                     'client_id'          => $this->request->param( 'client_id' ),

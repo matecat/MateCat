@@ -57,8 +57,8 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param \Model\Translations\SegmentTranslationStruct   $parentSegmentTranslation
-     * @param \Model\Translations\SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
+     * @param SegmentTranslationStruct   $parentSegmentTranslation
+     * @param SegmentTranslationStruct[] $arrayOfSegmentTranslationToPropagate
      *
      * @return PropagationTotalStruct
      */
@@ -115,7 +115,7 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param \Model\Translations\SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
@@ -124,12 +124,12 @@ class PropagationAnalyser {
     }
 
     /**
-     * @param SegmentTranslationStruct                     $parentSegmentTranslation
-     * @param \Model\Translations\SegmentTranslationStruct $segmentTranslation
+     * @param SegmentTranslationStruct $parentSegmentTranslation
+     * @param SegmentTranslationStruct $segmentTranslation
      *
      * @return bool
      */
-    private function detectMatchingIce( SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation ) {
+    private function detectMatchingIce( SegmentTranslationStruct $parentSegmentTranslation, SegmentTranslationStruct $segmentTranslation ): bool {
         return ( $segmentTranslation->match_type === 'ICE' and $segmentTranslation->locked == 1 and $segmentTranslation->segment_hash === $parentSegmentTranslation->segment_hash and
                 $segmentTranslation->id_segment !== null );
     }
