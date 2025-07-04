@@ -579,7 +579,7 @@ class GetContributionWorker extends AbstractWorker {
      */
     protected function _sortMatches( $mt_result, $matches ): array {
         if ( !empty( $mt_result ) ) {
-            $matches[] = $mt_result;
+            array_unshift($matches, $mt_result); // prepend the MT result to matches to ensure it's always first and win at sorting when scores are equal
             usort( $matches, [ "self", "__compareScoreDesc" ] );
         }
 
