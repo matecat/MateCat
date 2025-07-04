@@ -10,7 +10,7 @@ import ShareTmModal from '../../../modals/ShareTmModal'
 import CatToolActions from '../../../../actions/CatToolActions'
 import UserStore from '../../../../stores/UserStore'
 
-export const ShareResource = ({row, onClose}) => {
+export const ShareResource = ({row, onClose, onShare}) => {
   const [emails, setEmails] = useState('')
   const [status, setStatus] = useState()
   const [sharedUsers, setSharedUsers] = useState()
@@ -56,6 +56,7 @@ export const ShareResource = ({row, onClose}) => {
             timer: 5000,
           })
           setStatus({successfull: true})
+          onShare()
         })
         .catch((errors) => {
           const errorsObject = errors?.[0]

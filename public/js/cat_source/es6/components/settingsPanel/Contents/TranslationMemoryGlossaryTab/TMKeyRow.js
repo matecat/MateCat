@@ -95,6 +95,23 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const updateRow = ({isLookup, isUpdating, penalty}) => {
+    if (
+      isLookup &&
+      !row.isActive &&
+      tmKeys.filter((tm) => tm.isActive).length >= 10
+    ) {
+      CatToolActions.addNotification({
+        title: 'Resource cannot be activated',
+        type: 'error',
+        text: 'You can activate up to 10 resources per project.',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      })
+      setIsLookup(false)
+      return
+    }
+
     if (!isMMSharedKey) {
       const updatedKeys = tmKeys.map((tm) =>
         tm.id === row.id
@@ -147,7 +164,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const updateKeyName = () => {
     if (valueChange.current) {
-      if (name) {
+      if (name.trim() !== '') {
         updateTmKey({
           key: row.key,
           penalty: row.penalty,
@@ -180,6 +197,21 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             dataTm: getTmDataStructureToSendServer({tmKeys}),
           }).then(() => CatToolActions.onTMKeysChangeStatus())
         }
+      } else {
+        CatToolActions.addNotification({
+          title: 'Error updating resource',
+          type: 'error',
+          text: 'Resource name cannot be empty. Please provide a valid name.',
+          position: 'br',
+          allowHtml: true,
+          timer: 5000,
+        })
+        setTmKeys((prevState) =>
+          prevState.map((tm) =>
+            tm.id === row.id ? {...tm, name: valueName.current} : tm,
+          ),
+        )
+        setName(valueName.current)
       }
 
       valueChange.current = false
@@ -189,11 +221,21 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const handleExpandeRow = (Component, props = {}) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
     const onConfirm = onConfirmDeleteTmKey
-
+    const onShare = () => {
+      const updatedKeys = tmKeys.map((tm) =>
+        tm.id === row.id
+          ? {
+              ...tm,
+              is_shared: true,
+            }
+          : tm,
+      )
+      setTmKeys(updatedKeys)
+    }
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{...props, row, onClose, onConfirm}} />,
+      content: <Component {...{...props, row, onClose, onConfirm, onShare}} />,
     })
   }
 
