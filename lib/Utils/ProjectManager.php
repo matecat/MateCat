@@ -1328,15 +1328,20 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
+            \Log::doJsonLog("PIPPO ---> " . json_encode($projectStructure[ 'payable_rate_model' ]));
+
             // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
                 $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
-            } elseif ( isset( $projectStructure[ 'payable_rate_model' ] ) and !empty( $projectStructure[ 'payable_rate_model' ] ) and $projectStructure[ 'payable_rate_model' ] instanceof CustomPayableRateStruct ) {
+            } elseif ( isset( $projectStructure[ 'payable_rate_model' ] ) and !empty( $projectStructure[ 'payable_rate_model' ] ) ) {
+
                 // get payable rates
-                $payableRatesTemplate = $projectStructure[ 'payable_rate_model' ];
+                $payableRatesTemplate = new CustomPayableRateStruct();
+                $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
                 $payableRates         = json_encode( $payableRates );
+
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );
