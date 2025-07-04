@@ -36,6 +36,7 @@ use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
+use Xliff\XliffConfigTemplateStruct;
 
 class CreateProjectController extends AbstractStatefulKleinController {
 
@@ -162,6 +163,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
+            $projectStructure[ 'payable_rate_model' ]    = $this->data[ 'payable_rate_model_template' ];
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
@@ -506,7 +508,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validateQaModelTemplate( $qa_model_template = null, $qa_model_template_id = null ): ?QAModelTemplateStruct {
         if ( !empty( $qa_model_template ) ) {
-            $json   = html_entity_decode( $qa_model_template );
+            $json = html_entity_decode( $qa_model_template );
+
+            $model = json_decode( $json, true );
+            $json  = [
+                    "model" => $model,
+            ];
+            $json  = json_encode( $json );
+
             $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
 
             $validatorObject       = new JSONValidatorObject();
@@ -516,7 +525,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
-            $QAModelTemplateStruct->hydrateFromJSON( html_entity_decode( $validatorObject->decoded ) );
+            $QAModelTemplateStruct->hydrateFromJSON( $json );
             $QAModelTemplateStruct->uid = $this->user->uid;
 
             return $QAModelTemplateStruct;
@@ -546,6 +555,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validatePayableRateTemplate( $payable_rate_template = null, $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
+        $userId                   = $this->getUser()->uid;
 
         if ( !empty( $payable_rate_template ) ) {
             $json   = html_entity_decode( $payable_rate_template );
@@ -558,15 +568,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
-            $payableRateModelTemplate->hydrateFromJSON( html_entity_decode( $validatorObject->decoded ) );
-            $payableRateModelTemplate->uid = $this->user->uid;
+            $payableRateModelTemplate->hydrateFromJSON( $json );
+            $payableRateModelTemplate->uid = $userId;
 
         } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
 
-            $payableRateTemplateId = $payable_rate_template_id;
-            $userId                = $this->getUser()->uid;
-
-            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payable_rate_template_id, $userId );
 
             if ( null === $payableRateModelTemplate ) {
                 throw new InvalidArgumentException( 'Payable rate model id not valid' );
@@ -643,14 +650,18 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
-            $xliff_parameters = $validatorObject->decoded;
+
+            $xliffConfigTemplate = new XliffConfigTemplateStruct();
+            $xliffConfigTemplate->hydrateFromJSON( $json );
+            $xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+
         } elseif ( !empty( $xliff_parameters_template_id ) ) {
 
             $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $xliff_parameters_template_id, $this->getUser()->uid );
