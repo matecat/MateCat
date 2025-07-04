@@ -202,6 +202,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
+            $projectStructure[ 'payable_rate_model' ]    = $this->data[ 'payable_rate_model_template' ];
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
@@ -604,6 +605,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validatePayableRateTemplate( $payable_rate_template = null, $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
+        $userId                   = $this->getUser()->uid;
 
         if ( !empty( $payable_rate_template ) ) {
             $json   = html_entity_decode( $payable_rate_template );
@@ -617,14 +619,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
             $payableRateModelTemplate->hydrateFromJSON( $json );
-            $payableRateModelTemplate->uid = $this->user->uid;
+            $payableRateModelTemplate->uid = $userId;
 
         } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
 
-            $payableRateTemplateId = $payable_rate_template_id;
-            $userId                = $this->getUser()->uid;
-
-            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payable_rate_template_id, $userId );
 
             if ( null === $payableRateModelTemplate ) {
                 throw new InvalidArgumentException( 'Payable rate model id not valid' );
