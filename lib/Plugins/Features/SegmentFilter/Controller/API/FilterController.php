@@ -17,19 +17,19 @@ class FilterController extends BaseChunkController {
     /**
      * @var ChunkPasswordValidator
      */
-    protected $validator;
+    protected ChunkPasswordValidator $validator;
 
     /**
      * @var FilterDefinition
      */
-    private $filter;
+    private FilterDefinition $filter;
 
     /**
      * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( Jobs_JobStruct $chunk ): FilterController {
         $this->chunk = $chunk;
 
         return $this;
@@ -45,7 +45,6 @@ class FilterController extends BaseChunkController {
         // TODO: validate the input filter
         $model = new SegmentFilterModel( $this->chunk, $this->filter );
 
-        // TODO: move this into a formatter
         $ids_as_array = [];
         $ids_grouping = [];
         $segments_id  = $model->getSegmentList();
