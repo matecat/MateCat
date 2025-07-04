@@ -204,11 +204,21 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const handleExpandeRow = (Component, props = {}) => {
     const onClose = () => onExpandRow({row, shouldExpand: false})
     const onConfirm = onConfirmDeleteTmKey
-
+    const onShare = () => {
+      const updatedKeys = tmKeys.map((tm) =>
+        tm.id === row.id
+          ? {
+              ...tm,
+              is_shared: true,
+            }
+          : tm,
+      )
+      setTmKeys(updatedKeys)
+    }
     onExpandRow({
       row,
       shouldExpand: true,
-      content: <Component {...{...props, row, onClose, onConfirm}} />,
+      content: <Component {...{...props, row, onClose, onConfirm, onShare}} />,
     })
   }
 
