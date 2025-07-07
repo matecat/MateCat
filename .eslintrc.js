@@ -28,7 +28,7 @@ module.exports = {
 
     // grunt browserify compiled files
     {
-      files: ['**/js/**/*.js'],
+      files: ['**/cat_source/**/*.js', '**/js/*.js'],
       parser: '@babel/eslint-parser',
       env: {es6: true},
       parserOptions: {
