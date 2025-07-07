@@ -2,11 +2,23 @@ export const changeGDriveSourceLang = async ({
   sourceLang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
+  filters_extraction_parameters_template,
 }) => {
-  let url = `/gdrive/change?source=${sourceLang}&segmentation_rule=${segmentation_rule}&filters_extraction_parameters_template_id=${filters_extraction_parameters_template_id}`
+  let url = `/gdrive/change?source=${sourceLang}&segmentation_rule=${segmentation_rule}${typeof filters_extraction_parameters_template_id !== 'undefined' ? '&filters_extraction_parameters_template_id=' + filters_extraction_parameters_template_id : ''}`
+
+  const dataParams = {
+    filters_extraction_parameters_template,
+  }
+  const formData = new FormData()
+
+  Object.keys(dataParams).forEach((key) => {
+    if (dataParams[key] !== undefined) formData.append(key, dataParams[key])
+  })
 
   const res = await fetch(url, {
+    method: 'POST',
     credentials: 'include',
+    body: formData,
   })
 
   if (!res.ok) {
