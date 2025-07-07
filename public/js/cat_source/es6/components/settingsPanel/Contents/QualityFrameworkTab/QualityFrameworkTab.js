@@ -178,7 +178,7 @@ export const QualityFrameworkTab = () => {
       value={{templates, currentTemplate, modifyingCurrentTemplate}}
     >
       {templates.length > 0 && (
-        <div className="settings-panel-box">
+        <div className="settings-panel-box settings-panel-box-quality-framework-tab">
           <SubTemplates
             {...{
               templates,
