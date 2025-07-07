@@ -148,71 +148,6 @@ class ReviewExtendedIssuesContainer extends React.Component {
           {...{tabs, selectedTabId: r1Active ? 'r1' : 'r2'}}
         />
       )
-
-      // return (
-      //   <div>
-      //     <div
-      //       className="ui top attached tabular menu"
-      //       ref={(tabs) => (this.tabs = tabs)}
-      //     >
-      //       <a
-      //         className={classnames(
-      //           'item',
-      //           r1Active && 'active',
-      //           htmlR1.length === 0 && 'disabled',
-      //         )}
-      //         data-tab="r1"
-      //       >
-      //         R1 issues
-      //       </a>
-      //       <a
-      //         className={classnames(
-      //           'item',
-      //           r2Active && 'active',
-      //           htmlR2.length === 0 && 'disabled',
-      //         )}
-      //         data-tab="r2"
-      //       >
-      //         R2 issues
-      //       </a>
-      //     </div>
-
-      //     <div
-      //       className={classnames(
-      //         'ui bottom attached tab segment',
-      //         htmlR1.length === 0 && 'disabled',
-      //         r1Active && 'active',
-      //       )}
-      //       data-tab="r1"
-      //       style={{
-      //         padding: '0px',
-      //         width: '99.5%',
-      //         maxHeight: '200px',
-      //         overflowY: 'auto',
-      //         marginBottom: 'unset',
-      //       }}
-      //     >
-      //       {htmlR1}
-      //     </div>
-      //     <div
-      //       className={classnames(
-      //         'ui bottom attached tab segment',
-      //         htmlR2.length === 0 && 'disabled',
-      //         r2Active && 'active',
-      //       )}
-      //       data-tab="r2"
-      //       style={{
-      //         padding: '0px',
-      //         width: '99.5%',
-      //         maxHeight: '200px',
-      //         overflowY: 'auto',
-      //         marginBottom: 'unset',
-      //       }}
-      //     >
-      //       {htmlR2}
-      //     </div>
-      //   </div>
-      // )
     } else {
       return htmlR1
     }
@@ -378,7 +313,6 @@ class ReviewExtendedIssuesContainer extends React.Component {
       SegmentConstants.ISSUE_ADDED,
       this.setLastIssueAdded.bind(this),
     )
-    $(this.tabs).find('.item:not(.disabled)').tab()
   }
 
   componentWillUnmount() {
@@ -396,7 +330,6 @@ class ReviewExtendedIssuesContainer extends React.Component {
         visible: true,
       })
     }
-    $(this.tabs).find('.item:not(.disabled)').tab()
   }
 
   render() {
