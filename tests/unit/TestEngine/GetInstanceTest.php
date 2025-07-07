@@ -2,6 +2,9 @@
 
 use Model\Database;
 use TestHelpers\AbstractTest;
+use Utils\Engines\Apertium;
+use Utils\Engines\NONE;
+use Utils\Engines\MyMemory;
 
 
 /**
@@ -66,7 +69,7 @@ class GetInstanceTest extends AbstractTest {
     public function test_getInstance_of_constructed_engine() {
 
         $engine = Engine::getInstance( $this->id_database );
-        $this->assertTrue( $engine instanceof Engines_Apertium );
+        $this->assertTrue( $engine instanceof Apertium );
     }
 
     /**
@@ -77,7 +80,7 @@ class GetInstanceTest extends AbstractTest {
     public function test_getInstance_of_constructed_engine_my_memory() {
 
         $engine = Engine::getInstance( 1 );
-        $this->assertTrue( $engine instanceof Engines_MyMemory );
+        $this->assertTrue( $engine instanceof MyMemory );
     }
 
     /**
@@ -87,7 +90,7 @@ class GetInstanceTest extends AbstractTest {
      */
     public function test_getInstance_of_default_engine() {
         $engine = Engine::getInstance( 0 );
-        $this->assertTrue( $engine instanceof Engines_NONE );
+        $this->assertTrue( $engine instanceof NONE );
 
     }
 
@@ -140,7 +143,7 @@ class GetInstanceTest extends AbstractTest {
         $flusher->flushdb();
 
         $engine = Engine::getInstance( $this->id_database );
-        $this->assertTrue( $engine instanceof Engines_NONE );
+        $this->assertTrue( $engine instanceof NONE );
     }
 
 

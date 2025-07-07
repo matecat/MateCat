@@ -2,7 +2,7 @@
 
 /**
  * @group  regression
- * @covers Engines_MyMemory
+ * @covers MyMemory
  * User: dinies
  * Date: 16/05/16
  * Time: 19.35
@@ -17,12 +17,14 @@
  */
 
 
-use Langs\Languages;
 use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\TmxResponse;
+use Utils\Langs\Languages;
 
 error_reporting( ~E_DEPRECATED );
 
@@ -39,11 +41,11 @@ class TmxImportMyMemoryTest extends AbstractTest {
     }
 
     /**
-     * @covers Engines_MyMemory::importMemory
-     * @covers Engines_MyMemory::getStatus
-     * @covers Engines_MyMemory::createExport
-     * @covers Engines_MyMemory::checkExport
-     * @covers Engines_MyMemory::downloadExport
+     * @covers MyMemory::importMemory
+     * @covers MyMemory::getStatus
+     * @covers MyMemory::createExport
+     * @covers MyMemory::checkExport
+     * @covers MyMemory::downloadExport
      */
     public function test_about_best_case_scenario_of_TMX_import() {
 
@@ -62,7 +64,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
 
         Languages::getInstance();
 
@@ -84,7 +86,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
         $result = $engine_MyMemory->importMemory( $file_param, $key_param, new UserStruct() );
 
 
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
+        $this->assertTrue( $result instanceof TmxResponse );
         $this->assertTrue( Utils::isTokenValid( $result->id ) );
         $this->assertEquals( 202, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
@@ -111,7 +113,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
             }
         }
 
-        $this->assertTrue( $importResult instanceof Engines_Results_MyMemory_TmxResponse );
+        $this->assertTrue( $importResult instanceof TmxResponse );
         $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
         $this->assertEquals( $importResult->id, $importResult->id );
         $this->assertEquals( 200, $importResult->responseStatus );

@@ -1,8 +1,11 @@
 <?php
 
-use Email\AbstractEmail;
+namespace Utils\TmKeyManagement;
+
+use Exception;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Utils\Email\AbstractEmail;
 
 /**
  * Created by PhpStorm.
@@ -11,27 +14,23 @@ use Model\Users\UserStruct;
  * Time: 18.03
  *
  */
+class ShareKeyEmail extends AbstractEmail {
 
+    protected array $userMail = [];
 
-class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
+    protected MemoryKeyStruct $keyStruct;
 
-    protected $userMail = [];
+    protected UserStruct $sender;
 
-    protected $keyStruct;
-
-    protected $sender;
-
-    protected $alreadyRegistered = false;
-
-    public function __construct( UserStruct $sender, Array $userMail, MemoryKeyStruct $keyStruct ) {
+    public function __construct( UserStruct $sender, array $userMail, MemoryKeyStruct $keyStruct ) {
 
         $this->userMail  = $userMail;
         $this->keyStruct = $keyStruct;
-        $this->sender = $sender;
+        $this->sender    = $sender;
 
 
-        $this->_setLayout('skeleton.html') ;
-        $this->_setTemplate('ShareKey/message_content.html') ;
+        $this->_setLayout( 'skeleton.html' );
+        $this->_setTemplate( 'ShareKey/message_content.html' );
 
     }
 
@@ -42,8 +41,8 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
 
         $mailConf = $this->_getDefaultMailConf();
 
-        $mailConf[ 'address' ] = array( $this->userMail[ 0 ], $this->userMail[ 1 ] );
-        $mailConf[ 'subject' ] = $this->_getLayoutVariables()['title'] ;
+        $mailConf[ 'address' ] = [ $this->userMail[ 0 ], $this->userMail[ 1 ] ];
+        $mailConf[ 'subject' ] = $this->_getLayoutVariables()[ 'title' ];
 
         $mailConf[ 'htmlBody' ] = $this->_buildHTMLMessage();
         $mailConf[ 'altBody' ]  = $this->_buildTxtMessage( $this->_buildMessageContent() );
@@ -62,15 +61,15 @@ class TmKeyManagement_ShareKeyEmail extends AbstractEmail {
         $params[ "tm_key_value" ]   = $this->keyStruct->tm_key->key;
         $params[ "addressMail" ]    = $this->userMail[ 0 ];
 
-        return $params ;
+        return $params;
     }
 
-    protected function _getLayoutVariables($messageBody = null): array {
-        $vars = parent::_getLayoutVariables();
-        $vars['showTitle'] = TRUE ;
-        $vars['title'] = "Matecat - Resource shared" ;
+    protected function _getLayoutVariables( $messageBody = null ): array {
+        $vars                = parent::_getLayoutVariables();
+        $vars[ 'showTitle' ] = true;
+        $vars[ 'title' ]     = "Matecat - Resource shared";
 
-        return $vars ;
+        return $vars;
     }
 
 }

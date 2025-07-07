@@ -1,9 +1,14 @@
 <?php
 
-class Engines_Results_ErrorMatches {
+namespace Utils\Engines\Results;
+class ErrorResponse {
 
     public $code    = 0;
     public $message = "";
+    /**
+     * @var string|null
+     */
+    public ?string $http_code = null;
 
     public function __construct( $result = [] ) {
         if ( !empty( $result ) ) {

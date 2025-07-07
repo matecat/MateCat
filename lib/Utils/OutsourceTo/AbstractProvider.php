@@ -3,11 +3,11 @@
  * Created by PhpStorm.
  */
 
-namespace OutsourceTo;
+namespace Utils\OutsourceTo;
 
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
-use Shop_AbstractItem;
+use Utils\Shop\AbstractItem;
 
 /**
  * Abstract class of a Provider to extend to implement a login/review/confirm communication
@@ -70,7 +70,7 @@ abstract class AbstractProvider {
     /**
      * Object containing the quote result
      *
-     * @var Shop_AbstractItem[]
+     * @var \Utils\Shop\AbstractItem[]
      */
     protected array $_quote_result;
 
@@ -125,7 +125,7 @@ abstract class AbstractProvider {
     /**
      * Get quotes Result after Provider Interrogation
      *
-     * @return Shop_AbstractItem[]
+     * @return AbstractItem[]
      */
     public function getQuotesResult(): array {
         return $this->_quote_result;

@@ -3,12 +3,7 @@
 namespace Utils\AsyncTasks\Workers\Analysis;
 
 use AMQHandler;
-use Constants_ProjectStatus as ProjectStatus;
 use Engine;
-use Engines_MMT;
-use Engines_MyMemory;
-use Engines_NONE;
-use Engines_Results_MyMemory_AnalyzeResponse;
 use Exception;
 use INIT;
 use Log;
@@ -28,13 +23,18 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Stomp\Transport\Message;
-use TaskRunner\Commons\AbstractDaemon;
-use TaskRunner\Commons\Context;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
 use UnexpectedValueException;
 use Utils;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
+use Utils\Constants\ProjectStatus as ProjectStatus;
+use Utils\Engines\MMT;
+use Utils\Engines\MyMemory;
+use Utils\Engines\NONE;
+use Utils\Engines\Results\MyMemory\AnalyzeResponse;
+use Utils\TaskRunner\Commons\AbstractDaemon;
+use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 
 /**
  * Created by PhpStorm.
@@ -311,13 +311,13 @@ class FastAnalysis extends AbstractDaemon {
     /**
      * @param $pid
      *
-     * @return Engines_Results_MyMemory_AnalyzeResponse
+     * @return AnalyzeResponse
      * @throws Exception
      */
-    protected function _fetchMyMemoryFast( $pid ): Engines_Results_MyMemory_AnalyzeResponse {
+    protected function _fetchMyMemoryFast( $pid ): AnalyzeResponse {
 
         /**
-         * @var $myMemory Engines_MyMemory
+         * @var $myMemory \Utils\Engines\MyMemory
          */
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
@@ -375,7 +375,7 @@ class FastAnalysis extends AbstractDaemon {
         $this->_logTimeStampedMsg( "Sending query to MyMemory analysis..." );
 
         /**
-         * @var $result Engines_Results_MyMemory_AnalyzeResponse
+         * @var $result AnalyzeResponse
          */
         $result = $myMemory->fastAnalysis( $fastSegmentsRequest );
 
@@ -894,10 +894,10 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( $mtEngine instanceof Engines_MMT || $mtEngine instanceof Utils\Engines\Lara ):
+            case ( $mtEngine instanceof MMT || $mtEngine instanceof Utils\Engines\Lara ):
                 $context = $contextList[ 'P4' ];
                 break;
-            case ( !$mtEngine instanceof Engines_MyMemory && !$mtEngine instanceof Engines_NONE ):
+            case ( !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE ):
                 $context = $contextList[ 'P3' ];
                 break;
             case ( $queueLen >= 10000 ): // at rate of 100 segments/s (100 processes) ~ 2m 30s

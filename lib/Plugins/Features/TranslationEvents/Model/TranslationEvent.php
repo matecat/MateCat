@@ -3,7 +3,6 @@
 namespace Features\TranslationEvents\Model;
 
 use Constants;
-use Constants_TranslationStatus;
 use Error;
 use Exception;
 use Model\Database;
@@ -15,6 +14,7 @@ use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use RuntimeException;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEvent {
 
@@ -262,14 +262,14 @@ class TranslationEvent {
             if (
                     in_array( $this->getOldTranslation()->status,
                             array_merge(
-                                    Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                                    Constants_TranslationStatus::$INITIAL_STATUSES
+                                    TranslationStatus::$TRANSLATION_STATUSES,
+                                    TranslationStatus::$INITIAL_STATUSES
                             ) )
             ) {
                 $source_page = Constants::SOURCE_PAGE_TRANSLATE;
-            } elseif ( $this->getOldTranslation()->status == Constants_TranslationStatus::STATUS_APPROVED ) {
+            } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED ) {
                 $source_page = Constants::SOURCE_PAGE_REVISION;
-            } elseif ( $this->getOldTranslation()->status == Constants_TranslationStatus::STATUS_APPROVED2 ) {
+            } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED2 ) {
                 $source_page = Constants::SOURCE_PAGE_REVISION_2;
             } else {
                 throw new Exception( 'Unable to guess source_page for missing prior event' );
@@ -289,11 +289,11 @@ class TranslationEvent {
     private function statusAsSourcePage( $status ): int {
 
         switch ( $status ) {
-            case $status == Constants_TranslationStatus::STATUS_TRANSLATED:
+            case $status == TranslationStatus::STATUS_TRANSLATED:
                 return Constants::SOURCE_PAGE_TRANSLATE;
-            case $status == Constants_TranslationStatus::STATUS_APPROVED:
+            case $status == TranslationStatus::STATUS_APPROVED:
                 return Constants::SOURCE_PAGE_REVISION;
-            case $status == Constants_TranslationStatus::STATUS_APPROVED2:
+            case $status == TranslationStatus::STATUS_APPROVED2:
                 return Constants::SOURCE_PAGE_REVISION_2;
             default:
                 return 0;

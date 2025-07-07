@@ -17,67 +17,6 @@ use Model\Segments\SegmentMetadataDao;
 use Utils\LQA\BxExG\Validator;
 
 /**
- * Class errObject
- * Object vector for error reporting.
- * json_encode facilities of public properties.
- *
- * __toString method are used for array_count_values and array_unique over container
- *
- */
-class errObject {
-
-    public $outcome;
-    public $debug;
-    public $tip = "";
-
-    protected $orig_debug;
-
-    /**
-     * Output externally the original debug string, needed for occurrence count
-     * @return string
-     */
-    public function getOrigDebug() {
-        return $this->orig_debug;
-    }
-
-    /**
-     * Outputs externally the error tip
-     * @return string
-     */
-    public function getTip() {
-        return $this->tip;
-    }
-
-    /**
-     * Static instance constructor
-     *
-     * @param array $errors
-     *
-     * @return errObject
-     */
-    public static function get( array $errors ) {
-        $errObj             = new self();
-        $errObj->outcome    = $errors[ 'outcome' ];
-        $errObj->orig_debug = $errors[ 'debug' ];
-        $errObj->debug      = $errors[ 'debug' ];
-
-        ( !empty( $errors[ 'tip' ] ) ) ? $errObj->tip = $errors[ 'tip' ] : null;
-
-        return $errObj;
-    }
-
-    /**
-     * Return string id
-     * @return string
-     */
-    public function __toString() {
-        return (string)$this->outcome;
-    }
-
-}
-
-
-/**
  * Translation string quality assurance.
  *
  * Used for integrity comparison of XML ( xliff ) strings. <br />
@@ -476,14 +415,14 @@ class QA {
     /**
      * List of Errors from  check analysis
      *
-     * @var array(errObject(number:string))
+     * @var array(ErrObject(number:string))
      */
     protected $exceptionList = [ self::ERROR => [], self::WARNING => [], self::INFO => [] ];
 
     /**
      * List of warnings from check analysis
      *
-     * @var array(errObject(number,string))
+     * @var array(ErrObject(number,string))
      */
     protected $warningList = [];
 
@@ -518,35 +457,35 @@ class QA {
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
             case self::ERR_TAG_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAG_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
                 ] );
                 break;
             case self::ERR_TAG_ID:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAG_ID,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
             case self::ERR_EX_BX_COUNT_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
                 ] );
                 break;
             case self::ERR_EX_BX_NESTED_IN_G:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
                 ] );
                 break;
             case self::ERR_EX_BX_WRONG_POSITION:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                $this->exceptionList[ self::WARNING ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_WRONG_POSITION,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
@@ -555,14 +494,14 @@ class QA {
             case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_UNCLOSED_G_TAG:
             case self::SMART_COUNT_PLURAL_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
                 ] );
                 break;
             case self::SMART_COUNT_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
@@ -570,7 +509,7 @@ class QA {
                 break;
 
             case self::ERR_SIZE_RESTRICTION:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
                         'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
@@ -579,7 +518,7 @@ class QA {
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
@@ -589,7 +528,7 @@ class QA {
 
             case self::ERR_TAB_HEAD:
             case self::ERR_TAB_TAIL:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAB_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
@@ -597,7 +536,7 @@ class QA {
                 break;
 
             case self::ERR_BOUNDARY_HEAD:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
@@ -607,7 +546,7 @@ class QA {
             case self::ERR_BOUNDARY_TAIL:
                 // if source target is CJ we won't to add an trailing space mismatch error
                 if ( false === CatUtils::isCJ( $this->getSourceSegLang() ) ) {
-                    $this->exceptionList[ self::INFO ][] = errObject::get( [
+                    $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                             'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
                             'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
                             'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
@@ -616,7 +555,7 @@ class QA {
                 break;
 
             case self::ERR_SPACE_MISMATCH_AFTER_TAG:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
@@ -624,7 +563,7 @@ class QA {
                 break;
 
             case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
@@ -633,7 +572,7 @@ class QA {
 
 
             case self::ERR_BOUNDARY_HEAD_TEXT:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
@@ -652,7 +591,7 @@ class QA {
             case self::ERR_STARSIGN_MISMATCH :
             case self::ERR_SPECIAL_ENTITY_MISMATCH :
             case self::ERR_SYMBOL_MISMATCH :
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SYMBOL_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
@@ -660,7 +599,7 @@ class QA {
                 break;
 
             case self::ERR_NEWLINE_MISMATCH:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_NEWLINE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
@@ -669,7 +608,7 @@ class QA {
 
             case self::ERR_TAG_ORDER:
             default:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                $this->exceptionList[ self::WARNING ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
@@ -751,7 +690,7 @@ class QA {
     /**
      * Get Warning level errors
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     public function getWarnings() {
         return $this->checkErrorNone( self::WARNING );
@@ -797,7 +736,7 @@ class QA {
     /**
      * Get Notice level errors
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     public function getNotices() {
         return $this->checkErrorNone( self::INFO );
@@ -818,7 +757,7 @@ class QA {
      * <pre>
      * Array
      * (
-     *     [0] => errObject Object
+     *     [0] => ErrObject Object
      *         (
      *             [outcome] => 0
      *             [debug] =>
@@ -829,13 +768,13 @@ class QA {
      * @param string $level
      * @param bool   $count
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     protected function checkErrorNone( $level = self::ERROR, $count = false ) {
 
         if ( !$this->_thereAreErrorLevel( $level ) ) {
             return [
-                    errObject::get( [
+                    ErrObject::get( [
                             'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[ self::ERR_NONE ] . " [ 0 ]"
                     ] )
             ];
@@ -859,7 +798,7 @@ class QA {
              * count same values in array of errors.
              * we use array_map with strval callback function because array_count_values can count only strings or int
              * so:
-             * __toString was made internally in errObject class
+             * __toString was made internally in ErrObject class
              *
              * @see http://www.php.net/manual/en/function.array-count-values.php
              **/
@@ -868,14 +807,14 @@ class QA {
              * array_unique remove duplicated values in array,
              * Two elements are considered equal if and only if (string) $elem1 === (string) $elem2
              * so:
-             * __toString was made internally in errObject class
+             * __toString was made internally in ErrObject class
              *
              * @see http://www.php.net/manual/en/function.array-unique.php
              */
             $list = array_values( array_unique( $list ) );
 
             /**
-             * @var $errObj errObject
+             * @var $errObj ErrObject
              */
             foreach ( $list as $errObj ) {
                 $errObj->debug = $errObj->getOrigDebug() .
@@ -1557,7 +1496,7 @@ class QA {
     /**
      * Perform all integrity check and comparisons on source and target string
      *
-     * @return errObject[]
+     * @return ErrObject[]
      * @throws Exception
      */
     public function performConsistencyCheck() {
@@ -1584,7 +1523,7 @@ class QA {
     /**
      * Perform integrity check only for tag mismatch
      *
-     * @return errObject[]
+     * @return ErrObject[]
      * @throws Exception
      */
     public function performTagCheckOnly() {
@@ -1966,7 +1905,7 @@ class QA {
      * After realignment a Tag consistency check is performed ( QA::performTagCheckOnly() )
      * if no errors where found the dom is reloaded and tags map are updated.
      *
-     * @return errObject[]|null
+     * @return ErrObject[]|null
      * @throws Exception|DOMException
      */
     public

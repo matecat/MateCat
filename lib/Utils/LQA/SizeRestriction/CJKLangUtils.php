@@ -11,11 +11,11 @@ class CJKLangUtils {
      *
      * @return int
      */
-    public static function getMatches( $string ) {
+    public static function getMatches( $string ): int {
         $count = 0;
 
-        // The chinese regex is a subset of the japanese one.
-        // So, we rely only on the japanese regex to get the match count
+        // The chinese regular expression is a subset of the japanese one.
+        // So, we rely only on the japanese regular expression to get the match count
         preg_match_all( self::JAPANESE_REGEX, $string, $japaneseMatches );
         preg_match_all( self::KOREAN_REGEX, $string, $korenMatches );
 
@@ -35,7 +35,7 @@ class CJKLangUtils {
      *
      * @return bool
      */
-    public static function isCjk( $string ) {
+    public static function isCjk( string $string ): bool {
         return self::isChinese( $string ) or self::isJapanese( $string ) or self::isKorean( $string );
     }
 
@@ -44,7 +44,7 @@ class CJKLangUtils {
      *
      * @return bool
      */
-    public static function isChinese( $string ) {
+    public static function isChinese( string $string ): bool {
         return self::check( self::CHINESE_REGEX, $string );
     }
 
@@ -53,7 +53,7 @@ class CJKLangUtils {
      *
      * @return bool
      */
-    public static function isJapanese( $string ) {
+    public static function isJapanese( string $string ): bool {
         return self::check( self::JAPANESE_REGEX, $string );
     }
 
@@ -62,7 +62,7 @@ class CJKLangUtils {
      *
      * @return bool
      */
-    public static function isKorean( $string ) {
+    public static function isKorean( string $string ): bool {
         return self::check( self::KOREAN_REGEX, $string );
     }
 
@@ -72,7 +72,7 @@ class CJKLangUtils {
      *
      * @return bool
      */
-    private static function check( $regex, $string ) {
+    private static function check( string $regex, string $string ): bool {
         preg_match( $regex, $string, $matches );
 
         return !empty( $matches );

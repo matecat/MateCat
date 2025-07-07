@@ -2,8 +2,6 @@
 
 namespace Model\Translations;
 
-use Autopropagation\PropagationAnalyser;
-use Constants_TranslationStatus;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
@@ -19,6 +17,8 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Utils\AsyncTasks\Workers\PropagationWorker;
+use Utils\Autopropagation\PropagationAnalyser;
+use Utils\Constants\TranslationStatus;
 use View\API\V2\Json\Propagation as PropagationApi;
 use WorkerClient;
 
@@ -246,22 +246,22 @@ class SegmentTranslationDao extends AbstractDao {
         $where_values = [];
         $conn         = Database::obtain()->getConnection();
 
-        if ( $status == Constants_TranslationStatus::STATUS_APPROVED || $status == Constants_TranslationStatus::STATUS_APPROVED2 ) {
+        if ( $status == TranslationStatus::STATUS_APPROVED || $status == TranslationStatus::STATUS_APPROVED2 ) {
             /**
              * if source_page is null, we keep the default behavior and only allow TRANSLATED and APPROVED segments.
              */
-            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
-        } elseif ( $status == Constants_TranslationStatus::STATUS_TRANSLATED ) {
+            $where_values[] = TranslationStatus::STATUS_TRANSLATED;
+            $where_values[] = TranslationStatus::STATUS_APPROVED;
+            $where_values[] = TranslationStatus::STATUS_APPROVED2;
+        } elseif ( $status == TranslationStatus::STATUS_TRANSLATED ) {
             /**
              * When status is TRANSLATED we can change APPROVED DRAFT and NEW statuses
              */
-            $where_values[] = Constants_TranslationStatus::STATUS_DRAFT;
-            $where_values[] = Constants_TranslationStatus::STATUS_NEW;
-            $where_values[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED;
-            $where_values[] = Constants_TranslationStatus::STATUS_APPROVED2;
+            $where_values[] = TranslationStatus::STATUS_DRAFT;
+            $where_values[] = TranslationStatus::STATUS_NEW;
+            $where_values[] = TranslationStatus::STATUS_TRANSLATED;
+            $where_values[] = TranslationStatus::STATUS_APPROVED;
+            $where_values[] = TranslationStatus::STATUS_APPROVED2;
         } else {
             throw new Exception( 'not allowed to change status to ' . $status );
         }
@@ -283,8 +283,8 @@ class SegmentTranslationDao extends AbstractDao {
 
             $where_values = array_merge( [
                     $chunk->id,
-                    Constants_TranslationStatus::STATUS_APPROVED,
-                    Constants_TranslationStatus::STATUS_APPROVED2
+                    TranslationStatus::STATUS_APPROVED,
+                    TranslationStatus::STATUS_APPROVED2
             ], $where_values );
         } else {
             $join_ste = '';

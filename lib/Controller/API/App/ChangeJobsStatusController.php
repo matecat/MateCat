@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -13,6 +12,7 @@ use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use Utils;
+use Utils\Constants\JobStatus;
 
 class ChangeJobsStatusController extends KleinController {
 
@@ -85,7 +85,7 @@ class ChangeJobsStatusController extends KleinController {
         $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $new_status = filter_var( $this->request->param( 'new_status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
-        if ( !Constants_JobStatus::isAllowedStatus( $new_status ) ) {
+        if ( !JobStatus::isAllowedStatus( $new_status ) ) {
             throw new Exception( "Invalid Status" );
         }
 

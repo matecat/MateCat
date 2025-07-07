@@ -2,7 +2,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\Intento;
 
 /**
  * Class Engine_IntentoStruct
@@ -40,7 +40,7 @@ class IntentoStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::INTENTO;
+    public ?string $class_load = Intento::class;
 
 
     /**

@@ -9,7 +9,6 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
@@ -20,8 +19,9 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
 use ReflectionException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\Langs\Languages;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class GetSegmentsController extends KleinController {
 

@@ -11,10 +11,10 @@ use Model\Exceptions\NotFoundException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
 use Utils;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 
 class UserKeysController extends KleinController {
 
@@ -106,7 +106,7 @@ class UserKeysController extends KleinController {
             throw new NotFoundException( "No user memory keys found" );
         }
 
-        ( new TmKeyManagement_TmKeyManagement() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
+        ( new TmKeyManager() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
 
         $this->response->json( [
                 'errors'  => [],
@@ -184,7 +184,7 @@ class UserKeysController extends KleinController {
         //validate the key
         $tmService->checkCorrectKey( $key );
 
-        $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
+        $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->key  = $key;
         $tmKeyStruct->name = $description;
         $tmKeyStruct->tm   = true;

@@ -6,6 +6,8 @@ use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class Utils {
 
@@ -702,7 +704,7 @@ class Utils {
         //check if the user can see the key.
         $memoryKey              = new MemoryKeyStruct();
         $memoryKey->uid         = $uid;
-        $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+        $memoryKey->tm_key      = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
         $memoryKeyDao         = new MemoryKeyDao( Database::obtain() );
@@ -731,7 +733,7 @@ class Utils {
      * @throws Exception
      */
     public static function getDefaultKeyDescription( string $key, string $job_tm_keys ): string {
-        $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
+        $ownerKeys   = TmKeyManager::getOwnerKeys( [ $job_tm_keys ] );
         $description = Constants::NO_DESCRIPTION_TM;
 
         //search the current key

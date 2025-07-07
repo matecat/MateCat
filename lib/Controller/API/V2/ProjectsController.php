@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
@@ -15,6 +14,7 @@ use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use Utils;
+use Utils\Constants\JobStatus;
 use View\API\V2\Json\Project;
 
 /**
@@ -95,21 +95,21 @@ class ProjectsController extends KleinController {
      * @throws Exception
      */
     public function cancel() {
-        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( JobStatus::STATUS_CANCELLED );
     }
 
     /**
      * @throws Exception
      */
     public function archive() {
-        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( JobStatus::STATUS_ARCHIVED );
     }
 
     /**
      * @throws Exception
      */
     public function active() {
-        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( JobStatus::STATUS_ACTIVE );
     }
 
     /**

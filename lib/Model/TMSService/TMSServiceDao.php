@@ -10,12 +10,12 @@
 namespace Model\TMSService;
 
 
-use Constants_TranslationStatus;
 use Log;
 use Model\Database;
 use PDO;
 use PDOException;
 use RuntimeException;
+use Utils\Constants\TranslationStatus;
 
 class TMSServiceDao {
 
@@ -89,8 +89,8 @@ class TMSServiceDao {
             $stmt->execute( [
                     'id_job'      => $jid,
                     'password'    => $jPassword,
-                    '_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => Constants_TranslationStatus::STATUS_APPROVED
+                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                    '_approved'   => TranslationStatus::STATUS_APPROVED
             ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
@@ -139,8 +139,8 @@ class TMSServiceDao {
             $stmt->execute( [
                     'id_job'      => $jid,
                     'password'    => $jPassword,
-                    '_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
-                    '_approved'   => Constants_TranslationStatus::STATUS_APPROVED
+                    '_translated' => TranslationStatus::STATUS_TRANSLATED,
+                    '_approved'   => TranslationStatus::STATUS_APPROVED
             ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
@@ -152,8 +152,8 @@ class TMSServiceDao {
 
             //we already extracted a 100% match by definition
             if ( in_array( $value[ 'status' ], [
-                            Constants_TranslationStatus::STATUS_TRANSLATED,
-                            Constants_TranslationStatus::STATUS_APPROVED
+                            TranslationStatus::STATUS_TRANSLATED,
+                            TranslationStatus::STATUS_APPROVED
                     ]
             )
             ) {

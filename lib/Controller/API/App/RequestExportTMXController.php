@@ -6,7 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use TMS\TMSService;
+use Utils\TMS\TMSService;
 
 class RequestExportTMXController extends KleinController {
 

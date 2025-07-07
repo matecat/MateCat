@@ -17,8 +17,8 @@ use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.

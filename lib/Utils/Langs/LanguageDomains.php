@@ -1,6 +1,6 @@
 <?php
 
-namespace Langs;
+namespace Utils\Langs;
 /*
    this class manages supported languages in the CAT tool
  */

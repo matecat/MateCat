@@ -2,6 +2,8 @@
 
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\DeepL;
 
 
 /**
@@ -28,11 +30,11 @@ class CreateTempInstanceTest extends AbstractTest {
 
         $this->engine_struct_param = new EngineStruct();
 
-        $this->engine_struct_param->type       = Constants_Engines::MT;
+        $this->engine_struct_param->type       = EngineConstants::MT;
         $this->engine_struct_param->class_load = "DeepL";
 
 
         $engine = Engine::createTempInstance( $this->engine_struct_param );
-        $this->assertTrue( $engine instanceof Engines_DeepL );
+        $this->assertTrue( $engine instanceof DeepL );
     }
 }

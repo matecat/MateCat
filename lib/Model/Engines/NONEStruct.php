@@ -2,6 +2,8 @@
 
 namespace Model\Engines;
 
+use Utils\Engines\NONE;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -22,7 +24,7 @@ class NONEStruct extends EngineStruct {
     public ?string $delete_relative_url          = "";
     public         $others                       = [];
     public         $extra_parameters             = [];
-    public ?string $class_load                   = 'NONE';
+    public ?string $class_load                   = None::class;
     public ?int    $google_api_compliant_version = null;
     public ?int    $penalty                      = 100;
     public ?bool   $active                       = false;

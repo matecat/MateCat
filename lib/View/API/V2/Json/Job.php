@@ -14,8 +14,6 @@ use CatUtils;
 use Constants;
 use Exception;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
-use Langs\LanguageDomains;
-use Langs\Languages;
 use ManageUtils;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -24,10 +22,12 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
-use OutsourceTo\OutsourceAvailable;
-use TmKeyManagement_ClientTmKeyStruct;
-use TmKeyManagement_Filter;
 use Utils;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\OutsourceTo\OutsourceAvailable;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
 use View\API\App\Json\OutsourceConfirmation;
 
 class Job {
@@ -48,7 +48,7 @@ class Job {
     protected bool $called_from_api = false;
 
     /**
-     * @var TmKeyManagement_ClientTmKeyStruct[]
+     * @var ClientTmKeyStruct[]
      */
     protected array $keyList = [];
 
@@ -93,9 +93,9 @@ class Job {
         }
 
         if ( !$this->called_from_api ) {
-            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, Filter::OWNER )[ 'job_keys' ];
         } else {
-            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
         }
 
         return ( new JobClientKeys( $out ) )->render();

@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -14,6 +13,7 @@ use Model\Jobs\ChunkDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use Utils\Constants\TranslationStatus;
 
 class SplitSegmentController extends KleinController {
 
@@ -42,7 +42,7 @@ class SplitSegmentController extends KleinController {
         $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );
         $translationStruct->target_chunk_lengths = [
                 'len'      => [ 0 ],
-                'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT )
+                'statuses' => array_fill( 0, $pieces, TranslationStatus::STATUS_DRAFT )
         ];
 
         $translationDao = new SplitDAO( Database::obtain() );

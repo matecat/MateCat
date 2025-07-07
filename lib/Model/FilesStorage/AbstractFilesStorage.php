@@ -83,12 +83,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *    'filename'  => PATHINFO_FILENAME
      * ]
      *
-     * @param     $path
-     * @param int $options
+     * @param string $path
+     * @param int    $options
      *
      * @return array|mixed
      */
-    public static function pathinfo_fix( $path, $options = 15 ) {
+    public static function pathinfo_fix( string $path, int $options = 15 ) {
         $rawPath = explode( DIRECTORY_SEPARATOR, $path );
 
         $basename = array_pop( $rawPath );
@@ -159,7 +159,6 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * // XXX use constructor parameters to define the cache dir and remove the condition
      * @return string
      */
     public static function getStorageCachePath(): string {
@@ -296,16 +295,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
 
             ftruncate( $fp, 0 );
-            rewind($fp); // Move the pointer to the beginning
+            rewind( $fp ); // Move the pointer to the beginning
 
             if ( !in_array( $realFileName, $content ) ) {
                 $content[] = $realFileName;
             }
 
             // remove empty lines
-            $content = array_filter($content, function ($filename){
-                return !empty($filename);
-            });
+            $content = array_filter( $content, function ( $filename ) {
+                return !empty( $filename );
+            } );
 
             $contentString = implode( "\n", $content ) . "\n";
 

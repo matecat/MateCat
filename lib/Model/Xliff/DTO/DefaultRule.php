@@ -2,9 +2,9 @@
 
 namespace Model\Xliff\DTO;
 
-use Constants\XliffTranslationStatus;
-use Constants_TranslationStatus;
 use LogicException;
+use Utils\Constants\TranslationStatus;
+use Utils\Constants\XliffTranslationStatus;
 
 class DefaultRule extends AbstractXliffRule {
 
@@ -32,7 +32,7 @@ class DefaultRule extends AbstractXliffRule {
         // default behavior
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) {
             if ( XliffTranslationStatus::isStateQualifierNew( $this->getStates( "state-qualifiers" )[ 0 ] ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
+                return TranslationStatus::STATUS_NEW;
             }
         }
 
@@ -42,25 +42,25 @@ class DefaultRule extends AbstractXliffRule {
             $state = $this->getStates( "states" )[ 0 ];
 
             if ( XliffTranslationStatus::isStatusNew( $state ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
+                return TranslationStatus::STATUS_NEW;
             }
 
             if ( XliffTranslationStatus::isTranslated( $state ) ) {
-                return Constants_TranslationStatus::STATUS_TRANSLATED;
+                return TranslationStatus::STATUS_TRANSLATED;
             }
 
             if ( XliffTranslationStatus::isRevision( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED;
+                return TranslationStatus::STATUS_APPROVED;
             }
 
             if ( XliffTranslationStatus::isFinalState( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED2;
+                return TranslationStatus::STATUS_APPROVED2;
             }
 
         }
 
         // retro-compatibility
-        return Constants_TranslationStatus::STATUS_APPROVED;
+        return TranslationStatus::STATUS_APPROVED;
 
     }
 

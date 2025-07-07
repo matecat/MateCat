@@ -4,6 +4,7 @@ use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Constants\EngineConstants;
 
 
 /**
@@ -73,7 +74,7 @@ class BuildQueryForEngineTest extends AbstractTest {
      */
     public function test__buildQueryForEngine_with_given_engine_struct_with_type_inizialized() {
 
-        $this->engine_struct->type = Constants_Engines::MT;
+        $this->engine_struct->type = EngineConstants::MT;
         $sql_query_result          = $this->method->invoke( $this->databaseInstance, $this->engine_struct );
         $sql_query_expected        = "SELECT * FROM engines WHERE type = 'MT'";
         $this->assertEquals( $sql_query_expected, $this->getRawQuery( $sql_query_result ) );

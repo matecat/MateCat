@@ -3,7 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -15,6 +14,7 @@ use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class SetCurrentSegmentController extends KleinController {
 
@@ -79,9 +79,9 @@ class SetCurrentSegmentController extends KleinController {
             if ( !$revision_number ) {
                 $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList );
             } else {
-                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, TranslationStatus::STATUS_TRANSLATED );
                 if ( !$nextSegmentId ) {
-                    $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+                    $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, TranslationStatus::STATUS_APPROVED );
                 }
             }
         }

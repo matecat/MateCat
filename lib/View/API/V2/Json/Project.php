@@ -9,7 +9,6 @@
 
 namespace View\API\V2\Json;
 
-use Constants_JobStatus;
 use Exception;
 use Model\Analysis\Status;
 use Model\Jobs\JobStruct;
@@ -19,6 +18,7 @@ use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Utils;
+use Utils\Constants\JobStatus;
 
 class Project {
 
@@ -160,8 +160,8 @@ class Project {
                 'project_slug'         => Utils::friendly_slug( $project->name ),
                 'jobs'                 => $jobJSONs,
                 'features'             => implode( ",", $featureSet->getCodes() ),
-                'is_cancelled'         => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
-                'is_archived'          => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
+                'is_cancelled'         => ( in_array( JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
+                'is_archived'          => ( in_array( JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
                 'remote_file_service'  => $project->getRemoteFileServiceName(),
                 'due_date'             => Utils::api_timestamp( $project->due_date ),
                 'project_info'         => ( null !== $projectInfo ) ? $projectInfo->value : null,

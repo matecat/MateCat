@@ -5,14 +5,12 @@ namespace Controller\API\App;
 use AMQHandler;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Email\CommentEmail;
-use Email\CommentMentionEmail;
-use Email\CommentResolveEmail;
 use INIT;
 use InvalidArgumentException;
 use Log;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -25,6 +23,9 @@ use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Utils;
+use Utils\Email\CommentEmail;
+use Utils\Email\CommentMentionEmail;
+use Utils\Email\CommentResolveEmail;
 use Utils\Url\JobUrlBuilder;
 
 class CommentController extends KleinController {
@@ -433,10 +434,10 @@ class CommentController extends KleinController {
     /**
      * @param $id_project
      *
-     * @return array|\Model\DataAccess\ShapelessConcreteStruct[]
+     * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    private function projectData( $id_project ) {
+    private function projectData( $id_project ): array {
         return ( new ProjectDao() )->setCacheTTL( 60 * 60 )->getProjectData( $id_project );
     }
 

@@ -9,17 +9,18 @@
 
 namespace Utils\AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct;
 use Engine;
 use Exception;
 use Model\Jobs\JobStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TmKeyManagement_TmKeyManagement;
+use Utils\Contribution\SetContributionRequest;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class SetContributionMTWorker extends SetContributionWorker {
 
     /**
-     * @param \Model\Jobs\JobStruct $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @throws EndQueueException
      * @see SetContributionWorker::_loadEngine
@@ -38,12 +39,12 @@ class SetContributionMTWorker extends SetContributionWorker {
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array                  $config
+     * @param SetContributionRequest $contributionStruct
      *
      * @throws Exception
      */
-    protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
+    protected function _set( array $config, SetContributionRequest $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
@@ -63,12 +64,13 @@ class SetContributionMTWorker extends SetContributionWorker {
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array                  $config
+     * @param SetContributionRequest $contributionStruct
+     * @param int                    $id_mt_engine
      *
-     * @throws Exception
+     * @throws ReQueueException
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 0 ) {
+    protected function _update( array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0 ) {
 
         $config[ 'segment' ]        = $contributionStruct->segment;
         $config[ 'translation' ]    = $contributionStruct->translation;
@@ -87,10 +89,10 @@ class SetContributionMTWorker extends SetContributionWorker {
 
     }
 
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, JobStruct $jobStruct ) {
+    protected function _extractAvailableKeysForUser( SetContributionRequest $contributionStruct, JobStruct $jobStruct ): array {
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );
+        $tm_keys = TmKeyManager::getOwnerKeys( [ $jobStruct->tm_keys ], 'w' );
 
         $config           = [];
         $config[ 'keys' ] = array_map( function ( $tm_key ) {

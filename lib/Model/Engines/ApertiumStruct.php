@@ -9,7 +9,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\Apertium;
 
 /**
  * Class Engine_ApertiumStruct
@@ -43,7 +43,7 @@ class ApertiumStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::APERTIUM;
+    public ?string $class_load = Apertium::class;
 
     /**
      * @var ?int

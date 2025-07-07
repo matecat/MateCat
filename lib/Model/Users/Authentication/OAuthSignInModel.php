@@ -5,7 +5,6 @@ namespace Model\Users\Authentication;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
-use Email\WelcomeEmail;
 use Exception;
 use FlashMessage;
 use Model\ConnectedServices\Oauth\OauthTokenEncryption;
@@ -16,6 +15,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Utils;
+use Utils\Email\WelcomeEmail;
 
 /**
  * Created by PhpStorm.

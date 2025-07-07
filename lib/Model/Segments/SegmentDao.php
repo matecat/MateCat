@@ -2,7 +2,6 @@
 
 namespace Model\Segments;
 
-use Constants_TranslationStatus;
 use Exception;
 use Log;
 use Model\DataAccess\AbstractDao;
@@ -15,6 +14,7 @@ use Model\QualityReport\QualityReportSegmentStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class SegmentDao extends AbstractDao {
     const TABLE = 'segments';
@@ -187,9 +187,9 @@ class SegmentDao extends AbstractDao {
         $options_join_query        = "";
         $options_conditions_values = [];
         $statuses                  = array_merge(
-                Constants_TranslationStatus::$INITIAL_STATUSES,
-                Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                Constants_TranslationStatus::$REVISION_STATUSES
+                TranslationStatus::$INITIAL_STATUSES,
+                TranslationStatus::$TRANSLATION_STATUSES,
+                TranslationStatus::$REVISION_STATUSES
         );
 
         //
@@ -708,9 +708,9 @@ class SegmentDao extends AbstractDao {
 
         return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'        => $job->id,
-                'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
-                'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
-                'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                'st_approved'   => TranslationStatus::STATUS_APPROVED,
+                'st_approved2'  => TranslationStatus::STATUS_APPROVED2,
+                'st_translated' => TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
 
@@ -755,9 +755,9 @@ class SegmentDao extends AbstractDao {
                             'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
                             'job_last_segment'  => end( $jStructs )->job_last_segment,
                             'job_password'      => $currentJob->password,
-                            'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
-                            'st_approved2'      => Constants_TranslationStatus::STATUS_APPROVED2,
-                            'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
+                            'st_approved'       => TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'      => TranslationStatus::STATUS_APPROVED2,
+                            'st_translated'     => TranslationStatus::STATUS_TRANSLATED,
                             'id_job'            => $jStructs[ 0 ]->id,
                             'id_segment'        => $sid
                     ]
@@ -785,9 +785,9 @@ class SegmentDao extends AbstractDao {
             $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
             $list = $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                             'id_job'        => $currentJob->id,
-                            'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
-                            'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
-                            'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                            'st_approved'   => TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'  => TranslationStatus::STATUS_APPROVED2,
+                            'st_translated' => TranslationStatus::STATUS_TRANSLATED,
                     ]
             );
 
@@ -872,14 +872,14 @@ class SegmentDao extends AbstractDao {
 
         if ( !$getTranslatedInstead ) {
             $translationStatus = " ( st.status IN (
-                '" . Constants_TranslationStatus::STATUS_NEW . "',
-                '" . Constants_TranslationStatus::STATUS_DRAFT . "',
-                '" . Constants_TranslationStatus::STATUS_REJECTED . "'
+                '" . TranslationStatus::STATUS_NEW . "',
+                '" . TranslationStatus::STATUS_DRAFT . "',
+                '" . TranslationStatus::STATUS_REJECTED . "'
             ) OR st.status IS NULL )"; //status NULL isn't possible
         } else {
             $translationStatus = " st.status IN(
-            '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
-            '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+            '" . TranslationStatus::STATUS_TRANSLATED . "',
+            '" . TranslationStatus::STATUS_APPROVED . "'
         )";
         }
 

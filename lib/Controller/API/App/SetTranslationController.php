@@ -3,12 +3,6 @@
 namespace Controller\API\App;
 
 use CatUtils;
-use Constants_Engines;
-use Constants_JobStatus;
-use Constants_ProjectStatus;
-use Constants_TranslationStatus;
-use Contribution\ContributionSetStruct;
-use Contribution\Set;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -41,10 +35,16 @@ use Model\WordCount\WordCountStruct;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Utils;
+use Utils\Constants\EngineConstants;
+use Utils\Constants\JobStatus;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
+use Utils\Contribution\Set;
+use Utils\Contribution\SetContributionRequest;
 use Utils\LQA\QA;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 
@@ -176,14 +176,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
                     $project = $this->data[ 'project' ];
                     // case 1. is MT
                     $new_translation->suggestion_match  = $project->getMetadataValue( MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
-                    $new_translation->suggestion_source = Constants_Engines::MT;
+                    $new_translation->suggestion_source = EngineConstants::MT;
                 } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
                     $new_translation->suggestion_source = 'NO_MATCH';
                 } else {
                     // case 3. otherwise is TM
                     $new_translation->suggestion_match  = (int)$old_suggestion->match; // cast '71%' to int 71
-                    $new_translation->suggestion_source = Constants_Engines::TM;
+                    $new_translation->suggestion_source = EngineConstants::TM;
                 }
             }
 
@@ -213,9 +213,9 @@ class SetTranslationController extends AbstractStatefulKleinController {
              * must be removed
              */
             if ( $new_translation->translation != $old_translation->translation or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED2
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_TRANSLATED or
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_APPROVED or
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_APPROVED2
             ) {
                 $new_translation->autopropagated_from = null;
             }
@@ -241,10 +241,10 @@ class SetTranslationController extends AbstractStatefulKleinController {
             ];
 
             if ( $this->data[ 'propagate' ] && in_array( $this->data[ 'status' ], [
-                            Constants_TranslationStatus::STATUS_TRANSLATED,
-                            Constants_TranslationStatus::STATUS_APPROVED,
-                            Constants_TranslationStatus::STATUS_APPROVED2,
-                            Constants_TranslationStatus::STATUS_REJECTED
+                            TranslationStatus::STATUS_TRANSLATED,
+                            TranslationStatus::STATUS_APPROVED,
+                            TranslationStatus::STATUS_APPROVED2,
+                            TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
                 //propagate translations
@@ -305,8 +305,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $job_stats                        = CatUtils::getFastStatsForJob( $newTotals );
             $job_stats[ 'analysis_complete' ] = (
-                    $this->data[ 'project' ][ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE or
-                    $this->data[ 'project' ][ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+                    $this->data[ 'project' ][ 'status_analysis' ] == ProjectStatus::STATUS_DONE or
+                    $this->data[ 'project' ][ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE
             );
 
             $file_stats = [];
@@ -441,7 +441,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $this->chunk = $chunk;
 
         //add check for job status archived.
-        if ( strtolower( $chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( strtolower( $chunk[ 'status' ] ) == JobStatus::STATUS_ARCHIVED ) {
             throw new NotFoundException( "Job archived", -3 );
         }
 
@@ -506,7 +506,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             // we take the status for the entire segment
             $this->data[ 'status' ] = $this->data[ 'split_statuses' ][ 0 ];
         } else {
-            $this->data[ 'status' ] = Constants_TranslationStatus::STATUS_DRAFT;
+            $this->data[ 'status' ] = TranslationStatus::STATUS_DRAFT;
         }
     }
 
@@ -553,13 +553,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
      */
     private function checkStatus( $status ): void {
         switch ( $status ) {
-            case Constants_TranslationStatus::STATUS_TRANSLATED:
-            case Constants_TranslationStatus::STATUS_APPROVED:
-            case Constants_TranslationStatus::STATUS_APPROVED2:
-            case Constants_TranslationStatus::STATUS_REJECTED:
-            case Constants_TranslationStatus::STATUS_DRAFT:
-            case Constants_TranslationStatus::STATUS_NEW:
-            case Constants_TranslationStatus::STATUS_FIXED:
+            case TranslationStatus::STATUS_TRANSLATED:
+            case TranslationStatus::STATUS_APPROVED:
+            case TranslationStatus::STATUS_APPROVED2:
+            case TranslationStatus::STATUS_REJECTED:
+            case TranslationStatus::STATUS_DRAFT:
+            case TranslationStatus::STATUS_NEW:
+            case TranslationStatus::STATUS_FIXED:
                 break;
 
             default:
@@ -616,7 +616,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $translation             = new SegmentTranslationStruct();
             $translation->id_segment = (int)$this->data[ 'id_segment' ];
             $translation->id_job     = (int)$this->data[ 'id_job' ];
-            $translation->status     = Constants_TranslationStatus::STATUS_NEW;
+            $translation->status     = TranslationStatus::STATUS_NEW;
 
             $translation->segment_hash        = $this->data[ 'segment' ][ 'segment_hash' ];
             $translation->translation         = $this->data[ 'segment' ][ 'segment' ];
@@ -667,9 +667,9 @@ class SetTranslationController extends AbstractStatefulKleinController {
         }
 
         $allowedStatuses = [
-                Constants_TranslationStatus::STATUS_NEW,
-                Constants_TranslationStatus::STATUS_DRAFT,
-                Constants_TranslationStatus::STATUS_TRANSLATED,
+                TranslationStatus::STATUS_NEW,
+                TranslationStatus::STATUS_DRAFT,
+                TranslationStatus::STATUS_TRANSLATED,
         ];
 
         if ( !in_array( $new_translation->status, $allowedStatuses ) ) {
@@ -788,8 +788,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
      */
     private function evalSetContribution( $_Translation, $old_translation ): void {
         if ( in_array( $this->data[ 'status' ], [
-                Constants_TranslationStatus::STATUS_DRAFT,
-                Constants_TranslationStatus::STATUS_NEW
+                TranslationStatus::STATUS_DRAFT,
+                TranslationStatus::STATUS_NEW
         ] ) ) {
             return;
         }
@@ -800,7 +800,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         /**
          * Set the new contribution in the queue
          */
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = $this->isRevision();
         $contributionStruct->id_file              = $filesParts->id_file ?? null;
         $contributionStruct->id_job               = $this->data[ 'id_job' ];

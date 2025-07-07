@@ -10,8 +10,8 @@ use Exception;
 use Log;
 use LogicException;
 use Model\Outsource\ConfirmationStruct;
-use Shop_Cart;
 use SimpleJWT;
+use Utils\Shop\Cart;
 
 /**
  * Class AbstractController
@@ -66,9 +66,9 @@ abstract class AbstractController extends BaseKleinViewController {
     protected $data_key_content;
 
     /**
-     * @var Shop_Cart
+     * @var \Utils\Shop\Cart
      */
-    protected Shop_Cart $shop_cart;
+    protected Cart $shop_cart;
 
     /**
      * @var int|null
@@ -128,7 +128,7 @@ abstract class AbstractController extends BaseKleinViewController {
      */
     public function renderView() {
 
-        $this->shop_cart = Shop_Cart::getInstance( 'outsource_to_external' );
+        $this->shop_cart = Cart::getInstance( 'outsource_to_external' );
 
         if ( !$this->shop_cart->countItems() ) {
             /**

@@ -76,7 +76,7 @@ H;
         $mmtClient = @$this->getMockBuilder( '\Engines\MMT\MMTServiceApi' )->disableOriginalConstructor()->getMock();
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
-        $mmtEngine = @$this->getMockBuilder( '\Engines_MMT' )
+        $mmtEngine = @$this->getMockBuilder( '\Utils\Engines\MMT' )
                 ->setConstructorArgs( [ new EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 

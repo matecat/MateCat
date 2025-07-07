@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Klein\Response;
 use Model\ConnectedServices\GDrive\Session;
 use Model\Database;
-use TMS\TMSService;
+use Utils\TMS\TMSService;
 
 class AjaxUtilsController extends KleinController {
 

@@ -4,11 +4,14 @@ use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::fastAnalysis
+ * @covers MyMemory::fastAnalysis
  * User: dinies
  * Date: 21/05/16
  * Time: 12.26
@@ -17,7 +20,7 @@ class FastAnalysisTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::fastAnalysis
+     * @covers MyMemory::fastAnalysis
      */
     public function test_fastAnalysis_general_check() {
         $segment_third_position  = <<<'Z'
@@ -70,13 +73,13 @@ Z;
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
         $result          = $engine_MyMemory->fastAnalysis( $array_paramemeter );
 
         /**
          * general check of the result object structure
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_AnalyzeResponse );
+        $this->assertTrue( $result instanceof AnalyzeResponse );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
         $this->assertTrue( property_exists( $result, 'responseData' ) );
@@ -86,7 +89,7 @@ Z;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::fastAnalysis
+     * @covers MyMemory::fastAnalysis
      */
     public function test_fastAnalysis_specific_check() {
         $segment_third_position  = <<<'Z'
@@ -139,13 +142,13 @@ Z;
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
         $result          = $engine_MyMemory->fastAnalysis( $array_paramemeter );
 
         /**
          * Specific check of the result object structure
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_AnalyzeResponse );
+        $this->assertTrue( $result instanceof AnalyzeResponse );
 
         $this->assertEquals( 200, $result->responseStatus );
         $this->assertEquals( "OK", $result->responseDetails );
@@ -232,11 +235,11 @@ Z;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::fastAnalysis
+     * @covers MyMemory::fastAnalysis
      */
     public function test_fastAnalysis_with_no_array_as_param_for_coverage_purpose() {
 
-        $array_paramemeter = "bar_and_foo";
+        $array_paramemeter = [ "bar_and_foo" ];
 
 
         $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
@@ -249,14 +252,14 @@ Z;
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
         $this->assertNull( $engine_MyMemory->fastAnalysis( $array_paramemeter ) );
     }
 
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::fastAnalysis
+     * @covers MyMemory::fastAnalysis
      */
     public function test_fastAnalysis_with_error_from_mocked__call_for_coverage_purpose() {
         $segment_third_position  = <<<'Z'
@@ -331,9 +334,9 @@ Z;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
         $result = $engine_MyMemory->fastAnalysis( $array_paramemeter );
@@ -341,11 +344,11 @@ Z;
         /**
          * general check of the result object structure
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_AnalyzeResponse );
+        $this->assertTrue( $result instanceof AnalyzeResponse );
         $this->assertEquals( 0, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
         $this->assertEquals( "", $result->responseData );
-        $this->assertTrue( $result->error instanceof Engines_Results_ErrorMatches );
+        $this->assertTrue( $result->error instanceof ErrorResponse );
 
         $this->assertEquals( -6, $result->error->code );
         $this->assertEquals( "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message );

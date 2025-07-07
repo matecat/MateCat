@@ -14,9 +14,9 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Segments\SegmentDao;
 use Model\Translations\WarningDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
 use Utils\LQA\QA;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use View\API\V2\Json\QAGlobalWarning;
 use View\API\V2\Json\QALocalWarning;
 

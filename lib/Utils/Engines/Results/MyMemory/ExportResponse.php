@@ -1,12 +1,16 @@
 <?php
 
+namespace Utils\Engines\Results\MyMemory;
+
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 03/03/15
  * Time: 12.33
  */
-class Engines_Results_MyMemory_ExportResponse extends Engines_Results_AbstractResponse {
+class ExportResponse extends TMSAbstractResponse {
 
     public $id;
     public $resourceLink;

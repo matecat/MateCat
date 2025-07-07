@@ -3,18 +3,18 @@
 namespace Controller\Views;
 
 use CatUtils;
-use Constants_TranslationStatus;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use Langs\Languages;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Jobs\JobDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Utils;
+use Utils\Constants\TranslationStatus;
+use Utils\Langs\Languages;
 
 /**
  *
@@ -108,9 +108,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
      */
     private function searchableStatuses(): array {
         $statuses = array_merge(
-                Constants_TranslationStatus::$INITIAL_STATUSES,
-                Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                Constants_TranslationStatus::$REVISION_STATUSES
+                TranslationStatus::$INITIAL_STATUSES,
+                TranslationStatus::$TRANSLATION_STATUSES,
+                TranslationStatus::$REVISION_STATUSES
         );
 
         return array_map( function ( $item ) {

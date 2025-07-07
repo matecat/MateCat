@@ -5,7 +5,6 @@ namespace Model\Projects;
 use DateTime;
 use Engine;
 use Exception;
-use Langs\Languages;
 use Model\DataAccess\AbstractDao;
 use Model\Database;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -22,8 +21,9 @@ use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
 use ReflectionException;
 use stdClass;
-use TmKeyManagement_TmKeyStruct;
 use Utils;
+use Utils\Langs\Languages;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -272,7 +272,7 @@ class ProjectTemplateDao extends AbstractDao {
                 $keyRing = $mkDao->read(
                         ( new MemoryKeyStruct( [
                                 'uid'    => $projectTemplateStruct->uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey->key )
+                                'tm_key' => new TmKeyStruct( $tmKey->key )
                         ] )
                         )
                 );

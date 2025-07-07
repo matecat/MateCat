@@ -14,9 +14,9 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class DeleteContributionController extends KleinController {
 
@@ -67,11 +67,11 @@ class DeleteContributionController extends KleinController {
 
         //get job's TM keys
         try {
-            $userRole = ( $this->isRevision() ) ? TmKeyManagement_Filter::ROLE_REVISOR : TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = ( $this->isRevision() ) ? Filter::ROLE_REVISOR : Filter::ROLE_TRANSLATOR;
 
             //get TM keys with read grants
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $userRole );
-            $tm_keys = TmKeyManagement_TmKeyManagement::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
+            $tm_keys = TmKeyManager::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $userRole );
+            $tm_keys = TmKeyManager::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
 
         } catch ( Exception $e ) {
             throw new NotFoundException( "Cannot retrieve TM keys info.", -11, $e );
@@ -81,7 +81,7 @@ class DeleteContributionController extends KleinController {
         $set_code = [];
 
         /**
-         * @var $tm_key TmKeyManagement_TmKeyStruct
+         * @var $tm_key TmKeyStruct
          */
 
         //if there's no key

@@ -14,7 +14,7 @@ class CSV {
      * @return false|string
      * @throws Exception
      */
-    public static function extract( $file, $prefix = '' ) {
+    public static function extract( stdClass $file, string $prefix = '' ) {
         if ( !isset( $file->file_path ) ) {
             return false;
         }
@@ -52,7 +52,7 @@ class CSV {
      *
      * @return array
      */
-    public static function parseToArray( $filepath, $delimiter = ',' ) {
+    public static function parseToArray( string $filepath, string $delimiter = ',' ): array {
 
         $output = [];
 
@@ -67,17 +67,13 @@ class CSV {
     }
 
     /**
-     * @param        $filepath
+     * @param string $filepath
      * @param string $delimiter
      *
      * @return string|null
      */
-    public static function withoutHeaders( $filepath, $delimiter = ',' ) {
+    public static function withoutHeaders( string $filepath, string $delimiter = ',' ): string {
         $csv = self::parseToArray( $filepath );
-
-        if ( !is_array( $csv ) ) {
-            return null;
-        }
 
         unset( $csv[ 0 ] );
 
@@ -96,7 +92,7 @@ class CSV {
      *
      * @return bool
      */
-    public static function save( $filepath, array $data = [] ) {
+    public static function save( string $filepath, array $data = [] ): bool {
         File::create( $filepath );
 
         $fp = fopen( $filepath, 'w' );

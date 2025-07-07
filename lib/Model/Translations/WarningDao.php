@@ -3,12 +3,12 @@
 
 namespace Model\Translations;
 
-use Constants_TranslationStatus;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Jobs\JobStruct;
 use Model\Jobs\WarningsCountStruct;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class WarningDao extends AbstractDao {
 
@@ -26,8 +26,8 @@ class WarningDao extends AbstractDao {
      */
     public function getWarningsByProjectIds( $projectIds ): array {
 
-        $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
+        $statuses[] = TranslationStatus::STATUS_TRANSLATED;
+        $statuses[] = TranslationStatus::STATUS_APPROVED;
 
         $arrayCount   = count( $projectIds );
         $rowCount     = ( $arrayCount ? $arrayCount - 1 : 0 );
@@ -69,7 +69,7 @@ class WarningDao extends AbstractDao {
                 'id'       => $chunk->id,
                 'password' => $chunk->password,
                 'level'    => WarningModel::ERROR,
-                'status'   => Constants_TranslationStatus::STATUS_NEW
+                'status'   => TranslationStatus::STATUS_NEW
         ] );
 
         $result = $stmt->fetch();
@@ -106,7 +106,7 @@ class WarningDao extends AbstractDao {
         return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $jid,
                 'password'       => $jpassword,
-                'segment_status' => Constants_TranslationStatus::STATUS_NEW
+                'segment_status' => TranslationStatus::STATUS_NEW
         ] );
 
     }

@@ -3,13 +3,13 @@
 namespace Model\Translations;
 
 use ArrayAccess;
-use Constants_TranslationStatus;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
+use Utils\Constants\TranslationStatus;
 
 class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
@@ -40,7 +40,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     public ?int    $version_number         = 0; // this value should be not null
 
     public function isReviewedStatus(): bool {
-        return in_array( $this->status, Constants_TranslationStatus::$REVISION_STATUSES );
+        return in_array( $this->status, TranslationStatus::$REVISION_STATUSES );
     }
 
     public function isICE(): bool {
@@ -56,7 +56,7 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
     }
 
     public function isRejected(): bool {
-        return $this->status == Constants_TranslationStatus::STATUS_REJECTED;
+        return $this->status == TranslationStatus::STATUS_REJECTED;
     }
 
     public function isTranslationStatus(): bool {

@@ -9,6 +9,7 @@
  */
 
 use TestHelpers\AbstractTest;
+use Utils\ServerCheck\ServerCheck;
 
 
 /**
@@ -21,17 +22,6 @@ class ServerCheckTest extends AbstractTest {
         $servCheck2 = ServerCheck::getInstance();
         $this->assertEquals( spl_object_hash( $servCheck ), spl_object_hash( $servCheck2 ) );
     }
-
-    public function testServerParams() {
-        $servCheck = ServerCheck::getInstance();
-        $this->assertInstanceOf( 'ServerCheck', $servCheck );
-        $params = $servCheck->getAllServerParams();
-
-        $this->assertNotEmpty( $params );
-        $this->assertNotEmpty( $params->getUpload() );
-
-    }
-
 
     public function testUploadParams() {
 
@@ -53,20 +43,9 @@ class ServerCheckTest extends AbstractTest {
 
         $servCheck = ServerCheck::getInstance();
 
-        $allServerParams = $servCheck->getAllServerParams();
         $upload          = $servCheck->getUploadParams();
-        $mysql_params    = $servCheck->getMysqlParams();
 
-        $this->assertEquals( $servCheck->getUploadParams(), $allServerParams->getUpload() );
-        $this->assertEquals( $upload, $allServerParams->getUpload() );
-
-        $this->assertNotEquals( spl_object_hash( $upload ), $allServerParams->getUpload() );
         $this->assertNotEquals( spl_object_hash( $upload ), $servCheck->getUploadParams() );
-
-        $this->expectException( 'DomainException' );
-        $allServerParams->field_test_not_existent = "kkk";
-        $this->expectException( 'Exception' );
-        echo $allServerParams->field_test_not_existent;
 
 
         $this->expectException( 'DomainException' );
@@ -74,21 +53,7 @@ class ServerCheckTest extends AbstractTest {
         $this->expectException( 'Exception' );
         echo $upload->field_test_not_existent;
 
-
-        $this->expectException( 'DomainException' );
-        $mysql_params->field_test_not_existent = "kkk";
-        $this->expectException( 'Exception' );
-        echo $mysql_params->field_test_not_existent;
-
     }
 
-    public function testMysql() {
-
-        $servCheck    = ServerCheck::getInstance();
-        $mysql_params = $servCheck->getMysqlParams();
-
-        $this->assertInstanceOf( 'ServerCheck_mysqlParams', $mysql_params );
-
-    }
 
 }

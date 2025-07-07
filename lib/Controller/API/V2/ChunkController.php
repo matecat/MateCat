@@ -8,7 +8,6 @@
 
 namespace Controller\API\V2;
 
-use Constants_JobStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -21,6 +20,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Utils;
+use Utils\Constants\JobStatus;
 use View\API\V2\Json\Chunk;
 
 class ChunkController extends KleinController {
@@ -71,7 +71,7 @@ class ChunkController extends KleinController {
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
+        $this->changeStatus( JobStatus::STATUS_DELETED );
     }
 
     /**
@@ -80,7 +80,7 @@ class ChunkController extends KleinController {
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( JobStatus::STATUS_CANCELLED );
     }
 
     /**
@@ -89,7 +89,7 @@ class ChunkController extends KleinController {
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( JobStatus::STATUS_ARCHIVED );
     }
 
     /**
@@ -98,7 +98,7 @@ class ChunkController extends KleinController {
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( JobStatus::STATUS_ACTIVE );
     }
 
     /**

@@ -18,8 +18,8 @@ use Model\Exceptions\ValidationError;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 
 class FileInfoController extends KleinController {

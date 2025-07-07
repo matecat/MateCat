@@ -1,6 +1,18 @@
 <?php
 
+namespace Utils\Constants;
+
+use Utils\Engines\Altlang;
+use Utils\Engines\Apertium;
+use Utils\Engines\DeepL;
+use Utils\Engines\GoogleTranslate;
+use Utils\Engines\Intento;
 use Utils\Engines\Lara;
+use Utils\Engines\MicrosoftHub;
+use Utils\Engines\MMT;
+use Utils\Engines\MyMemory;
+use Utils\Engines\SmartMATE;
+use Utils\Engines\YandexTranslate;
 
 /**
  * Created by PhpStorm.
@@ -8,7 +20,7 @@ use Utils\Engines\Lara;
  * Date: 23/02/15
  * Time: 15.08
  */
-class Constants_Engines {
+class EngineConstants {
 
     const MT   = "MT";
     const TM   = "TM";
@@ -26,24 +38,24 @@ class Constants_Engines {
     const GOOGLE_TRANSLATE = 'GoogleTranslate';
     const INTENTO          = 'Intento';
 
-    protected static $ENGINES_LIST = [
-            self::MY_MEMORY        => self::MY_MEMORY,
-            self::MICROSOFT_HUB    => self::MICROSOFT_HUB,
-            self::APERTIUM         => self::APERTIUM,
-            self::ALTLANG          => self::ALTLANG,
-            self::SMART_MATE       => self::SMART_MATE,
-            self::YANDEX_TRANSLATE => self::YANDEX_TRANSLATE,
-            self::GOOGLE_TRANSLATE => self::GOOGLE_TRANSLATE,
-            self::INTENTO          => self::INTENTO,
-            self::MMT              => self::MMT,
-            self::DEEPL            => self::DEEPL,
+    protected static array $ENGINES_LIST = [
+            MyMemory::class        => MyMemory::class,
+            MicrosoftHub::class    => MicrosoftHub::class,
+            Apertium::class        => Apertium::class,
+            Altlang::class         => Altlang::class,
+            SmartMATE::class       => SmartMATE::class,
+            YandexTranslate::class => YandexTranslate::class,
+            GoogleTranslate::class => GoogleTranslate::class,
+            Intento::class         => Intento::class,
+            MMT::class             => MMT::class,
+            DeepL::class           => DeepL::class,
             Lara::class            => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
     ];
 
     /**
      * @return array
      */
-    public static function getAvailableEnginesList() {
+    public static function getAvailableEnginesList(): array {
         return self::$ENGINES_LIST;
     }
 

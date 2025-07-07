@@ -11,9 +11,6 @@ namespace Model\Translators;
 
 
 use Controller\Abstracts\KleinController;
-use Email\SendToTranslatorForDeliveryChangeEmail;
-use Email\SendToTranslatorForJobSplitEmail;
-use Email\SendToTranslatorForNewJobEmail;
 use Exception;
 use InvalidArgumentException;
 use Model\FeaturesBase\FeatureSet;
@@ -27,6 +24,9 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Utils;
+use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
+use Utils\Email\SendToTranslatorForJobSplitEmail;
+use Utils\Email\SendToTranslatorForNewJobEmail;
 
 class TranslatorsModel {
 

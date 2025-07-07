@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 use AMQHandler;
 use Exception;
@@ -17,9 +17,9 @@ use PDOException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Message;
-use TaskRunner\Exceptions\EmptyElementException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\TaskRunner\Exceptions\EmptyElementException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Class AbstractWorker

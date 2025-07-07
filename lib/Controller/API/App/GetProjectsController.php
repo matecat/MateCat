@@ -2,8 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants_JobStatus;
-use Constants_Teams;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -15,6 +13,8 @@ use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Utils\Constants\Teams;
+use Utils\Constants\JobStatus;
 
 class GetProjectsController extends KleinController {
 
@@ -46,7 +46,7 @@ class GetProjectsController extends KleinController {
 
         $team = $this->filterTeam( $id_team );
 
-        if ( $team->type == Constants_Teams::PERSONAL ) {
+        if ( $team->type == Teams::PERSONAL ) {
             $assignee = $this->user;
             $team     = null;
         } else {
@@ -106,7 +106,7 @@ class GetProjectsController extends KleinController {
         $id_assignee     = filter_var( $this->request->param( 'id_assignee' ), FILTER_SANITIZE_NUMBER_INT );
         $no_assignee     = filter_var( $this->request->param( 'no_assignee' ), FILTER_VALIDATE_BOOLEAN );
 
-        $search_status = ( !empty( $status ) and Constants_JobStatus::isAllowedStatus( $status ) ) ? $status : Constants_JobStatus::STATUS_ACTIVE;
+        $search_status = ( !empty( $status ) and JobStatus::isAllowedStatus( $status ) ) ? $status : JobStatus::STATUS_ACTIVE;
         $page          = ( !empty( $page ) ) ? (int)$page : 1;
         $step          = ( !empty( $step ) ) ? (int)$step : 10;
         $start         = ( $page - 1 ) * $step;

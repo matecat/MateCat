@@ -3,19 +3,15 @@
 namespace Controller\API\App;
 
 use Constants;
-use Constants_ProjectStatus;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use CookieManager;
 use Engine;
-use Engines_DeepL;
-use Engines_MMT;
 use Exception;
 use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
-use Langs\Languages;
 use Model\ConnectedServices\GDrive\Session;
 use Model\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -29,10 +25,14 @@ use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use ProjectManager;
-use ProjectQueue\Queue;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
 use Utils;
+use Utils\Constants\ProjectStatus;
+use Utils\Engines\DeepL;
+use Utils\Engines\MMT;
+use Utils\Langs\Languages;
+use Utils\ProjectQueue\Queue;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 use Validator\Contracts\ValidatorObject;
 use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
@@ -115,7 +115,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
-        $projectStructure[ 'status' ]                                = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
         $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
         $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
@@ -141,16 +141,16 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
-        if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
+        if ( $engine instanceof MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
         }
 
         // DeepL
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_formality' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $this->data[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $this->data[ 'deepl_id_glossary' ];
         }
 
@@ -363,9 +363,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @return array
      */
     private static function sanitizeTmKeyArr( $elem ): array {
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }

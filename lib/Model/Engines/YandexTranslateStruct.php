@@ -2,7 +2,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\YandexTranslate;
 
 /**
  * Class Engine_YandexTranslateStruct
@@ -37,7 +37,7 @@ class YandexTranslateStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::YANDEX_TRANSLATE;
+    public ?string $class_load = YandexTranslate::class;
 
 
     /**

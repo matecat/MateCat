@@ -1,13 +1,14 @@
 <?php
 
 use TestHelpers\AbstractTest;
+use Utils\Engines\Results\MyMemory\Matches;
 
 class MatchesTest extends AbstractTest {
 
 
     public function test_empty_constructor()
     {
-        $match = new Engines_Results_MyMemory_Matches([]);
+        $match = new Matches([]);
 
         $this->assertEquals($match->id, "0");
         $this->assertEquals($match->create_date, "1970-01-01 00:00:00");
@@ -20,7 +21,7 @@ class MatchesTest extends AbstractTest {
     {
         $createDate = date( "Y-m-d" );
 
-        $match = new Engines_Results_MyMemory_Matches([
+        $match = new Matches([
             'id' => '234',
             'source' => 'en-US',
             'target' => 'it-IT',
@@ -45,7 +46,7 @@ class MatchesTest extends AbstractTest {
 
     public function test_tms_constructor()
     {
-        $match = new Engines_Results_MyMemory_Matches([
+        $match = new Matches([
             'id' => '123134123',
             'raw_segment' => 'This is a sample page for Demo purposes.',
             'raw_translation' =>  'Ceci est un exemple de page à des fins de démonstration',
@@ -93,7 +94,7 @@ class MatchesTest extends AbstractTest {
     {
         $createDate = date( "Y-m-d" );
 
-        $match = new Engines_Results_MyMemory_Matches([
+        $match = new Matches([
             'id' => '234',
             'source' => 'en-US',
             'target' => 'it-IT',

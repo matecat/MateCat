@@ -12,9 +12,9 @@ use Exception;
 use Log;
 use Model\Database;
 use Model\Users\UserStruct;
-use TmKeyManagement_ClientTmKeyStruct;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyStruct;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class UserKeysModel {
 
@@ -24,7 +24,7 @@ class UserKeysModel {
 
     protected string $userRole;
 
-    public function __construct( UserStruct $user, string $role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
+    public function __construct( UserStruct $user, string $role = Filter::ROLE_TRANSLATOR ) {
         $this->user     = $user;
         $this->userRole = $role;
     }
@@ -60,14 +60,14 @@ class UserKeysModel {
         foreach ( $keyList as $_j => $key ) {
 
             /**
-             * @var $_client_tm_key TmKeyManagement_TmKeyStruct
+             * @var $_client_tm_key \Utils\TmKeyManagement\TmKeyStruct
              */
 
             //create a reverse lookup
             $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
             $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
 
-            $this->_user_keys[ 'totals' ][ $_j ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
+            $this->_user_keys[ 'totals' ][ $_j ] = new ClientTmKeyStruct( $key->tm_key );
 
         }
 
@@ -84,7 +84,7 @@ class UserKeysModel {
          */
         foreach ( $job_keyList as $jobKey ) {
 
-            $jobKey                  = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+            $jobKey                  = new ClientTmKeyStruct( $jobKey );
             $jobKey->complete_format = true;
 
             if ( !is_null( $this->user->uid ) && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ) {
@@ -98,19 +98,19 @@ class UserKeysModel {
 
                     //I FOUND A KEY IN THE JOB THAT IS PRESENT IN MY KEYRING
                     //i'm owner?? and the key is an owner type key?
-                    if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
-                        $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
-                        $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
+                    if ( !$jobKey->owner && $this->userRole != Filter::OWNER ) {
+                        $jobKey->r = $jobKey->{Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
+                        $jobKey->w = $jobKey->{Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
                         $jobKey    = $jobKey->hideKey( $this->user->uid );
                     } else {
-                        if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
+                        if ( $jobKey->owner && $this->userRole != Filter::OWNER ) {
                             // I'm not the job owner, but i know the key because it is in my keyring
                             // so, i can upload and download TMX, but i don't want it to be removed from job
                             // in tm.html relaxed the control to "key.edit" to enable buttons
                             // $jobKey = $jobKey->hideKey( $uid ); // enable editing
 
                         } else {
-                            if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
+                            if ( $jobKey->owner && $this->userRole == Filter::OWNER ) {
                                 //do Nothing
                             }
                         }

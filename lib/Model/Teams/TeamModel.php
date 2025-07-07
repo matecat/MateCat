@@ -2,13 +2,18 @@
 
 namespace Model\Teams;
 
-use Constants_Teams;
-use Email\InvitedToTeamEmail;
-use Email\MembershipCreatedEmail;
-use Email\MembershipDeletedEmail;
+use DomainException;
+use Exception;
+use InvalidArgumentException;
 use Model\Database;
 use Model\Projects\ProjectDao;
 use Model\Users\UserStruct;
+use RedisHandler;
+use ReflectionException;
+use Utils\Constants\Teams;
+use Utils\Email\InvitedToTeamEmail;
+use Utils\Email\MembershipCreatedEmail;
+use Utils\Email\MembershipDeletedEmail;
 
 class TeamModel {
 
@@ -38,8 +43,6 @@ class TeamModel {
      * @var UserStruct[]
      */
     protected array $removed_users = [];
-
-    protected $emails_to_invite;
 
     /**
      * @var MembershipStruct[]
@@ -73,8 +76,9 @@ class TeamModel {
      *
      * @return MembershipStruct[] the full list of members after the update.
      * @throws ReflectionException
+     * @throws Exception
      */
-    public function updateMembers() {
+    public function updateMembers(): array {
         $this->removed_users = [];
 
         Database::obtain()->begin();
@@ -134,7 +138,11 @@ class TeamModel {
         return $this->all_memberships;
     }
 
-    public function create() {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function create(): TeamStruct {
         if ( !$this->user ) {
             throw new Exception( 'User is not set' );
         }
@@ -160,8 +168,11 @@ class TeamModel {
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _setPendingStatuses() {
-        $redis = ( new \RedisHandler() )->getConnection();
+        $redis = ( new RedisHandler() )->getConnection();
         foreach ( $this->_getInvitedEmails() as $email ) {
             $pendingInvitation = new PendingInvitations( $redis, [
                     'team_id' => $this->struct->id,
@@ -212,25 +223,31 @@ class TeamModel {
 
 
     protected function _checkType() {
-        if ( !Constants_Teams::isAllowedType( $this->struct->type ) ) {
+        if ( !Teams::isAllowedType( $this->struct->type ) ) {
             throw new InvalidArgumentException( "Invalid Team Type" );
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _checkPersonalUnique() {
         $dao = new TeamDao();
-        if ( $this->struct->type == Constants_Teams::PERSONAL && $dao->getPersonalByUid( $this->struct->created_by ) ) {
+        if ( $this->struct->type == Teams::PERSONAL && $dao->getPersonalByUid( $this->struct->created_by ) ) {
             throw new InvalidArgumentException( "User already has the personal team" );
         }
     }
 
     protected function _checkAddMembersToPersonalTeam() {
-        if ( $this->struct->type == Constants_Teams::PERSONAL ) {
+        if ( $this->struct->type == Teams::PERSONAL ) {
             throw new DomainException( "Can not invite members to a Personal team." );
         }
     }
 
-    protected function _createTeamWithMatecatUsers() {
+    /**
+     * @throws ReflectionException
+     */
+    protected function _createTeamWithMatecatUsers(): TeamStruct {
 
         $this->_checkAddMembersToPersonalTeam();
 
@@ -250,6 +267,10 @@ class TeamModel {
         return $team;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     protected function _sendEmailsToNewMemberships() {
         foreach ( $this->_getNewMembershipEmailList() as $membership ) {
             $email = new MembershipCreatedEmail( $this->user, $membership );
@@ -257,6 +278,9 @@ class TeamModel {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _sendEmailsForRemovedMemberships() {
         foreach ( $this->_getRemovedMembersEmailList() as $user ) {
             $email = new MembershipDeletedEmail( $this->user, $user, $this->struct );
@@ -266,8 +290,9 @@ class TeamModel {
 
     /**
      * @return $this
+     * @throws ReflectionException
      */
-    public function updateMembersProjectsCount() {
+    public function updateMembersProjectsCount(): TeamModel {
 
         $this->all_memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->struct->id );
 

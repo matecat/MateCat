@@ -1,5 +1,5 @@
 <?php
-namespace OutsourceTo;
+namespace Utils\OutsourceTo;
 
 
 class OutsourceAvailable {

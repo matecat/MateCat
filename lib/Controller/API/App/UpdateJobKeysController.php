@@ -17,10 +17,10 @@ use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use TmKeyManagement_ClientTmKeyStruct;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 use Validator\JSONSchema\Errors\JSONValidatorException;
 use Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Validator\JSONSchema\JSONValidator;
@@ -45,13 +45,13 @@ class UpdateJobKeysController extends KleinController {
 
         // moved here because self::isRevision() in constructor
         // generates an infinite loop
-        $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        $userRole = Filter::ROLE_TRANSLATOR;
         if ( $this->user->email == $request[ 'jobData' ][ 'owner' ] ) {
-            $userRole = TmKeyManagement_Filter::OWNER;
+            $userRole = Filter::OWNER;
         } elseif ( $this->isRevision() ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $userRole = Filter::ROLE_REVISOR;
         } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = Filter::ROLE_TRANSLATOR;
         }
 
         /*
@@ -116,7 +116,7 @@ class UpdateJobKeysController extends KleinController {
         foreach ( $tm_keys[ 'mine' ] as $k => $val ) {
 
             // check if logged user is owner of $val['key']
-            $check = array_filter( $clientKeys[ 'job_keys' ], function ( TmKeyManagement_ClientTmKeyStruct $element ) use ( $val ) {
+            $check = array_filter( $clientKeys[ 'job_keys' ], function ( ClientTmKeyStruct $element ) use ( $val ) {
                 if ( $element->isEncryptedKey() ) {
                     return false;
                 }
@@ -131,7 +131,7 @@ class UpdateJobKeysController extends KleinController {
         $tm_keys = json_encode( $tm_keys );
 
 
-        $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
+        $totalTmKeys = TmKeyManager::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
 
         $this->log( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
         $this->log( 'After: ' . json_encode( $totalTmKeys ) );
@@ -140,7 +140,7 @@ class UpdateJobKeysController extends KleinController {
             $request[ 'jobData' ][ 'only_private_tm' ] = $request[ 'only_private' ];
         }
 
-        /** @var TmKeyManagement_TmKeyStruct $totalTmKey */
+        /** @var TmKeyStruct $totalTmKey */
         foreach ( $totalTmKeys as $totalTmKey ) {
             $totalTmKey->complete_format = true;
         }

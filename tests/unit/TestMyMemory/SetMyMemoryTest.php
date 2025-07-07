@@ -4,11 +4,14 @@ use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::set
+ * @covers MyMemory::set
  * User: dinies
  * Date: 02/05/16
  * Time: 18.22
@@ -21,7 +24,7 @@ class SetMyMemoryTest extends AbstractTest {
     protected $engine_struct_param;
 
     /**
-     * @var Engines_MyMemory
+     * @var MyMemory
      */
     protected $engine_MyMemory;
 
@@ -69,7 +72,7 @@ class SetMyMemoryTest extends AbstractTest {
         $this->str_tra_2 = 'For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.';
         $this->prop      = '{"project_id":"987654","project_name":"barfoo","job_id":"321"}';
 
-        $this->engine_MyMemory = new Engines_MyMemory( $this->engine_struct_param );
+        $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
         $this->reflector       = new ReflectionClass( $this->engine_MyMemory );
         $this->property        = $this->reflector->getProperty( "result" );
         $this->property->setAccessible( true );
@@ -79,7 +82,7 @@ class SetMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::set
+     * @covers MyMemory::set
      */
     public function test_set_segment_1_general_check() {
 
@@ -105,12 +108,12 @@ class SetMyMemoryTest extends AbstractTest {
         $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
 
         /**
-         *  general check of the Engines_Results_MyMemory_SetContributionResponse object
-         * @var $result_object Engines_Results_MyMemory_SetContributionResponse
+         *  general check of the SetContributionResponse object
+         * @var $result_object SetContributionResponse
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $result_object instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $result_object, 'matches' ) );
         $this->assertTrue( property_exists( $result_object, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result_object, 'responseDetails' ) );
@@ -123,7 +126,7 @@ class SetMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::set
+     * @covers MyMemory::set
      */
     public function test_set_segment_1_with_mock() {
 
@@ -165,9 +168,9 @@ TAB;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $this->anything(), $curl_params )->willReturn( $mock_json_return );
 
         $actual_result = $this->engine_MyMemory->set( $params );
@@ -175,12 +178,12 @@ TAB;
         $this->assertEquals( 484525156, $actual_result );
 
         /**
-         * check of the Engines_Results_MyMemory_SetContributionResponse object
-         * @var $result_object Engines_Results_MyMemory_SetContributionResponse
+         * check of the SetContributionResponse object
+         * @var $result_object SetContributionResponse
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $result_object instanceof SetContributionResponse );
         $this->assertEquals( 200, $result_object->responseStatus );
         $this->assertEquals( [ '0' => 484525156 ], $result_object->responseDetails );
         $this->assertEquals( "OK", $result_object->responseData );
@@ -199,7 +202,7 @@ TAB;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::set
+     * @covers MyMemory::set
      */
     public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose() {
 
@@ -225,12 +228,12 @@ TAB;
         $this->assertTrue( (bool)preg_match( '/^[\dA-F]{8}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{4}-[\dA-F]{12}$/i', $result ) );
 
         /**
-         *  general check of the Engines_Results_MyMemory_SetContributionResponse object
-         * @var $result_object Engines_Results_MyMemory_SetContributionResponse
+         *  general check of the SetContributionResponse object
+         * @var $result_object SetContributionResponse
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $result_object instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $result_object, 'matches' ) );
         $this->assertTrue( property_exists( $result_object, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result_object, 'responseDetails' ) );
@@ -282,9 +285,9 @@ TAB;
         ];
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(
                 $url_mock_param,
                 $curl_params
@@ -296,12 +299,12 @@ TAB;
 
 
         /**
-         * check of the Engines_Results_MyMemory_SetContributionResponse object
-         * @var Engines_Results_MyMemory_SetContributionResponse
+         * check of the SetContributionResponse object
+         * @var SetContributionResponse
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $result_object instanceof SetContributionResponse );
         $this->assertEquals( 200, $result_object->responseStatus );
         $this->assertEquals( [ '0' => 484540480 ], $result_object->responseDetails );
         $this->assertEquals( "OK", $result_object->responseData );
@@ -320,7 +323,7 @@ TAB;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::set
+     * @covers MyMemory::set
      */
     public function test_set_with_error_from_mocked__call() {
 
@@ -369,9 +372,9 @@ TAB;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_params )->willReturn( $rawValue_error );
 
         $actual_result = $this->engine_MyMemory->set( $params );
@@ -380,16 +383,16 @@ TAB;
 
 
         /**
-         * check of the Engines_Results_MyMemory_SetContributionResponse object
-         * @var Engines_Results_MyMemory_SetContributionResponse
+         * check of the SetContributionResponse object
+         * @var SetContributionResponse
          */
         $result_object = $this->property->getValue( $this->engine_MyMemory );
 
-        $this->assertTrue( $result_object instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $result_object instanceof SetContributionResponse );
         $this->assertEquals( 0, $result_object->responseStatus );
         $this->assertEquals( "", $result_object->responseDetails );
         $this->assertEquals( "", $result_object->responseData );
-        $this->assertTrue( $result_object->error instanceof Engines_Results_ErrorMatches );
+        $this->assertTrue( $result_object->error instanceof ErrorResponse );
 
         $this->assertEquals( -6, $result_object->error->code );
         $this->assertEquals( "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result_object->error->message );

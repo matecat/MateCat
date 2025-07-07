@@ -20,10 +20,10 @@ use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserDao;
 use ReflectionException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {

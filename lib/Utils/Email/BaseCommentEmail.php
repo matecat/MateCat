@@ -6,17 +6,22 @@
  * Time: 15:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
+use Exception;
+use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
+use ReflectionException;
 
 class BaseCommentEmail extends AbstractEmail {
 
     /**
      * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
     /**
      * @var CommentStruct
@@ -26,22 +31,22 @@ class BaseCommentEmail extends AbstractEmail {
     /**
      * @var string
      */
-    protected $url;
+    protected string $url;
 
-    protected $project;
+    protected ShapelessConcreteStruct $project;
 
-    protected $job;
+    protected JobStruct $job;
 
     /**
      * BaseCommentEmail constructor.
      *
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct              $user
      * @param CommentStruct           $comment
-     * @param $url
-     * @param $project
-     * @param $job
+     * @param string                  $url
+     * @param ShapelessConcreteStruct $project
+     * @param JobStruct               $job
      */
-    public function __construct( UserStruct $user, CommentStruct $comment, $url, $project, $job ) {
+    public function __construct( UserStruct $user, CommentStruct $comment, string $url, ShapelessConcreteStruct $project, JobStruct $job ) {
 
         $this->project = $project;
         $this->user    = $user;
@@ -52,6 +57,9 @@ class BaseCommentEmail extends AbstractEmail {
         $this->_setTemplate( 'Comment/action_on_a_comment.html' );
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
 
         $recipient = [ $this->user->email, $this->user->first_name ];
@@ -62,8 +70,11 @@ class BaseCommentEmail extends AbstractEmail {
         );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _getTemplateVariables(): array {
-        $content = \Model\Comments\CommentDao::placeholdContent( $this->comment->message );
+        $content = CommentDao::placeholdContent( $this->comment->message );
 
         return [
                 'user'      => $this->user->toArray(),

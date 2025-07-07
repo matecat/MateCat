@@ -3,6 +3,7 @@
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\FilesStorage\AbstractFilesStorage;
+use Utils\ServerCheck\ServerCheck;
 
 const DIRSEP = "//";
 

@@ -1,8 +1,8 @@
 <?php
 
-use Langs\LanguageDomains;
-use Langs\Languages;
 use Model\FeaturesBase\FeatureSet;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
 
 require_once '../../inc/Bootstrap.php';
 try {

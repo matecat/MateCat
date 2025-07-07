@@ -5,7 +5,6 @@ namespace Model\Conversion;
 use CURLFile;
 use Exception;
 use INIT;
-use Langs\Languages;
 use Log;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
@@ -13,6 +12,7 @@ use Model\Jobs\JobStruct;
 use MultiCurlHandler;
 use PDO;
 use Utils;
+use Utils\Langs\Languages;
 
 class Filters {
 

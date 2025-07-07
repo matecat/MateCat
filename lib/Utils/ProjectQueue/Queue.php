@@ -7,14 +7,16 @@
  *
  */
 
-namespace ProjectQueue;
+namespace Utils\ProjectQueue;
 
 use ArrayObject;
-use Constants_ProjectStatus;
 use Exception;
 use Log;
+use Predis\Response\Status;
 use RedisHandler;
+use ReflectionException;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
+use Utils\Constants\ProjectStatus;
 use WorkerClient;
 
 /**
@@ -49,18 +51,24 @@ class Queue {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public static function getPublishedResults( $id_project ){
 
         $redisHandler = ( new RedisHandler() )->getConnection();
-        $response = json_decode( $redisHandler->get( sprintf( Constants_ProjectStatus::PROJECT_QUEUE_HASH, $id_project ) ), true );
+        $response = json_decode( $redisHandler->get( sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $id_project ) ), true );
         $redisHandler->disconnect();
         return $response;
 
     }
 
-    public static function publishResults( ArrayObject $projectStructure ){
+    /**
+     * @throws ReflectionException
+     */
+    public static function publishResults( ArrayObject $projectStructure ): Status {
 
-        $hashKey = sprintf( Constants_ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure[ 'id_project' ] );
+        $hashKey = sprintf( ProjectStatus::PROJECT_QUEUE_HASH, $projectStructure[ 'id_project' ] );
         return ( new RedisHandler() )->getConnection()->set( $hashKey, json_encode( $projectStructure[ 'result' ], 60 * 60 * 24 * 7 ) ); //store for 7 days
 
     }

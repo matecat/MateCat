@@ -7,9 +7,8 @@
  *
  */
 
-namespace Contribution;
+namespace Utils\Contribution;
 
-use Constants_TranslationStatus;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Database;
@@ -19,13 +18,14 @@ use Model\Jobs\JobStruct;
 use Model\Projects\MetadataDao;
 use Model\Projects\MetadataStruct;
 use Model\Segments\SegmentNoteDao;
-use TaskRunner\Commons\Params;
+use Utils\Constants\TranslationStatus;
+use Utils\TaskRunner\Commons\Params;
 
 /**
- * Class ContributionSetStruct
+ * Class SetContributionRequest
  * @package Contribution
  */
-class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct {
 
     protected array $cached_results = [];
 
@@ -99,7 +99,7 @@ class ContributionSetStruct extends AbstractDaoObjectStruct implements IDaoStruc
     /**
      * @var string
      */
-    public $oldTranslationStatus = Constants_TranslationStatus::STATUS_NEW;
+    public $oldTranslationStatus = TranslationStatus::STATUS_NEW;
 
     /**
      * @var bool

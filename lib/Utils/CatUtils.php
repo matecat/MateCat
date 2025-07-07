@@ -16,6 +16,8 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use Utils\Constants\TranslationStatus;
+use Utils\Constants\ProjectStatus;
 use Validator\Contracts\ValidatorObject;
 use Validator\IsJobRevisionValidator;
 
@@ -582,7 +584,7 @@ class CatUtils {
         $wStruct = WordCountStruct::loadFromJob( $job );
 
         // For projects created with No tm analysis enabled
-        if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
+        if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
             Log::doJsonLog( "BackWard compatibility set Counter." );
@@ -641,14 +643,14 @@ class CatUtils {
      *
      * @return null|int
      */
-    public static function fetchStatus( int $sid, array $results, string $status = Constants_TranslationStatus::STATUS_NEW ): ?int {
+    public static function fetchStatus( int $sid, array $results, string $status = TranslationStatus::STATUS_NEW ): ?int {
 
         $statusWeight = [
-                Constants_TranslationStatus::STATUS_NEW        => 10,
-                Constants_TranslationStatus::STATUS_DRAFT      => 10,
-                Constants_TranslationStatus::STATUS_REJECTED   => 10,
-                Constants_TranslationStatus::STATUS_TRANSLATED => 40,
-                Constants_TranslationStatus::STATUS_APPROVED   => 50
+                TranslationStatus::STATUS_NEW        => 10,
+                TranslationStatus::STATUS_DRAFT      => 10,
+                TranslationStatus::STATUS_REJECTED   => 10,
+                TranslationStatus::STATUS_TRANSLATED => 40,
+                TranslationStatus::STATUS_APPROVED   => 50
         ];
 
         $nSegment = null;
@@ -656,7 +658,7 @@ class CatUtils {
             //Check if there is a translated segment with $seg[ 'id' ] > $sid
             foreach ( $results as $seg ) {
                 if ( $seg[ 'status' ] == null ) {
-                    $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                    $seg[ 'status' ] = TranslationStatus::STATUS_NEW;
                 }
                 if ( $seg[ 'id' ] > $sid && $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
                     $nSegment = $seg[ 'id' ];
@@ -667,7 +669,7 @@ class CatUtils {
             if ( !$nSegment ) {
                 foreach ( $results as $seg ) {
                     if ( $seg[ 'status' ] == null ) {
-                        $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                        $seg[ 'status' ] = TranslationStatus::STATUS_NEW;
                     }
                     if ( $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
                         $nSegment = $seg[ 'id' ];

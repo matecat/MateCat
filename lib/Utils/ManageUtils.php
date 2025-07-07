@@ -4,6 +4,7 @@ use Model\Database;
 use Model\Projects\ProjectDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use Utils\Constants\ProjectStatus;
 use View\API\V2\Json\Project;
 
 class ManageUtils {
@@ -68,7 +69,7 @@ class ManageUtils {
         }
 
         $conditions[]           = " p.status_analysis != :not_to_analyze ";
-        $data [ 'not_to_analyze' ] = Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+        $data [ 'not_to_analyze' ] = ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         $where_query = implode( " AND ", $conditions );
 

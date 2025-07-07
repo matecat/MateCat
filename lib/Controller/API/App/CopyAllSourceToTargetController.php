@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -19,6 +18,7 @@ use Model\Translations\SegmentTranslationDao;
 use Model\WordCount\CounterModel;
 use ReflectionException;
 use RuntimeException;
+use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController {
 
@@ -106,14 +106,14 @@ class CopyAllSourceToTargetController extends KleinController {
 
             $old_translation = SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-            if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
+            if ( empty( $old_translation ) || ( $old_translation->status !== TranslationStatus::STATUS_NEW ) ) {
                 //no segment found
                 continue;
             }
 
             $new_translation                   = clone $old_translation;
             $new_translation->translation      = $segment->segment;
-            $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
+            $new_translation->status           = TranslationStatus::STATUS_DRAFT;
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
             try {

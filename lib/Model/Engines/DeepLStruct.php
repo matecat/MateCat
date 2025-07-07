@@ -2,7 +2,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\DeepL;
 
 class DeepLStruct extends EngineStruct {
     /**
@@ -42,14 +42,14 @@ class DeepLStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::DEEPL;
+    public ?string $class_load = DeepL::class;
 
     /**
      * @var ?int
      */
     public ?int $penalty = 15; // to get 85% matches
 
-    public static function getStruct() {
+    public static function getStruct(): EngineStruct {
         return new DeepLStruct();
     }
 }

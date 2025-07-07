@@ -2,7 +2,6 @@
 
 namespace Model\Xliff;
 
-use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
@@ -11,6 +10,7 @@ use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
 use Model\Xliff\DTO\XliffRulesModel;
 use stdClass;
+use Utils\Date\DateTimeUtil;
 
 class XliffConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 

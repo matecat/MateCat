@@ -15,7 +15,7 @@ use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
-use TmKeyManagement_Filter;
+use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
 
 class AnalysisChunk implements JsonSerializable {
@@ -161,7 +161,7 @@ class AnalysisChunk implements JsonSerializable {
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {
             $tmKeys[][ trim( $tmKey->name ) ] = trim( $tmKey->key );

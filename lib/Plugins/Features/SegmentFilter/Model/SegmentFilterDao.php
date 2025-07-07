@@ -8,7 +8,6 @@
 
 namespace Features\SegmentFilter\Model;
 
-use Constants_TranslationStatus;
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDao;
@@ -16,6 +15,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Jobs\JobStruct;
+use Utils\Constants\TranslationStatus;
 
 class SegmentFilterDao extends AbstractDao {
 
@@ -126,20 +126,20 @@ class SegmentFilterDao extends AbstractDao {
 
                 case 'todo':
                     $data = array_merge( $data, [
-                            'status_new'   => Constants_TranslationStatus::STATUS_NEW,
-                            'status_draft' => Constants_TranslationStatus::STATUS_DRAFT
+                            'status_new'   => TranslationStatus::STATUS_NEW,
+                            'status_draft' => TranslationStatus::STATUS_DRAFT
                     ] );
 
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated' => TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
-                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                                'status_translated'   => TranslationStatus::STATUS_TRANSLATED,
+                                'status_approved'   => TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
 

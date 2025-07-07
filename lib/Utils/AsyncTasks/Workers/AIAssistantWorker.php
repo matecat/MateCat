@@ -10,11 +10,11 @@ use Predis\Client;
 use Predis\Response\Status;
 use ReflectionException;
 use Stomp\Exception\StompException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Exceptions\EndQueueException;
 use Utils;
 use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class AIAssistantWorker extends AbstractWorker {
     const EXPLAIN_MEANING_ACTION = 'explain_meaning';

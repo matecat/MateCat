@@ -2,7 +2,7 @@
 
 namespace Model\Xliff\DTO;
 
-use Constants\XliffTranslationStatus;
+use Utils\Constants\XliffTranslationStatus;
 
 class Xliff20Rule extends AbstractXliffRule {
 

@@ -10,7 +10,6 @@ namespace Model\QualityReport;
 
 use CatUtils;
 use Constants;
-use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Features\TranslationVersions\Model\TranslationVersionDao;
@@ -25,6 +24,7 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
+use Utils\Constants\TranslationStatus;
 
 class QualityReportSegmentModel {
 
@@ -62,7 +62,7 @@ class QualityReportSegmentModel {
         /**
          * Validate revision_number param
          */
-        if ( !empty( $options[ 'filter' ] ) && in_array( ( $options[ 'filter' ] [ 'status' ] ?? '' ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( !empty( $options[ 'filter' ] ) && in_array( ( $options[ 'filter' ] [ 'status' ] ?? '' ), TranslationStatus::$REVISION_STATUSES ) ) {
             if ( isset( $options[ 'filter' ][ 'revision_number' ] ) ) {
 
                 $validRevisionNumbers = array_map( function ( $chunkReview ) {
@@ -235,19 +235,19 @@ class QualityReportSegmentModel {
             $seg->last_revisions    = [];
             $seg->is_pre_translated = true;
             switch ( $seg->status ) {
-                case Constants_TranslationStatus::STATUS_APPROVED:
+                case TranslationStatus::STATUS_APPROVED:
                     $seg->last_revisions[] = [
                             'revision_number' => 1,
                             'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
                     ];
                     break;
-                case Constants_TranslationStatus::STATUS_APPROVED2:
+                case TranslationStatus::STATUS_APPROVED2:
                     $seg->last_revisions[] = [
                             'revision_number' => 2,
                             'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
                     ];
                     break;
-                case Constants_TranslationStatus::STATUS_TRANSLATED:
+                case TranslationStatus::STATUS_TRANSLATED:
                     $seg->last_translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation;
                     break;
                 default:
@@ -255,7 +255,7 @@ class QualityReportSegmentModel {
                     break;
             }
 
-        } elseif ( Constants_TranslationStatus::isNotInitialStatus( $seg->status ) ) {
+        } elseif ( TranslationStatus::isNotInitialStatus( $seg->status ) ) {
 
             foreach ( $events as $event ) {
 

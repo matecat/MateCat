@@ -2,8 +2,8 @@
 
 namespace Model\Conversion;
 
-use Constants\ConversionHandlerStatus;
 use Exception;
+use Utils\Constants\ConversionHandlerStatus;
 
 class ConvertedFileModel {
     /**

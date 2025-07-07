@@ -6,7 +6,7 @@
  * Time: 16:13
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use CatUtils;
@@ -20,10 +20,14 @@ use Routes;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
-    protected $user;
-    protected $project;
-    protected $assignee;
-    protected $title;
+    protected UserStruct    $user;
+    protected ProjectStruct $project;
+    protected UserStruct    $assignee;
+    protected ?string       $title;
+    /**
+     * @var JobStruct[]
+     */
+    private array $jobs;
 
     public function __construct( UserStruct $user, ProjectStruct $project, UserStruct $assignee ) {
         $this->user     = $user;

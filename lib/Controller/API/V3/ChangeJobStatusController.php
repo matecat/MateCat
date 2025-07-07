@@ -3,7 +3,7 @@
 namespace Controller\API\V3;
 
 use Controller\API\V2\ChunkController as ChunkControllerV2;
-use Constants_JobStatus;
+use Utils\Constants\JobStatus;
 
 /**
  * Class ChangeJobStatusController
@@ -15,24 +15,24 @@ class ChangeJobStatusController extends ChunkControllerV2 {
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
+        $this->changeStatus( JobStatus::STATUS_DELETED );
     }
 
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( JobStatus::STATUS_CANCELLED );
     }
 
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( JobStatus::STATUS_ARCHIVED );
     }
 
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( JobStatus::STATUS_ACTIVE );
     }
 }

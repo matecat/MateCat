@@ -3,10 +3,8 @@
 namespace Model\Analysis;
 
 use AMQHandler;
-use Constants_ProjectStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Langs\LanguageDomains;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -17,11 +15,13 @@ use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
-use OutsourceTo\OutsourceAvailable;
 use ReflectionException;
 use Routes;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\Constants\ProjectStatus;
+use Utils\Langs\LanguageDomains;
+use Utils\OutsourceTo\OutsourceAvailable;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use View\API\App\Json\Analysis\AnalysisChunk;
 use View\API\App\Json\Analysis\AnalysisFile;
 use View\API\App\Json\Analysis\AnalysisJob;
@@ -258,8 +258,8 @@ abstract class AbstractStatus {
 
         if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && in_array( $this->status_project,
                         [
-                                Constants_ProjectStatus::STATUS_NEW,
-                                Constants_ProjectStatus::STATUS_BUSY
+                                ProjectStatus::STATUS_NEW,
+                                ProjectStatus::STATUS_BUSY
                         ]
                 ) ) {
 

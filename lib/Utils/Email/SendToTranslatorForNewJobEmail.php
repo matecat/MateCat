@@ -6,11 +6,12 @@
  * Time: 17:46
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use Routes;
 
 class SendToTranslatorForNewJobEmail extends SendToTranslatorAbstract {
 
@@ -18,7 +19,7 @@ class SendToTranslatorForNewJobEmail extends SendToTranslatorAbstract {
         parent::__construct( $user, $translator, $projectName );
         $this->title = "Matecat - Translation Job.";
         $this->_setTemplate( 'Translator/job_new_send_to_translator_content.html' );
-        $this->_RoutesMethod = '\Routes::translate';
+        $this->_RoutesMethod = [ Routes::class, 'translate' ];
     }
 
 }

@@ -1,23 +1,25 @@
 <?php
 
 
-class Engines_Results_MT {
+namespace Utils\Engines\Results;
+
+class MTResponse {
 
     public $translatedText = "";
     public $sentence_confidence;
     public $error          = "";
 
-    public function __construct( $result ) {
-        $this->error = new Engines_Results_ErrorMatches();
-        if ( is_array( $result ) and array_key_exists( "data", $result ) ) {
+    public function __construct( array $result ) {
+        $this->error = new ErrorResponse();
+        if ( array_key_exists( "data", $result ) ) {
             $this->translatedText = $result[ 'data' ][ 'translations' ][ 0 ][ 'translatedText' ];
             if ( isset( $result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ] ) ) {
                 $this->sentence_confidence = $result[ 'data' ][ 'translations' ][ 0 ][ 'sentence_confidence' ];
             }
         }
 
-        if ( is_array( $result ) and array_key_exists( "error", $result ) ) {
-            $this->error = new Engines_Results_ErrorMatches( $result[ 'error' ] );
+        if ( array_key_exists( "error", $result ) ) {
+            $this->error = new ErrorResponse( $result[ 'error' ] );
         }
     }
 

@@ -2,7 +2,6 @@
 
 namespace Features\TranslationVersions\Handlers;
 
-use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
@@ -10,7 +9,6 @@ use Features\TranslationEvents\TranslationEventsHandler;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Features\TranslationVersions\VersionHandlerInterface;
-use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -20,6 +18,7 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use RuntimeException;
 use Utils;
+use Utils\Constants\TranslationStatus;
 
 /**
  * Class TranslationVersionsHandler
@@ -137,8 +136,8 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         // From now on, translations are treated as arrays and get attributes attached
         // just to be passed to version save. Create two arrays for the purpose.
         $new_version             = new TranslationVersionStruct( $old_translation->toArray() );
-        $new_version->old_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
-        $new_version->new_status = Constants_TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
+        $new_version->old_status = TranslationStatus::$DB_STATUSES_MAP[ $old_translation->status ];
+        $new_version->new_status = TranslationStatus::$DB_STATUSES_MAP[ $new_translation->status ];
 
         /**
          * In some cases, version 0 may already be there among saved_versions, because

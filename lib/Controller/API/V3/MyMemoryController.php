@@ -5,13 +5,13 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
-use Engines_MyMemory;
 use Exception;
 use InvalidArgumentException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
+use Utils\Engines\MyMemory;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 
 class MyMemoryController extends KleinController {
     protected function afterConstruct() {
@@ -70,7 +70,7 @@ class MyMemoryController extends KleinController {
      */
     private function createANewKeyAndAssignToUser( string $name ) {
         $tms = Engine::getInstance( 1 );
-        /** @var Engines_MyMemory $tms */
+        /** @var MyMemory $tms */
         $newKey = $tms->createMyMemoryKey();
 
         $this->saveMemoryKey( $newKey->key, $name );
@@ -105,7 +105,7 @@ class MyMemoryController extends KleinController {
      * @throws Exception
      */
     private function saveMemoryKey( string $key, string $name ) {
-        $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
+        $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->key  = $key;
         $tmKeyStruct->name = $name;
         $tmKeyStruct->tm   = true;

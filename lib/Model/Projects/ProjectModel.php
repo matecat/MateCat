@@ -2,9 +2,7 @@
 
 namespace Projects;
 
-use Constants_Teams;
 use Controller\API\Commons\Exceptions\AuthorizationError;
-use Email\ProjectAssignedEmail;
 use Exception;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectDao;
@@ -15,6 +13,8 @@ use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Utils\Constants\Teams;
+use Utils\Email\ProjectAssignedEmail;
 
 /**
  * Class ProjectModel
@@ -138,7 +138,7 @@ class ProjectModel {
 
         $teamDao = new TeamDao();
         $team    = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $id_team );
-        if ( $team->type == Constants_Teams::PERSONAL ) {
+        if ( $team->type == Teams::PERSONAL ) {
             throw new ValidationError( 'Can\'t change the Assignee of a personal project.' );
         }
 
@@ -191,7 +191,7 @@ class ProjectModel {
         $team = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getPersonalByUid( $this->user->uid );
 
         // check if the destination team is personal, in such a case, set the assignee to the user UID
-        if ( $team->id == $this->willChange[ 'id_team' ] && $team->type == Constants_Teams::PERSONAL ) {
+        if ( $team->id == $this->willChange[ 'id_team' ] && $team->type == Teams::PERSONAL ) {
             $this->willChange[ 'id_assignee' ] = $this->user->uid;
             $this->cacheTeamsToClean[]         = $this->willChange[ 'id_team' ];
             $this->cacheTeamsToClean[]         = $this->project_struct->id_team;

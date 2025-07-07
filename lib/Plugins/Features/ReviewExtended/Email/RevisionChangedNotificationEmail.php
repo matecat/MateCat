@@ -8,9 +8,9 @@
 
 namespace Features\ReviewExtended\Email ;
 
-use Email\AbstractEmail;
 use Exception;
 use Model\Users\UserStruct;
+use Utils\Email\AbstractEmail;
 
 class RevisionChangedNotificationEmail extends AbstractEmail {
 

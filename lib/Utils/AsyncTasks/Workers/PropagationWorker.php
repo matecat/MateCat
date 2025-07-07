@@ -17,11 +17,11 @@ use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDOException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class PropagationWorker extends AbstractWorker {
 

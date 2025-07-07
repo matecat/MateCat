@@ -10,16 +10,12 @@
 namespace Controller\Views;
 
 use CatUtils;
-use Constants_Teams;
-use Constants_TranslationStatus;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
-use Engines_Intento;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use INIT;
-use Langs\Languages;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Engines\EngineDAO;
@@ -41,6 +37,10 @@ use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
 use Utils;
+use Utils\Constants\Teams;
+use Utils\Constants\TranslationStatus;
+use Utils\Engines\Intento;
+use Utils\Langs\Languages;
 
 class CattoolController extends BaseKleinViewController {
 
@@ -191,11 +191,11 @@ class CattoolController extends BaseKleinViewController {
                 'source_code'                           => $chunkStruct->source,
                 'source_page'                           => Utils::getSourcePage(),
                 'status_labels'                         => new PHPTalMap( [
-                                Constants_TranslationStatus::STATUS_NEW        => 'new',
-                                Constants_TranslationStatus::STATUS_DRAFT      => 'Draft',
-                                Constants_TranslationStatus::STATUS_TRANSLATED => 'Translated',
-                                Constants_TranslationStatus::STATUS_APPROVED   => 'Approved',
-                                Constants_TranslationStatus::STATUS_APPROVED2  => 'Revised'
+                                TranslationStatus::STATUS_NEW        => 'new',
+                                TranslationStatus::STATUS_DRAFT      => 'Draft',
+                                TranslationStatus::STATUS_TRANSLATED => 'Translated',
+                                TranslationStatus::STATUS_APPROVED   => 'Approved',
+                                TranslationStatus::STATUS_APPROVED2  => 'Revised'
                         ]
                 ),
                 'tag_projection_languages'              => new PHPTalMap( ProjectOptionsSanitizer::$tag_projection_allowed_languages ),
@@ -203,7 +203,7 @@ class CattoolController extends BaseKleinViewController {
                 'target_code'                           => $chunkStruct->target,
                 'team_name'                             => $jobOwnership[ 'team' ]->name,
                 'tms_enabled'                           => new PHPTalBoolean( (bool)$chunkStruct->id_tms ),
-                'translation_engines_intento_providers' => new PHPTalMap( Engines_Intento::getProviderList() ),
+                'translation_engines_intento_providers' => new PHPTalMap( Intento::getProviderList() ),
                 'translation_matches_enabled'           => new PHPTalBoolean( true ),
                 'warningPollingInterval'                => 1000 * ( INIT::$WARNING_POLLING_INTERVAL ),
                 'word_count_type'                       => $chunkStruct->getProject()->getWordCountType(),
@@ -333,7 +333,7 @@ class CattoolController extends BaseKleinViewController {
             $teamModel = new TeamModel( $team );
             $teamModel->updateMembersProjectsCount();
             $membersIdList = [];
-            if ( $team->type == Constants_Teams::PERSONAL ) {
+            if ( $team->type == Teams::PERSONAL ) {
                 $ownerMail = $team->getMembers()[ 0 ]->getUser()->getEmail();
             } else {
                 $assignee = ( new UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $project->id_assignee );
@@ -391,10 +391,10 @@ class CattoolController extends BaseKleinViewController {
      */
     private function searchableStatuses(): array {
         $statuses = array_merge(
-                Constants_TranslationStatus::$INITIAL_STATUSES,
-                Constants_TranslationStatus::$TRANSLATION_STATUSES,
+                TranslationStatus::$INITIAL_STATUSES,
+                TranslationStatus::$TRANSLATION_STATUSES,
                 [
-                        Constants_TranslationStatus::STATUS_APPROVED,
+                        TranslationStatus::STATUS_APPROVED,
                 ]
         );
 

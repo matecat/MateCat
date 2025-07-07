@@ -9,14 +9,14 @@ use CookieManager;
 use Exception;
 use Google_Service_Exception;
 use INIT;
-use Langs\InvalidLanguageException;
-use Langs\Languages;
 use Log;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils;
+use Utils\Langs\InvalidLanguageException;
+use Utils\Langs\Languages;
 
 class GDriveController extends AbstractStatefulKleinController {
 

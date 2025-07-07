@@ -2,11 +2,11 @@
 
 namespace Features\ReviewExtended\Email;
 
-use Email\AbstractEmail;
 use Exception;
 use INIT;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
+use Utils\Email\AbstractEmail;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 

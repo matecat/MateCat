@@ -8,7 +8,6 @@
 
 namespace Model\Teams;
 
-use Constants_Teams;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Database;
@@ -16,6 +15,7 @@ use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
 use Utils;
+use Utils\Constants\Teams;
 
 class TeamDao extends AbstractDao {
 
@@ -89,7 +89,7 @@ class TeamDao extends AbstractDao {
     public function createPersonalTeam( UserStruct $user ): TeamStruct {
         return $this->createUserTeam( $user, [
                 'name' => 'Personal',
-                'type' => Constants_Teams::PERSONAL
+                'type' => Teams::PERSONAL
         ] );
     }
 
@@ -220,7 +220,7 @@ class TeamDao extends AbstractDao {
                 TeamStruct::class,
                 [
                         'created_by' => $uid,
-                        'type'       => Constants_Teams::PERSONAL
+                        'type'       => Teams::PERSONAL
                 ]
         )[ 0 ];
     }
@@ -240,7 +240,7 @@ class TeamDao extends AbstractDao {
                 TeamStruct::class,
                 [
                         'created_by' => $teamQuery->created_by,
-                        'type'       => Constants_Teams::PERSONAL
+                        'type'       => Teams::PERSONAL
                 ]
         );
     }

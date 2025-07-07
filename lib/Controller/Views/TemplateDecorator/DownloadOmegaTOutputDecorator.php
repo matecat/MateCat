@@ -8,7 +8,7 @@ use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use Model\FilesStorage\AbstractFilesStorage;
 use ReflectionException;
-use TMS\TMSService;
+use Utils\TMS\TMSService;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
 

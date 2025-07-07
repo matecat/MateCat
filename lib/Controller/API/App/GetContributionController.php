@@ -2,8 +2,6 @@
 
 namespace Controller\API\App;
 
-use Contribution\ContributionRequestStruct;
-use Contribution\Request;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
@@ -21,7 +19,9 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Model\Users\UserDao;
 use ReflectionException;
-use TmKeyManagement_Filter;
+use Utils\Contribution\Get;
+use Utils\Contribution\GetContributionRequest;
+use Utils\TmKeyManagement\Filter;
 
 class GetContributionController extends KleinController {
 
@@ -62,7 +62,7 @@ class GetContributionController extends KleinController {
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
-        $contributionRequest = new ContributionRequestStruct();
+        $contributionRequest = new GetContributionRequest();
 
         if ( !$concordance_search ) {
 
@@ -106,9 +106,9 @@ class GetContributionController extends KleinController {
         $contributionRequest->mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
 
         if ( $this->isRevision() ) {
-            $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $contributionRequest->userRole = Filter::ROLE_REVISOR;
         } else {
-            $contributionRequest->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
         $jobsMetadataDao = new MetadataDao();
@@ -149,7 +149,7 @@ class GetContributionController extends KleinController {
             $contributionRequest->penalty_key = $penalty_key;
         }
 
-        Request::contribution( $contributionRequest );
+        Get::contribution( $contributionRequest );
 
         $this->response->json( [
                 'errors' => [],

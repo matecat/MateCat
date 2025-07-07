@@ -2,11 +2,12 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
 use DomainException;
+use Engine;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Utils\Constants\EngineConstants;
 
 /**
  * Created by PhpStorm.
@@ -153,7 +154,7 @@ class EngineDAO extends AbstractDao {
         $stmt      = $this->database->getConnection()->prepare( $query );
         $resultSet = $this->_fetchObjectMap( $stmt, EngineStruct::class, $bind_values );
 
-        return $this->_buildResult( $resultSet, Constants_Engines::getAvailableEnginesList() );
+        return $this->_buildResult( $resultSet );
 
     }
 
@@ -305,13 +306,11 @@ class EngineDAO extends AbstractDao {
 
         foreach ( $array_result as $item ) {
 
-            if ( func_num_args() > 1 ) { // check if $availableEngines is provided as second argument
-                $availableEngines = func_get_arg( 1 );
-
-                if ( !array_key_exists( $item[ 'class_load' ], $availableEngines ) ) {
-                    $result[] = new NONEStruct();
-                    continue;
-                }
+            try {
+                Engine::getFullyQualifiedClassName( $item[ 'class_load' ] );
+            } catch ( Exception $e ) {
+                $result[] = new NONEStruct();
+                continue;
             }
 
             $build_arr = [
@@ -381,7 +380,7 @@ class EngineDAO extends AbstractDao {
             throw new Exception( "Base URL cannot be null" );
         }
 
-        if ( !empty ( $obj->type ) && !in_array( $obj->type, [ Constants_Engines::TM, Constants_Engines::MT, Constants_Engines::NONE ], true ) ) {
+        if ( !empty ( $obj->type ) && !in_array( $obj->type, [ EngineConstants::TM, EngineConstants::MT, EngineConstants::NONE ], true ) ) {
             throw new Exception( "Type not allowed" );
         }
 

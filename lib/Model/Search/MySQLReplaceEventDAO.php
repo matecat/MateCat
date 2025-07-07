@@ -18,7 +18,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
      *
      * @return ReplaceEventStruct[]
      */
-    public function getEvents( $id_job, $version ): ?array {
+    public function getEvents( $id_job, $version ): array {
         $conn  = Database::obtain()->getConnection();
         $query = "SELECT * FROM " . self::TABLE . " WHERE id_job = :id_job  AND replace_version = :replace_version ORDER BY created_at DESC";
 
@@ -28,7 +28,7 @@ class MySQLReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterfa
                 ':replace_version' => $version,
         ] );
 
-        return $stmt->fetchAll( PDO::FETCH_CLASS, self::STRUCT_TYPE ) ?? null;
+        return $stmt->fetchAll( PDO::FETCH_CLASS, self::STRUCT_TYPE ) ?? [];
     }
 
     /**

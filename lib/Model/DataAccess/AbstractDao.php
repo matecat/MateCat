@@ -23,7 +23,7 @@ abstract class AbstractDao {
 
     /**
      * The connection object
-     * @var \Model\Database
+     * @var Database
      */
     protected IDatabase $database;
 
@@ -54,7 +54,7 @@ abstract class AbstractDao {
 
     public function __construct( IDatabase $con = null ) {
         /**
-         * @var $con \Model\IDatabase
+         * @var $con IDatabase
          */
 
         if ( $con == null ) {
@@ -66,7 +66,7 @@ abstract class AbstractDao {
     }
 
     /**
-     * @return \Model\Database|IDatabase
+     * @return Database|IDatabase
      */
     public function getDatabaseHandler() {
         return $this->database;

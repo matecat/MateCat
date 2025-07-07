@@ -8,7 +8,7 @@
  *
  */
 
-namespace Contribution;
+namespace Utils\Contribution;
 use Exception;
 use Log;
 use Utils\AsyncTasks\Workers\GetContributionWorker;
@@ -19,14 +19,14 @@ use WorkerClient;
  * @package Contribution
  *
  */
-class Request {
+class Get {
 
     /**
-     * @param ContributionRequestStruct $contribution
+     * @param GetContributionRequest $contribution
      *
      * @throws Exception
      */
-    public static function contribution( ContributionRequestStruct $contribution ){
+    public static function contribution( GetContributionRequest $contribution ){
 
         try{
             WorkerClient::enqueue( 'CONTRIBUTION_GET', GetContributionWorker::class, $contribution->getArrayCopy(), array( 'persistent' => false ) );

@@ -11,9 +11,9 @@ use Model\Database;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSFile;
-use TMS\TMSService;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSFile;
+use Utils\TMS\TMSService;
 
 class LoadTMXController extends KleinController {
 
@@ -61,7 +61,7 @@ class LoadTMXController extends KleinController {
                  */
                 $mkDao           = new MemoryKeyDao( Database::obtain() );
                 $searchMemoryKey = new MemoryKeyStruct();
-                $key             = new TmKeyManagement_TmKeyStruct();
+                $key             = new TmKeyStruct();
                 $key->key        = $request[ 'tm_key' ];
 
                 $searchMemoryKey->uid    = $this->user->uid;

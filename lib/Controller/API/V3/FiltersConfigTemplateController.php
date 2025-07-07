@@ -108,7 +108,7 @@ class FiltersConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $json = $this->request->body();
@@ -160,7 +160,7 @@ class FiltersConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $id  = (int)$this->request->param( 'id' );

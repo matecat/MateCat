@@ -15,7 +15,7 @@ use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Users\UserDao;
 use ReflectionException;
-use TmKeyManagement_TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Class DataAccess_MemoryKeyDao<br/>
@@ -422,7 +422,7 @@ class MemoryKeyDao extends AbstractDao {
 
             $build_arr = [
                     'uid'    => $item[ 'uid' ],
-                    'tm_key' => new TmKeyManagement_TmKeyStruct( [
+                    'tm_key' => new TmKeyStruct( [
                                     'key'       => (string)$item[ 'key_value' ],
                                     'name'      => (string)$item[ 'key_name' ],
                                     'tm'        => (bool)$item[ 'tm' ],

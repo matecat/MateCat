@@ -8,7 +8,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\GoogleTranslate;
 
 /**
  * Class GoogleTranslateStruct
@@ -43,7 +43,7 @@ class GoogleTranslateStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::GOOGLE_TRANSLATE;
+    public ?string $class_load = GoogleTranslate::class;
 
 
     /**

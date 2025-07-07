@@ -1,10 +1,23 @@
 <?php
 
+namespace Utils\Engines;
+
+use CURLFile;
+use DomainException;
+use Engine;
+use Exception;
+use INIT;
+use Log;
 use Model\Engines\EngineStruct;
 use Model\Engines\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use MultiCurlHandler;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
  * Created by PhpStorm.
@@ -13,7 +26,7 @@ use Model\Users\UserStruct;
  * Time: 11.59
  *
  */
-abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
+abstract class  AbstractEngine implements EngineInterface {
 
     /**
      * @var EngineStruct
@@ -22,8 +35,11 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     protected string $className;
     protected array  $_config = [];
-    protected        $result  = []; // this cannot be forced to be an array, engines may use different types
-    protected array  $error   = [];
+    /**
+     * @var mixed
+     */
+    protected       $result = []; // this cannot be forced to be an array, engines may use different types
+    protected array $error  = [];
 
     protected array $curl_additional_params = [];
 
@@ -67,7 +83,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setMTPenalty( ?int $mt_penalty = null ): Engines_AbstractEngine {
+    public function setMTPenalty( ?int $mt_penalty = null ): AbstractEngine {
         $this->mt_penalty = $mt_penalty;
 
         return $this;
@@ -84,7 +100,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setAnalysis( ?bool $bool = true ): Engines_AbstractEngine {
+    public function setAnalysis( ?bool $bool = true ): AbstractEngine {
         $this->_isAnalysis = filter_var( $bool, FILTER_VALIDATE_BOOLEAN );
 
         return $this;
@@ -95,7 +111,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @return $this
      */
-    public function setSkipAnalysis( ?bool $bool = true ): Engines_AbstractEngine {
+    public function setSkipAnalysis( ?bool $bool = true ): AbstractEngine {
         $this->_skipAnalysis = $bool;
 
         return $this;
@@ -154,6 +170,13 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         }
     }
 
+    /**
+     * @param mixed $rawValue
+     * @param array $parameters
+     * @param       $function
+     *
+     * @return mixed
+     */
     abstract protected function _decode( $rawValue, array $parameters = [], $function = null );
 
     /**
@@ -323,23 +346,19 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
      *
      * @param $file
      *
-     * @return CURLFile|string
+     * @return CURLFile
      */
-    protected function getCurlFile( $file ) {
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 and class_exists( '\\CURLFile' ) ) {
-            return new CURLFile( realpath( $file ) );
-        }
-
-        return "@" . realpath( $file );
+    protected function getCurlFile( $file ): CURLFile {
+        return new CURLFile( realpath( $file ) );
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
-     * @return array|Engines_Results_AbstractResponse
+     * @return array|\Utils\Engines\Results\TMSAbstractResponse
      * @throws Exception
      */
-    protected function GoogleTranslateFallback( $_config ) {
+    protected function GoogleTranslateFallback( array $_config ) {
 
         /**
          * Create a record of type GoogleTranslate
@@ -348,14 +367,14 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
         $newEngineStruct->name                                = "Generic";
         $newEngineStruct->uid                                 = 0;
-        $newEngineStruct->type                                = Constants_Engines::MT;
+        $newEngineStruct->type                                = EngineConstants::MT;
         $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
         $newEngineStruct->others                              = [];
 
         $gtEngine = Engine::createTempInstance( $newEngineStruct );
 
         /**
-         * @var $gtEngine Engines_GoogleTranslate
+         * @var $gtEngine GoogleTranslate
          */
         return $gtEngine->get( $_config );
 
@@ -429,15 +448,15 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
 
     /**
      * @param string $raw_segment
-     * @param        $decoded
+     * @param array  $decoded
      * @param int    $layerNum
      *
      * @return array
      * @throws Exception
      */
-    protected function _composeMTResponseAsMatch( string $raw_segment, $decoded, int $layerNum = 1 ): array {
+    protected function _composeMTResponseAsMatch( string $raw_segment, array $decoded, int $layerNum = 1 ): array {
 
-        $mt_result = new Engines_Results_MT( $decoded );
+        $mt_result = new MTResponse( $decoded );
 
         if ( $mt_result->error->code < 0 ) {
             $mt_result            = $mt_result->get_as_array();
@@ -446,7 +465,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
             return $mt_result;
         }
 
-        $mt_match_res = new Engines_Results_MyMemory_Matches( [
+        $mt_match_res = new Matches( [
                 'raw_segment'     => $raw_segment,
                 'raw_translation' => $mt_result->translatedText,
                 'match'           => $this->getStandardPenaltyString(),

@@ -9,7 +9,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\SmartMATE;
 
 /**
  * Class Engine_MicrosoftHubStruct
@@ -59,7 +59,7 @@ class SmartMATEStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::SMART_MATE;
+    public ?string $class_load = SmartMATE::class;
 
 
     /**
@@ -74,9 +74,9 @@ class SmartMATEStruct extends EngineStruct {
 
     /**
      * An empty struct
-     * @return EngineStruct
+     * @return SmartMATEStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): SmartMATEStruct {
         return new SmartMATEStruct();
     }
 

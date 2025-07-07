@@ -4,11 +4,11 @@ namespace Utils\AsyncTasks\Workers;
 
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
 use Utils;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 //include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 

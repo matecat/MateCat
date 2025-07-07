@@ -9,12 +9,12 @@
 namespace Model\QualityReport;
 
 use Constants;
-use Constants_TranslationStatus;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
+use Utils\Constants\TranslationStatus;
 
 class QualityReportDao extends AbstractDao {
 
@@ -163,8 +163,8 @@ SQL;
         $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
         $stmt->execute( [
-                'approved' => Constants_TranslationStatus::STATUS_APPROVED,
-                'rejected' => Constants_TranslationStatus::STATUS_REJECTED,
+                'approved' => TranslationStatus::STATUS_APPROVED,
+                'rejected' => TranslationStatus::STATUS_REJECTED,
                 'id_job'   => $chunk->id,
                 'password' => $chunk->password
         ] );

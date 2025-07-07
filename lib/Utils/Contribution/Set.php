@@ -8,7 +8,7 @@
  *
  */
 
-namespace Contribution;
+namespace Utils\Contribution;
 
 use Exception;
 use Log;
@@ -24,11 +24,11 @@ use WorkerClient;
 class Set {
 
     /**
-     * @param ContributionSetStruct $contribution
+     * @param SetContributionRequest $contribution
      *
      * @throws Exception
      */
-    public static function contribution( ContributionSetStruct $contribution ) {
+    public static function contribution( SetContributionRequest $contribution ) {
 
         try {
             WorkerClient::enqueue( 'CONTRIBUTION', SetContributionWorker::class, $contribution->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
@@ -48,7 +48,7 @@ class Set {
     /**
      * @throws Exception
      */
-    public static function contributionMT( ContributionSetStruct $contribution = null ) {
+    public static function contributionMT( SetContributionRequest $contribution = null ) {
         try {
 
             if ( empty( $contribution ) ) {

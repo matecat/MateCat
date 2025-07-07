@@ -2,8 +2,6 @@
 
 namespace Model\Jobs;
 
-use Constants_JobStatus;
-use Constants_TranslationStatus;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -16,6 +14,8 @@ use Model\Users\UserStruct;
 use PDOException;
 use PDOStatement;
 use ReflectionException;
+use Utils\Constants\JobStatus;
+use Utils\Constants\TranslationStatus;
 
 class JobDao extends AbstractDao {
 
@@ -42,7 +42,7 @@ class JobDao extends AbstractDao {
      *
      * @return JobStruct[]
      * @throws ReflectionException
-     * @see \Contribution\ContributionSetStruct
+     * @see \Utils\Contribution\SetContributionRequest
      *
      * @see \Utils\AsyncTasks\Workers\SetContributionWorker
      */
@@ -219,9 +219,9 @@ class JobDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, Constants_JobStatus::STATUS_DELETED ] );
+        $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, JobStatus::STATUS_DELETED ] );
 
-        return $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, Constants_JobStatus::STATUS_DELETED ] );
+        return $this->_destroyObjectCache( $stmt, JobStruct::class, [ $project_id, JobStatus::STATUS_DELETED ] );
     }
 
     /**
@@ -237,7 +237,7 @@ class JobDao extends AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct(), [ $id_project, Constants_JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct(), [ $id_project, JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -292,7 +292,7 @@ class JobDao extends AbstractDao {
 
         return $this
                 ->setCacheTTL( $ttl )
-                ->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id, 'password' => $password, 'deleted' => Constants_JobStatus::STATUS_DELETED ] );
+                ->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id, 'password' => $password, 'deleted' => JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -311,7 +311,7 @@ class JobDao extends AbstractDao {
         $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment" );
 
         /** @var JobStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct, [ $id_job, Constants_JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct, [ $id_job, JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -470,8 +470,8 @@ class JobDao extends AbstractDao {
         return $this->_fetchObject( $stmt, new EditLogSegmentStruct(), [
                 'id_job'             => $jStruct->id,
                 'password'           => $jStruct->password,
-                'status_new'         => Constants_TranslationStatus::STATUS_NEW,
-                'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
+                'status_new'         => TranslationStatus::STATUS_NEW,
+                'status_draft'       => TranslationStatus::STATUS_DRAFT,
                 'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
                 'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
         ] );
@@ -531,8 +531,8 @@ class JobDao extends AbstractDao {
         return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
                 'id_job'             => $id_job,
                 'password'           => $password,
-                'status_new'         => Constants_TranslationStatus::STATUS_NEW,
-                'status_draft'       => Constants_TranslationStatus::STATUS_DRAFT,
+                'status_new'         => TranslationStatus::STATUS_NEW,
+                'status_draft'       => TranslationStatus::STATUS_DRAFT,
                 'edit_time_fast_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_FAST_CUT,
                 'edit_time_slow_cut' => 1000 * EditLogSegmentStruct::EDIT_TIME_SLOW_CUT
         ] )[ 0 ];
@@ -596,7 +596,7 @@ class JobDao extends AbstractDao {
                     AND status=:status  
                     AND source_page=:source_page";
 
-        $status = ( $source_page == 1 ) ? Constants_TranslationStatus::STATUS_TRANSLATED : Constants_TranslationStatus::STATUS_APPROVED;
+        $status = ( $source_page == 1 ) ? TranslationStatus::STATUS_TRANSLATED : TranslationStatus::STATUS_APPROVED;
         $stmt   = $this->database->getConnection()->prepare( $query );
 
         /** @var ShapelessConcreteStruct */

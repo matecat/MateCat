@@ -9,15 +9,8 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis;
 
-use Constants\Ices;
-use Constants_ProjectStatus;
-use Constants_TranslationStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Engine;
-use Engines_AbstractEngine;
-use Engines_MyMemory;
-use Engines_Results_AbstractResponse;
-use Engines_Results_MyMemory_TMS;
 use Exception;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
@@ -35,17 +28,24 @@ use Model\WordCount\CounterModel;
 use PDOException;
 use PostProcess;
 use ReflectionException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EmptyElementException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\NotSupportedMTException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_TmKeyManagement;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\AsyncTasks\Workers\Traits\SortMatchesTrait;
+use Utils\Constants\Ices;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EmptyElementException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\NotSupportedMTException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
 
 /**
  * Class TMAnalysisWorker
@@ -358,19 +358,19 @@ class TMAnalysisWorker extends AbstractWorker {
                 //I found this language in the list of disabled target languages??
                 if ( !in_array( $lang, ICES::$iceLockDisabledForTargetLangs ) ) {
                     //ice lock enabled, language not found
-                    $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
+                    $tm_data[ 'status' ] = TranslationStatus::STATUS_APPROVED;
                     $tm_data[ 'locked' ] = true;
                 }
 
             } elseif ( $queueElementParams->pretranslate_100 ) {
-                $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_TRANSLATED;
+                $tm_data[ 'status' ] = TranslationStatus::STATUS_TRANSLATED;
                 $tm_data[ 'locked' ] = false;
             }
 
         }
 
         if ( $queueElementParams->mt_qe_workflow_enabled && $tm_data[ 'match_type' ] == InternalMatchesConstants::ICE_MT ) {
-            $tm_data[ 'status' ] = Constants_TranslationStatus::STATUS_APPROVED;
+            $tm_data[ 'status' ] = TranslationStatus::STATUS_APPROVED;
             $tm_data[ 'locked' ] = false;
         }
 
@@ -560,7 +560,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // penalty_key
         $penalty_key = [];
-        $tm_keys     = TmKeyManagement_TmKeyManagement::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
+        $tm_keys     = TmKeyManager::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
 
         if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
             foreach ( $tm_keys as $tm_key ) {
@@ -586,7 +586,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tmsEngine = Engine::getInstance( $id_tms );
         $mtEngine  = Engine::getInstance( $id_mt_engine );
 
-        if ( $mtEngine instanceof Engines_MyMemory ) {
+        if ( $mtEngine instanceof MyMemory ) {
 
             $_config[ 'get_mt' ] = true;
             $mtEngine            = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
@@ -701,15 +701,15 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
-     * @param Engines_AbstractEngine  $mtEngine
-     * @param array                   $_config
+     * @param \Utils\Engines\AbstractEngine $mtEngine
+     * @param array                         $_config
      *
-     * @param QueueElement            $queueElement
-     * @param MTQEWorkflowParams|null $mt_qe_config
+     * @param QueueElement                  $queueElement
+     * @param MTQEWorkflowParams|null       $mt_qe_config
      *
-     * @return bool|Engines_Results_AbstractResponse
+     * @return bool|TMSAbstractResponse
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ) {
+    protected function _getMT( AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ) {
 
         $mt_result = false;
 
@@ -744,8 +744,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $mt_result = $mtEngine->get( $config );
 
-            // handle Engines_Results_MyMemory_TMS instead of having directly Engines_Results_MyMemory_Matches
-            if ( $mt_result instanceof Engines_Results_MyMemory_TMS ) {
+            // handle GetMemoryResponse instead of having directly Matches
+            if ( $mt_result instanceof GetMemoryResponse ) {
                 if ( isset( $mt_result->responseStatus ) && $mt_result->responseStatus >= 400 ) {
                     $mt_result = false;
                 }
@@ -766,11 +766,11 @@ class TMAnalysisWorker extends AbstractWorker {
     }
 
     /**
-     * @param Engines_AbstractEngine $tmsEngine
+     * @param \Utils\Engines\AbstractEngine $tmsEngine
      * @param                        $_config
-     * @param QueueElement           $queueElement
+     * @param QueueElement                  $queueElement
      *
-     * @return array|Engines_Results_MyMemory_TMS|null
+     * @return array|GetMemoryResponse|null
      * @throws AuthenticationError
      * @throws EndQueueException
      * @throws NotFoundException
@@ -779,10 +779,10 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ValidationError
      * @throws Exception
      */
-    protected function _getTM( Engines_AbstractEngine $tmsEngine, $_config, QueueElement $queueElement ) {
+    protected function _getTM( AbstractEngine $tmsEngine, $_config, QueueElement $queueElement ) {
 
         /**
-         * @var $tmsEngine Engines_MyMemory
+         * @var $tmsEngine \Utils\Engines\MyMemory
          */
         $tmsEngine->setFeatureSet( $this->featureSet );
 
@@ -791,7 +791,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $tmsEngine->setMTPenalty( $queueElement->params->mt_quality_value_in_editor ? 100 - $queueElement->params->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102);
 
-        /** @var $tms_match Engines_Results_MyMemory_TMS */
+        /** @var $tms_match GetMemoryResponse */
         $tms_match = $tmsEngine->get( $config );
 
         /**
@@ -989,7 +989,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             ProjectDao::updateFields(
                     [
-                            'status_analysis'      => Constants_ProjectStatus::STATUS_DONE,
+                            'status_analysis'      => ProjectStatus::STATUS_DONE,
                             'tm_analysis_wc'       => $project_totals[ 'eq_wc' ],
                             'standard_analysis_wc' => $project_totals[ 'st_wc' ]
                     ],

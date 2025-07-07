@@ -1,6 +1,6 @@
 <?php
 namespace Model\Analysis;
-use Langs\Languages;
+use Utils\Langs\Languages;
 
 /**
  * Created by PhpStorm.

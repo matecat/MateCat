@@ -2,7 +2,6 @@
 
 namespace Model\LQA\QAModelTemplate;
 
-use Date\DateTimeUtil;
 use DateTime;
 use Exception;
 use INIT;
@@ -15,6 +14,7 @@ use Model\Projects\ProjectTemplateDao;
 use PDO;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\Date\DateTimeUtil;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
 

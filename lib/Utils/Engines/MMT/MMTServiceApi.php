@@ -145,90 +145,98 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function getMemoryById( $id ) {
+    public function getMemoryById( string $id ) {
         return $this->send( 'GET', "$this->baseUrl/memories/$id" );
     }
 
     /**
-     * @param             $name
+     * @param string      $name
      * @param string|null $description
      * @param string|null $externalId
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function createMemory( $name, ?string $description = null, ?string $externalId = null ) {
+    public function createMemory( string $name, ?string $description = null, ?string $externalId = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories", [
                 'name' => $name, 'description' => $description, 'external_id' => $externalId
         ] );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return array
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function deleteMemory( $id ): ?array {
+    public function deleteMemory( string $id ): ?array {
         return $this->send( 'DELETE', "$this->baseUrl/memories/$id" );
     }
 
     /**
-     * @param $id
-     * @param $data
+     * @param string $id
+     * @param array  $data
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function importGlossary( $id, $data ) {
+    public function importGlossary( string $id, array $data ) {
         return $this->send( 'POST', "$this->baseUrl/memories/$id/glossary", $data, true );
     }
 
     /**
-     * @param $id
-     * @param $data
+     * @param string $id
+     * @param array  $data
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function updateGlossary( $id, $data ) {
+    public function updateGlossary( string $id, array $data ) {
         return $this->send( 'PUT', "$this->baseUrl/memories/$id/glossary", $data );
     }
 
     /**
-     * @param $uuid
+     * @param string $uuid
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function importJobStatus( $uuid ) {
+    public function importJobStatus( string $uuid ) {
         return $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid" );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function getMemory( $id ) {
+    public function getMemory( string $id ) {
         return $this->send( 'GET', "$this->baseUrl/memories/$id" );
     }
 
     /**
-     * @param             $id
-     * @param             $name
+     * @param string      $id
+     * @param string      $name
      * @param string|null $description
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function updateMemory( $id, $name, ?string $description = null ) {
+    public function updateMemory( string $id, string $name, ?string $description = null ) {
         return $this->send( 'PUT', "$this->baseUrl/memories/$id", [
                 'name' => $name, 'description' => $description
         ] );
@@ -248,18 +256,19 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $id
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
+     * @param array|string $id
+     * @param string       $source
+     * @param string       $target
+     * @param string       $sentence
+     * @param string       $translation
      *
-     * @param $session
+     * @param string       $session
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function addToMemoryContent( $id, $source, $target, $sentence, $translation, $session ) {
+    public function addToMemoryContent( $id, string $source, string $target, string $sentence, string $translation, string $session ) {
 
         if ( is_array( $id ) ) {
             return $this->send( 'POST', "$this->baseUrl/memories/content", [
@@ -282,28 +291,30 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $uuid
+     * @param string $uuid
      *
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function jobStatus( $uuid ) {
+    public function jobStatus( string $uuid ) {
         $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid/content", [] );
     }
 
     /**
-     * @param $tuid
-     * @param $memory_keys
-     * @param $source
-     * @param $target
-     * @param $sentence
-     * @param $translation
-     * @param $session
+     * @param string $tuid
+     * @param array  $memory_keys
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $session
      *
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function updateMemoryContent( $tuid, $memory_keys, $source, $target, $sentence, $translation, $session ) {
+    public function updateMemoryContent( string $tuid, array $memory_keys, string $source, string $target, string $sentence, string $translation, string $session ) {
         foreach ( $memory_keys as $memory ) {
-            $debug = $this->send( 'PUT', "$this->baseUrl/memories/$memory/content", [
+            $this->send( 'PUT', "$this->baseUrl/memories/$memory/content", [
                     'tuid'        => $tuid,
                     'source'      => $source,
                     'target'      => $target,
@@ -315,42 +326,45 @@ class MMTServiceApi {
     }
 
     /**
-     * @param             $id
-     * @param             $tmx
+     * @param string      $id
+     * @param string      $tmx
      * @param string|null $compression
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function importIntoMemoryContent( $id, $tmx, ?string $compression = null ) {
+    public function importIntoMemoryContent( string $id, string $tmx, ?string $compression = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
                 'tmx' => $this->_setCulFileUpload( $tmx ), 'compression' => $compression
         ], true );
     }
 
     /**
-     * @param $uuid
+     * @param string $uuid
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function getImportJob( $uuid ) {
+    public function getImportJob( string $uuid ) {
         return $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid" );
     }
 
     /* Translation -------------------------------------------------------------------------------------------------- */
 
     /**
-     * @param            $source
-     * @param            $targets
-     * @param            $text
+     * @param string     $source
+     * @param array      $targets
+     * @param string     $text
      * @param array|null $hints
      * @param mixed      $limit
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function getContextVectorFromText( $source, $targets, $text, $hints = null, $limit = null ) {
+    public function getContextVectorFromText( string $source, array $targets, string $text, ?array $hints = null, ?int $limit = null ) {
         return $this->send( 'GET', "$this->baseUrl/context-vector", [
                 'source' => $source, 'targets' => implode( ',', $targets ), 'text' => $text,
                 'hints'  => ( $hints ? implode( ',', $hints ) : null ), 'limit' => $limit
@@ -358,17 +372,18 @@ class MMTServiceApi {
     }
 
     /**
-     * @param             $source
-     * @param             $targets
-     * @param             $file
+     * @param string      $source
+     * @param array       $targets
+     * @param string      $file
      * @param string|null $compression
      * @param array|null  $hints
      * @param mixed       $limit
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function getContextVectorFromFile( $source, $targets, $file, ?string $compression = null, ?array $hints = null, ?int $limit = null ) {
+    public function getContextVectorFromFile( string $source, array $targets, string $file, ?string $compression = null, ?array $hints = null, ?int $limit = null ) {
         return $this->send( 'GET', "$this->baseUrl/context-vector", [
                 'source'      => $source, 'targets' => implode( ',', $targets ), 'content' => $this->_setCulFileUpload( $file ),
                 'compression' => $compression, 'hints' => ( $hints ? implode( ',', $hints ) : null ), 'limit' => $limit
@@ -376,18 +391,18 @@ class MMTServiceApi {
     }
 
     /**
-     * @param             $source
-     * @param             $target
-     * @param             $text
-     * @param null        $contextVector
-     * @param null        $hints
-     * @param null        $projectId
-     * @param null        $timeout
-     * @param null        $priority
-     * @param null        $session
-     * @param null        $glossaries
-     * @param null        $ignoreGlossaryCase
-     * @param null        $include_score
+     * @param string      $source
+     * @param string      $target
+     * @param string      $text
+     * @param string|null $contextVector
+     * @param array|null  $hints
+     * @param string|null $projectId
+     * @param int|null    $timeout
+     * @param string|null $priority
+     * @param string|null $session
+     * @param string|null $glossaries
+     * @param bool|null   $ignoreGlossaryCase
+     * @param bool|null   $include_score
      * @param string|null $mt_qe_engine_id
      *
      * @return mixed|void
@@ -395,19 +410,19 @@ class MMTServiceApi {
      * @throws MMTServiceApiRequestException
      */
     public function translate(
-            $source,
-            $target,
-            $text,
-            $contextVector = null,
-            $hints = null,
-            $projectId = null,
-            $timeout = null,
-            $priority = null,
-            $session = null,
-            $glossaries = null,
-            $ignoreGlossaryCase = null,
-            $include_score = null,
-            string $mt_qe_engine_id = '2'
+            string  $source,
+            string  $target,
+            string  $text,
+            ?string $contextVector = null,
+            ?array  $hints = [],
+            ?string $projectId = null,
+            ?int    $timeout = null,
+            ?string $priority = null,
+            ?string $session = null,
+            ?string $glossaries = null,
+            ?bool   $ignoreGlossaryCase = null,
+            ?bool   $include_score = null,
+            ?string $mt_qe_engine_id = '2'
     ) {
 
         if ( empty( $text ) ) {
@@ -448,16 +463,12 @@ class MMTServiceApi {
     /* - Low level utils -------------------------------------------------------------------------------------------- */
 
     /**
-     * @param $file
+     * @param string $file
      *
-     * @return CURLFile|string
+     * @return CURLFile
      */
-    protected function _setCulFileUpload( $file ) {
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            return new CURLFile( realpath( $file ) );
-        } else {
-            return '@' . realpath( $file );
-        }
+    protected function _setCulFileUpload( string $file ): CURLFile {
+        return new CURLFile( realpath( $file ) );
     }
 
     /**
@@ -542,7 +553,7 @@ class MMTServiceApi {
             if ( $handler->getError( $resourceHashId )[ 'errno' ] == 28 ) {
                 throw new MMTServiceApiException( "TimeoutException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
             } elseif ( $handler->getError( $resourceHashId )[ 'http_code' ] ) {
-                throw new MMTServiceApiRequestException( "ServiceException", $handler->getError( $resourceHashId )[ 'http_code' ], "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})" );
+                throw new MMTServiceApiRequestException( "ServiceException", $handler->getError( $resourceHashId )[ 'http_code' ], "Get denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})" );
             } else {
                 throw new MMTServiceApiException( "ConnectionException", 500, "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})" );
             }

@@ -10,20 +10,20 @@ class SizeRestriction {
     /**
      * @var string
      */
-    private $cleanedString;
+    private string $cleanedString;
 
     /**
-     * @var \Model\FeaturesBase\FeatureSet
+     * @var FeatureSet
      */
-    private $featureSet;
+    private FeatureSet $featureSet;
 
     /**
      * SizeRestriction constructor.
      *
-     * @param            $string
-     * @param \Model\FeaturesBase\FeatureSet $featureSet
+     * @param string     $string
+     * @param FeatureSet $featureSet
      */
-    public function __construct( $string, FeatureSet $featureSet ) {
+    public function __construct( string $string, FeatureSet $featureSet ) {
 
         $string = $this->clearStringFromTags( $string );
         $string = $this->removeHiddenCharacters( $string );
@@ -37,7 +37,7 @@ class SizeRestriction {
      *
      * @return string
      */
-    private function clearStringFromTags( $string ) {
+    private function clearStringFromTags( string $string ): string {
         $cleanedText = preg_replace( '#&lt;ph(?:(?!id).)*?id="[^"].*?"(?:(?!equiv-text).)*?equiv-text="base64:((?:(?!&gt;).)*?)"/&gt;#iu', '', $string );
         $cleanedText = preg_replace( '/&lt;g .*?id="(.*?)".*?&gt;/iu', '', $cleanedText );
         $cleanedText = preg_replace( '#&lt;(/g)&gt;#iu', '', $cleanedText );
@@ -50,25 +50,23 @@ class SizeRestriction {
         $cleanedText = preg_replace( '/##\$(_0A)\$##/iu', ' ', $cleanedText );
         $cleanedText = preg_replace( '/##\$_(SPLIT)\$##/iu', ' ', $cleanedText );
         $cleanedText = preg_replace( '/&nbsp;/iu', ' ', $cleanedText );
-        $cleanedText = html_entity_decode( $cleanedText, ENT_QUOTES | ENT_HTML5 );
 
-        return $cleanedText;
+        return html_entity_decode( $cleanedText, ENT_QUOTES | ENT_HTML5 );
     }
 
     /**
-     * Remove every hidden character like word joiner or half spaces
+     * Remove every hidden character like word joiner or half-spaces
      *
-     * @param $string
+     * @param string $string
      *
      * @return string
      */
-    private function removeHiddenCharacters( $string ) {
+    private function removeHiddenCharacters( string $string ): string {
         $cleanedText = str_replace( "&#8203;", "", $string );
         $cleanedText = str_replace( "\xE2\x80\x8C", "", $cleanedText );
         $cleanedText = str_replace( "\xE2\x80\x8B", "", $cleanedText );
-        $cleanedText = str_replace( "⁠", "", $cleanedText );
 
-        return $cleanedText;
+        return str_replace( "⁠", "", $cleanedText );
     }
 
     /**
@@ -76,7 +74,7 @@ class SizeRestriction {
      *
      * @return bool
      */
-    public function checkLimit( $limit ) {
+    public function checkLimit( $limit ): bool {
         return $this->getCleanedStringLength() <= $limit;
     }
 
@@ -85,7 +83,7 @@ class SizeRestriction {
      *
      * @return int
      */
-    public function getCharactersRemaining( $limit ) {
+    public function getCharactersRemaining( $limit ): int {
         return $limit - $this->getCleanedStringLength();
     }
 
@@ -97,7 +95,7 @@ class SizeRestriction {
      *
      * @return int
      */
-    public function getCleanedStringLength() {
+    public function getCleanedStringLength(): int {
 
         try {
 

@@ -2,7 +2,6 @@
 
 namespace Model\Filters;
 
-use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
@@ -14,6 +13,7 @@ use Model\Filters\DTO\MSPowerpoint;
 use Model\Filters\DTO\MSWord;
 use Model\Filters\DTO\Xml;
 use Model\Filters\DTO\Yaml;
+use Utils\Date\DateTimeUtil;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 

@@ -9,25 +9,25 @@
 namespace View\API\V2\Json;
 
 
-use TmKeyManagement_ClientTmKeyStruct;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
 
 class JobClientKeys {
 
     /**
-     * @var TmKeyManagement_ClientTmKeyStruct[]
+     * @var ClientTmKeyStruct[]
      */
     protected $data = [];
 
     /**
      * Project constructor.
      *
-     * @param TmKeyManagement_ClientTmKeyStruct[] $data
+     * @param ClientTmKeyStruct[] $data
      */
     public function __construct( array $data = [] ) {
         $this->data = $data;
     }
 
-    public static function renderItem( TmKeyManagement_ClientTmKeyStruct $keyStruct ) {
+    public static function renderItem( ClientTmKeyStruct $keyStruct ) {
 
         return [
                 "key"  => $keyStruct->key,

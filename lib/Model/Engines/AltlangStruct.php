@@ -9,7 +9,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\Altlang;
 
 /**
  * Class Engine_AltlangStruct
@@ -43,7 +43,7 @@ class AltlangStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::ALTLANG;
+    public ?string $class_load = Altlang::class;
 
     /**
      * @var ?int

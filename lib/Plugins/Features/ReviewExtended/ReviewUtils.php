@@ -9,11 +9,11 @@
 namespace Features\ReviewExtended;
 
 use Constants;
-use Constants_TranslationStatus;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ModelStruct;
+use Utils\Constants\TranslationStatus;
 
 class ReviewUtils {
 
@@ -24,9 +24,9 @@ class ReviewUtils {
      */
     public static function sourcePageToTranslationStatus( $number = null ): ?string {
         $statuses = [
-                Constants::SOURCE_PAGE_TRANSLATE  => Constants_TranslationStatus::STATUS_TRANSLATED,
-                Constants::SOURCE_PAGE_REVISION   => Constants_TranslationStatus::STATUS_APPROVED,
-                Constants::SOURCE_PAGE_REVISION_2 => Constants_TranslationStatus::STATUS_APPROVED2
+                Constants::SOURCE_PAGE_TRANSLATE  => TranslationStatus::STATUS_TRANSLATED,
+                Constants::SOURCE_PAGE_REVISION   => TranslationStatus::STATUS_APPROVED,
+                Constants::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
         ];
 
         return empty( $number ) ? null : $statuses[ $number ];

@@ -10,7 +10,7 @@ namespace Model\TmKeyManagement;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
-use TmKeyManagement_TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Class MemoryKeyStruct<br>
@@ -24,9 +24,9 @@ class MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
     public int $uid;
 
     /**
-     * @var TmKeyManagement_TmKeyStruct|null
+     * @var TmKeyStruct|null
      */
-    public ?TmKeyManagement_TmKeyStruct $tm_key = null;
+    public ?TmKeyStruct $tm_key = null;
 
     /**
      * Converts the current object into an associative array
@@ -42,9 +42,9 @@ class MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
         if ( $this->tm_key !== null ) {
             /*
              * this should already be done by '$result = (array)$this;'
-             * because TmKeyManagement_TmKeyStruct as toArray method too
+             * because TmKeyStruct as toArray method too
              */
-            if ( $this->tm_key instanceof TmKeyManagement_TmKeyStruct ) {
+            if ( $this->tm_key instanceof TmKeyStruct ) {
                 $result[ 'tm_key' ] = $this->tm_key->toArray();
             }
         }

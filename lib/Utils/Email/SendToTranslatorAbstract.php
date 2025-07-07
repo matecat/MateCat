@@ -7,22 +7,30 @@
  *
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
+use DateInvalidTimeZoneException;
 use DateTime;
+use DateTimeInterface;
 use DateTimeZone;
+use Exception;
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
+use ReflectionException;
 
 abstract class SendToTranslatorAbstract extends AbstractEmail {
 
-    protected $user;
-    protected $projectName;
-    protected $translator;
-    protected $_RoutesMethod;
+    protected UserStruct            $user;
+    protected string                $projectName;
+    protected JobsTranslatorsStruct $translator;
+    protected array                $_RoutesMethod;
 
-    public function __construct( UserStruct $user, JobsTranslatorsStruct $translator, $projectName ) {
+    /**
+     * @throws DateInvalidTimeZoneException
+     * @throws Exception
+     */
+    public function __construct( UserStruct $user, JobsTranslatorsStruct $translator, string $projectName ) {
 
         $this->user        = $user;
         $this->translator  = $translator;
@@ -32,12 +40,15 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
         $translator->delivery_date =
                 ( new Datetime( $translator->delivery_date ) )
                         ->setTimezone( new DateTimeZone( $this->_offsetToTimeZone( $translator->job_owner_timezone ) ) )
-                        ->format( DateTime::RFC850 );
+                        ->format( DateTimeInterface::RFC850 );
 
         $this->_setLayout( 'skeleton.html' );
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient = [ $this->translator->email ];
 
@@ -51,6 +62,9 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
         );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _getTemplateVariables(): array {
 
         $userRecipient = $this->translator->getUser()->getArrayCopy();
@@ -66,20 +80,20 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
                 'email'         => $this->translator->email,
                 'delivery_date' => $this->translator->delivery_date,
                 'project_url'   => call_user_func(
-                    $this->_RoutesMethod,
-                    $this->projectName,
-                    $this->translator->id_job,
-                    $this->translator->job_password,
-                    $this->translator->source,
-                    $this->translator->target
-                 )
+                        $this->_RoutesMethod,
+                        $this->projectName,
+                        $this->translator->id_job,
+                        $this->translator->job_password,
+                        $this->translator->source,
+                        $this->translator->target
+                )
         ];
     }
 
     protected function _offsetToTimeZone( $offset ) {
         $offset             = $offset * 60 * 60;
         $abbreviations_list = array_reverse( timezone_abbreviations_list() );
-        foreach ( $abbreviations_list as $zone => $abbreviation ) {
+        foreach ( $abbreviations_list as $abbreviation ) {
             foreach ( $abbreviation as $city ) {
                 if ( $city[ 'offset' ] == $offset && $city[ 'timezone_id' ] != null ) {
                     return $city[ 'timezone_id' ];

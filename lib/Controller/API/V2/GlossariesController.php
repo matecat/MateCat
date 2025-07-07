@@ -18,8 +18,8 @@ use Klein\Request;
 use Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use TMS\TMSFile;
-use TMS\TMSService;
+use Utils\TMS\TMSFile;
+use Utils\TMS\TMSService;
 use Validator\Contracts\ValidatorObject;
 use Validator\GlossaryCSVValidator;
 

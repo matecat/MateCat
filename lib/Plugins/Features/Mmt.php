@@ -10,14 +10,11 @@
 namespace Features;
 
 
-use Constants_Engines;
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
 use Engine;
 use Engines\MMT\MMTServiceApiException;
-use Engines_AbstractEngine;
-use Engines_MMT;
 use Exception;
 use INIT;
 use Log;
@@ -34,9 +31,12 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_TmKeyManagement;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\MMT as MMTEngine;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class Mmt extends BaseFeature {
 
@@ -48,13 +48,13 @@ class Mmt extends BaseFeature {
      * Called in @see Bootstrap::notifyBootCompleted
      */
     public static function bootstrapCompleted() {
-        Constants_Engines::setInEnginesList( Constants_Engines::MMT );
+        EngineConstants::setInEnginesList( EngineConstants::MMT );
     }
 
     /**
      * Called in @param \Model\Engines\EngineStruct $newCreatedDbRowStruct
      *
-     * @param \Model\Users\UserStruct $userStruct
+     * @param UserStruct $userStruct
      *
      * @return null
      * @throws Exception
@@ -67,7 +67,7 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        /** @var Engines_MMT $newTestCreatedMT */
+        /** @var MMT $newTestCreatedMT */
         try {
             $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
         } catch ( Exception $exception ) {
@@ -109,7 +109,7 @@ class Mmt extends BaseFeature {
         }
 
         $UserMetadataDao = new MetadataDao();
-        $UserMetadataDao->set( $userStruct->uid, self::FEATURE_CODE, $newCreatedDbRowStruct->id );
+        $UserMetadataDao->set( $userStruct->uid, MMTEngine::class, $newCreatedDbRowStruct->id );
 
         return $newCreatedDbRowStruct;
 
@@ -125,7 +125,7 @@ class Mmt extends BaseFeature {
      *
      */
     public function engineCreationFailed( $errorObject, $class_load ) {
-        if ( $class_load == Constants_Engines::MMT ) {
+        if ( $class_load == EngineConstants::MMT ) {
             return [ 'code' => 403, 'message' => "Creation failed. Only one ModernMT engine is allowed." ];
         }
 
@@ -135,21 +135,21 @@ class Mmt extends BaseFeature {
     /**
      * Called in
      *
-     * @param array                  $config
-     * @param Engines_AbstractEngine $engine
-     * @param JobStruct              $jobStruct
+     * @param array                         $config
+     * @param \Utils\Engines\AbstractEngine $engine
+     * @param JobStruct                     $jobStruct
      *
      * @return array
      * @throws Exception
      * @see getContributionController::doAction()
      *
      */
-    public static function beforeGetContribution( $config, Engines_AbstractEngine $engine, JobStruct $jobStruct ) {
+    public static function beforeGetContribution( $config, AbstractEngine $engine, JobStruct $jobStruct ) {
 
-        if ( $engine instanceof Engines_MMT ) {
+        if ( $engine instanceof MMTEngine ) {
 
             //get the Owner Keys from the Job
-            $tm_keys          = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobStruct->tm_keys ], 'r' );
+            $tm_keys          = TmKeyManager::getOwnerKeys( [ $jobStruct->tm_keys ], 'r' );
             $config[ 'keys' ] = array_map( function ( $tm_key ) {
                 /**
                  * @var $tm_key MemoryKeyStruct
@@ -234,7 +234,7 @@ class Mmt extends BaseFeature {
     public function filterCreateProjectFeatures( $projectFeatures, $controller, $mt_engine_id ) {
 
         $engine = Engine::getInstance( $mt_engine_id );
-        if ( $engine instanceof Engines_MMT ) {
+        if ( $engine instanceof MMT ) {
             $feature               = new BasicFeatureStruct();
             $feature->feature_code = self::FEATURE_CODE;
             $projectFeatures[]     = $feature;
@@ -264,15 +264,15 @@ class Mmt extends BaseFeature {
      */
     public function buildNewEngineStruct( $isValid, $data ) {
 
-        if ( strtolower( Constants_Engines::MMT ) == $data->providerName ) {
+        if ( strtolower( EngineConstants::MMT ) == $data->providerName ) {
 
             /**
-             * @var $featureSet \Model\FeaturesBase\FeatureSet
+             * @var $featureSet FeatureSet
              */
             $featureSet = $data->featureSet;
 
             /**
-             * @var $logged_user \Model\Users\UserStruct
+             * @var $logged_user UserStruct
              */
             $logged_user = $data->logged_user;
 
@@ -282,7 +282,7 @@ class Mmt extends BaseFeature {
             $newEngineStruct = MMTStruct::getStruct();
 
             $newEngineStruct->uid                                        = $logged_user->uid;
-            $newEngineStruct->type                                       = Constants_Engines::MT;
+            $newEngineStruct->type                                       = EngineConstants::MT;
             $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $data->engineData[ 'secret' ];
             $newEngineStruct->extra_parameters[ 'MMT-pretranslate' ]     = $data->engineData[ 'pretranslate' ];
             $newEngineStruct->extra_parameters[ 'MMT-preimport' ]        = $data->engineData[ 'preimport' ];
@@ -321,7 +321,7 @@ class Mmt extends BaseFeature {
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
-             * @var Engines_MMT $MMTEngine
+             * @var MMT $MMTEngine
              */
             $MMTEngine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
             $engineStruct = $MMTEngine->getEngineRecord();

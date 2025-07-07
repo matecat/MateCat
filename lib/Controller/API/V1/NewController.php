@@ -3,20 +3,15 @@
 namespace Controller\API\V1;
 
 use Constants;
-use Constants_ProjectStatus;
-use Constants_TmKeyPermissions;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Engine;
-use Engines_DeepL;
 use Exception;
 use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
-use Langs\LanguageDomains;
-use Langs\Languages;
 use Log;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
@@ -45,15 +40,20 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Xliff\XliffConfigTemplateDao;
-use ProjectQueue\Queue;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
 use Utils;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\DeepL;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\ProjectQueue\Queue;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 use Validator\Contracts\ValidatorObject;
 use Validator\EngineValidator;
 use Validator\JSONSchema\JSONValidator;
@@ -155,7 +155,7 @@ class NewController extends KleinController {
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
-        $projectStructure[ 'status' ]                   = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
@@ -189,11 +189,11 @@ class NewController extends KleinController {
 
         // DeepL
         $engine = Engine::getInstance( $request[ 'mt_engine' ] );
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_formality' ] !== null ) {
+        if ( $engine instanceof DeepL and $request[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
         }
 
@@ -802,7 +802,7 @@ class NewController extends KleinController {
                     $keyRing = $mkDao->read(
                             ( new MemoryKeyStruct( [
                                     'uid'    => $uid,
-                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                                    'tm_key' => new TmKeyStruct( $this_tm_key )
                             ] )
                             )
                     );
@@ -834,9 +834,9 @@ class NewController extends KleinController {
      */
     private static function sanitizeTmKeyArr( $elem ): array {
 
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }
@@ -1254,7 +1254,7 @@ class NewController extends KleinController {
                 break;
             //permission string value is not allowed
             default:
-                $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
+                $allowed_permissions = implode( ", ", TmKeyPermissions::$_accepted_grants );
                 throw new Exception( "Invalid permission modifier string. Allowed: <empty>, $allowed_permissions" );
         }
 

@@ -2,9 +2,9 @@
 
 namespace Validator;
 
-use Langs\Languages;
 use Utils;
 use Utils\Files\CSV;
+use Utils\Langs\Languages;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
 

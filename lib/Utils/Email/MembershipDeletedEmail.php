@@ -6,7 +6,7 @@
  * Time: 15:35
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Exception;
@@ -15,21 +15,21 @@ use Model\Users\UserStruct;
 
 class MembershipDeletedEmail extends AbstractEmail {
 
-    protected $title;
+    protected ?string $title;
 
     /**
      * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
     /**
      * @var UserStruct
      */
-    protected $sender;
+    protected UserStruct $sender;
 
     /**
      * @var TeamStruct
      */
-    protected $team;
+    protected TeamStruct $team;
 
     /**
      * MembershipDeletedEmail constructor.

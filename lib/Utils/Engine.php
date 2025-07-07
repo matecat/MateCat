@@ -3,6 +3,8 @@
 use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EngineInterface;
 
 /**
  * Created by PhpStorm.
@@ -11,16 +13,15 @@ use Model\Engines\EngineStruct;
  * Time: 11.34
  *
  */
-
 class Engine {
 
     /**
      * @param $id
      *
-     * @return Engines_AbstractEngine
+     * @return AbstractEngine
      * @throws Exception
      */
-    public static function getInstance( $id ): Engines_AbstractEngine {
+    public static function getInstance( $id ): AbstractEngine {
 
         if ( !is_numeric( $id ) ) {
             throw new Exception( "Missing id engineRecord", -1 );
@@ -41,13 +42,7 @@ class Engine {
             throw new Exception( "Engine $id not found", -2 );
         }
 
-        $className = 'Engines_' . $engineRecord->class_load;
-        if ( !class_exists( $className ) ) {
-            $className = $engineRecord->class_load;
-            if ( !class_exists( $className ) ) {
-                throw new Exception( "Engine Class $className not Found" );
-            }
-        }
+        $className = self::getFullyQualifiedClassName( $engineRecord->class_load );
 
         return new $className( $engineRecord );
 
@@ -56,25 +51,29 @@ class Engine {
     /**
      * @param EngineStruct $engineRecord
      *
-     * @return Engines_EngineInterface
+     * @return EngineInterface
      * @throws Exception
      */
-    public static function createTempInstance( EngineStruct $engineRecord ): Engines_EngineInterface {
+    public static function createTempInstance( EngineStruct $engineRecord ): EngineInterface {
+        $className                = self::getFullyQualifiedClassName( $engineRecord->class_load );
+        $engineRecord->class_load = $className;
 
-        $className = 'Engines_' . $engineRecord->class_load;
+        return new $engineRecord->class_load( $engineRecord );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function getFullyQualifiedClassName( string $_className ): string {
+        $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if ( !class_exists( $className ) ) {
-            $className = $engineRecord->class_load; // fully qualified class name
-            if ( !class_exists( $className ) ) {
-                $className = 'Utils\Engines\\' . $engineRecord->class_load; // guess
-                if ( !class_exists( $className ) ) {
-                    throw new Exception( "Engine Class $engineRecord->class_load not Found" );
-                }
-                // we found the right class name, overwrite the fake record
-                $engineRecord->class_load = $className;
+            if ( !class_exists( $_className ) ) {
+                throw new Exception( "Engine Class $className not Found" );
             }
+            $className = $_className; // use the class name as is
         }
 
-        return new $className( $engineRecord );
+        return $className;
     }
 
 }

@@ -7,11 +7,10 @@
  *
  */
 
-namespace Contribution;
+namespace Utils\Contribution;
 
 
 use Engine;
-use Engines_AbstractEngine;
 use Exception;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
@@ -19,8 +18,9 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use Utils\Engines\AbstractEngine;
 
-class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct {
 
     // Needed by getSessionId()
     public ?int    $id_file  = null;
@@ -97,21 +97,21 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
     ### NOT SERIALIZABLE Private members ###
 
     /**
-     * @var ?Engines_AbstractEngine
+     * @var ?\Utils\Engines\AbstractEngine
      */
-    private ?Engines_AbstractEngine $tmEngine = null;
+    private ?AbstractEngine $tmEngine = null;
 
     /**
-     * @var ?Engines_AbstractEngine
+     * @var ?AbstractEngine
      */
-    private ?Engines_AbstractEngine $mt_engine = null;
+    private ?AbstractEngine $mt_engine = null;
 
     /**
      * @param JobStruct $jobStruct
      *
      * @return $this
      */
-    public function setJobStruct( JobStruct $jobStruct ): ContributionRequestStruct {
+    public function setJobStruct( JobStruct $jobStruct ): GetContributionRequest {
         $this->jobStruct = $jobStruct->toArray();
 
         return $this;
@@ -122,7 +122,7 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
      *
      * @return $this
      */
-    public function setProjectStruct( ProjectStruct $projectStruct ): ContributionRequestStruct {
+    public function setProjectStruct( ProjectStruct $projectStruct ): GetContributionRequest {
         $this->projectStruct = $projectStruct->toArray();
 
         return $this;
@@ -133,7 +133,7 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
      *
      * @return $this
      */
-    public function setUser( UserStruct $user ): ContributionRequestStruct {
+    public function setUser( UserStruct $user ): GetContributionRequest {
         $this->user = $user->toArray();
 
         return $this;
@@ -157,10 +157,10 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return AbstractEngine
      * @throws Exception
      */
-    public function getTMEngine( FeatureSet $featureSet ): Engines_AbstractEngine {
+    public function getTMEngine( FeatureSet $featureSet ): AbstractEngine {
         if ( $this->tmEngine == null ) {
             $this->tmEngine = Engine::getInstance( $this->getJobStruct()->id_tms );
             $this->tmEngine->setFeatureSet( $featureSet );
@@ -172,10 +172,10 @@ class ContributionRequestStruct extends AbstractDaoObjectStruct implements IDaoS
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return \Utils\Engines\AbstractEngine
      * @throws Exception
      */
-    public function getMTEngine( FeatureSet $featureSet ): Engines_AbstractEngine {
+    public function getMTEngine( FeatureSet $featureSet ): AbstractEngine {
         if ( $this->mt_engine == null ) {
             $this->mt_engine = Engine::getInstance( $this->getJobStruct()->id_mt_engine );
             $this->mt_engine->setFeatureSet( $featureSet );

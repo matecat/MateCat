@@ -7,7 +7,6 @@
  */
 
 namespace Controller\API\V2;
-use Constants_TranslationStatus;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -16,6 +15,7 @@ use Exception;
 use Features\ReviewExtended\ReviewUtils;
 use Model\Translations\SegmentTranslationDao;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
+use Utils\Constants\TranslationStatus;
 use WorkerClient;
 
 
@@ -58,7 +58,7 @@ class JobStatusController extends KleinController {
         }
 
         if ( in_array( $status, [
-                Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
+                TranslationStatus::STATUS_TRANSLATED, TranslationStatus::STATUS_APPROVED, TranslationStatus::STATUS_APPROVED2
         ] ) ) {
             $unchangeable_segments = SegmentTranslationDao::getUnchangeableStatus(
                     $this->chunk, $segments_id, $status, $source_page
@@ -75,7 +75,7 @@ class JobStatusController extends KleinController {
                                     'chunk'              => $this->chunk,
                                     'destination_status' => $status,
                                     'id_user'            => ( $this->isLoggedIn() ? $this->getUser()->uid : null ),
-                                    'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),
+                                    'is_review'          => ( $status == TranslationStatus::STATUS_APPROVED ),
                                     'revision_number'    => $this->request->param( 'revision_number' )
                             ], [ 'persistent' => true ]
                     );

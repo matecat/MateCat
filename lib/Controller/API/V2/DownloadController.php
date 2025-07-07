@@ -9,7 +9,6 @@ use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
 use Google_Service_Drive_DriveFile;
 use INIT;
-use Langs\Languages;
 use Log;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
@@ -41,6 +40,7 @@ use Predis\Connection\ConnectionException;
 use RedisHandler;
 use ReflectionException;
 use Utils;
+use Utils\Langs\Languages;
 use View\API\Commons\ZipContentObject;
 use XliffReplacer\XliffReplacerCallback;
 
@@ -464,7 +464,7 @@ class DownloadController extends AbstractDownloadController {
             } catch ( Exception $e ) {
 
                 $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
-                $msg .= "\n\n Request: " . var_export( $_REQUEST, true );
+                $msg .= "\n\n Get: " . var_export( $_REQUEST, true );
                 Log::setLogFileName( 'fatal_errors.txt' );
                 Log::doJsonLog( $msg );
                 Utils::sendErrMailReport( $msg );

@@ -5,8 +5,8 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
-use OutsourceTo\Translated;
 use ReflectionException;
+use Utils\OutsourceTo\Translated;
 
 class OutsourceToController extends KleinController {
 

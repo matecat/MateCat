@@ -7,7 +7,7 @@
  *
  */
 
-namespace Engines\Traits;
+namespace Utils\Engines\Traits;
 
 
 use Exception;
@@ -16,7 +16,9 @@ use Model\Engines\EngineDAO;
 
 trait Oauth {
 
-    protected function getAuthParameters() {
+    protected int $token_endlife = 0;
+
+    protected function getAuthParameters(): array {
         return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
@@ -27,10 +29,10 @@ trait Oauth {
     /**
      * Check for time to live and refresh cache and token info
      *
-     * @return mixed
+     * @return void
      * @throws Exception
      */
-    protected function _authenticate() {
+    protected function _authenticate(): void {
 
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
@@ -80,7 +82,7 @@ trait Oauth {
         $engineStruct->id = $record->id;
 
         //variable assignment only used for debugging purpose
-        $debugParam = $engineDAO->destroyCache( $engineStruct );
+        $engineDAO->destroyCache( $engineStruct );
         $engineDAO->updateByStruct( $record );
 
         if ( is_null( $this->token ) ) {
@@ -89,7 +91,7 @@ trait Oauth {
 
     }
 
-    private function isJson( $string ) {
+    private function isJson( $string ): bool {
         if ( is_array( $string ) ) {
             return false;
         }
@@ -98,6 +100,9 @@ trait Oauth {
         return ( json_last_error() == JSON_ERROR_NONE );
     }
 
+    /**
+     * @throws Exception
+     */
     public function get( $_config ) {
 
         $cycle = @(int)func_get_arg( 1 );
@@ -150,7 +155,7 @@ trait Oauth {
 
     abstract protected function _checkAuthFailure();
 
-    abstract protected function _setTokenEndLife( $expires_in_seconds = null );
+    abstract protected function _setTokenEndLife( ?int $expires_in_seconds = null );
 
     abstract protected function _fillCallParameters( $_config );
 

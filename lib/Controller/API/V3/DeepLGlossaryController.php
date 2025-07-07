@@ -4,11 +4,11 @@ namespace Controller\API\V3;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Engines_DeepL;
 use Exception;
 use Model\Conversion\Upload;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use Utils\Engines\DeepL;
 use Utils\Files\CSV as CSVParser;
 use Validator\EngineValidator;
 
@@ -228,12 +228,12 @@ class DeepLGlossaryController extends KleinController {
     /**
      * @param $engineId
      *
-     * @return Engines_DeepL
+     * @return DeepL
      * @throws Exception
      */
-    private function getDeepLClient( $engineId ): Engines_DeepL {
-        /** @var Engines_DeepL $engine */
-        $engine      = EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Engines_DeepL::class );
+    private function getDeepLClient( $engineId ): DeepL {
+        /** @var \Utils\Engines\DeepL $engine */
+        $engine      = EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, DeepL::class );
         $extraParams = $engine->getEngineRecord()->extra_parameters;
 
         if ( !isset( $extraParams[ 'DeepL-Auth-Key' ] ) ) {

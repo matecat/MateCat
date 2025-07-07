@@ -13,14 +13,14 @@ use Constants;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use CookieManager;
-use Engines_Intento;
 use Exception;
 use INIT;
-use Langs\LanguageDomains;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
 use Utils;
+use Utils\Engines\Intento;
+use Utils\Langs\LanguageDomains;
 
 class UploadPageController extends BaseKleinViewController {
 
@@ -45,7 +45,7 @@ class UploadPageController extends BaseKleinViewController {
                 'maxNumberFiles'                        => INIT::$MAX_NUM_FILES,
                 'subjects'                              => new PHPTalMap( LanguageDomains::getInstance()->getEnabledDomains() ),
                 'formats_number'                        => $this->countSupportedFileTypes(),
-                'translation_engines_intento_prov_json' => new PHPTalMap( Engines_Intento::getProviderList() ),
+                'translation_engines_intento_prov_json' => new PHPTalMap( Intento::getProviderList() ),
                 'tag_projection_languages'              => new PHPTalMap( ProjectOptionsSanitizer::$tag_projection_allowed_languages ),
                 'developerKey'                          => INIT::$GOOGLE_OAUTH_BROWSER_API_KEY,
                 'clientId'                              => INIT::$GOOGLE_OAUTH_CLIENT_ID

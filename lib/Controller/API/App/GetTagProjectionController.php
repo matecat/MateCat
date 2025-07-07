@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ExternalServiceException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
-use Engines_MyMemory;
 use Exception;
 use InvalidArgumentException;
 use Log;
@@ -16,6 +15,7 @@ use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
 use Utils;
+use Utils\Engines\MyMemory;
 
 class GetTagProjectionController extends KleinController {
 
@@ -37,7 +37,7 @@ class GetTagProjectionController extends KleinController {
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         /**
-         * @var $engine Engines_MyMemory
+         * @var $engine MyMemory
          */
         $engine = Engine::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );

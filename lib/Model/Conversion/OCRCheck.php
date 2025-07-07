@@ -3,8 +3,8 @@
 namespace Model\Conversion;
 
 use INIT;
-use Langs\Languages;
 use Model\Conversion\MimeTypes\MimeTypes;
+use Utils\Langs\Languages;
 
 /**
  * Created by PhpStorm.

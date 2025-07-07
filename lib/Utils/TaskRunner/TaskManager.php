@@ -7,15 +7,15 @@
  *
  */
 
-namespace TaskRunner;
+namespace Utils\TaskRunner;
 
 use AMQHandler;
 use Exception;
 use INIT;
 use Log;
 use ReflectionException;
-use TaskRunner\Commons\AbstractDaemon;
-use TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\AbstractDaemon;
+use Utils\TaskRunner\Commons\Context;
 
 /**
  * Class Analysis_Manager
@@ -50,11 +50,6 @@ class TaskManager extends AbstractDaemon {
      * Exception code, error to fork the process
      */
     const ERR_NOT_FORK = 1;
-
-    /**
-     * Exception code, error to increment the number of processes on the Redis key
-     */
-    const ERR_NOT_INCREMENT = 2;
 
     /**
      * TaskManager constructor.
@@ -302,7 +297,7 @@ class TaskManager extends AbstractDaemon {
      */
     protected function _killPids( Context $queueInfo = null, int $pid = 0, int $num = 0 ) {
 
-        $this->_logTimeStampedMsg( "Request to kill some processes." );
+        $this->_logTimeStampedMsg( "Get to kill some processes." );
         $this->_logTimeStampedMsg( "Pid List: " . @var_export( $queueInfo->pid_set_name, true ) );
         $this->_logTimeStampedMsg( "Pid:      " . @var_export( $pid, true ) );
         $this->_logTimeStampedMsg( "Num:      " . @var_export( $num, true ) );

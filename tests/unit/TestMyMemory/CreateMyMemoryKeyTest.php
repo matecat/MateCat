@@ -4,11 +4,14 @@ use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\CreateUserResponse;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::createMyMemoryKey
+ * @covers MyMemory::createMyMemoryKey
  * User: dinies
  * Date: 18/05/16
  * Time: 18.51
@@ -16,7 +19,7 @@ use TestHelpers\AbstractTest;
 class CreateMyMemoryKeyTest extends AbstractTest {
     /**
      * @group  regression
-     * @covers Engines_MyMemory::createMyMemoryKey
+     * @covers MyMemory::createMyMemoryKey
      */
     public function test_createMyMemoryKey_mocked_engine_avoiding_uncontrolled_key_spawning() {
 
@@ -46,7 +49,7 @@ T;
         /**
          * creation of the engine
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
 
 
@@ -55,7 +58,7 @@ T;
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_CreateUserResponse );
+        $this->assertTrue( $result instanceof CreateUserResponse );
         $this->assertEquals( "8dd91ebad29bb0ad0b08", $result->key );
         $this->assertEquals( "MyMemory_0837f645849e069fd481", $result->id );
         $this->assertEquals( "1f8fae3dca", $result->pass );
@@ -63,7 +66,7 @@ T;
         $this->assertFalse( isset( $result->responseDetails ) );
         $this->assertFalse( isset( $result->responseData ) );
 
-        $this->assertTrue( $result->error instanceof Engines_Results_ErrorMatches );
+        $this->assertTrue( $result->error instanceof ErrorResponse );
         $this->assertEquals( 0, $result->error->code );
         $this->assertEquals( "", $result->error->message );
         /**
@@ -79,7 +82,7 @@ T;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::createMyMemoryKey
+     * @covers MyMemory::createMyMemoryKey
      */
     public function test_createMyMemoryKey_with_error_from_mocked__call_for_coverage_purpose() {
 
@@ -113,9 +116,9 @@ T;
 
         /**
          * creation of the engine
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
 
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
@@ -125,7 +128,7 @@ T;
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_CreateUserResponse );
+        $this->assertTrue( $result instanceof CreateUserResponse );
         $this->assertEquals( "", $result->key );
         $this->assertEquals( "", $result->id );
         $this->assertEquals( "", $result->pass );
@@ -133,7 +136,7 @@ T;
         $this->assertFalse( isset( $result->responseDetails ) );
         $this->assertFalse( isset( $result->responseData ) );
 
-        $this->assertTrue( $result->error instanceof Engines_Results_ErrorMatches );
+        $this->assertTrue( $result->error instanceof ErrorResponse );
 
         $this->assertEquals( -6, $result->error->code );
         $this->assertEquals( "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message );

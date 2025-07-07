@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants_Engines;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
@@ -32,9 +31,10 @@ use Model\Exceptions\ValidationError;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use RuntimeException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\Constants\EngineConstants;
 use Utils\Engines\Lara;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Validator\DeepLValidator;
 
 class EngineController extends KleinController {
@@ -74,13 +74,13 @@ class EngineController extends KleinController {
         $validEngine = true;
         switch ( strtolower( $provider ) ) {
 
-            case strtolower( Constants_Engines::DEEPL ):
+            case strtolower( EngineConstants::DEEPL ):
 
                 $newEngineStruct = DeepLStruct::getStruct();
 
                 $newEngineStruct->name                                 = $name;
                 $newEngineStruct->uid                                  = $this->user->uid;
-                $newEngineStruct->type                                 = Constants_Engines::MT;
+                $newEngineStruct->type                                 = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'DeepL-Auth-Key' ] = $engineData[ 'client_id' ];
 
                 DeepLValidator::validate( $newEngineStruct );
@@ -88,7 +88,7 @@ class EngineController extends KleinController {
                 break;
 
 
-            case strtolower( Constants_Engines::MICROSOFT_HUB ):
+            case strtolower( EngineConstants::MICROSOFT_HUB ):
 
                 /**
                  * Create a record of type MicrosoftHub
@@ -97,12 +97,12 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                            = $name;
                 $newEngineStruct->uid                             = $this->user->uid;
-                $newEngineStruct->type                            = Constants_Engines::MT;
+                $newEngineStruct->type                            = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ] = $engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'category' ]  = $engineData[ 'category' ];
                 break;
 
-            case strtolower( Constants_Engines::APERTIUM ):
+            case strtolower( EngineConstants::APERTIUM ):
 
                 /**
                  * Create a record of type APERTIUM
@@ -111,12 +111,12 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
                 break;
 
-            case strtolower( Constants_Engines::ALTLANG ):
+            case strtolower( EngineConstants::ALTLANG ):
 
                 /**
                  * Create a record of type ALTLANG
@@ -125,12 +125,12 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
                 break;
 
-            case strtolower( Constants_Engines::SMART_MATE ):
+            case strtolower( EngineConstants::SMART_MATE ):
 
                 /**
                  * Create a record of type SmartMate
@@ -139,13 +139,13 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_id' ]     = $engineData[ 'client_id' ];
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
                 break;
 
-            case strtolower( Constants_Engines::YANDEX_TRANSLATE ):
+            case strtolower( EngineConstants::YANDEX_TRANSLATE ):
 
                 /**
                  * Create a record of type YandexTranslate
@@ -154,12 +154,12 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
                 break;
 
-            case strtolower( Constants_Engines::GOOGLE_TRANSLATE ):
+            case strtolower( EngineConstants::GOOGLE_TRANSLATE ):
 
                 /**
                  * Create a record of type GoogleTranslate
@@ -168,33 +168,33 @@ class EngineController extends KleinController {
 
                 $newEngineStruct->name                                = $name;
                 $newEngineStruct->uid                                 = $this->user->uid;
-                $newEngineStruct->type                                = Constants_Engines::MT;
+                $newEngineStruct->type                                = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'client_secret' ] = $engineData[ 'secret' ];
 
                 break;
 
-            case strtolower( Constants_Engines::INTENTO ):
+            case strtolower( EngineConstants::INTENTO ):
                 /**
                  * Create a record of type Intento
                  */
                 $newEngineStruct                                         = IntentoStruct::getStruct();
                 $newEngineStruct->name                                   = $name;
                 $newEngineStruct->uid                                    = $this->user->uid;
-                $newEngineStruct->type                                   = Constants_Engines::MT;
+                $newEngineStruct->type                                   = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'apikey' ]           = $engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'provider' ]         = $engineData[ 'provider' ];
                 $newEngineStruct->extra_parameters[ 'providerkey' ]      = $engineData[ 'providerkey' ];
                 $newEngineStruct->extra_parameters[ 'providercategory' ] = $engineData[ 'providercategory' ];
                 break;
 
-            case strtolower( Constants_Engines::LARA ):
+            case strtolower( EngineConstants::LARA ):
                 /**
                  * Create a record of type Lara
                  */
                 $newEngineStruct = LaraStruct::getStruct();
 
                 $newEngineStruct->uid                                        = $this->user->uid;
-                $newEngineStruct->type                                       = Constants_Engines::MT;
+                $newEngineStruct->type                                       = EngineConstants::MT;
                 $newEngineStruct->extra_parameters[ 'Lara-AccessKeyId' ]     = $engineData[ 'lara-access-key-id' ];
                 $newEngineStruct->extra_parameters[ 'Lara-AccessKeySecret' ] = $engineData[ 'secret' ];
                 $newEngineStruct->extra_parameters[ 'MMT-License' ]          = $engineData[ 'mmt-license' ];
@@ -217,7 +217,7 @@ class EngineController extends KleinController {
             throw new DomainException( "Engine not allowed", -4 );
         }
 
-        $engineList      = Constants_Engines::getAvailableEnginesList();
+        $engineList      = EngineConstants::getAvailableEnginesList();
         $UserMetadataDao = new MetadataDao();
         $engineEnabled   = $UserMetadataDao->get( $this->user->uid, $newEngineStruct->class_load );
 
@@ -412,8 +412,9 @@ class EngineController extends KleinController {
         $engine = Engine::createTempInstance( $result );
 
         if ( $engine->isAdaptiveMT() ) {
+            $engName = explode( "\\", $result->class_load );
             //retrieve OWNER Engine License
-            ( new MetadataDao() )->delete( $this->user->uid, $result->class_load ); // engine_id
+            ( new MetadataDao() )->delete( $this->user->uid, array_pop( $engName ) ); // engine_id
         }
 
         $this->response->json( [

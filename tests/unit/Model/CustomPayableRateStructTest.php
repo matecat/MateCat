@@ -1,8 +1,8 @@
 <?php
 
-use Langs\Languages;
 use Model\PayableRates\CustomPayableRateStruct;
 use TestHelpers\AbstractTest;
+use Utils\Langs\Languages;
 
 /**
  * Created by PhpStorm.

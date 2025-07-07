@@ -3,7 +3,6 @@
 namespace Model\Projects;
 
 use ArrayAccess;
-use Constants_ProjectStatus;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
@@ -18,6 +17,7 @@ use Model\RemoteFiles\RemoteFileServiceNameStruct;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use ReflectionException;
+use Utils\Constants\ProjectStatus;
 
 class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
@@ -47,8 +47,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function analysisComplete(): bool {
         return
-                $this->status_analysis == Constants_ProjectStatus::STATUS_DONE ||
-                $this->status_analysis == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+                $this->status_analysis == ProjectStatus::STATUS_DONE ||
+                $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
 
     /**

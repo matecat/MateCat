@@ -6,37 +6,40 @@
  * Time: 18:02
  */
 
-namespace Email;
+namespace Utils\Email;
 
 use Exception;
 use Model\Teams\MembershipStruct;
 use Model\Users\UserStruct;
+use ReflectionException;
 use Routes;
 
 class MembershipCreatedEmail extends AbstractEmail {
 
     /**
-     * @var \Model\Users\UserStruct
+     * @var UserStruct
      */
     protected $user;
 
     /**
      * @var MembershipStruct
      */
-    protected $membership;
+    protected MembershipStruct $membership;
 
-    protected $title;
+    protected ?string $title;
 
     /**
-     * @var  \Model\Users\UserStruct
+     * @var  UserStruct
      */
-    protected $sender;
+    protected UserStruct $sender;
 
     /**
      * MembershipCreatedEmail constructor.
      *
      * @param UserStruct       $sender
      * @param MembershipStruct $membership
+     *
+     * @throws ReflectionException
      */
     public function __construct( UserStruct $sender, MembershipStruct $membership ) {
         $this->user = $membership->getUser();

@@ -8,9 +8,9 @@
  */
 
 use Stomp\Transport\Message;
-use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Commons\ContextList;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 
 class WorkerClient {
 

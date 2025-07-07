@@ -9,7 +9,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\MMT;
 
 /**
  * Class Engine_MMTStruct
@@ -62,7 +62,7 @@ class MMTStruct extends EngineStruct {
     /**
      * @var string|null
      */
-    public ?string $class_load = Constants_Engines::MMT;
+    public ?string $class_load = MMT::class;
 
 
     /**

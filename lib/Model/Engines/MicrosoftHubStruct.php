@@ -9,7 +9,7 @@
 
 namespace Model\Engines;
 
-use Constants_Engines;
+use Utils\Engines\MicrosoftHub;
 
 /**
  * Class Engine_MicrosoftHubStruct
@@ -44,7 +44,7 @@ class MicrosoftHubStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $class_load = Constants_Engines::MICROSOFT_HUB;
+    public ?string $class_load = MicrosoftHub::class;
 
 
     /**
@@ -69,10 +69,12 @@ class MicrosoftHubStruct extends EngineStruct {
     public ?int $penalty = 14;
 
     /**
-     * An empty struct
-     * @return EngineStruct
+     *  An empty struct
+     *
+     * @template T
+     * @return T instance of EngineStruct
      */
-    public static function getStruct(): EngineStruct {
+    public static function getStruct(): MicrosoftHubStruct {
         return new MicrosoftHubStruct();
     }
 

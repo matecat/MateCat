@@ -9,7 +9,6 @@
 namespace Features\TranslationEvents;
 
 use Constants;
-use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\BatchReviewProcessor;
 use Features\TranslationEvents\Model\TranslationEvent;
@@ -20,6 +19,7 @@ use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\TransactionalTrait;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEventsHandler {
 
@@ -110,14 +110,14 @@ class TranslationEventsHandler {
     public function prepareEventStruct( TranslationEvent $event ) {
 
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) &&
+                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES ) &&
                 $event->getSourcePage() < Constants::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
         }
 
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
+                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES ) &&
                 $event->getSourcePage() >= Constants::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );

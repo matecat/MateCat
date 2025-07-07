@@ -122,7 +122,7 @@ class INIT {
      * We proose that lxq_server is in a configuration file
      * lxq_license: ${lxq_license},
      *
-     * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+     * THIS SHOULD BE YOUR LEXIQA LICENSE, Get your license key at
      * @see http://www.lexiqa.net
      *
      */

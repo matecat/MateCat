@@ -22,7 +22,7 @@ class EngineStruct
     public ?int $id = null;
 
     /**
-     * @var string
+     * @var string|null
      */
     public ?string $name = null;
 
@@ -100,8 +100,10 @@ class EngineStruct
     public ?int $uid = null;
 
     /**
-     * An empty struct
-     * @return EngineStruct
+     *  An empty struct
+     *
+     * @template T
+     * @return T instance of EngineStruct
      */
     public static function getStruct(): EngineStruct {
         return new EngineStruct();

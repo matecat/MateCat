@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner;
+namespace Utils\TaskRunner;
 
 use AMQHandler;
 use Bootstrap;
@@ -20,16 +20,16 @@ use ReflectionException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Frame;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Context;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Commons\SignalHandlerTrait;
-use TaskRunner\Exceptions\EmptyElementException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\FrameException;
-use TaskRunner\Exceptions\ReQueueException;
-use TaskRunner\Exceptions\WorkerClassException;
 use Utils;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Commons\SignalHandlerTrait;
+use Utils\TaskRunner\Exceptions\EmptyElementException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\FrameException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TaskRunner\Exceptions\WorkerClassException;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();

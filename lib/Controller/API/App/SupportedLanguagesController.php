@@ -5,7 +5,7 @@ namespace Controller\API\App;
 
 
 use Controller\Abstracts\KleinController;
-use Langs\Languages;
+use Utils\Langs\Languages;
 
 class SupportedLanguagesController extends KleinController {
 

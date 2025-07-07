@@ -7,7 +7,7 @@
  *
  */
 
-namespace Engines\Traits;
+namespace Utils\Engines\Traits;
 
 
 use Exception;
@@ -59,12 +59,11 @@ trait HotSwap {
      *     }
      *</code>
      *
-     * @param $project_id
+     * @param int $project_id
      *
      * @throws ReflectionException
-     * @throws Exception
      */
-    protected function swapOff( $project_id ) {
+    protected function swapOff( int $project_id ) {
 
         //There should be more than one job per project, to be generic use a foreach
         $jobDao     = new JobDao();

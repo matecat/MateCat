@@ -4,10 +4,10 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use INIT;
-use Langs\Languages;
 use Log;
 use Utils;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
+use Utils\Langs\Languages;
 
 class AIAssistantController extends KleinController {
 

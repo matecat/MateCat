@@ -1,24 +1,27 @@
 <?php
 
+namespace Utils\Search;
+
+use InvalidArgumentException;
 use Model\Search\MySQLReplaceEventDAO;
 use Model\Search\MySQLReplaceEventIndexDAO;
 use Model\Search\RedisReplaceEventDAO;
 use Model\Search\RedisReplaceEventIndexDAO;
 
-class Search_ReplaceHistoryFactory {
+class ReplaceHistoryFactory {
 
     /**
      * @param $id_job
      * @param $driver
      * @param $ttl
      *
-     * @return Search_ReplaceHistory
+     * @return ReplaceHistory
      */
-    public static function create( $id_job, $driver, $ttl ): Search_ReplaceHistory {
+    public static function create( $id_job, $driver, $ttl ): ReplaceHistory {
         self::_checkDriver( $driver );
 
         if ( $driver === 'redis' ) {
-            return new Search_ReplaceHistory(
+            return new ReplaceHistory(
                     $id_job,
                     new RedisReplaceEventDAO(),
                     new RedisReplaceEventIndexDAO(),
@@ -26,7 +29,7 @@ class Search_ReplaceHistoryFactory {
             );
         }
 
-        return new Search_ReplaceHistory(
+        return new ReplaceHistory(
                 $id_job,
                 new MySQLReplaceEventDAO(),
                 new MySQLReplaceEventIndexDAO(),

@@ -41,7 +41,8 @@ class File {
     }
 
     /**
-     * @param $filepath
+     * @param      $filepath
+     * @param null $options
      *
      * @return string|string[]
      */

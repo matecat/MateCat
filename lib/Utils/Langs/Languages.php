@@ -1,6 +1,6 @@
 <?php
 
-namespace Langs;
+namespace Utils\Langs;
 
 use INIT;
 use Log;

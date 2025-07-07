@@ -2,7 +2,6 @@
 
 namespace Model\PayableRates;
 
-use Date\DateTimeUtil;
 use DateTime;
 use Exception;
 use Model\Analysis\PayableRates;
@@ -15,6 +14,7 @@ use PDO;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
+use Utils\Date\DateTimeUtil;
 
 class CustomPayableRateDao extends AbstractDao {
     const TABLE           = 'payable_rate_templates';

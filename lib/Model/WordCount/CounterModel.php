@@ -11,10 +11,10 @@
 namespace Model\WordCount;
 
 use BadMethodCallException;
-use Constants_TranslationStatus;
 use Exception;
 use LogicException;
 use ReflectionClass;
+use Utils\Constants\TranslationStatus;
 
 class CounterModel {
 
@@ -43,7 +43,7 @@ class CounterModel {
      */
     public function __construct( WordCountStruct $oldWCount = null ) {
 
-        $reflect          = new ReflectionClass( Constants_TranslationStatus::class );
+        $reflect          = new ReflectionClass( TranslationStatus::class );
         self::$constCache = array_flip( $reflect->getConstants() );
 
         if ( $oldWCount !== null ) {
@@ -223,19 +223,19 @@ class CounterModel {
         $wStruct = new WordCountStruct();
         $wStruct->setIdJob( $job_details[ 'id' ] );
         $wStruct->setJobPassword( $jPassword );
-        $wStruct->setNewWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ][ 'weighted' ] );
-        $wStruct->setDraftWords( $job_details[ Constants_TranslationStatus::STATUS_DRAFT ][ 'weighted' ] );
-        $wStruct->setTranslatedWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ][ 'weighted' ] );
-        $wStruct->setApprovedWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ][ 'weighted' ] );
-        $wStruct->setApproved2Words( $job_details[ Constants_TranslationStatus::STATUS_APPROVED2 ][ 'weighted' ] );
-        $wStruct->setRejectedWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ][ 'weighted' ] );
+        $wStruct->setNewWords( $job_details[ TranslationStatus::STATUS_NEW ][ 'weighted' ] );
+        $wStruct->setDraftWords( $job_details[ TranslationStatus::STATUS_DRAFT ][ 'weighted' ] );
+        $wStruct->setTranslatedWords( $job_details[ TranslationStatus::STATUS_TRANSLATED ][ 'weighted' ] );
+        $wStruct->setApprovedWords( $job_details[ TranslationStatus::STATUS_APPROVED ][ 'weighted' ] );
+        $wStruct->setApproved2Words( $job_details[ TranslationStatus::STATUS_APPROVED2 ][ 'weighted' ] );
+        $wStruct->setRejectedWords( $job_details[ TranslationStatus::STATUS_REJECTED ][ 'weighted' ] );
 
-        $wStruct->setNewRawWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ][ 'raw' ] );
-        $wStruct->setDraftRawWords( $job_details[ Constants_TranslationStatus::STATUS_DRAFT ][ 'raw' ] );
-        $wStruct->setTranslatedRawWords( $job_details[ Constants_TranslationStatus::STATUS_TRANSLATED ][ 'raw' ] );
-        $wStruct->setApprovedRawWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED ][ 'raw' ] );
-        $wStruct->setApproved2RawWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED2 ][ 'raw' ] );
-        $wStruct->setRejectedRawWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ][ 'raw' ] );
+        $wStruct->setNewRawWords( $job_details[ TranslationStatus::STATUS_NEW ][ 'raw' ] );
+        $wStruct->setDraftRawWords( $job_details[ TranslationStatus::STATUS_DRAFT ][ 'raw' ] );
+        $wStruct->setTranslatedRawWords( $job_details[ TranslationStatus::STATUS_TRANSLATED ][ 'raw' ] );
+        $wStruct->setApprovedRawWords( $job_details[ TranslationStatus::STATUS_APPROVED ][ 'raw' ] );
+        $wStruct->setApproved2RawWords( $job_details[ TranslationStatus::STATUS_APPROVED2 ][ 'raw' ] );
+        $wStruct->setRejectedRawWords( $job_details[ TranslationStatus::STATUS_REJECTED ][ 'raw' ] );
 
         $wordCounterDao->initializeWordCount( $wStruct );
 

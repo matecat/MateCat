@@ -3,14 +3,8 @@
 namespace Utils\Engines;
 
 use AMQHandler;
-use Constants_Engines;
 use Engine;
 use Engines\MMT\MMTServiceApiException;
-use Engines_AbstractEngine;
-use Engines_EngineInterface;
-use Engines_MMT;
-use Engines_Results_AbstractResponse;
-use Engines_Results_MyMemory_Matches;
 use Exception;
 use Features\Mmt;
 use INIT;
@@ -32,8 +26,12 @@ use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\MMT as MMTEngine;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 
 /**
  * Created by PhpStorm.
@@ -42,11 +40,11 @@ use TmKeyManagement_TmKeyStruct;
  * Time: 17:56
  *
  */
-class Lara extends Engines_AbstractEngine {
+class Lara extends AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptiveMT
+     * @see AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
     protected bool $_isAdaptiveMT = true;
@@ -54,14 +52,14 @@ class Lara extends Engines_AbstractEngine {
     private ?Translator $clientLoaded = null;
 
     /**
-     * @var Engines_MMT
+     * @var MMTEngine
      */
-    private Engines_EngineInterface $mmt_GET_Fallback;
+    private MMTEngine $mmt_GET_Fallback;
 
     /**
-     * @var ?Engines_MMT
+     * @var ?MMTEngine
      */
-    private ?Engines_EngineInterface $mmt_SET_PrivateLicense = null;
+    private ?MMTEngine $mmt_SET_PrivateLicense = null;
 
     /**
      * @throws Exception
@@ -69,7 +67,7 @@ class Lara extends Engines_AbstractEngine {
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
 
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
@@ -93,23 +91,31 @@ class Lara extends Engines_AbstractEngine {
         $credentials = new LaraCredentials( $extraParams[ 'Lara-AccessKeyId' ], $extraParams[ 'Lara-AccessKeySecret' ] );
 
         $mmtStruct                   = MMTStruct::getStruct();
-        $mmtStruct->type             = Constants_Engines::MT;
+        $mmtStruct->type             = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
                 'MMT-License'      => $extraParams[ 'MMT-License' ] ?: INIT::$DEFAULT_MMT_KEY,
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
-        $this->mmt_GET_Fallback      = Engine::createTempInstance( $mmtStruct );
+        /**
+         * @var MMTEngine $engine
+         */
+        $engine                 = Engine::createTempInstance( $mmtStruct );
+        $this->mmt_GET_Fallback = $engine;
 
         if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
-            $mmtStruct                    = MMTStruct::getStruct();
-            $mmtStruct->type              = Constants_Engines::MT;
-            $mmtStruct->extra_parameters  = [
+            $mmtStruct                   = MMTStruct::getStruct();
+            $mmtStruct->type             = EngineConstants::MT;
+            $mmtStruct->extra_parameters = [
                     'MMT-License'      => $extraParams[ 'MMT-License' ],
                     'MMT-pretranslate' => true,
                     'MMT-preimport'    => false,
             ];
-            $this->mmt_SET_PrivateLicense = Engine::createTempInstance( $mmtStruct );
+            /**
+             * @var MMTEngine $engine
+             */
+            $engine                       = Engine::createTempInstance( $mmtStruct );
+            $this->mmt_SET_PrivateLicense = $engine;
         }
 
         $this->clientLoaded = new Translator( $credentials );
@@ -167,17 +173,17 @@ class Lara extends Engines_AbstractEngine {
      *
      * @param $_config
      *
-     * @return array|Engines_Results_AbstractResponse
+     * @return array|TMSAbstractResponse
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
      */
     public function get( $_config ) {
 
-        $tm_keys           = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
+        $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {
             /**
-             * @var $tm_key \Model\TmKeyManagement\MemoryKeyStruct
+             * @var $tm_key MemoryKeyStruct
              */
             return $tm_key->key;
         }, $tm_keys );
@@ -226,7 +232,7 @@ class Lara extends Engines_AbstractEngine {
 
             Log::doJsonLog( [
                     'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
-                    'timing'       => [ 'Total Time' => $time, 'Request Start Time' => $time_start, 'Request End Time' => $time_end ],
+                    'timing'       => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
                     'q'            => $request_translation,
                     'adapt_to'     => $_lara_keys,
                     'source'       => $_config[ 'source' ],
@@ -281,7 +287,7 @@ class Lara extends Engines_AbstractEngine {
             return $this->mmt_GET_Fallback->get( $_config );
         }
 
-        return ( new Engines_Results_MyMemory_Matches( [
+        return ( new Matches( [
                 'source'          => $_config[ 'source' ],
                 'target'          => $_config[ 'target' ],
                 'raw_segment'     => $_config[ 'segment' ],
@@ -370,7 +376,7 @@ class Lara extends Engines_AbstractEngine {
 
             Log::doJsonLog( [
                     'LARA REQUEST'    => 'PUT https://api.laratranslate.com/memories/content',
-                    'timing'          => [ 'Total Time' => $time, 'Request Start Time' => $time_start, 'Request End Time' => $time_end ],
+                    'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
                     'keys'            => $_keys,
                     'source'          => $_config[ 'source' ],
                     'target'          => $_config[ 'target' ],
@@ -387,12 +393,12 @@ class Lara extends Engines_AbstractEngine {
         }
 
         // let MMT to have the last word on requeue
-        return !empty( $this->mmt_SET_PrivateLicense ) ? $this->mmt_SET_PrivateLicense->update( $_config ) : true;
+        return empty( $this->mmt_SET_PrivateLicense ) || $this->mmt_SET_PrivateLicense->update( $_config );
 
     }
 
     /**
-     * @param \Model\TmKeyManagement\MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return array|null
      * @throws LaraException
@@ -418,7 +424,7 @@ class Lara extends Engines_AbstractEngine {
 
             if ( !empty( $this->mmt_SET_PrivateLicense ) ) {
                 $memoryKeyToUpdate         = new MemoryKeyStruct();
-                $memoryKeyToUpdate->tm_key = new TmKeyManagement_TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
+                $memoryKeyToUpdate->tm_key = new TmKeyStruct( [ 'key' => str_replace( 'ext_my_', '', $memoryKey[ 'externalId' ] ) ] );
 
                 $memoryMMT = $this->mmt_SET_PrivateLicense->getMemoryIfMine( $memoryKeyToUpdate );
                 if ( !empty( $memoryMMT ) ) {
@@ -501,8 +507,8 @@ class Lara extends Engines_AbstractEngine {
             foreach ( $project->getJobs() as $job ) {
 
                 $keyIds          = [];
-                $jobKeyListRead  = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
-                $jobKeyListWrite = TmKeyManagement_TmKeyManagement::getJobTmKeys( $job->tm_keys, 'w', 'tm', $user->uid );
+                $jobKeyListRead  = TmKeyManager::getJobTmKeys( $job->tm_keys, 'r', 'tm', $user->uid );
+                $jobKeyListWrite = TmKeyManager::getJobTmKeys( $job->tm_keys, 'w', 'tm', $user->uid );
                 $jobKeyList      = array_merge( $jobKeyListRead, $jobKeyListWrite );
 
                 foreach ( $jobKeyList as $memKey ) {

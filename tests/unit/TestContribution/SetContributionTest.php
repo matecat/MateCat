@@ -8,13 +8,13 @@
  *
  */
 
-use Contribution\ContributionSetStruct;
-use Contribution\Set;
 use Model\Database;
-use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
 use TestHelpers\AbstractTest;
+use Utils\Contribution\Set;
+use Utils\Contribution\SetContributionRequest;
+use Utils\TaskRunner\Commons\ContextList;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 
 class SetContributionTest extends AbstractTest {
 
@@ -102,7 +102,7 @@ class SetContributionTest extends AbstractTest {
      */
     public function testSetContributionEnqueue() {
 
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
@@ -111,7 +111,7 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source
         $contributionStruct->oldTranslation       = $contributionStruct->translation . " TEST";
-        $contributionStruct->props                = new TaskRunner\Commons\Params();
+        $contributionStruct->props                = new Utils\TaskRunner\Commons\Params();
 
         $queueElement            = new QueueElement();
         $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
@@ -139,7 +139,7 @@ class SetContributionTest extends AbstractTest {
 
     public function testSetContributionEnqueueException() {
 
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";

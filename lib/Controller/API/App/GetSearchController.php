@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants_TranslationStatus;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -24,9 +23,10 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use ReflectionException;
 use RuntimeException;
-use Search_ReplaceHistory;
-use Search_ReplaceHistoryFactory;
 use Utils;
+use Utils\Constants\TranslationStatus;
+use Utils\Search\ReplaceHistory;
+use Utils\Search\ReplaceHistoryFactory;
 
 class GetSearchController extends AbstractStatefulKleinController {
 
@@ -199,14 +199,14 @@ class GetSearchController extends AbstractStatefulKleinController {
     /**
      * @param $job_id
      *
-     * @return Search_ReplaceHistory
+     * @return \Utils\Search\ReplaceHistory
      */
-    private function getReplaceHistory( $job_id ): Search_ReplaceHistory {
-        // Search_ReplaceHistory init
+    private function getReplaceHistory( $job_id ): ReplaceHistory {
+        // ReplaceHistory init
         $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
         $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and '' !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
 
-        return Search_ReplaceHistoryFactory::create( $job_id, $srh_driver, $srh_ttl );
+        return ReplaceHistoryFactory::create( $job_id, $srh_driver, $srh_ttl );
     }
 
     /**
@@ -224,11 +224,11 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param Search_ReplaceHistory $srh
+     * @param ReplaceHistory $srh
      *
      * @return array
      */
-    private function getSegmentForRedoReplaceAll( Search_ReplaceHistory $srh ): array {
+    private function getSegmentForRedoReplaceAll( ReplaceHistory $srh ): array {
         $results = [];
 
         $versionToMove = $srh->getCursor() + 1;
@@ -247,11 +247,11 @@ class GetSearchController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param Search_ReplaceHistory $srh
+     * @param \Utils\Search\ReplaceHistory $srh
      *
      * @return array
      */
-    private function getSegmentForUndoReplaceAll( Search_ReplaceHistory $srh ): array {
+    private function getSegmentForUndoReplaceAll( ReplaceHistory $srh ): array {
         $results = [];
         $cursor  = $srh->getCursor();
 
@@ -342,10 +342,10 @@ class GetSearchController extends AbstractStatefulKleinController {
             ];
 
             if ( $old_translation->translation !== $tRow[ 'translation' ] && in_array( $old_translation->status, [
-                            Constants_TranslationStatus::STATUS_TRANSLATED,
-                            Constants_TranslationStatus::STATUS_APPROVED,
-                            Constants_TranslationStatus::STATUS_APPROVED2,
-                            Constants_TranslationStatus::STATUS_REJECTED
+                            TranslationStatus::STATUS_TRANSLATED,
+                            TranslationStatus::STATUS_APPROVED,
+                            TranslationStatus::STATUS_APPROVED2,
+                            TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
                 $TPropagation                             = new SegmentTranslationStruct();
@@ -453,14 +453,14 @@ class GetSearchController extends AbstractStatefulKleinController {
      */
     private function getNewStatus( SegmentTranslationStruct $translationStruct, $revisionNumber = false ): string {
         if ( false === $revisionNumber ) {
-            return Constants_TranslationStatus::STATUS_TRANSLATED;
+            return TranslationStatus::STATUS_TRANSLATED;
         }
 
-        if ( $translationStruct->status === Constants_TranslationStatus::STATUS_TRANSLATED ) {
-            return Constants_TranslationStatus::STATUS_TRANSLATED;
+        if ( $translationStruct->status === TranslationStatus::STATUS_TRANSLATED ) {
+            return TranslationStatus::STATUS_TRANSLATED;
         }
 
-        return Constants_TranslationStatus::STATUS_APPROVED;
+        return TranslationStatus::STATUS_APPROVED;
     }
 
     /**
@@ -486,10 +486,10 @@ class GetSearchController extends AbstractStatefulKleinController {
     /**
      * @param                         $replace_version
      * @param                         $tRow
-     * @param Search_ReplaceHistory   $srh
+     * @param ReplaceHistory          $srh
      * @param SearchQueryParamsStruct $queryParams
      */
-    private function saveReplacementEvent( $replace_version, $tRow, Search_ReplaceHistory $srh, SearchQueryParamsStruct $queryParams ): void {
+    private function saveReplacementEvent( $replace_version, $tRow, ReplaceHistory $srh, SearchQueryParamsStruct $queryParams ): void {
         $event                                 = new ReplaceEventStruct();
         $event->replace_version                = $replace_version;
         $event->id_segment                     = $tRow[ 'id_segment' ];

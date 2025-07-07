@@ -1,12 +1,14 @@
 <?php
+
+namespace Utils\Currency;
+
 /**
  * Created by PhpStorm.
  * User: lorenzo
  * Date: 10/11/14
  * Time: 17.52
  */
-
-class currency_translatedChangeRatesFetcher extends currency_changeRatesFetcher {
+class TranslatedChangeRatesFetcher extends ChangeRatesFetcher {
 
     /**
      * curl the service and store change rates in an instance variable

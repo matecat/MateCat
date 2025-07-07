@@ -4,11 +4,12 @@ use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\AbstractEngine;
 
 
 /**
  * @group   regression
- * @covers  Engines_AbstractEngine::_call
+ * @covers  AbstractEngine::_call
  * User: dinies
  * Date: 22/04/16
  * Time: 14.40
@@ -86,7 +87,7 @@ class CallprotectedfunctionTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  AbstractEngine::_call
      */
     public function test__call_using_mock_object_and_simple_segment() {
 
@@ -207,7 +208,7 @@ LAB;
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  AbstractEngine::_call
      */
     public function test__call_using_mock_object_and_long_segment() {
 

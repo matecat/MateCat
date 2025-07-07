@@ -4,6 +4,7 @@ use Model\Database;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Utils\Constants\Teams;
 
 class Factory_User extends Factory_Base {
 
@@ -16,7 +17,7 @@ class Factory_User extends Factory_Base {
 
         $orgDao = new TeamDao();
         $orgDao->createUserTeam( $user, [
-                'type' => Constants_Teams::PERSONAL,
+                'type' => Teams::PERSONAL,
                 'name' => 'personal'
         ] );
 

@@ -1,11 +1,17 @@
 <?php
 
+namespace Utils\Engines;
+
+use DomainException;
 use Engines\DeepL\DeepLApiClient;
 use Engines\DeepL\DeepLApiException;
+use Exception;
 use Model\Projects\MetadataDao;
+use Utils\Engines\Results\MTResponse;
+use Utils\Engines\Results\MyMemory\Matches;
 
-class Engines_DeepL extends Engines_AbstractEngine {
-    private $apiKey;
+class DeepL extends AbstractEngine {
+    private ?string $apiKey = null;
 
     public function setApiKey( $apiKey ) {
         $this->apiKey = $apiKey;
@@ -15,7 +21,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
      * @return DeepLApiClient
      * @throws Exception
      */
-    protected function _getClient() {
+    protected function _getClient(): DeepLApiClient {
         if ( $this->apiKey === null ) {
             throw new Exception( "API ket not set" );
         }
@@ -26,11 +32,12 @@ class Engines_DeepL extends Engines_AbstractEngine {
     /**
      * @param       $rawValue
      * @param array $parameters
-     * @param null $function
-     * @return Engines_Results_MT[]
+     * @param null  $function
+     *
+     * @return MTResponse[]
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ): array {
         $rawValue    = json_decode( $rawValue, true );
         $translation = $rawValue[ 'translations' ][ 0 ][ 'text' ];
         $translation = html_entity_decode( $translation, ENT_QUOTES | 16 );
@@ -38,19 +45,20 @@ class Engines_DeepL extends Engines_AbstractEngine {
         $target      = $parameters[ 'target_lang' ];
         $segment     = $parameters[ 'text' ][ 0 ];
 
-        return ( new Engines_Results_MyMemory_Matches([
-            'source' => $source,
-            'target' => $target,
-            'raw_segment' => $segment,
-            'raw_translation' => $translation,
-            'match' => "85%",
-            'created-by' => $this->getMTName(),
-            'create-date' => date( "Y-m-d" ),
+        return ( new Matches( [
+                'source'          => $source,
+                'target'          => $target,
+                'raw_segment'     => $segment,
+                'raw_translation' => $translation,
+                'match'           => "85%",
+                'created-by'      => $this->getMTName(),
+                'create-date'     => date( "Y-m-d" ),
         ] ) )->getMatches( 1, [], $source, $target );
     }
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
     public function get( $_config ) {
 
@@ -79,13 +87,13 @@ class Engines_DeepL extends Engines_AbstractEngine {
             // glossaries (only for DeepL)
 
             $parameters = [
-                'text' => [
-                    $_config['segment'],
-                ],
-                'source_lang' => $source[0],
-                'target_lang' => $target[0],
-                'formality' => ($_config['formality'] ?: null),
-                'glossary_id' => ($_config['idGlossary'] ?: null)
+                    'text'        => [
+                            $_config[ 'segment' ],
+                    ],
+                    'source_lang' => $source[ 0 ],
+                    'target_lang' => $target[ 0 ],
+                    'formality'   => ( $_config[ 'formality' ] ?: null ),
+                    'glossary_id' => ( $_config[ 'idGlossary' ] ?: null )
             ];
 
             $headers = [
@@ -131,7 +139,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
     /**
      * @inheritDoc
      */
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
         throw new DomainException( "Method " . __FUNCTION__ . " not implemented." );
     }
 
@@ -145,45 +153,43 @@ class Engines_DeepL extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
-     * @throws Exception
      */
-    public function getGlossary( $id ) {
+    public function getGlossary( string $id ) {
         return $this->_getClient()->getGlossary( $id );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
-     * @throws Exception
      */
-    public function deleteGlossary( $id ) {
+    public function deleteGlossary( string $id ) {
         return $this->_getClient()->deleteGlossary( $id );
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @return mixed
      * @throws DeepLApiException
      * @throws Exception
      */
-    public function createGlossary( $data ) {
+    public function createGlossary( array $data ) {
         return $this->_getClient()->createGlossary( $data );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function getGlossaryEntries( $id ) {
+    public function getGlossaryEntries( string $id ) {
         return $this->_getClient()->getGlossaryEntries( $id );
     }
 }

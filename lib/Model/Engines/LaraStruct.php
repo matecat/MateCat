@@ -73,7 +73,7 @@ class LaraStruct extends EngineStruct {
     ];
 
     /**
-     * @var int
+     * @var int|null
      */
     public ?int $google_api_compliant_version = 2;
 

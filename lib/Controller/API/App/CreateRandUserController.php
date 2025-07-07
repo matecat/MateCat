@@ -5,8 +5,8 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Engine;
-use Engines_MyMemory;
 use Exception;
+use Utils\Engines\MyMemory;
 
 class CreateRandUserController extends KleinController {
 
@@ -20,7 +20,7 @@ class CreateRandUserController extends KleinController {
     public function create(): void {
 
         /**
-         * @var $tms Engines_MyMemory
+         * @var $tms \Utils\Engines\MyMemory
          */
         $tms = Engine::getInstance( 1 );
 

@@ -3,9 +3,6 @@
 namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
-use Email\ForgotPasswordEmail;
-use Email\SignupEmail;
-use Email\WelcomeEmail;
 use Exception;
 use Model\Database;
 use Model\Teams\TeamDao;
@@ -14,6 +11,9 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use Routes;
 use Utils;
+use Utils\Email\ForgotPasswordEmail;
+use Utils\Email\SignupEmail;
+use Utils\Email\WelcomeEmail;
 
 class SignupModel {
 

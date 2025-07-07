@@ -1,8 +1,12 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
 use Model\Engines\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
  * Created by PhpStorm.
@@ -11,13 +15,12 @@ use Model\Users\UserStruct;
  * Time: 11.55
  *
  */
-
-interface Engines_EngineInterface {
+interface EngineInterface {
 
     /**
      * @param $_config
      *
-     * @return Engines_Results_AbstractResponse
+     * @return TMSAbstractResponse
      */
     public function get( $_config );
 
@@ -48,16 +51,16 @@ interface Engines_EngineInterface {
     public function getConfigStruct();
 
     /**
-     * @return Engines_EngineInterface
+     * @return EngineInterface
      */
-    public function setAnalysis(): Engines_EngineInterface;
+    public function setAnalysis(): EngineInterface;
 
     /**
      * @param int $mt_penalty
      *
-     * @return Engines_EngineInterface
+     * @return EngineInterface
      */
-    public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
+    public function setMTPenalty( int $mt_penalty ): EngineInterface;
 
     /**
      * @return EngineStruct

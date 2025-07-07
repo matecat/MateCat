@@ -9,14 +9,14 @@ class Validator {
     /**
      * To get array map of QA
      *
-     * @var \Utils\LQA\QA
+     * @var QA
      */
     private $qa;
 
     /**
      * Validator constructor.
      *
-     * @param \Utils\LQA\QA $qa
+     * @param QA $qa
      */
     public function __construct( QA $qa ) {
         $this->qa = $qa;
@@ -31,7 +31,7 @@ class Validator {
      *
      * @return array
      */
-    public function validate() {
+    public function validate(): array {
 
         $qa = $this->qa;
 
@@ -54,15 +54,13 @@ class Validator {
         $sourceTagCount = 0;
         $targetTagCount = 0;
 
-        /** @var $element Element */
         foreach ( $sourceMap as $i => $element ) {
 
             // for later (check for ERR_EX_BX_COUNT_MISMATCH)
             $sourceTagCount += $element->getTotalTagsCount();
 
             // loop target map to find corresponding <g> element
-            /** @var $targetElement Element */
-            foreach ( $targetMap as $index => $targetElement ) {
+            foreach ( $targetMap as $targetElement ) {
                 if ( $element->correspondsTo( $targetElement ) and $element->isG() ) {
                     // check for ERR_EX_BX_NESTED_IN_G
                     if ( !$element->hasNestedBxOrEx() and $targetElement->hasNestedBxOrEx() ) {
@@ -72,8 +70,7 @@ class Validator {
             }
         }
 
-        /** @var $element Element */
-        foreach ( $targetMap as $index => $element ) {
+        foreach ( $targetMap as $element ) {
             $targetTagCount += $element->getTotalTagsCount();
         }
 
@@ -95,7 +92,7 @@ class Validator {
      *
      * @return bool
      */
-    private function doesAMapHaveOneBxOrEx( array $map = [] ) {
+    private function doesAMapHaveOneBxOrEx( array $map = [] ): bool {
         if ( empty( $map ) ) {
             return false;
         }

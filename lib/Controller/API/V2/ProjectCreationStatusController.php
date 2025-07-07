@@ -15,7 +15,7 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
-use ProjectQueue\Queue;
+use Utils\ProjectQueue\Queue;
 use View\API\V2\Json\CreationStatus;
 use View\API\V2\Json\WaitCreation;
 

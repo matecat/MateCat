@@ -4,7 +4,6 @@ namespace Model\Jobs;
 
 use ArrayAccess;
 use CatUtils;
-use Constants_JobStatus;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Comments\CommentDao;
@@ -32,6 +31,7 @@ use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use ReflectionException;
 use Utils;
+use Utils\Constants\JobStatus;
 
 class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
@@ -59,7 +59,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     public ?string $last_update             = null;
     public int     $disabled                = 0;
     public string  $owner                   = '';
-    public string  $status_owner            = Constants_JobStatus::STATUS_ACTIVE;
+    public string  $status_owner            = JobStatus::STATUS_ACTIVE;
     public ?string $status_translator       = null;
     public string  $status                  = 'active';
     public int     $standard_analysis_wc    = 0;
@@ -309,14 +309,14 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @return bool
      */
     public function isCanceled(): bool {
-        return $this->status_owner == Constants_JobStatus::STATUS_CANCELLED;
+        return $this->status_owner == JobStatus::STATUS_CANCELLED;
     }
 
     /**
      * @return bool
      */
     public function isArchived(): bool {
-        return $this->status_owner == Constants_JobStatus::STATUS_ARCHIVED;
+        return $this->status_owner == JobStatus::STATUS_ARCHIVED;
     }
 
     /**
@@ -355,7 +355,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @return bool
      */
     public function isDeleted(): bool {
-        return $this->status_owner === Constants_JobStatus::STATUS_DELETED;
+        return $this->status_owner === JobStatus::STATUS_DELETED;
     }
 
     /** @return SegmentStruct[]

@@ -1,6 +1,10 @@
 <?php
 
+namespace Utils\Engines\Results;
+
 use Model\FeaturesBase\FeatureSet;
+use ReflectionClass;
+use ReflectionProperty;
 
 /**
  * Created by PhpStorm.
@@ -8,37 +12,55 @@ use Model\FeaturesBase\FeatureSet;
  * Date: 02/03/15
  * Time: 19.02
  */
+abstract class TMSAbstractResponse {
 
-abstract class Engines_Results_AbstractResponse {
+    public string $responseStatus = "";
 
-    public $responseStatus  = "";
+    /**
+     * @var string|array
+     */
     public $responseDetails = "";
-    public $responseData    = [];
-    public $mtLangSupported = true;
 
     /**
-     * @var \Engines_Results_ErrorMatches
+     * @var mixed
      */
-    public $error;
-
-    protected $_rawResponse = "";
+    public      $responseData    = [];
+    public bool $mtLangSupported = true;
 
     /**
-     * @var FeatureSet
+     * @var ErrorResponse|null
      */
-    protected $featureSet;
+    public ?ErrorResponse $error = null;
 
-    public static function getInstance( $result, FeatureSet $featureSet = null, array $dataRefMap = [] ) {
+    protected string $_rawResponse = "";
 
+    /**
+     * @var ?FeatureSet
+     */
+    protected ?FeatureSet $featureSet = null;
+
+    /**
+     * @template T of TMSAbstractResponse
+     * @param array|int       $result
+     * @param FeatureSet|null $featureSet
+     * @param array|null      $dataRefMap
+     *
+     * @return T
+     */
+    public static function getInstance( $result, ?FeatureSet $featureSet = null, ?array $dataRefMap = [] ): TMSAbstractResponse {
+
+        /**
+         * @var class-string<T> $class
+         */
         $class = get_called_class(); // late static binding, note: php >= 5.3
 
         /**
-         * @var Engines_Results_AbstractResponse $instance
+         * @var T $instance
          */
         $instance = new $class( $result, $dataRefMap );
 
-        if ( is_array( $result ) and array_key_exists( "error", $result ) ) {
-            $instance->error = new Engines_Results_ErrorMatches( $result[ 'error' ] );
+        if ( array_key_exists( "error", $result ) ) {
+            $instance->error = new ErrorResponse( $result[ 'error' ] );
         }
 
         if ( $featureSet !== null ) {
@@ -64,9 +86,8 @@ abstract class Engines_Results_AbstractResponse {
      * @param $mask array|null a mask for the keys to return
      *
      * @return array
-     * @throws ReflectionException
      */
-    public function toArray( $mask = null ) {
+    public function toArray( ?array $mask = [] ): array {
 
         $attributes       = [];
         $reflectionClass  = new ReflectionClass( $this );

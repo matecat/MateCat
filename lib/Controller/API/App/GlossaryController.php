@@ -6,14 +6,14 @@ use CatUtils;
 use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
-use Langs\Languages;
 use Log;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use TmKeyManagement_Filter;
 use Utils;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
+use Utils\Langs\Languages;
+use Utils\TmKeyManagement\Filter;
 use Validator\JSONSchema\JSONValidator;
 use Validator\JSONSchema\JSONValidatorObject;
 use WorkerClient;
@@ -273,11 +273,11 @@ class GlossaryController extends KleinController {
         if ( $this->isLoggedIn() ) {
 
             if ( CatUtils::isRevisionFromIdJobAndPassword( $json[ 'id_job' ], $json[ 'password' ] ) ) {
-                $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+                $userRole = Filter::ROLE_REVISOR;
             } elseif ( $this->user->email == $job->status_owner ) {
-                $userRole = TmKeyManagement_Filter::OWNER;
+                $userRole = Filter::OWNER;
             } else {
-                $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+                $userRole = Filter::ROLE_TRANSLATOR;
             }
 
             $userKeys = new UserKeysModel( $this->user, $userRole );
@@ -321,8 +321,8 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * @param array                                $keys
-     * @param \TmKeyManagement_ClientTmKeyStruct[] $userKeys
+     * @param array                                      $keys
+     * @param \Utils\TmKeyManagement\ClientTmKeyStruct[] $userKeys
      */
     private function checkWritePermissions( array $keys, array $userKeys ) {
         $allowedKeys = [];
@@ -344,7 +344,7 @@ class GlossaryController extends KleinController {
             }
 
             // check key permissions
-            $keyIsUse = array_filter( $userKeys, function ( \TmKeyManagement_ClientTmKeyStruct $userKey ) use ( $key ) {
+            $keyIsUse = array_filter( $userKeys, function ( Utils\TmKeyManagement\ClientTmKeyStruct $userKey ) use ( $key ) {
                 return $userKey->key === $key;
             } )[ 0 ];
 

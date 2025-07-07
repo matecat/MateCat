@@ -128,13 +128,13 @@ class MetadataDao extends AbstractDao {
     public function delete( int $uid, string $key ) {
         $sql = "DELETE FROM user_metadata " .
                 " WHERE uid = :uid " .
-                " AND `key` = :key ";
+                " AND `key` LIKE :key ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
                 'uid' => $uid,
-                'key' => $key,
+                'key' => '%' . $key,
         ] );
         $this->destroyCacheKey( $uid, $key );
     }

@@ -8,9 +8,9 @@
 
 namespace Model\Teams;
 
-use Constants_Teams;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Utils\Constants\Teams;
 
 class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
@@ -18,7 +18,7 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public string $name;
     public int    $created_by;
     public string $created_at;
-    public string $type = Constants_Teams::PERSONAL;
+    public string $type = Teams::PERSONAL;
 
     /**
      * @var MembershipStruct[]

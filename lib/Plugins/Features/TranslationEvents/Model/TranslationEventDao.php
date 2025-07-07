@@ -8,12 +8,12 @@
 
 namespace Features\TranslationEvents\Model;
 
-use Constants_TranslationStatus;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use PDO;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEventDao extends AbstractDao {
 
@@ -104,7 +104,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         return $stmt->fetchAll();
@@ -132,7 +132,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         $res = $stmt->fetchAll();

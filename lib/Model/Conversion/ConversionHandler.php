@@ -2,7 +2,6 @@
 
 namespace Model\Conversion;
 
-use Constants\ConversionHandlerStatus;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use INIT;
@@ -16,8 +15,9 @@ use Model\FilesStorage\Exceptions\FileSystemException;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\Constants\ConversionHandlerStatus;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class ConversionHandler {
 
