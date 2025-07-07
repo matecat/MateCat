@@ -7,7 +7,7 @@
  */
 
 route(
-        '/webhooks/gdrive/open', 'GET',
+        '/webhooks/gdrive/open', 'POST',
         [ 'ConnectedServices\GDrive\GDriveController', 'open' ]
 );
 
@@ -20,7 +20,7 @@ route(
         [ 'ConnectedServices\GDrive\GDriveController', 'listImportedFiles' ]
 );
 route(
-        '/gdrive/change', 'GET',
+        '/gdrive/change', 'POST',
         [ 'ConnectedServices\GDrive\GDriveController', 'changeConversionParameters' ]
 );
 route(
