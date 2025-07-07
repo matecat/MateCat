@@ -1314,7 +1314,7 @@ class ProjectManager {
                 $payableRatesTemplate = new CustomPayableRateStruct();
                 $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
                 $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
-                $payableRates         = json_encode( $payableRatgies );
+                $payableRates         = json_encode( $payableRates );
 
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
