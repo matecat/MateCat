@@ -53,7 +53,7 @@ const Header = ({
       <nav className="sixteen wide column navigation">
         <div className="ui grid">
           <div className="three wide column" data-testid="logo">
-            <a href="/public" className="logo" />
+            <a href="/" className="logo" />
           </div>
           {showFilterProjects && (
             <div className="nine wide column">
