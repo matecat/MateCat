@@ -66,7 +66,7 @@ use ZipArchiveExtended;
 
 class NewController extends KleinController {
 
-    const MAX_NUM_KEYS = 10;
+    const MAX_NUM_KEYS = 13;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -504,6 +504,7 @@ class NewController extends KleinController {
         $filters_extraction_parameters         = $this->validateFiltersExtractionParameters( $filters_extraction_parameters, $filters_extraction_parameters_template_id );
         $xliff_parameters                      = $this->validateXliffParameters( $xliff_parameters, $xliff_parameters_template_id );
         $metadata                              = $this->validateMetadataParam( $metadata );
+        $character_counter_mode                = $this->validateCharacterCounterMode( $character_counter_mode );
         $project_features                      = $this->appendFeaturesToProject( (bool)$project_completion, $mt_engine );
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation( $target_lang, $mt_engine );
 
@@ -628,6 +629,30 @@ class NewController extends KleinController {
 
         return $metadata;
 
+    }
+
+    /**
+     * @param string|null $character_counter_mode
+     *
+     * @return string|null
+     */
+    private function validateCharacterCounterMode( ?string $character_counter_mode = null ) {
+
+        if ( empty( $character_counter_mode ) ) {
+            return null;
+        }
+
+        $allowedModes = [
+                'google_ads',
+                'exclude_cjk',
+                'all_one'
+        ];
+
+        if ( !in_array( $character_counter_mode, $allowedModes ) ) {
+            throw new InvalidArgumentException( "Invalid character counter mode. Allowed values: [google_ads, exclude_cjk, all_one]", -23 );
+        }
+
+        return $character_counter_mode;
     }
 
     /**
