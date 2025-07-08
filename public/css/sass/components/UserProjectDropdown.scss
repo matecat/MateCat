@@ -102,12 +102,19 @@
   }
 
   .search-by-name {
+    padding: 0 10px !important;
+
     &:hover {
       background-color: unset !important;
     }
 
     .input-component {
       width: 100%;
+
+      input {
+        border: unset;
+        box-shadow: none;
+      }
     }
   }
 
