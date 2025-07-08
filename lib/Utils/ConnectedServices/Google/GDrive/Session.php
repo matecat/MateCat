@@ -97,13 +97,6 @@ class Session {
     }
 
     /**
-     * @return array
-     */
-    public function getSession(): array {
-        return $this->session;
-    }
-
-    /**
      * Creates a new instance of the Session class for CLI usage.
      *
      * @param $session
