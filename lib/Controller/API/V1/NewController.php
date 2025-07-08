@@ -331,10 +331,6 @@ class NewController extends KleinController {
         $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
         $projectManager->setTeam( $request[ 'team' ] );
 
-        $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
-        $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
-        $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
-        $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
         $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
@@ -439,15 +435,12 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $ai_assistant                              = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
-        $character_counter                         = filter_var( $this->request->param( 'character_counter' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $deepl_formality                           = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING );
         $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING );
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
-        $dictation                                 = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
         $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $get_public_matches                        = (bool)filter_var( $this->request->param( 'get_public_matches' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] ); // used to set the default value of get_public_matches to 1
@@ -455,7 +448,6 @@ class NewController extends KleinController {
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $instructions                              = filter_var( $this->request->param( 'instructions' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
-        $lexiqa                                    = filter_var( $this->request->param( 'lexiqa' ), FILTER_VALIDATE_BOOLEAN );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
@@ -476,12 +468,10 @@ class NewController extends KleinController {
         $project_completion                        = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $qa_model_template_id                      = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $show_whitespace                           = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
         $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
         $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $tag_projection                            = filter_var( $this->request->param( 'tag_projection' ), FILTER_VALIDATE_BOOLEAN );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
@@ -540,16 +530,8 @@ class NewController extends KleinController {
             $metadata[ 'dialect_strict' ] = $dialect_strict;
         }
 
-        if ( !empty( $lexiqa ) ) {
-            $metadata[ 'lexiqa' ] = $lexiqa;
-        }
-
         if ( !empty( $speech2text ) ) {
             $metadata[ 'speech2text' ] = $speech2text;
-        }
-
-        if ( !empty( $tag_projection ) ) {
-            $metadata[ 'tag_projection' ] = $tag_projection;
         }
 
         if ( !empty( $project_completion ) ) {
@@ -603,17 +585,11 @@ class NewController extends KleinController {
                 'qaModelTemplate'                           => $qaModelTemplate,
                 'payableRateModelTemplate'                  => $payableRateModelTemplate,
                 'instructions'                              => $instructions,
-                'lexiqa'                                    => $lexiqa,
                 'speech2text'                               => $speech2text,
-                'tag_projection'                            => $tag_projection,
                 'project_features'                          => $project_features,
                 'mt_evaluation'                             => $mt_evaluation,
-                '$character_counter'                        => $character_counter,
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
-                'dictation'                                 => $dictation,
-                'show_whitespace'                           => $show_whitespace,
-                'ai_assistant'                              => $ai_assistant,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null
         ];

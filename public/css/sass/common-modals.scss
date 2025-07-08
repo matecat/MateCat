@@ -1,7 +1,7 @@
 @use 'modals/instructionsModal';
 @use 'modals/tmShareModal';
 @use 'modals/PreferenceModal';
-@use "commons/colors";
+@use 'commons/colors';
 
 h1,
 h2,
@@ -543,8 +543,8 @@ a {
             border: 1px solid #797979;
             display: inherit;
             border-radius: 2px;
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
-              sans-serif;
+            font-family:
+              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-size: 14px;
             padding: 6px 15px;
             background-color: #f6f6f6;
@@ -569,12 +569,12 @@ a {
           .mini.ui.primary.button {
             border: 1px solid #797979;
             border-radius: 2px;
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
-              sans-serif;
+            font-family:
+              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-size: 14px;
             padding: 6px 15px;
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
-              sans-serif;
+            font-family:
+              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 
             i {
               opacity: 1;
@@ -584,8 +584,8 @@ a {
           .ui.primary.button {
             border: 1px solid #797979;
             border-radius: 2px;
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica,
-              sans-serif;
+            font-family:
+              'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
           }
 
           .mini.ui.icon.button {
@@ -781,56 +781,6 @@ a {
         .item:first-child {
           //border-top: none !important;
         }
-      }
-    }
-
-    .search-member-container {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      margin: 8px 0;
-      border-radius: 4px;
-      padding: 6px;
-      font-size: 15px;
-      color: black;
-      transition: 0.6s;
-
-      > svg {
-        margin-right: 8px;
-        color: colors.$grey6;
-      }
-
-      > input {
-        width: 100%;
-        background: unset;
-        outline: none;
-        border: none;
-
-        &::placeholder {
-          color: colors.$grey6;
-        }
-      }
-
-      &:hover {
-        background-color: white;
-      }
-
-      .reset_button {
-        display: flex;
-        cursor: pointer;
-        margin-right: 2px;
-
-        > svg {
-          color: colors.$grey6;
-        }
-      }
-
-      .reset_button--hidden {
-        visibility: hidden;
-      }
-
-      .reset_button--visible {
-        visibility: visible;
       }
     }
 

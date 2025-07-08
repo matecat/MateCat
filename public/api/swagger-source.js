@@ -62,10 +62,10 @@ var spec = {
           `,
         parameters: [
           {
-            name: 'files',
+            name: 'files[]',
             in: 'formData',
             description:
-              'The file(s) to be uploaded. You may also upload your own translation memories (TMX).',
+                'The file(s) to be uploaded, supported file formats <a href="#file-format">available here</a>. You may also upload TMX files, which will trigger the creation of a new translation memory in the account.',
             required: true,
             type: 'file',
           },
@@ -175,24 +175,6 @@ var spec = {
               'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'string',
-          },
-          {
-            name: 'lexiqa',
-            in: 'formData',
-            description:
-              'Enable lexiQA QA check. Requires purchase of a license from lexiQA.',
-            required: false,
-            type: 'string',
-            default: 0,
-          },
-          {
-            name: 'speech2text',
-            in: 'formData',
-            description:
-              'Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.',
-            required: false,
-            type: 'integer',
-            default: 0,
           },
           {
             name: 'get_public_matches',
