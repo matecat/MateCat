@@ -2,6 +2,7 @@
 
 use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
+use Constants\SegmentSize;
 use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Files\FileStruct;
@@ -83,6 +84,10 @@ class Translations_SegmentTranslationDao extends AbstractDao {
             $values = [];
 
             foreach ( $list as $row ) {
+
+                if ( strlen( $row->translation ) > SegmentSize::LIMIT ) {
+                    throw new PDOException( "Translation size limit reached. Translation is larger than 65kb.", -2 );
+                }
                 $values[] = $row->id_segment;
                 $values[] = $row->id_job;
                 $values[] = $row->translation;
@@ -380,6 +385,10 @@ class Translations_SegmentTranslationDao extends AbstractDao {
             throw new PDOException( $msg );
         }
 
+        if ( strlen( $translation[ 'translation' ] ) > SegmentSize::LIMIT ) {
+            throw new PDOException( "Translation size limit reached. Translation is larger than 65kb.", -2 );
+        }
+
         $db   = Database::obtain();
         $stmt = $db->getConnection()->prepare( $query );
 
@@ -544,10 +553,10 @@ class Translations_SegmentTranslationDao extends AbstractDao {
     public
     static function propagateTranslation(
             Translations_SegmentTranslationStruct $segmentTranslationStruct,
-            Jobs_JobStruct                        $chunkStruct,
-            int                                   $_idSegment,
-            Projects_ProjectStruct                $project,
-            bool                                  $execute_update = true
+            Jobs_JobStruct $chunkStruct,
+            int $_idSegment,
+            Projects_ProjectStruct $project,
+            bool $execute_update = true
     ): array {
         $db = Database::obtain();
 
