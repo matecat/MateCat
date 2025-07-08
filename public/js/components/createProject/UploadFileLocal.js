@@ -192,8 +192,39 @@ function UploadFileLocal() {
               }
               CreateProjectActions.enableAnalyzeButton(true)
             })
-            .catch(({errors}) => {
-              if (errors?.length > 0) {
+            .catch(({data, errors}) => {
+              clearInterval(interval)
+              if (data.data.zipFiles && data) {
+                data.data.zipFiles.forEach((zipFile) => {
+                  setFiles((prevFiles) =>
+                    prevFiles.concat({
+                      name: zipFile.name,
+                      uploadProgress: 100,
+                      convertedProgress: 100,
+                      converted: true,
+                      uploaded: true,
+                      error: errors.find((item) => item.name === zipFile.name)
+                        ? errors.find((item) => item.name === zipFile.name)
+                            .message
+                        : false,
+                      zipFolder: true,
+                      size: zipFile.size,
+                    }),
+                  )
+                  setFiles((prevFiles) =>
+                    prevFiles.map((f) =>
+                      f.file === file
+                        ? {
+                            ...f,
+                            convertedProgress: 100,
+                            converted: true,
+                          }
+                        : f,
+                    ),
+                  )
+                  setUploadedFilesNames((prev) => prev.concat([zipFile.name]))
+                })
+              } else if (errors?.length > 0) {
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
                     f.file === file
@@ -205,19 +236,19 @@ function UploadFileLocal() {
                       : f,
                   ),
                 )
-                return
+              } else {
+                setFiles((prevFiles) =>
+                  prevFiles.map((f) =>
+                    f.file === file
+                      ? {
+                          ...f,
+                          uploaded: false,
+                          error: 'Server error, try again.',
+                        }
+                      : f,
+                  ),
+                )
               }
-              setFiles((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.file === file
-                    ? {
-                        ...f,
-                        uploaded: false,
-                        error: 'Server error, try again.',
-                      }
-                    : f,
-                ),
-              )
             })
         }
       }

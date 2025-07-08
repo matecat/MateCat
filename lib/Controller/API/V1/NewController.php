@@ -33,13 +33,13 @@ use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
-use Model\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Xliff\XliffConfigTemplateDao;
+use ProjectManager;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use Utils;
@@ -480,7 +480,7 @@ class NewController extends KleinController {
      *
      * @return string|null
      */
-    private function validateCharacterCounterMode( ?string $character_counter_mode = null ) {
+    private function validateCharacterCounterMode( ?string $character_counter_mode = null ): ?string {
 
         if ( empty( $character_counter_mode ) ) {
             return null;
@@ -772,9 +772,6 @@ class NewController extends KleinController {
                 if ( $uid ) {
                     $mkDao = new MemoryKeyDao();
 
-                    /**
-                     * @var $keyRing MemoryKeyStruct[]
-                     */
                     $keyRing = $mkDao->read(
                             ( new MemoryKeyStruct( [
                                     'uid'    => $uid,
