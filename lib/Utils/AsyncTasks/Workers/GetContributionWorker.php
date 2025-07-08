@@ -31,8 +31,11 @@ use TmKeyManagement_TmKeyManagement;
 use Translations_SegmentTranslationDao;
 use Users_UserStruct;
 use Utils;
+use Utils\AsyncTasks\Workers\MatchesComparator;
 
 class GetContributionWorker extends AbstractWorker {
+
+    use MatchesComparator;
 
     /**
      * @param AbstractElement $queueElement
@@ -172,49 +175,6 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * Compares two associative arrays based on their 'match' and 'ICE' values.
-     *
-     * The function first evaluates the 'match' values of the two arrays:
-     * - If the 'match' values are equal, it prioritizes arrays with the 'ICE' key set to true:
-     *   - Returns -1 if the first array has 'ICE' set to true and the second does not.
-     *   - Returns 1 if the second array has 'ICE' set to true and the first does not.
-     *   - Returns 0 if both or neither have the 'ICE' key set to true.
-     * - If the 'match' values are not equal, it returns:
-     *   - 1 if the 'match' value of the first array is less than the second.
-     *   - -1 if the 'match' value of the first array is greater than the second.
-     *
-     * @param array $a The first array to compare, containing 'match' and optionally 'ICE'.
-     * @param array $b The second array to compare, containing 'match' and optionally 'ICE'.
-     *
-     * @return int Returns -1, 0, or 1 based on the comparison logic.
-     */
-    private static function __compareScoreDesc( array $a, array $b ): int {
-
-        // Check if the 'ICE' key is set and cast it to a boolean
-        $aIsICE = (bool)( $a[ 'ICE' ] ?? false );
-        $bIsICE = (bool)( $b[ 'ICE' ] ?? false );
-
-        // Convert 'match' values to float for comparison
-        $aMatch = floatval( $a[ 'match' ] );
-        $bMatch = floatval( $b[ 'match' ] );
-
-        // If 'match' values are equal, compare based on 'ICE' values
-        if ( $aMatch == $bMatch ) {
-            if ( $aIsICE && !$bIsICE ) {
-                return -1; // The First array has 'ICE' set to true, the second does not
-            }
-            if ( !$aIsICE && $bIsICE ) {
-                return 1; // The Second array has 'ICE' set to true, the first does not
-            }
-
-            return 0; // Both or neither have 'ICE' set to true
-        }
-
-        // If 'match' values are not equal, return based on their comparison
-        return ( $aMatch < $bMatch ? 1 : -1 );
-    }
-
-    /**
      * @param array                     $matches
      * @param ContributionRequestStruct $contributionStruct
      * @param FeatureSet                $featureSet
@@ -235,7 +195,7 @@ class GetContributionWorker extends AbstractWorker {
 
         foreach ( $matches as &$match ) {
 
-            if ( strpos( $match[ 'created_by' ], Constants_Engines::MT ) !== false ) {
+            if ( $this->isMtMatch( $match ) ) {
 
                 $match[ 'match' ] = Constants_Engines::MT;
 
@@ -255,7 +215,7 @@ class GetContributionWorker extends AbstractWorker {
 
             }
 
-            if ( $match[ 'created_by' ] == 'MT!' ) {
+            if ( $this->isMtMatch( $match ) ) {
 
                 $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
 
@@ -479,6 +439,8 @@ class GetContributionWorker extends AbstractWorker {
          *
          * This calls the TMEngine to get memories
          */
+        $tms_match = [];
+
         if ( isset( $_TMS ) ) {
 
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
@@ -554,12 +516,7 @@ class GetContributionWorker extends AbstractWorker {
             }
         }
 
-        $matches = [];
-        if ( !empty( $tms_match ) ) {
-            $matches = $tms_match;
-        }
-
-        return [ $mt_result, $matches ];
+        return [ $mt_result, $tms_match ];
     }
 
     /**
@@ -569,21 +526,6 @@ class GetContributionWorker extends AbstractWorker {
      */
     private function issetSourceAndTarget( $_config ): bool {
         return ( isset( $_config[ 'source' ] ) and $_config[ 'source' ] !== '' and isset( $_config[ 'target' ] ) and $_config[ 'target' ] !== '' );
-    }
-
-    /**
-     * @param $mt_result
-     * @param $matches
-     *
-     * @return array
-     */
-    protected function _sortMatches( $mt_result, $matches ): array {
-        if ( !empty( $mt_result ) ) {
-            array_unshift($matches, $mt_result); // prepend the MT result to matches to ensure it's always first and win at sorting when scores are equal
-            usort( $matches, [ "self", "__compareScoreDesc" ] );
-        }
-
-        return $matches;
     }
 
     private function _sortByLenDesc( $stringA, $stringB ): int {
@@ -626,7 +568,7 @@ class GetContributionWorker extends AbstractWorker {
                     $matches[ $k ][ 'translation' ]     = $Filter->fromLayer1ToLayer0( html_entity_decode( $m[ 'translation' ] ) );
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $m[ 'raw_translation' ] );
 
-                    if ( $m[ 'created_by' ] == 'MT!' ) {
+                    if ( $this->isMtMatch( $m ) ) {
                         $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new Users_UserStruct();
