@@ -76,7 +76,22 @@ export const TMKeyRow = ({row, onExpandRow}) => {
 
   const onChangeIsLookup = (e) => {
     const isLookup = e.currentTarget.checked
-
+    if (
+      isLookup &&
+      !row.isActive &&
+      tmKeys.filter((tm) => tm.isActive).length >= 10
+    ) {
+      CatToolActions.addNotification({
+        title: 'Resource cannot be activated',
+        type: 'error',
+        text: 'You can activate up to 10 resources per project.',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      })
+      setIsLookup(false)
+      return
+    }
     updateRow({isLookup, isUpdating})
     if (isMMSharedKey) {
       modifyingCurrentTemplate((prevTemplate) => ({
@@ -95,23 +110,6 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const updateRow = ({isLookup, isUpdating, penalty}) => {
-    if (
-      isLookup &&
-      !row.isActive &&
-      tmKeys.filter((tm) => tm.isActive).length >= 10
-    ) {
-      CatToolActions.addNotification({
-        title: 'Resource cannot be activated',
-        type: 'error',
-        text: 'You can activate up to 10 resources per project.',
-        position: 'br',
-        allowHtml: true,
-        timer: 5000,
-      })
-      setIsLookup(false)
-      return
-    }
-
     if (!isMMSharedKey) {
       const updatedKeys = tmKeys.map((tm) =>
         tm.id === row.id
@@ -456,7 +454,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         Add penalty
       </Button>
     )
-
+  console.log(isLookup)
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
