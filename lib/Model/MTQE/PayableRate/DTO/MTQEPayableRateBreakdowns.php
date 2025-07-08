@@ -22,14 +22,14 @@ class MTQEPayableRateBreakdowns extends \DataAccess\AbstractDaoSilentStruct impl
     /** @var int $ice The rate for ICE matches. Default is 0. */
     public int $ice = 0;
 
-    /** @var int $tm_100 The rate for 100% TM matches. Default is 30. */
-    public int $tm_100 = 30;
+    /** @var int $tm_100 The rate for 100% TM matches. Default is 0. */
+    public int $tm_100 = 0;
 
-    /** @var int $tm_100_public The rate for 100% public TM matches. Default is 30. */
-    public int $tm_100_public = 30;
+    /** @var int $tm_100_public The rate for 100% public TM matches. Default is 0. */
+    public int $tm_100_public = 0;
 
-    /** @var int $repetitions The rate for repetitions. Default is 30. */
-    public int $repetitions = 30;
+    /** @var int $repetitions The rate for repetitions. Default is 9. */
+    public int $repetitions = 9;
 
     /** @var int $ice_mt The rate for ICE matches with MT. Default is 0. */
     public int $ice_mt = 0;
@@ -37,10 +37,10 @@ class MTQEPayableRateBreakdowns extends \DataAccess\AbstractDaoSilentStruct impl
     /** @var int $top_quality_mt The rate for top-quality MT matches. Default is 9. */
     public int $top_quality_mt = 9;
 
-    /** @var int $higher_quality_mt The rate for higher-quality MT matches. Default is 30. */
+    /** @var int $higher_quality_mt The rate for higher-quality MT matches. Default is 27. */
     public int $higher_quality_mt = 27;
 
-    /** @var int $standard_quality_mt The rate for standard-quality MT matches. Default is 62. */
+    /** @var int $standard_quality_mt The rate for standard-quality MT matches. Default is 75. */
     public int $standard_quality_mt = 75;
 
     /**
