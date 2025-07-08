@@ -13,11 +13,8 @@ class JobMetadataModal extends React.Component {
         (currentFile && currentFile === file.id) ||
         (currentFilePart && currentFilePart === file.id)
 
-      let currentClass = isCurrentFile ? 'current' : ''
-      currentClass =
-        this.props.files.length === 1 || isCurrentFile
-          ? currentClass + ' active'
-          : currentClass
+      let currentClass = 'current active'
+
       if (file.metadata && file.metadata.instructions) {
         return (
           <div key={'file' + file.id}>
@@ -83,7 +80,7 @@ class JobMetadataModal extends React.Component {
   }
 
   componentDidMount() {
-    $(this.accordion).accordion()
+    // $(this.accordion).accordion()
     setTimeout(() => {
       const element = document.querySelector('.title.current.active')
       element && element.scrollIntoView({behavior: 'smooth'})
