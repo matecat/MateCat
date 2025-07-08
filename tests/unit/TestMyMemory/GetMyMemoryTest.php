@@ -439,45 +439,45 @@ TAB;
         /**
          * 1st match
          */
-        $this->assertEquals( "0", $result->matches[ 0 ][ 'id' ] );
+        $this->assertEquals( "484523811", $result->matches[ 0 ][ 'id' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 0 ][ 'raw_segment' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 0 ][ 'segment' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 0 ][ 'translation' ] );
         $this->assertEquals( "", $result->matches[ 0 ][ 'target_note' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 0 ][ 'raw_translation' ] );
-        $this->assertEquals( "70", $result->matches[ 0 ][ 'quality' ] );
-        $this->assertEquals( "Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.", $result->matches[ 0 ][ 'reference' ] );
+        $this->assertEquals( "74", $result->matches[ 0 ][ 'quality' ] );
+        $this->assertEquals( "", $result->matches[ 0 ][ 'reference' ] );
         $this->assertEquals( "1", $result->matches[ 0 ][ 'usage_count' ] );
-        $this->assertEquals( false, $result->matches[ 0 ][ 'subject' ] );
-        $this->assertEquals( "MT!", $result->matches[ 0 ][ 'created_by' ] );
-        $this->assertEquals( "MT!", $result->matches[ 0 ][ 'last_updated_by' ] );
-        $this->assertEquals( "2016-05-02 17:20:51", $result->matches[ 0 ][ 'create_date' ] );
+        $this->assertEquals( "All", $result->matches[ 0 ][ 'subject' ] );
+        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 0 ][ 'created_by' ] );
+        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 0 ][ 'last_updated_by' ] );
+        $this->assertEquals( "2016-05-02 17:15:11", $result->matches[ 0 ][ 'create_date' ] );
         $this->assertEquals( "2016-05-02", $result->matches[ 0 ][ 'last_update_date' ] );
-        $this->assertEquals( "95%", $result->matches[ 0 ][ 'match' ] );
+        $this->assertEquals( "94%", $result->matches[ 0 ][ 'match' ] );
         $this->assertEquals( [], $result->matches[ 0 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 0 ][ 'source_note' ] );
-        $this->assertEquals( "", $result->matches[ 0 ][ 'memory_key' ] );
+        $this->assertEquals( "a6043e606ac9b5d7ff24", $result->matches[ 0 ][ 'memory_key' ] );
         /**
          * 2nd match
          */
-        $this->assertEquals( "484523811", $result->matches[ 1 ][ 'id' ] );
+        $this->assertEquals( "0", $result->matches[ 1 ][ 'id' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 1 ][ 'raw_segment' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 1 ][ 'segment' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 1 ][ 'translation' ] );
         $this->assertEquals( "", $result->matches[ 1 ][ 'target_note' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 1 ][ 'raw_translation' ] );
-        $this->assertEquals( "74", $result->matches[ 1 ][ 'quality' ] );
-        $this->assertEquals( "", $result->matches[ 1 ][ 'reference' ] );
+        $this->assertEquals( "70", $result->matches[ 1 ][ 'quality' ] );
+        $this->assertEquals( "Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.", $result->matches[ 1 ][ 'reference' ] );
         $this->assertEquals( "1", $result->matches[ 1 ][ 'usage_count' ] );
-        $this->assertEquals( "All", $result->matches[ 1 ][ 'subject' ] );
-        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 1 ][ 'created_by' ] );
-        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 1 ][ 'last_updated_by' ] );
-        $this->assertEquals( "2016-05-02 17:15:11", $result->matches[ 1 ][ 'create_date' ] );
+        $this->assertEquals( false, $result->matches[ 1 ][ 'subject' ] );
+        $this->assertEquals( "MT!", $result->matches[ 1 ][ 'created_by' ] );
+        $this->assertEquals( "MT!", $result->matches[ 1 ][ 'last_updated_by' ] );
+        $this->assertEquals( "2016-05-02 17:20:51", $result->matches[ 1 ][ 'create_date' ] );
         $this->assertEquals( "2016-05-02", $result->matches[ 1 ][ 'last_update_date' ] );
-        $this->assertEquals( "94%", $result->matches[ 1 ][ 'match' ] );
+        $this->assertEquals( "95%", $result->matches[ 1 ][ 'match' ] ); // the match is 95% because of the MT penalty of 5
         $this->assertEquals( [], $result->matches[ 1 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 1 ][ 'source_note' ] );
-        $this->assertEquals( "a6043e606ac9b5d7ff24", $result->matches[ 1 ][ 'memory_key' ] );
+        $this->assertEquals( "", $result->matches[ 1 ][ 'memory_key' ] );
         /**
          * 3rd match
          */
