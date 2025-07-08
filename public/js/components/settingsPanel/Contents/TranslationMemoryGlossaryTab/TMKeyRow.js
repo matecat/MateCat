@@ -158,10 +158,16 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             valueName.current = row.name
           })
           .catch(({errors}) => {
+
+              const errMessage =
+                  errors && errors.length > 0
+                      ? errors[0].message
+                      : 'The key you entered is invalid.';
+
             CatToolActions.addNotification({
               title: 'Error updating key',
               type: 'error',
-              text: errors ? errors.message : 'Invalid key',
+              text: errMessage,
               position: 'br',
               allowHtml: true,
               timer: 5000,
