@@ -215,28 +215,17 @@ class GetContributionWorker extends AbstractWorker {
 
             }
 
-            if ( $this->isMtMatch( $match ) ) {
+            $user = new Users_UserStruct();
 
-                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
-
-            } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
-
-                $match[ 'created_by' ] = Constants_Engines::MT; //For now do not show differences
-
-            } else {
-
-                $user = new Users_UserStruct();
-
-                if ( !$contributionStruct->getUser()->isAnonymous() ) {
-                    $user = $contributionStruct->getUser();
-                }
-
-                $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                        $match,
-                        $contributionStruct->getJobStruct()->tm_keys,
-                        $user->uid
-                );
+            if ( !$contributionStruct->getUser()->isAnonymous() ) {
+                $user = $contributionStruct->getUser();
             }
+
+            $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                    $match,
+                    $contributionStruct->getJobStruct()->tm_keys,
+                    $user->uid
+            );
 
             $match = $this->_matchRewrite( $match );
 
@@ -568,7 +557,7 @@ class GetContributionWorker extends AbstractWorker {
                     $matches[ $k ][ 'translation' ]     = $Filter->fromLayer1ToLayer0( html_entity_decode( $m[ 'translation' ] ) );
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $m[ 'raw_translation' ] );
 
-                    if ( $this->isMtMatch( $m ) ) {
+                    if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new Users_UserStruct();
