@@ -331,7 +331,7 @@ class SegmentsFilter extends React.Component {
             <div
               className={'ui ' + 'approved-2ndpass-color empty circular label'}
             />
-            APPROVED
+            APPROVED 2
           </>
         ),
         id: 'APPROVED-2',
