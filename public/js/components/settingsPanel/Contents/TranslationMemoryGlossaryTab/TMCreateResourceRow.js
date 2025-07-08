@@ -161,11 +161,17 @@ export const TMCreateResourceRow = ({row}) => {
             timer: 5000,
           })
         })
-        .catch(() => {
+        .catch((errors) => {
+
+          const errMessage =
+              errors.errors && errors.errors.length > 0
+                  ? errors.errors[0].message
+                  : 'The key you entered is invalid.';
+
           CatToolActions.addNotification({
             title: 'Invalid key',
             type: 'error',
-            text: 'The key you entered is invalid.',
+            text: errMessage,
             position: 'br',
             timer: 5000,
           })
@@ -187,11 +193,17 @@ export const TMCreateResourceRow = ({row}) => {
           onReset()
           getInfoTmKeyCallback()
         })
-        .catch(() => {
+        .catch((errors) => {
+
+          const errMessage =
+              errors.errors && errors.errors.length > 0
+                  ? errors.errors[0].message
+                  : 'The key you entered is invalid.';
+
           CatToolActions.addNotification({
             title: 'Invalid key',
             type: 'error',
-            text: 'The key you entered is invalid.',
+            text: errMessage,
             position: 'br',
             timer: 5000,
           })
@@ -218,11 +230,17 @@ export const TMCreateResourceRow = ({row}) => {
       .then((data) => {
         if (data.success === true) createNewTmKeyCallback()
       })
-      .catch(() => {
+      .catch((errors) => {
+
+        const errMessage =
+            errors.errors && errors.errors.length > 0
+                ? errors.errors[0].message
+                : 'The key you entered is invalid.';
+
         CatToolActions.addNotification({
           title: 'Invalid key',
           type: 'error',
-          text: 'The key you entered is invalid.',
+          text: errMessage,
           position: 'br',
           timer: 5000,
         })
