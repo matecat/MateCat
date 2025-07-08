@@ -11,6 +11,7 @@ use Model\Exceptions\NotFoundException;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\ClientUserFacade;
+use ReflectionException;
 use Utils;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -65,10 +66,15 @@ class UserKeysController extends KleinController {
      */
     public function newKey(): void {
 
-        $request           = $this->validateTheRequest();
-        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
-        $mkDao             = $this->getMkDao();
-        $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+        try {
+            $request           = $this->validateTheRequest();
+            $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+            $mkDao             = $this->getMkDao();
+            $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+        } catch (Exception $exception){
+            throw new InvalidArgumentException('The key you entered is invalid.', $exception->getCode());
+        }
+
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
 
         $this->response->json( [
@@ -79,6 +85,10 @@ class UserKeysController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function info(): void {
 
         $request           = $this->validateTheRequest();
@@ -122,6 +132,15 @@ class UserKeysController extends KleinController {
      * @return array
      */
     protected function getKeyUsersInfo( array $userMemoryKeys ): array {
+
+        if(empty($userMemoryKeys)){
+            return [
+                    'errors'  => [],
+                    "data"    => [],
+                    "success" => true
+            ];
+        }
+
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
             $_userStructs[] = new ClientUserFacade( $userStruct );
@@ -165,7 +184,7 @@ class UserKeysController extends KleinController {
     }
 
     /**
-     * @return \Model\TmKeyManagement\MemoryKeyDao
+     * @return MemoryKeyDao
      */
     private function getMkDao(): MemoryKeyDao {
         return new MemoryKeyDao( Database::obtain() );

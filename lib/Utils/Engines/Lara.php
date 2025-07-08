@@ -292,7 +292,7 @@ class Lara extends AbstractEngine {
                 'target'          => $_config[ 'target' ],
                 'raw_segment'     => $_config[ 'segment' ],
                 'raw_translation' => $translation,
-                'match'           => $this->getStandardPenaltyString(),
+                'match'           => $this->getStandardMtPenaltyString(),
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null

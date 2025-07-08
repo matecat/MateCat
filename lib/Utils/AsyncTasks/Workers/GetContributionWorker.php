@@ -21,7 +21,7 @@ use PostProcess;
 use ReflectionException;
 use Stomp\Exception\StompException;
 use Utils;
-use Utils\AsyncTasks\Workers\Traits\SortMatchesTrait;
+use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
@@ -35,7 +35,7 @@ use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionWorker extends AbstractWorker {
 
-    use SortMatchesTrait;
+    use MatchesComparator;
 
     /**
      * @param AbstractElement $queueElement
@@ -195,7 +195,7 @@ class GetContributionWorker extends AbstractWorker {
 
         foreach ( $matches as &$match ) {
 
-            if ( strpos( $match[ 'created_by' ], EngineConstants::MT ) !== false ) {
+            if ( $this->isMtMatch( $match ) ) {
 
                 $match[ 'match' ] = EngineConstants::MT;
 
@@ -215,7 +215,7 @@ class GetContributionWorker extends AbstractWorker {
 
             }
 
-            if ( $match[ 'created_by' ] == 'MT!' ) {
+            if ( $this->isMtMatch( $match ) ) {
 
                 $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
 
@@ -438,6 +438,8 @@ class GetContributionWorker extends AbstractWorker {
          * so we want not to perform TMS Call
          * This calls the TMEngine to get memories
          */
+        $tms_match = [];
+
         if ( isset( $_TMS ) ) {
 
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
@@ -525,21 +527,6 @@ class GetContributionWorker extends AbstractWorker {
         return ( isset( $_config[ 'source' ] ) and $_config[ 'source' ] !== '' and isset( $_config[ 'target' ] ) and $_config[ 'target' ] !== '' );
     }
 
-    /**
-     * @param $mt_result
-     * @param $matches
-     *
-     * @return array
-     */
-    protected function _sortMatches( $mt_result, $matches ): array {
-        if ( !empty( $mt_result ) ) {
-            $matches[] = $mt_result;
-            usort( $matches, [ "self", "compareScoreDesc" ] );
-        }
-
-        return $matches;
-    }
-
     private function _sortByLenDesc( $stringA, $stringB ): int {
         if ( strlen( $stringA ) == strlen( $stringB ) ) {
             return 0;
@@ -580,8 +567,8 @@ class GetContributionWorker extends AbstractWorker {
                     $matches[ $k ][ 'translation' ]     = $Filter->fromLayer1ToLayer0( html_entity_decode( $m[ 'translation' ] ) );
                     $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $m[ 'raw_translation' ] );
 
-                    if ( $m[ 'created_by' ] == 'MT!' ) {
-                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
+                    if ( $this->isMtMatch( $m ) ) {
+                        $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new UserStruct();
 

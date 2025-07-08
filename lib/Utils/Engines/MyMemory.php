@@ -177,26 +177,40 @@ class MyMemory extends AbstractEngine {
         return $result_object;
     }
 
-    private function reorderResults(): void {
+    /**
+     * This method is used for help to rebuild result from MyMemory.
+     * Because when in CURL you send something using method POST and value's param start with "@"
+     * he assumes you are sending a file.
+     *
+     * Passing prefix you left before, this method, rebuild result putting prefix at start of translated phrase.
+     *
+     * @param $prefix
+     *
+     * @return void
+     */
+    private function rebuildResults( $prefix ): void {
+
+        if ( !empty( $this->result->responseData[ 'translatedText' ] ) ) {
+            $this->result->responseData[ 'translatedText' ] = $prefix . $this->result->responseData[ 'translatedText' ];
+        }
+
+        if ( !empty( $this->result->matches ) ) {
+            $matches_keys = [ 'raw_segment', 'segment', 'translation', 'raw_translation' ];
+            foreach ( $this->result->matches as $match ) {
+                foreach ( $matches_keys as $match_key ) {
+                    $match->$match_key = $prefix . $match->$match_key;
+                }
+            }
+        }
+
+    }
+
+    private function possiblyOverrideMtPenalty(): void {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
-                if ( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false ) {
-
-                    $match->match = $this->getStandardPenaltyString();
-
-                    //reorder after penalty modification
-                    usort( $this->result->matches, function ( $a, $b ): int {
-                        /** @var $a Matches */
-                        /** @var $b Matches */
-                        if ( floatval( $a->match ) == floatval( $b->match ) ) {
-                            return 0;
-                        }
-
-                        return ( floatval( $a->match ) < floatval( $b->match ) ? 1 : -1 ); //SORT DESC !!!!!!! INVERT MINUS SIGN
-                        //this is necessary since usort sorts is ascending order, thus inverting the ranking
-                    } );
-
+                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+                    $match->match = $this->getStandardMtPenaltyString();
                 }
             }
         }
@@ -265,7 +279,7 @@ class MyMemory extends AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters, true );
 
-        $this->reorderResults();
+        $this->possiblyOverrideMtPenalty();
 
         return $this->result;
 
