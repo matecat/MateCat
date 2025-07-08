@@ -18,7 +18,6 @@ use Database;
 use Engine;
 use Engines_AbstractEngine;
 use Engines_MyMemory;
-use Engines_Results_AbstractResponse;
 use Engines_Results_MyMemory_TMS;
 use Exception;
 use Exceptions\NotFoundException;
@@ -45,6 +44,7 @@ use TaskRunner\Exceptions\NotSupportedMTException;
 use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_TmKeyManagement;
 use Translations_SegmentTranslationDao;
+use Utils\AsyncTasks\Workers\MatchesComparator;
 use WordCount\CounterModel;
 
 /**
@@ -57,6 +57,7 @@ use WordCount\CounterModel;
 class TMAnalysisWorker extends AbstractWorker {
 
     use ProjectWordCount;
+    use MatchesComparator;
 
     /**
      * Matches vector
@@ -157,7 +158,9 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _updateRecord( QueueElement $queueElement ) {
 
-        $bestMatch  = $this->getHighestNotMT_OrPickTheFirstOne();
+        //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
+        $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
+
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
         $suggestion = $bestMatch[ 'raw_translation' ]; //No layering needed
 
@@ -283,7 +286,7 @@ class TMAnalysisWorker extends AbstractWorker {
         foreach ( $this->_matches as $match ) {
             // return $match if not MT and quality >= 75
             if (
-                    stripos( $match[ 'created_by' ], InternalMatchesConstants::MT ) === false and
+                    !$this->isMtMatch( $match ) and
                     (int)$match[ 'match' ] >= 75
             ) {
                 return $match;
@@ -395,7 +398,7 @@ class TMAnalysisWorker extends AbstractWorker {
             array        $equivalentWordMapping
     ): array {
 
-        $tm_match_type         = ( stripos( $bestMatch[ 'created_by' ], InternalMatchesConstants::MT ) !== false ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] );
+        $tm_match_type         = ( $this->isMtMatch( $bestMatch ) ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] );
         $fast_match_type       = strtoupper( $queueElement->params->match_type );
         $fast_exact_match_type = $queueElement->params->fast_exact_match_type;
 
@@ -635,15 +638,13 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         $mt_result = $this->_getMT( $mtEngine, $_config, $queueElement, $mt_qe_config );
-        if ( !empty( $mt_result ) ) {
-            $matches[] = $mt_result;
-            usort( $matches, "self::_compareScore" );
-        }
+
+        $matches = $this->_sortMatches( $mt_result, $matches );
 
         /**
          * If No results found. Ack and Continue
          */
-        if ( empty( $matches ) || !is_array( $matches ) ) {
+        if ( empty( $matches ) ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment." );
             $this->_forceSetSegmentAnalyzed( $queueElement );
             throw new EmptyElementException( "--- (Worker " . $this->_workerPid . ") : No contribution found for this segment.", self::ERR_EMPTY_ELEMENT );
@@ -699,17 +700,17 @@ class TMAnalysisWorker extends AbstractWorker {
     /**
      * Call External MT engine if it is custom (mt not requested from MyMemory)
      *
-     * @param Engines_AbstractEngine $mtEngine
-     * @param array                  $_config
+     * @param Engines_AbstractEngine  $mtEngine
+     * @param array                   $_config
      *
-     * @param QueueElement           $queueElement
-     * @param MTQEWorkflowParams     $mt_qe_config
+     * @param QueueElement            $queueElement
+     * @param MTQEWorkflowParams|null $mt_qe_config
      *
-     * @return bool|Engines_Results_AbstractResponse
+     * @return array
      */
-    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ) {
+    protected function _getMT( Engines_AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ): array {
 
-        $mt_result = false;
+        $mt_result = [];
 
         try {
 
@@ -745,14 +746,14 @@ class TMAnalysisWorker extends AbstractWorker {
             // handle Engines_Results_MyMemory_TMS instead of having directly Engines_Results_MyMemory_Matches
             if ( $mt_result instanceof Engines_Results_MyMemory_TMS ) {
                 if ( isset( $mt_result->responseStatus ) && $mt_result->responseStatus >= 400 ) {
-                    $mt_result = false;
+                    return [];
                 }
                 $mt_result = $mt_result->get_matches_as_array( 1 );
-                $mt_result = $mt_result[ 'matches' ][ 0 ] ?? false;
+                $mt_result = $mt_result[ 'matches' ][ 0 ] ?? [];
             }
 
             if ( isset( $mt_result[ 'error' ][ 'code' ] ) ) {
-                $mt_result = false;
+                return [];
             }
 
         } catch ( Exception $e ) {

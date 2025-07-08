@@ -1,45 +1,47 @@
 import React from 'react'
 import CommonUtils from '../../utils/commonUtils'
-import $ from 'jquery'
+import {Accordion} from '../common/Accordion/Accordion'
+
 class JobMetadataModal extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {
+      currentFile: this.props.currentFile,
+    }
   }
   createFileList() {
-    const {currentFile, currentFilePart} = this.props
+    const {currentFile} = this.state
     return this.props.files.map((file) => {
-      let isCurrentFile =
-        (currentFile && currentFile === file.id) ||
-        (currentFilePart && currentFilePart === file.id)
+      let isCurrentFile = currentFile && currentFile === file.id
 
-      let currentClass = 'current active'
+      const title = (
+        <div className="title">
+          <span
+            title={file.file_name}
+            className={
+              'fileFormat ' +
+              CommonUtils.getIconClass(
+                file.file_name.split('.')[file.file_name.split('.').length - 1],
+              )
+            }
+          >
+            {file.file_name}
+          </span>
+        </div>
+      )
 
-      if (file.metadata && file.metadata.instructions) {
-        return (
-          <div key={'file' + file.id}>
-            <div className={'title ' + currentClass}>
-              <i className="dropdown icon" />
-              <span
-                title={file.file_name}
-                className={
-                  'fileFormat ' +
-                  CommonUtils.getIconClass(
-                    file.file_name.split('.')[
-                      file.file_name.split('.').length - 1
-                    ],
-                  )
-                }
-              >
-                {file.file_name}
-              </span>
-              {isCurrentFile && (
-                <div className="current-icon">
-                  <CurrentIcon />
-                </div>
-              )}
-            </div>
-            <div className={'content ' + currentClass}>
+      return (
+        file.metadata &&
+        file.metadata.instructions && (
+          <Accordion
+            key={file.id}
+            id={file.id}
+            className="instructions-accordion"
+            title={title}
+            expanded={isCurrentFile}
+            onShow={(id) => this.setState({currentFile: id})}
+          >
+            <div className="content">
               <div
                 className="transition"
                 dangerouslySetInnerHTML={{
@@ -47,11 +49,9 @@ class JobMetadataModal extends React.Component {
                 }}
               />
             </div>
-          </div>
+          </Accordion>
         )
-      } else {
-        return ''
-      }
+      )
     })
   }
 
@@ -80,7 +80,6 @@ class JobMetadataModal extends React.Component {
   }
 
   componentDidMount() {
-    // $(this.accordion).accordion()
     setTimeout(() => {
       const element = document.querySelector('.title.current.active')
       element && element.scrollIntoView({behavior: 'smooth'})
@@ -111,12 +110,7 @@ class JobMetadataModal extends React.Component {
                 this.props.files.find((file) => file.metadata.instructions) && (
                   <div>
                     <h2>File instructions</h2>
-                    <div
-                      className="ui styled fluid accordion"
-                      ref={(acc) => {
-                        this.accordion = acc
-                      }}
-                    >
+                    <div className="ui styled fluid accordion">
                       {this.createFileList()}
                     </div>
                   </div>
@@ -130,23 +124,3 @@ class JobMetadataModal extends React.Component {
 }
 
 export default JobMetadataModal
-
-const CurrentIcon = () => {
-  return (
-    <svg
-      width={20}
-      height={20}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 16 12"
-    >
-      <path
-        fill="#777"
-        fillRule="evenodd"
-        stroke="none"
-        strokeWidth="1"
-        d="M15.735.265a.798.798 0 00-1.13 0L5.04 9.831 1.363 6.154a.798.798 0 00-1.13 1.13l4.242 4.24a.799.799 0 001.13 0l10.13-10.13a.798.798 0 000-1.129z"
-        transform="translate(-266 -10) translate(266 8) translate(0 2)"
-      />
-    </svg>
-  )
-}
