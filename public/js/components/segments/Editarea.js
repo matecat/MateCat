@@ -462,7 +462,7 @@ class Editarea extends React.Component {
           editorState: EditorState.set(editorState, {decorator}),
           activeDecorators,
         })
-      })
+      }, timer)
     }
   }
 
