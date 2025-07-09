@@ -356,11 +356,11 @@ class SegmentSource extends React.Component {
         //There are more occurrences and the current change
         // Cleanup all decorators
         this.removeDecorator()
-        ;(activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false),
+        ;((activeDecorators[DraftMatecatConstants.LEXIQA_DECORATOR] = false),
           (activeDecorators[DraftMatecatConstants.GLOSSARY_DECORATOR] = false),
           (activeDecorators[DraftMatecatConstants.QA_GLOSSARY_DECORATOR] =
             false),
-          this.addSearchDecorator()
+          this.addSearchDecorator())
         activeDecorators[DraftMatecatConstants.SEARCH_DECORATOR] = true
         changedDecorator = true
       }
