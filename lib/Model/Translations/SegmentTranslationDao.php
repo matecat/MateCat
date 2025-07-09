@@ -2,7 +2,7 @@
 
 use API\V2\Json\Propagation as PropagationApi;
 use Autopropagation\PropagationAnalyser;
-use Constants\SegmentSize;
+use Utils\Constants\SegmentSize;
 use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Files\FileStruct;
