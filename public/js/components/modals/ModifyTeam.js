@@ -2,7 +2,10 @@ import React, {useCallback, useContext, useEffect, useState} from 'react'
 import PropTypes from 'prop-types'
 import CommonUtils from '../../utils/commonUtils'
 import TEXT_UTILS from '../../utils/textUtils'
-import {EmailsBadge} from '../common/EmailsBadge/EmailsBadge'
+import {
+  EmailsBadge,
+  SPECIALS_SEPARATORS,
+} from '../common/EmailsBadge/EmailsBadge'
 import IconSearch from '../icons/IconSearch'
 import IconClose from '../icons/IconClose'
 import ManageActions from '../../actions/ManageActions'
@@ -227,8 +230,16 @@ export const ModifyTeam = ({team}) => {
   const userlist = getUserList()
   const pendingUsers = getPendingInvitations()
 
+  const isValidEmails =
+    emailsCollection.length &&
+    emailsCollection.every((email) => EMAIL_PATTERN.test(email))
+
+  const handleEnterKey = ({key}) => {
+    if (key === 'Enter' && isValidEmails) setTimeout(() => inviteMembers(), 100)
+  }
+
   return (
-    <div className="team-modal">
+    <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
         <h2>Change Team Name</h2>
         <div className="team-name-container">
@@ -276,16 +287,14 @@ export const ModifyTeam = ({team}) => {
           <EmailsBadge
             name="team"
             value={emailsCollection}
+            separators={[',', SPECIALS_SEPARATORS.EnterKey]}
             onChange={onChangeAddMembers}
-            placeholder="Add new people (separate email addresses with a comma)"
+            placeholder="Add new members by entering their email addresses"
           />
           <button
             className="create-team ui primary button open button-invite"
             onClick={inviteMembers}
-            disabled={
-              !emailsCollection.length ||
-              emailsCollection.some((email) => !EMAIL_PATTERN.test(email))
-            }
+            disabled={!isValidEmails}
           >
             Invite members
           </button>

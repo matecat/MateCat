@@ -1,5 +1,8 @@
 import React, {useCallback, useContext, useState} from 'react'
-import {EmailsBadge} from '../common/EmailsBadge/EmailsBadge'
+import {
+  EmailsBadge,
+  SPECIALS_SEPARATORS,
+} from '../common/EmailsBadge/EmailsBadge'
 import CommonUtils from '../../utils/commonUtils'
 import {EMAIL_PATTERN} from '../../constants/Constants'
 import ManageActions from '../../actions/ManageActions'
@@ -29,8 +32,17 @@ export const CreateTeam = () => {
     !emailsCollection.length ||
     emailsCollection.some((email) => !EMAIL_PATTERN.test(email))
 
+  const handleEnterKey = ({key}) => {
+    if (key === 'Enter' && !isDisabledCreation)
+      setTimeout(() => sendCreate(), 100)
+  }
+
   return (
-    <div className="team-modal team-modal-create">
+    <div
+      className="team-modal team-modal-create"
+      tabIndex={1}
+      onKeyDown={handleEnterKey}
+    >
       <p>
         Create a team and invite your colleagues to share and manage projects.
       </p>
@@ -51,6 +63,7 @@ export const CreateTeam = () => {
         <EmailsBadge
           name="team"
           value={emailsCollection}
+          separators={[',', SPECIALS_SEPARATORS.EnterKey]}
           onChange={onChangeAddMembers}
           placeholder="Insert email or emails separated by commas"
         />
