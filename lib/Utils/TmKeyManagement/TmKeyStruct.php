@@ -45,9 +45,9 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
     public ?string $name = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public string $key;
+    public ?string $key = null;
 
     /**
      * @var bool Read grant for owner. 0 or 1
