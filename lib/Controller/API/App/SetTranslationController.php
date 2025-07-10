@@ -105,10 +105,10 @@ class SetTranslationController extends AbstractStatefulKleinController {
             //get an original source segment, first
             $this->data[ 'segment' ] = $this->segment;
 
-            $segment     = $this->filter->fromLayer0ToLayer2( $this->data[ 'segment' ][ 'segment' ] );
-            $translation = $this->filter->fromLayer0ToLayer2( $this->data[ 'translation' ] );
+            $segment     = $this->filter->fromLayer2ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
+            $translation = $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] );
 
-            $check = new QA( $segment, $translation );
+            $check = new QA( $segment, $translation ); // Layer 1 here
             $check->setChunk( $this->data[ 'chunk' ] );
             $check->setFeatureSet( $this->featureSet );
             $check->setSourceSegLang( $this->data[ 'chunk' ]->source );
@@ -123,11 +123,11 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             if ( $check->thereAreWarnings() ) {
                 $err_json    = $check->getWarningsJSON();
-                $translation = $this->filter->fromLayer2ToLayer0( $this->data[ 'translation' ] );
+                $translation = $this->filter->fromLayer1ToLayer0( $translation );
             } else {
                 $err_json         = '';
                 $targetNormalized = $check->getTrgNormalized();
-                $translation      = $this->filter->fromLayer2ToLayer0( $targetNormalized );
+                $translation      = $this->filter->fromLayer1ToLayer0( $targetNormalized );
             }
 
             //PATCH TO FIX BOM INSERTIONS
@@ -145,8 +145,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $old_translation = $this->getOldTranslation();
 
-            $old_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
-            $old_suggestion       = $this->data[ 'chosen_suggestion_index' ] !== null ? $old_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
+            $client_suggestion_array = $this->data[ 'suggestion_array' ];
+            $client_old_suggestion   = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
             $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $this->data[ 'id_segment' ];
@@ -155,20 +155,20 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->segment_hash           = $this->data[ 'segment' ]->segment_hash;
             $new_translation->translation            = $translation;
             $new_translation->serialized_errors_list = $err_json;
-            $new_translation->suggestions_array      = ( $this->data[ 'chosen_suggestion_index' ] !== null ? $this->data[ 'suggestion_array' ] : $old_translation->suggestions_array );
+            $new_translation->suggestions_array      = ( $this->data[ 'chosen_suggestion_index' ] !== null ? json_encode( $client_suggestion_array ) : $old_translation->suggestions_array );
             $new_translation->suggestion_position    = ( $this->data[ 'chosen_suggestion_index' ] !== null ? $this->data[ 'chosen_suggestion_index' ] : $old_translation->suggestion_position );
             $new_translation->warning                = $check->thereAreWarnings();
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-            $new_translation->suggestion             = !empty( $old_suggestion ) ? $old_suggestion->translation : $old_translation->suggestion;
+            $new_translation->suggestion             = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; // raw_translation is in layer 0 and suggestion too
             $new_translation->suggestion_source      = $old_translation->suggestion_source;
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
-            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $old_suggestion ) ) {
-                $new_translation->suggestion = $old_suggestion->translation;
+            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_old_suggestion ) ) {
+                $new_translation->suggestion = $client_old_suggestion->translation;
 
                 // update suggestion match
-                if ( $old_suggestion->match == "MT" ) {
+                if ( $client_old_suggestion->match == "MT" ) {
 
                     /**
                      * @var $project ProjectStruct
@@ -177,12 +177,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
                     // case 1. is MT
                     $new_translation->suggestion_match  = $project->getMetadataValue( MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
                     $new_translation->suggestion_source = EngineConstants::MT;
-                } elseif ( $old_suggestion->match == 'NO_MATCH' ) {
+                } elseif ( $client_old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
                     $new_translation->suggestion_source = 'NO_MATCH';
                 } else {
                     // case 3. otherwise is TM
-                    $new_translation->suggestion_match  = (int)$old_suggestion->match; // cast '71%' to int 71
+                    $new_translation->suggestion_match  = (int)$client_old_suggestion->match; // cast '71%' to int 71
                     $new_translation->suggestion_source = EngineConstants::TM;
                 }
             }
@@ -454,6 +454,21 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $this->password         = $password;
         $this->request_password = $received_password;
 
+        //init filters and features set
+        $featureSet = $this->getFeatureSet();
+        $featureSet->loadForProject( $chunk->getProject() );
+
+        /** @var MateCatFilter $filter */
+        $filter       = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment ) );
+        $this->filter = $filter;
+
+        // decode and normalize the suggestion array coming from the client
+        $suggestion_array = json_decode( $suggestion_array );
+        foreach ( $suggestion_array as $match ) {
+            $match->segment     = $this->filter->fromLayer2ToLayer1( $match->segment );
+            $match->translation = $this->filter->fromLayer2ToLayer1( $match->translation );
+        }
+
         $data = [
                 'id_job'                  => $id_job,
                 'password'                => $password,
@@ -514,13 +529,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     protected function checkData(): void {
-
-        $featureSet = $this->getFeatureSet();
-        $featureSet->loadForProject( $this->data[ 'project' ] );
-
-        /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
-        $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
 
