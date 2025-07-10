@@ -66,14 +66,10 @@ class UserKeysController extends KleinController {
      */
     public function newKey(): void {
 
-        try {
-            $request           = $this->validateTheRequest();
-            $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
-            $mkDao             = $this->getMkDao();
-            $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
-        } catch (Exception $exception){
-            throw new InvalidArgumentException('The key you entered is invalid.', $exception->getCode());
-        }
+        $request           = $this->validateTheRequest();
+        $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
+        $mkDao             = $this->getMkDao();
+        $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
 
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
 
@@ -173,7 +169,7 @@ class UserKeysController extends KleinController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
         if ( $_POST[ 'description' ] and $_POST[ 'description' ] !== $description ) {
-            throw new InvalidArgumentException( "Invalid key description", -3 );
+            throw new InvalidArgumentException( "<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3 );
         }
 
         return [

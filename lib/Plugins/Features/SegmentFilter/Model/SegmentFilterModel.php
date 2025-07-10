@@ -17,12 +17,12 @@ class SegmentFilterModel {
     /**
      * @var JobStruct
      */
-    private $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var FilterDefinition
      */
-    private $filter;
+    private FilterDefinition $filter;
 
     /**
      * SegmentFilterModel constructor.
@@ -38,10 +38,10 @@ class SegmentFilterModel {
     }
 
     /**
-     * @return null|\Model\Translations\SegmentTranslationStruct[]
+     * @return null|SegmentTranslationStruct[]
      * @throws Exception
      */
-    public function getSegmentList() {
+    public function getSegmentList(): array {
 
         if ( $this->filter->isSampled() ) {
             $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );
