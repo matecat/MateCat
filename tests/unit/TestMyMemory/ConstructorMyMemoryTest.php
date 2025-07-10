@@ -57,7 +57,7 @@ class ConstructorMyMemoryTest extends AbstractTest {
         $this->property = $this->reflector->getProperty( "className" );
         $this->property->setAccessible( true );
 
-        $this->assertEquals( "MyMemory", $this->property->getValue( $this->databaseInstance ) );
+        $this->assertEquals( MyMemory::class, $this->property->getValue( $this->databaseInstance ) );
 
         $this->property = $this->reflector->getProperty( "curl_additional_params" );
         $this->property->setAccessible( true );

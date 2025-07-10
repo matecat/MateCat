@@ -173,7 +173,7 @@ class TmKeyManagementTest extends AbstractTest {
 
         $structure = TmKeyManager::getTmKeyStructure( $args );
 
-        $this->assertInstanceOf( "TmKeyStruct", $structure );
+        $this->assertInstanceOf( TmKeyStruct::class, $structure );
         $this->assertObjectHasProperty( "tm", $structure );
         $this->assertObjectHasProperty( "glos", $structure );
         $this->assertObjectHasProperty( "owner", $structure );
@@ -1210,14 +1210,14 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertTrue( is_array( $tmKeys ) );
 
         $this->assertFalse( empty( $tmKeys ) );
-        $this->assertInstanceOf( "TmKeyStruct", $tmKeys[ 0 ] );
+        $this->assertInstanceOf( TmKeyStruct::class, $tmKeys[ 0 ] );
     }
 
     /** TEST isValidStructure */
     public function testIsValidStructure_validStructure() {
         $validObj = TmKeyManager::isValidStructure( self::$validTmKeyStructArr );
 
-        $this->assertInstanceOf( 'Utils\TmKeyManagement\TmKeyStruct', $validObj );
+        $this->assertInstanceOf( TmKeyStruct::class, $validObj );
         $this->assertEquals( self::$validTmKeyStructArr[ 'key' ], $validObj->key );
         $this->assertEquals( self::$validTmKeyStructArr[ 'owner' ], $validObj->owner );
         $this->assertEquals( self::$validTmKeyStructArr[ 'r' ], $validObj->r );

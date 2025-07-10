@@ -26,7 +26,7 @@ class ServerCheckTest extends AbstractTest {
     public function testUploadParams() {
 
         $servCheck = ServerCheck::getInstance();
-        $this->assertInstanceOf( 'ServerCheck', $servCheck );
+        $this->assertInstanceOf( ServerCheck::class, $servCheck );
         $params = $servCheck->getUploadParams();
 
         $this->assertNotEmpty( $params );

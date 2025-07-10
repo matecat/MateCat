@@ -25,9 +25,9 @@ class TmKeyStruct extends stdClass implements JsonSerializable {
 
     /**
      * A flag that indicates whether the key has been created by the owner or not
-     * @var bool 0 or 1
+     * @var ?bool 0 or 1
      */
-    public bool $owner;
+    public ?bool $owner = null;
 
     /**
      * @var int|null The uid of the translator that uses that key in the job.

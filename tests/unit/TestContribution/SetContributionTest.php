@@ -115,11 +115,11 @@ class SetContributionTest extends AbstractTest {
 
         $queueElement            = new QueueElement();
         $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
-        $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
+        $queueElement->classLoad = SetContributionWorker::class;
 
         $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
-        $amqHandlerMock = @$this->getMockBuilder( '\AMQHandler' )->getMock();
+        $amqHandlerMock = @$this->getMockBuilder( AMQHandler::class )->getMock();
 
         $amqHandlerMock->expects( $spy = $this->exactly( 1 ) )
                 ->method( 'publishToQueues' )
