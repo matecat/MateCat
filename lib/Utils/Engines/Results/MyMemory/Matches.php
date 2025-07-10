@@ -93,8 +93,10 @@ class Engines_Results_MyMemory_Matches {
             $this->target = $target;
         }
 
-        $this->segment     = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
-        $this->translation = $this->getLayer( $this->raw_translation, $layerNum, $dataRefMap );
+        $this->segment         = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
+        $this->translation     = $this->getLayer( $this->raw_translation, $layerNum, $dataRefMap );
+        $this->raw_segment     = $this->getLayer( $this->raw_segment, 0, $dataRefMap ); //raw_segment must be in layer 0
+        $this->raw_translation = $this->getLayer( $this->raw_translation, 0, $dataRefMap ); //raw_translation must be in layer 0
 
         return $this->toArray();
     }
