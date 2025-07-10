@@ -153,7 +153,7 @@ class FilterSegments extends React.Component {
       })
       .unshift({
         name: 'All',
-        id: 1,
+        id: 'all',
       })
     let optionsSeverities = this.severities.map((item) => {
       return {

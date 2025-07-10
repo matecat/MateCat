@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6ad01e2d70859b95538d6896e32a4d61",
+    "content-hash": "92d7fa0c66bc7fbe7c0b6a495b632993",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1740,16 +1740,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.2.9",
+            "version": "v2.2.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "a562ef43d553304e86294b18d3543efd5a672c5f"
+                "reference": "e5c479fc2abc45a7fcd598ec54cb191bd21b33c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/a562ef43d553304e86294b18d3543efd5a672c5f",
-                "reference": "a562ef43d553304e86294b18d3543efd5a672c5f",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/e5c479fc2abc45a7fcd598ec54cb191bd21b33c5",
+                "reference": "e5c479fc2abc45a7fcd598ec54cb191bd21b33c5",
                 "shasum": ""
             },
             "require": {
@@ -1801,9 +1801,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.9"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.10"
             },
-            "time": "2024-10-03T10:17:11+00:00"
+            "time": "2025-07-08T08:28:39+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -6890,7 +6890,8 @@
         "ext-zlib": "*",
         "ext-gd": "*",
         "ext-iconv": "*",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "ext-simplexml": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"
