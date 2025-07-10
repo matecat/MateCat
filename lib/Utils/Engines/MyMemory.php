@@ -180,26 +180,12 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     }
 
-    private function reorderResults(): void {
+    private function possiblyOverrideMtPenalty(): void {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Engines_Results_MyMemory_Matches */
             foreach ( $this->result->matches as $match ) {
                 if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
-
-                    $match->match = $this->getStandardPenaltyString();
-
-                    //reorder after penalty modification
-                    usort( $this->result->matches, function ( $a, $b ): int {
-                        /** @var $a Engines_Results_MyMemory_Matches */
-                        /** @var $b Engines_Results_MyMemory_Matches */
-                        if ( floatval( $a->match ) == floatval( $b->match ) ) {
-                            return 0;
-                        }
-
-                        return ( floatval( $a->match ) < floatval( $b->match ) ? 1 : -1 ); //SORT DESC !!!!!!! INVERT MINUS SIGN
-                        //this is necessary since usort sorts is ascending order, thus inverting the ranking
-                    } );
-
+                    $match->match = $this->getStandardMtPenaltyString();
                 }
             }
         }
@@ -276,7 +262,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             $this->rebuildResults( $segment_file_chr[ 1 ] );
         }
 
-        $this->reorderResults();
+        $this->possiblyOverrideMtPenalty();
 
         return $this->result;
 
