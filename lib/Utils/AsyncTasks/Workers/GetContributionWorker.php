@@ -146,7 +146,7 @@ class GetContributionWorker extends AbstractWorker {
         foreach ( $content as &$match ) {
 
             if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
+                $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
             }
 
             // Convert &#10; to layer2 placeholder for the UI
