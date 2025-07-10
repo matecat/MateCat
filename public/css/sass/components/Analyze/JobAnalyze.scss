@@ -41,7 +41,7 @@
       80px,
       100px
     );
-  grid-template-rows: 100px;
+  grid-template-rows: 125px;
   padding: 0 !important;
   border-bottom: 1px solid colors.$grey3;
   background-color: colors.$grey4;
@@ -63,7 +63,7 @@
       }
     }
     :first-child {
-      height: 60px;
+      height: 85px;
       border-bottom: 1px solid colors.$grey3;
       font-weight: bold;
     }
