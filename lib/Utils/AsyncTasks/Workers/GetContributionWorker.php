@@ -144,6 +144,11 @@ class GetContributionWorker extends AbstractWorker {
         );
 
         foreach ( $content as &$match ) {
+
+            if ( $match[ 'created_by' ] == 'MT!' ) {
+                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
+            }
+
             // Convert &#10; to layer2 placeholder for the UI
             // Those strings are on layer 1, force the transition to layer 2.
             $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] );
@@ -220,28 +225,17 @@ class GetContributionWorker extends AbstractWorker {
 
             }
 
-            if ( $this->isMtMatch( $match ) ) {
+            $user = new UserStruct();
 
-                $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
-
-            } elseif ( $match[ 'created_by' ] == 'NeuralMT' ) {
-
-                $match[ 'created_by' ] = EngineConstants::MT; //For now do not show differences
-
-            } else {
-
-                $user = new UserStruct();
-
-                if ( !$contributionStruct->getUser()->isAnonymous() ) {
-                    $user = $contributionStruct->getUser();
-                }
-
-                $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
-                        $match,
-                        $contributionStruct->getJobStruct()->tm_keys,
-                        $user->uid
-                );
+            if ( !$contributionStruct->getUser()->isAnonymous() ) {
+                $user = $contributionStruct->getUser();
             }
+
+            $match[ 'created_by' ] = Utils::changeMemorySuggestionSource(
+                    $match,
+                    $contributionStruct->getJobStruct()->tm_keys,
+                    $user->uid
+            );
 
             $match = $this->_matchRewrite( $match );
 
