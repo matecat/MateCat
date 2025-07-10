@@ -557,7 +557,7 @@ class GetContributionWorker extends AbstractWorker {
 
                     // normalize data for saving `suggestions_array`
 
-                    if ( $this->isMtMatch( $m ) ) {
+                    if ( $m[ 'created_by' ] == 'MT!'  ) {
                         $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
                     } else {
                         $user = new UserStruct();
