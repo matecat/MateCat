@@ -19,7 +19,6 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use PostProcess;
 use ReflectionException;
-use Stomp\Exception\StompException;
 use Utils;
 use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
 use Utils\Constants\EngineConstants;
@@ -116,10 +115,11 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                                      $content
+     * @param array                  $content
      * @param GetContributionRequest $contributionStruct
-     *
-     * @param bool                                       $isCrossLang
+     * @param FeatureSet             $featureSet
+     * @param                        $targetLang
+     * @param bool                   $isCrossLang
      *
      * @throws Exception
      */
@@ -189,9 +189,9 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                     $matches
-     * @param GetContributionRequest    $contributionStruct
-     * @param FeatureSet                $featureSet
+     * @param array                  $matches
+     * @param GetContributionRequest $contributionStruct
+     * @param FeatureSet             $featureSet
      *
      * @throws Exception
      */
@@ -356,11 +356,11 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param \Utils\Contribution\GetContributionRequest $contributionStruct
-     * @param JobStruct                                  $jobStruct
-     * @param string                                     $targetLang
-     * @param FeatureSet                                 $featureSet
-     * @param bool                                       $isCrossLang
+     * @param GetContributionRequest $contributionStruct
+     * @param JobStruct              $jobStruct
+     * @param string                 $targetLang
+     * @param FeatureSet             $featureSet
+     * @param bool                   $isCrossLang
      *
      * @return array
      * @throws EndQueueException
@@ -435,8 +435,6 @@ class GetContributionWorker extends AbstractWorker {
         if ( $isCrossLang ) {
             $_config[ 'get_mt' ] = false;
         }
-
-        $tms_match = [];
 
         /**
          * if No TM server and No MT selected $_TMS is not defined,
@@ -541,13 +539,13 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                                      $matches
+     * @param array                  $matches
      * @param GetContributionRequest $contributionStruct
-     * @param FeatureSet             $featureSet
      *
      * @throws ReflectionException
+     * @throws Exception
      */
-    private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct, FeatureSet $featureSet ) {
+    private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ) {
 
         if (
                 count( $matches ) > 0 and
@@ -566,7 +564,7 @@ class GetContributionWorker extends AbstractWorker {
                     // normalize data for saving `suggestions_array`
 
                     if ( $this->isMtMatch( $m ) ) {
-                        $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
+                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
                     } else {
                         $user = new UserStruct();
 
