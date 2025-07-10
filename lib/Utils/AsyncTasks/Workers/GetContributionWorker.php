@@ -145,6 +145,11 @@ class GetContributionWorker extends AbstractWorker {
         );
 
         foreach ( $content as &$match ) {
+
+            if ( $match[ 'created_by' ] == 'MT!' ) {
+                $match[ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
+            }
+
             // Convert &#10; to layer2 placeholder for the UI
             // Those strings are on layer 1, force the transition to layer 2.
             $match[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $match[ 'segment' ] );
