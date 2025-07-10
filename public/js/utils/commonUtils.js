@@ -232,6 +232,8 @@ const CommonUtils = {
       case 'x-jsont2':
       case 'json':
       case 'jsont':
+      case 'yaml':
+      case 'yml':
         return 'extxml'
       case 'rc':
         return 'extrcc'
