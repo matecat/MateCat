@@ -1,6 +1,6 @@
 <?php
 
-use Constants\SegmentSize;
+use Utils\Constants\SegmentSize;
 use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Files\FileStruct;

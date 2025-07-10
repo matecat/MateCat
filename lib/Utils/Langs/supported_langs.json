@@ -108,6 +108,21 @@
         {
             "localized": [
                 {
+                    "en": "Arabic (United Arab Emirates)"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-AE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Arabic (Egypt)"
                 }
             ],
@@ -4973,6 +4988,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "gaz-ET",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "West Flemish"
+                }
+            ],
+            "isocode": "vls",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vls-BE",
             "ocr": {
                 "supported": false,
                 "not_supported_or_rtl": false
