@@ -221,11 +221,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
-        foreach ( $this->_matches as $k => $m ) {
-//            $this->_matches[ $k ][ 'segment' ]         = $filter->fromLayer1ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'segment' ] ) );
-//            $this->_matches[ $k ][ 'translation' ]     = $filter->fromLayer1ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'translation' ] ) );
-        }
-
         $suggestion_json = json_encode( $this->_matches );
 
         $tm_data                             = [];
