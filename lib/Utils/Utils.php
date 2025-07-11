@@ -812,7 +812,7 @@ class Utils {
         foreach ( $links as $link ) {
             $linkLabel       = $link->nodeValue;
             $linkHref        = $link->getAttribute( 'href' );
-            $link->nodeValue = $linkLabel . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
+            $link->nodeValue = "[".$linkLabel."]" . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
         }
 
         // replace <img> with src

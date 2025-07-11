@@ -476,10 +476,18 @@ class NewController extends KleinController {
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
-        /**
-         * Uber plugin callback
-         */
-        $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        // Strip tags from instructions
+        $instructions = [];
+        if ( is_array( $this->request->param( 'instructions' ) ) ) {
+            foreach ( $this->request->param( 'instructions' ) as $value ) {
+                $instructions[] = Utils::stripTagsPreservingHrefs( $value );
+            }
+
+            /**
+             * Uber plugin callback
+             */
+            $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        }
 
         if ( empty( $_FILES ) ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
