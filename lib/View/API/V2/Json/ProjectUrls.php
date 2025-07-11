@@ -6,10 +6,10 @@
  * Time: 15:57
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use DataAccess\ShapelessConcreteStruct;
 use Exception;
+use Model\DataAccess\ShapelessConcreteStruct;
 use Routes;
 
 class ProjectUrls {

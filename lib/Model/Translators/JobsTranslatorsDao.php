@@ -7,50 +7,31 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
-use DataAccess\AbstractDao;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class JobsTranslatorsDao extends AbstractDao {
 
     const TABLE       = "jobs_translators";
-    const STRUCT_TYPE = "JobsTranslatorsStruct";
+    const STRUCT_TYPE = JobsTranslatorsStruct::class;
 
     protected static array $auto_increment_field = [];
     protected static array $primary_keys         = [ 'id_job', 'job_password' ];
 
-    protected static $_query_all_by_id          = "SELECT * FROM jobs_translators WHERE id_job = :id_job ;";
-    protected static $_query_by_id_and_password = "SELECT * FROM jobs_translators WHERE id_job = :id_job and job_password = :password ;";
-
-    public function findByJobIdAndPassword( $id_job, $password ) {
-
-        $jobStruct           = new Jobs_JobStruct();
-        $jobStruct->id       = $id_job;
-        $jobStruct->password = $password;
-
-        return $this->findByJobsStruct( $jobStruct );
-
-    }
-
-    public function findByJobId( $id_job ) {
-
-        $jobStruct     = new Jobs_JobStruct();
-        $jobStruct->id = $id_job;
-
-        return $this->findByJobsStruct( $jobStruct );
-
-    }
+    protected static string $_query_all_by_id          = "SELECT * FROM jobs_translators WHERE id_job = :id_job ;";
+    protected static string $_query_by_id_and_password = "SELECT * FROM jobs_translators WHERE id_job = :id_job and job_password = :password ;";
 
     /**
-     * @param Jobs_JobStruct $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @return JobsTranslatorsStruct[]
      * @throws ReflectionException
      */
-    public function findByJobsStruct( Jobs_JobStruct $jobStruct ): ?array {
+    public function findByJobsStruct( JobStruct $jobStruct ): ?array {
 
         if ( !empty( $jobStruct->password ) ) {
             $query = self::$_query_by_id_and_password;
@@ -61,16 +42,18 @@ class JobsTranslatorsDao extends AbstractDao {
         }
 
         $stmt                 = $this->_getStatementForQuery( $query );
-        $jobsTranslatorsQuery = new JobsTranslatorsStruct();
 
-        return $this->_fetchObject( $stmt,
-                $jobsTranslatorsQuery,
+        return $this->_fetchObjectMap( $stmt,
+                self::STRUCT_TYPE,
                 $data
         );
 
     }
 
-    public function destroyCacheByJobStruct( Jobs_JobStruct $jobStruct ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function destroyCacheByJobStruct( JobStruct $jobStruct ): bool {
 
         if ( !empty( $jobStruct->password ) ) {
             $query = self::$_query_by_id_and_password;

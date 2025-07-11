@@ -6,29 +6,36 @@
  * Time: 18.45
  */
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
+namespace Model\TmKeyManagement;
+
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Database;
+use Model\Users\UserDao;
+use ReflectionException;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Class DataAccess_MemoryKeyDao<br/>
  * This class handles the communication with the corresponding table in the database using a CRUD interface
  */
-class TmKeyManagement_MemoryKeyDao extends AbstractDao {
+class MemoryKeyDao extends AbstractDao {
 
     const TABLE = "memory_keys";
 
-    const STRUCT_TYPE = "TmKeyManagement_MemoryKeyStruct";
+    const STRUCT_TYPE = MemoryKeyStruct::class;
 
     const MAX_INSERT_NUMBER = 10;
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param MemoryKeyStruct $obj
      *
-     * @return TmKeyManagement_MemoryKeyStruct|null The inserted object on success, null otherwise
+     * @return MemoryKeyStruct|null The inserted object on success, null otherwise
      * @throws Exception
      */
-    public function create( TmKeyManagement_MemoryKeyStruct $obj ) {
+    public function create( MemoryKeyStruct $obj ): ?MemoryKeyStruct {
         $obj = $this->sanitize( $obj );
 
         $this->_validateNotNullFields( $obj );
@@ -57,13 +64,15 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
-     * @param bool                            $traverse
+     * @param MemoryKeyStruct $obj
+     * @param bool            $traverse
+     * @param int             $ttl
      *
-     * @return array|void
+     * @return MemoryKeyStruct[]
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function read( TmKeyManagement_MemoryKeyStruct $obj, $traverse = false, $ttl = 0 ) {
+    public function read( MemoryKeyStruct $obj, bool $traverse = false, int $ttl = 0 ): array {
         $obj = $this->sanitize( $obj );
 
         $where_params = [];
@@ -124,11 +133,11 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
         /**
          * @var ShapelessConcreteStruct $arr_result
          */
-        $arr_result = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $where_params );
+        $arr_result = $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $where_params );
 
         if ( $traverse ) {
 
-            $userDao = new Users_UserDao( Database::obtain() );
+            $userDao = new UserDao( Database::obtain() );
 
             foreach ( $arr_result as $k => $row ) {
                 $users                          = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );
@@ -148,12 +157,12 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     }
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param MemoryKeyStruct $obj
      *
-     * @return bool|void
+     * @return MemoryKeyStruct|null
      * @throws Exception
      */
-    public function atomicUpdate( TmKeyManagement_MemoryKeyStruct $obj ) {
+    public function atomicUpdate( MemoryKeyStruct $obj ): ?MemoryKeyStruct {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -183,7 +192,6 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
 
         $where_string = implode( " AND ", $where_conditions );
 
-        $set_string = null;
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
         } else {
@@ -202,7 +210,10 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
         return null;
     }
 
-    public function delete( TmKeyManagement_MemoryKeyStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function delete( MemoryKeyStruct $obj ): ?MemoryKeyStruct {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -226,7 +237,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     /**
      * @throws Exception
      */
-    public function disable( TmKeyManagement_MemoryKeyStruct $obj ) {
+    public function disable( MemoryKeyStruct $obj ): ?MemoryKeyStruct {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -247,7 +258,10 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
         return null;
     }
 
-    public function enable( TmKeyManagement_MemoryKeyStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function enable( MemoryKeyStruct $obj ): ?MemoryKeyStruct {
         $obj = $this->sanitize( $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -270,7 +284,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
 
 
     /**
-     * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
+     * @param $obj_arr MemoryKeyStruct[] An array of MemoryKeyStruct objects
      *
      * @throws Exception
      */
@@ -287,17 +301,17 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
         $objects = array_chunk( $obj_arr, static::MAX_INSERT_NUMBER );
 
         //create an insert query for each chunk
-        foreach ( $objects as $i => $chunk ) {
+        foreach ( $objects as $chunk ) {
 
             $insert_query = $query;
             /**
-             * @var $chunk TmKeyManagement_MemoryKeyStruct[]
+             * @var $chunk MemoryKeyStruct[]
              */
             foreach ( $chunk as $obj ) {
                 $insert_query .= "( ?, ?, ?, ?, ?, NOW() ),";
 
                 //fill values array
-                $values[] = (int)$obj->uid;
+                $values[] = $obj->uid;
                 $values[] = $obj->tm_key->key;
                 $values[] = ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name;
                 $values[] = ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm;
@@ -317,14 +331,16 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     /**
      * See parent definition
      *
-     * @param TmKeyManagement_MemoryKeyStruct $input
+     * @template T of IDaoStruct
      *
-     * @return IDaoStruct|TmKeyManagement_MemoryKeyStruct
+     * @param MemoryKeyStruct $input
+     *
+     * @return MemoryKeyStruct
      * @throws Exception
      * @see AbstractDao::sanitize
      *
      */
-    public function sanitize( IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ): IDaoStruct {
         return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
@@ -345,7 +361,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     /**
      * See in AbstractDao::validatePrimaryKey
      *
-     * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param MemoryKeyStruct $obj
      *
      * @return void
      * @throws Exception
@@ -355,7 +371,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
         /**
-         * @var $obj TmKeyManagement_MemoryKeyStruct
+         * @var $obj MemoryKeyStruct
          */
         if ( empty( $obj->uid ) ) {
             throw new Exception( "Invalid Uid" );
@@ -372,14 +388,13 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
      *
      * @param IDaoStruct $obj
      *
-     * @return null
+     * @return void
      * @throws Exception
      * @see AbstractDao::_validateNotNullFields
-     *
      */
     protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
-         * @var $obj TmKeyManagement_MemoryKeyStruct
+         * @var $obj MemoryKeyStruct
          */
         if ( empty( $obj->uid ) ) {
             throw new Exception( "Uid cannot be null" );
@@ -396,9 +411,9 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
      *
      * @param $array_result array A result array obtained by a MySql query
      *
-     * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
+     * @return MemoryKeyStruct[] An array containing MemoryKeyStruct objects
      */
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult( array $array_result ): array {
         $result = [];
 
         foreach ( $array_result as $item ) {
@@ -407,7 +422,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
 
             $build_arr = [
                     'uid'    => $item[ 'uid' ],
-                    'tm_key' => new TmKeyManagement_TmKeyStruct( [
+                    'tm_key' => new TmKeyStruct( [
                                     'key'       => (string)$item[ 'key_value' ],
                                     'name'      => (string)$item[ 'key_name' ],
                                     'tm'        => (bool)$item[ 'tm' ],
@@ -419,7 +434,7 @@ class TmKeyManagement_MemoryKeyDao extends AbstractDao {
                     )
             ];
 
-            $obj = new TmKeyManagement_MemoryKeyStruct( $build_arr );
+            $obj = new MemoryKeyStruct( $build_arr );
 
             $result[] = $obj;
         }

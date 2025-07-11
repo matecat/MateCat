@@ -1,7 +1,10 @@
 <?php
 
+use Model\Database;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\Engines\EnginesFactory;
 
 /**
  * Created by PhpStorm.
@@ -58,8 +61,8 @@ H;
     public function constructor_should_raise_exception_when_is_not_an_MT_engine() {
 
         $this->expectException( Exception::class );
-        $this->expectExceptionMessage( "Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT" );
-        Engine::getInstance( $this->not_valid_engine_id );
+        $this->expectExceptionMessage( "EnginesFactory $this->not_valid_engine_id is not a MT engine, found TM -> MMT" );
+        EnginesFactory::getInstance( $this->not_valid_engine_id );
 
     }
 
@@ -74,8 +77,8 @@ H;
         $mmtClient = @$this->getMockBuilder( '\Engines\MMT\MMTServiceApi' )->disableOriginalConstructor()->getMock();
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
-        $mmtEngine = @$this->getMockBuilder( '\Engines_MMT' )
-                ->setConstructorArgs( [ new EnginesModel_EngineStruct( $record ) ] )
+        $mmtEngine = @$this->getMockBuilder( '\Utils\Engines\MMT' )
+                ->setConstructorArgs( [ new EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 
         $mmtEngine->expects( $this->once() )

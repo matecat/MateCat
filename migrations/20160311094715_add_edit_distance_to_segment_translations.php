@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddEditDistanceToSegmentTranslations extends AbstractMatecatMigration
 {
     public $sql_up = "ALTER TABLE `segment_translations` ADD COLUMN `edit_distance` int(11)";

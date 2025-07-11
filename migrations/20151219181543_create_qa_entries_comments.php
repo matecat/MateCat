@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateQaEntriesComments extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF

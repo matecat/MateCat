@@ -2,9 +2,9 @@
 
 namespace unit\TestCatUtils;
 
-use CatUtils;
 use Exception;
 use TestHelpers\AbstractTest;
+use Utils\CatUtils;
 
 class SegmentRawWordCountTest extends AbstractTest {
     /**

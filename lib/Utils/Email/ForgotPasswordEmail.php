@@ -6,22 +6,23 @@
  * Time: 17:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
 use Exception;
 use INIT;
+use Model\Users\UserStruct;
 use Routes;
 
 class  ForgotPasswordEmail extends AbstractEmail {
 
-    protected $title = 'Password reset';
+    protected ?string $title = 'Password reset';
 
     /**
-     * @var \Users_UserStruct
+     * @var UserStruct
      */
-    private $user;
+    private UserStruct $user;
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );

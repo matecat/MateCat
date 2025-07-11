@@ -224,7 +224,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         segment.modified = false
         segment.opened = false
         segment.selected = false
-        segment.propagable = segment.repetitions_in_chunk !== '1'
+        segment.propagable = segment.repetitions_in_chunk !== 1
         segment.inSearch = inSearch
         segment.currentInSearch = currentInSearch
         segment.occurrencesInSearch = occurrencesInSearch

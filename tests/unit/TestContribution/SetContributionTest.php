@@ -8,11 +8,15 @@
  *
  */
 
-use Contribution\ContributionSetStruct;
-use Contribution\Set;
-use TaskRunner\Commons\ContextList;
-use TaskRunner\Commons\QueueElement;
+use Model\Database;
 use TestHelpers\AbstractTest;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\Contribution\Set;
+use Utils\Contribution\SetContributionRequest;
+use Utils\TaskRunner\Commons\ContextList;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
 
 class SetContributionTest extends AbstractTest {
 
@@ -100,7 +104,7 @@ class SetContributionTest extends AbstractTest {
      */
     public function testSetContributionEnqueue() {
 
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
@@ -109,15 +113,15 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source
         $contributionStruct->oldTranslation       = $contributionStruct->translation . " TEST";
-        $contributionStruct->props                = new TaskRunner\Commons\Params();
+        $contributionStruct->props                = new Utils\TaskRunner\Commons\Params();
 
         $queueElement            = new QueueElement();
-        $queueElement->params    = $contributionStruct;
-        $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
+        $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
+        $queueElement->classLoad = SetContributionWorker::class;
 
         $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
-        $amqHandlerMock = @$this->getMockBuilder( '\AMQHandler' )->getMock();
+        $amqHandlerMock = @$this->getMockBuilder( AMQHandler::class )->getMock();
 
         $amqHandlerMock->expects( $spy = $this->exactly( 1 ) )
                 ->method( 'publishToQueues' )
@@ -137,7 +141,7 @@ class SetContributionTest extends AbstractTest {
 
     public function testSetContributionEnqueueException() {
 
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
@@ -149,10 +153,10 @@ class SetContributionTest extends AbstractTest {
 
         // Create a stub for the \AMQHandler class.
         //we want to test that Set::contribution will call send with these parameters
-        $stub = @$this->getMockBuilder( '\AMQHandler' )->getMock();
+        $stub = @$this->getMockBuilder( '\Utils\ActiveMQ\AMQHandler' )->getMock();
 
         $queueElement            = new QueueElement();
-        $queueElement->params    = $contributionStruct;
+        $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
         $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
 
         $stub->expects( $this->once() )

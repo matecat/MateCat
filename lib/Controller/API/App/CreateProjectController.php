@@ -1,45 +1,47 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Validators\LoginValidator;
-use BasicFeatureStruct;
-use ConnectedServices\Google\GDrive\Session;
-use Constants;
-use Constants_ProjectStatus;
-use CookieManager;
-use Database;
-use Engine;
-use Engines_DeepL;
-use Engines_MMT;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\CookieManager;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
-use Langs\Languages;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
+use Model\ConnectedServices\GDrive\Session;
+use Model\Database;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\Projects\MetadataDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
+use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
 use ProjectManager;
-use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
 use Utils;
-use Validator\EngineValidator;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
+use Utils\Constants\ProjectStatus;
+use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MMT;
+use Utils\Langs\Languages;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\EngineValidator;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class CreateProjectController extends AbstractStatefulKleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     private array $data     = [];
     private array $metadata = [];
@@ -95,45 +97,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 ]
         );
 
-        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
-
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $newArFiles = [];
+        //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $uploadDir );
-
-                //fetch cache links, created by converter, from upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //check if file begins with the name of the zip file.
-                    // If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
-                        //add file name to the files array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //this file was not in a zip. Add it normally
-
-                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -141,14 +108,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'project_name' ]                          = $this->data[ 'project_name' ];
         $projectStructure[ 'private_tm_key' ]                        = $this->data[ 'private_tm_key' ];
         $projectStructure[ 'uploadToken' ]                           = $_COOKIE[ 'upload_token' ];
-        $projectStructure[ 'array_files' ]                           = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]                      = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]                           = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]                      = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
         $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
-        $projectStructure[ 'status' ]                                = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'pretranslate_100' ]                      = $this->data[ 'pretranslate_100' ];
         $projectStructure[ 'pretranslate_101' ]                      = $this->data[ 'pretranslate_101' ];
         $projectStructure[ 'dialect_strict' ]                        = $this->data[ 'dialect_strict' ];
@@ -162,24 +129,24 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
         // GDrive session instance
-        if(isset($_SESSION[ "gdrive_session" ])){
+        if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
             $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
             $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
         }
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-        $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
-        if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
+        $engine = EnginesFactory::getInstance( $this->data[ 'mt_engine' ] );
+        if ( $engine instanceof MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
         }
 
         // DeepL
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_formality' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $this->data[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $this->data[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $this->data[ 'deepl_id_glossary' ];
         }
 
@@ -207,7 +174,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
         $projectStructure[ 'owner' ]        = $this->user->email;
-        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
+        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid a useless query
 
         //set features override
         $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
@@ -219,7 +186,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $this->clearSessionFiles();
         $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );
@@ -283,14 +250,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $private_tm_key = [];
         }
 
-        if ( $array_keys ) { // some keys are selected from panel
+        if ( $array_keys ) { // some keys are selected from the panel
 
             //remove duplicates
             foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
-                    //same key was get from keyring, remove
+                    //the same key was get from keyring, remove
                     $private_tm_key = [];
                 }
             }
@@ -384,9 +351,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @return array
      */
     private static function sanitizeTmKeyArr( $elem ): array {
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }
@@ -400,7 +367,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function setMetadataFromPostInput( array $data = [] ) {
         // new raw counter model
-        $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
+        $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
@@ -486,7 +453,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( !empty( $mmt_glossaries ) ) {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
-                MMTValidator::validateGlossary( $mmtGlossaries );
+
+                ( new MMTValidator )->validate(
+                        ValidatorObject::fromArray( [
+                                'glossaryString' => $mmtGlossaries,
+                        ] )
+                );
 
                 return $mmtGlossaries;
 
@@ -672,7 +644,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 
@@ -720,47 +692,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $team;
-    }
-
-    /**
-     * @param $filename
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
     }
 
     private function clearSessionFiles(): void {

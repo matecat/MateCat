@@ -1,70 +1,68 @@
 <?php
 
-namespace API\V1;
+namespace Controller\API\V1;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
-use BasicFeatureStruct;
-use Constants;
-use Constants\ConversionHandlerStatus;
-use Constants_ProjectStatus;
-use Constants_TmKeyPermissions;
-use Conversion\ConvertedFileModel;
-use ConversionHandler;
-use ConvertFile;
-use Database;
-use Engine;
-use Engines_DeepL;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
 use INIT;
 use InvalidArgumentException;
-use Langs\LanguageDomains;
-use Langs\Languages;
 use Log;
-use LQA\ModelDao;
-use LQA\ModelStruct;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
-use MTQE\PayableRate\MTQEPayableRateTemplateDao;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
-use MTQE\Templates\MTQEWorkflowTemplateDao;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
+use Model\Conversion\FilesConverter;
+use Model\Conversion\Upload;
+use Model\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\MTQE\PayableRate\MTQEPayableRateTemplateDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\Projects\MetadataDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
 use ProjectManager;
-use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
-use stdClass;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
-use Upload;
 use Utils;
-use Validator\EngineValidator;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
-use ZipArchiveExtended;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\EngineValidator;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class NewController extends KleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     const MAX_NUM_KEYS = 13;
 
@@ -105,195 +103,41 @@ class NewController extends KleinController {
             $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $cookieDir = $uploadFile->getDirUploadToken();
-        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        $uploadTokenValue = $uploadFile->getDirUploadToken();
+        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        $status = [];
+        $converter = new FilesConverter(
+                $arFiles,
+                $request[ 'source_lang' ],
+                $request[ 'target_lang' ],
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $request[ 'segmentation_rule' ],
+                $this->featureSet,
+                $request[ 'filters_extraction_parameters' ],
+        );
 
-        foreach ( $arFiles as $file_name ) {
-            $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+        $converter->convertFiles();
 
-            $conversionHandler = new ConversionHandler();
-            $conversionHandler->setFileName( $file_name );
-            $conversionHandler->setSourceLang( $request[ 'source_lang' ] );
-            $conversionHandler->setTargetLang( $request[ 'target_lang' ] );
-            $conversionHandler->setSegmentationRule( $request[ 'segmentation_rule' ] );
-            $conversionHandler->setCookieDir( $cookieDir );
-            $conversionHandler->setIntDir( $intDir );
-            $conversionHandler->setErrDir( $errDir );
-            $conversionHandler->setFeatures( $this->featureSet );
-            $conversionHandler->setUserIsLogged( $this->userIsLogged );
-            $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
-
-            if ( $ext == "zip" ) {
-                // this makes the ConversionHandler accumulate eventual errors on files and continue
-                $conversionHandler->setStopOnFileException( false );
-                $fileObjects = $conversionHandler->extractZipFile();
-                Log::doJsonLog( 'fileObjets', $fileObjects );
-
-                // call convertFileWrapper and start conversions for each file
-                if ( $conversionHandler->uploadError ) {
-                    $fileErrors = $conversionHandler->getUploadedFiles();
-
-                    foreach ( $fileErrors as $fileError ) {
-                        if ( count( $fileError->error ) == 0 ) {
-                            continue;
-                        }
-
-                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-                        $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
-                        $result->addError( $fileError->error[ 'message' ], $brokenFileName );
-                    }
-                }
-
-                $realFileObjectInfo  = $fileObjects;
-                $realFileObjectNames = array_map(
-                        [ 'ZipArchiveExtended', 'getFileName' ],
-                        $fileObjects
-                );
-
-                foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                    $__fileName     = $fileObject;
-                    $__realFileName = $realFileObjectInfo[ $i ];
-                    $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
-
-                    $fileObject               = [
-                            'name' => $__fileName,
-                            'size' => $filesize
-                    ];
-                    $realFileObjectInfo[ $i ] = $fileObject;
-                }
-
-                $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                $stdFileObjects                 = [];
-
-                if ( $fileObjects !== null ) {
-                    foreach ( $fileObjects as $fName ) {
-
-                        if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                            continue;
-                        }
-
-                        $newStdFile       = new stdClass();
-                        $newStdFile->name = $fName;
-                        $stdFileObjects[] = $newStdFile;
-
-                    }
-                } else {
-                    $errors             = $conversionHandler->getResult();
-                    $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                    $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                    Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
-
-                    throw new RuntimeException( "Zip Error" );
-                }
-
-                /* Do conversions here */
-                foreach ( $stdFileObjects as $stdFileObject ) {
-
-                    $converter = new ConvertFile(
-                            [ $stdFileObject->name ],
-                            $request[ 'source_lang' ],
-                            $request[ 'target_lang' ],
-                            $intDir,
-                            $errDir,
-                            $cookieDir,
-                            $request[ 'segmentation_rule' ],
-                            $this->featureSet,
-                            $request[ 'filters_extraction_parameters' ],
-                            false );
-
-                    $converter->setUser( $this->user );
-                    $converter->convertFiles();
-
-                    $status = $errors = $converter->getErrors();
-
-                    if ( !empty( $errors ) ) {
-
-                        $result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                        $result->changeCode( 500 );
-                        $savedErrors    = $result->getErrors();
-                        $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $errors )[ 0 ] );
-
-                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
-                            $result->addError( $errors[ 0 ][ 'message' ], $brokenFileName );
-                        }
-
-                        $result = $status = [
-                                'code'   => 500,
-                                'data'   => [], // Is it correct????
-                                'errors' => $errors,
-                        ];
-                    }
-
-                }
-            } else {
-                $conversionHandler->processConversion();
-                $res = $conversionHandler->getResult();
-                if ( $res->getCode() < 0 ) {
-                    $status[] = [
-                            'code'     => $res->getCode(),
-                            'data'     => $res->getData(), // Is it correct????
-                            'errors'   => $res->getErrors(),
-                            'warnings' => $res->getWarnings(),
-                    ];
-                }
-            }
+        $result      = $converter->getResult();
+        $errorStatus = [];
+        if ( $result->hasErrors() ) {
+            $errorStatus = $result->getErrors();
         }
-
-        $status = array_values( $status );
 
         // Upload errors handling
-        if ( !empty( $status ) ) {
-            throw new RuntimeException( 'Project Conversion Failure' );
+        if ( !empty( $errorStatus ) ) {
+            $this->response->code( 400 );
+            $this->response->json( [ 'status' => 'KO', 'errors' => $errorStatus ] );
+
+            return;
         }
 
-        /* Do conversions here */
-        if ( !empty( $result[ 'data' ] ) ) {
-            foreach ( $result[ 'data' ] as $zipFiles ) {
-                $zipFiles  = json_decode( $zipFiles, true );
-                $fileNames = array_column( $zipFiles, 'name' );
-                $arFiles   = array_merge( $arFiles, $fileNames );
-            }
-        }
+        $result = $result->getData();
 
-        $newArFiles = [];
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-
-                $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $intDir );
-
-                //fetch cache links, created by converter, from the upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //Check if the file begins with the name of the zip file.
-                    //If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
-                    ) {
-                        //add the file name to the file's array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //This file was not in a zip. Add it normally
-                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $filesFound = $this->getFilesList( FilesStorageFactory::create(), $arFiles, $uploadDir );
 
         $projectManager                                 = new ProjectManager();
         $projectStructure                               = $projectManager->getProjectStructure();
@@ -305,13 +149,13 @@ class NewController extends KleinController {
         $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
         $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
         $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]              = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]         = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
-        $projectStructure[ 'status' ]                   = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
@@ -340,12 +184,12 @@ class NewController extends KleinController {
         }
 
         // DeepL
-        $engine = Engine::getInstance( $request[ 'mt_engine' ] );
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_formality' ] !== null ) {
+        $engine = EnginesFactory::getInstance( $request[ 'mt_engine' ] );
+        if ( $engine instanceof DeepL and $request[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
         }
 
@@ -398,7 +242,7 @@ class NewController extends KleinController {
         // flag to mark the project "from API"
         $projectStructure[ 'from_api' ] = true;
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
 
@@ -512,11 +356,11 @@ class NewController extends KleinController {
 
             // engines restrictions
             if ( $mt_engine <= 1 ) {
-                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
+                throw new InvalidArgumentException( "MT EnginesFactory id $mt_engine is not supported for QE Workflows" );
             }
 
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
             // does not put this in the options, we do not want to save it in the DB as metadata
             $mt_qe_PayableRate = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
             $mt_evaluation     = true; // force mt_evaluation because it is the default for mt_qe_workflows
@@ -542,10 +386,10 @@ class NewController extends KleinController {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
         }
 
-        $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
+        $metadata[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
 
         if ( $mt_evaluation ) {
-            $metadata[ Projects_MetadataDao::MT_EVALUATION ] = true;
+            $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
 
         return [
@@ -625,7 +469,7 @@ class NewController extends KleinController {
         }
 
         // new raw counter model
-        $metadata[ Projects_MetadataDao::WORD_COUNT_TYPE_KEY ] = Projects_MetadataDao::WORD_COUNT_RAW;
+        $metadata[ MetadataDao::WORD_COUNT_TYPE_KEY ] = MetadataDao::WORD_COUNT_RAW;
 
         return $metadata;
 
@@ -636,7 +480,7 @@ class NewController extends KleinController {
      *
      * @return string|null
      */
-    private function validateCharacterCounterMode( ?string $character_counter_mode = null ) {
+    private function validateCharacterCounterMode( ?string $character_counter_mode = null ): ?string {
 
         if ( empty( $character_counter_mode ) ) {
             return null;
@@ -665,13 +509,13 @@ class NewController extends KleinController {
     private function validateEngines( int $tms_engine, int $mt_engine ): array {
 
         if ( $tms_engine > 1 ) {
-            throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
+            throw new InvalidArgumentException( "Invalid TM EnginesFactory.", -21 );
         }
 
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
-                throw new InvalidArgumentException( "Invalid MT Engine.", -2 );
+                throw new InvalidArgumentException( "Invalid MT EnginesFactory.", -2 );
             }
 
             try {
@@ -761,7 +605,7 @@ class NewController extends KleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 
@@ -875,7 +719,7 @@ class NewController extends KleinController {
         if ( empty( $private_tm_key ) ) {
             $uniformedFileObject = Upload::getUniformGlobalFilesStructure( $_FILES );
             foreach ( $uniformedFileObject as $_fileinfo ) {
-                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo->name );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $private_tm_key[] = [ 'key' => 'new' ];
                     break;
@@ -926,15 +770,12 @@ class NewController extends KleinController {
                  * Get the key description/name from the user keyring
                  */
                 if ( $uid ) {
-                    $mkDao = new TmKeyManagement_MemoryKeyDao();
+                    $mkDao = new MemoryKeyDao();
 
-                    /**
-                     * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
-                     */
                     $keyRing = $mkDao->read(
-                            ( new TmKeyManagement_MemoryKeyStruct( [
+                            ( new MemoryKeyStruct( [
                                     'uid'    => $uid,
-                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                                    'tm_key' => new TmKeyStruct( $this_tm_key )
                             ] )
                             )
                     );
@@ -966,9 +807,9 @@ class NewController extends KleinController {
      */
     private static function sanitizeTmKeyArr( $elem ): array {
 
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }
@@ -1118,7 +959,12 @@ class NewController extends KleinController {
         if ( !empty( $mmt_glossaries ) ) {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
-                MMTValidator::validateGlossary( $mmtGlossaries );
+
+                ( new MMTValidator )->validate(
+                        ValidatorObject::fromArray( [
+                                'glossaryString' => $mmtGlossaries,
+                        ] )
+                );
 
                 return $mmtGlossaries;
             } catch ( Exception $exception ) {
@@ -1200,10 +1046,10 @@ class NewController extends KleinController {
      * @param null $filters_extraction_parameters
      * @param null $filters_extraction_parameters_template_id
      *
-     * @return FiltersConfigTemplateStruct|mixed|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ) {
+    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             // first check if `filters_extraction_parameters` is a valid JSON
@@ -1381,7 +1227,7 @@ class NewController extends KleinController {
                 break;
             //permission string value is not allowed
             default:
-                $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
+                $allowed_permissions = implode( ", ", TmKeyPermissions::$_accepted_grants );
                 throw new Exception( "Invalid permission modifier string. Allowed: <empty>, $allowed_permissions" );
         }
 
@@ -1392,43 +1238,4 @@ class NewController extends KleinController {
         ];
     }
 
-    /**
-     * @param $filename
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
-    }
 }

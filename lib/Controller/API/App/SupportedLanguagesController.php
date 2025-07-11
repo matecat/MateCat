@@ -1,18 +1,18 @@
 <?php
 
 
-namespace API\App;
+namespace Controller\API\App;
 
 
-use AbstractControllers\KleinController;
-use Langs\Languages;
+use Controller\Abstracts\KleinController;
+use Utils\Langs\Languages;
 
 class SupportedLanguagesController extends KleinController {
 
 
     public function index() {
-        $lang_handler = Languages::getInstance();
-        $languages_array = $lang_handler->getEnabledLanguages() ;
+        $lang_handler    = Languages::getInstance();
+        $languages_array = $lang_handler->getEnabledLanguages();
         $this->response->json(
                 array_values( $languages_array )
         );

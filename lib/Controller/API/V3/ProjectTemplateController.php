@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use INIT;
 use Klein\Response;
+use Model\Projects\ProjectTemplateDao;
 use PDOException;
-use Projects\ProjectTemplateDao;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ProjectTemplateController extends KleinController {
     protected function afterConstruct() {
@@ -107,7 +107,7 @@ class ProjectTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $json = $this->request->body();
@@ -162,7 +162,7 @@ class ProjectTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $id   = (int)$this->request->param( 'id' );

@@ -1,22 +1,25 @@
 <?php
 
+use Model\Database;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers Chunks_ChunkDao::getByIdAndPassword
+ * @covers ChunkDao::getByIdAndPassword
  * User: dinies
  * Date: 22/06/16
  * Time: 12.47
  */
 class GetByIdAndPasswordChunkTest extends AbstractTest {
     /**
-     * @var Chunks_ChunkDao
+     * @var ChunkDao
      */
     protected $chunk_Dao;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
@@ -30,7 +33,7 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
         parent::setUp();
 
         $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
+        $this->chunk_Dao         = new ChunkDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -56,12 +59,12 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getByIdAndPassword
+     * @covers ChunkDao::getByIdAndPassword
      */
     function test_getByIdAndPassword_with_success() {
 
         $result = $this->chunk_Dao->getByIdAndPassword( $this->job[ 'id' ], $this->job[ 'password' ] );
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );
@@ -97,7 +100,7 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getByIdAndPassword
+     * @covers ChunkDao::getByIdAndPassword
      */
     function test_getByIdAndPassword_with_failure() {
 

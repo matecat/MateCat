@@ -4,16 +4,19 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * Get volume analysis of job
  *
  * @param {string} [idProject=config.id_project]
- * @param {string} [password=config.jpassword]
+ * @param {string} [idJob=config.id_job]
+ * @param {string} [password=config.password]
  * @returns {Promise<object>}
  */
 export const getJobVolumeAnalysis = async (
   idProject = config.id_project,
-  password = config.jpassword,
+  idJob = config.id_job,
+  password = config.job_password,
 ) => {
   const dataParams = {
-    pid: idProject,
-    jpassword: password,
+    id_project: idProject,
+    id_job: idJob,
+    password: password,
   }
 
   const formData = new FormData()

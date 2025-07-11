@@ -7,9 +7,9 @@
  *
  */
 
+use Model\Xliff\DTO\Xliff12Rule;
+use Model\Xliff\DTO\Xliff20Rule;
 use TestHelpers\AbstractTest;
-use Xliff\DTO\Xliff12Rule;
-use Xliff\DTO\Xliff20Rule;
 
 class XliffRulesTest extends AbstractTest {
 

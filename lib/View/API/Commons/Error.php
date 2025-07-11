@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\Commons;
+namespace View\API\Commons;
 
 
 use INIT;

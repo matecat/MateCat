@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
+              "Identifier for Machine Translation EnginesFactory. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -2881,7 +2881,7 @@ var spec = {
         parameters: [],
         responses: {
           200: {
-            description: 'Engine List',
+            description: 'EnginesFactory List',
             schema: {
               $ref: '#/definitions/EnginesList',
             },
@@ -6669,7 +6669,7 @@ var spec = {
     EnginesList: {
       type: 'array',
       items: {
-        $ref: '#/definitions/Engine',
+        $ref: '#/definitions/EnginesFactory',
       },
     },
     Engine: {

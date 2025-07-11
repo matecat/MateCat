@@ -1,18 +1,18 @@
 <?php
 
 
-namespace Features\SegmentFilter\Controller\API;
-
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\V2\BaseChunkController;
+namespace Plugins\Features\SegmentFilter\Controller\API;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\SegmentFilter\Model\FilterDefinition;
-use Features\SegmentFilter\Model\SegmentFilterModel;
-use Jobs_JobStruct;
+use Plugins\Features\SegmentFilter\Model\FilterDefinition;
+use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
 
-class FilterController extends BaseChunkController {
+class FilterController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     /**
      * @var ChunkPasswordValidator
@@ -25,7 +25,7 @@ class FilterController extends BaseChunkController {
     private FilterDefinition $filter;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */

@@ -7,28 +7,28 @@
  *
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use API\App\Json\OutsourceConfirmation;
-use CatUtils;
-use Constants;
 use Exception;
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
-use FeatureSet;
-use Jobs_JobStruct;
-use Langs\LanguageDomains;
-use Langs\Languages;
-use LQA\ChunkReviewDao;
 use ManageUtils;
-use OutsourceTo_OutsourceAvailable;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use TmKeyManagement_ClientTmKeyStruct;
-use TmKeyManagement_Filter;
-use Users_UserStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
+use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Utils;
-use WordCount\WordCountStruct;
+use Utils\CatUtils;
+use Utils\Constants\SourcePages;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\OutsourceTo\OutsourceAvailable;
+use Utils\TmKeyManagement\ClientTmKeyStruct;
+use Utils\TmKeyManagement\Filter;
+use View\API\App\Json\OutsourceConfirmation;
 
 class Job {
 
@@ -38,9 +38,9 @@ class Job {
     protected ?string $status = null;
 
     /**
-     * @var Users_UserStruct
+     * @var \Model\Users\UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
      * @var bool
@@ -48,7 +48,7 @@ class Job {
     protected bool $called_from_api = false;
 
     /**
-     * @var TmKeyManagement_ClientTmKeyStruct[]
+     * @var ClientTmKeyStruct[]
      */
     protected array $keyList = [];
 
@@ -60,11 +60,11 @@ class Job {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      *
      * @return $this
      */
-    public function setUser( Users_UserStruct $user ): Job {
+    public function setUser( UserStruct $user ): Job {
         $this->user = $user;
 
         return $this;
@@ -82,20 +82,20 @@ class Job {
     }
 
     /**
-     * @param Jobs_JobStruct $jStruct
+     * @param \Model\Jobs\JobStruct $jStruct
      *
      * @return array
      */
-    protected function getKeyList( Jobs_JobStruct $jStruct ): array {
+    protected function getKeyList( JobStruct $jStruct ): array {
 
         if ( empty( $this->user ) ) {
             return [];
         }
 
         if ( !$this->called_from_api ) {
-            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, Filter::OWNER )[ 'job_keys' ];
         } else {
-            $out = $jStruct->getClientKeys( $this->user, TmKeyManagement_Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
+            $out = $jStruct->getClientKeys( $this->user, Filter::ROLE_TRANSLATOR )[ 'job_keys' ];
         }
 
         return ( new JobClientKeys( $out ) )->render();
@@ -103,15 +103,15 @@ class Job {
     }
 
     /**
-     * @param                         $chunk Jobs_JobStruct
+     * @param                         $chunk \Model\Jobs\JobStruct
      *
-     * @param Projects_ProjectStruct  $project
+     * @param ProjectStruct           $project
      * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    public function renderItem( JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $outsourceInfo = $chunk->getOutsource();
         $tStruct       = $chunk->getTranslator();
@@ -147,7 +147,7 @@ class Job {
             ];
         }
 
-        $outsourceAvailable = OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+        $outsourceAvailable = OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
 
         $result = [
                 'id'                    => (int)$chunk->id,
@@ -190,7 +190,7 @@ class Job {
         // add revise_passwords to stats
         foreach ( $chunkReviews as $chunk_review ) {
 
-            if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+            if ( $chunk_review->source_page <= SourcePages::SOURCE_PAGE_REVISION ) {
                 $result[ 'revise_passwords' ][] = [
                         'revision_number' => 1,
                         'password'        => $chunk_review->review_password
@@ -209,9 +209,9 @@ class Job {
     }
 
 
-    protected function fillUrls( array $result, Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    protected function fillUrls( array $result, JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
-        $projectData = ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
+        $projectData = ( new ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $project->id, $project->password );
 
         $formatted = new ProjectUrls( $projectData );
 

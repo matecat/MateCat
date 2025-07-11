@@ -1,6 +1,7 @@
 <?php
 
-use LQA\QA;
+use Utils\CatUtils;
+use Utils\LQA\QA;
 
 class PostProcess extends QA {
 
@@ -12,12 +13,12 @@ class PostProcess extends QA {
     public function realignMTSpaces() {
 
         try {
-            [ $srcNodeList, $trgNodeList ] = $this->_prepareDOMStructures();
+            $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
 
-        $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+        $this->_checkTagMismatch();
 
         if( $this->thereAreErrors() ){
             $this->_getTagDiff();

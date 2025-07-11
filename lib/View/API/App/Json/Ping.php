@@ -7,9 +7,9 @@
  *
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
-use AbstractControllers\KleinController;
+use Controller\Abstracts\KleinController;
 use Utils;
 
 class Ping {

@@ -7,7 +7,7 @@
  *
  */
 
-namespace Pagination;
+namespace Model\Pagination;
 
 class PaginationParameters {
 

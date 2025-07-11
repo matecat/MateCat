@@ -7,25 +7,25 @@
  *
  */
 
-namespace TMS;
+namespace Utils\TMS;
 
 use stdClass;
 
 class TMSFile extends stdClass {
 
-    private $file_path;
-    private $tm_key;
-    private $name;
-    private $position;
-    private $uuid;
+    private string  $file_path;
+    private string  $tm_key;
+    private string  $name;
+    private int     $position;
+    private ?string $uuid = null;
 
     /**
-     * @param $file_path
-     * @param $tm_key
-     * @param $name
-     * @param $position
+     * @param string $file_path
+     * @param string $tm_key
+     * @param string $name
+     * @param int    $position
      */
-    public function __construct( $file_path, $tm_key, $name, $position = 0 ) {
+    public function __construct( string $file_path, string $tm_key, string $name, int $position = 0 ) {
         $this->file_path = $file_path;
         $this->tm_key    = $tm_key;
         $this->name      = $name;
@@ -40,39 +40,39 @@ class TMSFile extends stdClass {
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getTmKey() {
+    public function getTmKey(): string {
         return $this->tm_key;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
     /**
-     * @return mixed
+     * @return int
      */
-    public function getPosition() {
+    public function getPosition(): int {
         return $this->position;
     }
 
     /**
-     * @return mixed
+     * @return string|null
      */
-    public function getUuid() {
+    public function getUuid(): ?string {
         return $this->uuid;
     }
 
     /**
-     * @param mixed $uuid
+     * @param string $uuid
      *
      * @return $this
      */
-    public function setUuid( $uuid ) {
+    public function setUuid( string $uuid ): TMSFile {
         $this->uuid = $uuid;
 
         return $this;

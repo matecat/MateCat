@@ -1,18 +1,24 @@
 <?php
 
+use Model\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::_decode
+ * @covers MyMemory::_decode
  * User: dinies
  * Date: 28/04/16
  * Time: 17.58
  */
 class DecodeMyMemoryTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
     protected $reflector;
@@ -21,18 +27,18 @@ class DecodeMyMemoryTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = $eng[ 0 ];
 
 
-        $this->databaseInstance = new Engines_MyMemory( $this->engine_struct_param );
+        $this->databaseInstance = new MyMemory( $this->engine_struct_param );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_decode" );
         $this->method->setAccessible( true );
@@ -42,7 +48,7 @@ class DecodeMyMemoryTest extends AbstractTest {
     /**
      * It tests the behaviour of the decoding of json input.
      * @group   regression
-     * @covers  Engines_MyMemory::_decode
+     * @covers  MyMemory::_decode
      */
     public function test__decode_with_json_in_input_deusch_segment() {
         $json_input = <<<LAB
@@ -63,7 +69,7 @@ LAB;
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -77,7 +83,7 @@ LAB;
     /**
      * It tests the behaviour of the decoding of json input.
      * @group   regression
-     * @covers  Engines_MyMemory::_decode
+     * @covers  MyMemory::_decode
      */
     public function test__decode_with_json_in_input_from_italian_to_aragonese_segment_with_private_TM() {
         $json_input = <<<LAB
@@ -96,9 +102,9 @@ LAB;
 
         $actual_result = $this->method->invoke( $this->databaseInstance, $json_input, $this->array_param, $input_function_purpose );
         /**
-         * general check on the keys of Engines_Results_MyMemory_TMS object returned
+         * general check on the keys of GetMemoryResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -111,7 +117,7 @@ LAB;
     /**
      * It tests the behaviour of the decoding of json input.
      * @group   regression
-     * @covers  Engines_MyMemory::_decode
+     * @covers  MyMemory::_decode
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_1() {
         $json_input = <<<LAB
@@ -137,9 +143,9 @@ LABEL;
 
         $actual_result = $this->method->invoke( $this->databaseInstance, $json_input, $this->array_param, $input_function_purpose );
         /**
-         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $actual_result instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -147,7 +153,7 @@ LABEL;
         $this->assertTrue( property_exists( $actual_result, 'error' ) );
         $this->assertTrue( property_exists( $actual_result, '_rawResponse' ) );
 
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $actual_result instanceof SetContributionResponse );
         $this->assertEquals( 200, $actual_result->responseStatus );
         $this->assertEquals( [ '0' => 484525156 ], $actual_result->responseDetails );
         $this->assertEquals( "OK", $actual_result->responseData );
@@ -167,7 +173,7 @@ LABEL;
     /**
      * It tests the behaviour of the decoding of json input.
      * @group   regression
-     * @covers  Engines_MyMemory::_decode
+     * @covers  MyMemory::_decode
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_set_method_check_2() {
         $json_input = <<<LAB
@@ -199,9 +205,9 @@ LABEL;
 
         $actual_result = $this->method->invoke( $this->databaseInstance, $json_input, $this->array_param, $input_function_purpose );
         /**
-         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         * general check on the keys of SetContributionResponse object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_SetContributionResponse );
+        $this->assertTrue( $actual_result instanceof SetContributionResponse );
         $this->assertFalse( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );
@@ -228,7 +234,7 @@ LABEL;
     /**
      * It tests the behaviour of the decoding of json input.
      * @group   regression
-     * @covers  Engines_MyMemory::_decode
+     * @covers  MyMemory::_decode
      */
     public function test__decode_with_json_in_input_from_italian_to_english_triggered_by_delete_method_check() {
         $json_input = <<<LAB
@@ -246,7 +252,7 @@ LAB;
         $input_function_purpose = "delete_relative_url";
 
         /**
-         * @var Engines_Results_MyMemory_TMS
+         * @var GetMemoryResponse
          */
         $actual_result = $this->method->invoke( $this->databaseInstance, $json_input, $this->array_param, $input_function_purpose );
 
@@ -254,7 +260,7 @@ LAB;
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $actual_result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $actual_result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $actual_result, 'matches' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $actual_result, 'responseDetails' ) );

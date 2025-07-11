@@ -7,41 +7,70 @@
  *
  */
 
-use ActivityLog\ActivityLogStruct;
-use Analysis\PayableRates;
-use API\Commons\Error;
-use API\Commons\Exceptions\AuthenticationError;
-use ConnectedServices\Google\GDrive\Session;
-use ConnectedServices\Google\GoogleProvider;
-use Constants\XliffTranslationStatus;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use Files\FileDao;
-use Files\FilesPartsDao;
-use Files\FilesPartsStruct;
-use Files\MetadataDao;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use FilesStorage\S3FilesStorage;
-use Langs\Languages;
-use LQA\QA;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\AnalysisDao;
-use PayableRates\CustomPayableRateDao;
-use ProjectManager\ProjectManagerModel;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use Teams\TeamDao;
-use Teams\TeamStruct;
-use TMS\TMSFile;
-use TMS\TMSService;
-use Translators\TranslatorsModel;
-use WordCount\CounterModel;
-use Xliff\DTO\XliffRulesModel;
-use Xliff\XliffConfigTemplateStruct;
+use Model\Analysis\PayableRates;
+use Model\ConnectedServices\GDrive\Session;
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Files\FileDao;
+use Model\Files\FilesPartsDao;
+use Model\Files\FilesPartsStruct;
+use Model\Files\MetadataDao;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\FilesStorage\S3FilesStorage;
+use Model\IDatabase;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\ProjectManager\ProjectManagerModel;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentMetadataStruct;
+use Model\Segments\SegmentOriginalDataDao;
+use Model\Segments\SegmentOriginalDataStruct;
+use Model\Segments\SegmentStruct;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Translators\TranslatorsModel;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use Model\WordCount\CounterModel;
+use Model\Xliff\DTO\XliffRulesModel;
+use Model\Xliff\XliffConfigTemplateStruct;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\JobsWorker;
+use Utils\CatUtils;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\XliffTranslationStatus;
+use Utils\Engines\EnginesFactory;
+use Utils\Langs\Languages;
+use Utils\LQA\QA;
+use Utils\Shop\Cart;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSFile;
+use Utils\TMS\TMSService;
+use View\API\Commons\Error;
 
 class ProjectManager {
 
@@ -79,7 +108,7 @@ class ProjectManager {
     protected $langService;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -96,7 +125,7 @@ class ProjectManager {
     const TRANSLATED_USER = 'translated_user';
 
     /**
-     * @var Users_UserStruct ;
+     * @var UserStruct ;
      */
     protected $user;
 
@@ -132,77 +161,81 @@ class ProjectManager {
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
-                            'HTTP_HOST'                               => null,
-                            'id_project'                              => null,
-                            'create_date'                             => date( "Y-m-d H:i:s" ),
-                            'id_customer'                             => self::TRANSLATED_USER,
-                            'project_features'                        => [],
-                            'user_ip'                                 => null,
-                            'project_name'                            => null,
-                            'result'                                  => [ "errors" => [], "data" => [] ],
-                            'private_tm_key'                          => 0,
-                            'uploadToken'                             => null,
-                            'array_files'                             => [], //list of file names
-                            'array_files_meta'                        => [], //list of file metadata
-                            'file_id_list'                            => [],
-                            'source_language'                         => null,
-                            'target_language'                         => null,
-                            'job_subject'                             => 'general',
-                            'mt_engine'                               => null,
-                            'tms_engine'                              => null,
-                            'ppassword'                               => null,
-                            'array_jobs'                              => [
+                            'HTTP_HOST'                              => null,
+                            'id_project'                             => null,
+                            'create_date'                            => date( "Y-m-d H:i:s" ),
+                            'id_customer'                            => self::TRANSLATED_USER,
+                            'project_features'                       => [],
+                            'user_ip'                                => null,
+                            'project_name'                           => null,
+                            'result'                                 => [ "errors" => [], "data" => [] ],
+                            'private_tm_key'                         => 0,
+                            'uploadToken'                            => null,
+                            'array_files'                            => [], //list of file names
+                            'array_files_meta'                       => [], //list of file metadata
+                            'file_id_list'                           => [],
+                            'source_language'                        => null,
+                            'target_language'                        => null,
+                            'job_subject'                            => 'general',
+                            'mt_engine'                              => null,
+                            'tms_engine'                             => null,
+                            'ppassword'                              => null,
+                            'array_jobs'                             => [
                                     'job_list'      => [],
                                     'job_pass'      => [],
                                     'job_segments'  => [],
                                     'job_languages' => [],
                                     'payable_rates' => [],
                             ],
-                            'job_segments'                            => [], //array of job_id => [  min_seg, max_seg  ]
-                            'segments'                                => [], //array of files_id => segments[  ]
-                            'segments-original-data'                  => [], //array of files_id => segments-original-data[  ]
-                            'segments_metadata'                       => [], //array of segments_metadata
-                            'segments-meta-data'                      => [], //array of files_id => segments-meta-data[  ]
-                            'file-part-id'                            => [], //array of files_id => segments-meta-data[  ]
-                            'file-metadata'                           => [], //array of files metadata
-                            'translations'                            => [],
-                            'notes'                                   => [],
-                            'context-group'                           => [],
+                            'job_segments'                           => [], //array of job_id => [  min_seg, max_seg  ]
+                            'segments'                               => [], //array of files_id => segments[  ]
+                            'segments-original-data'                 => [], //array of files_id => segments-original-data[  ]
+                            'segments_metadata'                      => [], //array of segments_metadata
+                            'segments-meta-data'                     => [], //array of files_id => segments-meta-data[  ]
+                            'file-part-id'                           => [], //array of files_id => segments-meta-data[  ]
+                            'file-metadata'                          => [], //array of files metadata
+                            'translations'                           => [],
+                            'notes'                                  => [],
+                            'context-group'                          => [],
                         //one translation for every file because translations are files related
-                            'status'                                  => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                            'job_to_split'                            => null,
-                            'job_to_split_pass'                       => null,
-                            'split_result'                            => null,
-                            'job_to_merge'                            => null,
-                            'tm_keys'                                 => [],
-                            'userIsLogged'                            => false,
-                            'uid'                                     => null,
-                            'pretranslate_100'                        => 0,
-                            'pretranslate_101'                        => 1,
-                            'only_private'                            => 0,
-                            'owner'                                   => '',
-                            Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW,
-                            'metadata'                                => [],
-                            'id_assignee'                             => null,
-                            'session'                                 => ( isset( $_SESSION ) ? $_SESSION : false ),
-                            'instance_id'                             => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
-                            'id_team'                                 => null,
-                            'team'                                    => null,
-                            'sanitize_project_options'                => true,
-                            'file_segments_count'                     => [],
-                            'due_date'                                => null,
-                            'qa_model'                                => null,
-                            'target_language_mt_engine_association'   => [],
-                            'standard_word_count'                     => 0,
-                            'mmt_glossaries'                          => null,
-                            'deepl_formality'                         => null,
-                            'deepl_id_glossary'                       => null,
-                            'character_counter_mode'                  => null,
-                            'character_counter_count_tags'            => null,
-                            'filters_extraction_parameters'           => new RecursiveArrayObject(),
-                            'xliff_parameters'                        => new RecursiveArrayObject(),
-                            'tm_prioritization'                       => null,
-                            'mt_qe_workflow_payable_rate'             => null
+                            'status'                                 => ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'                           => null,
+                            'job_to_split_pass'                      => null,
+                            'split_result'                           => null,
+                            'job_to_merge'                           => null,
+                            'tm_keys'                                => [],
+                            'userIsLogged'                           => false,
+                            'uid'                                    => null,
+                            'pretranslate_100'                       => 0,
+                            'pretranslate_101'                       => 1,
+                            'only_private'                           => 0,
+                            'owner'                                  => '',
+                            ProjectsMetadataDao::WORD_COUNT_TYPE_KEY => ProjectsMetadataDao::WORD_COUNT_RAW,
+                            'metadata'                               => [],
+                            'id_assignee'                            => null,
+                            'session'                                => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'                            => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                            'id_team'                                => null,
+                            'team'                                   => null,
+                            'sanitize_project_options'               => true,
+                            'file_segments_count'                    => [],
+                            'due_date'                               => null,
+                            'qa_model'                               => null,
+                            'target_language_mt_engine_association'  => [],
+                            'standard_word_count'                    => 0,
+                            'mmt_glossaries'                         => null,
+                            'deepl_formality'                        => null,
+                            'deepl_id_glossary'                      => null,
+                            'dictation'                              => null,
+                            'show_whitespace'                        => null,
+                            'character_counter'                      => null,
+                            'character_counter_mode'                 => null,
+                            'character_counter_count_tags'           => null,
+                            'ai_assistant'                           => null,
+                            'filters_extraction_parameters'          => new RecursiveArrayObject(),
+                            'xliff_parameters'                       => new RecursiveArrayObject(),
+                            'tm_prioritization'                      => null,
+                            'mt_qe_workflow_payable_rate'            => null
                     ] );
         }
 
@@ -340,7 +373,7 @@ class ProjectManager {
     /**
      * @throws Exception
      */
-    public function setProjectAndReLoadFeatures( Projects_ProjectStruct $pStruct ) {
+    public function setProjectAndReLoadFeatures( ProjectStruct $pStruct ) {
         $this->project                           = $pStruct;
         $this->projectStructure[ 'id_project' ]  = $this->project->id;
         $this->projectStructure[ 'id_customer' ] = $this->project->id_customer;
@@ -364,12 +397,12 @@ class ProjectManager {
      */
     private function saveFeaturesInMetadata() {
 
-        $dao = new Projects_MetadataDao();
+        $dao = new ProjectsMetadataDao();
 
         $featureCodes = $this->features->getCodes();
         if ( !empty( $featureCodes ) ) {
             $dao->set( $this->projectStructure[ 'id_project' ],
-                    Projects_MetadataDao::FEATURES_KEY,
+                    ProjectsMetadataDao::FEATURES_KEY,
                     implode( ',', $featureCodes )
             );
         }
@@ -388,7 +421,7 @@ class ProjectManager {
     private function saveMetadata() {
 
         $options = $this->projectStructure[ 'metadata' ];
-        $dao     = new Projects_MetadataDao();
+        $dao     = new ProjectsMetadataDao();
 
         // "From API" flag
         if ( isset( $this->projectStructure[ 'from_api' ] ) and $this->projectStructure[ 'from_api' ] ) {
@@ -408,7 +441,7 @@ class ProjectManager {
 
         // mt evaluation => ice_mt already in metadata
         // add json parameters to the project metadata as json string
-        if ( $options[ 'mt_qe_workflow_enabled' ] ) {
+        if ( $options[ 'mt_qe_workflow_enabled' ] ?? false ) {
             $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
         }
 
@@ -569,7 +602,7 @@ class ProjectManager {
          * Validations should populate the projectStructure with errors and codes.
          */
         $featureSet = ( $this->features !== null ) ? $this->features : new FeatureSet();
-        \Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
+        \Plugins\Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
         $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
@@ -903,7 +936,7 @@ class ProjectManager {
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -1,
-                        "message" => "No text to translate in the file {$e->getMessage()}."
+                        "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
@@ -936,11 +969,11 @@ class ProjectManager {
             return false;
         }
 
-        $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+        $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         if ( $this->show_in_cattool_segs_counter == 0 ) {
             $this->_log( "Segment Search: No segments in this project - \n" );
-            $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_EMPTY;
+            $this->projectStructure[ 'status' ] = ProjectStatus::STATUS_EMPTY;
         }
 
         $this->projectStructure[ 'result' ][ 'code' ]            = 1;
@@ -987,12 +1020,12 @@ class ProjectManager {
         Database::obtain()->begin();
 
         //pre-fetch Analysis page in transaction and store in cache
-        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
-        ( new Projects_ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+        ( new ProjectDao() )->destroyCacheForProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
+        ( new ProjectDao() )->setCacheTTL( 60 * 60 * 24 )->getProjectData( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'ppassword' ] );
 
         $featureSet->run( 'postProjectCreate', $this->projectStructure );
 
-        Projects_ProjectDao::updateAnalysisStatus(
+        ProjectDao::updateAnalysisStatus(
                 $this->projectStructure[ 'id_project' ],
                 $this->projectStructure[ 'status' ],
                 $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] )
@@ -1061,7 +1094,7 @@ class ProjectManager {
     private function __clearFailedProject( Exception $e ) {
         $this->_log( $e->getMessage(), $e );
         $this->_log( "Deleting Records." );
-        ( new Projects_ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
+        ( new ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
         ( new FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
         $this->_log( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
         $this->_log( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
@@ -1117,8 +1150,8 @@ class ProjectManager {
             WorkerClient::enqueueWithClient(
                     AMQHandler::getNewInstanceForDaemons(),
                     'ACTIVITYLOG',
-                    '\AsyncTasks\Workers\ActivityLogWorker',
-                    $activity,
+                    \Utils\AsyncTasks\Workers\ActivityLogWorker::class,
+                    $activity->toArray(),
                     [ 'persistent' => WorkerClient::$_HANDLER->persistent ]
             );
         } catch ( Exception $e ) {
@@ -1184,7 +1217,7 @@ class ProjectManager {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
-                    $userStruct = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
+                    $userStruct = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] );
                     $this->tmxServiceWrapper->addTmxInMyMemory( $file, $userStruct );
 
                 } else {
@@ -1324,7 +1357,7 @@ class ProjectManager {
 
             if ( !empty( $projectStructure[ 'private_tm_key' ] ) ) {
                 foreach ( $projectStructure[ 'private_tm_key' ] as $tmKeyObj ) {
-                    $newTmKey                  = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+                    $newTmKey                  = TmKeyManager::getTmKeyStructure();
                     $newTmKey->complete_format = true;
                     $newTmKey->tm              = true;
                     $newTmKey->glos            = true;
@@ -1342,7 +1375,7 @@ class ProjectManager {
 
             // check for job_first_segment and job_last_segment existence
             if ( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) or !isset( $this->min_max_segments_id[ 'job_last_segment' ] ) ) {
-                throw new Exception( 'Job cannot be created. No job_first_segment or job_last_segment found!' );
+                throw new Exception( 'Job cannot be created. No segments found!' );
             }
 
             $this->_log( $projectStructure[ 'private_tm_key' ] );
@@ -1352,7 +1385,7 @@ class ProjectManager {
             // Replace {{pid}} with project ID for new keys created with empty name
             $projectStructure[ 'tm_keys' ] = str_replace( "{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ] );
 
-            $newJob                    = new Jobs_JobStruct();
+            $newJob                    = new JobStruct();
             $newJob->password          = $password;
             $newJob->id_project        = $projectStructure[ 'id_project' ];
             $newJob->source            = $projectStructure[ 'source_language' ];
@@ -1371,7 +1404,7 @@ class ProjectManager {
             $newJob->only_private_tm   = (int)$projectStructure[ 'only_private' ];
 
             $this->features->run( 'validateJobCreation', $newJob, $projectStructure );
-            $newJob = Jobs_JobDao::createFromStruct( $newJob );
+            $newJob = JobDao::createFromStruct( $newJob );
 
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob->password );
@@ -1379,7 +1412,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
-            $jobsMetadataDao = new Jobs\MetadataDao();
+            $jobsMetadataDao = new \Model\Jobs\MetadataDao();
 
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
@@ -1464,7 +1497,7 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type = Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
+    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = [], $count_type = ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) {
 
         $num_split = (int)$num_split;
 
@@ -1480,7 +1513,7 @@ class ProjectManager {
             throw new Exception( "Requested words per chunk available only for Matecat PRO version", -4 );
         }
 
-        $rows = ( new Jobs_JobDao() )->getSplitData( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
+        $rows = ( new JobDao() )->getSplitData( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
 
         if ( empty( $rows ) ) {
             throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ], -5 );
@@ -1498,7 +1531,7 @@ class ProjectManager {
         // if the requested $count_type is empty (for example: equivalent raw count = 0),
         // switch to the other one
         if ( $total_words < $num_split ) {
-            $new_count_type = ( $count_type === Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) ? Projects_MetadataDao::SPLIT_RAW_WORD_TYPE : Projects_MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
+            $new_count_type = ( $count_type === ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) ? ProjectsMetadataDao::SPLIT_RAW_WORD_TYPE : ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
             $total_words    = $row_totals[ $new_count_type ];
             $count_type     = $new_count_type;
         }
@@ -1580,7 +1613,7 @@ class ProjectManager {
             throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7 );
         }
 
-        $chunk                                   = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
+        $chunk                                   = JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
         $row_totals[ 'standard_analysis_count' ] = $chunk->standard_analysis_wc;
 
         $result = array_merge( $row_totals->getArrayCopy(), [ 'chunks' => $counter ] );
@@ -1603,17 +1636,17 @@ class ProjectManager {
     protected function _splitJob( ArrayObject $projectStructure ) {
 
         // init JobDao
-        $jobDao = new Jobs_JobDao();
+        $jobDao = new JobDao();
 
         // job to split
-        $jobToSplit = Jobs_JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
+        $jobToSplit = JobDao::getByIdAndPassword( $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
 
         $translatorModel   = new TranslatorsModel( $jobToSplit );
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'uid' ] ) ) {
 
             $translatorModel
-                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
+                    ->setUserInvite( ( new UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'uid' ] ) )
                     ->setDeliveryDate( $jTranslatorStruct->delivery_date )
                     ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
                     ->setEmail( $jTranslatorStruct->email )
@@ -1684,7 +1717,7 @@ class ProjectManager {
              * Async worker to re-count avg-PEE and total-TTE for split jobs
              */
             try {
-                WorkerClient::enqueue( 'JOBS', '\AsyncTasks\Workers\JobsWorker', $job, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+                WorkerClient::enqueue( 'JOBS', JobsWorker::class, $job->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
             } catch ( Exception $e ) {
                 # Handle the error, logging, ...
                 $output = "**** Job Split PEE recount request failed. AMQ Connection Error. ****\n\t";
@@ -1694,13 +1727,13 @@ class ProjectManager {
             }
         }
 
-        ( new Jobs_JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
+        ( new JobDao() )->destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
         $projectStruct = $jobToSplit->getProject( 60 * 10 );
-        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+        ( new ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
         AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
+        Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
 
         $this->features->run( 'postJobSplitted', $projectStructure );
 
@@ -1714,7 +1747,7 @@ class ProjectManager {
      * @throws Exception
      */
     public function applySplit( ArrayObject $projectStructure ) {
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+        Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
         Database::obtain()->begin();
         $this->_splitJob( $projectStructure );
@@ -1723,14 +1756,14 @@ class ProjectManager {
     }
 
     /**
-     * @param ArrayObject      $projectStructure
-     * @param Jobs_JobStruct[] $jobStructs
+     * @param ArrayObject $projectStructure
+     * @param JobStruct[] $jobStructs
      *
      * @throws Exception
      */
     public function mergeALL( ArrayObject $projectStructure, array $jobStructs ) {
 
-        $metadata_dao = new Projects_MetadataDao();
+        $metadata_dao = new ProjectsMetadataDao();
         $metadata_dao->cleanupChunksOptions( $jobStructs );
 
         //get the min and
@@ -1758,7 +1791,7 @@ class ProjectManager {
         }
 
         try {
-            $owner_tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( $tm_keys );
+            $owner_tm_keys = TmKeyManager::getOwnerKeys( $tm_keys );
 
             foreach ( $owner_tm_keys as $i => $owner_key ) {
                 $owner_key->complete_format = true;
@@ -1783,21 +1816,21 @@ class ProjectManager {
 
         if ( $first_job->getTranslator() ) {
             //Update the password in the struct and in the database for the first job
-            Jobs_JobDao::updateForMerge( $first_job, self::generatePassword() );
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+            JobDao::updateForMerge( $first_job, self::generatePassword() );
+            Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         } else {
-            Jobs_JobDao::updateForMerge( $first_job, false );
+            JobDao::updateForMerge( $first_job, false );
         }
 
-        Jobs_JobDao::deleteOnMerge( $first_job );
+        JobDao::deleteOnMerge( $first_job );
 
         $wCountManager = new CounterModel();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
 
-        $chunk = new Jobs_JobStruct( $first_job->toArray() );
+        $chunk = new JobStruct( $first_job->toArray() );
         $this->features->run( 'postJobMerged', $projectStructure, $chunk );
 
-        $jobDao = new Jobs_JobDao();
+        $jobDao = new JobDao();
 
         $jobDao->updateStdWcAndTotalWc( $first_job[ 'id' ], $standard_word_count, $total_raw_wc );
 
@@ -1807,7 +1840,7 @@ class ProjectManager {
         AnalysisDao::destroyCacheByProjectId( $projectStructure[ 'id_project' ] );
 
         $projectStruct = $jobStructs[ 0 ]->getProject( 60 * 10 );
-        ( new Projects_ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
+        ( new ProjectDao() )->destroyCacheForProjectData( $projectStruct->id, $projectStruct->password );
 
     }
 
@@ -1827,7 +1860,7 @@ class ProjectManager {
 
         $xliff_file_content = $this->getXliffFileContent( $file_info[ 'path_cached_xliff' ] );
         $mimeType           = $file_info[ 'mime_type' ];
-        $jobsMetadataDao    = new \Jobs\MetadataDao();
+        $jobsMetadataDao    = new \Model\Jobs\MetadataDao();
 
         // create Structure for multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( [] ) );
@@ -2013,7 +2046,7 @@ class ProjectManager {
                             // -------------------------------------
                             //
 
-                            $metadataStruct = new Segments_SegmentMetadataStruct();
+                            $metadataStruct = new SegmentMetadataStruct();
 
                             // check if there is sizeRestriction
                             if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
@@ -2035,9 +2068,9 @@ class ProjectManager {
                             // -------------------------------------
                             //
 
-                            // if its empty pass create a Segments_SegmentOriginalDataStruct with no data
+                            // if its empty pass create a SegmentOriginalDataStruct with no data
                             $segmentOriginalDataStructMap = ( !empty( $dataRefMap ) ) ? [ 'map' => $dataRefMap ] : [];
-                            $segmentOriginalDataStruct    = new Segments_SegmentOriginalDataStruct( $segmentOriginalDataStructMap );
+                            $segmentOriginalDataStruct    = new SegmentOriginalDataStruct( $segmentOriginalDataStructMap );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //
@@ -2054,7 +2087,7 @@ class ProjectManager {
                             $segmentHash = $this->createSegmentHash( $seg_source[ 'raw-content' ], $dataRefMap, $sizeRestriction );
 
                             // segment struct
-                            $segStruct = new Segments_SegmentStruct( [
+                            $segStruct = new SegmentStruct( [
                                     'id_file'                 => $fid,
                                     'id_file_part'            => ( isset( $filePartsId ) ) ? $filePartsId : null,
                                     'id_project'              => $this->projectStructure[ 'id_project' ],
@@ -2152,7 +2185,7 @@ class ProjectManager {
                         // START SEGMENTS META
                         // -------------------------------------
                         //
-                        $metadataStruct = new Segments_SegmentMetadataStruct();
+                        $metadataStruct = new SegmentMetadataStruct();
 
                         // check if there is sizeRestriction
                         if ( isset( $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] ) and $xliff_trans_unit[ 'attr' ][ 'sizeRestriction' ] > 0 ) {
@@ -2172,7 +2205,7 @@ class ProjectManager {
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
 
-                            $segmentOriginalDataStruct = new Segments_SegmentOriginalDataStruct( [
+                            $segmentOriginalDataStruct = new SegmentOriginalDataStruct( [
                                     'data' => $segmentOriginalData,
                             ] );
 
@@ -2186,7 +2219,7 @@ class ProjectManager {
 
                         $segmentHash = $this->createSegmentHash( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $segmentOriginalData, $sizeRestriction );
 
-                        $segStruct = new Segments_SegmentStruct( [
+                        $segStruct = new SegmentStruct( [
                                 'id_file'             => $fid,
                                 'id_file_part'        => ( isset( $filePartsId ) ) ? $filePartsId : null,
                                 'id_project'          => $this->projectStructure[ 'id_project' ],
@@ -2393,11 +2426,11 @@ class ProjectManager {
         foreach ( $sequenceIds as $position => $id_segment ) {
 
             /**
-             * @var $this ->projectStructure[ 'segments' ][ $fid ][ $position ] Segments_SegmentStruct
+             * @var $this ->projectStructure[ 'segments' ][ $fid ][ $position ] SegmentStruct
              */
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
-            /** @var ?Segments_SegmentOriginalDataStruct $segmentOriginalDataStruct */
+            /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
             $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
 
             if ( isset( $segmentOriginalDataStruct->map ) ) {
@@ -2407,7 +2440,7 @@ class ProjectManager {
                 $map = $this->features->filter( 'sanitizeOriginalDataMap', $segmentOriginalDataStruct->map );
 
                 // persist original data map if present
-                Segments_SegmentOriginalDataDao::insertRecord( $id_segment, $map );
+                SegmentOriginalDataDao::insertRecord( $id_segment, $map );
 
                 $this->projectStructure[ 'segments' ][ $fid ][ $position ]->segment = $this->features->filter(
                         'correctTagErrors',
@@ -2416,7 +2449,7 @@ class ProjectManager {
                 );
             }
 
-            /** @var  Segments_SegmentMetadataStruct $segmentMetadataStruct */
+            /** @var  SegmentMetadataStruct $segmentMetadataStruct */
             $segmentMetadataStruct = @$this->projectStructure[ 'segments-meta-data' ][ $fid ][ $position ];
 
             if ( isset( $segmentMetadataStruct ) and !empty( $segmentMetadataStruct ) ) {
@@ -2449,7 +2482,7 @@ class ProjectManager {
 
         }
 
-        $segmentsDao = new Segments_SegmentDao();
+        $segmentsDao = new SegmentDao();
         //split the query in to chunks if there are too much segments
         $segmentsDao->createList( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy() );
 
@@ -2556,17 +2589,17 @@ class ProjectManager {
     /**
      * Save segment metadata
      *
-     * @param int                                 $id_segment
-     * @param Segments_SegmentMetadataStruct|null $metadataStruct
+     * @param int                        $id_segment
+     * @param SegmentMetadataStruct|null $metadataStruct
      */
-    protected function _saveSegmentMetadata( $id_segment, Segments_SegmentMetadataStruct $metadataStruct = null ) {
+    protected function _saveSegmentMetadata( $id_segment, SegmentMetadataStruct $metadataStruct = null ) {
 
         if ( $metadataStruct !== null and
                 isset( $metadataStruct->meta_key ) and $metadataStruct->meta_key !== '' and
                 isset( $metadataStruct->meta_value ) and $metadataStruct->meta_value !== ''
         ) {
             $metadataStruct->id_segment = $id_segment;
-            Segments_SegmentMetadataDao::save( $metadataStruct );
+            SegmentMetadataDao::save( $metadataStruct );
         }
     }
 
@@ -2604,7 +2637,7 @@ class ProjectManager {
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = Engine::getInstance( 1 );
+        $engine = EnginesFactory::getInstance( 1 );
         $config = $engine->getConfigStruct();
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {
@@ -2671,12 +2704,12 @@ class ProjectManager {
     }
 
     /**
-     * @param Jobs_JobStruct $job
-     * @param ArrayObject    $projectStructure
+     * @param JobStruct   $job
+     * @param ArrayObject $projectStructure
      *
      * @throws Exception
      */
-    protected function _insertPreTranslations( Jobs_JobStruct $job, ArrayObject $projectStructure ) {
+    protected function _insertPreTranslations( JobStruct $job, ArrayObject $projectStructure ) {
 
         $jid = $job->id;
         $this->_cleanSegmentsMetadata();
@@ -2693,7 +2726,7 @@ class ProjectManager {
             foreach ( $struct as $translation_row ) {
 
                 $position = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
-                $segment  = ( new Segments_SegmentDao() )->getById( $translation_row [ 0 ] );
+                $segment  = ( new SegmentDao() )->getById( $translation_row [ 0 ] );
 
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );
@@ -2718,12 +2751,12 @@ class ProjectManager {
                 }
 
                 // Use QA to get target segment
-                $chunk  = Chunks_ChunkDao::getByJobID( $jid )[ 0 ];
+                $chunk  = ChunkDao::getByJobID( $jid )[ 0 ];
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
                 /** @var $filter MateCatFilter filter */
-                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
+                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 
@@ -3026,9 +3059,9 @@ class ProjectManager {
         //check if the MyMemory keys provided by the user are already associated to him.
         if ( $this->projectStructure[ 'userIsLogged' ] ) {
 
-            $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
+            $mkDao = new MemoryKeyDao( $this->dbHandler );
 
-            $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
+            $searchMemoryKey      = new MemoryKeyStruct();
             $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
 
             $userMemoryKeys = $mkDao->read( $searchMemoryKey );
@@ -3039,7 +3072,7 @@ class ProjectManager {
             //extract user tm keys
             foreach ( $userMemoryKeys as $_memoKey ) {
                 /**
-                 * @var $_memoKey TmKeyManagement_MemoryKeyStruct
+                 * @var $_memoKey MemoryKeyStruct
                  */
                 $userTmKeys[] = $_memoKey->tm_key->key;
             }
@@ -3048,8 +3081,8 @@ class ProjectManager {
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
                 if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
-                    $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
-                    $newTmKey       = new TmKeyManagement_TmKeyStruct();
+                    $newMemoryKey   = new MemoryKeyStruct();
+                    $newTmKey       = new TmKeyStruct();
                     $newTmKey->key  = $_tmKey[ 'key' ];
                     $newTmKey->tm   = true;
                     $newTmKey->glos = true;

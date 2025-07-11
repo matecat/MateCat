@@ -1,11 +1,18 @@
 <?php
 
+use Model\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\ErrorResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\Matches;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::get
+ * @covers MyMemory::get
  * User: dinies
  * Date: 28/04/16
  * Time: 16.12
@@ -13,7 +20,7 @@ use TestHelpers\AbstractTest;
 class GetMyMemoryTest extends AbstractTest {
 
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
@@ -22,7 +29,7 @@ class GetMyMemoryTest extends AbstractTest {
      */
     protected $others_param;
     /**
-     * @var Engines_MyMemory
+     * @var MyMemory
      */
     protected $engine_MyMemory;
     /**
@@ -36,13 +43,13 @@ class GetMyMemoryTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = @$eng[ 0 ];
 
@@ -67,11 +74,11 @@ class GetMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_dutch() {
 
-        $this->engine_MyMemory = new Engines_MyMemory( $this->engine_struct_param );
+        $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
 
         $this->config_param_of_get[ 'segment' ] = "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
 
@@ -79,7 +86,7 @@ class GetMyMemoryTest extends AbstractTest {
         $this->assertEquals( 200, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
         $this->assertCount( 2, $result->responseData );
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
 
         $this->reflector = new ReflectionClass( $result );
         $property        = $this->reflector->getProperty( '_rawResponse' );
@@ -93,11 +100,11 @@ class GetMyMemoryTest extends AbstractTest {
      * Test that verified the behaviour of a get request for the translation
      * of a segment given personal tm with respective id_user.
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_italian_with_id_user_initialized() {
 
-        $this->engine_MyMemory = new Engines_MyMemory( $this->engine_struct_param );
+        $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
 
 
         $this->config_param_of_get[ 'segment' ] = "L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
@@ -108,7 +115,7 @@ class GetMyMemoryTest extends AbstractTest {
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -122,11 +129,11 @@ class GetMyMemoryTest extends AbstractTest {
      * Test that verified the behaviour of a get request for the translation of a
      * segment with wrong source language.
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_italian_with_wrong_source_language_and_id_user_not_in_array_coverage_purpose() {
 
-        $this->engine_MyMemory = new Engines_MyMemory( $this->engine_struct_param );
+        $this->engine_MyMemory = new MyMemory( $this->engine_struct_param );
 
 
         $this->config_param_of_get[ 'segment' ] = "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
@@ -139,7 +146,7 @@ class GetMyMemoryTest extends AbstractTest {
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -153,7 +160,7 @@ class GetMyMemoryTest extends AbstractTest {
      * It tests the behaviour with the return of the inner method _call simulated by a mock object.
      * This test certificates the righteousness of code without involving the _call method.
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_with_mock_for__call0() {
 
@@ -180,16 +187,16 @@ class GetMyMemoryTest extends AbstractTest {
 TAB;
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->exactly( 1 ) )->method( '_call' )->with( $url_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -218,7 +225,7 @@ TAB;
      * It tests the behaviour with the return of the inner method _call simulated by a mock object.
      * This test certificates the righteousness of code without involving the _call method.
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM() {
 
@@ -246,9 +253,9 @@ TAB;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
@@ -256,7 +263,7 @@ TAB;
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -267,9 +274,9 @@ TAB;
          * check of the 3 matches obtained from MyMemory
          */
         $this->assertCount( 3, $result->matches );
-        $this->assertTrue( $result->matches[ 0 ] instanceof Engines_Results_MyMemory_Matches );
-        $this->assertTrue( $result->matches[ 1 ] instanceof Engines_Results_MyMemory_Matches );
-        $this->assertTrue( $result->matches[ 2 ] instanceof Engines_Results_MyMemory_Matches );
+        $this->assertTrue( $result->matches[ 0 ] instanceof Matches );
+        $this->assertTrue( $result->matches[ 1 ] instanceof Matches );
+        $this->assertTrue( $result->matches[ 2 ] instanceof Matches );
 
         $result->matches = $result->get_matches_as_array();
 
@@ -369,7 +376,7 @@ TAB;
      * We expect that the MT match is the first one in the list of matches having a penalty of 5 against a TM match of 94.
      *
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_segment_with_mock_for__call_and_MT_penalty_management() {
 
@@ -397,9 +404,9 @@ TAB;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(  $url_mock_param, $curl_mock_param  )->willReturn( $mock_json_return );
 
         /**
@@ -412,7 +419,7 @@ TAB;
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -423,54 +430,54 @@ TAB;
          * check of the 3 matches obtained from MyMemory
          */
         $this->assertCount( 3, $result->matches );
-        $this->assertTrue( $result->matches[ 0 ] instanceof Engines_Results_MyMemory_Matches );
-        $this->assertTrue( $result->matches[ 1 ] instanceof Engines_Results_MyMemory_Matches );
-        $this->assertTrue( $result->matches[ 2 ] instanceof Engines_Results_MyMemory_Matches );
+        $this->assertTrue( $result->matches[ 0 ] instanceof Matches );
+        $this->assertTrue( $result->matches[ 1 ] instanceof Matches );
+        $this->assertTrue( $result->matches[ 2 ] instanceof Matches );
 
         $result->matches = $result->get_matches_as_array();
 
         /**
          * 1st match
          */
-        $this->assertEquals( "0", $result->matches[ 0 ][ 'id' ] );
+        $this->assertEquals( "484523811", $result->matches[ 0 ][ 'id' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 0 ][ 'raw_segment' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 0 ][ 'segment' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 0 ][ 'translation' ] );
         $this->assertEquals( "", $result->matches[ 0 ][ 'target_note' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 0 ][ 'raw_translation' ] );
-        $this->assertEquals( "70", $result->matches[ 0 ][ 'quality' ] );
-        $this->assertEquals( "Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.", $result->matches[ 0 ][ 'reference' ] );
+        $this->assertEquals( "74", $result->matches[ 0 ][ 'quality' ] );
+        $this->assertEquals( "", $result->matches[ 0 ][ 'reference' ] );
         $this->assertEquals( "1", $result->matches[ 0 ][ 'usage_count' ] );
-        $this->assertEquals( false, $result->matches[ 0 ][ 'subject' ] );
-        $this->assertEquals( "MT!", $result->matches[ 0 ][ 'created_by' ] );
-        $this->assertEquals( "MT!", $result->matches[ 0 ][ 'last_updated_by' ] );
-        $this->assertEquals( "2016-05-02 17:20:51", $result->matches[ 0 ][ 'create_date' ] );
+        $this->assertEquals( "All", $result->matches[ 0 ][ 'subject' ] );
+        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 0 ][ 'created_by' ] );
+        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 0 ][ 'last_updated_by' ] );
+        $this->assertEquals( "2016-05-02 17:15:11", $result->matches[ 0 ][ 'create_date' ] );
         $this->assertEquals( "2016-05-02", $result->matches[ 0 ][ 'last_update_date' ] );
-        $this->assertEquals( "95%", $result->matches[ 0 ][ 'match' ] );
+        $this->assertEquals( "94%", $result->matches[ 0 ][ 'match' ] );
         $this->assertEquals( [], $result->matches[ 0 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 0 ][ 'source_note' ] );
-        $this->assertEquals( "", $result->matches[ 0 ][ 'memory_key' ] );
+        $this->assertEquals( "a6043e606ac9b5d7ff24", $result->matches[ 0 ][ 'memory_key' ] );
         /**
          * 2nd match
          */
-        $this->assertEquals( "484523811", $result->matches[ 1 ][ 'id' ] );
+        $this->assertEquals( "0", $result->matches[ 1 ][ 'id' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 1 ][ 'raw_segment' ] );
         $this->assertEquals( "Ciascuna copia è dotata di un numero di serie univoco.", $result->matches[ 1 ][ 'segment' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 1 ][ 'translation' ] );
         $this->assertEquals( "", $result->matches[ 1 ][ 'target_note' ] );
         $this->assertEquals( "Each copy has a unique serial number.", $result->matches[ 1 ][ 'raw_translation' ] );
-        $this->assertEquals( "74", $result->matches[ 1 ][ 'quality' ] );
-        $this->assertEquals( "", $result->matches[ 1 ][ 'reference' ] );
+        $this->assertEquals( "70", $result->matches[ 1 ][ 'quality' ] );
+        $this->assertEquals( "Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.", $result->matches[ 1 ][ 'reference' ] );
         $this->assertEquals( "1", $result->matches[ 1 ][ 'usage_count' ] );
-        $this->assertEquals( "All", $result->matches[ 1 ][ 'subject' ] );
-        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 1 ][ 'created_by' ] );
-        $this->assertEquals( "MyMemory_65655950851269d899c7", $result->matches[ 1 ][ 'last_updated_by' ] );
-        $this->assertEquals( "2016-05-02 17:15:11", $result->matches[ 1 ][ 'create_date' ] );
+        $this->assertEquals( false, $result->matches[ 1 ][ 'subject' ] );
+        $this->assertEquals( "MT!", $result->matches[ 1 ][ 'created_by' ] );
+        $this->assertEquals( "MT!", $result->matches[ 1 ][ 'last_updated_by' ] );
+        $this->assertEquals( "2016-05-02 17:20:51", $result->matches[ 1 ][ 'create_date' ] );
         $this->assertEquals( "2016-05-02", $result->matches[ 1 ][ 'last_update_date' ] );
-        $this->assertEquals( "94%", $result->matches[ 1 ][ 'match' ] );
+        $this->assertEquals( "95%", $result->matches[ 1 ][ 'match' ] ); // the match is 95% because of the MT penalty of 5
         $this->assertEquals( [], $result->matches[ 1 ][ 'prop' ] );
         $this->assertEquals( "", $result->matches[ 1 ][ 'source_note' ] );
-        $this->assertEquals( "a6043e606ac9b5d7ff24", $result->matches[ 1 ][ 'memory_key' ] );
+        $this->assertEquals( "", $result->matches[ 1 ][ 'memory_key' ] );
         /**
          * 3rd match
          */
@@ -514,7 +521,7 @@ TAB;
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::get
+     * @covers MyMemory::get
      */
     public function test_get_with_error_from_mocked__call_for_coverage_purpose() {
 
@@ -548,16 +555,16 @@ TAB;
 
 
         /**
-         * @var Engines_MyMemory
+         * @var MyMemory
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $rawValue_error );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
         /**
          * general check on the keys of TSM object returned
          */
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TMS );
+        $this->assertTrue( $result instanceof GetMemoryResponse );
         $this->assertTrue( property_exists( $result, 'matches' ) );
         $this->assertTrue( property_exists( $result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $result, 'responseDetails' ) );
@@ -571,7 +578,7 @@ TAB;
         $this->assertEquals( 0, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
         $this->assertEquals( "", $result->responseData );
-        $this->assertTrue( $result->error instanceof Engines_Results_ErrorMatches );
+        $this->assertTrue( $result->error instanceof ErrorResponse );
 
         $this->assertEquals( -6, $result->error->code );
         $this->assertEquals( "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message );

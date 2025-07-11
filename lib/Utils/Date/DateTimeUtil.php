@@ -1,6 +1,6 @@
 <?php
 
-namespace Date;
+namespace Utils\Date;
 
 use DateTime;
 use DateTimeInterface;

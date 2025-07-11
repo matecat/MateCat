@@ -1,7 +1,13 @@
 <?php
 
+use Model\Database;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TmKeyManagement\TmKeyManager;
 
 /**
  * Created by PhpStorm.
@@ -117,9 +123,9 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testGetTmKeyStructure_noArgs() {
-        $structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+        $structure = TmKeyManager::getTmKeyStructure();
 
-        $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $structure );
+        $this->assertInstanceOf( "TmKeyStruct", $structure );
         $this->assertObjectHasProperty( "tm", $structure );
         $this->assertObjectHasProperty( "glos", $structure );
         $this->assertObjectHasProperty( "owner", $structure );
@@ -165,9 +171,9 @@ class TmKeyManagementTest extends AbstractTest {
                 'w'          => self::$dummyTmKey_w
         ];
 
-        $structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure( $args );
+        $structure = TmKeyManager::getTmKeyStructure( $args );
 
-        $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $structure );
+        $this->assertInstanceOf( TmKeyStruct::class, $structure );
         $this->assertObjectHasProperty( "tm", $structure );
         $this->assertObjectHasProperty( "glos", $structure );
         $this->assertObjectHasProperty( "owner", $structure );
@@ -205,9 +211,9 @@ class TmKeyManagementTest extends AbstractTest {
      * @depends testGetTmKeyStructure_noArgs
      */
     public function testGetClientTmKeyStructure_noArgs() {
-        $structure = TmKeyManagement_TmKeyManagement::getClientTmKeyStructure();
+        $structure = TmKeyManager::getClientTmKeyStructure();
 
-        $this->assertInstanceOf( "TmKeyManagement_ClientTmKeyStruct", $structure );
+        $this->assertInstanceOf( "ClientTmKeyStruct", $structure );
         $this->assertObjectHasProperty( "edit", $structure );
 
         $this->assertTrue( $structure->edit );
@@ -229,9 +235,9 @@ class TmKeyManagementTest extends AbstractTest {
                 'edit'       => self::$dummyTmKey_edit
         ];
 
-        $structure = TmKeyManagement_TmKeyManagement::getClientTmKeyStructure( $args );
+        $structure = TmKeyManager::getClientTmKeyStructure( $args );
 
-        $this->assertInstanceOf( "TmKeyManagement_ClientTmKeyStruct", $structure );
+        $this->assertInstanceOf( "ClientTmKeyStruct", $structure );
         $this->assertObjectHasProperty( "edit", $structure );
 
         $this->assertTrue( $structure->edit );
@@ -314,14 +320,14 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing two TmKeyStruct object representing:
          * the key 'ABC'
          * the key 'GHI'
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'r',
                     'tm',
@@ -338,12 +344,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 2, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
         /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
+         * @var $sndKey TmKeyStruct
          */
         $sndKey = $tmKeys[ 1 ];
 
@@ -424,14 +430,14 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing one TmKeyManagement_TmKeyStruct object representing:
+         * An array containing one TmKeyStruct object representing:
          * the key 'ABC'
          * DEF key should not be kept because it is not writable even if mine (user 560)
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'w',
                     'tm',
@@ -449,7 +455,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
@@ -523,14 +529,14 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing one TmKeyManagement_TmKeyStruct object representing:
+         * An array containing one TmKeyStruct object representing:
          * the key 'ABC'
          * DEF key should not be kept because it is not writable even if mine (user 560)
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'rw',
                     'tm',
@@ -547,7 +553,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
@@ -638,14 +644,14 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing two TmKeyStruct object representing:
          * the key 'ABC'
          * the key 'DEF'
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'r',
                     'tm',
@@ -662,12 +668,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 2, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
         /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
+         * @var $sndKey TmKeyStruct
          */
         $sndKey = $tmKeys[ 1 ];
 
@@ -748,18 +754,18 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing two TmKeyStruct object representing:
          * the key 'ABC'
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'w',
                     'tm',
                     null,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
+                    Filter::ROLE_TRANSLATOR
             );
 
         } catch ( Exception $e ) {
@@ -772,7 +778,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
@@ -847,7 +853,7 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing two TmKeyStruct object representing:
          * the key 'ABC'
          * the key 'DEF'
          * the key 'GHI'
@@ -855,12 +861,12 @@ class TmKeyManagementTest extends AbstractTest {
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'r',
                     'tm',
                     $_idTranslator,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
+                    Filter::ROLE_TRANSLATOR
             );
 
         } catch ( Exception $e ) {
@@ -873,12 +879,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 2, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
         /**
-         * @var $sndKey TmKeyManagement_TmKeyStruct
+         * @var $sndKey TmKeyStruct
          */
         $sndKey = $tmKeys[ 1 ];
 
@@ -962,19 +968,19 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing two TmKeyManagement_TmKeyStruct object representing:
+         * An array containing two TmKeyStruct object representing:
          * the key 'ABC'
          * the key 'GHI'
          */
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'w',
                     'tm',
                     $_idTranslator,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
+                    Filter::ROLE_TRANSLATOR
             );
 
         } catch ( Exception $e ) {
@@ -987,7 +993,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
@@ -1063,7 +1069,7 @@ class TmKeyManagementTest extends AbstractTest {
 
         /**
          * EXPECTED:
-         * An array containing one TmKeyManagement_TmKeyStruct object representing:
+         * An array containing one TmKeyStruct object representing:
          * the key 'ABC'
          *
          * The key 'DEF' has no write permissions even if mine
@@ -1071,12 +1077,12 @@ class TmKeyManagementTest extends AbstractTest {
         $tmKeys = null;
 
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     $_jobTmKeys,
                     'rw',
                     'tm',
                     $_idTranslator,
-                    TmKeyManagement_Filter::ROLE_TRANSLATOR
+                    Filter::ROLE_TRANSLATOR
             );
 
         } catch ( Exception $e ) {
@@ -1089,7 +1095,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $tmKeys ) );
 
         /**
-         * @var $fstKey TmKeyManagement_TmKeyStruct
+         * @var $fstKey TmKeyStruct
          */
         $fstKey = $tmKeys[ 0 ];
 
@@ -1106,7 +1112,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testGetJobTmKeys_invalidJson() {
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$invalidJsonTmKeyArr );
+            $tmKeys = TmKeyManager::getJobTmKeys( self::$invalidJsonTmKeyArr );
         } catch ( Exception $e ) {
             $invalidJSONposition = strpos( $e->getMessage(), "Syntax error, malformed JSON" );
 
@@ -1116,7 +1122,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testGetJobTmKeys_wGrant() {
 
-        $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'w' );
+        $tmKeys = TmKeyManager::getJobTmKeys( self::$validJsonTmKeyArr, 'w' );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
@@ -1126,7 +1132,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testGetJobTmKeys_invalidGrant() {
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, self::$invalidGrantString );
+            $tmKeys = TmKeyManager::getJobTmKeys( self::$validJsonTmKeyArr, self::$invalidGrantString );
         } catch ( Exception $e ) {
             $invalidGrantPosition = strpos( $e->getMessage(), "Invalid grant string." );
 
@@ -1135,12 +1141,12 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testGetJobTmKeys_glosType() {
-        $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+        $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonTmKeyArr,
                 'rw',
                 'glos',
                 null,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR );
+                Filter::ROLE_TRANSLATOR );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
@@ -1149,12 +1155,12 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testGetJobTmKeys_revisorRole() {
-        $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+        $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonTmKeyArr,
                 'rw',
                 'glos',
                 null,
-                TmKeyManagement_Filter::ROLE_REVISOR );
+                Filter::ROLE_REVISOR );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
@@ -1164,7 +1170,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testGetJobTmKeys_invalidType() {
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     self::$validJsonTmKeyArr,
                     'rw',
                     self::$invalidTypeString
@@ -1178,7 +1184,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testGetJobTmKeys_invalidRole() {
         try {
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+            $tmKeys = TmKeyManager::getJobTmKeys(
                     self::$validJsonTmKeyArr,
                     'rw',
                     'tm',
@@ -1192,26 +1198,26 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testGetJobTmKeys_uidNotNull() {
-        $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
+        $tmKeys = TmKeyManager::getJobTmKeys(
                 self::$validJsonTmKeyArrWithUidTranslator,
                 'rw',
                 'tm',
                 self::$uid_translator,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR
+                Filter::ROLE_TRANSLATOR
         );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
 
         $this->assertFalse( empty( $tmKeys ) );
-        $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $tmKeys[ 0 ] );
+        $this->assertInstanceOf( TmKeyStruct::class, $tmKeys[ 0 ] );
     }
 
     /** TEST isValidStructure */
     public function testIsValidStructure_validStructure() {
-        $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$validTmKeyStructArr );
+        $validObj = TmKeyManager::isValidStructure( self::$validTmKeyStructArr );
 
-        $this->assertInstanceOf( 'TmKeyManagement_TmKeyStruct', $validObj );
+        $this->assertInstanceOf( TmKeyStruct::class, $validObj );
         $this->assertEquals( self::$validTmKeyStructArr[ 'key' ], $validObj->key );
         $this->assertEquals( self::$validTmKeyStructArr[ 'owner' ], $validObj->owner );
         $this->assertEquals( self::$validTmKeyStructArr[ 'r' ], $validObj->r );
@@ -1222,7 +1228,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testIsValidStructure_invalidStructure() {
-        $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$invalidTmKeyStructArr );
+        $validObj = TmKeyManager::isValidStructure( self::$invalidTmKeyStructArr );
 
         $this->assertNotNull( $validObj );
         $this->assertNull( $validObj->invalidField ?? null );
@@ -1231,7 +1237,7 @@ class TmKeyManagementTest extends AbstractTest {
     /** TEST mergeJsonKeys */
     public function testMergeJsonKeys_invalidClientJson() {
         try {
-            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys( self::$invalidClientJson, self::$validServerJson );
+            $resultMerge = TmKeyManager::mergeJsonKeys( self::$invalidClientJson, self::$validServerJson );
         } catch ( Exception $e ) {
             $this->assertTrue( $e->getCode() > 0 );
         }
@@ -1239,7 +1245,7 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_invalidServerJson() {
         try {
-            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys( self::$validClientJson, self::$invalidServerJson );
+            $resultMerge = TmKeyManager::mergeJsonKeys( self::$validClientJson, self::$invalidServerJson );
         } catch ( Exception $e ) {
             $this->assertTrue( $e->getCode() > 0 );
         }
@@ -1247,10 +1253,10 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_validInput_clientABCDEF_serverABC() {
 
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_ABC_DEF,
                 self::$srv_json_ABC,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
@@ -1271,12 +1277,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 2, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
         /**
-         * @var $secondKey TmKeyManagement_TmKeyStruct
+         * @var $secondKey TmKeyStruct
          */
         $secondKey = $resultMerge[ 1 ];
 
@@ -1305,10 +1311,10 @@ class TmKeyManagementTest extends AbstractTest {
      */
     public function testMergeJsonKeys_validInput_clientGHI_Anonymous_serverGHI() {
 
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR
+                Filter::ROLE_TRANSLATOR
         );
 
         /*
@@ -1326,7 +1332,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
@@ -1343,7 +1349,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testMergeJsonKeys_validInput_clientGHI_INVALID_serverGHI() {
 
         $this->expectException( 'Exception', "Please, select Lookup and/or Update to activate your TM in this project" );
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_INVALID_GHI,
                 self::$srv_json_GHI
         );
@@ -1353,7 +1359,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testMergeJsonKeys_InvalidRole() {
 
         $this->expectException( 'Exception', "Invalid Role Type string." );
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
                 'invalid role!',
@@ -1365,20 +1371,20 @@ class TmKeyManagementTest extends AbstractTest {
     public function testMergeJsonKeys_InvalidAnonymousOWNER() {
 
         $this->expectException( 'Exception', "Anonymous user can not be OWNER" );
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
-                TmKeyManagement_Filter::OWNER
+                Filter::OWNER
         );
 
     }
 
     public function testMergeJsonKeys_OWNER_DELETE_key() {
 
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 '[]',
                 self::$srv_json_GHI,
-                TmKeyManagement_Filter::OWNER,
+                Filter::OWNER,
                 123
         );
 
@@ -1389,10 +1395,10 @@ class TmKeyManagementTest extends AbstractTest {
 
     public function testMergeJsonKeys_OWNER_clientGHI_serverGHI() {
 
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI,
                 self::$srv_json_GHI,
-                TmKeyManagement_Filter::OWNER,
+                Filter::OWNER,
                 123
         );
 
@@ -1410,7 +1416,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
@@ -1425,7 +1431,7 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testMergeJsonKeys_validInput_clientGHIDEF_serverGHI() {
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_GHI_DEF,
                 self::$srv_json_GHI
         );
@@ -1434,12 +1440,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 2, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
         /**
-         * @var $secondKey TmKeyManagement_TmKeyStruct
+         * @var $secondKey TmKeyStruct
          */
         $secondKey = $resultMerge[ 1 ];
 
@@ -1459,10 +1465,10 @@ class TmKeyManagementTest extends AbstractTest {
     }
 
     public function testMergeJsonKeys_validInput_clientABC_serverABC() {
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_ABC,
                 self::$srv_json_ABC,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
@@ -1470,7 +1476,7 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 1, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
@@ -1499,10 +1505,10 @@ class TmKeyManagementTest extends AbstractTest {
          *
          */
 
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_DEF,
                 self::$srv_json_ABC,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
@@ -1518,7 +1524,7 @@ class TmKeyManagementTest extends AbstractTest {
 
         //this should not to be, because a client can not send not hashed keys
         //already present in job as an anonymous user
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_ABC_GHI_JKL,
                 self::$srv_json_ABC_GHI_DEF
         );
@@ -1532,15 +1538,15 @@ class TmKeyManagementTest extends AbstractTest {
 
         //this should not to be, because a client can not send not hashed keys
         //already present in job as an anonymous user
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 self::$client_json_ABC_GHI_JKL,
                 self::$srv_json_ABC_GHI_DEF,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
-        $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-        $dh        = new TmKeyManagement_MemoryKeyStruct( [
+        $MemoryDao = new MemoryKeyDao( Database::obtain() );
+        $dh        = new MemoryKeyStruct( [
                 'uid' => 123
         ] );
 
@@ -1569,17 +1575,17 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 3, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
         /**
-         * @var $secondKey TmKeyManagement_TmKeyStruct
+         * @var $secondKey TmKeyStruct
          */
         $secondKey = $resultMerge[ 1 ];
 
         /**
-         * @var $thirdKey TmKeyManagement_TmKeyStruct
+         * @var $thirdKey TmKeyStruct
          */
         $thirdKey = $resultMerge[ 2 ];
 
@@ -1646,10 +1652,10 @@ class TmKeyManagementTest extends AbstractTest {
 
         //this should not to be, because a client can not send not hashed keys
         //already present in job as an anonymous user
-        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        $resultMerge = TmKeyManager::mergeJsonKeys(
                 $client_json,
                 $server_json,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
@@ -1657,17 +1663,17 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 3, count( $resultMerge ) );
 
         /**
-         * @var $firstKey TmKeyManagement_TmKeyStruct
+         * @var $firstKey TmKeyStruct
          */
         $firstKey = $resultMerge[ 0 ];
 
         /**
-         * @var $secondKey TmKeyManagement_TmKeyStruct
+         * @var $secondKey TmKeyStruct
          */
         $secondKey = $resultMerge[ 1 ];
 
         /**
-         * @var $thirdKey TmKeyManagement_TmKeyStruct
+         * @var $thirdKey TmKeyStruct
          */
         $thirdKey = $resultMerge[ 2 ];
 
@@ -1734,10 +1740,10 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->expectException( 'Exception', "A key is already present in this project.", 5 );
 
-        TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+        TmKeyManager::mergeJsonKeys(
                 $client_json,
                 $server_json,
-                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                Filter::ROLE_TRANSLATOR,
                 123
         );
 
@@ -1746,7 +1752,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testJsonSerialization() {
 
         $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
-        $result_arr  = array_map( [ 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ], json_decode( $client_json ) );
+        $result_arr  = array_map( [ 'Utils\TmKeyManagement\TmKeyManager', 'getTmKeyStructure' ], json_decode( $client_json ) );
 
         $this->assertTrue( strpos( json_encode( $result_arr ), 'u0000readable_chars' ) === false );
         $this->assertTrue( strpos( json_encode( $result_arr[ 0 ]->toArray() ), 'u0000readable_chars' ) === false );
@@ -1771,7 +1777,7 @@ class TmKeyManagementTest extends AbstractTest {
         }
 
         $jobKeys = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"vuota 4","key":"cXXXXXXXXXXXXae68","r":1,"w":1,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"baYYYYYYYYYYYY91d","r":1,"w":0,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"fe88ZZZZZZZZZZZZ79c","r":1,"w":0,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"a7dWWWWWWWWWWW7b3","r":1,"w":1,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"is_shared":false,"is_private":false}]';
-        $keys    = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $jobKeys ], 'w' );
+        $keys    = TmKeyManager::getOwnerKeys( [ $jobKeys ], 'w' );
 
         $this->assertTrue( Utils::array_is_list( $keys ) );
 

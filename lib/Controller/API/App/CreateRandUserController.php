@@ -1,12 +1,11 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Engine;
-use Engines_MyMemory;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
+use Utils\Engines\EnginesFactory;
 
 class CreateRandUserController extends KleinController {
 
@@ -20,9 +19,9 @@ class CreateRandUserController extends KleinController {
     public function create(): void {
 
         /**
-         * @var $tms Engines_MyMemory
+         * @var $tms \Utils\Engines\MyMemory
          */
-        $tms = Engine::getInstance( 1 );
+        $tms = EnginesFactory::getInstance( 1 );
 
         $this->response->json( [
                 'data' => $tms->createMyMemoryKey()

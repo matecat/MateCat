@@ -1,18 +1,22 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use CatUtils;
+use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
-use Langs\Languages;
+use Log;
+use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use TmKeyManagement\UserKeysModel;
-use TmKeyManagement_Filter;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\GlossaryWorker;
+use Utils\CatUtils;
+use Utils\Langs\Languages;
+use Utils\TmKeyManagement\Filter;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
 
@@ -269,11 +273,11 @@ class GlossaryController extends KleinController {
         if ( $this->isLoggedIn() ) {
 
             if ( CatUtils::isRevisionFromIdJobAndPassword( $json[ 'id_job' ], $json[ 'password' ] ) ) {
-                $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+                $userRole = Filter::ROLE_REVISOR;
             } elseif ( $this->user->email == $job->status_owner ) {
-                $userRole = TmKeyManagement_Filter::OWNER;
+                $userRole = Filter::OWNER;
             } else {
-                $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+                $userRole = Filter::ROLE_TRANSLATOR;
             }
 
             $userKeys = new UserKeysModel( $this->user, $userRole );
@@ -317,8 +321,8 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * @param array                                $keys
-     * @param \TmKeyManagement_ClientTmKeyStruct[] $userKeys
+     * @param array                                      $keys
+     * @param \Utils\TmKeyManagement\ClientTmKeyStruct[] $userKeys
      */
     private function checkWritePermissions( array $keys, array $userKeys ) {
         $allowedKeys = [];
@@ -340,7 +344,7 @@ class GlossaryController extends KleinController {
             }
 
             // check key permissions
-            $keyIsUse = array_filter( $userKeys, function ( \TmKeyManagement_ClientTmKeyStruct $userKey ) use ( $key ) {
+            $keyIsUse = array_filter( $userKeys, function ( Utils\TmKeyManagement\ClientTmKeyStruct $userKey ) use ( $key ) {
                 return $userKey->key === $key;
             } )[ 0 ];
 
@@ -370,8 +374,8 @@ class GlossaryController extends KleinController {
      *
      * @throws InvalidValue
      * @throws \Swaggest\JsonSchema\Exception
-     * @throws \Validator\Errors\JSONValidatorException
-     * @throws \Validator\Errors\JsonValidatorGenericException
+     * @throws \Utils\Validator\JSONSchema\Errors\JSONValidatorException
+     * @throws \Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException
      */
     private function validateJson( $json, $jsonSchema ) {
         $validatorObject       = new JSONValidatorObject();
@@ -414,14 +418,14 @@ class GlossaryController extends KleinController {
      */
     private function enqueueWorker( $queue, $params ) {
         try {
-            \WorkerClient::enqueue( $queue, '\AsyncTasks\Workers\GlossaryWorker', $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+            WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( \Exception $e ) {
             # Handle the error, logging, ...
             $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
-            \Log::doJsonLog( $output );
-            \Utils::sendErrMailReport( $output );
+            Log::doJsonLog( $output );
+            Utils::sendErrMailReport( $output );
         }
     }
 }

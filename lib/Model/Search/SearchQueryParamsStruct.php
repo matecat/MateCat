@@ -7,76 +7,67 @@
  *
  */
 
-namespace Search;
+namespace Model\Search;
 
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use stdClass;
 
 class SearchQueryParamsStruct extends ShapelessConcreteStruct {
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $key;
+    public ?string $key = null;
 
     /**
      * @var integer
      */
-    public $job;
+    public int $job;
 
     /**
-     * @var $password
+     * @var string $password
      */
-    public $password;
+    public string $password;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $searchWhere;
+    public ?string $target = null;
 
     /**
-     * @var string
+     * @var string|null
      */
-    public $target;
+    public ?string $source = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $source;
+    public ?string $replacement = null;
 
     /**
-     * @var string
+     * @var ?string
      */
-    public $replacement;
-
-    /**
-     * @var string
-     */
-    public $status;
+    public ?string $status = null;
 
     /**
      * @var bool
      */
-    public $isMatchCaseRequested;
+    public bool $isMatchCaseRequested;
 
     /**
      * @var bool
      */
-    public $isExactMatchRequested;
+    public bool $isExactMatchRequested;
 
 
     /**
-     * @var string|\stdClass
+     * @var ?stdClass
      */
-    public $matchCase;
+    public ?stdClass $matchCase = null;
 
     /**
-     * @var string|\stdClass
+     * @var ?stdClass
      */
-    public $exactMatch;
-
-    /**
-     * @var integer
-     */
-    public $sourcePage;
+    public ?stdClass $exactMatch = null;
 
 }

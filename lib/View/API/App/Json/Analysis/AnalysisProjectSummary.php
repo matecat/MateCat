@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
-use Constants_ProjectStatus;
 use INIT;
 use JsonSerializable;
+use Utils\Constants\ProjectStatus;
 
 class AnalysisProjectSummary implements JsonSerializable {
 
@@ -30,7 +30,7 @@ class AnalysisProjectSummary implements JsonSerializable {
     /**
      * @var string
      */
-    protected string $analysis_status = Constants_ProjectStatus::STATUS_NEW;
+    protected string $analysis_status = ProjectStatus::STATUS_NEW;
     /**
      * @var float
      */

@@ -15,17 +15,17 @@
         /*<![CDATA[*/
         var config = {
             basepath: '${basepath | string:/}',
-            id_job: '${jid}',
+            id_job: ${jid},
             password: '${password}',
             isSourceRTL: ${source_rtl | string:false},
             isTargetRTL: ${target_rtl | string:false},
-            searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-            enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+            searchable_statuses : ${searchable_statuses},
+            user_plugins: ${user_plugins},
+            enableMultiDomainApi: ${enableMultiDomainApi},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-            isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
+            isAnInternalUser: ${isAnInternalUser},
             source_code: '${source_code}',
-            target_code: '${target_code}',
+            target_code: '${target_code}'
         }
         /*]]>*/
     </script>

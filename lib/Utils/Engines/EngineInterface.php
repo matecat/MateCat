@@ -1,4 +1,13 @@
 <?php
+
+namespace Utils\Engines;
+
+use Exception;
+use Model\Engines\Structs\EngineStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,13 +15,12 @@
  * Time: 11.55
  *
  */
-
-interface Engines_EngineInterface {
+interface EngineInterface {
 
     /**
      * @param $_config
      *
-     * @return Engines_Results_AbstractResponse
+     * @return TMSAbstractResponse
      */
     public function get( $_config );
 
@@ -43,21 +51,21 @@ interface Engines_EngineInterface {
     public function getConfigStruct();
 
     /**
-     * @return Engines_EngineInterface
+     * @return EngineInterface
      */
-    public function setAnalysis(): Engines_EngineInterface;
+    public function setAnalysis(): EngineInterface;
 
     /**
      * @param int $mt_penalty
      *
-     * @return Engines_EngineInterface
+     * @return EngineInterface
      */
-    public function setMTPenalty( int $mt_penalty ): Engines_EngineInterface;
+    public function setMTPenalty( int $mt_penalty ): EngineInterface;
 
     /**
-     * @return EnginesModel_EngineStruct
+     * @return EngineStruct
      */
-    public function getEngineRecord(): EnginesModel_EngineStruct;
+    public function getEngineRecord(): EngineStruct;
 
     /**
      * @return bool
@@ -69,7 +77,7 @@ interface Engines_EngineInterface {
     /**
      * @return void
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user );
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user );
 
     /**
      * @param array      $projectRow
@@ -80,12 +88,12 @@ interface Engines_EngineInterface {
     public function syncMemories( array $projectRow, ?array $segments = [] );
 
     /**
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return ?array
      * @throws Exception
      */
-    public function memoryExists( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function memoryExists( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * Deletes a specific memory key.
@@ -101,12 +109,12 @@ interface Engines_EngineInterface {
     /**
      * Determines if the provided memory belongs to the caller.
      *
-     * @param TmKeyManagement_MemoryKeyStruct $memoryKey
+     * @param MemoryKeyStruct $memoryKey
      *
      * @return array|null Returns the memory key if the caller owns the memory, false otherwise.
      * @throws Exception
      */
-    public function getMemoryIfMine( TmKeyManagement_MemoryKeyStruct $memoryKey ): ?array;
+    public function getMemoryIfMine( MemoryKeyStruct $memoryKey ): ?array;
 
     /**
      * @param string $source

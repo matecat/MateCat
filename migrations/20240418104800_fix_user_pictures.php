@@ -2,6 +2,8 @@
 
 // IMPORTANT: launch the migration shortly before the end of the deployment to avoid key duplication
 
+use migrations\AbstractMatecatMigration;
+
 class FixUserPictures extends AbstractMatecatMigration {
 
     public $sql_up = [

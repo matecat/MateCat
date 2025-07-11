@@ -1,12 +1,17 @@
 <?php
+
+namespace Utils\Engines\Results\MyMemory;
+
+use Log;
+use Utils\Engines\Results\TMSAbstractResponse;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 03/03/15
  * Time: 15.33
  */
-
-class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractResponse {
+class TmxResponse extends TMSAbstractResponse {
 
     /*
     {
@@ -28,9 +33,9 @@ class Engines_Results_MyMemory_TmxResponse extends Engines_Results_AbstractRespo
 
     public function __construct( $response ) {
 
-        $this->responseData    = isset( $response[ 'responseData' ] ) ? $response[ 'responseData' ] : '';
-        $this->responseStatus  = isset( $response[ 'responseStatus' ] ) ? $response[ 'responseStatus' ] : '';
-        $this->responseDetails = isset( $response[ 'responseDetails' ] ) ? $response[ 'responseDetails' ] : '';
+        $this->responseData    = $response[ 'responseData' ] ?? '';
+        $this->responseStatus  = $response[ 'responseStatus' ] ?? '';
+        $this->responseDetails = $response[ 'responseDetails' ] ?? '';
 
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
             $this->id = empty( $this->responseData[ 'uuid' ] ) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];

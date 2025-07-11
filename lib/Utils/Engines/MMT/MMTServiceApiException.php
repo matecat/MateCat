@@ -8,19 +8,21 @@
 
 namespace Engines\MMT;
 
-class MMTServiceApiException extends \Exception {
+use Exception;
 
-    public static function fromJSONResponse( $json ) {
+class MMTServiceApiException extends Exception {
+
+    public static function fromJSONResponse( array $json ): MMTServiceApiException {
         $code    = isset( $json[ 'status' ] ) ? intval( $json[ 'status' ] ) : 500;
-        $type    = isset( $json[ 'error' ][ 'type' ] ) ? $json[ 'error' ][ 'type' ] : 'UnknownException';
-        $message = isset( $json[ 'error' ][ 'message' ] ) ? $json[ 'error' ][ 'message' ] : '';
+        $type    = $json[ 'error' ][ 'type' ] ?? 'UnknownException';
+        $message = $json[ 'error' ][ 'message' ] ?? '';
 
         return new self( $type, $code, $message );
     }
 
     private $type;
 
-    public function __construct( $type, $code, $message = "" ) {
+    public function __construct( ?string $type = '', ?int $code = 0, ?string $message = "" ) {
         parent::__construct( "($type) $message", $code );
         $this->type = $type;
     }
@@ -28,7 +30,7 @@ class MMTServiceApiException extends \Exception {
     /**
      * @return string
      */
-    public function getType() {
+    public function getType(): string {
         return $this->type;
     }
 

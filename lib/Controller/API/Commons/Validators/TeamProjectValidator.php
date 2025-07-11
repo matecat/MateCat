@@ -6,18 +6,18 @@
  * Time: 10:57
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use Exceptions\NotFoundException;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectStruct;
 
 class TeamProjectValidator extends Base {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
 
     /**
      * @throws NotFoundException
@@ -31,11 +31,11 @@ class TeamProjectValidator extends Base {
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return TeamProjectValidator
      */
-    public function setProject( Projects_ProjectStruct $project ): TeamProjectValidator {
+    public function setProject( ProjectStruct $project ): TeamProjectValidator {
         $this->project = $project;
 
         return $this;

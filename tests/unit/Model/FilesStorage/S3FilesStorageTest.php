@@ -1,7 +1,7 @@
 <?php
 
-use FilesStorage\S3FilesStorage;
 use Matecat\SimpleS3\Client;
+use Model\FilesStorage\S3FilesStorage;
 use Predis\Connection\ConnectionException;
 use TestHelpers\AbstractTest;
 

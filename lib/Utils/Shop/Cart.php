@@ -4,6 +4,9 @@
  * Created by PhpStorm.
  */
 
+namespace Utils\Shop;
+use LogicException;
+
 /**
  * Generic Cart Container / Manager attached to the session
  *
@@ -12,39 +15,39 @@
  * Time: 15.01
  *
  */
-class Shop_Cart {
+class Cart {
 
     /**
      * Singleton Pool container
      *
-     * @var Shop_Cart[]
+     * @var Cart[]
      */
-    protected static $_instance = [];
+    protected static array $_instance = [];
 
     /**
      * The cart content storage
      *
-     * @var Shop_AbstractItem[]
+     * @var AbstractItem[]
      */
-    protected $cart;
+    protected array $cart;
 
     /**
      * Unique identifier for the cart
      *
      * @var string
      */
-    protected $cartName;
+    protected string $cartName;
 
     /**
      * Retrieve an instance of Cart identified by $cartName in a pool with singleton pattern
      *
      * @param String $cartName
      *
-     * @return Shop_Cart
+     * @return Cart
      */
-    public static function getInstance( $cartName ) {
+    public static function getInstance( string $cartName ): Cart {
         if ( !array_key_exists( $cartName, self::$_instance ) ) {
-            self::$_instance[ $cartName ] = new Shop_Cart( $cartName );
+            self::$_instance[ $cartName ] = new Cart( $cartName );
         }
 
         return self::$_instance[ $cartName ];
@@ -54,9 +57,9 @@ class Shop_Cart {
      * Create a new instance of cart identified by $cartName
      * That instance is automatically attached to session vars
      *
-     * @param $cartName
+     * @param string $cartName
      */
-    protected function __construct( $cartName ) {
+    protected function __construct( string $cartName ) {
         $this->cartName = $cartName;
         if ( !isset ( $_SESSION[ $this->cartName ] ) ) {
             $_SESSION[ $this->cartName ] = [];
@@ -67,11 +70,11 @@ class Shop_Cart {
     /**
      * Add an item to the cart
      *
-     * @param Shop_AbstractItem $item
+     * @param AbstractItem $item
      *
      * @throws LogicException
      */
-    public function addItem( Shop_AbstractItem $item ) {
+    public function addItem( AbstractItem $item ) {
 
         if ( !isset( $item[ 'id' ] ) || $item[ 'id' ] == null ) {
             throw new LogicException( "Field 'id' in object " . get_class( $item ) . " is mandatory." );
@@ -105,11 +108,11 @@ class Shop_Cart {
     /**
      * Check if an item exists in cart by check it's unique id
      *
-     * @param $item_id
+     * @param string $item_id
      *
      * @return bool
      */
-    public function itemExists( $item_id ) {
+    public function itemExists( string $item_id ): bool {
         return array_key_exists( $item_id, $this->cart );
     }
 
@@ -118,36 +121,32 @@ class Shop_Cart {
      *
      * @return int
      */
-    public function countItems() {
+    public function countItems(): int {
         return count( $this->cart );
     }
 
     /**
      * Gat an item from cart bay it's unique id
      *
-     * @param $item_id
+     * @param string $item_id
      *
-     * @return mixed
+     * @return ?AbstractItem
      */
-    public function getItem( $item_id ) {
+    public function getItem( string $item_id ): ?AbstractItem {
         if ( array_key_exists( $item_id, $this->cart ) ) {
-
-            $classType = $this->cart[ $item_id ][ '_id_type_class' ];
-
-            //for compatibility with php 5.2 ( lacks of late static bindings -> new static() in the abstract class )
-            //we can't use Shop_AbstractItem::getInflate to get the right child object
-            //return $classType::getInflate( $this->cart[ $item_id ] ); //not valid in php 5.2.x
-            return call_user_func_array( $classType . '::getInflate', [ $this->cart[ $item_id ] ] );
-
+            return AbstractItem::getInflate( $this->cart[ $item_id ] );
         }
+
+        return null;
+
     }
 
     /**
      * Remove an item from the cart
      *
-     * @param $item_id
+     * @param string $item_id
      */
-    public function delItem( $item_id ) {
+    public function delItem( string $item_id ) {
         foreach ( $this->cart as $key => $item ) {
             if ( strpos( $item[ 'id' ], $item_id ) !== false ) {
                 unset ( $this->cart[ $key ] );
@@ -177,7 +176,7 @@ class Shop_Cart {
     /**
      * Return the cart content
      *
-     * @return Shop_AbstractItem[]
+     * @return AbstractItem[]
      */
     public function getCart() {
         $_cart = $this->cart;
@@ -191,11 +190,11 @@ class Shop_Cart {
     /**
      * Check if cart exists by it's name
      *
-     * @param $cart_name
+     * @param string $cart_name
      *
      * @return bool
      */
-    public static function issetCart( $cart_name ) {
+    public static function issetCart( string $cart_name ) {
         if ( empty( $_SESSION[ $cart_name ] ) ) {
             false;
         }

@@ -1,36 +1,41 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Model\Jobs\JobStruct;
+use Model\ReviseFeedback\FeedbackDAO;
+use Model\ReviseFeedback\FeedbackStruct;
+use ReflectionException;
 
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\V2\BaseChunkController;
-use Jobs_JobStruct;
-use Revise\FeedbackDAO;
-use Revise\FeedbackStruct;
-
-class RevisionFeedbackController extends BaseChunkController {
-
+class RevisionFeedbackController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( JobStruct $chunk ): RevisionFeedbackController {
         $this->chunk = $chunk;
 
         return $this;
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function feedback() {
 
         // insert or update feedback
-        $feedbackStruct = new FeedbackStruct();
-        $feedbackStruct->id_job = $this->request->param( 'id_job' );
-        $feedbackStruct->password = $this->request->param( 'password' );
+        $feedbackStruct                  = new FeedbackStruct();
+        $feedbackStruct->id_job          = $this->request->param( 'id_job' );
+        $feedbackStruct->password        = $this->request->param( 'password' );
         $feedbackStruct->revision_number = $this->request->param( 'revision_number' );
-        $feedbackStruct->feedback = $this->request->param( 'feedback' );
+        $feedbackStruct->feedback        = $this->request->param( 'feedback' );
 
         // check if job exists and it is not deleted
         $job = $this->getJob( $feedbackStruct->id_job, $feedbackStruct->password );
@@ -42,8 +47,8 @@ class RevisionFeedbackController extends BaseChunkController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $rows = (new FeedbackDAO())->insertOrUpdate($feedbackStruct);
-        $status = ($rows > 0) ? 'ok' : 'ko';
+        $rows   = ( new FeedbackDAO() )->insertOrUpdate( $feedbackStruct );
+        $status = ( $rows > 0 ) ? 'ok' : 'ko';
 
         $this->response->json( [
                 'status' => $status
@@ -51,7 +56,7 @@ class RevisionFeedbackController extends BaseChunkController {
     }
 
     protected function afterConstruct() {
-        $validator = new ChunkPasswordValidator( $this ) ;
+        $validator  = new ChunkPasswordValidator( $this );
         $controller = $this;
         $validator->onSuccess( function () use ( $validator, $controller ) {
             $controller->setChunk( $validator->getChunk() );

@@ -7,12 +7,12 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
-use AMQHandler;
 use Exception;
 use INIT;
 use Log;
+use Utils\ActiveMQ\AMQHandler;
 
 /**
  * The abstract Daemon definition.

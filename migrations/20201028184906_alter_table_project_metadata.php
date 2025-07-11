@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AlterTableProjectMetadata extends AbstractMatecatMigration {
 
     public $sql_up = [ 'ALTER TABLE project_metadata CHANGE COLUMN value value VARCHAR(2048) NOT NULL' ];

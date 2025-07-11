@@ -7,20 +7,21 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
-use DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDao;
+use ReflectionException;
 
 class TranslatorsProfilesDao extends AbstractDao {
 
     const TABLE       = "translator_profiles";
-    const STRUCT_TYPE = "TranslatorProfilesStruct";
+    const STRUCT_TYPE = TranslatorProfilesStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
 
-    protected static $_query_by_uid_src_trg_rev = "
+    protected static string $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 
         WHERE uid_translator = :uid_translator 
         AND source = :source 
@@ -33,15 +34,16 @@ class TranslatorsProfilesDao extends AbstractDao {
      * @param TranslatorProfilesStruct $profile
      *
      * @return TranslatorProfilesStruct
+     * @throws ReflectionException
      * @internal param $id
      *
      */
-    public function getByProfile( TranslatorProfilesStruct $profile ) {
+    public function getByProfile( TranslatorProfilesStruct $profile ): ?TranslatorProfilesStruct {
 
         $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
 
-        return @$this->_fetchObject( $stmt,
-                $profile,
+        return $this->_fetchObjectMap( $stmt,
+                TranslatorProfilesStruct::class,
                 [
                         'uid_translator' => $profile->uid_translator,
                         'source'         => $profile->source,
@@ -49,7 +51,7 @@ class TranslatorsProfilesDao extends AbstractDao {
                         'is_revision'    => $profile->is_revision,
 
                 ]
-        )[ 0 ];
+        )[ 0 ] ?? null;
     }
 
 }

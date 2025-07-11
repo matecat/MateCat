@@ -7,16 +7,16 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
-use Engine;
 use Exception;
-use Jobs_JobStruct;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
-use TmKeyManagement_Filter;
-use Url\JobUrlBuilder;
-use Users_UserStruct;
+use Model\Jobs\JobStruct;
+use Model\Users\UserStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\TmKeyManagement\Filter;
+use Utils\Url\JobUrlBuilder;
 
 class AnalysisChunk implements JsonSerializable {
 
@@ -30,17 +30,17 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected array $files = [];
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
-    protected Jobs_JobStruct $chunkStruct;
+    protected JobStruct $chunkStruct;
     /**
      * @var string
      */
     protected string $projectName;
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected Users_UserStruct $user;
+    protected UserStruct $user;
 
     /**
      * @var int
@@ -55,7 +55,7 @@ class AnalysisChunk implements JsonSerializable {
      */
     protected float $total_industry = 0;
 
-    public function __construct( Jobs_JobStruct $chunkStruct, $projectName, Users_UserStruct $user, ConstantsInterface $matchConstantsClass ) {
+    public function __construct( JobStruct $chunkStruct, $projectName, UserStruct $user, ConstantsInterface $matchConstantsClass ) {
         $this->chunkStruct = $chunkStruct;
         $this->projectName = $projectName;
         $this->user        = $user;
@@ -92,9 +92,9 @@ class AnalysisChunk implements JsonSerializable {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
-    public function getChunkStruct(): Jobs_JobStruct {
+    public function getChunkStruct(): JobStruct {
         return $this->chunkStruct;
     }
 
@@ -132,20 +132,20 @@ class AnalysisChunk implements JsonSerializable {
         }
 
         try {
-            $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
+            $tmEngine = EnginesFactory::getInstance( $this->chunkStruct->id_tms );
         } catch ( Exception $exception ) {
             $tmEngine = null;
         }
 
         try {
-            $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
+            $mtEngine = EnginesFactory::getInstance( $this->chunkStruct->id_mt_engine );
         } catch ( Exception $exception ) {
             $mtEngine = null;
         }
 
         return [
-                'tm' => $tmEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
-                'mt' => $mtEngine !== null ? ( new \API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
+                'tm' => $tmEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $tmEngine->getEngineRecord() ) : null,
+                'mt' => $mtEngine !== null ? ( new \View\API\V2\Json\Engine() )->renderItem( $mtEngine->getEngineRecord() ) : null,
         ];
     }
 
@@ -161,7 +161,7 @@ class AnalysisChunk implements JsonSerializable {
             return $tmKeys;
         }
 
-        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, TmKeyManagement_Filter::OWNER )[ 'job_keys' ];
+        $jobKeys = $this->chunkStruct->getClientKeys( $this->user, Filter::OWNER )[ 'job_keys' ];
 
         foreach ( $jobKeys as $tmKey ) {
             $tmKeys[][ trim( $tmKey->name ) ] = trim( $tmKey->key );

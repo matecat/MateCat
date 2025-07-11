@@ -1,6 +1,7 @@
 <?php
 
 use TestHelpers\AbstractTest;
+use Utils\CatUtils;
 
 
 /**
@@ -32,7 +33,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 &#66375;
 LAB;
-        $this->actual_segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $this->source_segment );
+        $this->actual_segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }
@@ -49,7 +50,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 <g &#66438; &#66505;##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $this->source_segment );
+        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }
@@ -66,7 +67,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ψ##LESSTHAN##L2c=##GREATERTHAN##&#128564;<g &#128518;id="2">&#128736;λ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $this->source_segment );
+        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }

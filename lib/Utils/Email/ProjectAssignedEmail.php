@@ -6,26 +6,30 @@
  * Time: 16:13
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
-use CatUtils;
 use Exception;
-use Jobs_JobStruct;
-use Projects_MetadataDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
+use Model\WordCount\WordCountStruct;
 use Routes;
-use Users_UserStruct;
-use WordCount\WordCountStruct;
+use Utils\CatUtils;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
-    protected $user;
-    protected $project;
-    protected $assignee;
-    protected $title;
+    protected UserStruct    $user;
+    protected ProjectStruct $project;
+    protected UserStruct    $assignee;
+    protected ?string       $title;
+    /**
+     * @var JobStruct[]
+     */
+    private array $jobs;
 
-    public function __construct( Users_UserStruct $user, Projects_ProjectStruct $project, Users_UserStruct $assignee ) {
+    public function __construct( UserStruct $user, ProjectStruct $project, UserStruct $assignee ) {
         $this->user     = $user;
         $this->project  = $project;
         $this->assignee = $assignee;
@@ -41,15 +45,16 @@ class ProjectAssignedEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         $words_count = [];
         foreach ( $this->jobs as $job ) {
-            $jStruct  = new Jobs_JobStruct( $job->getArrayCopy() );
+            $jStruct  = new JobStruct( $job->getArrayCopy() );
             $jobStats = new WordCountStruct();
             $jobStats->setIdJob( $jStruct->id );
+            $jobStats->setJobPassword( $jStruct->password );
             $jobStats->setDraftWords( $jStruct->draft_words + $jStruct->new_words ); // (draft_words + new_words) AS DRAFT
             $jobStats->setRejectedWords( $jStruct->rejected_words );
             $jobStats->setTranslatedWords( $jStruct->translated_words );
             $jobStats->setApprovedWords( $jStruct->approved_words );
             $stats         = CatUtils::getFastStatsForJob( $jobStats, false );
-            $words_count[] = $stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'total' ];
+            $words_count[] = $stats[ MetadataDao::WORD_COUNT_RAW ][ 'total' ];
         }
 
         return [

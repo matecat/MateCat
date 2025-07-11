@@ -7,8 +7,8 @@
  *
  */
 
+use Model\Xliff\DTO\DefaultRule;
 use TestHelpers\AbstractTest;
-use Xliff\DTO\DefaultRule;
 
 class DefaultRuleTest extends AbstractTest {
 

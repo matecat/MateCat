@@ -6,21 +6,21 @@
  * Time: 15:23
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
-use Users_UserStruct;
+use Model\Users\UserStruct;
 
 class WelcomeEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
-    protected $title = 'Welcome to Matecat! Get Started with Your First Project Today';
+    protected ?string $title = 'Welcome to Matecat! Get Started with Your First Project Today';
 
-    public function __construct( Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
         $this->user = $user;
 
         $this->_setLayout( 'skeleton.html' );

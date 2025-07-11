@@ -1,18 +1,22 @@
 <?php
 
+use Model\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\AbstractEngine;
 
 
 /**
  * @group   regression
- * @covers  Engines_AbstractEngine::_call
+ * @covers  AbstractEngine::_call
  * User: dinies
  * Date: 22/04/16
  * Time: 14.40
  */
 class CallprotectedfunctionTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
@@ -50,7 +54,7 @@ class CallprotectedfunctionTest extends AbstractTest {
         /**
          * engine insertion
          */
-        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
+        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
         $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
@@ -58,13 +62,13 @@ class CallprotectedfunctionTest extends AbstractTest {
         $this->sql_delete_user   = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
         $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = $this->id_database;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $this->engine_struct_param = @$eng[ 0 ];
         $this->mock_engine         = $this->getMockBuilder( '\Engines_DeepLingo' )->setMethods( [ '_call' ] )->getMock();
@@ -83,7 +87,7 @@ class CallprotectedfunctionTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  AbstractEngine::_call
      */
     public function test__call_using_mock_object_and_simple_segment() {
 
@@ -204,7 +208,7 @@ LAB;
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  AbstractEngine::_call
      */
     public function test__call_using_mock_object_and_long_segment() {
 

@@ -1,5 +1,10 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
+use Utils\Constants\EngineConstants;
+
 /**
  * Created by PhpStorm.
  * @property string client_secret
@@ -8,8 +13,7 @@
  * Time: 12.17
  *
  */
-
-class Engines_Apertium extends Engines_AbstractEngine {
+class Apertium extends AbstractEngine {
 
     protected array $_config = [
             'segment' => null,
@@ -18,10 +22,13 @@ class Engines_Apertium extends Engines_AbstractEngine {
             'key'     => null,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -40,7 +47,7 @@ class Engines_Apertium extends Engines_AbstractEngine {
      * @param array $parameters
      * @param null  $function
      *
-     * @return array|Engines_Results_MT
+     * @return array
      * @throws Exception
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
@@ -60,7 +67,7 @@ class Engines_Apertium extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($original[ "text" ], $decoded);
+        return $this->_composeMTResponseAsMatch( $original[ "text" ], $decoded );
     }
 
     public function get( $_config ) {
@@ -90,19 +97,19 @@ class Engines_Apertium extends Engines_AbstractEngine {
 
     }
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
 
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
+    public function update( $_config ): bool {
 
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         //if engine does not implement DELETE method, exit
         return true;

@@ -7,7 +7,7 @@
  *
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 use Exception;
 use INIT;
@@ -62,10 +62,11 @@ trait DaoCacheTrait {
     }
 
     /**
+     * @template T of IDaoStruct
      * @param string $keyMap
      * @param string $query A query
      *
-     * @return ?object
+     * @return ?T[]
      * @throws ReflectionException
      */
     protected function _getFromCacheMap( string $keyMap, string $query ): ?array {
@@ -82,16 +83,18 @@ trait DaoCacheTrait {
             $this->_logCache( "GETMAP: " . $keyMap, $key, $value, $query );
         }
 
-        return $value ?: null;
+        return !is_bool( $value ) ? $value : null;
     }
 
     /**
+     *
      * This method uses a clean, human-readable key instead of a md5 hash.
      * It also allows grouping multiple queries under a single namespace (`$keyMap`).
      *
+     * @template T of IDaoStruct
      * @param string $keyMap
      * @param        $query string
-     * @param        $value array
+     * @param        $value T[]
      *
      * @return void|null
      */

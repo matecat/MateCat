@@ -6,14 +6,14 @@
  * Time: 12:01
  */
 
-namespace Features\ProjectCompletion\Model ;
+namespace Plugins\Features\ProjectCompletion\Model ;
 
-use Chunks_ChunkCompletionEventDao;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use Features\ProjectCompletion\CompletionEventStruct;
-use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
 
 
 class EventModel {
@@ -23,14 +23,14 @@ class EventModel {
      */
     protected $eventStruct ;
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
 
 
-    public function __construct( Jobs_JobStruct $chunk, CompletionEventStruct $eventStruct ) {
+    public function __construct( JobStruct $chunk, CompletionEventStruct $eventStruct ) {
         $this->eventStruct = $eventStruct ;
         $this->chunk = $chunk ;
     }
@@ -38,12 +38,12 @@ class EventModel {
     public function save() {
         $this->_checkStatusIsValid();
 
-        $this->chunkCompletionEventId = Chunks_ChunkCompletionEventDao::createFromChunk(
+        $this->chunkCompletionEventId = ChunkCompletionEventDao::createFromChunk(
                 $this->chunk, $this->eventStruct
         );
 
         $featureSet = new FeatureSet() ;
-        $featureSet->loadForProject( Projects_ProjectDao::findById($this->chunk->id_project ) );
+        $featureSet->loadForProject( ProjectDao::findById($this->chunk->id_project ) );
         $featureSet->run('project_completion_event_saved', $this->chunk, $this->eventStruct, $this->chunkCompletionEventId );
     }
 
@@ -52,12 +52,12 @@ class EventModel {
     }
 
     private function _checkStatusIsValid() {
-        $dao = new Chunks_ChunkCompletionEventDao();
+        $dao = new ChunkCompletionEventDao();
         $current_phase = $dao->currentPhase( $this->chunk );
 
         if (
-                (  $this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
-                ( !$this->eventStruct->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
+                (  $this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::REVISE ) ||
+                ( !$this->eventStruct->is_review && $current_phase != ChunkCompletionEventDao::TRANSLATE )
         ) {
             throw new Exception('Cannot save event, current status mismatch.') ;
         }

@@ -1,11 +1,14 @@
 <?php
 
+use Model\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineDAO::delete
+ * @covers EngineDAO::delete
  * User: dinies
  * Date: 20/04/16
  * Time: 17.43
@@ -23,7 +26,7 @@ class CrudEngineTest extends AbstractTest {
     protected $engine_struct_param;
     protected $flusher;
     /**
-     * @var EnginesModel_EngineDAO
+     * @var EngineDAO
      */
     protected $engine_DAO;
 
@@ -39,15 +42,15 @@ class CrudEngineTest extends AbstractTest {
         $this->user_id = $this->database_instance->last_insert();
 
 
-        $sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES (NULL, 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '" . $this->user_id . "');";
+        $sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES (NULL, 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '" . $this->user_id . "');";
         $this->database_instance->getConnection()->query( $sql_insert_engine );
         $this->engine_id = $this->database_instance->last_insert();
 
 
-        $this->engine_DAO = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->engine_DAO = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
 
         $this->flusher                  = new Predis\Client( INIT::$REDIS_SERVERS );
-        $this->engine_struct_param      = new EnginesModel_EngineStruct();
+        $this->engine_struct_param      = new EngineStruct();
         $this->engine_struct_param->id  = $this->engine_id;
         $this->engine_struct_param->uid = $this->user_id;
 
@@ -67,7 +70,7 @@ class CrudEngineTest extends AbstractTest {
      * This test delete the struct of an engine from the database that corresponds
      * to the artificially constructed engine passed as @param.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::delete
+     * @covers EngineDAO::delete
      */
     public function test_delete_the_struct_of_constructed_engine() {
 
@@ -85,7 +88,7 @@ class CrudEngineTest extends AbstractTest {
      * This test doesn't delete the struct of an engine from the database that corresponds
      * to the artificially constructed engine passed as @param.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::delete
+     * @covers EngineDAO::delete
      */
     public function test_delete_the_struct_of_engine_with_wrong_uid_avoiding_the_delete() {
 
@@ -95,11 +98,11 @@ class CrudEngineTest extends AbstractTest {
     }
 
     /**
-     * @param EnginesModel_EngineStruct
+     * @param EngineStruct
      * It disables the struct of the engine passed as @param
      *
      * @group  regression
-     * @covers EnginesModel_EngineDAO::disable
+     * @covers EngineDAO::disable
      */
     public function test_disable_the_struct_of_constructed_engine() {
 
@@ -114,11 +117,11 @@ class CrudEngineTest extends AbstractTest {
     }
 
     /**
-     * @param EnginesModel_EngineStruct
+     * @param EngineStruct
      * It fails in disabling the struct of the engine because the engine passed as @param has wrong uid
      *
      * @group  regression
-     * @covers EnginesModel_EngineDAO::disable
+     * @covers EngineDAO::disable
      */
     public function test_disable_the_struct_of_engine_with_wrong_uid_avoiding_the_disable() {
 
@@ -130,7 +133,7 @@ class CrudEngineTest extends AbstractTest {
     /**
      * It updates the struct of an engine checking the righteousness through the field 'name'.
      * @group  regression
-     * @covers EnginesModel_EngineDAO::updateByStruct
+     * @covers EngineDAO::updateByStruct
      */
     public function test_update_the_struct_of_constructed_engine_check_by_name() {
 
@@ -167,7 +170,7 @@ class CrudEngineTest extends AbstractTest {
     /**
      * It doesn't update the struct of an engine because the
      * @throws Exception @group regression
-     * @covers EnginesModel_EngineDAO::updateFields
+     * @covers EngineDAO::updateFields
      */
     public function test_update_the_struct_of_engine_with_wrong_uid_avoiding_any_update() {
 

@@ -7,11 +7,11 @@
  *
  */
 
-namespace Segments;
+namespace Model\Segments;
 
-use DataAccess\AbstractDao;
-use \DataAccess\IDaoStruct;
-use Projects_ProjectStruct;
+use Model\DataAccess\AbstractDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
 
 class ContextGroupDao extends AbstractDao {
 
@@ -20,54 +20,69 @@ class ContextGroupDao extends AbstractDao {
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id', 'id_project' ];
 
-    protected static $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
-    protected static $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";
-    protected static $query_get_by_segment_id    = "SELECT * FROM context_groups WHERE id_segment = :id_segment";
-    protected static $query_get_by_segment_range = "SELECT * FROM context_groups WHERE id_segment BETWEEN :id_segment_start AND :id_segment_stop";
+    protected static string $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
+    protected static string $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";
+    protected static string $query_get_by_segment_id    = "SELECT * FROM context_groups WHERE id_segment = :id_segment";
+    protected static string $query_get_by_segment_range = "SELECT * FROM context_groups WHERE id_segment BETWEEN :id_segment_start AND :id_segment_stop";
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
-     * @return IDaoStruct[]
+     * @return ProjectStruct[]
+     * @throws ReflectionException
      */
-    public function getAllByProject( Projects_ProjectStruct $project ) {
+    public function getAllByProject( ProjectStruct $project ) {
         $stmt = $this->_getStatementForQuery( self::$query_get_all_by_project );
 
-        return $this->_fetchObject( $stmt,
-                $project,
+        return $this->_fetchObjectMap( $stmt,
+                ProjectStruct::class,
                 [
                         'id_project' => $project->id
                 ]
         );
     }
 
-    public function getBySegmentID( $sid ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function getBySegmentID( $sid ): ?ContextStruct {
         $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_id );
 
-        return $this->_fetchObject( $stmt,
-                new ContextStruct(),
+        return $this->_fetchObjectMap( $stmt,
+                ContextStruct::class,
                 [
                         'id_segment' => $sid
                 ]
-        )[ 0 ];
+        )[ 0 ] ?? null;
     }
 
-    public function getByFileID( $fid ) {
+    /**
+     * @return ContextStruct[]
+     * @throws ReflectionException
+     */
+    public function getByFileID( $fid ): array {
         $stmt = $this->_getStatementForQuery( self::$query_get_all_by_file_id );
 
-        return $this->_fetchObject( $stmt,
-                new ContextStruct(),
+        return $this->_fetchObjectMap( $stmt,
+                ContextStruct::class,
                 [
                         'id_file' => $fid
                 ]
         );
     }
 
-    public function getBySIDRange( $start, $stop ) {
+    /**
+     * @param $start
+     * @param $stop
+     *
+     * @return ContextStruct[]
+     * @throws ReflectionException
+     */
+    public function getBySIDRange( $start, $stop ): array {
         $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_range );
-        /** @var ContextStruct[] $resSet */
-        $resSet      = $this->_fetchObject( $stmt,
-                new ContextStruct(),
+
+        $resSet      = $this->_fetchObjectMap( $stmt,
+                ContextStruct::class,
                 [
                         'id_segment_start' => $start,
                         'id_segment_stop'  => $stop

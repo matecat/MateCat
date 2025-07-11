@@ -6,23 +6,24 @@
  * Time: 17:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Exception;
 use INIT;
+use Model\Users\UserStruct;
 use Routes;
 
 class SignupEmail extends AbstractEmail {
 
     /**
-     * @var \Users_UserStruct
+     * @var UserStruct
      */
-    private $user;
+    private UserStruct $user;
 
-    protected $title = 'Confirm your registration with Matecat';
+    protected ?string $title = 'Confirm your registration with Matecat';
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );

@@ -1,24 +1,28 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Predis\Client;
+namespace Model\Search;
 
-class Search_RedisReplaceEventIndexDAO extends AbstractDao implements Search_ReplaceEventIndexDAOInterface {
+use Model\DataAccess\AbstractDao;
+use Predis\Client;
+use RedisHandler;
+use ReflectionException;
+
+class RedisReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface {
 
     const TABLE = 'replace_events_current_version';
 
     /**
      * @var Client
      */
-    private $redis;
+    private Client $redis;
 
     /**
      * @var int
      */
-    private $ttl = 10800; // 3 hours
+    private int $ttl = 10800; // 3 hours
 
     /**
-     * Search_RedisReplaceEventDAO constructor.
+     * RedisReplaceEventDAO constructor.
      *
      * @param null $con
      *
@@ -35,21 +39,21 @@ class Search_RedisReplaceEventIndexDAO extends AbstractDao implements Search_Rep
      *
      * @return int
      */
-    public function getActualIndex( $idJob ) {
+    public function getActualIndex( $idJob ): int {
         $index = $this->redis->get( $this->getRedisKey( $idJob ) );
-
         return ( null !== $index and $index > 0 ) ? (int)$index : 0;
     }
 
     /**
-     * @param $idJob
-     * @param $version
+     * @param int $id_job
+     * @param int $version
      *
      * @return int
      */
-    public function save( $idJob, $version ) {
-        $this->redis->set( $this->getRedisKey( $idJob ), $version );
-        $this->redis->expire( $this->getRedisKey( $idJob ), $this->ttl );
+    public function save( int $id_job, int $version ): int {
+        $this->redis->set( $this->getRedisKey( $id_job ), $version );
+        $this->redis->expire( $this->getRedisKey( $id_job ), $this->ttl );
+        return 1; // Redis doesn't return the number of affected rows, so we return 1 to indicate success
     }
 
     /**
@@ -58,7 +62,7 @@ class Search_RedisReplaceEventIndexDAO extends AbstractDao implements Search_Rep
      *
      * @return string
      */
-    private function getRedisKey( $idJob ) {
+    private function getRedisKey( $idJob ): string {
         return md5( self::TABLE . '::' . $idJob );
     }
 

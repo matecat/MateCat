@@ -1,7 +1,16 @@
 <?php
 
 use Behat\Transliterator\Transliterator;
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Model\Database;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\ErrMailWorker;
+use Utils\Constants\Constants;
+use Utils\Constants\SourcePages;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class Utils {
 
@@ -23,7 +32,7 @@ class Utils {
      * @return int
      */
     private static function returnSourcePageAsInt( array $url ): int {
-        $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
+        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
 
         if ( !isset( $url[ 'path' ] ) ) {
             return $sourcePage;
@@ -33,7 +42,7 @@ class Utils {
         preg_match( '/revise([2-9]|\'\')?\//', $url[ 'path' ], $matches );
 
         if ( count( $matches ) === 1 ) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage( Constants::SOURCE_PAGE_TRANSLATE );
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage( SourcePages::SOURCE_PAGE_TRANSLATE );
         }
 
         if ( count( $matches ) > 1 ) { // [0] => revise2/ [1] => 2
@@ -388,7 +397,7 @@ class Utils {
         $queue_element[ 'subject' ] = $subject;
         $queue_element[ 'body' ]    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
-        WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        WorkerClient::enqueue( 'MAIL', ErrMailWorker::class, $queue_element, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
 
         Log::doJsonLog( 'Message has been sent' );
 
@@ -696,12 +705,12 @@ class Utils {
         }
 
         //check if the user can see the key.
-        $memoryKey              = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKey              = new MemoryKeyStruct();
         $memoryKey->uid         = $uid;
-        $memoryKey->tm_key      = new TmKeyManagement_TmKeyStruct();
+        $memoryKey->tm_key      = new TmKeyStruct();
         $memoryKey->tm_key->key = $key;
 
-        $memoryKeyDao         = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $memoryKeyDao         = new MemoryKeyDao( Database::obtain() );
         $currentUserMemoryKey = $memoryKeyDao->setCacheTTL( 3600 )->read( $memoryKey );
         if ( count( $currentUserMemoryKey ) > 0 ) {
             $currentUserMemoryKey = $currentUserMemoryKey[ 0 ];
@@ -727,7 +736,7 @@ class Utils {
      * @throws Exception
      */
     public static function getDefaultKeyDescription( string $key, string $job_tm_keys ): string {
-        $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
+        $ownerKeys   = TmKeyManager::getOwnerKeys( [ $job_tm_keys ] );
         $description = Constants::NO_DESCRIPTION_TM;
 
         //search the current key
@@ -863,39 +872,12 @@ class Utils {
      * @param array $arr
      * @return bool
      */
-    public static function arrayIsList(array $arr)
-    {
+    public static function arrayIsList(array $arr): bool {
         if ($arr === []) {
             return true;
         }
 
         return array_keys($arr) === range(0, count($arr) - 1);
-    }
-
-    /**
-     * @param string $haystack
-     * @param string $needle
-     *
-     * @return bool
-     */
-    public static function stringEndsWith( string $haystack, string $needle ): bool {
-        $length = strlen( $needle );
-        if ( $length == 0 ) {
-            return true;
-        }
-
-        return ( substr( $haystack, -$length ) === $needle );
-    }
-
-    /**
-     * @param string    $haystack
-     * @param string    $needle
-     * @param bool|null $caseSensitive
-     *
-     * @return bool
-     */
-    public static function stringStartsWith( string $haystack, string $needle, ?bool $caseSensitive = true ): bool {
-        return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
     }
 
     /**
