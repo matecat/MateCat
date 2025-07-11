@@ -64,7 +64,8 @@ const ProjectContainer = ({
         (team.get('type') == 'personal' && uid !== UserStore.getUser().user.uid)
       ) {
         setTimeout(() => {
-          $(projectRef.current).transition('fly right')
+          projectRef.current.style.transition = 'transform 0.5s ease-in-out'
+          projectRef.current.style.transform = 'translateX(-2000px)'
         }, 500)
         setTimeout(() => {
           ManageActions.removeProject(project)
@@ -442,7 +443,8 @@ const ProjectContainer = ({
 
     const hideProject = (projectCompare) => {
       if (project.get('id') === projectCompare.get('id')) {
-        $(projectRef.current).transition('fly right')
+        projectRef.current.style.transition = 'transform 0.5s ease-in-out'
+        projectRef.current.style.transform = 'translateX(-2000px)'
       }
     }
 

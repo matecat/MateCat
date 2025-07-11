@@ -83,13 +83,15 @@ class ReviewExtendedIssue extends React.Component {
       })
     }, 500)
   }
-  confirmDeletedIssue(sid, data) {
-    let issue_id = data
+  confirmDeletedIssue(sid, issue_id) {
     if (
       sid === this.props.issue.id_segment &&
       issue_id === this.props.issue.id
     ) {
-      $(this.el).transition('fade left')
+      this.el.style.transition =
+        'transform 1s ease-in-out, opacity 1s ease-in-out'
+      this.el.style.transform = 'translateX(-200px)'
+      this.el.style.opacity = '0'
     }
   }
 
