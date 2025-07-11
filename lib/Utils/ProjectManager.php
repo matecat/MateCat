@@ -42,6 +42,7 @@ use Translators\TranslatorsModel;
 use WordCount\CounterModel;
 use Xliff\DTO\XliffRulesModel;
 use Xliff\XliffConfigTemplateStruct;
+use Conversion\ZipArchiveHandler;
 
 class ProjectManager {
 
@@ -903,7 +904,7 @@ class ProjectManager {
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -1,
-                        "message" => "No text to translate in the file {$e->getMessage()}."
+                        "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );

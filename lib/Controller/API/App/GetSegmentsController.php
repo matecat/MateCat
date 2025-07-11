@@ -8,6 +8,7 @@ use API\Commons\Exceptions\NotFoundException;
 use API\Commons\Validators\LoginValidator;
 use CatUtils;
 use Chunks_ChunkDao;
+use Conversion\ZipArchiveHandler;
 use Exception;
 use Exceptions\ValidationError;
 use InvalidArgumentException;
@@ -21,7 +22,6 @@ use Segments_SegmentMetadataDao;
 use Segments_SegmentNoteDao;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
-use ZipArchiveExtended;
 
 class GetSegmentsController extends KleinController {
 
@@ -88,7 +88,7 @@ class GetSegmentsController extends KleinController {
 
             if ( !isset( $res[ $id_file ] ) ) {
                 $res[ $id_file ][ 'jid' ]         = $seg[ 'jid' ];
-                $res[ $id_file ][ "filename" ]    = ZipArchiveExtended::getFileName( $seg[ 'filename' ] );
+                $res[ $id_file ][ "filename" ]    = ZipArchiveHandler::getFileName( $seg[ 'filename' ] );
                 $res[ $id_file ][ 'source' ]      = $lang_handler->getLocalizedName( $job->source );
                 $res[ $id_file ][ 'target' ]      = $lang_handler->getLocalizedName( $job->target );
                 $res[ $id_file ][ 'source_code' ] = $job->source;

@@ -1,8 +1,8 @@
 <?php
 
-namespace MimeTypes\Guesser;
+namespace Conversion\MimeTypes\Guesser;
 
-use MimeTypes\Constants\MimeTypesMap;
+use Conversion\MimeTypes\Constants\MimeTypesMap;
 
 class FileExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
     /**
@@ -27,7 +27,8 @@ class FileExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
         }
 
         if ( isset( MimeTypesMap::REVERSE_MAP[ $pathinfo[ 'extension' ] ] ) ) {
-            return array_pop( MimeTypesMap::REVERSE_MAP[ $pathinfo[ 'extension' ] ] );
+            $mimeList = MimeTypesMap::REVERSE_MAP[ $pathinfo[ 'extension' ] ];
+            return array_pop( $mimeList );
         }
 
         return null;

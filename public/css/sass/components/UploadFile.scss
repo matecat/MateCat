@@ -45,6 +45,9 @@
       align-items: center;
       padding: 8px;
       border-bottom: 1px dashed #ccc;
+      &.zip-folder {
+        padding-left: 40px;
+      }
       .file-item-name, .file-item-error {
         display: flex;
         align-items: center;
