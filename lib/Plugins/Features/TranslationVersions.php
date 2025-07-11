@@ -1,13 +1,13 @@
 <?php
 
-namespace Features;
+namespace Plugins\Features;
 
-use Features\TranslationVersions\Handlers\DummyTranslationVersionHandler;
-use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
-use Features\TranslationVersions\VersionHandlerInterface;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
+use Plugins\Features\TranslationVersions\Handlers\DummyTranslationVersionHandler;
+use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
 class TranslationVersions extends BaseFeature {
 

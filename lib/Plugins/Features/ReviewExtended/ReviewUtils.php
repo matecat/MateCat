@@ -6,13 +6,13 @@
  * Time: 12:30
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
-use Constants;
 use Exception;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ModelStruct;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class ReviewUtils {
@@ -24,9 +24,9 @@ class ReviewUtils {
      */
     public static function sourcePageToTranslationStatus( $number = null ): ?string {
         $statuses = [
-                Constants::SOURCE_PAGE_TRANSLATE  => TranslationStatus::STATUS_TRANSLATED,
-                Constants::SOURCE_PAGE_REVISION   => TranslationStatus::STATUS_APPROVED,
-                Constants::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
+                SourcePages::SOURCE_PAGE_TRANSLATE  => TranslationStatus::STATUS_TRANSLATED,
+                SourcePages::SOURCE_PAGE_REVISION   => TranslationStatus::STATUS_APPROVED,
+                SourcePages::SOURCE_PAGE_REVISION_2 => TranslationStatus::STATUS_APPROVED2
         ];
 
         return empty( $number ) ? null : $statuses[ $number ];
@@ -38,7 +38,7 @@ class ReviewUtils {
      *
      * @return int
      */
-    public static function revisionNumberToSourcePage( int $number = null ): int {
+    public static function revisionNumberToSourcePage( ?int $number = null ): int {
         return ( !empty( $number ) ) ? $number + 1 : 1;
     }
 

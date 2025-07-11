@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use CookieManager;
 use DomainException;
 use INIT;
 use Log;

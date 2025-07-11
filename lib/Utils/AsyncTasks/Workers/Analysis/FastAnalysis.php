@@ -2,8 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers\Analysis;
 
-use AMQHandler;
-use Engine;
 use Exception;
 use INIT;
 use Log;
@@ -25,8 +23,10 @@ use ReflectionException;
 use Stomp\Transport\Message;
 use UnexpectedValueException;
 use Utils;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
@@ -319,7 +319,7 @@ class FastAnalysis extends AbstractDaemon {
         /**
          * @var $myMemory \Utils\Engines\MyMemory
          */
-        $myMemory = Engine::getInstance( 1 /* MyMemory */ );
+        $myMemory = EnginesFactory::getInstance( 1 /* MyMemory */ );
 
         $fs = $this->files_storage;
 
@@ -633,7 +633,7 @@ class FastAnalysis extends AbstractDaemon {
             return $e->getCode() * -1;
         }
 
-        $engine = Engine::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
+        $engine = EnginesFactory::getInstance( $this->actual_project_row[ 'id_mt_engine' ] );
         if ( $engine->isAdaptiveMT() ) {
             $engine->syncMemories( $this->actual_project_row, array_values( $this->segments ) );
         }
@@ -884,7 +884,7 @@ HD;
 
         $mtEngine = null;
         try {
-            $mtEngine = Engine::getInstance( $id_mt_engine );
+            $mtEngine = EnginesFactory::getInstance( $id_mt_engine );
         } catch ( Exception $e ) {
             $this->_logTimeStampedMsg( "Caught Exception: " . $e->getMessage() );
         }

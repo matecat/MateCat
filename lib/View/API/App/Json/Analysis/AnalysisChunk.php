@@ -9,12 +9,12 @@
 
 namespace View\API\App\Json\Analysis;
 
-use Engine;
 use Exception;
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Jobs\JobStruct;
 use Model\Users\UserStruct;
+use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\Filter;
 use Utils\Url\JobUrlBuilder;
 
@@ -132,13 +132,13 @@ class AnalysisChunk implements JsonSerializable {
         }
 
         try {
-            $tmEngine = Engine::getInstance( $this->chunkStruct->id_tms );
+            $tmEngine = EnginesFactory::getInstance( $this->chunkStruct->id_tms );
         } catch ( Exception $exception ) {
             $tmEngine = null;
         }
 
         try {
-            $mtEngine = Engine::getInstance( $this->chunkStruct->id_mt_engine );
+            $mtEngine = EnginesFactory::getInstance( $this->chunkStruct->id_mt_engine );
         } catch ( Exception $exception ) {
             $mtEngine = null;
         }

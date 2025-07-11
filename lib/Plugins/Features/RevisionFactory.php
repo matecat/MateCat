@@ -1,6 +1,6 @@
 <?php
 
-namespace Features;
+namespace Plugins\Features;
 
 use Exception;
 use Model\FeaturesBase\BasicFeatureStruct;

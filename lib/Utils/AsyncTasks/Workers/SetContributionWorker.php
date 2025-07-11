@@ -9,13 +9,13 @@
 
 namespace Utils\AsyncTasks\Workers;
 
-use Engine;
 use Exception;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EngineInterface;
+use Utils\Engines\EnginesFactory;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -122,7 +122,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
-            $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
+            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load MyMemory
         }
 
     }

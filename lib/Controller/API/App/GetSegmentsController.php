@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
@@ -19,6 +18,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
 use ReflectionException;
+use Utils\CatUtils;
 use Utils\Langs\Languages;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;

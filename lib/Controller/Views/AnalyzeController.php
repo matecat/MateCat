@@ -84,14 +84,14 @@ class AnalyzeController extends BaseKleinViewController implements IController {
             // we are looking for a chunk
             $chunkStruct = JobDao::getByIdAndPassword( $jid, $pass );
             if ( empty( $chunkStruct ) || $chunkStruct->isDeleted() ) {
-                $this->setView( "project_not_found.html", [], 404 );
+                $this->setView( "job_not_found.html", [], 404 );
                 $this->render();
             }
 
             $this->setView( "jobAnalysis.html", [
-                    'jid'              => $jid,
-                    'job_password'     => $pass,
-                    'project_password' => $projectStruct->password,
+                    'jid'                  => $jid,
+                    'job_password'         => $chunkStruct->password,
+                    'project_access_token' => sha1( $projectStruct->id . $projectStruct->password ),
             ] );
 
         } else {

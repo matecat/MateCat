@@ -49,7 +49,7 @@ class QualityFrameworkController extends KleinController {
         $idJob    = $this->request->param( 'id_job' );
         $password = $this->request->param( 'password' );
 
-        $job = \CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
+        $job = \Utils\CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 
         if ( $job === null ) {
             $this->response->code( 500 );

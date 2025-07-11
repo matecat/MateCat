@@ -1,13 +1,13 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\LQA\ChunkReviewDao;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class IsJobRevisionValidator extends AbstractValidator {
 

@@ -1,5 +1,6 @@
 <?php
 
+use Utils\CatUtils;
 use Utils\LQA\QA;
 
 class PostProcess extends QA {

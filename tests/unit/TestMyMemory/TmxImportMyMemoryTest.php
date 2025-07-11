@@ -19,7 +19,7 @@
 
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
@@ -50,7 +50,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
     public function test_about_best_case_scenario_of_TMX_import() {
 
         /**
-         * Engine creation
+         * EnginesFactory creation
          */
 
 

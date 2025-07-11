@@ -8,7 +8,6 @@ use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Engines\MMT\MMTServiceApiRequestException;
 use Exception;
-use Features\Mmt as MMTFeature;
 use INIT;
 use Log;
 use Model\Database;
@@ -18,6 +17,7 @@ use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Plugins\Features\Mmt as MMTFeature;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -69,7 +69,7 @@ class MMT extends AbstractEngine {
         parent::__construct( $engineRecord );
 
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         if ( isset( $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) && $this->getEngineRecord()->extra_parameters[ 'MMT-pretranslate' ] ) {

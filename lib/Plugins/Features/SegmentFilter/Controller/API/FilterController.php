@@ -1,15 +1,14 @@
 <?php
 
 
-namespace Features\SegmentFilter\Controller\API;
+namespace Plugins\Features\SegmentFilter\Controller\API;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\SegmentFilter\Model\FilterDefinition;
-use Features\SegmentFilter\Model\SegmentFilterModel;
-use Model\Jobs\JobStruct;
+use Plugins\Features\SegmentFilter\Model\FilterDefinition;
+use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
 
 class FilterController extends KleinController {

@@ -6,7 +6,7 @@
  * Time: 17:20
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;

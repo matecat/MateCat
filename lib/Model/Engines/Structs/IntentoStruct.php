@@ -1,13 +1,13 @@
 <?php
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\Intento;
 
 /**
  * Class Engine_IntentoStruct
  *
- * This class contains the default parameters for a Intento Engine CREATION
+ * This class contains the default parameters for a Intento EnginesFactory CREATION
  *
  */
 class IntentoStruct extends EngineStruct {

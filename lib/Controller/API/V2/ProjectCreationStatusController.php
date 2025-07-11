@@ -15,7 +15,7 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
-use Utils\ProjectQueue\Queue;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use View\API\V2\Json\CreationStatus;
 use View\API\V2\Json\WaitCreation;
 
@@ -31,7 +31,7 @@ class ProjectCreationStatusController extends KleinController {
             throw new Exception( "ID project is not a valid integer", -1 );
         }
 
-        $result = Queue::getPublishedResults( $this->request->param( 'id_project' ) );
+        $result = ProjectQueue::getPublishedResults( $this->request->param( 'id_project' ) );
 
         if ( empty( $result ) ) {
 

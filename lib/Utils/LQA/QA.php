@@ -2,7 +2,6 @@
 
 namespace Utils\LQA;
 
-use CatUtils;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -14,6 +13,7 @@ use Log;
 use LogicException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Segments\SegmentMetadataDao;
+use Utils\CatUtils;
 use Utils\LQA\BxExG\Validator;
 
 /**
@@ -2416,7 +2416,7 @@ class QA {
             }
 
             //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'CatUtils', 'htmlentitiesFromUnicode' ], $matches[ 1 ] );
+            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'Utils\CatUtils', 'htmlentitiesFromUnicode' ], $matches[ 1 ] );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

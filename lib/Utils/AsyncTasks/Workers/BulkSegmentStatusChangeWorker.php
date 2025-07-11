@@ -10,15 +10,15 @@ namespace Utils\AsyncTasks\Workers;
 
 
 use Exception;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\TranslationEventsHandler;
 use Model\Database;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserDao;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;

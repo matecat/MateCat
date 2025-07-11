@@ -9,7 +9,6 @@
 
 namespace Utils\TaskRunner\Commons;
 
-use AMQHandler;
 use Exception;
 use INIT;
 use Model\Database;
@@ -17,6 +16,7 @@ use PDOException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;

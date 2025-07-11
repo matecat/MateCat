@@ -10,7 +10,6 @@
 namespace Utils\Contribution;
 
 
-use Engine;
 use Exception;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
@@ -19,6 +18,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
 
 class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStruct {
 
@@ -162,7 +162,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public function getTMEngine( FeatureSet $featureSet ): AbstractEngine {
         if ( $this->tmEngine == null ) {
-            $this->tmEngine = Engine::getInstance( $this->getJobStruct()->id_tms );
+            $this->tmEngine = EnginesFactory::getInstance( $this->getJobStruct()->id_tms );
             $this->tmEngine->setFeatureSet( $featureSet );
         }
 
@@ -177,7 +177,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      */
     public function getMTEngine( FeatureSet $featureSet ): AbstractEngine {
         if ( $this->mt_engine == null ) {
-            $this->mt_engine = Engine::getInstance( $this->getJobStruct()->id_mt_engine );
+            $this->mt_engine = EnginesFactory::getInstance( $this->getJobStruct()->id_mt_engine );
             $this->mt_engine->setFeatureSet( $featureSet );
         }
 

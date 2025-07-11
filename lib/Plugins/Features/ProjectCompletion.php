@@ -1,6 +1,6 @@
 <?php
 
-namespace Features;
+namespace Plugins\Features;
 
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;

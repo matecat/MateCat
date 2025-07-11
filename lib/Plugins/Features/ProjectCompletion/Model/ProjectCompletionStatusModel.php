@@ -6,7 +6,7 @@
  * Time: 18:13
  */
 
-namespace Features\ProjectCompletion\Model;
+namespace Plugins\Features\ProjectCompletion\Model;
 
 
 use Controller\API\Commons\Exceptions\AuthenticationError;

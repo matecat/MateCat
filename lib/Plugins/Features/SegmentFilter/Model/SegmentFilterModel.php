@@ -6,7 +6,7 @@
  * Time: 11:08 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
 use Exception;
 use Model\Jobs\JobStruct;

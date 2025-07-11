@@ -5,12 +5,12 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEventDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Translations\SegmentTranslationStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 
 class SegmentTranslationIssueValidator extends Base {
 

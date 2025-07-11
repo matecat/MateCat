@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\API\Commons\Validators\JSONRequestValidator;
@@ -11,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
+use Utils\CatUtils;
 
 class UserController extends AbstractStatefulKleinController {
     public function afterConstruct() {

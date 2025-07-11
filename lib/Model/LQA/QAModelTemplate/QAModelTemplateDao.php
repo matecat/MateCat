@@ -15,8 +15,8 @@ use PDO;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Date\DateTimeUtil;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class QAModelTemplateDao extends AbstractDao {
 

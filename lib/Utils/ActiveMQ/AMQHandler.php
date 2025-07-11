@@ -7,12 +7,22 @@
  *
  */
 
+namespace Utils\ActiveMQ;
+
+use Exception;
+use INIT;
+use Log;
+use MultiCurlHandler;
+use Predis;
+use RedisHandler;
+use ReflectionException;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
 use Stomp\Network\Connection;
 use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
+use Utils;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\TaskRunner\Commons\Context;
 
@@ -21,31 +31,29 @@ class AMQHandler {
     /**
      * @var RedisHandler
      */
-    protected $redisHandler;
+    protected RedisHandler $redisHandler;
 
     /**
      * @var StatefulStomp
      */
-    protected $statefulStomp;
+    protected StatefulStomp $statefulStomp;
     /**
      * @var Connection
      */
-    protected static $staticStompConnection;
-    protected        $clientType = null;
-
-    protected $queueTotalID = null;
+    protected static Connection $staticStompConnection;
+    protected ?string           $clientType = null;
 
     const CLIENT_TYPE_PUBLISHER  = 'Publisher';
     const CLIENT_TYPE_SUBSCRIBER = 'Subscriber';
 
-    public $persistent = 'true';
+    public string $persistent = 'true';
 
     /**
      * Handle a string for the queue name
-     * @var string
+     * @var string|null
      *
      */
-    protected $queueName = null;
+    protected ?string $queueName = null;
 
     /**
      * Singleton implementation of StatefulStomp in a not static constructor
@@ -82,14 +90,14 @@ class AMQHandler {
 
     }
 
-    public static function getNewInstanceForDaemons() {
+    public static function getNewInstanceForDaemons(): AMQHandler {
         return new self( null, false );
     }
 
     /**
      * @return Client
      */
-    public function getClient() {
+    public function getClient(): Client {
         return $this->statefulStomp->getClient();
     }
 
@@ -125,22 +133,15 @@ class AMQHandler {
     }
 
     /**
-     * @return RedisHandler
-     */
-    public function getRedisHandler(): RedisHandler {
-        return $this->redisHandler;
-    }
-
-    /**
      *
      * @param string $destination
-     * @param null   $selector
+     * @param ?mixed $selector
      * @param string $ack
      * @param array  $header
      *
      * @return int
      */
-    public function subscribe( $destination, $selector = null, $ack = 'client-individual', array $header = [] ) {
+    public function subscribe( string $destination, $selector = null, string $ack = 'client-individual', array $header = [] ): int {
 
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->queueName  = $destination;
@@ -173,7 +174,7 @@ class AMQHandler {
     /**
      * Clean connections
      */
-    public function close(){
+    public function close() {
         $this->statefulStomp->getClient()->disconnect();
     }
 
@@ -244,34 +245,17 @@ class AMQHandler {
      *
      * @param null $qid
      *
-     * @return mixed
+     * @return string|null
      * @throws Exception
      */
-    public function getActualForQID( $qid = null ) {
+    public function getActualForQID( $qid = null ): ?string {
 
-        if ( empty( $this->queueTotalID ) && empty( $qid ) ) {
-            throw new Exception( 'Can Not get values without a Queue ID. Use \AMQHandler::setQueueID or pass a queue id to this method' );
+        if ( empty( $qid ) ) {
+            throw new Exception( 'Can Not get values without a Queue ID. Use ' . AMQHandler::class . '::setQueueID  or pass a queue id to this method' );
         }
 
-        if ( !empty( $qid ) ) {
-            $_qid = $qid;
-        } else {
-            $_qid = $this->queueTotalID;
-        }
+        return $this->getRedisClient()->get( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $qid );
 
-        return $this->getRedisClient()->get( RedisKeys::TOTAL_SEGMENTS_TO_WAIT . $_qid );
-
-    }
-
-    /**
-     * @param $qid
-     *
-     * @return $this
-     */
-    public function setQueueID( $qid ) {
-        $this->queueTotalID = $qid;
-
-        return $this;
     }
 
     /**

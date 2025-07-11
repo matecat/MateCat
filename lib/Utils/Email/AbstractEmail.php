@@ -11,8 +11,8 @@ namespace Utils\Email;
 use Exception;
 use INIT;
 use Log;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
-use WorkerClient;
 
 abstract class AbstractEmail {
 

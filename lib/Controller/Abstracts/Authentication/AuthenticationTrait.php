@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use AMQHandler;
 use Bootstrap;
 use Exception;
 use INIT;
@@ -10,6 +9,7 @@ use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
+use Utils\ActiveMQ\AMQHandler;
 
 /**
  * Created by PhpStorm.

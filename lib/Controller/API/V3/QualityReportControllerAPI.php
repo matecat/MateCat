@@ -12,8 +12,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEventDao;
 use INIT;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
@@ -23,6 +21,8 @@ use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 
 class QualityReportControllerAPI extends KleinController {
     use ChunkNotFoundHandlerTrait;

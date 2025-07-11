@@ -3,7 +3,6 @@
 namespace Model\Jobs;
 
 use ArrayAccess;
-use CatUtils;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Comments\CommentDao;
@@ -31,6 +30,7 @@ use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use ReflectionException;
 use Utils;
+use Utils\CatUtils;
 use Utils\Constants\JobStatus;
 
 class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {

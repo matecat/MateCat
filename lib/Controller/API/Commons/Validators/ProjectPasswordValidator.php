@@ -13,6 +13,7 @@ use Controller\Abstracts\KleinController;
 use Model\Exceptions\NotFoundException;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 
 class ProjectPasswordValidator extends Base {
     /**
@@ -20,8 +21,8 @@ class ProjectPasswordValidator extends Base {
      */
     private ?ProjectStruct $project = null;
 
-    private int    $id_project;
-    private string $password;
+    private int     $id_project;
+    private ?string $password;
 
     public function __construct( KleinController $controller ) {
 
@@ -48,17 +49,14 @@ class ProjectPasswordValidator extends Base {
     /**
      * @return void
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function _validate(): void {
 
         $this->project = ProjectDao::findByIdAndPassword(
                 $this->id_project,
-                $this->password
+                $this->password ?? ''
         );
-
-        if ( !$this->project ) {
-            throw new NotFoundException();
-        }
 
     }
 

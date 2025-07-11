@@ -9,16 +9,16 @@
 
 namespace Controller\Views;
 
-use Constants;
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
-use CookieManager;
 use Exception;
 use INIT;
 use PHPTalBoolean;
 use PHPTalMap;
 use ProjectOptionsSanitizer;
 use Utils;
+use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Langs\LanguageDomains;
 

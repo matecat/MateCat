@@ -1,6 +1,6 @@
 <?php
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\NONE;
 

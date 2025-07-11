@@ -2,7 +2,7 @@
 
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -42,7 +42,7 @@ class CrudEngineTest extends AbstractTest {
         $this->user_id = $this->database_instance->last_insert();
 
 
-        $sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES (NULL, 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '" . $this->user_id . "');";
+        $sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES (NULL, 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '" . $this->user_id . "');";
         $this->database_instance->getConnection()->query( $sql_insert_engine );
         $this->engine_id = $this->database_instance->last_insert();
 

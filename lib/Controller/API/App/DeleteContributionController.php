@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
-use Engine;
 use Exception;
 use INIT;
 use InvalidArgumentException;
@@ -14,9 +13,10 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
+use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class DeleteContributionController extends KleinController {
 
@@ -52,7 +52,7 @@ class DeleteContributionController extends KleinController {
 
         $tm_keys = $jobStruct[ 'tm_keys' ];
 
-        $tms    = Engine::getInstance( $jobStruct[ 'id_tms' ] );
+        $tms    = EnginesFactory::getInstance( $jobStruct[ 'id_tms' ] );
         $config = $tms->getConfigStruct();
 
         /** @var MateCatFilter $Filter */

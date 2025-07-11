@@ -74,8 +74,8 @@ trait Oauth {
         $engineDAO = new EngineDAO( Database::obtain() );
 
         /**
-         * Use a generic Engine and not Engine_MicrosoftHubStruct
-         * because the Engine Factory Class built the query as generic engine
+         * Use a generic EnginesFactory and not Engine_MicrosoftHubStruct
+         * because the EnginesFactory Factory Class built the query as generic engine
          *
          */
         $engineStruct     = $this->_getEngineStruct();

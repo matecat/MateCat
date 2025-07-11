@@ -2,7 +2,6 @@
 
 namespace Utils\AsyncTasks\Workers;
 
-use AMQHandler;
 use Exception;
 use INIT;
 use Orhanerday\OpenAi\OpenAi;
@@ -11,6 +10,7 @@ use Predis\Response\Status;
 use ReflectionException;
 use Stomp\Exception\StompException;
 use Utils;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\Client as AIAssistantClient;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;

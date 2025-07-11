@@ -10,10 +10,7 @@
 namespace View\API\V2\Json;
 
 
-use CatUtils;
-use Constants;
 use Exception;
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use ManageUtils;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -22,7 +19,10 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Utils;
+use Utils\CatUtils;
+use Utils\Constants\SourcePages;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\OutsourceTo\OutsourceAvailable;
@@ -190,7 +190,7 @@ class Job {
         // add revise_passwords to stats
         foreach ( $chunkReviews as $chunk_review ) {
 
-            if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+            if ( $chunk_review->source_page <= SourcePages::SOURCE_PAGE_REVISION ) {
                 $result[ 'revise_passwords' ][] = [
                         'revision_number' => 1,
                         'password'        => $chunk_review->review_password

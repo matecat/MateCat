@@ -2,15 +2,11 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions;
-use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
@@ -32,10 +28,14 @@ use Model\Translations\SegmentTranslationStruct;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use Utils;
+use Utils\CatUtils;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
 use Utils\Constants\ProjectStatus;
@@ -459,7 +459,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $chunk->getProject() );
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment ) );
+        $filter       = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment ) );
         $this->filter = $filter;
 
         // decode and normalize the suggestion array coming from the client

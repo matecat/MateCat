@@ -2,10 +2,8 @@
 
 namespace Controller\API\V2;
 
-use CatUtils;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
 use Model\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -14,7 +12,9 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils;
+use Utils\CatUtils;
 
 class ChangePasswordController extends ChunkController {
     protected function afterConstruct() {

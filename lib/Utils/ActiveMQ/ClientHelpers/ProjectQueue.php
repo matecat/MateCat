@@ -7,7 +7,7 @@
  *
  */
 
-namespace Utils\ProjectQueue;
+namespace Utils\ActiveMQ\ClientHelpers;
 
 use ArrayObject;
 use Exception;
@@ -15,16 +15,16 @@ use Log;
 use Predis\Response\Status;
 use RedisHandler;
 use ReflectionException;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
 use Utils\Constants\ProjectStatus;
-use WorkerClient;
 
 /**
  * Class Enqueue
  * @package ProjectQueue
  *
  */
-class Queue {
+class ProjectQueue {
 
     /**
      * @param ArrayObject $projectStructure

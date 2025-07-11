@@ -10,7 +10,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Utils\Engines\DeepL;
 use Utils\Files\CSV as CSVParser;
-use Validator\EngineValidator;
+use Utils\Validator\EngineValidator;
 
 class DeepLGlossaryController extends KleinController {
     protected function afterConstruct() {
@@ -232,7 +232,7 @@ class DeepLGlossaryController extends KleinController {
      * @throws Exception
      */
     private function getDeepLClient( $engineId ): DeepL {
-        /** @var \Utils\Engines\DeepL $engine */
+        /** @var DeepL $engine */
         $engine      = EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, DeepL::class );
         $extraParams = $engine->getEngineRecord()->extra_parameters;
 

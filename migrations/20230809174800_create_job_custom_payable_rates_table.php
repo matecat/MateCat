@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateJobCustomPayableRatesTable extends AbstractMatecatMigration {
 
     public $sql_up = [ '

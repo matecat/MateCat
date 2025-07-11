@@ -8,12 +8,12 @@
 
 namespace Model\QualityReport;
 
-use Constants;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class QualityReportDao extends AbstractDao {
@@ -230,7 +230,7 @@ JOIN (
     public function getReviseIssuesByChunk( int $job_id, string $password, int $source_page = null ): array {
 
         if ( is_null( $source_page ) ) {
-            $source_page = Constants::SOURCE_PAGE_REVISION;
+            $source_page = SourcePages::SOURCE_PAGE_REVISION;
         }
 
         $sql = "SELECT

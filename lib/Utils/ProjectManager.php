@@ -54,9 +54,13 @@ use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateStruct;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
+use Utils\CatUtils;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\XliffTranslationStatus;
+use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\LQA\QA;
 use Utils\Shop\Cart;
@@ -598,7 +602,7 @@ class ProjectManager {
          * Validations should populate the projectStructure with errors and codes.
          */
         $featureSet = ( $this->features !== null ) ? $this->features : new FeatureSet();
-        \Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
+        \Plugins\Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
         $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
@@ -2633,7 +2637,7 @@ class ProjectManager {
         }
 
         // set the contribution for every key in the job belonging to the user
-        $engine = Engine::getInstance( 1 );
+        $engine = EnginesFactory::getInstance( 1 );
         $config = $engine->getConfigStruct();
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) != 0 ) {

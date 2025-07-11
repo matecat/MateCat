@@ -6,7 +6,7 @@
  * Time: 12:57
  */
 
-namespace Features\ProjectCompletion\Model;
+namespace Plugins\Features\ProjectCompletion\Model;
 
 
 class UndoModel {

@@ -1,8 +1,7 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Plugins\Features\TranslationVersions\Model;
 
-use Constants;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
@@ -11,6 +10,7 @@ use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
 use Utils;
+use Utils\Constants\SourcePages;
 
 class TranslationVersionDao extends AbstractDao {
 
@@ -300,7 +300,7 @@ class TranslationVersionDao extends AbstractDao {
         $db = Database::obtain()->getConnection();
 
         $final_flag = "";
-        if ( $source_page > Constants::SOURCE_PAGE_TRANSLATE ) {
+        if ( $source_page > SourcePages::SOURCE_PAGE_TRANSLATE ) {
             // when searching for revision, search for the final revision flag
             $final_flag = " AND final_revision = 1 ";
         }

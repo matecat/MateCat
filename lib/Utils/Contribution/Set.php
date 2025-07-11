@@ -12,9 +12,9 @@ namespace Utils\Contribution;
 
 use Exception;
 use Log;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\SetContributionMTWorker;
 use Utils\AsyncTasks\Workers\SetContributionWorker;
-use WorkerClient;
 
 /**
  * Class Set

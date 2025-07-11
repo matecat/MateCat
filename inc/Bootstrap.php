@@ -5,7 +5,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
 use Model\Database;
 use Model\FeaturesBase\FeatureSet;
-use Model\FeaturesBase\FeaturesFactory;
+use Model\FeaturesBase\PluginsLoader;
+use Utils\ActiveMQ\WorkerClient;
 
 /**
  * Created by PhpStorm.
@@ -405,7 +406,7 @@ class Bootstrap {
 
         INIT::obtain(); //load configurations
 
-        FeaturesFactory::setIncludePath();
+        PluginsLoader::setIncludePath();
 
     }
 

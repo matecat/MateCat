@@ -8,9 +8,7 @@
 
 namespace View\API\V3\Json;
 
-use Constants;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
@@ -19,8 +17,10 @@ use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use Utils;
+use Utils\Constants\SourcePages;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use View\API\App\Json\OutsourceConfirmation;
@@ -178,7 +178,7 @@ class Chunk extends \View\API\V2\Json\Chunk {
             $result[ 'revise_passwords' ] = [];
         }
 
-        if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+        if ( $chunk_review->source_page <= SourcePages::SOURCE_PAGE_REVISION ) {
             $result[ 'revise_passwords' ][] = [
                     'revision_number' => 1,
                     'password'        => $chunk_review->review_password

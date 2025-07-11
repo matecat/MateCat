@@ -3,11 +3,13 @@
 namespace Model\Engines;
 
 use DomainException;
-use Engine;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\NONEStruct;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\EnginesFactory;
 
 /**
  * Created by PhpStorm.
@@ -107,7 +109,7 @@ class EngineDAO extends AbstractDao {
         $bind_values[] = $obj->others;
         $bind_values[] = $obj->extra_parameters;
 
-        //This parameter MUST be set from Engine, Needed to load the right Engine
+        //This parameter MUST be set from EnginesFactory, Needed to load the right EnginesFactory
         $bind_values[] = $obj->class_load;
 
         $bind_values[] = 2;
@@ -307,7 +309,7 @@ class EngineDAO extends AbstractDao {
         foreach ( $array_result as $item ) {
 
             try {
-                Engine::getFullyQualifiedClassName( $item[ 'class_load' ] );
+                EnginesFactory::getFullyQualifiedClassName( $item[ 'class_load' ] );
             } catch ( Exception $e ) {
                 $result[] = new NONEStruct();
                 continue;
@@ -394,7 +396,7 @@ class EngineDAO extends AbstractDao {
      */
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
         if ( $obj->id === null ) {
-            throw new Exception( "Engine ID required" );
+            throw new Exception( "EnginesFactory ID required" );
         }
 
         if ( $obj->uid === null ) {

@@ -9,8 +9,6 @@
 namespace Model\ConnectedServices\GDrive;
 
 use ArrayObject;
-use CatUtils;
-use Constants;
 use DirectoryIterator;
 use Exception;
 use FilesystemIterator;
@@ -37,6 +35,8 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
 use Utils;
+use Utils\CatUtils;
+use Utils\Constants\Constants;
 
 /**
  * Class Session

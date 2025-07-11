@@ -8,9 +8,9 @@
 
 namespace View\API\V2\Json\Json;
 
-use Features\ReviewExtended\ReviewUtils;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use Routes;
 
 class ProjectUrls extends \View\API\V2\Json\ProjectUrls {

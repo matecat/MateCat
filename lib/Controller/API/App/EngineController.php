@@ -7,7 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use DomainException;
-use Engine;
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
@@ -15,27 +14,28 @@ use INIT;
 use InvalidArgumentException;
 use Lara\LaraException;
 use Model\Database;
-use Model\Engines\AltlangStruct;
-use Model\Engines\ApertiumStruct;
-use Model\Engines\DeepLStruct;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
-use Model\Engines\GoogleTranslateStruct;
-use Model\Engines\IntentoStruct;
-use Model\Engines\LaraStruct;
-use Model\Engines\MicrosoftHubStruct;
-use Model\Engines\SmartMATEStruct;
-use Model\Engines\YandexTranslateStruct;
+use Model\Engines\Structs\AltlangStruct;
+use Model\Engines\Structs\ApertiumStruct;
+use Model\Engines\Structs\DeepLStruct;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\GoogleTranslateStruct;
+use Model\Engines\Structs\IntentoStruct;
+use Model\Engines\Structs\LaraStruct;
+use Model\Engines\Structs\MicrosoftHubStruct;
+use Model\Engines\Structs\SmartMATEStruct;
+use Model\Engines\Structs\YandexTranslateStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Users\MetadataDao;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
-use Validator\DeepLValidator;
+use Utils\Validator\DeepLValidator;
 
 class EngineController extends KleinController {
 
@@ -60,15 +60,15 @@ class EngineController extends KleinController {
         $provider   = $request[ 'provider' ];
 
         if ( empty( $name ) ) {
-            throw new InvalidArgumentException( "Engine name required", -6 );
+            throw new InvalidArgumentException( "EnginesFactory name required", -6 );
         }
 
         if ( empty( $engineData ) ) {
-            throw new InvalidArgumentException( "Engine data required", -7 );
+            throw new InvalidArgumentException( "EnginesFactory data required", -7 );
         }
 
         if ( empty( $provider ) ) {
-            throw new InvalidArgumentException( "Engine provider required", -8 );
+            throw new InvalidArgumentException( "EnginesFactory provider required", -8 );
         }
 
         $validEngine = true;
@@ -214,7 +214,7 @@ class EngineController extends KleinController {
         }
 
         if ( !$validEngine ) {
-            throw new DomainException( "Engine not allowed", -4 );
+            throw new DomainException( "EnginesFactory not allowed", -4 );
         }
 
         $engineList      = EngineConstants::getAvailableEnginesList();
@@ -244,7 +244,7 @@ class EngineController extends KleinController {
 
         if ( $newEngineStruct instanceof MicrosoftHubStruct ) {
 
-            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -261,7 +261,7 @@ class EngineController extends KleinController {
 
         } elseif ( $newEngineStruct instanceof IntentoStruct ) {
 
-            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getEngineRecord()->getExtraParamsAsArray();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -299,7 +299,7 @@ class EngineController extends KleinController {
 
         } elseif ( $newEngineStruct instanceof GoogleTranslateStruct ) {
 
-            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -319,7 +319,7 @@ class EngineController extends KleinController {
             /**
              * @var $newTestCreatedMT Lara
              */
-            $newTestCreatedMT    = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT    = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
             $config              = $newTestCreatedMT->getConfigStruct();
             $config[ 'segment' ] = "Hello World";
             $config[ 'source' ]  = "en-US";
@@ -394,7 +394,7 @@ class EngineController extends KleinController {
         $id      = $request[ 'id' ];
 
         if ( empty( $id ) ) {
-            throw new InvalidArgumentException( "Engine id required", -5 );
+            throw new InvalidArgumentException( "EnginesFactory id required", -5 );
         }
 
         $engineToBeDeleted      = EngineStruct::getStruct();
@@ -409,11 +409,11 @@ class EngineController extends KleinController {
             throw new RuntimeException( "Deletion failed. Generic error", -9 );
         }
 
-        $engine = Engine::createTempInstance( $result );
+        $engine = EnginesFactory::createTempInstance( $result );
 
         if ( $engine->isAdaptiveMT() ) {
             $engName = explode( "\\", $result->class_load );
-            //retrieve OWNER Engine License
+            //retrieve OWNER EnginesFactory License
             ( new MetadataDao() )->delete( $this->user->uid, array_pop( $engName ) ); // engine_id
         }
 

@@ -7,14 +7,14 @@
  * Time: 14.54
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\Lara;
 
 /**
  * Class LaraStruct
  *
- * This class contains the default parameters for a Lara Engine CREATION
+ * This class contains the default parameters for a Lara EnginesFactory CREATION
  *
  */
 class LaraStruct extends EngineStruct {

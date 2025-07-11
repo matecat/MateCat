@@ -1,13 +1,16 @@
 <?php
 
 use Behat\Transliterator\Transliterator;
-use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
-use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Constants\Constants;
+use Utils\Constants\SourcePages;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class Utils {
 
@@ -29,7 +32,7 @@ class Utils {
      * @return int
      */
     private static function returnSourcePageAsInt( array $url ): int {
-        $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
+        $sourcePage = SourcePages::SOURCE_PAGE_TRANSLATE;
 
         if ( !isset( $url[ 'path' ] ) ) {
             return $sourcePage;
@@ -39,7 +42,7 @@ class Utils {
         preg_match( '/revise([2-9]|\'\')?\//', $url[ 'path' ], $matches );
 
         if ( count( $matches ) === 1 ) { // [0] => revise/
-            $sourcePage = ReviewUtils::revisionNumberToSourcePage( Constants::SOURCE_PAGE_TRANSLATE );
+            $sourcePage = ReviewUtils::revisionNumberToSourcePage( SourcePages::SOURCE_PAGE_TRANSLATE );
         }
 
         if ( count( $matches ) > 1 ) { // [0] => revise2/ [1] => 2

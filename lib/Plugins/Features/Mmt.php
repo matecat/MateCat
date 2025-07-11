@@ -7,21 +7,20 @@
  *
  */
 
-namespace Features;
+namespace Plugins\Features;
 
 
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
-use Engine;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
 use INIT;
 use Log;
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
-use Model\Engines\MMTStruct;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\MMTStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -33,6 +32,7 @@ use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -42,7 +42,7 @@ class Mmt extends BaseFeature {
 
     const FEATURE_CODE = 'mmt';
 
-    protected $forceOnProject = true;
+    protected bool $forceOnProject = true;
 
     /**
      * Called in @see Bootstrap::notifyBootCompleted
@@ -52,7 +52,7 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param \Model\Engines\EngineStruct $newCreatedDbRowStruct
+     * Called in @param EngineStruct $newCreatedDbRowStruct
      *
      * @param UserStruct $userStruct
      *
@@ -67,9 +67,9 @@ class Mmt extends BaseFeature {
             return $newCreatedDbRowStruct;
         }
 
-        /** @var MMT $newTestCreatedMT */
+        /** @var MMTEngine $newTestCreatedMT */
         try {
-            $newTestCreatedMT = Engine::createTempInstance( $newCreatedDbRowStruct );
+            $newTestCreatedMT = EnginesFactory::createTempInstance( $newCreatedDbRowStruct );
         } catch ( Exception $exception ) {
             throw new Exception( "MMT license not valid" );
         }
@@ -135,9 +135,9 @@ class Mmt extends BaseFeature {
     /**
      * Called in
      *
-     * @param array                         $config
-     * @param \Utils\Engines\AbstractEngine $engine
-     * @param JobStruct                     $jobStruct
+     * @param array          $config
+     * @param AbstractEngine $engine
+     * @param JobStruct      $jobStruct
      *
      * @return array
      * @throws Exception
@@ -233,8 +233,8 @@ class Mmt extends BaseFeature {
      */
     public function filterCreateProjectFeatures( $projectFeatures, $controller, $mt_engine_id ) {
 
-        $engine = Engine::getInstance( $mt_engine_id );
-        if ( $engine instanceof MMT ) {
+        $engine = EnginesFactory::getInstance( $mt_engine_id );
+        if ( $engine instanceof MMTEngine ) {
             $feature               = new BasicFeatureStruct();
             $feature->feature_code = self::FEATURE_CODE;
             $projectFeatures[]     = $feature;
@@ -253,7 +253,7 @@ class Mmt extends BaseFeature {
      *                          'engineData'   => []
      *                          ]
      *
-     * @return \Model\Engines\EngineStruct|bool
+     * @return EngineStruct|bool
      * @throws AuthenticationError
      * @throws NotFoundException
      * @throws ValidationError
@@ -321,9 +321,9 @@ class Mmt extends BaseFeature {
         if ( !empty( $ownerMmtEngineMetaData ) ) {
 
             /**
-             * @var MMT $MMTEngine
+             * @var MMTEngine $MMTEngine
              */
-            $MMTEngine    = Engine::getInstance( $ownerMmtEngineMetaData->value );
+            $MMTEngine    = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
             $engineStruct = $MMTEngine->getEngineRecord();
 
             $extraParams = $engineStruct->getExtraParamsAsArray();

@@ -11,8 +11,8 @@
 namespace Utils\Contribution;
 use Exception;
 use Log;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GetContributionWorker;
-use WorkerClient;
 
 /**
  * Class Set

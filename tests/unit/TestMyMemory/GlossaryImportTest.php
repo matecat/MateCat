@@ -17,7 +17,7 @@
 
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;

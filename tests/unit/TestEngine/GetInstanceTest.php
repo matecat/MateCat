@@ -3,13 +3,14 @@
 use Model\Database;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Apertium;
-use Utils\Engines\NONE;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Engines\NONE;
 
 
 /**
  * @group  regression
- * @covers Engine::getInstance
+ * @covers EnginesFactory::getInstance
  * User: dinies
  * Date: 14/04/16
  * Time: 17.45
@@ -41,7 +42,7 @@ class GetInstanceTest extends AbstractTest {
         /**
          * engine insertion
          */
-        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
+        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
         $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
@@ -64,32 +65,32 @@ class GetInstanceTest extends AbstractTest {
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_of_constructed_engine() {
 
-        $engine = Engine::getInstance( $this->id_database );
+        $engine = EnginesFactory::getInstance( $this->id_database );
         $this->assertTrue( $engine instanceof Apertium );
     }
 
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_of_constructed_engine_my_memory() {
 
-        $engine = Engine::getInstance( 1 );
+        $engine = EnginesFactory::getInstance( 1 );
         $this->assertTrue( $engine instanceof MyMemory );
     }
 
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_of_default_engine() {
-        $engine = Engine::getInstance( 0 );
+        $engine = EnginesFactory::getInstance( 0 );
         $this->assertTrue( $engine instanceof NONE );
 
     }
@@ -97,40 +98,40 @@ class GetInstanceTest extends AbstractTest {
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_without_id() {
 
         $this->expectException( Exception::class );
-        Engine::getInstance( '' );
+        EnginesFactory::getInstance( '' );
     }
 
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_whit_null_id() {
 
         $this->expectException( Exception::class );
-        Engine::getInstance( null );
+        EnginesFactory::getInstance( null );
     }
 
     /**
      * @throws Exception
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      */
     public function test_getInstance_with_no_mach_for_engine_id() {
 
         $this->expectException( Exception::class );
-        Engine::getInstance( $this->id_database + 1 );
+        EnginesFactory::getInstance( $this->id_database + 1 );
     }
 
     /**
      * verify that the method  name of engine not match the classes of known engines
      * @group  regression
-     * @covers Engine::getInstance
+     * @covers EnginesFactory::getInstance
      * @throws Exception
      */
     public function test_getInstance_with_no_mach_for_engine_class_name() {
@@ -142,7 +143,7 @@ class GetInstanceTest extends AbstractTest {
         $flusher->select( INIT::$INSTANCE_ID );
         $flusher->flushdb();
 
-        $engine = Engine::getInstance( $this->id_database );
+        $engine = EnginesFactory::getInstance( $this->id_database );
         $this->assertTrue( $engine instanceof NONE );
     }
 

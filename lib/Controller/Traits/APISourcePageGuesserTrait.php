@@ -9,7 +9,7 @@
 
 namespace Controller\Traits;
 
-use CatUtils;
+use Utils\CatUtils;
 
 trait APISourcePageGuesserTrait {
 

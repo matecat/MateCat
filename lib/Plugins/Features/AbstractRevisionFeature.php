@@ -1,18 +1,13 @@
 <?php
 
-namespace Features;
+namespace Plugins\Features;
 
 use ArrayObject;
-use Constants;
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use Features\ReviewExtended\ChunkReviewModel;
-use Features\ReviewExtended\IChunkReviewModel;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEventDao;
 use INIT;
 use Klein\Klein;
 use Log;
@@ -32,18 +27,21 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\QualityReport\QualityReportModel;
 use Model\ReviseFeedback\FeedbackDAO;
+use Plugins\Features\ReviewExtended\ChunkReviewModel;
+use Plugins\Features\ReviewExtended\IChunkReviewModel;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Predis\Connection\ConnectionException;
 use RecursiveArrayObject;
 use ReflectionException;
 use Utils;
+use Utils\Constants\SourcePages;
 use View\API\V2\Json\Json\ProjectUrls;
 use ZipArchive;
 
-;
-
 abstract class AbstractRevisionFeature extends BaseFeature {
 
-    protected static $dependencies = [
+    protected static array $dependencies = [
             FeatureCodes::TRANSLATION_VERSIONS
     ];
 
@@ -156,20 +154,20 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param \Model\Jobs\JobStruct[]|ChunkReviewStruct[] $chunksArray
-     * @param ProjectStruct                               $project
-     * @param array                                       $options
+     * @param JobStruct[]|ChunkReviewStruct[] $chunksArray
+     * @param ProjectStruct                   $project
+     * @param array                           $options
      *
      * @return array
      * @throws Exception
      */
-    public function createQaChunkReviewRecords( array $chunksArray, ProjectStruct $project, $options = [] ) {
+    public function createQaChunkReviewRecords( array $chunksArray, ProjectStruct $project, array $options = [] ): array {
 
         $createdRecords = [];
 
         // expect one chunk
         if ( !isset( $options[ 'source_page' ] ) ) {
-            $options[ 'source_page' ] = Constants::SOURCE_PAGE_REVISION;
+            $options[ 'source_page' ] = SourcePages::SOURCE_PAGE_REVISION;
         }
 
         foreach ( $chunksArray as $k => $chunk ) {
@@ -402,7 +400,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $job
+     * @param JobStruct      $job
      * @param                $old_password
      */
     public function job_password_changed( JobStruct $job, $old_password ) {

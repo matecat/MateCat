@@ -4,12 +4,11 @@ namespace Utils\Engines;
 
 use CURLFile;
 use DomainException;
-use Engine;
 use Exception;
 use INIT;
 use Log;
-use Model\Engines\EngineStruct;
-use Model\Engines\GoogleTranslateStruct;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
@@ -17,7 +16,6 @@ use MultiCurlHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
-use Utils\Engines\Results\TMSAbstractResponse;
 
 /**
  * Created by PhpStorm.
@@ -371,7 +369,7 @@ abstract class  AbstractEngine implements EngineInterface {
         $newEngineStruct->extra_parameters[ 'client_secret' ] = $_config[ 'secret_key' ];
         $newEngineStruct->others                              = [];
 
-        $gtEngine = Engine::createTempInstance( $newEngineStruct );
+        $gtEngine = EnginesFactory::createTempInstance( $newEngineStruct );
 
         /**
          * @var $gtEngine GoogleTranslate

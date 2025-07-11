@@ -2,11 +2,11 @@
 
 namespace Utils\AsyncTasks\Workers;
 
-use Engine;
 use Exception;
 use Model\FeaturesBase\FeatureSet;
 use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\DomainsResponse;
 use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
@@ -477,7 +477,7 @@ class GlossaryWorker extends AbstractWorker {
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
-        $_TMS = Engine::getInstance( 1 );
+        $_TMS = EnginesFactory::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
         /** @var MyMemory $_TMS */

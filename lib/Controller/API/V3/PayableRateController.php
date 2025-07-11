@@ -10,10 +10,10 @@ use Klein\Response;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\JSONSchema\Errors\JSONValidatorException;
-use Validator\JSONSchema\Errors\JsonValidatorGenericException;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class PayableRateController extends KleinController {
     protected function afterConstruct() {

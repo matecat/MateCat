@@ -2,7 +2,6 @@
 
 namespace Controller\API\V2;
 
-use CatUtils;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
@@ -40,9 +39,10 @@ use Predis\Connection\ConnectionException;
 use RedisHandler;
 use ReflectionException;
 use Utils;
+use Utils\CatUtils;
 use Utils\Langs\Languages;
+use Utils\XliffReplacer\XliffReplacerCallback;
 use View\API\Commons\ZipContentObject;
-use XliffReplacer\XliffReplacerCallback;
 
 set_time_limit( 180 );
 

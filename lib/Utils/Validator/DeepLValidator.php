@@ -1,11 +1,11 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
 use Engines\DeepL\DeepLApiClient;
 use Exception;
-use Model\Engines\DeepLStruct;
 use Model\Engines\EngineDAO;
+use Model\Engines\Structs\DeepLStruct;
 
 class DeepLValidator {
     /**

@@ -1,8 +1,8 @@
 <?php
 
-namespace Validator\JSONSchema;
+namespace Utils\Validator\JSONSchema;
 
-use Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class JSONValidatorObject extends ValidatorObject {
 

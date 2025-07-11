@@ -3,7 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
 use Utils\Engines\Results\TMSAbstractResponse;

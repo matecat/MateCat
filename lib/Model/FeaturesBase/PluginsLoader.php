@@ -3,32 +3,32 @@
 namespace Model\FeaturesBase;
 
 use DirectoryIterator;
-use Features\BaseFeature;
 use INIT;
 use Klein\Klein;
 use Klein\Request;
 use Log;
+use Plugins\Features\BaseFeature;
 use Utils;
 
 
 /**
- * Class FeaturesFactory
+ * Class PluginsLoader
  *
- * This class is an autoloader for Matecat FeaturesFactory, load external plugins classes
+ * This class is an autoloader for Matecat PluginsLoader, load external plugins classes
  * defined in the
  *      <matecat_root>/plugins/<plugin>/manifest.php
  *
  * and the internal ones
- * by making a fallback on the default internal namespace for \FeaturesFactory
+ * by making a fallback on the default internal namespace for \PluginsLoader
  *
  *
  */
-class FeaturesFactory {
+class PluginsLoader {
 
     /**
      * @var self
      */
-    protected static FeaturesFactory $_INSTANCE;
+    protected static PluginsLoader $_INSTANCE;
 
     protected array $VALID_CODES = [
             FeatureCodes::PROJECT_COMPLETION,
@@ -47,7 +47,7 @@ class FeaturesFactory {
         return static::getInstance()->VALID_CODES;
     }
 
-    protected static function getInstance(): FeaturesFactory {
+    protected static function getInstance(): PluginsLoader {
 
         if ( empty( self::$_INSTANCE ) ) {
 
@@ -110,7 +110,7 @@ class FeaturesFactory {
         $instance = static::getInstance();
         if ( !isset( $instance->PLUGIN_CLASSES[ $code ] ) ) {
             //try default autoloading for internal plugins
-            return '\\Features\\' . Utils::underscoreToCamelCase( $code );
+            return '\\Plugins\\Features\\' . Utils::underscoreToCamelCase( $code );
         }
 
         return $instance->PLUGIN_CLASSES[ $code ];

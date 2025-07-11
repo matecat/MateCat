@@ -6,7 +6,7 @@
  * Time: 12:01
  */
 
-namespace Features\ProjectCompletion\Model ;
+namespace Plugins\Features\ProjectCompletion\Model ;
 
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;

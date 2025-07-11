@@ -4,10 +4,10 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessTokenValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
-use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -32,7 +32,6 @@ class ProjectsController extends KleinController {
 
     /**
      * @return void
-     * @throws NotFoundException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -142,10 +141,16 @@ class ProjectsController extends KleinController {
 
         $projectValidator->onSuccess( function () use ( $projectValidator ) {
             $this->project = $projectValidator->getProject();
+        } )->onFailure( function () {
+            $projectByTokenValidator = new ProjectAccessTokenValidator( $this );
+            $projectByTokenValidator->onSuccess( function () use ( $projectByTokenValidator ) {
+                $this->project = $projectByTokenValidator->getProject();
+            } )->validate();
+
         } );
 
-        $this->appendValidator( $projectValidator );
         $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator( $projectValidator );
     }
 
 }

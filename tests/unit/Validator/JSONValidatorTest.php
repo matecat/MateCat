@@ -1,8 +1,8 @@
 <?php
 
 use TestHelpers\AbstractTest;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class JSONValidatorTest extends AbstractTest {
 

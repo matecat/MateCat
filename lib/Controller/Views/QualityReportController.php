@@ -2,7 +2,6 @@
 
 namespace Controller\Views;
 
-use CatUtils;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
@@ -13,6 +12,7 @@ use Model\Jobs\JobDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Utils;
+use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
 use Utils\Langs\Languages;
 

@@ -10,7 +10,6 @@
 namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Engine;
 use Exception;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
@@ -34,9 +33,9 @@ use Utils\Constants\Ices;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
-use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -578,13 +577,13 @@ class TMAnalysisWorker extends AbstractWorker {
         $id_mt_engine = $queueElement->params->id_mt_engine;
         $id_tms       = $queueElement->params->id_tms;
 
-        $tmsEngine = Engine::getInstance( $id_tms );
-        $mtEngine  = Engine::getInstance( $id_mt_engine );
+        $tmsEngine = EnginesFactory::getInstance( $id_tms );
+        $mtEngine  = EnginesFactory::getInstance( $id_mt_engine );
 
         if ( $mtEngine instanceof MyMemory ) {
 
             $_config[ 'get_mt' ] = true;
-            $mtEngine            = Engine::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
+            $mtEngine            = EnginesFactory::getInstance( 0 );  //Do Not Call MyMemory with this instance, use $tmsEngine instance
 
         } else {
             $_config[ 'get_mt' ] = false;
@@ -596,7 +595,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         // if we want only private tm with no keys, mymemory should not be called
         if ( $queueElement->params->only_private && empty( $_config[ 'id_user' ] ) && !$_config[ 'get_mt' ] ) {
-            $tmsEngine = Engine::getInstance( 0 );
+            $tmsEngine = EnginesFactory::getInstance( 0 );
         }
 
         /*
@@ -713,7 +712,7 @@ class TMAnalysisWorker extends AbstractWorker {
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
 
-            // If mt_qe_workflow_enabled is true, force set Engine.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
+            // If mt_qe_workflow_enabled is true, force set EnginesFactory.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
                 $mtEngine->setSkipAnalysis( false );
                 $_config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_version;

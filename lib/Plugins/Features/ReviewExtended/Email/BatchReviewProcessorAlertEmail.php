@@ -1,6 +1,6 @@
 <?php
 
-namespace Features\ReviewExtended\Email;
+namespace Plugins\Features\ReviewExtended\Email;
 
 use Exception;
 use INIT;
@@ -21,9 +21,9 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     private $chunkReview;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $title = 'Alert from batch review processor';
+    protected ?string $title = 'Alert from batch review processor';
 
     /**
      * BatchEventCreatorAlertEmail constructor.

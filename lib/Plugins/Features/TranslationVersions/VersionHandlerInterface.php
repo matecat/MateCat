@@ -7,7 +7,7 @@
  *
  */
 
-namespace Features\TranslationVersions;
+namespace Plugins\Features\TranslationVersions;
 
 
 use Model\Translations\SegmentTranslationStruct;

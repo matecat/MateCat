@@ -7,14 +7,14 @@
  * Time: 14.54
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\SmartMATE;
 
 /**
  * Class Engine_MicrosoftHubStruct
  *
- * This class contains the default parameters for a Moses Engine CREATION
+ * This class contains the default parameters for a Moses EnginesFactory CREATION
  *
  */
 class SmartMATEStruct extends EngineStruct {
@@ -22,7 +22,7 @@ class SmartMATEStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $description = "SmartMATE Engine by Capita";
+    public ?string $description = "SmartMATE EnginesFactory by Capita";
 
     /**
      * @var ?string

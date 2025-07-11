@@ -2,7 +2,6 @@
 
 namespace Model\Analysis;
 
-use AMQHandler;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use Model\Analysis\Constants\MatchConstantsFactory;
@@ -17,6 +16,7 @@ use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Routes;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\ProjectStatus;
 use Utils\Langs\LanguageDomains;
 use Utils\OutsourceTo\OutsourceAvailable;

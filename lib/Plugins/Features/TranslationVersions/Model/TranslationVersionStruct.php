@@ -1,6 +1,6 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Plugins\Features\TranslationVersions\Model;
 
 class TranslationVersionStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct {
 

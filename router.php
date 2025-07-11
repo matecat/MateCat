@@ -9,11 +9,11 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
 use Klein\Klein;
 use Model\Exceptions\ValidationError as Model_ValidationError;
-use Model\FeaturesBase\FeaturesFactory;
+use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Langs\InvalidLanguageException;
-use Validator\JSONSchema\Errors\JSONValidatorException;
-use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use View\API\Commons\Error;
 
 require_once './inc/Bootstrap.php';
@@ -129,6 +129,6 @@ require './lib/Routes/api_v3_routes.php';
 require './lib/Routes/gdrive_routes.php';
 require './lib/Routes/oauth_routes.php';
 require './lib/Routes/app_routes.php';
-FeaturesFactory::loadRoutes( $klein );
+PluginsLoader::loadRoutes( $klein );
 
 $klein->dispatch();

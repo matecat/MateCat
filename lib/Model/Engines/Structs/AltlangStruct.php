@@ -7,14 +7,14 @@
  * Time: 14.34
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\Altlang;
 
 /**
  * Class Engine_AltlangStruct
  *
- * This class contains the default parameters for an Altlang Engine CREATION
+ * This class contains the default parameters for an Altlang EnginesFactory CREATION
  *
  */
 class AltlangStruct extends EngineStruct {
@@ -22,7 +22,7 @@ class AltlangStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $description = "AltLang Engine";
+    public ?string $description = "AltLang EnginesFactory";
 
     /**
      * @var ?string

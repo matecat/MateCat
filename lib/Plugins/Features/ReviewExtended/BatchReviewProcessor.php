@@ -6,18 +6,18 @@
  * Time: 17:44
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
-use Features\RevisionFactory;
-use Features\TranslationEvents\Model\TranslationEvent;
 use Log;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
+use Plugins\Features\RevisionFactory;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
 
 class BatchReviewProcessor {

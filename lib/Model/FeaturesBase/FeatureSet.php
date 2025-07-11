@@ -7,7 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
-use Features\BaseFeature;
 use INIT;
 use Log;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
@@ -17,6 +16,7 @@ use Model\OwnerFeatures\OwnerFeatureDao;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
+use Plugins\Features\BaseFeature;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -304,7 +304,7 @@ class FeatureSet implements FeatureSetInterface {
 
         foreach ( $this->features as $feature ) {
 
-            $cls = FeaturesFactory::getFeatureClassDecorator( $feature, $name );
+            $cls = PluginsLoader::getFeatureClassDecorator( $feature, $name );
             if ( !empty( $cls ) ) {
                 /** @var AbstractDecorator $obj */
                 $obj = new $cls( $controller, $template );
@@ -394,7 +394,7 @@ class FeatureSet implements FeatureSetInterface {
     }
 
     /**
-     * Updates the FeaturesFactory array with new features. Ensures no duplicates are created.
+     * Updates the PluginsLoader array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
      * @param $new_features BasicFeatureStruct[]
@@ -489,7 +489,7 @@ class FeatureSet implements FeatureSetInterface {
      * @return void
      */
     private function runOnFeature( string $method, BasicFeatureStruct $feature, array $args ): void {
-        $name = FeaturesFactory::getPluginClass( $feature->feature_code );
+        $name = PluginsLoader::getPluginClass( $feature->feature_code );
         if ( $name ) {
             $obj = new $name( $feature );
 

@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
@@ -11,12 +10,13 @@ use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
+use Utils\CatUtils;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\Filter;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
-use WorkerClient;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class GlossaryController extends KleinController {
 
@@ -374,8 +374,8 @@ class GlossaryController extends KleinController {
      *
      * @throws InvalidValue
      * @throws \Swaggest\JsonSchema\Exception
-     * @throws \Validator\JSONSchema\Errors\JSONValidatorException
-     * @throws \Validator\JSONSchema\Errors\JsonValidatorGenericException
+     * @throws \Utils\Validator\JSONSchema\Errors\JSONValidatorException
+     * @throws \Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException
      */
     private function validateJson( $json, $jsonSchema ) {
         $validatorObject       = new JSONValidatorObject();

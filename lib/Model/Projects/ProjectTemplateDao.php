@@ -3,7 +3,6 @@
 namespace Model\Projects;
 
 use DateTime;
-use Engine;
 use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\Database;
@@ -22,6 +21,7 @@ use PDO;
 use ReflectionException;
 use stdClass;
 use Utils;
+use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -249,7 +249,7 @@ class ProjectTemplateDao extends AbstractDao {
             $mt = $projectTemplateStruct->getMt();
 
             if ( isset( $mt->id ) ) {
-                $engine = Engine::getInstance( $mt->id );
+                $engine = EnginesFactory::getInstance( $mt->id );
 
                 if ( empty( $engine ) ) {
                     throw new Exception( "Not existing engine." );
@@ -258,7 +258,7 @@ class ProjectTemplateDao extends AbstractDao {
                 $engineRecord = $engine->getEngineRecord();
 
                 if ( $engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid ) {
-                    throw new Exception( "Engine doesn't belong to the user.", 403 );
+                    throw new Exception( "EnginesFactory doesn't belong to the user.", 403 );
                 }
             }
         }

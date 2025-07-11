@@ -7,10 +7,10 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\TranslationVersions\Model\TranslationVersionDao;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
 use View\API\V2\Json\SegmentVersion as JsonFormatter;
 

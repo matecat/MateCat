@@ -20,8 +20,8 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
-use Validator\Contracts\ValidatorObject;
-use Validator\GlossaryCSVValidator;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\GlossaryCSVValidator;
 
 class GlossariesController extends AbstractStatefulKleinController {
 

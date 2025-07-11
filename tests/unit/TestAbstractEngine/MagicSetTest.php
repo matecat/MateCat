@@ -1,6 +1,6 @@
 <?php
 
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;

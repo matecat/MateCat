@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use AMQHandler;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use INIT;
@@ -23,6 +22,7 @@ use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
 use Utils;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;

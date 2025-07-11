@@ -2,20 +2,20 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use Engine;
 use Exception;
 use Log;
 use Model\Database;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Users\MetadataDao;
 use ReflectionException;
+use Utils\CatUtils;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\EnginesFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -164,13 +164,13 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
                 $struct             = EngineStruct::getStruct();
                 $struct->class_load = $engineName;
                 $struct->type       = EngineConstants::MT;
-                $engine             = Engine::createTempInstance( $struct );
+                $engine             = EnginesFactory::createTempInstance( $struct );
 
                 if ( $engine->isAdaptiveMT() ) {
-                    //retrieve OWNER Engine License
+                    //retrieve OWNER EnginesFactory License
                     $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $this->getUser()->uid, $engine->getEngineRecord()->class_load ); // engine_id
                     if ( !empty( $ownerMmtEngineMetaData ) ) {
-                        $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                        $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
                         if ( $engine->getMemoryIfMine( $memoryKey ) ) {
                             $engine_type = explode( "\\", $engine->getEngineRecord()->class_load );
                             $response[]  = array_pop( $engine_type );

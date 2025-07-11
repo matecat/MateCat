@@ -6,7 +6,7 @@
  * Time: 15:08
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;

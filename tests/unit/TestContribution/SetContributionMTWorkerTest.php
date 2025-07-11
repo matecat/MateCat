@@ -1,12 +1,13 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Stomp\Transport\Frame;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\SetContributionMTWorker;
 use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Constants\EngineConstants;
@@ -127,7 +128,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MMT
+        //create a stub EnginesFactory MMT
         $stubEngine = @$this->getMockBuilder( MMT::class )
                 ->disableOriginalConstructor()
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
@@ -213,7 +214,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this->getMockBuilder( MMT::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
                 ->disableOriginalConstructor()
@@ -345,7 +346,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this
                 ->getMockBuilder( '\Utils\Engines\MMT' )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
@@ -406,7 +407,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this
                 ->getMockBuilder( Lara::class )
                 ->onlyMethods( [ 'update', 'getEngineRecord' ] )
@@ -499,7 +500,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         $this->expectException( EndQueueException::class );
-        $this->expectExceptionMessage( "Engine 91827364 not found" );
+        $this->expectExceptionMessage( "EnginesFactory 91827364 not found" );
         $this->expectExceptionCode( SetContributionWorker::ERR_NO_TM_ENGINE );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );

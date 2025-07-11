@@ -1,8 +1,8 @@
 <?php
 
-use Features\Airbnb;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
+use Plugins\Features\Airbnb;
 use TestHelpers\AbstractTest;
 
 

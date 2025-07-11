@@ -126,7 +126,7 @@ class AIAssistantController extends KleinController {
      */
     private function enqueueWorker( $queue, $params ) {
         try {
-            \WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => \WorkerClient::$_HANDLER->persistent ] );
+            Utils\ActiveMQ\WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => Utils\ActiveMQ\WorkerClient::$_HANDLER->persistent ] );
         } catch ( \Exception $e ) {
             # Handle the error, logging, ...
             $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";

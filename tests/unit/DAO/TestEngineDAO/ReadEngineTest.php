@@ -2,8 +2,8 @@
 
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
-use Model\Engines\NONEStruct;
+use Model\Engines\Structs\EngineStruct;
+use Model\Engines\Structs\NONEStruct;
 use TestHelpers\AbstractTest;
 
 

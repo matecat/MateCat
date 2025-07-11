@@ -1,17 +1,17 @@
 <?php
 
-namespace Validator\JSONSchema\Errors;
+namespace Utils\Validator\JSONSchema\Errors;
 
 use Exception;
 use JsonSerializable;
 use Swaggest\JsonSchema\Exception\Error;
-use Validator\Contracts\ValidatorExceptionInterface;
+use Utils\Validator\Contracts\ValidatorExceptionInterface;
 
 class JSONValidatorException extends Exception implements JsonSerializable, ValidatorExceptionInterface {
     /**
      * @var Error
      */
-    private $error;
+    private Error $error;
 
     /**
      * JSONValidatorException constructor.
@@ -26,35 +26,35 @@ class JSONValidatorException extends Exception implements JsonSerializable, Vali
     /**
      * @return string
      */
-    public function getError() {
+    public function getError(): string {
         return $this->error->error;
     }
 
     /**
      * @return string[]
      */
-    public function getSchemaPointers() {
+    public function getSchemaPointers(): array {
         return $this->error->schemaPointers;
     }
 
     /**
      * @return string
      */
-    public function getDataPointer() {
+    public function getDataPointer(): string {
         return $this->error->dataPointer;
     }
 
     /**
      * @return string
      */
-    public function getProcessingPath() {
+    public function getProcessingPath(): string {
         return $this->error->processingPath;
     }
 
     /**
      * @return Error[]
      */
-    public function getSubErrors() {
+    public function getSubErrors(): array {
         return $this->error->subErrors;
     }
 

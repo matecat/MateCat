@@ -6,7 +6,7 @@
  * Time: 11:25 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
 use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
@@ -15,8 +15,8 @@ use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
 use Model\Jobs\JobStruct;
-use Utils\Constants\TranslationStatus;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class SegmentFilterDao extends AbstractDao {
 

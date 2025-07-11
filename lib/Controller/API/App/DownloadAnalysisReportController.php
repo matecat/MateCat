@@ -2,9 +2,9 @@
 
 namespace Controller\API\App;
 
-use AjaxPasswordCheck;
 use Controller\Abstracts\AbstractDownloadController;
 use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\ActivityLog\Activity;
@@ -13,7 +13,6 @@ use Model\Analysis\XTRFStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use ReflectionException;
-use RuntimeException;
 use Utils;
 use View\API\Commons\ZipContentObject;
 
@@ -21,6 +20,7 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
+        $this->appendValidator( new ProjectPasswordValidator( $this ) );
     }
 
     /**
@@ -33,18 +33,6 @@ class DownloadAnalysisReportController extends AbstractDownloadController {
         $request          = $this->validateTheRequest();
         $_project_data    = ProjectDao::getProjectAndJobData( $request[ 'id_project' ] );
         $this->id_job     = (int)$_project_data[ 0 ][ 'jid' ];
-
-        $pCheck = new AjaxPasswordCheck();
-        $access = $pCheck->grantProjectAccess( $_project_data, $request[ 'password' ] );
-
-        //check for Password correctness
-        if ( !$access ) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            $this->log( $msg );
-            Utils::sendErrMailReport( $msg );
-
-            throw new RuntimeException( $msg );
-        }
 
         $this->featureSet->loadForProject( ProjectDao::findById( $request[ 'id_project' ], 60 * 60 * 24 ) );
 

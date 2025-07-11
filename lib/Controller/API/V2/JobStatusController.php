@@ -12,11 +12,11 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
 use Model\Translations\SegmentTranslationDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\BulkSegmentStatusChangeWorker;
 use Utils\Constants\TranslationStatus;
-use WorkerClient;
 
 
 class JobStatusController extends KleinController {

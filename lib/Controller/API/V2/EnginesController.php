@@ -14,7 +14,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Model\Database;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use View\API\V2\Json\Engine;
 
 class EnginesController extends KleinController {

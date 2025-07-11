@@ -1,6 +1,6 @@
 <?php
 
-namespace Validator\JSONSchema;
+namespace Utils\Validator\JSONSchema;
 
 use Exception;
 use INIT;
@@ -10,10 +10,10 @@ use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRefProvider;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
-use Validator\JSONSchema\Errors\JSONValidatorException;
-use Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 
 class JSONValidator extends AbstractValidator {
 
@@ -68,6 +68,7 @@ class JSONValidator extends AbstractValidator {
      */
     public function validate( ValidatorObject $object ): ?ValidatorObject {
 
+        /** @var JSONValidatorObject $object */
         $object->decoded = json_decode( $object->json );
 
         try {

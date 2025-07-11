@@ -1,14 +1,8 @@
 <?php
 
-namespace Features\TranslationVersions\Handlers;
+namespace Plugins\Features\TranslationVersions\Handlers;
 
 use Exception;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\TranslationEventsHandler;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
-use Features\TranslationVersions\VersionHandlerInterface;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -16,6 +10,12 @@ use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\TranslationEventsHandler;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use RuntimeException;
 use Utils;
 use Utils\Constants\TranslationStatus;

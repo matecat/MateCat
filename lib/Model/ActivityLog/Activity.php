@@ -4,8 +4,8 @@ namespace Model\ActivityLog;
 
 use Exception;
 use Log;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
-use WorkerClient;
 
 /**
  * Created by PhpStorm.

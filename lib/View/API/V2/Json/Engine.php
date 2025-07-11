@@ -9,7 +9,7 @@
 namespace View\API\V2\Json;
 
 
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 
 class Engine {
 

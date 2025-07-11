@@ -53,7 +53,7 @@ abstract class KleinController implements IController {
     public array $params = [];
 
     /**
-     * @var ?\Model\FeaturesBase\FeatureSet
+     * @var ?FeatureSet
      */
     protected ?FeatureSet $featureSet = null;
 

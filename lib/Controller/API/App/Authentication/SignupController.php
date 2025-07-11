@@ -2,7 +2,6 @@
 
 namespace Controller\API\App\Authentication;
 
-use CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
@@ -18,6 +17,7 @@ use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
 use Utils;
+use Utils\CatUtils;
 
 class SignupController extends AbstractStatefulKleinController {
 

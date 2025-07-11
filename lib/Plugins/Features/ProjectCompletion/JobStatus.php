@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Features\ProjectCompletion ;
+namespace Plugins\Features\ProjectCompletion ;
 
 class JobStatus implements IProjectCompletionStatus  {
 

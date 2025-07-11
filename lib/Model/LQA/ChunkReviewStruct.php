@@ -35,7 +35,7 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      */
     public function getChunk(): JobStruct {
         $review = clone $this;
@@ -43,17 +43,6 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         return $this->cachable( __FUNCTION__, $review, function ( $review ) {
             return ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
         } );
-    }
-
-    /**
-     * @return int
-     */
-    public function getReviewedPercentage() {
-        $count = $this->getChunk()->totalWordsCount();
-
-        return round( ( $this->reviewed_words_count /
-                ( empty( $count ) ? 1 : $count ) *
-                100 ), 2 );
     }
 
     public function getUndoData() {

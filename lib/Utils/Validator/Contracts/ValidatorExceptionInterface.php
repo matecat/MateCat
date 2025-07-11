@@ -7,7 +7,7 @@
  *
  */
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
 interface ValidatorExceptionInterface {
 

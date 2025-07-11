@@ -2,10 +2,11 @@
 
 namespace Utils\Url;
 
-use CatUtils;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
+use Utils\CatUtils;
 
 class JobUrlBuilder {
 
@@ -18,13 +19,13 @@ class JobUrlBuilder {
      *
      * Returns null in case of wrong parameters
      *
-     * @param \Model\Jobs\JobStruct $job
-     * @param string                $projectName
-     * @param array                 $options
+     * @param JobStruct $job
+     * @param string    $projectName
+     * @param array     $options
      *
      * @return JobUrls
      */
-    public static function createFromJobStructAndProjectName( JobStruct $job, $projectName, $options = [] ) {
+    public static function createFromJobStructAndProjectName( JobStruct $job, string $projectName, array $options = [] ): JobUrls {
 
         // 3. get passwords array
         $passwords   = [];
@@ -74,13 +75,14 @@ class JobUrlBuilder {
      *
      * Returns null in case of wrong parameters
      *
-     * @param \Model\Jobs\JobStruct $job
-     * @param array                 $options
-     * @param ProjectStruct|null    $project
+     * @param JobStruct          $job
+     * @param array              $options
+     * @param ProjectStruct|null $project
      *
      * @return JobUrls
+     * @throws ReflectionException
      */
-    public static function createFromJobStruct( JobStruct $job, $options = [], ProjectStruct $project = null ) {
+    public static function createFromJobStruct( JobStruct $job, array $options = [], ProjectStruct $project = null ): ?JobUrls {
 
         // 1. if project is passed we gain a query
         if ( $project == null ) {

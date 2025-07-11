@@ -1,5 +1,8 @@
 <?php
 
+namespace Utils;
+
+use Log;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -16,10 +19,11 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
-use Utils\Constants\TranslationStatus;
+use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
-use Validator\Contracts\ValidatorObject;
-use Validator\IsJobRevisionValidator;
+use Utils\Constants\TranslationStatus;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\IsJobRevisionValidator;
 
 class CatUtils {
 
@@ -772,12 +776,8 @@ class CatUtils {
         if ( !$job ) {
 
             $chunkReview = ChunkReviewDao::findByReviewPasswordAndJobId( $jobPassword, $jobId );
+            $job         = $chunkReview->getChunk();
 
-            if ( !$chunkReview ) {
-                return null;
-            }
-
-            $job = $chunkReview->getChunk();
         }
 
         return $job;
@@ -878,6 +878,7 @@ class CatUtils {
      * @param int|null    $filtersTemplateId
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function deleteSha( string $file_path, string $source, ?string $segmentationRule = null, ?int $filtersTemplateId = 0 ) {
 
@@ -929,7 +930,6 @@ class CatUtils {
                 return;
             } //exit the loop after 2 seconds, can not acquire the lock
             usleep( 50000 );
-            continue;
         }
 
         $file_content       = fread( $fp, filesize( $hash_file_path ) );
@@ -969,51 +969,48 @@ class CatUtils {
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $params    = null;
 
-        if ( $filters_extraction_parameters !== null ) {
-
-            // send extraction params based on the file extension
-            switch ( $extension ) {
-                case "json":
-                    if ( isset( $filters_extraction_parameters->json ) ) {
-                        $params = $filters_extraction_parameters->json;
-                    }
-                    break;
-                case "xml":
-                    if ( isset( $filters_extraction_parameters->xml ) ) {
-                        $params = $filters_extraction_parameters->xml;
-                    }
-                    break;
-                case "yml":
-                case "yaml":
-                    if ( isset( $filters_extraction_parameters->yaml ) ) {
-                        $params = $filters_extraction_parameters->yaml;
-                    }
-                    break;
-                case "doc":
-                case "docx":
-                    if ( isset( $filters_extraction_parameters->ms_word ) ) {
-                        $params = $filters_extraction_parameters->ms_word;
-                    }
-                    break;
-                case "xls":
-                case "xlsx":
-                    if ( isset( $filters_extraction_parameters->ms_excel ) ) {
-                        $params = $filters_extraction_parameters->ms_excel;
-                    }
-                    break;
-                case "ppt":
-                case "pptx":
-                    if ( isset( $filters_extraction_parameters->ms_powerpoint ) ) {
-                        $params = $filters_extraction_parameters->ms_powerpoint;
-                    }
-                    break;
-                case "dita":
-                case "ditamap":
-                    if ( isset( $filters_extraction_parameters->dita ) ) {
-                        $params = $filters_extraction_parameters->dita;
-                    }
-                    break;
-            }
+        // send extraction params based on the file extension
+        switch ( $extension ) {
+            case "json":
+                if ( isset( $filters_extraction_parameters->json ) ) {
+                    $params = $filters_extraction_parameters->json;
+                }
+                break;
+            case "xml":
+                if ( isset( $filters_extraction_parameters->xml ) ) {
+                    $params = $filters_extraction_parameters->xml;
+                }
+                break;
+            case "yml":
+            case "yaml":
+                if ( isset( $filters_extraction_parameters->yaml ) ) {
+                    $params = $filters_extraction_parameters->yaml;
+                }
+                break;
+            case "doc":
+            case "docx":
+                if ( isset( $filters_extraction_parameters->ms_word ) ) {
+                    $params = $filters_extraction_parameters->ms_word;
+                }
+                break;
+            case "xls":
+            case "xlsx":
+                if ( isset( $filters_extraction_parameters->ms_excel ) ) {
+                    $params = $filters_extraction_parameters->ms_excel;
+                }
+                break;
+            case "ppt":
+            case "pptx":
+                if ( isset( $filters_extraction_parameters->ms_powerpoint ) ) {
+                    $params = $filters_extraction_parameters->ms_powerpoint;
+                }
+                break;
+            case "dita":
+            case "ditamap":
+                if ( isset( $filters_extraction_parameters->dita ) ) {
+                    $params = $filters_extraction_parameters->dita;
+                }
+                break;
         }
 
         return $params;

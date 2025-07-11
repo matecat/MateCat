@@ -6,7 +6,7 @@
  * Time: 17:24
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
 
 class TranslationEventStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct  {

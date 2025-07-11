@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class MigrateEngines extends AbstractMatecatMigration {
 
     public $sql_up = [ "

@@ -2,11 +2,9 @@
 
 namespace Controller\API\V3;
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
 use Model\Analysis\Constants\ConstantsInterface;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\DataAccess\IDaoStruct;
@@ -22,7 +20,9 @@ use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
+use Utils\CatUtils;
 use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController {

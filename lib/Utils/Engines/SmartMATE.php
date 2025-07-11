@@ -3,7 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
-use Model\Engines\SmartMATEStruct;
+use Model\Engines\Structs\SmartMATEStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Traits\Oauth;
 
@@ -44,7 +44,7 @@ class SmartMATE extends AbstractEngine {
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
 class ValidatorErrorObject {
 

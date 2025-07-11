@@ -2,8 +2,6 @@
 
 namespace Controller\API\App;
 
-use AjaxPasswordCheck;
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
@@ -13,18 +11,21 @@ use Exception;
 use INIT;
 use InvalidArgumentException;
 use Model\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\CatUtils;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TmKeyManagement\TmKeyManager;
-use Validator\JSONSchema\Errors\JSONValidatorException;
-use Validator\JSONSchema\Errors\JsonValidatorGenericException;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class UpdateJobKeysController extends KleinController {
 
@@ -162,7 +163,7 @@ class UpdateJobKeysController extends KleinController {
 
         // update character_counter_count_tags job metadata
         if ( $request[ 'character_counter_count_tags' ] !== null ) {
-            $character_counter_count_tags = $request[ 'character_counter_count_tags' ] == true ? "1" : "0";
+            $character_counter_count_tags = $request[ 'character_counter_count_tags' ] ? "1" : "0";
             $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'character_counter_count_tags', $character_counter_count_tags );
         }
 
@@ -179,8 +180,8 @@ class UpdateJobKeysController extends KleinController {
 
     /**
      * @return array
-     * @throws AuthenticationError
      * @throws ReflectionException
+     * @throws NotFoundException
      */
     private function validateTheRequest(): array {
         $character_counter_mode       = ( $this->request->param( 'character_counter_mode' ) !== null ) ? filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) : null;
@@ -202,15 +203,7 @@ class UpdateJobKeysController extends KleinController {
         }
 
         // Get Job Info, we need only a row of job
-        $jobData = JobDao::getByIdAndPassword( (int)$job_id, $job_pass );
-
-        // Check if user can access the job
-        $pCheck = new AjaxPasswordCheck();
-
-        // Check for Password correctness
-        if ( empty( $jobData ) or !$pCheck->grantJobAccessByJobData( $jobData, $job_pass ) ) {
-            throw new AuthenticationError( "Wrong password", -10 );
-        }
+        $jobData = ChunkDao::getByIdAndPassword( (int)$job_id, $job_pass );
 
         // validate $tm_keys
         try {

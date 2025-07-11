@@ -6,8 +6,8 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Controller\API\Commons\Validators\ProjectValidator;
 use Exception;
-use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 use Model\Projects\ProjectStruct;
+use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 
 class ProjectCompletionStatus extends KleinController {
 

@@ -2,10 +2,10 @@
 
 namespace Model\ConnectedServices\Oauth;
 
-use Constants;
 use DefuseEncryption;
 use Exception;
 use INIT;
+use Utils\Constants\Constants;
 
 /**
  * Class OauthTokenEncryption.

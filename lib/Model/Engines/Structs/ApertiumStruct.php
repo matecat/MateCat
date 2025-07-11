@@ -7,14 +7,14 @@
  * Time: 14.34
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\Apertium;
 
 /**
  * Class Engine_ApertiumStruct
  *
- * This class contains the default parameters for a Apertium Engine CREATION
+ * This class contains the default parameters for a Apertium EnginesFactory CREATION
  *
  */
 class ApertiumStruct extends EngineStruct {
@@ -22,7 +22,7 @@ class ApertiumStruct extends EngineStruct {
     /**
      * @var ?string
      */
-    public ?string $description = "Apertium Engine";
+    public ?string $description = "Apertium EnginesFactory";
 
     /**
      * @var ?string

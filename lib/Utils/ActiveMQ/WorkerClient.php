@@ -7,6 +7,11 @@
  * Time: 12:42 PM
  */
 
+namespace Utils\ActiveMQ;
+
+use Exception;
+use INIT;
+use InvalidArgumentException;
 use Stomp\Transport\Message;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
@@ -14,11 +19,11 @@ use Utils\TaskRunner\Commons\QueueElement;
 
 class WorkerClient {
 
-    public static $_QUEUES;
+    public static array $_QUEUES = [];
     /**
      * @var AMQHandler
      */
-    public static $_HANDLER;
+    public static AMQHandler $_HANDLER;
 
 
     /**

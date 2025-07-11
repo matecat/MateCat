@@ -9,10 +9,10 @@ use INIT;
 use Klein\Response;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\JSONSchema\Errors\JSONValidatorException;
-use Validator\JSONSchema\Errors\JsonValidatorGenericException;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 
 class QAModelTemplateController extends KleinController {

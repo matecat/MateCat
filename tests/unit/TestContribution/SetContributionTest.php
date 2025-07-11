@@ -10,6 +10,8 @@
 
 use Model\Database;
 use TestHelpers\AbstractTest;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
 use Utils\TaskRunner\Commons\ContextList;
@@ -151,7 +153,7 @@ class SetContributionTest extends AbstractTest {
 
         // Create a stub for the \AMQHandler class.
         //we want to test that Set::contribution will call send with these parameters
-        $stub = @$this->getMockBuilder( '\AMQHandler' )->getMock();
+        $stub = @$this->getMockBuilder( '\Utils\ActiveMQ\AMQHandler' )->getMock();
 
         $queueElement            = new QueueElement();
         $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );

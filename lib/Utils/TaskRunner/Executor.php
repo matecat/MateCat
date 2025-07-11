@@ -9,7 +9,6 @@
 
 namespace Utils\TaskRunner;
 
-use AMQHandler;
 use Bootstrap;
 use Exception;
 use INIT;
@@ -21,6 +20,7 @@ use SplObserver;
 use SplSubject;
 use Stomp\Transport\Frame;
 use Utils;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\QueueElement;

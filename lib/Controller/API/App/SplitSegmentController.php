@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -13,6 +12,7 @@ use Model\Jobs\ChunkDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
+use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
 
 class SplitSegmentController extends KleinController {

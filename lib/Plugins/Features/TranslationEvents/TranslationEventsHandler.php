@@ -6,19 +6,19 @@
  * Time: 16:29
  */
 
-namespace Features\TranslationEvents;
+namespace Plugins\Features\TranslationEvents;
 
-use Constants;
 use Exception;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationEvents\Model\TranslationEventStruct;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\TransactionalTrait;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class TranslationEventsHandler {
@@ -111,14 +111,14 @@ class TranslationEventsHandler {
 
         if (
                 in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES ) &&
-                $event->getSourcePage() < Constants::SOURCE_PAGE_REVISION
+                $event->getSourcePage() < SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
         }
 
         if (
                 in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES ) &&
-                $event->getSourcePage() >= Constants::SOURCE_PAGE_REVISION
+                $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
         }
@@ -153,7 +153,7 @@ class TranslationEventsHandler {
         if ( !$event->isFinalRevisionFlagAllowed() ) {
             $eventStruct->final_revision = 0;
         } else {
-            $eventStruct->final_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
+            $eventStruct->final_revision = (int)$eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
         }
 
         $eventStruct->id = TranslationEventDao::insertStruct( $eventStruct );

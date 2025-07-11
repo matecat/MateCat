@@ -2,14 +2,11 @@
 
 namespace Controller\API\V1;
 
-use Constants;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
-use Engine;
 use Exception;
-use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
 use Log;
@@ -39,26 +36,29 @@ use Model\Teams\TeamStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
 use ProjectManager;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
 use Utils;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TmKeyPermissions;
 use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
-use Utils\ProjectQueue\Queue;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
-use Validator\Contracts\ValidatorObject;
-use Validator\EngineValidator;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
-use Validator\MMTValidator;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\EngineValidator;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class NewController extends KleinController {
 
@@ -184,7 +184,7 @@ class NewController extends KleinController {
         }
 
         // DeepL
-        $engine = Engine::getInstance( $request[ 'mt_engine' ] );
+        $engine = EnginesFactory::getInstance( $request[ 'mt_engine' ] );
         if ( $engine instanceof DeepL and $request[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
         }
@@ -242,7 +242,7 @@ class NewController extends KleinController {
         // flag to mark the project "from API"
         $projectStructure[ 'from_api' ] = true;
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
 
@@ -356,7 +356,7 @@ class NewController extends KleinController {
 
             // engines restrictions
             if ( $mt_engine <= 1 ) {
-                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
+                throw new InvalidArgumentException( "MT EnginesFactory id $mt_engine is not supported for QE Workflows" );
             }
 
             $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
@@ -509,13 +509,13 @@ class NewController extends KleinController {
     private function validateEngines( int $tms_engine, int $mt_engine ): array {
 
         if ( $tms_engine > 1 ) {
-            throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
+            throw new InvalidArgumentException( "Invalid TM EnginesFactory.", -21 );
         }
 
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
-                throw new InvalidArgumentException( "Invalid MT Engine.", -2 );
+                throw new InvalidArgumentException( "Invalid MT EnginesFactory.", -2 );
             }
 
             try {

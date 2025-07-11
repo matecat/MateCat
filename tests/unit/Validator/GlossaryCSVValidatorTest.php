@@ -1,8 +1,8 @@
 <?php
 
 use TestHelpers\AbstractTest;
-use Validator\Contracts\ValidatorObject;
-use Validator\GlossaryCSVValidator;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\GlossaryCSVValidator;
 
 class GlossaryCSVValidatorTest extends AbstractTest {
 

@@ -15,7 +15,7 @@ use PDOException;
 use ProjectManager;
 use RecursiveArrayObject;
 use ReflectionException;
-use Utils\ProjectQueue\Queue;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -95,7 +95,7 @@ class ProjectCreationWorker extends AbstractWorker {
      * @throws ReflectionException
      */
     protected function _publishResults() {
-        Queue::publishResults( $this->projectStructure );
+        ProjectQueue::publishResults( $this->projectStructure );
         $this->_doLog( "Project creation completed: " . $this->projectStructure[ 'id_project' ] );
         $this->projectStructure = new RecursiveArrayObject();
     }

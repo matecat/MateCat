@@ -2,11 +2,8 @@
 
 namespace Utils\Engines;
 
-use AMQHandler;
-use Engine;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
-use Features\Mmt;
 use INIT;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
@@ -15,23 +12,25 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
-use Model\Engines\MMTStruct;
+use Model\Engines\Structs\MMTStruct;
 use Model\Projects\ProjectDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Plugins\Features\Mmt;
 use RedisHandler;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 use Stomp\Transport\Message;
 use Throwable;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Created by PhpStorm.
@@ -68,7 +67,7 @@ class Lara extends AbstractEngine {
         parent::__construct( $engineRecord );
 
         if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         $this->_skipAnalysis = true;
@@ -100,7 +99,7 @@ class Lara extends AbstractEngine {
         /**
          * @var MMTEngine $engine
          */
-        $engine                 = Engine::createTempInstance( $mmtStruct );
+        $engine                 = EnginesFactory::createTempInstance( $mmtStruct );
         $this->mmt_GET_Fallback = $engine;
 
         if ( !empty( $extraParams[ 'MMT-License' ] ) ) {
@@ -114,7 +113,7 @@ class Lara extends AbstractEngine {
             /**
              * @var MMTEngine $engine
              */
-            $engine                       = Engine::createTempInstance( $mmtStruct );
+            $engine                       = EnginesFactory::createTempInstance( $mmtStruct );
             $this->mmt_SET_PrivateLicense = $engine;
         }
 

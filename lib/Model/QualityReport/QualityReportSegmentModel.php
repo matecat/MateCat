@@ -8,11 +8,7 @@
 
 namespace Model\QualityReport;
 
-use CatUtils;
-use Constants;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationVersionDao;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Comments\CommentDao;
 use Model\FeaturesBase\FeatureSet;
@@ -24,6 +20,10 @@ use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Utils\CatUtils;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class QualityReportSegmentModel {
@@ -265,7 +265,7 @@ class QualityReportSegmentModel {
 
                 $translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $event->translation ) : $event->translation;
 
-                if ( $event->source_page == Constants::SOURCE_PAGE_TRANSLATE ) {
+                if ( $event->source_page == SourcePages::SOURCE_PAGE_TRANSLATE ) {
                     $seg->last_translation = $translation;
                 } else {
                     $seg->last_revisions[] = [

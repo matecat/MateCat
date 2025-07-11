@@ -1,14 +1,16 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Constants\EngineConstants;
 use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
@@ -121,7 +123,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this
             ->getMockBuilder( MyMemory::class )
             ->onlyMethods(['update', 'getEngineRecord' ])
@@ -205,7 +207,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this
             ->getMockBuilder( '\Utils\Engines\MyMemory' )
             ->onlyMethods(['update', 'getEngineRecord' ])
@@ -338,7 +340,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker = new $this->queueElement->classLoad( @$this->getMockBuilder( AMQHandler::class )->getMock() );
         $_worker->attach( $this );
 
-        //create a stub Engine MyMemory
+        //create a stub EnginesFactory MyMemory
         $stubEngine = @$this
             ->getMockBuilder( MyMemory::class )
             ->disableOriginalConstructor()
@@ -437,7 +439,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         //create an empty engine
-        $_worker->setEngine( Engine::getInstance( 0 ) );
+        $_worker->setEngine( EnginesFactory::getInstance( 0 ) );
 
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );

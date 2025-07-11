@@ -3,9 +3,8 @@
 namespace Controller\API\GDrive;
 
 use Aws\S3\Exception\S3Exception;
-use Constants;
 use Controller\Abstracts\AbstractStatefulKleinController;
-use CookieManager;
+use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
 use INIT;
@@ -15,6 +14,7 @@ use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils;
+use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
 

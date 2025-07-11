@@ -7,7 +7,7 @@
  */
 
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\Jobs\JobStruct;

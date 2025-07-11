@@ -5,14 +5,13 @@ namespace Utils\TMS;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use DateTime;
 use DateTimeZone;
-use Engine;
 use Exception;
 use INIT;
 use InvalidArgumentException;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use Model\TMSService\TMSServiceDao;
@@ -24,6 +23,7 @@ use stdClass;
 use Utils;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\ExportResponse;
 
@@ -61,7 +61,7 @@ class TMSService {
 
         //get MyMemory service
         /** @var $mymemory_engine MyMemory */
-        $mymemory_engine       = Engine::getInstance( 1 );
+        $mymemory_engine       = EnginesFactory::getInstance( 1 );
         $this->mymemory_engine = $mymemory_engine;
 
         $this->output_type = 'translation';
@@ -186,13 +186,13 @@ class TMSService {
                     $struct             = EngineStruct::getStruct();
                     $struct->class_load = $engineName;
                     $struct->type       = EngineConstants::MT;
-                    $engine             = Engine::createTempInstance( $struct );
+                    $engine             = EnginesFactory::createTempInstance( $struct );
 
                     if ( $engine->isAdaptiveMT() ) {
-                        //retrieve OWNER Engine License
+                        //retrieve OWNER EnginesFactory License
                         $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRecord()->class_load ); // engine_id
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
-                            $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                            $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
 
                             Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );

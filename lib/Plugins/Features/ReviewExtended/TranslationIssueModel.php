@@ -6,18 +6,18 @@
  * Time: 11:36
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
 use Model\Exceptions\ValidationError;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Utils;
 
 class TranslationIssueModel {

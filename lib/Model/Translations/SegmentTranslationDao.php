@@ -16,11 +16,11 @@ use Model\Search\ReplaceEventStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\PropagationWorker;
 use Utils\Autopropagation\PropagationAnalyser;
 use Utils\Constants\TranslationStatus;
 use View\API\V2\Json\Propagation as PropagationApi;
-use WorkerClient;
 
 class SegmentTranslationDao extends AbstractDao {
 

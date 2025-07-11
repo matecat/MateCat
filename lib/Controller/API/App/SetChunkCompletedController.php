@@ -6,10 +6,10 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Controller\Traits\APISourcePageGuesserTrait;
-use Features\ProjectCompletion\Model\EventModel;
 use InvalidArgumentException;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Jobs\JobDao;
+use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
 use Utils;
 

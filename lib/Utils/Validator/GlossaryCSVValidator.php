@@ -1,12 +1,12 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
 use Utils;
 use Utils\Files\CSV;
 use Utils\Langs\Languages;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class GlossaryCSVValidator extends AbstractValidator {
 
@@ -39,11 +39,11 @@ class GlossaryCSVValidator extends AbstractValidator {
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
      *
      * @return array
      */
-    private function getHeaders( $filePath ): array {
+    private function getHeaders( string $filePath ): array {
         $headers = CSV::headers( $filePath );
         $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
@@ -51,11 +51,11 @@ class GlossaryCSVValidator extends AbstractValidator {
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
      *
      * @return int
      */
-    public function getNumberOfLanguage( $filePath ): int {
+    public function getNumberOfLanguage( string $filePath ): int {
 
         $headers  = $this->getHeaders( $filePath );
         $skipKeys = [

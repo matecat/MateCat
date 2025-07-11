@@ -2,14 +2,11 @@
 
 namespace Controller\API\App;
 
-use Constants;
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
-use CookieManager;
-use Engine;
 use Exception;
-use Features\ProjectCompletion;
 use INIT;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
@@ -24,20 +21,23 @@ use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
 use ProjectManager;
 use Utils;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Langs\Languages;
-use Utils\ProjectQueue\Queue;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TmKeyManagement\TmKeyManager;
-use Validator\Contracts\ValidatorObject;
-use Validator\EngineValidator;
-use Validator\JSONSchema\JSONValidator;
-use Validator\JSONSchema\JSONValidatorObject;
-use Validator\MMTValidator;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\EngineValidator;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class CreateProjectController extends AbstractStatefulKleinController {
 
@@ -136,7 +136,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
-        $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
+        $engine = EnginesFactory::getInstance( $this->data[ 'mt_engine' ] );
         if ( $engine instanceof MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
         }
@@ -186,7 +186,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectManager->sanitizeProjectStructure();
         $fs::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_token' ] );
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $this->clearSessionFiles();
         $this->assignLastCreatedPid( $projectStructure[ 'id_project' ] );

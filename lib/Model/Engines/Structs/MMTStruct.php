@@ -7,14 +7,14 @@
  * Time: 14.54
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\MMT;
 
 /**
  * Class Engine_MMTStruct
  *
- * This class contains the default parameters for a MMT Engine CREATION
+ * This class contains the default parameters for a MMT EnginesFactory CREATION
  *
  */
 class MMTStruct extends EngineStruct {

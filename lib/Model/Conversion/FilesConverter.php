@@ -2,7 +2,6 @@
 
 namespace Model\Conversion;
 
-use Constants;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -11,6 +10,7 @@ use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\FiltersConfigTemplateStruct;
 use RuntimeException;
 use Utils;
+use Utils\Constants\Constants;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Langs\Languages;
 

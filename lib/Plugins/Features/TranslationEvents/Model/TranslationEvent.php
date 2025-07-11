@@ -1,8 +1,7 @@
 <?php
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
-use Constants;
 use Error;
 use Exception;
 use Model\Database;
@@ -14,6 +13,7 @@ use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
 use RuntimeException;
+use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
 
 class TranslationEvent {
@@ -266,11 +266,11 @@ class TranslationEvent {
                                     TranslationStatus::$INITIAL_STATUSES
                             ) )
             ) {
-                $source_page = Constants::SOURCE_PAGE_TRANSLATE;
+                $source_page = SourcePages::SOURCE_PAGE_TRANSLATE;
             } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED ) {
-                $source_page = Constants::SOURCE_PAGE_REVISION;
+                $source_page = SourcePages::SOURCE_PAGE_REVISION;
             } elseif ( $this->getOldTranslation()->status == TranslationStatus::STATUS_APPROVED2 ) {
-                $source_page = Constants::SOURCE_PAGE_REVISION_2;
+                $source_page = SourcePages::SOURCE_PAGE_REVISION_2;
             } else {
                 throw new Exception( 'Unable to guess source_page for missing prior event' );
             }
@@ -290,11 +290,11 @@ class TranslationEvent {
 
         switch ( $status ) {
             case $status == TranslationStatus::STATUS_TRANSLATED:
-                return Constants::SOURCE_PAGE_TRANSLATE;
+                return SourcePages::SOURCE_PAGE_TRANSLATE;
             case $status == TranslationStatus::STATUS_APPROVED:
-                return Constants::SOURCE_PAGE_REVISION;
+                return SourcePages::SOURCE_PAGE_REVISION;
             case $status == TranslationStatus::STATUS_APPROVED2:
-                return Constants::SOURCE_PAGE_REVISION_2;
+                return SourcePages::SOURCE_PAGE_REVISION_2;
             default:
                 return 0;
         }

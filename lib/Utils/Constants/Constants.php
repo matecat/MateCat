@@ -1,9 +1,9 @@
 <?php
 
+namespace Utils\Constants;
+use Exception;
+
 class Constants {
-    const SOURCE_PAGE_TRANSLATE = 1 ;
-    const SOURCE_PAGE_REVISION = 2 ;
-    const SOURCE_PAGE_REVISION_2 = 3 ;
 
     const SESSION_ACTUAL_SOURCE_LANG = 'actualSourceLang';
 
@@ -17,10 +17,10 @@ class Constants {
 
     const OAUTH_TOKEN_KEY_FILE = '/inc/oauth-token-key.txt';
 
-    const PUBLIC_TM  = "Public TM";
+    const PUBLIC_TM         = "Public TM";
     const NO_DESCRIPTION_TM = "No description";
 
-    public static $allowed_seg_rules = [
+    public static array $allowed_seg_rules = [
             'standard',
             'patent',
             'paragraph',

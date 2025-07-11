@@ -7,11 +7,11 @@
  *
  */
 
-namespace Features\TranslationVersions\Handlers;
+namespace Plugins\Features\TranslationVersions\Handlers;
 
 
-use Features\TranslationVersions\VersionHandlerInterface;
 use Model\Translations\SegmentTranslationStruct;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
 class DummyTranslationVersionHandler implements VersionHandlerInterface {
 

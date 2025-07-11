@@ -1,14 +1,14 @@
 <?php
 
-namespace Features\ProjectCompletion\Decorator;
+namespace Plugins\Features\ProjectCompletion\Decorator;
 
-use CatUtils;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
+use Utils\CatUtils;
 
 class CatDecorator extends AbstractDecorator {
 

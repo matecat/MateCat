@@ -9,17 +9,15 @@
 
 namespace Controller\Views;
 
-use CatUtils;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
-use Features\ReviewExtended\ReviewUtils;
 use INIT;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Engines\EngineDAO;
-use Model\Engines\EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
@@ -33,10 +31,12 @@ use Model\Teams\TeamModel;
 use Model\Users\UserDao;
 use PHPTalBoolean;
 use PHPTalMap;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
 use Utils;
+use Utils\CatUtils;
 use Utils\Constants\Teams;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\Intento;

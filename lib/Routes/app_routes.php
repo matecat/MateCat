@@ -127,6 +127,7 @@ $klein->with( '/api/app/filters-config-template', function () {
     route( '/default', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'default' ] );
 } );
 
+route( '/api/app/projects/[:id_project]/token/[:project_access_token]', 'GET', [ 'Controller\API\V2\ProjectsController', 'get' ] );
 
 // MISC (OLD AJAX ROUTES)
 route( '/api/app/xliff-to-target/convert', 'POST', [ 'Controller\API\App\XliffToTargetConverterController', 'convert' ] );

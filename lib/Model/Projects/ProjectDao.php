@@ -378,7 +378,7 @@ class ProjectDao extends AbstractDao {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_by_id_and_password );
-        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectStruct::class, [ 'id' => $id, 'password' => $password ] )[ 0 ];
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectStruct::class, [ 'id' => $id, 'password' => $password ] )[ 0 ] ?? null;
 
         if ( !$fetched ) {
             throw new NotFoundException( "No project found." );

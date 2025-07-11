@@ -6,14 +6,14 @@
  * Time: 12:06
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\GoogleTranslate;
 
 /**
  * Class GoogleTranslateStruct
  *
- * This class contains the default parameters for a Google Translate Engine CREATION
+ * This class contains the default parameters for a Google Translate EnginesFactory CREATION
  *
  */
 class GoogleTranslateStruct extends EngineStruct {

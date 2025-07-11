@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use Constants;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -14,6 +13,7 @@ use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
 use Utils;
+use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
 

@@ -9,10 +9,10 @@
 
 namespace View\API\App\Json\Analysis;
 
-use CatUtils;
 use Exception;
 use JsonSerializable;
 use stdClass;
+use Utils\CatUtils;
 use Utils\Langs\Languages;
 
 class AnalysisJob implements JsonSerializable {

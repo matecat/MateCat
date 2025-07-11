@@ -1,13 +1,13 @@
 <?php
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\YandexTranslate;
 
 /**
  * Class Engine_YandexTranslateStruct
  *
- * This class contains the default parameters for a Yandex.Translate Engine CREATION
+ * This class contains the default parameters for a Yandex.Translate EnginesFactory CREATION
  *
  */
 class YandexTranslateStruct extends EngineStruct {

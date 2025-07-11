@@ -7,14 +7,14 @@
  * Time: 14.54
  */
 
-namespace Model\Engines;
+namespace Model\Engines\Structs;
 
 use Utils\Engines\MicrosoftHub;
 
 /**
  * Class Engine_MicrosoftHubStruct
  *
- * This class contains the default parameters for a Microsoft Hub Engine CREATION
+ * This class contains the default parameters for a Microsoft Hub EnginesFactory CREATION
  *
  */
 class MicrosoftHubStruct extends EngineStruct {

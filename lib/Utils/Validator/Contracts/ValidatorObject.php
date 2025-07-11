@@ -1,6 +1,6 @@
 <?php
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
 use ArrayAccess;
 use Model\DataAccess\ArrayAccessTrait;
@@ -41,21 +41,21 @@ class ValidatorObject implements ArrayAccess {
     /**
      * Magic setter
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed  $value
      */
-    public function __set( $name, $value ) {
+    public function __set( string $name, $value ) {
         $this->$name = $value;
     }
 
     /**
      * Magic getter
      *
-     * @param $name
+     * @param string $name
      *
      * @return mixed
      */
-    public function __get( $name ) {
+    public function __get( string $name ) {
         if ( !property_exists( $this, $name ) ) {
             return null;
         }

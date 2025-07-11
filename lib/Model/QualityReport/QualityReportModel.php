@@ -10,15 +10,15 @@ namespace Model\QualityReport;
 
 use ArrayObject;
 use Exception;
-use Features\ReviewExtended\IChunkReviewModel;
-use Features\ReviewExtended\ReviewUtils;
-use Features\RevisionFactory;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\ReviseFeedback\FeedbackDAO;
 use Model\Users\UserDao;
+use Plugins\Features\ReviewExtended\IChunkReviewModel;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\RevisionFactory;
 use Utils;
 
 

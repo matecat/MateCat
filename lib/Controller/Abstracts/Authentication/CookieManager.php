@@ -1,5 +1,6 @@
 <?php
 
+namespace Controller\Abstracts\Authentication;
 /**
  * Created by PhpStorm.
  * @author ostico domenico@translated.net / ostico@gmail.com
@@ -10,13 +11,13 @@
 class CookieManager {
 
     /**
-     * @param        $name
+     * @param string $name
      * @param string $value
      * @param array  $options
      *
      * @return bool
      */
-    public static function setCookie( $name, $value = "", array $options = [] ) {
+    public static function setCookie( string $name, string $value = "", array $options = [] ): bool {
 
         if ( version_compare( PHP_VERSION, '7.3.0' ) >= 0 ) {
             return setcookie( $name, $value, $options );

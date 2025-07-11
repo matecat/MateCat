@@ -23,7 +23,7 @@ use ReflectionException;
 
 class ChunkPasswordValidator extends Base {
     /**
-     * @var ?\Model\Jobs\JobStruct
+     * @var ?JobStruct
      */
     protected ?JobStruct $chunk = null;
 

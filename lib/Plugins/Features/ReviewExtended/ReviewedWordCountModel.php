@@ -6,13 +6,9 @@
  * Time: 10:21 AM
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationEvents\Model\TranslationEventStruct;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentStruct;
@@ -22,6 +18,10 @@ use Model\Projects\ProjectStruct;
 use Model\TransactionalTrait;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
+use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
 use Routes;
 use Utils;
 

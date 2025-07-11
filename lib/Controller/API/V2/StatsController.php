@@ -3,12 +3,12 @@
 namespace Controller\API\V2;
 
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Model\Jobs\JobStruct;
 use Model\WordCount\WordCountStruct;
+use Utils\CatUtils;
 
 class StatsController extends KleinController {
 

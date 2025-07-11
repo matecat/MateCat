@@ -2,7 +2,6 @@
 
 namespace Controller\API\App;
 
-use CatUtils;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
@@ -14,6 +13,7 @@ use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
+use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
 
 class SetCurrentSegmentController extends KleinController {

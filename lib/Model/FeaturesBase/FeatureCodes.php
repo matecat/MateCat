@@ -9,11 +9,11 @@
 
 namespace Model\FeaturesBase;
 
-use Features\Mmt;
-use Features\ProjectCompletion;
-use Features\ReviewExtended;
-use Features\SecondPassReview;
-use Features\TranslationVersions;
+use Plugins\Features\Mmt;
+use Plugins\Features\ProjectCompletion;
+use Plugins\Features\ReviewExtended;
+use Plugins\Features\SecondPassReview;
+use Plugins\Features\TranslationVersions;
 
 class FeatureCodes {
 

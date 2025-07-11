@@ -6,7 +6,7 @@
  * Time: 13:06
  */
 
-namespace Features\ReviewExtended\Email ;
+namespace Plugins\Features\ReviewExtended\Email ;
 
 use Exception;
 use Model\Users\UserStruct;
@@ -24,8 +24,8 @@ class RevisionChangedNotificationEmail extends AbstractEmail {
      */
     protected $recipientUser ;
 
-    protected $title = 'Revised segment changed' ;
-    protected $data;
+    protected ?string $title = 'Revised segment changed' ;
+    protected         $data;
     protected $_segmentInfo;
 
     public function __construct( $segmentInfo, $data, $segmentUrl, $changeAuthor = null ) {

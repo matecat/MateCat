@@ -2,7 +2,7 @@
 
 namespace Controller\Abstracts;
 
-use CookieManager;
+use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use INIT;
 use Model\Files\FileDao;

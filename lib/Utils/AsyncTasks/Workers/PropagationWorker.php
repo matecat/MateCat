@@ -10,13 +10,13 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use Features\TranslationVersions\Model\TranslationVersionDao;
 use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDOException;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;

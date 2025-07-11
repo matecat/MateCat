@@ -22,12 +22,29 @@ class JobPasswordValidator extends Base {
      * @throws ReflectionException
      * @throws \Model\Exceptions\NotFoundException
      */
-    public function __construct( KleinController $controller ) {
+    public function __construct( KleinController $controller, ?bool $setChunkInController = true ) {
 
         parent::__construct( $controller );
-        $this->jStruct = ChunkDao::getByIdAndPassword( $this->controller->params[ 'id_job' ], $this->controller->params[ 'password' ] );
 
-        $this->controller->setChunk( $this->jStruct );
+        $filterArgs = [
+                'id_job'   => [
+                        'filter' => FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'password' => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+        ];
+
+        $postInput = (object)filter_var_array( $controller->params, $filterArgs );
+
+        $this->jStruct = ChunkDao::getByIdAndPassword( $postInput->id_job, $postInput->password );
+
+        $controller->params[ 'id_job' ]   = $postInput->id_job;
+        $controller->params[ 'password' ] = $postInput->password;
+
+        if ( $setChunkInController ) {
+            $this->controller->setChunk( $this->jStruct ); //WIP remove this and use onSuccess and afterConstruct Methods in validators and controllers
+        }
 
     }
 

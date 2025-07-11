@@ -12,8 +12,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Model\Jobs\JobStruct;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use View\API\V2\Json\SegmentVersion as JsonFormatter;
 
 

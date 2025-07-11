@@ -7,6 +7,8 @@
    Thank you for keeping is confidential.
  */
 
+use Utils\CatUtils;
+
 class MyMemory {
 
     public static function TMS_MATCH( $seg1, $seg2, $language = false ) {
