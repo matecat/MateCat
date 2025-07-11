@@ -199,20 +199,32 @@ function UploadFileLocal() {
               clearInterval(interval)
               setUploadedFilesNames((prev) => prev.concat([name]))
               if (data.data.zipFiles) {
-                data.data.zipFiles.forEach((zipFile) => {
-                  setFiles((prevFiles) =>
-                    prevFiles.concat({
-                      name: zipFile.name,
-                      uploadProgress: 100,
-                      convertedProgress: 100,
-                      converted: true,
-                      uploaded: true,
-                      error: null,
-                      zipFolder: true,
-                      size: zipFile.size,
-                    }),
-                  )
-                  setUploadedFilesNames((prev) => prev.concat([zipFile.name]))
+                data.data.zipFiles.reverse().forEach((zipFile) => {
+                  setFiles((prevFiles) => {
+                    const index = prevFiles.findIndex((cf) => cf.name === name)
+                    return [
+                      ...prevFiles.slice(0, index + 1),
+                      {
+                        name: zipFile.name,
+                        uploadProgress: 100,
+                        convertedProgress: 100,
+                        converted: true,
+                        uploaded: true,
+                        error: null,
+                        zipFolder: true,
+                        size: zipFile.size,
+                      },
+                      ...prevFiles.slice(index + 1),
+                    ]
+                  })
+                  setUploadedFilesNames((prev) => {
+                    const index = prev.findIndex((cf) => cf === name)
+                    return [
+                      ...prev.slice(0, index + 1),
+                      zipFile.name,
+                      ...prev.slice(index + 1),
+                    ]
+                  })
                 })
               }
               setFiles((prevFiles) =>
@@ -552,7 +564,10 @@ function UploadFileLocal() {
         <>
           <div className="upload-files-list">
             {files.map((f, idx) => (
-              <div key={idx} className="file-item">
+              <div
+                key={idx}
+                className={`file-item ${f.zipFolder ? 'zip-folder' : ''}`}
+              >
                 <div className="file-item-name">
                   <span
                     className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
