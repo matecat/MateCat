@@ -197,12 +197,8 @@ class ProjectManager {
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
-                            'dictation'                               => null,
-                            'show_whitespace'                         => null,
-                            'character_counter'                       => null,
                             'character_counter_mode'                  => null,
                             'character_counter_count_tags'            => null,
-                            'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
                             'tm_prioritization'                       => null,
@@ -397,26 +393,6 @@ class ProjectManager {
         // "From API" flag
         if ( isset( $this->projectStructure[ 'from_api' ] ) and $this->projectStructure[ 'from_api' ] ) {
             $options[ 'from_api' ] = 1;
-        }
-
-        // dictation (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ] !== null ) {
-            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
-        }
-
-        // show_whitespace (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ] !== null ) {
-            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
-        }
-
-        // character_counter (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ] !== null ) {
-            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
-        }
-
-        // ai_assistant (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ] !== null ) {
-            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
         }
 
         // xliff_parameters
