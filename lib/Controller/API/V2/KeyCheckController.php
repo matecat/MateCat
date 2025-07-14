@@ -9,12 +9,12 @@
 namespace API\V2;
 
 
-use API\App\RateLimiterTrait;
+use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Exceptions\NotFoundException;
-use API\Commons\KleinController;
 use ApiKeys_ApiKeyDao;
 use Exception;
+use Traits\RateLimiterTrait;
 use Utils;
 
 class KeyCheckController extends KleinController {

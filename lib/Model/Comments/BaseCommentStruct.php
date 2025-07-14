@@ -1,6 +1,6 @@
 <?php
 
-class Comments_BaseCommentStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, JsonSerializable {
+class Comments_BaseCommentStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
 
     public int     $id;
     public int     $id_job;

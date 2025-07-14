@@ -43,7 +43,8 @@
         "ext-zlib": "*",
         "ext-gd": "*",
         "ext-iconv": "*",
-        "ext-openssl": "*"
+        "ext-openssl": "*",
+        "ext-simplexml": "*"
     },
     "config": {
         "allow-plugins": {

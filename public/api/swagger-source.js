@@ -10,13 +10,13 @@ var spec = {
         </div>
       </div>
       `,
-    version: '2.0.0',
+    version: '3.0.0',
   },
   host: config.swagger_host,
   schemes: ['https'],
   produces: ['application/json'],
   paths: {
-    '/api/v2/projects/{id_project}/{password}': {
+    '/api/v3/projects/{id_project}/{password}': {
       get: {
         tags: ['Project'],
         summary: 'Get project information',
@@ -62,10 +62,10 @@ var spec = {
           `,
         parameters: [
           {
-            name: 'files',
+            name: 'files[]',
             in: 'formData',
             description:
-              'The file(s) to be uploaded. You may also upload your own translation memories (TMX).',
+                'The file(s) to be uploaded, supported file formats <a href="#file-format">available here</a>. You may also upload TMX files, which will trigger the creation of a new translation memory in the account.',
             required: true,
             type: 'file',
           },
@@ -105,7 +105,7 @@ var spec = {
             name: 'mt_engine',
             in: 'formData',
             description:
-              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v2/engines/list endpoint).",
+              "Identifier for Machine Translation Engine. 0 deactivates MT, 1 uses ModernMT Lite, other values correspond to the user's personal MT engines (available engines are retrieved via the /api/v3/engines/list endpoint).",
             required: false,
             type: 'integer',
             default: 1,
@@ -115,7 +115,7 @@ var spec = {
             in: 'formData',
             description:
               'Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create' +
-              ' a new key. - Multiple keys must be comma separated. Up to 5 keys allowed. (xxx345cvf,new,s342f234fc) - If you want to set read, write or both on your private key you can' +
+              ' a new key. - Multiple keys must be comma separated. Up to 10 keys allowed. (xxx345cvf,new,s342f234fc) - If you want to set read, write or both on your private key you can' +
               " add after the key 'r' for read, 'w' for write or 'rw' for both  separated by ':' (xxx345cvf:r,new:w,s342f234fc:rw) - Only available if tms_engine is set to 1 or if is not used",
             required: false,
             type: 'string',
@@ -175,24 +175,6 @@ var spec = {
               'The name of the billing model you want to use in the project you are creating (if you want to use a custom billing model in a project, both relevant parameters must be included in the API call)',
             required: false,
             type: 'string',
-          },
-          {
-            name: 'lexiqa',
-            in: 'formData',
-            description:
-              'Enable lexiQA QA check. Requires purchase of a license from lexiQA.',
-            required: false,
-            type: 'string',
-            default: 0,
-          },
-          {
-            name: 'speech2text',
-            in: 'formData',
-            description:
-              'Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.',
-            required: false,
-            type: 'integer',
-            default: 0,
           },
           {
             name: 'get_public_matches',
@@ -361,94 +343,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/analysis/status': {
-      get: {
-        tags: ['Project'],
-        summary: 'Retrieve the status of a project',
-        description: 'Check Status of a created Project With HTTP POST.',
-        parameters: [
-          {
-            name: 'id_project',
-            in: 'path',
-            description:
-              'The identifier of the project, should be the value returned by the /new method.',
-            required: true,
-            type: 'integer',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description:
-              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'An array of price estimates by product',
-            schema: {
-              $ref: '#/definitions/Status',
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
-    '/api/v2/projects/{id_project}/{password}/change-name': {
-      post: {
-        tags: ['Project'],
-        summary: 'Change the name of a project',
-        description: 'Change the name of a created Project With HTTP POST.',
-        parameters: [
-          {
-            name: 'id_project',
-            in: 'path',
-            description: 'The id of the project',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'password',
-            in: 'path',
-            description: 'The password of the project',
-            required: true,
-            type: 'string',
-          },
-          {
-            name: 'name',
-            in: 'formData',
-            description: 'The new project name.',
-            required: true,
-            type: 'string',
-          },
-        ],
-        responses: {
-          200: {
-            description: 'The id and the new project name',
-            schema: {
-              type: 'object',
-              properties: {
-                id: {
-                  type: 'integer',
-                  example: 123,
-                },
-                name: {
-                  type: 'string',
-                  example: 'the_new_project_name',
-                },
-              },
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
-    '/api/v2/change-password': {
+    '/api/v3/change-password': {
       post: {
         tags: ['Project', 'Job'],
       },
@@ -516,7 +411,130 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/creation_status': {
+    '/api/v3/projects/analysis/status/{id_project}/{password}': {
+      get: {
+        tags: ['Project'],
+        summary: 'Retrieve the status of a project',
+        description: 'Check Status of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description:
+              'The identifier of the project, should be the value returned by the /new method.',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of price estimates by product',
+            schema: {
+              $ref: '#/definitions/Status',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/projects/{id_project}/{password}/analysis/status': {
+      get: {
+        tags: ['Project'],
+        summary: 'Retrieve the status of a project',
+        description: 'Check Status of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description:
+              'The identifier of the project, should be the value returned by the /new method.',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description:
+              'The password associated with the project, should be the value returned by the /new method ( associated with the id_project )',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of price estimates by product',
+            schema: {
+              $ref: '#/definitions/Status',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/projects/{id_project}/{password}/change-name': {
+      post: {
+        tags: ['Project'],
+        summary: 'Change the name of a project',
+        description: 'Change the name of a created Project With HTTP POST.',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'name',
+            in: 'formData',
+            description: 'The new project name.',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The id and the new project name',
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  example: 123,
+                },
+                name: {
+                  type: 'string',
+                  example: 'the_new_project_name',
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/projects/{id_project}/{password}/creation_status': {
       get: {
         tags: ['Project'],
         summary: 'Shows creation status of a project',
@@ -550,7 +568,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/completion_status': {
+    '/api/v3/projects/{id_project}/{password}/completion_status': {
       get: {
         tags: ['Project'],
         summary: 'Shows project completion statuses',
@@ -586,7 +604,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}': {
+    '/api/v3/jobs/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Job Info',
@@ -620,7 +638,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/translation/{id_job}/{password}': {
+    '/api/v3/translation/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Download Translation',
@@ -651,7 +669,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/cancel': {
+    '/api/v3/jobs/{id_job}/{password}/cancel': {
       post: {
         tags: ['Job'],
         summary: 'Cancel API',
@@ -685,7 +703,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/archive': {
+    '/api/v3/jobs/{id_job}/{password}/archive': {
       post: {
         tags: ['Job'],
         summary: 'Archive API',
@@ -719,7 +737,41 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/active': {
+    '/api/v3/jobs/{id_job}/{password}/delete': {
+      post: {
+        tags: ['Job'],
+        summary: 'Delete API',
+        description: 'API to delete a Job',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'ChangeStatus',
+            schema: {
+              $ref: '#/definitions/ChangeStatus',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/active': {
       post: {
         tags: ['Job'],
         summary: 'Active API',
@@ -753,7 +805,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/r2': {
+    '/api/v3/projects/{id_project}/{password}/r2': {
       post: {
         tags: ['Project'],
         summary: 'Generate second pass review 2',
@@ -780,7 +832,7 @@ var spec = {
             in: 'formData',
             description:
               'The id of the job you intend to generate the Revise 2 step for',
-            required: true,
+            required: false,
             type: 'string',
           },
           {
@@ -788,7 +840,7 @@ var spec = {
             in: 'formData',
             description:
               'The password of the job you intend to generate the Revise 2 step for',
-            required: true,
+            required: false,
             type: 'string',
           },
         ],
@@ -805,7 +857,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/urls': {
+    '/api/v3/projects/{id_project}/{password}/urls': {
       get: {
         tags: ['Project'],
         summary: 'Urls of a Project',
@@ -840,7 +892,7 @@ var spec = {
       },
     },
 
-    '/api/v2/projects/{id_project}/{password}/due_date': {
+    '/api/v3/projects/{id_project}/{password}/due_date': {
       post: {
         tags: ['Project'],
         summary: 'Create due date',
@@ -961,7 +1013,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/cancel': {
+    '/api/v3/projects/{id_project}/{password}/cancel': {
       post: {
         tags: ['Project'],
         summary: 'Cancel API',
@@ -995,7 +1047,41 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/archive': {
+    '/api/v3/projects/{id_project}/{password}/delete': {
+      post: {
+        tags: ['Project'],
+        summary: 'Delete API',
+        description: 'API to delete a Project',
+        parameters: [
+          {
+            name: 'id_project',
+            in: 'path',
+            description: 'The id of the project',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the project',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'ChangeStatus',
+            schema: {
+              $ref: '#/definitions/ChangeStatus',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/projects/{id_project}/{password}/archive': {
       post: {
         tags: ['Project'],
         summary: 'Archive API',
@@ -1029,7 +1115,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/active': {
+    '/api/v3/projects/{id_project}/{password}/active': {
       post: {
         tags: ['Project'],
         summary: 'Active API',
@@ -1063,7 +1149,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/merge': {
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/merge': {
       post: {
         tags: ['Project'],
         summary: 'Merge',
@@ -1100,7 +1186,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check':
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/check':
       {
         post: {
           tags: ['Project'],
@@ -1171,7 +1257,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply':
+    '/api/v3/projects/{id_project}/{password}/jobs/{id_job}/{job_password}/split/{num_split}/apply':
       {
         post: {
           tags: ['Project'],
@@ -1242,7 +1328,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/translator': {
+    '/api/v3/jobs/{id_job}/{password}/translator': {
       get: {
         tags: ['Job'],
         summary: 'Gets the translator assigned to a job',
@@ -1331,7 +1417,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/comments': {
+    '/api/v3/jobs/{id_job}/{password}/comments': {
       get: {
         tags: ['Job'],
         summary: 'Get segment comments in a job',
@@ -1372,7 +1458,107 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/quality-report': {
+    '/api/v3/feedback': {
+      post: {
+        tags: ['Job'],
+        summary: 'Create a revision feedback',
+        description: 'Create a revision feedback',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'formData',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'revision_number',
+            in: 'formData',
+            description: 'The revision number (1 or 2)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'feedback',
+            in: 'formData',
+            description: 'The feedback',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'ok',
+            schema: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  example: 'ok',
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qr/download': {
+      post: {
+        tags: ['Quality Report'],
+        summary: 'Download the quality report',
+        description: 'Download the quality report',
+        parameters: [
+          {
+            name: 'idJob',
+            in: 'formData',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'formData',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'format',
+            in: 'formData',
+            description: 'The QR format (csv or json)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'segmentsPerFile',
+            in: 'formData',
+            description: 'The number of segments per file (max 100)',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        produces: ['text/csv', 'application/json'],
+        responses: {
+          200: {
+            description: 'ok',
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/quality-report': {
       get: {
         tags: ['Job', 'Quality Report'],
         summary: 'Quality report',
@@ -1406,7 +1592,41 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams': {
+    '/api/v3/jobs/{id_job}/{password}/quality-report/segments': {
+      get: {
+        tags: ['Job', 'Quality Report'],
+        summary: 'Quality report segments',
+        description: 'API for fetching segments for quality report',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Quality report segments',
+            schema: {
+              $ref: '#/definitions/QualityReportSegments',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/teams': {
       get: {
         tags: ['Teams'],
         summary: 'List available teams',
@@ -1469,7 +1689,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}': {
+    '/api/v3/teams/{id_team}': {
       put: {
         tags: ['Teams'],
         summary: 'Update team',
@@ -1507,7 +1727,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/members': {
+    '/api/v3/teams/{id_team}/members': {
       get: {
         tags: ['Teams'],
         summary: 'List team members',
@@ -1567,7 +1787,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/members/{id_member}': {
+    '/api/v3/teams/{id_team}/members/{id_member}': {
       delete: {
         tags: ['Teams'],
         summary: 'List team members',
@@ -1600,7 +1820,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects': {
+    '/api/v3/teams/{id_team}/projects': {
       get: {
         tags: ['Teams'],
         summary: 'Get the list of projects in a team',
@@ -1626,7 +1846,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects/{id_project}': {
+    '/api/v3/teams/{id_team}/projects/{id_project}': {
       get: {
         tags: ['Teams'],
         summary: 'Get a project in a team scope',
@@ -1702,7 +1922,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/teams/{id_team}/projects/{project_name}': {
+    '/api/v3/teams/{id_team}/projects/{project_name}': {
       get: {
         tags: ['Teams'],
         summary: 'Get projects in a team scope',
@@ -1735,7 +1955,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/translation-issues': {
+    '/api/v3/jobs/{id_job}/{password}/translation-issues': {
       get: {
         tags: ['Job', 'Translation Issues'],
         summary: 'Project translation issues',
@@ -1769,7 +1989,49 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/translation-versions': {
+    '/api/v3/jobs/{id_job}/{password}/{source_page}/issue-report/segments': {
+      get: {
+        tags: ['Job', 'Segment issues'],
+        summary: 'Segment issues',
+        description: 'Segment issues',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'source_page',
+            in: 'path',
+            description:
+              'The source page (possible values: 2 for R1, 3 for R2)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Segment issues report',
+            schema: {
+              $ref: '#/definitions/SegmentIssueReport',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/translation-versions': {
       get: {
         tags: ['Job', 'Translation Versions'],
         summary: 'Project translation versions',
@@ -1803,7 +2065,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions':
       {
         get: {
           tags: ['Job', 'Translation Versions'],
@@ -1845,7 +2107,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}':
       {
         get: {
           tags: ['Job', 'Translation Versions'],
@@ -1894,7 +2156,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -2014,7 +2276,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -2111,7 +2373,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments':
+    '/api/v3/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments':
       {
         post: {
           tags: ['Job', 'Translation Issues'],
@@ -2224,7 +2486,7 @@ var spec = {
           },
         },
       },
-    '/api/v2/jobs/{id_job}/{password}/options': {
+    '/api/v3/jobs/{id_job}/{password}/options': {
       post: {
         tags: ['Job', 'Options'],
         summary: 'Update Options',
@@ -2279,7 +2541,171 @@ var spec = {
         },
       },
     },
-    '/api/v2/TMX/{id_job}/{password}': {
+    '/api/v3/jobs/{id_job}/{password}/files': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Job files',
+        description: 'Get job files information',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get job files information',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/QualityReportFile',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/file/{id_file}/instructions': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Job instructions',
+        description: 'Get job instructions',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get job instructions',
+            type: 'object',
+            properties: {
+              instructions: {
+                type: 'string',
+                example: 'Write some instructions for this file',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Job', 'Files'],
+        summary: 'Job instructions',
+        description: 'Insert/update job instructions for a specific job file',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'instructions',
+            in: 'body',
+            description: 'The instructions for this file',
+            required: true,
+            type: 'string',
+            example: 'Write some instructions for this file',
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'Insert/update job instructions for a specific job file',
+            schema: {
+              type: 'boolean',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/jobs/{id_job}/{password}/metadata': {
+      get: {
+        tags: ['Job'],
+        summary: 'Job metadata',
+        description: 'Get all job metadata',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Get all job metadata',
+            schema: {
+              $ref: '#/definitions/JobMetadata',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/TMX/{id_job}/{password}': {
       get: {
         tags: ['Job'],
         summary: 'Download Job TMX',
@@ -2310,7 +2736,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/check/': {
+    '/api/v3/glossaries/check/': {
       post: {
         tags: ['Glossary'],
         summary: 'Check Glossary',
@@ -2334,7 +2760,7 @@ var spec = {
             name: 'tm_key',
             in: 'formData',
             description: 'The tm key.',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
@@ -2348,7 +2774,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/import/': {
+    '/api/v3/glossaries/import/': {
       post: {
         tags: ['Glossary'],
         summary: 'Import Glossary',
@@ -2389,7 +2815,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/import/status/{tm_key}': {
+    '/api/v3/glossaries/import/status/{tm_key}': {
       get: {
         summary: 'Glossary Upload status.',
         description: 'Glossary Upload status.',
@@ -2422,7 +2848,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/glossaries/export/': {
+    '/api/v3/glossaries/export/': {
       post: {
         tags: ['Glossary'],
         summary: 'Download Glossary',
@@ -2446,7 +2872,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/engines/list': {
+    '/api/v3/engines/list': {
       get: {
         tags: ['Engines'],
         summary: 'Retrieve personal engine list.',
@@ -2466,7 +2892,50 @@ var spec = {
         },
       },
     },
-    '/api/v2/keys/list': {
+    '/api/v3/create-key': {
+      post: {
+        tags: ['TM keys'],
+        summary: 'Create a TM key.',
+        description: 'Create a TM key.',
+        consumes: ['application/json'],
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              type: 'object',
+              properties: {
+                key: {
+                  type: 'string',
+                  example: '1234_xxxx',
+                },
+                name: {
+                  type: 'string',
+                  example: 'My new key',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The new key created',
+            schema: {
+              type: 'object',
+              properties: {
+                key: {
+                  type: 'string',
+                  example: '1234_xxxx',
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/keys/list': {
       get: {
         tags: ['TM keys'],
         summary: 'Retrieve private TM keys list.',
@@ -2485,7 +2954,29 @@ var spec = {
         },
       },
     },
-    '/api/v2/languages': {
+    '/api/v3/tm-keys/list': {
+      get: {
+        tags: ['TM keys'],
+        summary: 'Retrieve private TM keys list.',
+        description: 'Retrieve private TM keys list.',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'Keys List',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/KeysListComplete',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/languages': {
       get: {
         tags: ['Languages'],
         summary: 'Supported languages list.',
@@ -2504,7 +2995,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/files': {
+    '/api/v3/files': {
       get: {
         tags: ['Files'],
         summary: 'Supported file types list.',
@@ -2523,7 +3014,193 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate': {
+
+    '/api/v3/project-template': {
+      get: {
+        tags: ['Project templates'],
+        summary:
+          'Shows the list of project template models available for the currents user',
+        description:
+          'Shows the list of project template models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/ProjectTemplateSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Project templates'],
+        summary: 'Creates a new project template model',
+        description: 'Creates a new project template model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/{id}': {
+      get: {
+        tags: ['Project templates'],
+        summary: 'Shows a particular project template model',
+        description: 'Shows a particular project template model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Project templates'],
+        summary: 'Deletes a particular project template model',
+        description: 'Deletes a particular project template model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Project templates'],
+        summary: 'Updates a particular project template model',
+        description: 'Updates a particular project template model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/validate': {
+      post: {
+        tags: ['Project templates'],
+        summary: 'Validates a project template before creation',
+        description: 'Validates a project template before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/project-template/schema': {
+      get: {
+        tags: ['Project templates'],
+        summary: 'Shows the project template model creation schema',
+        description: 'Shows the project template model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/ProjectTemplateSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/payable_rate': {
       get: {
         tags: ['Billing models'],
         summary:
@@ -2573,7 +3250,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/{id}': {
+    '/api/v3/payable_rate/{id}': {
       get: {
         tags: ['Billing models'],
         summary: 'Shows a particular billing model',
@@ -2661,7 +3338,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/validate': {
+    '/api/v3/payable_rate/validate': {
       post: {
         tags: ['Billing models'],
         summary: 'Validates a billing model before creation',
@@ -2689,7 +3366,7 @@ var spec = {
         },
       },
     },
-    '/api/v2/payable_rate/schema': {
+    '/api/v3/payable_rate/schema': {
       get: {
         tags: ['Billing models'],
         summary: 'Shows the billing model creation schema',
@@ -2708,12 +3385,1841 @@ var spec = {
         },
       },
     },
+    '/api/v3/qa_model_template': {
+      get: {
+        tags: ['Quality models'],
+        summary:
+          'Shows the list of quality models available for the currents user',
+        description:
+          'Shows the list of quality models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/QualityModelSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Quality models'],
+        summary: 'Creates a new quality model',
+        description: 'Creates a new quality model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/{id}': {
+      get: {
+        tags: ['Quality models'],
+        summary: 'Shows a particular quality model',
+        description: 'Shows a particular quality model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Quality models'],
+        summary: 'Deletes a particular quality model',
+        description: 'Deletes a particular quality model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Quality models'],
+        summary: 'Updates a particular quality model',
+        description: 'Updates a particular quality model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/validate': {
+      post: {
+        tags: ['Quality models'],
+        summary: 'Validates a quality model before creation',
+        description: 'Validates a quality model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/qa_model_template/schema': {
+      get: {
+        tags: ['Quality models'],
+        summary: 'Shows the quality model creation schema',
+        description: 'Shows the quality model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/QualityModelSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary:
+          'Shows the list of filters analysis configuration models available for the currents user',
+        description:
+          'Shows the list of filters analysis configuration models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/FiltersConfigSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Creates a new filters analysis configuration model',
+        description: 'Creates a new filters analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/{id}': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Shows a particular filters analysis configuration model',
+        description: 'Shows a particular filters analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Deletes a particular filters analysis configuration model',
+        description:
+          'Deletes a particular filters analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Filters analysis configuration'],
+        summary: 'Updates a particular filters analysis configuration model',
+        description:
+          'Updates a particular filters analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/validate': {
+      post: {
+        tags: ['Filters analysis configuration'],
+        summary:
+          'Validates a filters analysis configuration model before creation',
+        description:
+          'Validates a filters analysis configuration model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/filters-config-template/schema': {
+      get: {
+        tags: ['Filters analysis configuration'],
+        summary:
+          'Shows the filters analysis configuration model creation schema',
+        description:
+          'Shows the filters analysis configuration model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/FiltersConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary:
+          'Shows the list of xliff analysis configuration models available for the currents user',
+        description:
+          'Shows the list of xliff analysis configuration models available for the currents user',
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/XliffConfigSchema',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Creates a new xliff analysis configuration model',
+        description: 'Creates a new xliff analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'create',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/{id}': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Shows a particular xliff analysis configuration model',
+        description: 'Shows a particular xliff analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The model JSON representation.',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Deletes a particular xliff analysis configuration model',
+        description: 'Deletes a particular xliff analysis configuration model',
+        parameters: [
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'delete',
+            examples: {
+              'application/json': {
+                id: 3,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      put: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Updates a particular xliff analysis configuration model',
+        description: 'Updates a particular xliff analysis configuration model',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The model ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'update',
+            examples: {
+              'application/json': {
+                id: 4,
+                version: 1,
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/validate': {
+      post: {
+        tags: ['Xliff analysis configuration'],
+        summary:
+          'Validates a xliff analysis configuration model before creation',
+        description:
+          'Validates a xliff analysis configuration model before creation',
+        parameters: [
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'validate',
+            examples: {
+              'application/json': {
+                errors: [],
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/xliff-config-template/schema': {
+      get: {
+        tags: ['Xliff analysis configuration'],
+        summary: 'Shows the xliff analysis configuration model creation schema',
+        description:
+          'Shows the xliff analysis configuration model creation schema',
+        parameters: [],
+        responses: {
+          200: {
+            description: 'schema',
+            schema: {
+              $ref: '#/definitions/XliffConfigSchema',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+
+    '/api/v3/deepl/{engineId}/glossaries': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get all DeepL engines',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'An array of JSON representation models.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/DeepLGlossary',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      post: {
+        tags: ['DeepL'],
+        summary: 'Create new DeepL engine',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/deepl/{engineId}/glossaries/{id}': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get a specific DeepL glossary item',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              $ref: '#/definitions/DeepLGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['DeepL'],
+        summary: 'Delete a specific DeepL glossary item',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The JSON representation model.',
+            schema: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  readOnly: true,
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/deepl/{engineId}/glossaries/{id}/entries': {
+      get: {
+        tags: ['DeepL'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'id',
+            in: 'path',
+            description: 'The glossary ID',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'List the entries of a single glossary in the format specified by the Accept header.',
+            schema: {
+              type: 'string',
+              example: 'Hello! Guten Tag!',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+
+    '/api/v3/mmt/{engineId}/keys': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Get Modern MT keys',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'List the Modern MT keys.',
+            schema: {
+              type: 'array',
+              items: {
+                $ref: '#/definitions/MMTKey',
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/import-status/{uuid}': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Returns the status of an Import Job.',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns the JSON representation of an Import Job.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/memory/create': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Create a new memory on Modern MT.',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+                external_id: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTKey',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/memory/update/{memoryId}': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Update Modern MT memory metadata',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'path',
+            description: 'The memory ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            in: 'body',
+            schema: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                },
+                description: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTMemory',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+      delete: {
+        tags: ['Modern MT'],
+        summary: 'Delete a Modern MT memory',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'path',
+            description: 'The memory ID',
+            required: true,
+            type: 'integer',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the created memory.',
+            schema: {
+              $ref: '#/definitions/MMTMemory',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/glossary/create-memory-and-import': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Store Modern MT glossary content',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'csv',
+            in: 'formData',
+            description: 'The CSV file',
+            required: true,
+            type: 'file',
+          },
+        ],
+        responses: {
+          200: {
+            description:
+              'Returns a JSON representation of the created glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/glossary/import-status/{uuid}': {
+      get: {
+        tags: ['Modern MT'],
+        summary: 'Get a Modern MT glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'uuid',
+            in: 'path',
+            description: 'The glossary uuid',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/glossary/import': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'formData',
+            description: 'The memory id',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'csv',
+            in: 'formData',
+            description: 'The CSV file',
+            required: true,
+            type: 'file',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+    '/api/v3/mmt/{engineId}/glossary/modify': {
+      post: {
+        tags: ['Modern MT'],
+        summary: 'Get a DeepL engine glossary items',
+        description: '',
+        parameters: [
+          {
+            name: 'engineId',
+            in: 'path',
+            description: 'The engine ID',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'memoryId',
+            in: 'body',
+            description: 'The memory id',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'tuid',
+            in: 'body',
+            description:
+              'The tuid of the glossary entry to be updated. forbidden if type is unidirectional, required if type is equivalent',
+            required: true,
+            type: 'integer',
+          },
+          {
+            name: 'terms',
+            in: 'body',
+            description: 'The glossary terms to be updated',
+            required: true,
+            type: 'string',
+            example:
+              '[{"term": "test", "language": "en"}, {"term": "prova", "language": "it"}, {"term": "prueba", "language": "es"}]',
+          },
+          {
+            name: 'type',
+            in: 'body',
+            description:
+              'The string identifying the glossary type (either unidirectional or equivalent)',
+            required: true,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'Returns a JSON representation of the glossary.',
+            schema: {
+              $ref: '#/definitions/MMTGlossary',
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
+
+    '/api/v3/word-count/raw': {
+      post: {
+        tags: ['Word count'],
+        summary: 'Create new Project on Matecat in detached mode',
+        description: '',
+        parameters: [
+          {
+            name: 'text',
+            in: 'formData',
+            description: 'The text string',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'language',
+            in: 'formData',
+            description: 'The language (optional).',
+            required: false,
+            type: 'string',
+          },
+        ],
+        responses: {
+          200: {
+            description: 'The word and character count of a text string.',
+            schema: {
+              type: 'object',
+              properties: {
+                word_count: {
+                  type: 'integer',
+                  example: 123,
+                },
+                character_count: {
+                  type: 'integer',
+                  example: 123,
+                },
+              },
+            },
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        },
+      },
+    },
   },
   definitions: {
+    MMTGlossary: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'string',
+        },
+        memory: {
+          type: 'integer',
+        },
+        size: {
+          type: 'integer',
+        },
+        progress: {
+          type: 'integer',
+        },
+      },
+    },
+    MMTKey: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        name: {
+          type: 'string',
+        },
+        has_glossary: {
+          type: 'boolean',
+        },
+      },
+    },
+    MMTMemory: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        creationDate: {
+          type: 'string',
+          format: 'date-time',
+        },
+        name: {
+          type: 'string',
+        },
+      },
+    },
+    DeepLGlossary: {
+      type: 'object',
+      properties: {
+        glossary_id: {
+          type: 'integer',
+        },
+        name: {
+          type: 'string',
+        },
+        ready: {
+          type: 'boolean',
+        },
+        source_lang: {
+          type: 'string',
+        },
+        target_lang: {
+          type: 'string',
+        },
+        creation_time: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        entry_count: {
+          type: 'integer',
+        },
+      },
+    },
+    FiltersConfigSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: 'string',
+        },
+        json: {
+          type: 'object',
+          properties: {
+            extract_arrays: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            escape_forward_slashes: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            translate_keys: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            do_not_translate_keys: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            context_keys: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            character_limit: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          dependencies: {
+            translate_keys: {
+              not: {
+                required: ['do_not_translate_keys'],
+              },
+            },
+            do_not_translate_keys: {
+              not: {
+                required: ['translate_keys'],
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+        xml: {
+          type: 'object',
+          properties: {
+            preserve_whitespace: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            translate_attributes: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            translate_elements: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            do_not_translate_elements: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          dependencies: {
+            translate_elements: {
+              not: {
+                required: ['do_not_translate_elements'],
+              },
+            },
+            do_not_translate_elements: {
+              not: {
+                required: ['translate_elements'],
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+        yaml: {
+          type: 'object',
+          properties: {
+            translate_keys: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            do_not_translate_keys: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          dependencies: {
+            translate_keys: {
+              not: {
+                required: ['do_not_translate_keys'],
+              },
+            },
+            do_not_translate_keys: {
+              not: {
+                required: ['translate_keys'],
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+        ms_word: {
+          type: 'object',
+          properties: {
+            extract_doc_properties: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_comments: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_headers_footers: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_hidden_text: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            accept_revisions: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            exclude_styles: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+            exclude_highlight_colors: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          additionalProperties: false,
+        },
+        ms_excel: {
+          type: 'object',
+          properties: {
+            extract_doc_properties: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_hidden_cells: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_diagrams: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_drawings: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_sheet_names: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            exclude_columns: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              default: [],
+            },
+          },
+          additionalProperties: false,
+        },
+        ms_powerpoint: {
+          type: 'object',
+          properties: {
+            extract_doc_properties: {
+              type: 'boolean',
+              nullable: true,
+              default: false,
+            },
+            extract_hidden_slides: {
+              type: 'boolean',
+              nullable: true,
+            },
+            extract_notes: {
+              type: 'boolean',
+              nullable: true,
+              default: true,
+            },
+            translate_slides: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          dependencies: {
+            extract_hidden_slides: {
+              not: {
+                required: ['translate_slides'],
+              },
+            },
+            translate_slides: {
+              not: {
+                required: ['extract_hidden_slides'],
+              },
+            },
+          },
+          additionalProperties: false,
+        },
+        dita: {
+          type: 'object',
+          properties: {
+            do_not_translate_elements: {
+              type: 'array',
+              items: {
+                $ref: {
+                  type: 'string',
+                },
+              },
+              nullable: true,
+            },
+          },
+          required: ['do_not_translate_elements'],
+          additionalProperties: false,
+        },
+      },
+    },
+    XliffConfigSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: 'string',
+        },
+        rules: {
+          type: 'object',
+          additionalProperties: false,
+          properties: {
+            xliff12: {
+              $ref: '#/definitions/XliffRule',
+            },
+            xliff20: {
+              $ref: '#/definitions/XliffRule',
+            },
+          },
+        },
+      },
+      required: ['rules', 'name'],
+    },
+    XliffRule: {
+      type: 'object',
+      properties: {
+        states: {
+          type: 'array',
+          example: ['translated'],
+          items: {
+            $ref: {
+              type: 'string',
+            },
+          },
+        },
+        analysis: {
+          type: 'string',
+          example: 'new',
+        },
+        editor: {
+          type: 'string',
+          example: 'translated',
+        },
+        matchCategory: {
+          type: 'string',
+        },
+      },
+    },
+    ProjectTemplateSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        name: {
+          type: 'string',
+        },
+        is_default: {
+          type: 'boolean',
+        },
+        id_team: {
+          type: 'integer',
+        },
+        tm_prioritization: {
+          type: 'boolean',
+        },
+        pretranslate_100: {
+          type: 'boolean',
+        },
+        pretranslate_101: {
+          type: 'boolean',
+        },
+        get_public_matches: {
+          type: 'boolean',
+        },
+        subject: {
+          type: 'string',
+        },
+        source_language: {
+          type: 'string',
+        },
+        target_language: {
+          type: 'array',
+          items: {
+            type: 'string',
+            example: 'it-IT',
+          },
+        },
+        segmentation_rule: {
+          type: 'object',
+          nullable: true,
+        },
+        tm: {
+          type: 'array',
+          items: {
+            type: 'object',
+            $ref: '#/definitions/ProjectTemplateSchemaTM',
+          },
+        },
+        mt: {
+          type: 'object',
+          $ref: '#/definitions/ProjectTemplateSchemaMT',
+        },
+        payable_rate_template_id: {
+          type: 'integer',
+          nullable: true,
+        },
+        qa_model_template_id: {
+          type: 'integer',
+          nullable: true,
+        },
+        xliff_config_template_id: {
+          type: 'integer',
+          nullable: true,
+        },
+        filters_template_id: {
+          type: 'integer',
+          nullable: true,
+        },
+      },
+      required: ['name', 'id_team', 'pretranslate_100', 'get_public_matches'],
+    },
+    ProjectTemplateSchemaTM: {
+      type: 'object',
+      properties: {
+        glos: {
+          type: 'boolean',
+        },
+        is_shared: {
+          type: 'boolean',
+        },
+        key: {
+          type: 'string',
+        },
+        name: {
+          type: 'string',
+        },
+        owner: {
+          type: 'boolean',
+        },
+        tm: {
+          type: 'boolean',
+        },
+        r: {
+          type: 'boolean',
+        },
+        w: {
+          type: 'boolean',
+        },
+        penalty: {
+          type: 'integer',
+          nullable: true,
+          maximum: 100,
+          minimum: 0,
+        },
+      },
+    },
+    ProjectTemplateSchemaMT: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+        },
+        extra: {
+          type: 'object',
+        },
+      },
+    },
+    QualityModelSchema: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
+          type: 'integer',
+          readOnly: true,
+        },
+        label: {
+          type: 'string',
+        },
+        version: {
+          type: 'integer',
+          readOnly: true,
+          description:
+            "The model version. It's incremented on every model update.",
+          example: 1,
+        },
+        categories: {
+          type: 'array',
+          maxItems: 50,
+          items: {
+            $ref: '#/definitions/QAModelCategory',
+          },
+        },
+        passfail: {
+          type: 'object',
+          $ref: '#/definitions/PassFail',
+        },
+        createdAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        modifiedAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+        deletedAt: {
+          type: 'string',
+          format: 'date-time',
+          required: true,
+        },
+      },
+      required: ['version', 'label', 'categories', 'passfail'],
+    },
+    QAModelCategory: {
+      type: 'object',
+      properties: {
+        id_parent: {
+          type: 'integer',
+        },
+        label: {
+          type: 'string',
+          maxLength: 255,
+        },
+        code: {
+          type: 'string',
+          maxLength: 3,
+        },
+        severities: {
+          type: 'array',
+          maxItems: 50,
+          items: {
+            $ref: '#/definitions/QAModelSeverity',
+          },
+        },
+        sort: {
+          type: 'integer',
+          nullable: true,
+        },
+      },
+      required: ['code', 'label', 'severities'],
+    },
+    QAModelSeverity: {
+      type: 'object',
+      properties: {
+        label: {
+          type: 'string',
+        },
+        code: {
+          type: 'string',
+          maxLength: 3,
+        },
+        penalty: {
+          type: 'number',
+          format: 'currency',
+          examples: ['0', '0.00', '0.05', '19.95'],
+        },
+        sort: {
+          type: 'integer',
+          nullable: true,
+        },
+      },
+      required: ['code', 'label', 'penalty'],
+    },
+    PassFail: {
+      type: 'object',
+      properties: {
+        type: {
+          type: 'string',
+          enum: ['points_per_thousand'],
+        },
+        thresholds: {
+          type: 'array',
+          maxItems: 2,
+          items: {
+            $ref: '#/definitions/PassFailThreshold',
+          },
+        },
+      },
+      required: ['type', 'thresholds'],
+    },
+    PassFailThreshold: {
+      type: 'object',
+      properties: {
+        label: {
+          type: 'string',
+          enum: ['R1', 'R2'],
+        },
+        value: {
+          type: 'integer',
+        },
+      },
+      required: ['label', 'value'],
+    },
     PayableRateSchema: {
       type: 'object',
       properties: {
         id: {
+          type: 'integer',
+          readOnly: true,
+        },
+        uid: {
           type: 'integer',
           readOnly: true,
         },
@@ -2733,7 +5239,6 @@ var spec = {
         },
       },
     },
-
     PayableRateBreakdowns: {
       type: 'object',
       properties: {
@@ -3391,14 +5896,14 @@ var spec = {
       type: 'object',
       properties: {
         files: {
-          $ref: '#/definitions/Files',
+          $ref: '#/definitions/JobFiles',
         },
         jobs: {
           $ref: '#/definitions/UrlsJobs',
         },
       },
     },
-    Files: {
+    JobFiles: {
       type: 'array',
       items: {
         $ref: '#/definitions/JobFile',
@@ -3581,6 +6086,281 @@ var spec = {
         },
       },
     },
+    QualityReportSegments: {
+      type: 'object',
+      properties: {
+        segments: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/QualityReportSegment',
+          },
+        },
+        first_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        last_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        _params: {
+          type: 'object',
+          properties: {
+            ref_segment: {
+              type: 'integer',
+              format: 'int32',
+            },
+            where: {
+              type: 'string',
+            },
+            step: {
+              type: 'integer',
+              format: 'int32',
+            },
+            filter: {
+              type: 'string',
+            },
+          },
+        },
+        _links: {
+          type: 'object',
+          properties: {
+            base: {
+              type: 'string',
+            },
+            last_segment_id: {
+              type: 'integer',
+              format: 'int32',
+            },
+            pages: {
+              type: 'integer',
+            },
+            items_per_page: {
+              type: 'integer',
+            },
+            total_items: {
+              type: 'integer',
+            },
+            self: {
+              type: 'string',
+            },
+            next: {
+              type: 'string',
+              nullable: true,
+            },
+            prev: {
+              type: 'string',
+              nullable: true,
+            },
+          },
+        },
+      },
+    },
+    QualityReportSegment: {
+      type: 'object',
+      properties: {
+        comments: {
+          type: 'array',
+          items: {},
+          nullable: true,
+        },
+        dataRefMap: {
+          type: 'array',
+          items: {},
+          nullable: true,
+        },
+        edit_distance: {
+          type: 'string',
+          nullable: true,
+        },
+        file: {
+          $ref: '#/definitions/QualityReportFile',
+        },
+        ice_locked: {
+          type: 'integer',
+        },
+        ice_modified: {
+          type: 'boolean',
+        },
+        id: {
+          type: 'integer',
+          format: 'int32',
+        },
+        is_pre_translated: {
+          type: 'boolean',
+        },
+        issues: {
+          type: 'array',
+          items: {
+            $ref: '#/definitions/Issue',
+          },
+        },
+        last_revisions: {
+          type: 'array',
+          items: {},
+          nullable: true,
+        },
+        last_translation: {
+          type: 'string',
+        },
+        locked: {
+          type: 'integer',
+        },
+        match_type: {
+          type: 'string',
+        },
+        parsed_time_to_edit: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+          nullable: true,
+        },
+        pee: {
+          type: 'integer',
+        },
+        pee_translation_revise: {
+          type: 'integer',
+        },
+        pee_translation_suggestion: {
+          type: 'integer',
+        },
+        raw_word_count: {
+          type: 'float',
+        },
+        revision_number: {
+          type: 'integer',
+          nullable: true,
+        },
+        secs_per_word: {
+          type: 'float',
+        },
+        segment: {
+          type: 'string',
+        },
+        segment_hash: {
+          type: 'string',
+          nullable: true,
+        },
+        source_page: {
+          type: 'string',
+        },
+        status: {
+          type: 'string',
+        },
+        suggestion: {
+          type: 'string',
+        },
+        suggestion_match: {
+          type: 'string',
+        },
+        suggestion_source: {
+          type: 'string',
+        },
+        target: {
+          type: 'string',
+        },
+        time_to_edit: {
+          type: 'integer',
+        },
+        time_to_edit_revise: {
+          type: 'integer',
+        },
+        time_to_edit_revise_2: {
+          type: 'integer',
+        },
+        time_to_edit_translation: {
+          type: 'integer',
+        },
+        translation: {
+          type: 'string',
+        },
+        version: {
+          type: 'string',
+        },
+        version_number: {
+          type: 'string',
+        },
+        warnings: {
+          type: 'object',
+          properties: {
+            details: {
+              type: 'object',
+              properties: {
+                issues_info: {
+                  type: 'object',
+                },
+                id_segment: {
+                  type: 'string',
+                },
+                tag_mismatch: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    QualityReportFile: {
+      type: 'object',
+      properties: {
+        id: {
+          type: 'integer',
+          format: 'int32',
+        },
+        first_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        last_segment: {
+          type: 'integer',
+          format: 'int32',
+        },
+        file_name: {
+          type: 'string',
+        },
+        raw_words: {
+          type: 'integer',
+        },
+        weighted_words: {
+          type: 'integer',
+        },
+        standard_words: {
+          type: 'integer',
+        },
+        metadata: {
+          type: 'array',
+        },
+      },
+    },
+    SegmentIssueReport: {
+      type: 'object',
+      properties: {
+        modified_segments_count: {
+          type: 'integer',
+        },
+        issue_count: {
+          type: 'integer',
+        },
+        modified_segments: {
+          type: 'array',
+          items: {
+            $ref: {
+              type: 'object',
+              properties: {
+                id_segment: {
+                  type: 'integer',
+                },
+                issue_count: {
+                  type: 'integer',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     TranslationVersions: {
       type: 'array',
       items: {
@@ -3628,6 +6408,34 @@ var spec = {
         },
         lexiqa: {
           type: 'integer',
+        },
+      },
+    },
+    JobMetadata: {
+      type: 'object',
+      properties: {
+        project: {
+          type: 'object',
+        },
+        job: {
+          type: 'object',
+        },
+        files: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'integer',
+              },
+              filename: {
+                type: 'string',
+              },
+              data: {
+                type: 'object',
+              },
+            },
+          },
         },
       },
     },
@@ -3895,6 +6703,35 @@ var spec = {
           items: {
             $ref: '#/definitions/Key',
           },
+        },
+      },
+    },
+    KeysListComplete: {
+      type: 'object',
+      properties: {
+        tm: {
+          type: 'boolean',
+        },
+        glos: {
+          type: 'boolean',
+        },
+        owner: {
+          type: 'boolean',
+        },
+        name: {
+          type: 'string',
+          example: 'Key name',
+        },
+        key: {
+          type: 'string',
+          example: 'xxxyyyzzz',
+        },
+        penalty: {
+          type: 'number',
+          example: 0.93,
+        },
+        is_shared: {
+          type: 'boolean',
         },
       },
     },

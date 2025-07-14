@@ -2,12 +2,12 @@
 
 namespace API\App\Authentication;
 
-use API\App\RateLimiterTrait;
-use API\Commons\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\Commons\Exceptions\ValidationError;
 use API\Commons\Validators\LoginValidator;
 use Exception;
 use Klein\Response;
+use Traits\RateLimiterTrait;
 use Users\Authentication\ChangePasswordModel;
 
 class UserController extends AbstractStatefulKleinController {

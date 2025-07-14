@@ -1,6 +1,7 @@
 <?php
 
 use Engines\DeepL\DeepLApiClient;
+use Engines\DeepL\DeepLApiException;
 
 class Engines_DeepL extends Engines_AbstractEngine {
     private $apiKey;
@@ -169,6 +170,7 @@ class Engines_DeepL extends Engines_AbstractEngine {
      *
      * @return mixed
      * @throws DeepLApiException
+     * @throws Exception
      */
     public function createGlossary( $data ) {
         return $this->_getClient()->createGlossary( $data );

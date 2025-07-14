@@ -1,6 +1,13 @@
 <?php
+namespace Files;
 
-class Files_FileDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+use Database;
+use Exception;
+use PDO;
+use ReflectionException;
+
+class FileDao extends AbstractDao {
     const TABLE = "files";
 
     protected static array $auto_increment_field = [ 'id' ];
@@ -10,7 +17,7 @@ class Files_FileDao extends DataAccess_AbstractDao {
      *
      * @param int $ttl
      *
-     * @return Files_FileStruct[]
+     * @return FileStruct[]
      * @throws ReflectionException
      */
     public static function getByJobId( $id_job, int $ttl = 60 ): array {
@@ -23,8 +30,8 @@ class Files_FileDao extends DataAccess_AbstractDao {
                 " AND id_job = :id_job "
         );
 
-        /** @var Files_FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_job' => $id_job ] );
+        /** @var FileStruct[] */
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_job' => $id_job ] );
 
     }
 
@@ -33,7 +40,7 @@ class Files_FileDao extends DataAccess_AbstractDao {
      *
      * @param int $ttl
      *
-     * @return Files_FileStruct[]
+     * @return FileStruct[]
      * @throws ReflectionException
      */
     public static function getByProjectId( int $id_project, int $ttl = 600 ): array {
@@ -41,8 +48,8 @@ class Files_FileDao extends DataAccess_AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( "SELECT * FROM files where id_project = :id_project " );
 
-        /** @var Files_FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Files_FileStruct, [ 'id_project' => $id_project ] );
+        /** @var FileStruct[] */
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_project' => $id_project ] );
     }
 
     public static function updateField( $file, $field, $value ): bool {
@@ -75,13 +82,13 @@ class Files_FileDao extends DataAccess_AbstractDao {
     /**
      * @param $id
      *
-     * @return Files_FileStruct
+     * @return FileStruct
      */
-    public static function getById( $id ): Files_FileStruct {
+    public static function getById( $id ): FileStruct {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM files where id = :id " );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Files_FileStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, FileStruct::class );
 
         return $stmt->fetch();
     }

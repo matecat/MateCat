@@ -25,7 +25,7 @@ class ReviseTranslationIssuesController extends BaseChunkController {
             $this->featureSet->loadForProject( $validator->getJob()->getProject() );
         } );
         $this->appendValidator( $validator );
-        $this->appendValidator( new SegmentTranslation( $this->request ) );
+        $this->appendValidator( new SegmentTranslation( $this ) );
         $this->appendValidator( new LoginValidator( $this ) );
     }
 

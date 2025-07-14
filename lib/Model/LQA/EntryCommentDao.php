@@ -2,10 +2,11 @@
 
 namespace LQA;
 
+use DataAccess\AbstractDao;
 use Database;
 use PDO;
 
-class EntryCommentDao extends \DataAccess_AbstractDao {
+class EntryCommentDao extends AbstractDao {
 
     public function findByIssueId( $id_issue ) {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .

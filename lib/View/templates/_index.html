@@ -36,8 +36,6 @@
                 isOpenAiEnabled: ${isOpenAiEnabled},
                 maxFileSize: ${maxFileSize},
                 maxTMXFileSize: ${maxTMXFileSize},
-                id_customer: '${id_customer | string:unknown_customer}',
-                private_customer: '${private_customer | string:0}',
                 first_job_segment: '${first_job_segment}',
                 server_load_time: '${load_time}',
                 tms_enabled: ${tms_enabled | string:true},
@@ -66,27 +64,18 @@
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
                 segmentQACheckInterval: '${segmentQACheckInterval}',
-                taglockEnabled: ${taglockEnabled | string:1},
-                tagLockCustomizable: ${tagLockCustomizable},
                 alternativesEnabled: true,
-                brPlaceholdEnabled: '${brPlaceholdEnabled}',
-                survey: false,
                 isReview: ${isReview | string: false},
-                reviewType: '${review_type}',
-                enableReview: true,
                 user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
                 project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
-                stat_quality: ${structure php: stat_quality },
                 offlineModeEnabled: true,
                 splitSegmentEnabled: ${splitSegmentEnabled},
-                copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
                 active_engine: JSON.parse(String.raw`${php: json_encode(active_engine)}`),
                 isGDriveProject : ${isGDriveProject|string:false},
-                remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
                 translation_matches_enabled : ${translation_matches_enabled} ,
                 isCJK: ${isCJK},
                 isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
@@ -105,10 +94,7 @@
                 lexiqa_languages: ${lexiqa_languages | string:[]},
                 lexiqaServer: '${lexiqaServer | string:}',
 
-                qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
-                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 support_mail : '${support_mail}',
-                speech2text_enabled: ${speech2text_enabled | string:false},
                 tag_projection_languages: ${tag_projection_languages},
                 segmentation_rule : '${segmentation_rule}',
                 segmentFilterEnabled: true,
@@ -183,7 +169,6 @@
             /*]]>*/
         </script>
 
-        <script type="text/javascript" src="${basepath}public/build/libs.js?build=${build_number}"></script>
 
     </head>
 

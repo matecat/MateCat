@@ -41,10 +41,13 @@
       80px,
       100px
     );
-  grid-template-rows: 100px;
+  grid-template-rows: 125px;
   padding: 0 !important;
   border-bottom: 1px solid colors.$grey3;
   background-color: colors.$grey4;
+  &.mtqe {
+    grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+  }
   > div {
     display: flex;
     flex-direction: column;
@@ -60,7 +63,7 @@
       }
     }
     :first-child {
-      height: 60px;
+      height: 85px;
       border-bottom: 1px solid colors.$grey3;
       font-weight: bold;
     }
@@ -71,6 +74,7 @@
       align-items: flex-end;
       padding-bottom: 2px;
       padding-right: 6px;
+      white-space: pre-wrap
     }
   }
   .job-table-header-title {
@@ -118,6 +122,9 @@
     background-color: colors.$white;
     position: relative;
     font-size: 16px;
+    &.mtqe {
+      grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+    }
     .chunk-analyze-info-background {
       position: absolute;
       width: 86%;
@@ -207,6 +214,9 @@
   padding: 0;
   color: colors.$grey;
   position: relative;
+  &.mtqe {
+    grid-template-columns: minmax(100px, 150px) repeat(8, 1fr) minmax(80px, 100px);
+  }
   .chunk-file-detail-background {
     position: absolute;
     width: 86%;

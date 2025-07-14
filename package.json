@@ -48,21 +48,22 @@
     "semantic-ui-react": "^2.1.5",
     "socket.io-client": "^4.8.1",
     "sprintf-js": "^1.1.2",
-    "uuid": "^11.0.2"
+    "uuid": "^11.0.2",
+    "crypto-js": "^4.1.1"
   },
   "devDependencies": {
-    "@babel/core": "7.27.1",
-    "@babel/eslint-parser": "7.27.1",
+    "@babel/core": "^7.27.7",
+    "@babel/eslint-parser": "^7.27.5",
     "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-transform-runtime": "^7.23.7",
-    "@babel/preset-env": "^7.23.8",
-    "@babel/preset-react": "^7.23.3",
-    "@sentry/webpack-plugin": "2.23.0",
+    "@babel/plugin-transform-runtime": "^7.27.4",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "@sentry/webpack-plugin": "3.5.0",
     "@testing-library/dom": "^10.1.0",
     "@testing-library/jest-dom": "^6.2.0",
     "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.5.2",
-    "babel-loader": "9.2.1",
+    "babel-loader": "10.0.0",
     "broadcast-channel": "^7.1.0",
     "css-loader": "7.1.2",
     "eslint": "^8.0.0",
@@ -91,7 +92,7 @@
     "thread-loader": "^4.0.4",
     "undici": "^5.28.2",
     "web-streams-polyfill": "^4.1.0",
-    "webpack": "5.97.1",
+    "webpack": "5.99.9",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "6.0.1",
     "webpack-concat-files-plugin": "^0.5.2",
@@ -100,5 +101,5 @@
   "resolutions": {
     "wrap-ansi": "^7.0.0"
   },
-  "version": "3.2.9"
+  "version": "3.2.29"
 }

@@ -2,10 +2,11 @@
 
 namespace LQA;
 
+use DataAccess\AbstractDao;
 use PDO;
 use ReflectionException;
 
-class CategoryDao extends \DataAccess_AbstractDao {
+class CategoryDao extends AbstractDao {
     const TABLE = 'qa_categories';
 
     /**
@@ -42,10 +43,9 @@ class CategoryDao extends \DataAccess_AbstractDao {
     /**
      * @param $data
      *
-     * @return mixed
-     * @throws ReflectionException
+     * @return CategoryStruct
      */
-    public static function createRecord( $data ) {
+    public static function createRecord( $data ): CategoryStruct {
 
         $categoryStruct = new CategoryStruct( $data );
 

@@ -9,7 +9,7 @@
 
 namespace Features\ProjectCompletion\Controller;
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use Chunks_ChunkCompletionEventDao;
 use Chunks_ChunkCompletionEventStruct;

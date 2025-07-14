@@ -9,17 +9,18 @@
 
 namespace AsyncTasks\Workers;
 
-use Constants\Ices;
 use Constants_Engines;
 use Constants_TranslationStatus;
 use Contribution\ContributionRequestStruct;
+use Engines_Results_MyMemory_TMS;
 use Exception;
 use FeatureSet;
 use INIT;
 use Jobs_JobStruct;
-use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
+use MTQE\Templates\DTO\MTQEWorkflowParams;
 use PostProcess;
+use ReflectionException;
 use Stomp\Exception\StompException;
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
@@ -56,24 +57,6 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param                $matches
-     * @param AbstractFilter $filter
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function normalizeMatchesToLayer0( $matches, AbstractFilter $filter ) {
-        foreach ( $matches as $k => $m ) {
-            $matches[ $k ][ 'raw_segment' ]     = $filter->fromLayer2ToLayer0( $matches[ $k ][ 'raw_segment' ] );
-            $matches[ $k ][ 'segment' ]         = $filter->fromLayer2ToLayer0( html_entity_decode( $matches[ $k ][ 'segment' ] ) );
-            $matches[ $k ][ 'translation' ]     = $filter->fromLayer2ToLayer0( html_entity_decode( $matches[ $k ][ 'translation' ] ) );
-            $matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $matches[ $k ][ 'raw_translation' ] );
-        }
-
-        return $matches;
-    }
-
-    /**
      * @param ContributionRequestStruct $contributionStruct
      *
      * @throws Exception
@@ -100,7 +83,7 @@ class GetContributionWorker extends AbstractWorker {
 
         $this->_publishPayload( $matches, $contributionStruct );
 
-        // cross language matches
+        // cross-language matches
         if ( !empty( $contributionStruct->crossLangTargets ) ) {
             $crossLangMatches = [];
 
@@ -120,8 +103,7 @@ class GetContributionWorker extends AbstractWorker {
             }
 
             if ( !empty( $crossLangMatches ) ) {
-                usort( $crossLangMatches, [ "self", "__compareScore" ] );
-                $crossLangMatches = array_reverse( $crossLangMatches );
+                usort( $crossLangMatches, [ "self", "__compareScoreDesc" ] );
             }
 
             if ( false === $contributionStruct->concordanceSearch ) {
@@ -131,24 +113,15 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * Suggestion array must be updated every time we receive the matches
-     *
-     * @param $id_segment
-     * @param $matches
-     */
-    protected function _updateSuggestionArray( $id_segment, $matches ) {
-        Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $matches );
-    }
-
-    /**
      * @param array                     $content
      * @param ContributionRequestStruct $contributionStruct
      *
      * @param bool                      $isCrossLang
      *
      * @throws StompException
+     * @throws Exception
      */
-    protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, $isCrossLang = false ) {
+    protected function _publishPayload( array $content, ContributionRequestStruct $contributionStruct, ?bool $isCrossLang = false ) {
 
         $type = 'contribution';
 
@@ -182,7 +155,7 @@ class GetContributionWorker extends AbstractWorker {
     /**
      * @throws Exception
      */
-    protected function _extractAvailableKeysForUser( ContributionRequestStruct $contributionStruct ) {
+    protected function _extractAvailableKeysForUser( ContributionRequestStruct $contributionStruct ): array {
 
         //find all the job's TMs with write grants and make a contribution to them
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
@@ -198,12 +171,47 @@ class GetContributionWorker extends AbstractWorker {
 
     }
 
-    private static function __compareScore( $a, $b ) {
-        if ( floatval( $a[ 'match' ] ) == floatval( $b[ 'match' ] ) ) {
-            return 0;
+    /**
+     * Compares two associative arrays based on their 'match' and 'ICE' values.
+     *
+     * The function first evaluates the 'match' values of the two arrays:
+     * - If the 'match' values are equal, it prioritizes arrays with the 'ICE' key set to true:
+     *   - Returns -1 if the first array has 'ICE' set to true and the second does not.
+     *   - Returns 1 if the second array has 'ICE' set to true and the first does not.
+     *   - Returns 0 if both or neither have the 'ICE' key set to true.
+     * - If the 'match' values are not equal, it returns:
+     *   - 1 if the 'match' value of the first array is less than the second.
+     *   - -1 if the 'match' value of the first array is greater than the second.
+     *
+     * @param array $a The first array to compare, containing 'match' and optionally 'ICE'.
+     * @param array $b The second array to compare, containing 'match' and optionally 'ICE'.
+     *
+     * @return int Returns -1, 0, or 1 based on the comparison logic.
+     */
+    private static function __compareScoreDesc( array $a, array $b ): int {
+
+        // Check if the 'ICE' key is set and cast it to a boolean
+        $aIsICE = (bool)( $a[ 'ICE' ] ?? false );
+        $bIsICE = (bool)( $b[ 'ICE' ] ?? false );
+
+        // Convert 'match' values to float for comparison
+        $aMatch = floatval( $a[ 'match' ] );
+        $bMatch = floatval( $b[ 'match' ] );
+
+        // If 'match' values are equal, compare based on 'ICE' values
+        if ( $aMatch == $bMatch ) {
+            if ( $aIsICE && !$bIsICE ) {
+                return -1; // The First array has 'ICE' set to true, the second does not
+            }
+            if ( !$aIsICE && $bIsICE ) {
+                return 1; // The Second array has 'ICE' set to true, the first does not
+            }
+
+            return 0; // Both or neither have 'ICE' set to true
         }
 
-        return ( floatval( $a[ 'match' ] ) < floatval( $b[ 'match' ] ) ? -1 : 1 );
+        // If 'match' values are not equal, return based on their comparison
+        return ( $aMatch < $bMatch ? 1 : -1 );
     }
 
     /**
@@ -217,6 +225,7 @@ class GetContributionWorker extends AbstractWorker {
      */
     public function normalizeTMMatches( array &$matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet, $targetLang ) {
 
+        /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
                 $featureSet,
                 $contributionStruct->getJobStruct()->source,
@@ -269,7 +278,7 @@ class GetContributionWorker extends AbstractWorker {
                 );
             }
 
-            $match = $this->_matchRewrite( $match, $contributionStruct, $featureSet );
+            $match = $this->_matchRewrite( $match );
 
             if ( $contributionStruct->concordanceSearch ) {
 
@@ -287,7 +296,7 @@ class GetContributionWorker extends AbstractWorker {
 
     }
 
-    private function _formatConcordanceValues( $_source, $_target, $regularExpressions ) {
+    private function _formatConcordanceValues( $_source, $_target, $regularExpressions ): array {
 
         $_source = strip_tags( html_entity_decode( $_source ) );
         $_source = preg_replace( '#\x{20}{2,}#u', chr( 0x20 ), $_source );
@@ -301,23 +310,11 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                     $match
-     * @param ContributionRequestStruct $contributionStruct
-     * @param FeatureSet                $featureSet
+     * @param array $match
      *
      * @return array
-     * @throws Exception
      */
-    protected function _matchRewrite( array $match, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
-
-        //Rewrite ICE matches as 101%
-        if ( $match[ 'match' ] == '100%' ) {
-            [ $lang, ] = explode( '-', $contributionStruct->getJobStruct()->target );
-            if ( isset( $match[ 'ICE' ] ) && $match[ 'ICE' ] && !in_array( $lang, ICES::$iceLockDisabledForTargetLangs ) ) {
-                $match[ 'match' ] = '101%';
-            }
-            //else do not rewrite the match value
-        }
+    protected function _matchRewrite( array $match ): array {
 
         if ( !empty( $match[ 'score' ] ) && $match[ 'score' ] >= 0.9 ) {
             $match[ 'match' ] = 'ICE_MT';
@@ -329,14 +326,14 @@ class GetContributionWorker extends AbstractWorker {
 
     /**
      * Build tokens to mark with highlight placeholders
-     * the source RESULTS occurrences ( correspondences ) with text search incoming from ajax
+     * the source RESULTS occurrences (correspondences) with text search incoming from ajax
      *
      * @param $text string
      *
      * @return array[string => string] $regularExpressions Pattern is in the key and replacement in the value of the array
      *
      */
-    protected function tokenizeSourceSearch( $text ) {
+    protected function tokenizeSourceSearch( string $text ): array {
 
         $text = strip_tags( html_entity_decode( $text ) );
 
@@ -421,17 +418,8 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        if ( $contributionStruct->mt_evaluation !== null ) {
-            $_config[ 'mt_evaluation' ] = $contributionStruct->mt_evaluation;
-        }
-
-        if ( $contributionStruct->dialect_strict !== null ) {
-            $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
-        }
-
-        if ( $contributionStruct->tm_prioritization !== null ) {
-            $_config[ 'priority_key' ] = $contributionStruct->tm_prioritization;
-        }
+        $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
 
         if ( !empty( $contributionStruct->penalty_key ) ) {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
@@ -499,13 +487,15 @@ class GetContributionWorker extends AbstractWorker {
             $temp_matches = [];
 
             if ( $this->issetSourceAndTarget( $config ) ) {
+                $tmEngine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
                 $temp_matches = $tmEngine->get( $config );
             }
 
             if ( !empty( $temp_matches ) ) {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
-                $tms_match  = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
+                /** @var Engines_Results_MyMemory_TMS $temp_matches */
+                $tms_match = $temp_matches->get_matches_as_array( 2, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
             }
         }
 
@@ -517,13 +507,21 @@ class GetContributionWorker extends AbstractWorker {
                 !$isCrossLang
         ) {
 
-            if ( empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
+            if ( ( $contributionStruct->mt_quality_value_in_editor ?? 0 ) > 99 || empty( $tms_match ) || (int)str_replace( "%", "", $tms_match[ 0 ][ 'match' ] ) < 100 ) {
 
+                /**
+                 * Call The MT Engine IF
+                 * - The user has set an MT Quality value in the editor > 99
+                 * OR
+                 * - The TM Engine has not returned any match
+                 * OR
+                 * - The TM Engine has returned a match with a score < 100
+                 */
                 $mt_engine = $contributionStruct->getMTEngine( $featureSet );
                 $config    = $mt_engine->getConfigStruct();
 
                 //if a callback is not set only the first argument is returned, get the config params from the callback
-                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct );
+                $config = $featureSet->filter( 'beforeGetContribution', $config, $mt_engine, $jobStruct ); //MMT
 
                 $config[ 'pid' ]                 = $jobStruct->id_project;
                 $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
@@ -539,7 +537,18 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
-                $config[ 'mt_evaluation' ]       = $contributionStruct->mt_evaluation;
+
+                if ( $contributionStruct->mt_evaluation ) {
+                    $config[ 'include_score' ] = $contributionStruct->mt_evaluation;
+                }
+
+                if ( $contributionStruct->mt_qe_workflow_enabled ) {
+                    // Initialize the MTQEWorkflowParams object with the workflow parameters from the queue element.
+                    $mt_qe_config                = new MTQEWorkflowParams( json_decode( $queueElement->params->mt_qe_workflow_parameters ?? null, true ) ?? [] ); // params or default configuration (NULL safe)
+                    $config[ 'mt_qe_engine_id' ] = $mt_qe_config->qe_model_version;
+                }
+
+                $mt_engine->setMTPenalty( $contributionStruct->mt_quality_value_in_editor ? 100 - $contributionStruct->mt_quality_value_in_editor : null ); // can be (100-102 == -2). In AbstractEngine it will be set as (100 - -2 == 102)
 
                 $mt_result = $mt_engine->get( $config );
             }
@@ -558,7 +567,7 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @return bool
      */
-    private function issetSourceAndTarget( $_config ) {
+    private function issetSourceAndTarget( $_config ): bool {
         return ( isset( $_config[ 'source' ] ) and $_config[ 'source' ] !== '' and isset( $_config[ 'target' ] ) and $_config[ 'target' ] !== '' );
     }
 
@@ -568,18 +577,16 @@ class GetContributionWorker extends AbstractWorker {
      *
      * @return array
      */
-    protected function _sortMatches( $mt_result, $matches ) {
+    protected function _sortMatches( $mt_result, $matches ): array {
         if ( !empty( $mt_result ) ) {
             $matches[] = $mt_result;
-            usort( $matches, [ "self", "__compareScore" ] );
-            //this is necessary since usort sorts is ascending order, thus inverting the ranking
-            $matches = array_reverse( $matches );
+            usort( $matches, [ "self", "__compareScoreDesc" ] );
         }
 
         return $matches;
     }
 
-    private function _sortByLenDesc( $stringA, $stringB ) {
+    private function _sortByLenDesc( $stringA, $stringB ): int {
         if ( strlen( $stringA ) == strlen( $stringB ) ) {
             return 0;
         }
@@ -588,16 +595,16 @@ class GetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param                           $matches
+     * @param array                     $matches
      * @param ContributionRequestStruct $contributionStruct
      * @param FeatureSet                $featureSet
      *
+     * @throws ReflectionException
      * @throws Exception
      */
-    private function updateAnalysisSuggestion( $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
+    private function updateAnalysisSuggestion( array $matches, ContributionRequestStruct $contributionStruct, FeatureSet $featureSet ) {
 
         if (
-                is_array( $matches ) and
                 count( $matches ) > 0 and
                 $contributionStruct->segmentId !== null and
                 $contributionStruct->getJobStruct() !== null and
@@ -614,12 +621,12 @@ class GetContributionWorker extends AbstractWorker {
                 foreach ( $matches as $k => $m ) {
 
                     // normalize data for saving `suggestions_array`
-                    $matches[ $k ][ 'raw_segment' ]     = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_segment' ] );
-                    $matches[ $k ][ 'segment' ]         = $Filter->fromLayer1ToLayer0( html_entity_decode( $matches[ $k ][ 'segment' ] ) );
-                    $matches[ $k ][ 'translation' ]     = $Filter->fromLayer1ToLayer0( html_entity_decode( $matches[ $k ][ 'translation' ] ) );
-                    $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $matches[ $k ][ 'raw_translation' ] );
+                    $matches[ $k ][ 'raw_segment' ]     = $Filter->fromLayer1ToLayer0( $m[ 'raw_segment' ] );
+                    $matches[ $k ][ 'segment' ]         = $Filter->fromLayer1ToLayer0( html_entity_decode( $m[ 'segment' ] ) );
+                    $matches[ $k ][ 'translation' ]     = $Filter->fromLayer1ToLayer0( html_entity_decode( $m[ 'translation' ] ) );
+                    $matches[ $k ][ 'raw_translation' ] = $Filter->fromLayer1ToLayer0( $m[ 'raw_translation' ] );
 
-                    if ( $matches[ $k ][ 'created_by' ] == 'MT!' ) {
+                    if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = Constants_Engines::MT; //MyMemory returns MT!
                     } else {
                         $user = new Users_UserStruct();

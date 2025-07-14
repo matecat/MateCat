@@ -3,7 +3,7 @@
 namespace API\V1;
 
 
-use API\Commons\KleinController;
+use AbstractControllers\KleinController;
 use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\Validators\LoginValidator;
 use CatUtils;

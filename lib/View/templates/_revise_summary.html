@@ -20,23 +20,14 @@
             isSourceRTL: ${source_rtl | string:false},
             isTargetRTL: ${target_rtl | string:false},
             searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
+            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
             enableMultiDomainApi: ${enableMultiDomainApi | string:false},
             ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
             isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-            isReview: ${isReview | string: false},
             source_code: '${source_code}',
             target_code: '${target_code}',
-            user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-            project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
-            pname: '${pname}',
-            word_count_type: '${word_count_type}'
-
-        };
+        }
         /*]]>*/
-    </script>
-
-    <script tal:condition="true:isReview" tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
-        config.review_password = '${review_password}';
     </script>
 
     <script tal:condition="true:brPlaceholdEnabled" tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
@@ -60,7 +51,6 @@
         config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
         /*]]>*/
     </script>
-    <script type="text/javascript" src="${basepath}public/build/libs.js?build=${build_number}"></script>
 
 </head>
 

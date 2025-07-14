@@ -1,4 +1,4 @@
-@use "../../commons/colors";
+@use '../../commons/colors';
 
 .label-with-tooltip {
   position: absolute;
@@ -14,6 +14,23 @@
     border-right: 4px solid transparent;
     border-top: 6px solid white;
     content: '';
+  }
+}
+
+.label-with-tooltip-bottom {
+  &:before {
+    position: absolute;
+    left: 50%;
+    top: -6px;
+    margin-left: -4px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid white;
+    content: '';
+  }
+
+  &::after {
+    display: none;
   }
 }
 

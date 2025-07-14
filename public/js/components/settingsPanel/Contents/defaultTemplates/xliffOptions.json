@@ -1,0 +1,63 @@
+{
+  "xliff12": {
+    "states": [
+      "final",
+      "needs-adaptation",
+      "needs-l10n",
+      "needs-review-adaptation",
+      "needs-review-l10n",
+      "needs-review-translation",
+      "needs-translation",
+      "new",
+      "signed-off",
+      "translated",
+      "exact-match",
+      "fuzzy-match",
+      "id-match",
+      "leveraged-glossary",
+      "leveraged-inherited",
+      "leveraged-mt",
+      "leveraged-repository",
+      "leveraged-tm",
+      "mt-suggestion",
+      "rejected-grammar",
+      "rejected-inaccurate",
+      "rejected-length",
+      "rejected-spelling",
+      "tm-suggestion"
+    ],
+    "analysis": ["new", "pre-translated"],
+    "match_category": [
+      {"id": "new", "name": "New"},
+      {"id": "repetitions", "name": "Repetitions"},
+      {"id": "internal", "name": "Internal 75-99%"},
+      {"id": "tm_50_74", "name": "TM Partial 50-74%"},
+      {"id": "tm_75_84", "name": "TM Partial 75-84%"},
+      {"id": "tm_85_94", "name": "TM Partial 85-94%"},
+      {"id": "tm_95_99", "name": "TM Partial 95-99%"},
+      {"id": "tm_100", "name": "TM 100%"},
+      {"id": "tm_100_public", "name": "Public TM 100% "},
+      {"id": "ice", "name": "TM 100% in context"},
+      {"id": "mt", "name": "Machine Translation"}
+    ],
+    "editor": ["draft", "translated", "approved", "approved2"]
+  },
+  "xliff20": {
+    "states": ["initial", "translated", "reviewed", "final"],
+    "analysis": ["new", "pre-translated"],
+    "match_category": [
+      {"id": "new", "name": "New"},
+      {"id": "repetitions", "name": "Repetitions"},
+      {"id": "internal", "name": "Internal 75-99%"},
+      {"id": "tm_50_74", "name": "TM Partial 50-74%"},
+      {"id": "tm_75_84", "name": "TM Partial 75-84%"},
+      {"id": "tm_85_94", "name": "TM Partial 85-94%"},
+      {"id": "tm_95_99", "name": "TM Partial 95-99%"},
+      {"id": "tm_100", "name": "TM 100%"},
+      {"id": "tm_100_public", "name": "Public TM 100% "},
+      {"id": "ice", "name": "TM 100% in context"},
+      {"id": "mt", "name": "Machine Translation"}
+    ],
+    "editor": ["draft", "translated", "approved", "approved2"]
+  }
+}
