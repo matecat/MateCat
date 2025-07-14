@@ -160,7 +160,13 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // get the prefix
         $prefix = $this->getCachePackageHashFolder( $hash, $lang );
-        $file   = $prefix . '/work/' . $this->getTheLastPartOfKey( $xliffPath );
+        $fileName = $this->getTheLastPartOfKey( $xliffPath );
+
+        // encode the file name (fix name too longs)
+        $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
+        $fileName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+
+        $file   = $prefix . '/work/' . $fileName;
         $valid  = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
 
         if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid ) {
@@ -169,10 +175,16 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // We need to execute uploadItem in a try/catch block because $origDestination string can be safe but $xliffDestination can be not
         //
-        // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.dox.xliff (TOO LONG)
+        // Example: حديث_أمني_ريف_حلب_الغربي.docx (OK) -----> حديث_أمني_ريف_حلب_الغربي.docx.xliff (TOO LONG)
         //
         try {
             $xliffDestination = $this->storeOriginalFileAndGetXliffDestination( $prefix, $xliffPath, static::$FILES_STORAGE_BUCKET, $originalPath );
+            $fileName = $this->getTheLastPartOfKey( $xliffDestination );
+
+            // encode the file name (fix name too longs)
+            $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
+            $fileName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+            $xliffDestination = str_replace($file_info['filename'] . "." . $file_info['extension'], $fileName, $xliffDestination);
 
             $this->s3Client->uploadItem( [
                     'bucket' => static::$FILES_STORAGE_BUCKET,
@@ -472,8 +484,6 @@ class S3FilesStorage extends AbstractFilesStorage {
             if ( !$item->isDir() ) {
 
                 $subPathName = $iterator->getSubPathName();
-//                $file_info = AbstractFilesStorage::pathinfo_fix($subPathName);
-//                $encodedSubPathName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
 
                 // Example: {CAD1B6E1-B312-8713-E8C3-97145410FD37}} --> cad1b6e1-b312-8713-e8c3-97145410fd37}
                 $prefix = self::QUEUE_FOLDER . DIRECTORY_SEPARATOR . self::getUploadSessionSafeName( $uploadSession );
@@ -487,12 +497,15 @@ class S3FilesStorage extends AbstractFilesStorage {
                 }
 
                 $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
-                // $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
+
+                $file_info = AbstractFilesStorage::pathinfo_fix($subPathName);
+                $encodedSubPathName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+                $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
 
                 // upload file
                 $s3Client->uploadItem( [
                         'bucket' => static::$FILES_STORAGE_BUCKET,
-                        'key'    => $subPathName, // encode filename
+                        'key'    => $encodedSubPathName, // encode filename
                         'source' => $item->getPathName()
                 ] );
 
