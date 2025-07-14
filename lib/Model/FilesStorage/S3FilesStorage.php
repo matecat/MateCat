@@ -164,7 +164,9 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // encode the file name (fix name too longs)
         $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
-        $fileName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+        $encodedFileName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+        $xliffPath = str_replace($fileName, $encodedFileName, $xliffPath);
+        $fileName = $encodedFileName;
 
         $file   = $prefix . '/work/' . $fileName;
         $valid  = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
