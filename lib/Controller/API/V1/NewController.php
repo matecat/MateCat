@@ -60,6 +60,8 @@ use Xliff\XliffConfigTemplateDao;
 
 class NewController extends KleinController {
 
+    use ScanDirectoryForConvertedFiles;
+
     const MAX_NUM_KEYS = 13;
 
     protected function afterConstruct() {
