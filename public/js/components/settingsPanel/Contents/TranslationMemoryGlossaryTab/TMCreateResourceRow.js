@@ -169,10 +169,11 @@ export const TMCreateResourceRow = ({row}) => {
                   : 'The key you entered is invalid.';
 
           CatToolActions.addNotification({
-            title: 'Invalid key',
+            title: 'Invalid key name',
             type: 'error',
             text: errMessage,
             position: 'br',
+            allowHtml: true,
             timer: 5000,
           })
         })
@@ -205,6 +206,7 @@ export const TMCreateResourceRow = ({row}) => {
             type: 'error',
             text: errMessage,
             position: 'br',
+            allowHtml: true,
             timer: 5000,
           })
         })
@@ -241,6 +243,7 @@ export const TMCreateResourceRow = ({row}) => {
           title: 'Invalid key',
           type: 'error',
           text: errMessage,
+          allowHtml: true,
           position: 'br',
           timer: 5000,
         })
@@ -281,6 +284,7 @@ export const TMCreateResourceRow = ({row}) => {
           title: 'Invalid key',
           type: 'error',
           text: message,
+          allowHtml: true,
           position: 'br',
           timer: 5000,
         })
