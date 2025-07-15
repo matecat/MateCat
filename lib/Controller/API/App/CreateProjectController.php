@@ -3,6 +3,7 @@
 namespace API\App;
 
 use AbstractControllers\AbstractStatefulKleinController;
+use API\Commons\Traits\ScanDirectoryForConvertedFiles;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
@@ -14,13 +15,10 @@ use Engine;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
 use Langs\Languages;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectManager;
@@ -38,8 +36,11 @@ use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
+use Xliff\XliffConfigTemplateStruct;
 
 class CreateProjectController extends AbstractStatefulKleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     private array $data     = [];
     private array $metadata = [];
@@ -95,45 +96,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 ]
         );
 
-        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
-
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $newArFiles = [];
+        //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $uploadDir );
-
-                //fetch cache links, created by converter, from upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //check if file begins with the name of the zip file.
-                    // If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
-                        //add file name to the files array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //this file was not in a zip. Add it normally
-
-                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -141,8 +107,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'project_name' ]                          = $this->data[ 'project_name' ];
         $projectStructure[ 'private_tm_key' ]                        = $this->data[ 'private_tm_key' ];
         $projectStructure[ 'uploadToken' ]                           = $_COOKIE[ 'upload_token' ];
-        $projectStructure[ 'array_files' ]                           = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]                      = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]                           = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]                      = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
         $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
@@ -162,7 +128,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
 
         // GDrive session instance
-        if(isset($_SESSION[ "gdrive_session" ])){
+        if ( isset( $_SESSION[ "gdrive_session" ] ) ) {
             $projectStructure[ 'session' ]          = $_SESSION[ "gdrive_session" ];
             $projectStructure[ 'session' ][ 'uid' ] = $this->user->uid;
         }
@@ -197,6 +163,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         if ( !empty( $this->data[ 'payable_rate_model_template' ] ) ) {
+            $projectStructure[ 'payable_rate_model' ]    = $this->data[ 'payable_rate_model_template' ];
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
@@ -207,7 +174,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
         $projectStructure[ 'owner' ]        = $this->user->email;
-        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
+        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid a useless query
 
         //set features override
         $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
@@ -264,7 +231,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $xliff_parameters              = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING );
         $xliff_parameters_template_id  = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $qa_model_template_id          = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $qa_model_template             = filter_var( $this->request->param( 'qa_model_template' ), FILTER_SANITIZE_STRING );
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_quality_value_in_editor    = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 85, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
+        $payable_rate_template         = filter_var( $this->request->param( 'payable_rate_template' ), FILTER_SANITIZE_STRING );
+
 
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
         $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
@@ -283,14 +254,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $private_tm_key = [];
         }
 
-        if ( $array_keys ) { // some keys are selected from panel
+        if ( $array_keys ) { // some keys are selected from the panel
 
             //remove duplicates
             foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
-                    //same key was get from keyring, remove
+                    //the same key was get from keyring, remove
                     $private_tm_key = [];
                 }
             }
@@ -328,7 +299,9 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
                 'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
                 'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template'             => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
                 'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
                 'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
                 'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
                 'postPrivateTmKey'              => $postPrivateTmKey,
@@ -336,6 +309,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
                 'only_private'                  => $only_private,
+                'mt_quality_value_in_editor'    => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
                 'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
         ];
 
@@ -366,8 +340,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
         $data[ 'mmt_glossaries' ]                        = $this->validateMMTGlossaries( $data[ 'mmt_glossaries' ] );
         $data[ 'deepl_formality' ]                       = $this->validateDeepLFormalityParams( $data[ 'deepl_formality' ] );
-        $data[ 'qa_model_template' ]                     = $this->validateQaModelTemplate( $data[ 'qa_model_template_id' ] );
-        $data[ 'payable_rate_model_template' ]           = $this->validatePayableRateTemplate( $data[ 'payable_rate_template_id' ] );
+        $data[ 'qa_model_template' ]                     = $this->validateQaModelTemplate( $data[ 'qa_model_template' ], $data[ 'qa_model_template_id' ] );
+        $data[ 'payable_rate_model_template' ]           = $this->validatePayableRateTemplate( $data[ 'payable_rate_template' ], $data[ 'payable_rate_template_id' ] );
         $data[ 'dialect_strict' ]                        = $this->validateDialectStrictParam( $data[ 'target_lang' ], $data[ 'dialect_strict' ] );
         $data[ 'filters_extraction_parameters' ]         = $this->validateFiltersExtractionParameters( $data[ 'filters_extraction_parameters' ] );
         $data[ 'xliff_parameters' ]                      = $this->validateXliffParameters( $data[ 'xliff_parameters' ], $data[ 'xliff_parameters_template_id' ] );
@@ -408,6 +382,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
             $options[ 'segmentation_rule' ] = $data[ 'segmentation_rule' ];
+        }
+
+        if ( isset( $data[ 'mt_quality_value_in_editor' ] ) ) {
+            $options[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $data[ 'mt_quality_value_in_editor' ];
         }
 
         $this->metadata = $options;
@@ -524,13 +502,36 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
+     * @param null $qa_model_template
      * @param null $qa_model_template_id
      *
      * @return QAModelTemplateStruct|null
      * @throws Exception
      */
-    private function validateQaModelTemplate( $qa_model_template_id = null ): ?QAModelTemplateStruct {
-        if ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
+    private function validateQaModelTemplate( $qa_model_template = null, $qa_model_template_id = null ): ?QAModelTemplateStruct {
+        if ( !empty( $qa_model_template ) ) {
+            $json = html_entity_decode( $qa_model_template );
+
+            $model = json_decode( $json, true );
+            $json  = [
+                    "model" => $model,
+            ];
+            $json  = json_encode( $json );
+
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+
+            $QAModelTemplateStruct = new QAModelTemplateStruct();
+            $QAModelTemplateStruct->hydrateFromJSON( $json );
+            $QAModelTemplateStruct->uid = $this->user->uid;
+
+            return $QAModelTemplateStruct;
+        } elseif ( !empty( $qa_model_template_id ) and $qa_model_template_id > 0 ) {
             $qaModelTemplate = QAModelTemplateDao::get( [
                     'id'  => $qa_model_template_id,
                     'uid' => $this->getUser()->uid
@@ -548,20 +549,33 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
+     * @param null $payable_rate_template
      * @param null $payable_rate_template_id
      *
      * @return CustomPayableRateStruct|null
      * @throws Exception
      */
-    private function validatePayableRateTemplate( $payable_rate_template_id = null ): ?CustomPayableRateStruct {
+    private function validatePayableRateTemplate( $payable_rate_template = null, $payable_rate_template_id = null ): ?CustomPayableRateStruct {
         $payableRateModelTemplate = null;
+        $userId                   = $this->getUser()->uid;
 
-        if ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
+        if ( !empty( $payable_rate_template ) ) {
+            $json   = html_entity_decode( $payable_rate_template );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
 
-            $payableRateTemplateId = $payable_rate_template_id;
-            $userId                = $this->getUser()->uid;
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
 
-            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payableRateTemplateId, $userId );
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+
+            $payableRateModelTemplate = new CustomPayableRateStruct();
+            $payableRateModelTemplate->hydrateFromJSON( $json );
+            $payableRateModelTemplate->uid = $userId;
+
+        } elseif ( !empty( $payable_rate_template_id ) and $payable_rate_template_id > 0 ) {
+
+            $payableRateModelTemplate = CustomPayableRateDao::getByIdAndUser( $payable_rate_template_id, $userId );
 
             if ( null === $payableRateModelTemplate ) {
                 throw new InvalidArgumentException( 'Payable rate model id not valid' );
@@ -622,7 +636,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $validator = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = json_decode( $json );
+            $filters_extraction_parameters = $validatorObject->decoded;
         }
 
         return $filters_extraction_parameters;
@@ -638,14 +652,18 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
 
             $validator = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
-            $xliff_parameters = $validatorObject->decoded;
+
+            $xliffConfigTemplate = new XliffConfigTemplateStruct();
+            $xliffConfigTemplate->hydrateFromJSON( $json );
+            $xliff_parameters = $xliffConfigTemplate->rules->getArrayCopy();
+
         } elseif ( !empty( $xliff_parameters_template_id ) ) {
 
             $xliffConfigTemplate = XliffConfigTemplateDao::getByIdAndUser( $xliff_parameters_template_id, $this->getUser()->uid );
@@ -720,47 +738,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $team;
-    }
-
-    /**
-     * @param $filename
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
     }
 
     private function clearSessionFiles(): void {

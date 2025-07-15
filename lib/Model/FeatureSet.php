@@ -192,8 +192,10 @@ class FeatureSet implements FeatureSetInterface {
             return $feature->toNewObject();
         }, $features );
 
-        $returnable = array_filter( $objs, function ( BaseFeature $obj ) {
-            return $obj->isAutoActivableOnProject();
+        $returnable = array_filter( $objs, function ( ?BaseFeature $obj ) {
+            if($obj !== null){
+                return $obj->isAutoActivableOnProject();
+            }
         } );
 
         $this->merge( array_map( function ( BaseFeature $feature ) {
@@ -390,21 +392,23 @@ class FeatureSet implements FeatureSetInterface {
         $conflictingDeps = [];
 
         foreach ( $new_features as $feature ) {
-            // flat dependency management
 
+            // flat dependency management
             $baseFeature = $feature->toNewObject();
 
-            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            if($baseFeature !== null){
+                $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
 
-            $deps = [];
+                $deps = [];
 
-            if ( !$this->_ignoreDependencies ) {
-                $deps = array_map( function ( $code ) {
-                    return new BasicFeatureStruct( [ 'feature_code' => $code ] );
-                }, $baseFeature->getDependencies() );
+                if ( !$this->_ignoreDependencies ) {
+                    $deps = array_map( function ( $code ) {
+                        return new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                    }, $baseFeature->getDependencies() );
+                }
+
+                $all_features = array_merge( $all_features, $deps, [ $feature ] );
             }
-
-            $all_features = array_merge( $all_features, $deps, [ $feature ] );
         }
 
         /** @var BasicFeatureStruct $feature */

@@ -31,6 +31,7 @@ use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Analysis\AnalysisDao;
 use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use ProjectManager\ProjectManagerModel;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -42,6 +43,7 @@ use Translators\TranslatorsModel;
 use WordCount\CounterModel;
 use Xliff\DTO\XliffRulesModel;
 use Xliff\XliffConfigTemplateStruct;
+use Conversion\ZipArchiveHandler;
 
 class ProjectManager {
 
@@ -903,7 +905,7 @@ class ProjectManager {
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -1,
-                        "message" => "No text to translate in the file {$e->getMessage()}."
+                        "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
@@ -1307,6 +1309,14 @@ class ProjectManager {
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
                 $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model' ] ) and !empty( $projectStructure[ 'payable_rate_model' ] ) ) {
+
+                // get payable rates
+                $payableRatesTemplate = new CustomPayableRateStruct();
+                $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
+                $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = json_encode( $payableRates );
+
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );

@@ -118,10 +118,11 @@ export const EmailsBadge = ({
     inputRef?.current.blur()
   }
   const handleInputKeyDown = (e) => {
-    e.stopPropagation()
+    if (e.key !== 'Enter') e.stopPropagation()
+
     if (
-      (e.code === 'Backspace' && !inputValue && areaRef?.current) ||
-      (e.code === 'ArrowLeft' &&
+      (e.key === 'Backspace' && !inputValue && areaRef?.current) ||
+      (e.key === 'ArrowLeft' &&
         inputRef?.current.selectionStart === 0 &&
         emails.length > 0)
     ) {
@@ -130,7 +131,7 @@ export const EmailsBadge = ({
       inputRef?.current.blur()
       areaRef?.current.focus()
     }
-    if (e.code === 'Enter') {
+    if (e.key === 'Enter') {
       if (
         separators.some(
           (separator) => separator === SPECIALS_SEPARATORS.EnterKey,
@@ -139,11 +140,13 @@ export const EmailsBadge = ({
         updateEmails(
           `${inputRef.current.value}${filterSeparators(separators)[0]}`,
         )
+      if (inputValue !== '') e.stopPropagation()
+
       e.preventDefault()
     }
   }
   const handleAreaKeyDown = (e) => {
-    switch (e.code) {
+    switch (e.key) {
       case 'Backspace':
         if (highlightedEmailIndexRef.current >= 0) {
           removeEmail(highlightedEmailIndexRef.current)

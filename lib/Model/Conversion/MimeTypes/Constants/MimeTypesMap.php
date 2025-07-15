@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace MimeTypes\Constants;
+namespace Conversion\MimeTypes\Constants;
 
 class MimeTypesMap {
     /**

@@ -6,28 +6,37 @@ use TestHelpers\AbstractTest;
 
 class ConvertFileModelTest extends AbstractTest {
 
+    /**
+     * @throws Exception
+     */
     function test_model() {
         $model = new ConvertedFileModel();
-        $this->assertEquals( $model->getCode(), ConversionHandlerStatus::NOT_CONVERTED );
-        $this->assertFalse( $model->hasErrors() );
+        $model->setFileName( 'set file name is mandatory' );
 
-        $model->changeCode( ConversionHandlerStatus::OK );
-        $this->assertEquals( $model->getCode(), ConversionHandlerStatus::OK );
+        $this->assertEquals( ConversionHandlerStatus::NOT_CONVERTED, $model->getCode() );
+        $this->assertFalse( $model->isError() );
+
+        $model->setErrorCode( ConversionHandlerStatus::OK );
+        $this->assertEquals( ConversionHandlerStatus::OK, $model->getCode() );
 
         try {
-            $model->changeCode( 43434343 );
-        } catch ( \Exception $exception ) {
-            $this->assertEquals( $exception->getMessage(), '43434343 is not a valid code' );
+            $model->setErrorCode( 43434343 );
+            throw new Exception(); // to be sure that the exception is raised internally and to not skip the assertion.
+        } catch ( Exception $exception ) {
+            $this->assertEquals( '43434343 is not a valid code', $exception->getMessage() );
         }
 
-        $model->changeCode( ConversionHandlerStatus::SOURCE_ERROR );
-        $model->addError( 'Source not valid' );
+        $model->setErrorCode( ConversionHandlerStatus::SOURCE_ERROR );
+        $model->setErrorMessage( 'Source not valid' );
 
-        $this->assertCount( 1, $model->getErrors() );
-        $this->assertTrue( $model->hasErrors() );
+        $this->assertEquals( 'Source not valid', $model->getMessage() );
+        $this->assertTrue( $model->isError() );
 
-        $json = json_encode( $model );
+        $json = json_encode( $model->getResult() );
 
-        $this->assertEquals( '{"code":-3,"errors":[{"code":-3,"message":"Source not valid","debug":null}],"warnings":[],"data":[]}', $json );
+        $this->assertEquals( '{"name":"set file name is mandatory","size":0}', $json );
+
+        $this->assertEquals( '{"code":-3,"message":"Source not valid","name":"set file name is mandatory"}', json_encode( $model->asError() ) );
+
     }
 }

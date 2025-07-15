@@ -5,6 +5,55 @@
     "payable_rate_template_name": {
       "type": "string"
     },
+    "id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "uid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "version": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "createdAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true
+    },
+    "modifiedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true
+    },
+    "isSelected": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true
+    },
+    "isTemporary": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true
+    },
     "breakdowns": {
       "type": "object",
       "$ref": "#/definitions/breakdowns"

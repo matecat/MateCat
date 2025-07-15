@@ -61,6 +61,7 @@ class ProjectTemplateDao extends AbstractDao {
         $default->qa_model_template_id         = 0;
         $default->xliff_config_template_id     = 0;
         $default->filters_template_id          = 0;
+        $default->mt_quality_value_in_editor   = 85;
         $default->subject                      = "general";
         $default->source_language              = "en-US";
         $default->target_language              = serialize( [ "fr-FR" ] );
@@ -383,9 +384,9 @@ class ProjectTemplateDao extends AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -409,6 +410,7 @@ class ProjectTemplateDao extends AbstractDao {
                 "filters_template_id"          => $projectTemplateStruct->filters_template_id,
                 "xliff_config_template_id"     => $projectTemplateStruct->xliff_config_template_id,
                 "subject"                      => $projectTemplateStruct->subject,
+                "mt_quality_value_in_editor"   => $projectTemplateStruct->mt_quality_value_in_editor,
                 "source_language"              => $projectTemplateStruct->source_language,
                 "target_language"              => $projectTemplateStruct->target_language,
                 "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
@@ -461,6 +463,7 @@ class ProjectTemplateDao extends AbstractDao {
             `target_language` = :target_language,
             `character_counter_count_tags` = :character_counter_count_tags,
             `character_counter_mode` = :character_counter_mode,
+            `mt_quality_value_in_editor` = :mt_quality_value_in_editor,
             `modified_at` = :now 
          WHERE id = :id;";
 
@@ -485,6 +488,7 @@ class ProjectTemplateDao extends AbstractDao {
                 "xliff_config_template_id"     => $projectTemplateStruct->xliff_config_template_id,
                 "filters_template_id"          => $projectTemplateStruct->filters_template_id,
                 "subject"                      => $projectTemplateStruct->subject,
+                "mt_quality_value_in_editor"   => $projectTemplateStruct->mt_quality_value_in_editor,
                 "character_counter_count_tags" => $projectTemplateStruct->character_counter_count_tags,
                 "character_counter_mode"       => $projectTemplateStruct->character_counter_mode,
                 "source_language"              => $projectTemplateStruct->source_language,
