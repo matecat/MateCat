@@ -226,7 +226,7 @@ const tagSignaturesMap = {
   },
   space: {
     type: 'space',
-    regex: /(?<!<[^>]*)\s(?![^<]*>)/g,
+    regex: /(?<!<[^>]*)[^\S\n](?![^<]*>)/g,
     selfClosing: true,
     isClosure: false,
     placeholder: '\u00b7',
