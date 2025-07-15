@@ -7,10 +7,9 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Model\ConnectedServices\GDrive\Session;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
@@ -30,6 +29,7 @@ use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
@@ -78,7 +78,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'None',
@@ -90,7 +90,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 [
                         'expires'  => time() + ( 86400 * 365 ),
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'None',
@@ -99,7 +99,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $uploadDir  = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
         $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
 
         $projectManager   = new ProjectManager();
@@ -123,7 +123,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'due_date' ]                              = $this->data[ 'due_date' ];
         $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'HTTP_HOST' ]                             = AppConfig::$HTTPHOST;
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
@@ -586,7 +586,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             $json   = html_entity_decode( $filters_extraction_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
@@ -610,7 +610,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateXliffParameters( $xliff_parameters = null, $xliff_parameters_template_id = null ): ?array {
         if ( !empty( $xliff_parameters ) ) {
             $json   = html_entity_decode( $xliff_parameters );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;

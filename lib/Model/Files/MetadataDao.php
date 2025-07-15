@@ -9,7 +9,7 @@
 namespace Model\Files;
 
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use ReflectionException;
 
 class MetadataDao extends AbstractDao {

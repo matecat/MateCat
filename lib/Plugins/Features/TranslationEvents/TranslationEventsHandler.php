@@ -9,11 +9,11 @@
 namespace Plugins\Features\TranslationEvents;
 
 use Exception;
+use Model\DataAccess\TransactionalTrait;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
-use Model\TransactionalTrait;
 use Plugins\Features\ReviewExtended\BatchReviewProcessor;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;

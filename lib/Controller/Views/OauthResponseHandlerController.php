@@ -5,11 +5,11 @@ namespace Controller\Views;
 use Controller\Abstracts\BaseKleinViewController;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
-use INIT;
 use Model\ConnectedServices\Oauth\OauthClient;
 use Model\ConnectedServices\Oauth\ProviderUser;
 use Model\Users\Authentication\OAuthSignInModel;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 
 class OauthResponseHandlerController extends BaseKleinViewController {
 
@@ -31,7 +31,7 @@ class OauthResponseHandlerController extends BaseKleinViewController {
                 'error'    => [ 'filter' => FILTER_SANITIZE_STRING ]
         ] );
 
-        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . INIT::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
+        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . AppConfig::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
             $this->render( 401 );
         }
 

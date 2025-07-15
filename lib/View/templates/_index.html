@@ -2,7 +2,7 @@
 <html dir="ltr" lang="it-IT">
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
-        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+        <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta property="og:title" content="Translate a file with Matecat" />
@@ -14,7 +14,7 @@
         <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
-        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+        <tal:block metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
         <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
             /*<![CDATA[*/
                 const config = {
@@ -141,7 +141,7 @@
     <body class="cattool">
         <div class="page-content"></div>
         <tal:block metal:use-macro="templates/common.html/footer_includes" />
-        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+        <tal:block metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
         <!--Container for Matecat Notifications-->
         <div class="notifications-wrapper"></div>
     </body>

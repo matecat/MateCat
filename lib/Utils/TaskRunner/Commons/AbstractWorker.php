@@ -10,13 +10,13 @@
 namespace Utils\TaskRunner\Commons;
 
 use Exception;
-use INIT;
-use Model\Database;
+use Model\DataAccess\Database;
 use PDOException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EmptyElementException;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -245,7 +245,7 @@ abstract class AbstractWorker implements SplSubject {
     protected function publishToNodeJsClients( $_object ) {
 
         $message = json_encode( $_object );
-        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
+        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
         $this->_doLog( $message );
 
     }

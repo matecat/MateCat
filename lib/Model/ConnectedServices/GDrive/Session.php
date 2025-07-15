@@ -16,7 +16,6 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use GuzzleHttp\Psr7\Response;
-use INIT;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Conversion\FilesConverter;
@@ -35,6 +34,7 @@ use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -175,7 +175,7 @@ class Session {
                         'fileId'        => $fileId,
                         'fileName'      => $fileName,
                         'fileSize'      => $s3[ 'ContentLength' ],
-                        'fileExtension' => INIT::$MIME_TYPES[ $s3[ 'ContentType' ] ][ 0 ]
+                        'fileExtension' => AppConfig::$MIME_TYPES[ $s3[ 'ContentType' ] ][ 0 ]
                 ];
 
             } else {
@@ -376,7 +376,7 @@ class Session {
                 $this->deleteDirectory( $pathCache );
             }
 
-            $tempUploadedFileDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
+            $tempUploadedFileDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->session[ 'upload_token' ];
 
             /** @var DirectoryIterator $item */
             foreach (
@@ -653,10 +653,10 @@ class Session {
 
         $uploadTokenValue = $this->guid;
 
-        $uploadDir = INIT::$UPLOAD_REPOSITORY .
+        $uploadDir = AppConfig::$UPLOAD_REPOSITORY .
                 DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        $errDir = INIT::$STORAGE_DIR .
+        $errDir = AppConfig::$STORAGE_DIR .
                 DIRECTORY_SEPARATOR .
                 'conversion_errors' .
                 DIRECTORY_SEPARATOR . $uploadTokenValue;

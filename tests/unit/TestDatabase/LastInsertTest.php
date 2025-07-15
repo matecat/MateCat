@@ -1,7 +1,8 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -19,7 +20,7 @@ class LastInsertTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         $this->sql_create              = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value  = "INSERT INTO Persons VALUES (475144 )";

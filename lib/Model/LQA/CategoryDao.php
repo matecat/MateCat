@@ -15,7 +15,7 @@ class CategoryDao extends AbstractDao {
      */
     public static function findById( $id ) {
         $sql  = "SELECT * FROM qa_categories WHERE id = :id LIMIT 1";
-        $conn = \Model\Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
@@ -31,7 +31,7 @@ class CategoryDao extends AbstractDao {
      */
     public function findByIdModelAndIdParent( $id_model, $id_parent ) {
         $sql  = "SELECT * FROM qa_categories WHERE id_model = :id_model AND id_parent = :id_parent ";
-        $conn = \Model\Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
@@ -53,7 +53,7 @@ class CategoryDao extends AbstractDao {
                 " VALUES " .
                 " ( :id_model, :label, :id_parent, :severities, :options )";
 
-        $conn = \Model\Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $categoryStruct->toArray(
                 [
@@ -79,7 +79,7 @@ class CategoryDao extends AbstractDao {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model " .
                 " ORDER BY COALESCE(id_parent, 0) ";
 
-        $conn = \Model\Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         $stmt->execute(
@@ -101,7 +101,7 @@ class CategoryDao extends AbstractDao {
     public static function getCategoriesAndSeverities( $id_model ): array {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
-        $conn = \Model\Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(
                 [

@@ -10,11 +10,11 @@
 namespace Model\DataAccess;
 
 use Exception;
-use INIT;
 use Predis\Client;
 use ReflectionException;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 
 trait DaoCacheTrait {
 
@@ -70,7 +70,7 @@ trait DaoCacheTrait {
      * @throws ReflectionException
      */
     protected function _getFromCacheMap( string $keyMap, string $query ): ?array {
-        if ( INIT::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
+        if ( AppConfig::$SKIP_SQL_CACHE || $this->cacheTTL == 0 ) {
             return null;
         }
 
@@ -118,7 +118,7 @@ trait DaoCacheTrait {
      * @return self
      */
     public function setCacheTTL( ?int $cacheSecondsTTL ): self {
-        if ( !INIT::$SKIP_SQL_CACHE ) {
+        if ( !AppConfig::$SKIP_SQL_CACHE ) {
             $this->cacheTTL = $cacheSecondsTTL ?? 0;
         }
 

@@ -4,7 +4,6 @@ namespace Plugins\Features\TranslationEvents\Model;
 
 use Error;
 use Exception;
-use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
@@ -162,7 +161,7 @@ class TranslationEvent {
      * @return \Model\Segments\SegmentStruct
      */
     public function getSegmentStruct(): ?SegmentStruct {
-        $dao = new SegmentDao( Database::obtain() );
+        $dao = new SegmentDao( \Model\DataAccess\Database::obtain() );
 
         return $dao->getByChunkIdAndSegmentId(
                 $this->chunk->id,

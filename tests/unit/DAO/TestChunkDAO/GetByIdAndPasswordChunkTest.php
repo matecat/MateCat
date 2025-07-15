@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -32,7 +33,7 @@ class GetByIdAndPasswordChunkTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->chunk_Dao         = new ChunkDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(

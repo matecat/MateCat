@@ -14,10 +14,10 @@ use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
+use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
 
@@ -56,7 +56,7 @@ class LoginController extends AbstractStatefulKleinController {
         }
 
         // XSRF-Token
-        $xsrfToken = $this->request->headers()->get( INIT::$XSRF_TOKEN );
+        $xsrfToken = $this->request->headers()->get( AppConfig::$XSRF_TOKEN );
 
         if ( $xsrfToken === null ) {
             $this->incrementRateLimitCounter( $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login' );
@@ -76,11 +76,11 @@ class LoginController extends AbstractStatefulKleinController {
             return;
         }
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, '',
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, '',
                 [
                         'expires' => 0,
                         'path'    => '/',
-                        'domain'  => INIT::$COOKIE_DOMAIN
+                        'domain'  => AppConfig::$COOKIE_DOMAIN
                 ]
         );
 
@@ -118,11 +118,11 @@ class LoginController extends AbstractStatefulKleinController {
         $jwt = new SimpleJWT( [ "csrf" => Utils::uuid4() ] );
         $jwt->setTimeToLive( 60 );
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
                 [
                         'expires'  => time() + 60, /* now + 60 seconds */
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => false,
                         'samesite' => 'Strict',
@@ -147,11 +147,11 @@ class LoginController extends AbstractStatefulKleinController {
         $jwt = new SimpleJWT( [ "uid" => $_SESSION[ 'user' ]->uid ] );
         $jwt->setTimeToLive( 60 );
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
                 [
                         'expires'  => time() + 60, /* now + 60 seconds */
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => false,
                         'samesite' => 'Strict',

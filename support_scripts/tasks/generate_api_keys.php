@@ -2,16 +2,17 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 $db->debug = false;
 $db->connect();
 

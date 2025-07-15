@@ -10,7 +10,6 @@
 namespace Utils\ActiveMQ;
 
 use Exception;
-use INIT;
 use Predis;
 use ReflectionException;
 use Stomp\Client;
@@ -23,6 +22,7 @@ use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\Logger\Log;
 use Utils\Network\MultiCurlHandler;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\Context;
 use Utils\Tools\Utils;
 
@@ -68,7 +68,7 @@ class AMQHandler {
                 if ( !is_null( $brokerUri ) ) {
                     self::$staticStompConnection = new Connection( $brokerUri, 2 );
                 } else {
-                    self::$staticStompConnection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+                    self::$staticStompConnection = new Connection( AppConfig::$QUEUE_BROKER_ADDRESS, 2 );
                 }
             }
 
@@ -79,7 +79,7 @@ class AMQHandler {
             if ( !is_null( $brokerUri ) ) {
                 $connection = new Connection( $brokerUri, 2 );
             } else {
-                $connection = new Connection( INIT::$QUEUE_BROKER_ADDRESS, 2 );
+                $connection = new Connection( AppConfig::$QUEUE_BROKER_ADDRESS, 2 );
             }
 
         }
@@ -146,7 +146,7 @@ class AMQHandler {
         $this->clientType = self::CLIENT_TYPE_SUBSCRIBER;
         $this->queueName  = $destination;
 
-        return $this->statefulStomp->subscribe( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
+        return $this->statefulStomp->subscribe( '/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $selector, $ack, $header );
 
     }
 
@@ -160,7 +160,7 @@ class AMQHandler {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
-        return $this->statefulStomp->send( '/queue/' . INIT::$INSTANCE_ID . "_" . $destination, $message );
+        return $this->statefulStomp->send( '/queue/' . AppConfig::$INSTANCE_ID . "_" . $destination, $message );
 
     }
 
@@ -210,7 +210,7 @@ class AMQHandler {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/QueueSize";
+        $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/QueueSize";
 
         return $this->callAmqJmx( $queue_interface_url );
 
@@ -234,7 +234,7 @@ class AMQHandler {
             throw new Exception( 'No queue name provided.' );
         }
 
-        $queue_interface_url = INIT::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . INIT::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
+        $queue_interface_url = AppConfig::$QUEUE_JMX_ADDRESS . "/api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost,destinationType=Queue,destinationName=" . AppConfig::$INSTANCE_ID . "_" . $queue . "/ConsumerCount";
 
         return $this->callAmqJmx( $queue_interface_url );
 
@@ -282,11 +282,11 @@ class AMQHandler {
         $options = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( INIT::$QUEUE_CREDENTIALS ) ]
+                CURLOPT_HTTPHEADER     => [ 'Authorization: Basic ' . base64_encode( AppConfig::$QUEUE_CREDENTIALS ) ]
         ];
 
         $resource = $mHandler->createResource( $queue_interface_url, $options );

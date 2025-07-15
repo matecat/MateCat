@@ -5,11 +5,11 @@ namespace Model\ConnectedServices\Oauth\Google;
 use Exception;
 use Google_Client;
 use Google_Service_Oauth2;
-use INIT;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Utils\Registry\AppConfig;
 
 class GoogleProvider extends AbstractProvider {
 
@@ -41,10 +41,10 @@ class GoogleProvider extends AbstractProvider {
 
         $client = new Google_Client();
 
-        $client->setApplicationName( INIT::$GOOGLE_OAUTH_CLIENT_APP_NAME );
-        $client->setClientId( INIT::$GOOGLE_OAUTH_CLIENT_ID );
-        $client->setClientSecret( INIT::$GOOGLE_OAUTH_CLIENT_SECRET );
-        $client->setRedirectUri( $redirectUrl ?? INIT::$GOOGLE_OAUTH_REDIRECT_URL );
+        $client->setApplicationName( AppConfig::$GOOGLE_OAUTH_CLIENT_APP_NAME );
+        $client->setClientId( AppConfig::$GOOGLE_OAUTH_CLIENT_ID );
+        $client->setClientSecret( AppConfig::$GOOGLE_OAUTH_CLIENT_SECRET );
+        $client->setRedirectUri( $redirectUrl ?? AppConfig::$GOOGLE_OAUTH_REDIRECT_URL );
         $client->setScopes( static::$OAUTH_SCOPES );
         $client->setAccessType( "offline" );
         $client->setApprovalPrompt( 'force' );
@@ -72,7 +72,7 @@ class GoogleProvider extends AbstractProvider {
      * @return string
      */
     protected static function logFilePath(): string {
-        return INIT::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
+        return AppConfig::$LOG_REPOSITORY . '/' . self::$LOGGER_NAME . '.log';
     }
 
     /**

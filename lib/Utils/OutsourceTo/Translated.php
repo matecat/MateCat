@@ -4,7 +4,6 @@ namespace Utils\OutsourceTo;
 
 use Bootstrap;
 use Exception;
-use INIT;
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -13,6 +12,7 @@ use ReflectionException;
 use Utils\Langs\LanguageDomains;
 use Utils\Logger\Log;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 
@@ -136,9 +136,9 @@ class Translated extends AbstractProvider {
 
         $this->currency = "EUR";
 
-        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "webhooks/outsource/success";
-        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "webhooks/outsource/failure";
-        static::$OUTSOURCE_URL_CONFIRM = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
+        $this->_outsource_login_url_ok = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "webhooks/outsource/success";
+        $this->_outsource_login_url_ko = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "webhooks/outsource/failure";
+        static::$OUTSOURCE_URL_CONFIRM = AppConfig::$HTTPHOST . AppConfig::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = [
                 CURLOPT_HEADER         => 0,
@@ -147,7 +147,7 @@ class Translated extends AbstractProvider {
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPGET        => true,
                 CURLOPT_TIMEOUT        => 10,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 5,
                 CURLOPT_FOLLOWLOCATION => true
         ];

@@ -10,7 +10,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
@@ -24,6 +23,7 @@ use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\LQA\PostProcess;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -369,7 +369,7 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'target' ]  = $targetLang;
         $_config[ 'uid' ]     = $contributionStruct->getUser()->uid ?? 0;
 
-        $_config[ 'email' ] = INIT::$MYMEMORY_API_KEY;
+        $_config[ 'email' ] = AppConfig::$MYMEMORY_API_KEY;
 
         $_config[ 'context_before' ] = $contributionStruct->getContexts()->context_before;
         $_config[ 'context_after' ]  = $contributionStruct->getContexts()->context_after;
@@ -485,7 +485,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'segment' ]             = $contributionStruct->getContexts()->segment;
                 $config[ 'source' ]              = $jobStruct->source;
                 $config[ 'target' ]              = $jobStruct->target;
-                $config[ 'email' ]               = INIT::$MYMEMORY_API_KEY;
+                $config[ 'email' ]               = AppConfig::$MYMEMORY_API_KEY;
                 $config[ 'segid' ]               = $contributionStruct->segmentId;
                 $config[ 'job_id' ]              = $jobStruct->id;
                 $config[ 'job_password' ]        = $jobStruct->password;

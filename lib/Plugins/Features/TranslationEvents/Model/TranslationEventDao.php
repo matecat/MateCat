@@ -10,7 +10,6 @@ namespace Plugins\Features\TranslationEvents\Model;
 
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use PDO;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
@@ -213,7 +212,7 @@ class TranslationEventDao extends AbstractDao {
         }
 
         if ( !empty( $bind_values ) ) {
-            $conn = Database::obtain()->getConnection();
+            $conn = \Model\DataAccess\Database::obtain()->getConnection();
             $stmt = $conn->prepare( $sql );
 
             return $stmt->execute( $bind_values );

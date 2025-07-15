@@ -9,10 +9,10 @@
 
 namespace Model\ProjectManager;
 
+use ArrayObject;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use DomainException;
 use Exception;
-use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
@@ -22,7 +22,9 @@ use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
-use Model\Database;
+use Model\Conversion\ZipArchiveHandler;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -34,7 +36,6 @@ use Model\Files\MetadataDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\S3FilesStorage;
-use Model\IDatabase;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -71,6 +72,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
 use Utils\LQA\QA;
+use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -82,8 +84,6 @@ use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 use View\API\Commons\Error;
-use Model\Conversion\ZipArchiveHandler;
-use ArrayObject;
 
 class ProjectManager {
 
@@ -227,7 +227,7 @@ class ProjectManager {
                             'metadata'                               => [],
                             'id_assignee'                            => null,
                             'session'                                => ( isset( $_SESSION ) ? $_SESSION : false ),
-                            'instance_id'                            => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : 0 ),
+                            'instance_id'                            => ( !is_null( AppConfig::$INSTANCE_ID ) ? AppConfig::$INSTANCE_ID : 0 ),
                             'id_team'                                => null,
                             'team'                                   => null,
                             'sanitize_project_options'               => true,
@@ -674,7 +674,7 @@ class ProjectManager {
             }
         }
 
-        $uploadDir = $this->uploadDir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
+        $uploadDir = $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
         Log::doJsonLog( $uploadDir );
 
@@ -922,8 +922,8 @@ class ProjectManager {
             }
 
             //Allow projects with less than 250.000 words or characters ( for cjk languages )
-            if ( $this->files_word_count > INIT::$MAX_SOURCE_WORDS ) {
-                throw new Exception( "Matecat is unable to create your project. Please contact us at " . INIT::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
+            if ( $this->files_word_count > AppConfig::$MAX_SOURCE_WORDS ) {
+                throw new Exception( "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
             // check for project Creation, before wasting disk space
@@ -951,7 +951,7 @@ class ProjectManager {
                         "code"    => -1,
                         "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
-                if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
+                if ( AppConfig::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
                 }
             } elseif ( $e->getCode() == -4 ) {
@@ -982,7 +982,7 @@ class ProjectManager {
             return false;
         }
 
-        $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
+        $this->projectStructure[ 'status' ] = ( AppConfig::$VOLUME_ANALYSIS_ENABLED ) ? ProjectStatus::STATUS_NEW : ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         if ( $this->show_in_cattool_segs_counter == 0 ) {
             $this->_log( "Segment Search: No segments in this project - \n" );
@@ -1026,7 +1026,7 @@ class ProjectManager {
             }
         }
 
-        if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
+        if ( AppConfig::$VOLUME_ANALYSIS_ENABLED ) {
             $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL();
         }
 
@@ -1098,7 +1098,7 @@ class ProjectManager {
 
         /** @var $fs S3FilesStorage */
         $client              = $fs::getStaticS3Client();
-        $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;
         $params[ 'key' ]     = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
         $params[ 'save_as' ] = "$this->uploadDir/$fileName";
         $client->downloadItem( $params );
@@ -1191,7 +1191,7 @@ class ProjectManager {
                 ],
                 [
                         'http_host' => ( is_null( $this->projectStructure[ 'HTTP_HOST' ] ) ?
-                                INIT::$HTTPHOST :
+                                AppConfig::$HTTPHOST :
                                 $this->projectStructure[ 'HTTP_HOST' ]
                         ),
                 ]
@@ -1226,7 +1226,7 @@ class ProjectManager {
 
                     $memoryFiles[] = $file;
 
-                    if ( INIT::$FILE_STORAGE_METHOD == 's3' ) {
+                    if ( AppConfig::$FILE_STORAGE_METHOD == 's3' ) {
                         $this->getSingleS3QueueFile( $fileName );
                     }
 
@@ -1477,7 +1477,7 @@ class ProjectManager {
                 FileDao::insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                    $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id, $client );
                 }
             }
@@ -1522,7 +1522,7 @@ class ProjectManager {
             throw new Exception( "Requested words per chunk and Number of chunks not consistent.", -3 );
         }
 
-        if ( !empty( $requestedWordsPerSplit ) && !INIT::$VOLUME_ANALYSIS_ENABLED ) {
+        if ( !empty( $requestedWordsPerSplit ) && !AppConfig::$VOLUME_ANALYSIS_ENABLED ) {
             throw new Exception( "Requested words per chunk available only for Matecat PRO version", -4 );
         }
 
@@ -2363,7 +2363,7 @@ class ProjectManager {
                 if ( $this->gdriveSession ) {
                     $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName );
                     if ( $gdriveFileId ) {
-                        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                        $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
                         $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId, $client );
                     }
                 }
@@ -2665,7 +2665,7 @@ class ProjectManager {
 
         $config[ 'source' ] = $xliff_file_attributes[ 'source-language' ];
         $config[ 'target' ] = $xliff_file_attributes[ 'target-language' ];
-        $config[ 'email' ]  = INIT::$MYMEMORY_API_KEY;
+        $config[ 'email' ]  = AppConfig::$MYMEMORY_API_KEY;
 
         foreach ( $xliff_trans_unit[ 'alt-trans' ] as $altTrans ) {
 

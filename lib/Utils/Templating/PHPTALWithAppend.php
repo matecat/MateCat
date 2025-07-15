@@ -1,5 +1,8 @@
 <?php
 
+namespace Utils\Templating;
+use PHPTAL;
+
 /**
  * Created by PhpStorm.
  * User: fregini

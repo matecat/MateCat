@@ -4,7 +4,6 @@ namespace Controller\Abstracts;
 
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
-use INIT;
 use Model\Files\FileDao;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Jobs\JobDao;
@@ -12,6 +11,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 use View\API\Commons\ZipContentObject;
 use ZipArchive;
 
@@ -122,7 +122,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
                     [
                             'expires'  => time() + 600,
                             'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'domain'   => AppConfig::$COOKIE_DOMAIN,
                             'secure'   => true,
                             'httponly' => false,
                             'samesite' => 'None',

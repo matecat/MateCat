@@ -1,12 +1,13 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Database::close
+ * @covers \Model\DataAccess\Database::close
  * User: dinies
  * Date: 12/04/16
  * Time: 16.22
@@ -17,7 +18,7 @@ class CloseTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
     }
 
     public function tearDown(): void {
@@ -27,7 +28,7 @@ class CloseTest extends AbstractTest {
     /**
      * It tests that after the call of the method 'close', the variable connection will be set NULL.
      * @group  regression
-     * @covers Database::close
+     * @covers \Model\DataAccess\Database::close
      * @throws ReflectionException
      */
     public function test_close() {

@@ -2,6 +2,7 @@
 
 use TestHelpers\AbstractTest;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -23,7 +24,7 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 
@@ -50,7 +51,7 @@ class MultiCurlHandlerTest extends AbstractTest {
                 CURLOPT_URL            => 'http://www.google.com/',
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 
@@ -78,7 +79,7 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 

@@ -1,13 +1,14 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
+use Utils\Registry\AppConfig;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 $db->debug = false;
 $db->connect();
 
@@ -33,7 +34,7 @@ $json = json_decode( $content, true );
 
 $model_record = Model\LQA\ModelDao::createModelFromJsonDefinition( $json );
 
-$dao = new \Model\Projects\ProjectDao( Model\Database::obtain() );
+$dao = new \Model\Projects\ProjectDao( \Model\DataAccess\Database::obtain() );
 $dao->updateField( $this->project, 'id_qa_model', $model_record->id );
 
 echo "done \n";

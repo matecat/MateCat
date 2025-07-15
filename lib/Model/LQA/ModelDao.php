@@ -3,7 +3,7 @@
 namespace Model\LQA;
 
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use ReflectionException;
 
 class ModelDao extends AbstractDao {

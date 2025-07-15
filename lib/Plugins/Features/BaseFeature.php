@@ -3,7 +3,6 @@
 namespace Plugins\Features;
 
 use Exception;
-use INIT;
 use Klein\Klein;
 use LogicException;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -12,6 +11,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Utils\Registry\AppConfig;
 
 
 abstract class BaseFeature implements IBaseFeature {
@@ -114,7 +114,7 @@ abstract class BaseFeature implements IBaseFeature {
     }
 
     protected function logFilePath(): string {
-        return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+        return AppConfig::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 

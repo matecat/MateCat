@@ -1,7 +1,6 @@
 {
     "require-dev": {
-        "phpunit/phpunit": "^9",
-        "robmorgan/phinx": "^0"
+        "phpunit/phpunit": "^9"
     },
     "require": {
         "php": ">=7.4",
@@ -45,11 +44,6 @@
         "ext-iconv": "*",
         "ext-openssl": "*",
         "ext-simplexml": "*"
-    },
-    "autoload": {
-      "files": [
-        "inc/INIT.php"
-      ]
     },
     "config": {
         "use-include-path": true,

@@ -11,7 +11,7 @@ namespace Model\QualityReport;
 use ArrayObject;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\ReviseFeedback\FeedbackDAO;

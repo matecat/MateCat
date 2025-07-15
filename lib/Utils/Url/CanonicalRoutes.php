@@ -4,7 +4,7 @@
 namespace Utils\Url;
 
 use Exception;
-use INIT;
+use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 use Utils\Tools\Utils;
 
@@ -204,7 +204,7 @@ class CanonicalRoutes {
     public static function appRoot( array $options = [] ): string {
         $query = $options[ 'query' ] ?? null;
 
-        $url = self::httpHost( $options ) . INIT::$BASEURL;
+        $url = self::httpHost( $options ) . AppConfig::$BASEURL;
 
         if ( $query ) {
             $url .= '?' . http_build_query( $query );
@@ -230,7 +230,7 @@ class CanonicalRoutes {
      * @throws Exception
      */
     public static function httpHost( array $params = [] ): string {
-        $host = INIT::$HTTPHOST;
+        $host = AppConfig::$HTTPHOST;
 
         if ( !empty( $params[ 'http_host' ] ) ) {
             $host = $params[ 'http_host' ];

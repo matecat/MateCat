@@ -3,7 +3,7 @@
 namespace Model\Search;
 
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 
 class MySQLReplaceEventIndexDAO extends AbstractDao implements ReplaceEventIndexDAOInterface {
 

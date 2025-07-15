@@ -5,7 +5,7 @@ namespace Model\Teams;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use Model\Users\UserStruct;
 use ReflectionException;

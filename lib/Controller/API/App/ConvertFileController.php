@@ -5,7 +5,6 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Model\Conversion\FilesConverter;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -15,6 +14,7 @@ use RuntimeException;
 use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class ConvertFileController extends KleinController {
@@ -29,8 +29,8 @@ class ConvertFileController extends KleinController {
     public function handle(): void {
         $data             = $this->validateTheRequest();
         $uploadTokenValue = $_COOKIE[ 'upload_token' ];
-        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
-        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         if ( !Utils::isTokenValid( $uploadTokenValue ) ) {
             throw new RuntimeException( "Invalid Upload Token." );

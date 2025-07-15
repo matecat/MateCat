@@ -6,7 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentDao;

@@ -1,11 +1,12 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
 use Utils\Engines\Apertium;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -17,7 +18,7 @@ use Utils\Engines\NONE;
  */
 class GetInstanceTest extends AbstractTest {
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $sql_insert_user;
@@ -31,18 +32,18 @@ class GetInstanceTest extends AbstractTest {
     public function setUp(): void {
 
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ( '" . uniqid( '', true ) . "bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES ( '" . uniqid( '', true ) . "bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->id_user = $this->database_instance->getConnection()->lastInsertId();
 
         /**
          * engine insertion
          */
-        $this->sql_insert_engine = "INSERT INTO " . INIT::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
+        $this->sql_insert_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`engines` (`name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ( 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'Apertium', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
         $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
@@ -55,8 +56,8 @@ class GetInstanceTest extends AbstractTest {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
         $this->database_instance->getConnection()->query( $this->sql_delete_engine );
-        $flusher = new Predis\Client( INIT::$REDIS_SERVERS );
-        $flusher->select( INIT::$INSTANCE_ID );
+        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+        $flusher->select( AppConfig::$INSTANCE_ID );
         $flusher->flushdb();
         parent::tearDown();
 
@@ -139,8 +140,8 @@ class GetInstanceTest extends AbstractTest {
         $sql_update_engine_class_name = "UPDATE `engines` SET class_load='YourMemory' WHERE id=" . $this->id_database . ";";
 
         $this->database_instance->getConnection()->query( $sql_update_engine_class_name );
-        $flusher = new Predis\Client( INIT::$REDIS_SERVERS );
-        $flusher->select( INIT::$INSTANCE_ID );
+        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+        $flusher->select( AppConfig::$INSTANCE_ID );
         $flusher->flushdb();
 
         $engine = EnginesFactory::getInstance( $this->id_database );

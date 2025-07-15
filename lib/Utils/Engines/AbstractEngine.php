@@ -5,7 +5,6 @@ namespace Utils\Engines;
 use CURLFile;
 use DomainException;
 use Exception;
-use INIT;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -17,6 +16,7 @@ use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -68,7 +68,7 @@ abstract class  AbstractEngine implements EngineInterface {
         $this->curl_additional_params = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 10, // a timeout to call itself should not be too much higher :D
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2

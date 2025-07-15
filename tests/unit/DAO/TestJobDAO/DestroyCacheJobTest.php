@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -25,7 +26,7 @@ class DestroyCacheJobTest extends AbstractTest {
     protected $job_struct;
 
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
 
@@ -95,9 +96,9 @@ class DestroyCacheJobTest extends AbstractTest {
                 ]
         );
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->job_Dao           = new JobDao( $this->database_instance );
-        $this->cache             = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->cache             = new Predis\Client( AppConfig::$REDIS_SERVERS );
     }
 
     public function tearDown(): void {
@@ -112,7 +113,7 @@ class DestroyCacheJobTest extends AbstractTest {
      */
     public function test_DestroyCache_with_ID_and_Password() {
 
-        $cache_key = "SELECT * FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->id . "' AND password = '" . $this->str_password . " '";
+        $cache_key = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->id . "' AND password = '" . $this->str_password . " '";
 
 
         $key   = md5( $cache_key );
@@ -133,7 +134,7 @@ class DestroyCacheJobTest extends AbstractTest {
      */
     public function test_DestroyCache_with_ID_Project() {
 
-        $cache_key = "SELECT * FROM ( SELECT * FROM  " . INIT::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->str_id_project . "' ORDER BY id DESC) t GROUP BY id ; ";
+        $cache_key = "SELECT * FROM ( SELECT * FROM  " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id ='" . $this->str_id_project . "' ORDER BY id DESC) t GROUP BY id ; ";
 
 
         $key   = md5( $cache_key );

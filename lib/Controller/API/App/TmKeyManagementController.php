@@ -5,7 +5,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;

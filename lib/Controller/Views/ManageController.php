@@ -15,7 +15,7 @@ use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
-use PHPTalBoolean;
+use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\Utils;
 
 class ManageController extends BaseKleinViewController implements IController {

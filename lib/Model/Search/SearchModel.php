@@ -12,8 +12,8 @@ namespace Model\Search;
 use Exception;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Database;
-use Model\IDatabase;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use stdClass;
@@ -27,7 +27,7 @@ class SearchModel {
     protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var \Model\Database
+     * @var \Model\DataAccess\Database
      */
     protected IDatabase $db;
 

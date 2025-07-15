@@ -9,9 +9,9 @@
 
 namespace View\API\App\Json\Analysis;
 
-use INIT;
 use JsonSerializable;
 use Utils\Constants\ProjectStatus;
+use Utils\Registry\AppConfig;
 
 class AnalysisProjectSummary implements JsonSerializable {
 
@@ -78,7 +78,7 @@ class AnalysisProjectSummary implements JsonSerializable {
 
     private function getEstimatedWorkTime(): string {
 
-        $wc_time = $this->total_equivalent / INIT::$ANALYSIS_WORDS_PER_DAYS;
+        $wc_time = $this->total_equivalent / AppConfig::$ANALYSIS_WORDS_PER_DAYS;
         $wc_unit = 'day';
 
         if ( $wc_time > 0 and $wc_time < 1 ) {

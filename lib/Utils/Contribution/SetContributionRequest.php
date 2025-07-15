@@ -10,8 +10,8 @@
 namespace Utils\Contribution;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use Model\Database;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -75,7 +75,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public $context_after = "";
 
     /**
-     * \INIT::$MYMEMORY_API_KEY
+     * \AppConfig::$MYMEMORY_API_KEY
      * @var string
      */
     public $api_key = "";

@@ -3,7 +3,7 @@
 namespace Model\FilesStorage;
 
 use Exception;
-use INIT;
+use Utils\Registry\AppConfig;
 
 class FilesStorageFactory {
     /**
@@ -11,7 +11,7 @@ class FilesStorageFactory {
      * @throws Exception
      */
     public static function create(): AbstractFilesStorage {
-        $storageMethod = !empty( INIT::$FILE_STORAGE_METHOD ) ? INIT::$FILE_STORAGE_METHOD : 'fs';
+        $storageMethod = !empty( AppConfig::$FILE_STORAGE_METHOD ) ? AppConfig::$FILE_STORAGE_METHOD : 'fs';
 
         if ( $storageMethod === 'fs' ) {
             return new FsFilesStorage();

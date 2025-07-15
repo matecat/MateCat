@@ -14,13 +14,13 @@ use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -66,7 +66,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
                                     $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
 
-                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
+                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( AppConfig::$HTTPHOST )[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
                                 }
                         ]
                 ] );

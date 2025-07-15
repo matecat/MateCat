@@ -1,10 +1,11 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
 use Utils\Engines\EnginesFactory;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -47,8 +48,8 @@ H;
 
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->engine_id . ";" );
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->not_valid_engine_id . ";" );
-        $flusher = new Predis\Client( INIT::$REDIS_SERVERS );
-        $flusher->select( INIT::$INSTANCE_ID );
+        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+        $flusher->select( AppConfig::$INSTANCE_ID );
         $flusher->flushdb();
         parent::tearDown();
 

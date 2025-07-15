@@ -9,7 +9,7 @@
 
 namespace Utils\AsyncTasks\Workers\Traits;
 
-use Model\Database;
+use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use RuntimeException;

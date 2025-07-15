@@ -10,12 +10,12 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Controller\Views\CustomPageView;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\Teams\InvitedUser;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
+use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -83,7 +83,7 @@ class SignupController extends AbstractStatefulKleinController {
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
                                     $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
 
-                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
+                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( AppConfig::$HTTPHOST )[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
                                 }
                         ]
                 ]

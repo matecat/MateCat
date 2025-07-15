@@ -2,8 +2,9 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -37,13 +38,13 @@ class GetByIdApikeyTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->apikey_Dao        = new ApiKeyDao( $this->database_instance );
 
         /**
          * apikey insertion
          */
-        $this->sql_insert_apikey = "INSERT INTO " . INIT::$DB_DATABASE . ".`api_keys` " .
+        $this->sql_insert_apikey = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`api_keys` " .
                 " ( uid, api_key, api_secret, create_date, last_update, enabled ) " .
                 " VALUES " .
                 " ( '1999', 'c4ca4238bar92382fake509a6f758foo', 'api_secret' , '2016-06-16 18:06:29', '2016-06-16 19:06:30', '1') ";
@@ -52,7 +53,7 @@ class GetByIdApikeyTest extends AbstractTest {
         $this->database_instance->getConnection()->query( $this->sql_insert_apikey );
         $this->apikey_id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
-        $this->sql_delete_apikey = "DELETE FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE uid='" . $this->apikey_id . "';";
+        $this->sql_delete_apikey = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE uid='" . $this->apikey_id . "';";
 
     }
 
@@ -60,7 +61,7 @@ class GetByIdApikeyTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }

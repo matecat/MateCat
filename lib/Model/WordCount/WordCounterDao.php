@@ -11,7 +11,7 @@ namespace Model\WordCount;
 
 
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use Utils\Logger\Log;

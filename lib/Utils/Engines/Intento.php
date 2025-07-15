@@ -3,11 +3,11 @@
 namespace Utils\Engines;
 
 use Exception;
-use INIT;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 
 class Intento extends AbstractEngine {
 
@@ -237,7 +237,7 @@ class Intento extends AbstractEngine {
      *  Set Matecat + Intento user agent
      */
     private function _setIntentoUserAgent() {
-        $this->curl_additional_params[ CURLOPT_USERAGENT ] = self::INTENTO_USER_AGENT . ' ' . INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER;
+        $this->curl_additional_params[ CURLOPT_USERAGENT ] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
     }
 
     /**
@@ -258,7 +258,7 @@ class Intento extends AbstractEngine {
                 CURLOPT_HTTPHEADER     => [ 'apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json' ],
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
                 CURLOPT_CONNECTTIMEOUT => 10,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2

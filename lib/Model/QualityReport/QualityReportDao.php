@@ -9,8 +9,8 @@
 namespace Model\QualityReport;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Jobs\JobStruct;
 use PDO;
 use Utils\Constants\SourcePages;

@@ -4,7 +4,6 @@ namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
-use INIT;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
@@ -12,6 +11,7 @@ use PDO;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class Filters {
@@ -33,27 +33,27 @@ class Filters {
         foreach ( $dataGroups as $id => $data ) {
             // Add to POST fields the version forced using the config file
             if ( $endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
-                    && !empty( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
-                $data[ 'forceVersion' ] = INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
+                    && !empty( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
+                $data[ 'forceVersion' ] = AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
             }
 
             // Setup CURL options and add to MultiCURL
             $options = [
                     CURLOPT_POST           => true,
-                    CURLOPT_USERAGENT      => INIT::$FILTERS_USER_AGENT,
+                    CURLOPT_USERAGENT      => AppConfig::$FILTERS_USER_AGENT,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POSTFIELDS     => $data,
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
-            if ( !empty( INIT::$FILTERS_RAPIDAPI_KEY ) ) {
+            if ( !empty( AppConfig::$FILTERS_RAPIDAPI_KEY ) ) {
                 $options[ CURLOPT_HTTPHEADER ] = [
-                        'X-RapidAPI-Host: ' . parse_url( INIT::$FILTERS_ADDRESS )[ 'host' ],
-                        'X-RapidAPI-Key: ' . INIT::$FILTERS_RAPIDAPI_KEY,
+                        'X-RapidAPI-Host: ' . parse_url( AppConfig::$FILTERS_ADDRESS )[ 'host' ],
+                        'X-RapidAPI-Key: ' . AppConfig::$FILTERS_RAPIDAPI_KEY,
                 ];
             }
 
-            $url = rtrim( INIT::$FILTERS_ADDRESS, '/' ) . $endpoint;
+            $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
             Log::doJsonLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
@@ -254,8 +254,8 @@ class Filters {
      */
     private static function logConversion( array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData ) {
         try {
-            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER,
-                    INIT::$DB_USER, INIT::$DB_PASS, [
+            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
+                    AppConfig::$DB_USER, AppConfig::$DB_PASS, [
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
                             PDO::ATTR_EMULATE_PREPARES   => false,
                             PDO::ATTR_ORACLE_NULLS       => true,
@@ -304,7 +304,7 @@ class Filters {
 
         if ( $response[ 'successful' ] !== true ) {
 
-            if ( INIT::$FILTERS_EMAIL_FAILURES ) {
+            if ( AppConfig::$FILTERS_EMAIL_FAILURES ) {
                 Utils::sendErrMailReport( "Matecat: conversion failed.\n\n" . print_r( $info, true ) );
             }
 
@@ -320,7 +320,7 @@ class Filters {
      */
     private static function backupFailedConversion( string &$sentFile ) {
 
-        $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
+        $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
                 . 'conversion_errors' . DIRECTORY_SEPARATOR
                 . date( "Ymd" );
         if ( !is_dir( $backupDir ) ) {

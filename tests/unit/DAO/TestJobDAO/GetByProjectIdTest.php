@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -97,7 +98,7 @@ class GetByProjectIdTest extends AbstractTest {
                 ]
         );
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         $this->job_Dao = new JobDao( $this->database_instance );
 
@@ -105,7 +106,7 @@ class GetByProjectIdTest extends AbstractTest {
 
         $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
-        $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
+        $this->sql_delete_job = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
 
     }
@@ -114,7 +115,7 @@ class GetByProjectIdTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }

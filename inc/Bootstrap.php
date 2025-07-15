@@ -3,11 +3,12 @@
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Views\CustomPageView;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 /**
@@ -19,9 +20,9 @@ use Utils\Tools\Utils;
  */
 class Bootstrap {
 
-    public static    $_INI_VERSION;
-    protected static $CONFIG;
-    protected static $_ROOT;
+    private static    $_INI_VERSION;
+    private static $CONFIG;
+    private static $_ROOT;
 
     /**
      * @var FeatureSet
@@ -52,68 +53,68 @@ class Bootstrap {
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
         // Overridable defaults
-        INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
-        INIT::$BASEURL                        = "/"; // Accessible by the browser
-        INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
-        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View/templates";
+        AppConfig::$ROOT                        = self::$_ROOT; // Accessible by Apache/PHP
+        AppConfig::$BASEURL                     = "/"; // Accessible by the browser
+        AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
+        AppConfig::$TRACKING_CODES_VIEW_PATH    = AppConfig::$ROOT . "/lib/View/templates";
 
         //get the environment configuration
         self::initConfig();
         PluginsLoader::setIncludePath();
 
         if ( $task_runner_config_file != null ) {
-            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
+            AppConfig::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
         } else {
-            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
+            AppConfig::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
         }
 
         ini_set( 'display_errors', false );
 
-        if ( empty( INIT::$STORAGE_DIR ) ) {
-            INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage";
+        if ( empty( AppConfig::$STORAGE_DIR ) ) {
+            AppConfig::$STORAGE_DIR = AppConfig::$ROOT . "/local_storage";
         }
 
-        if ( INIT::$PRINT_ERRORS || stripos( INIT::$ENV, 'develop' ) !== false ) {
-            ini_set( 'error_log', INIT::$STORAGE_DIR . "/log_archive/php_errors.txt" );
+        if ( AppConfig::$PRINT_ERRORS || stripos( AppConfig::$ENV, 'develop' ) !== false ) {
+            ini_set( 'error_log', AppConfig::$STORAGE_DIR . "/log_archive/php_errors.txt" );
             ini_set( 'error_reporting', E_ALL );
         }
 
-        date_default_timezone_set( INIT::$TIME_ZONE );
+        date_default_timezone_set( AppConfig::$TIME_ZONE );
 
-        INIT::$LOG_REPOSITORY                  = INIT::$STORAGE_DIR . "/log_archive";
-        INIT::$UPLOAD_REPOSITORY               = INIT::$STORAGE_DIR . "/upload";
-        INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
-        INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
-        INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
-        INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
-        INIT::$QUEUE_PROJECT_REPOSITORY        = INIT::$STORAGE_DIR . "/files_storage/queueProjects";
-        INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
-        INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
-        INIT::$TEMPLATE_ROOT                   = INIT::$ROOT . "/lib/View";
-        INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
+        AppConfig::$LOG_REPOSITORY              = AppConfig::$STORAGE_DIR . "/log_archive";
+        AppConfig::$UPLOAD_REPOSITORY           = AppConfig::$STORAGE_DIR . "/upload";
+        AppConfig::$FILES_REPOSITORY            = AppConfig::$STORAGE_DIR . "/files_storage/files";
+        AppConfig::$CACHE_REPOSITORY            = AppConfig::$STORAGE_DIR . "/files_storage/cache";
+        AppConfig::$ZIP_REPOSITORY              = AppConfig::$STORAGE_DIR . "/files_storage/originalZip";
+        AppConfig::$ANALYSIS_FILES_REPOSITORY   = AppConfig::$STORAGE_DIR . "/files_storage/fastAnalysis";
+        AppConfig::$QUEUE_PROJECT_REPOSITORY    = AppConfig::$STORAGE_DIR . "/files_storage/queueProjects";
+        AppConfig::$CONVERSIONERRORS_REPOSITORY = AppConfig::$STORAGE_DIR . "/conversion_errors";
+        AppConfig::$TMP_DOWNLOAD                = AppConfig::$STORAGE_DIR . "/tmp_download";
+        AppConfig::$TEMPLATE_ROOT               = AppConfig::$ROOT . "/lib/View";
+        AppConfig::$UTILS_ROOT                  = AppConfig::$ROOT . '/lib/Utils';
 
-        $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
+        $OAUTH_CONFIG            = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
+        AppConfig::$OAUTH_CONFIG = $OAUTH_CONFIG;
 
         try {
-            Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
+            Log::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
             WorkerClient::init();
-            Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+            Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         } catch ( Exception $e ) {
             Log::doJsonLog( $e->getMessage() );
         }
 
         $directories = [
-                INIT::$STORAGE_DIR,
-                INIT::$LOG_REPOSITORY,
-                INIT::$UPLOAD_REPOSITORY,
-                INIT::$FILES_REPOSITORY,
-                INIT::$CACHE_REPOSITORY,
-                INIT::$ANALYSIS_FILES_REPOSITORY,
-                INIT::$ZIP_REPOSITORY,
-                INIT::$CONVERSIONERRORS_REPOSITORY,
-                INIT::$TMP_DOWNLOAD,
-                INIT::$QUEUE_PROJECT_REPOSITORY,
+                AppConfig::$STORAGE_DIR,
+                AppConfig::$LOG_REPOSITORY,
+                AppConfig::$UPLOAD_REPOSITORY,
+                AppConfig::$FILES_REPOSITORY,
+                AppConfig::$CACHE_REPOSITORY,
+                AppConfig::$ANALYSIS_FILES_REPOSITORY,
+                AppConfig::$ZIP_REPOSITORY,
+                AppConfig::$CONVERSIONERRORS_REPOSITORY,
+                AppConfig::$TMP_DOWNLOAD,
+                AppConfig::$QUEUE_PROJECT_REPOSITORY,
         ];
 
         foreach ( $directories as $directory ) {
@@ -123,24 +124,24 @@ class Bootstrap {
         }
 
         //auth sections
-        INIT::$AUTHSECRET_PATH = INIT::$ROOT . '/inc/login_secret.dat';
+        AppConfig::$AUTHSECRET_PATH = AppConfig::$ROOT . '/inc/login_secret.dat';
         //if a secret is set in file
-        if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
+        if ( file_exists( AppConfig::$AUTHSECRET_PATH ) ) {
             //fetch it
-            INIT::$AUTHSECRET = file_get_contents( INIT::$AUTHSECRET_PATH );
+            AppConfig::$AUTHSECRET = file_get_contents( AppConfig::$AUTHSECRET_PATH );
         } else {
             //try creating the file and the fetch it
             //generates pass
             $secret = Utils::randomString( 512, true );
             //put the file
-            file_put_contents( INIT::$AUTHSECRET_PATH, $secret );
+            file_put_contents( AppConfig::$AUTHSECRET_PATH, $secret );
             //if put succeeds
-            if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
+            if ( file_exists( AppConfig::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
-                chmod( INIT::$AUTHSECRET_PATH, 0400 );
+                chmod( AppConfig::$AUTHSECRET_PATH, 0400 );
             } else {
                 //if we couldn't create due to permissions, use default secret
-                INIT::$AUTHSECRET = 'ScavengerOfHumanSorrow';
+                AppConfig::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
         }
 
@@ -157,7 +158,7 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    public static function exceptionHandler( Throwable $exception ) {
+    private static function exceptionHandler( Throwable $exception ) {
 
         Log::setLogFileName( 'fatal_errors.txt' );
 
@@ -201,7 +202,7 @@ class Bootstrap {
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
-            if ( INIT::$PRINT_ERRORS ) {
+            if ( AppConfig::$PRINT_ERRORS ) {
                 $report = [
                         'message' => $exception->getMessage(),
                         'trace'   => $exception->getTraceAsString(),
@@ -224,7 +225,7 @@ class Bootstrap {
 
     }
 
-    public static function shutdownFunctionHandler() {
+    private static function shutdownFunctionHandler() {
 
         $errorType = [
                 E_CORE_ERROR        => 'E_CORE_ERROR',
@@ -283,9 +284,8 @@ class Bootstrap {
         }
     }
 
-    protected static function _setIncludePath( $custom_paths = null ) {
+    private static function _setIncludePath( $custom_paths = null ) {
         $def_path = [
-                self::$_ROOT . "/inc/PHPTAL",
                 self::$_ROOT . "/lib"
         ];
         if ( !empty( $custom_paths ) ) {
@@ -298,28 +298,12 @@ class Bootstrap {
 
     }
 
-    public static function loadClass( $className ) {
-
-        $className = ltrim( $className, '\\' );
-        $fileName  = '';
-        if ( $lastNsPos = strrpos( $className, '\\' ) ) {
-            $namespace = substr( $className, 0, $lastNsPos );
-            $className = substr( $className, $lastNsPos + 1 );
-            $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
-        }
-        $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
-        if ( stream_resolve_include_path( $fileName ) ) {
-            include $fileName;
-        }
-
-    }
-
     /**
      * Returns an array of configuration params as parsed from the config.ini file.
      * The returned array only returns entries that match the current environment.
      *
      */
-    public static function getEnvConfig() {
+    private static function getEnvConfig() {
 
         if ( getenv( 'ENV' ) !== false ) {
             self::$CONFIG[ 'ENV' ] = getenv( 'ENV' );
@@ -337,21 +321,7 @@ class Bootstrap {
 
         return $env;
     }
-
-    /**
-     * Returns a specific key from a parsed configuration file
-     *
-     * @param $key
-     *
-     * @return mixed
-     * @noinspection PhpUnused
-     */
-    public static function getEnvConfigKey( $key ) {
-        $config = self::getEnvConfig();
-
-        return $config[ $key ] ?? null;
-    }
-
+    
     /**
      * TODO: move this to a private instance method on a singleton of this class.
      *
@@ -360,22 +330,22 @@ class Bootstrap {
      *
      * If any sanity check is to be done, this is the right place to do it.
      */
-    public static function initConfig() {
+    private static function initConfig() {
 
-        INIT::$ENV          = self::$CONFIG[ 'ENV' ];
-        INIT::$BUILD_NUMBER = self::$_INI_VERSION;
+        AppConfig::$ENV          = self::$CONFIG[ 'ENV' ];
+        AppConfig::$BUILD_NUMBER = self::$_INI_VERSION;
 
         $env = self::getEnvConfig();
 
         foreach ( $env as $KEY => $value ) {
-            if ( property_exists( 'INIT', $KEY ) ) {
-                INIT::${$KEY} = $value;
+            if ( property_exists( AppConfig::class, $KEY ) ) {
+                AppConfig::${$KEY} = $value;
             }
         }
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
 
-            register_shutdown_function( 'Bootstrap::sessionClose' );
+            register_shutdown_function( [ Bootstrap::class, 'sessionClose' ] );
 
             // Get HTTPS server status
             // Override if the header is set from load balancer
@@ -387,17 +357,17 @@ class Bootstrap {
                 }
             }
 
-            INIT::$PROTOCOL = $localProto;
-            ini_set( 'session.name', INIT::$PHP_SESSION_NAME );
-            ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
+            AppConfig::$PROTOCOL = $localProto;
+            ini_set( 'session.name', AppConfig::$PHP_SESSION_NAME );
+            ini_set( 'session.cookie_domain', '.' . AppConfig::$COOKIE_DOMAIN );
             ini_set( 'session.cookie_secure', true );
             ini_set( 'session.cookie_httponly', true );
 
         }
 
-        INIT::$HTTPHOST = INIT::$CLI_HTTP_HOST;
+        AppConfig::$HTTPHOST = AppConfig::$CLI_HTTP_HOST;
 
-        INIT::obtain(); //load configurations
+        AppConfig::init(); //load configurations
 
     }
 
@@ -407,9 +377,9 @@ class Bootstrap {
      * @return bool true if all mandatory keys are present, false otherwise
      */
     public static function areMandatoryKeysPresent(): bool {
-        $merged_config = array_merge( self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
+        $merged_config = array_merge( self::$CONFIG, self::$CONFIG[ AppConfig::$ENV ] );
 
-        foreach ( INIT::$MANDATORY_KEYS as $key ) {
+        foreach ( AppConfig::$MANDATORY_KEYS as $key ) {
             if ( !array_key_exists( $key, $merged_config ) || $merged_config[ $key ] === null ) {
                 return false;
             }
@@ -419,7 +389,7 @@ class Bootstrap {
     }
 
     public static function isGDriveConfigured(): bool {
-        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_ID ) || empty( INIT::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
+        if ( empty( AppConfig::$GOOGLE_OAUTH_CLIENT_ID ) || empty( AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
             return false;
         }
 

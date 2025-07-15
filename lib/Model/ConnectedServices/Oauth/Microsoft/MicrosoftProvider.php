@@ -2,12 +2,12 @@
 
 namespace Model\ConnectedServices\Oauth\Microsoft;
 
-use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
 use Stevenmaguire\OAuth2\Client\Provider\Microsoft;
+use Utils\Registry\AppConfig;
 
 class MicrosoftProvider extends AbstractProvider {
 
@@ -20,9 +20,9 @@ class MicrosoftProvider extends AbstractProvider {
      */
     public static function getClient( ?string $redirectUrl = null ): Microsoft {
         return new Microsoft( [
-                'clientId'     => INIT::$MICROSOFT_OAUTH_CLIENT_ID,
-                'clientSecret' => INIT::$MICROSOFT_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? INIT::$MICROSOFT_OAUTH_REDIRECT_URL,
+                'clientId'     => AppConfig::$MICROSOFT_OAUTH_CLIENT_ID,
+                'clientSecret' => AppConfig::$MICROSOFT_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? AppConfig::$MICROSOFT_OAUTH_REDIRECT_URL,
         ] );
     }
 

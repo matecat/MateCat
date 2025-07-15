@@ -3,8 +3,8 @@
 namespace Model\OwnerFeatures;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use Model\Database;
 use PDO;
 use ReflectionException;
 use Utils\Logger\Log;

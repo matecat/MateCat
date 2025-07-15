@@ -9,13 +9,13 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
+use Model\DataAccess\TransactionalTrait;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
-use Model\TransactionalTrait;
 use Model\Users\UserDao;
 use Model\WordCount\CounterModel;
 use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;

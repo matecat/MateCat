@@ -5,7 +5,7 @@ namespace Model\Projects;
 use DateInterval;
 use DateTime;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;

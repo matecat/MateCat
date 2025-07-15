@@ -1,10 +1,11 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\NONEStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -37,7 +38,7 @@ class ReadEngineTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance   = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance   = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->engine_Dao          = new EngineDAO( $this->database_instance );
         $this->engine_struct_param = new EngineStruct();
 
@@ -57,8 +58,8 @@ class ReadEngineTest extends AbstractTest {
 
         $this->actual            = $this->engine_Dao->create( $this->engine_struct_param );
         $this->id                = $this->getTheLastInsertIdByQuery( $this->database_instance );
-        $this->sql_select_engine = "SELECT * FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
-        $this->sql_delete_engine = "DELETE FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
+        $this->sql_select_engine = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
+        $this->sql_delete_engine = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
     }
 
     /**
@@ -106,7 +107,7 @@ class ReadEngineTest extends AbstractTest {
      */
     public function test_read_engine_just_created_in_database() {
 
-        $this->engine_Dao = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->engine_Dao = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
 
         $wrapped_result = $this->engine_Dao->read( $this->engine_struct_param );
 

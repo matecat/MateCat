@@ -10,12 +10,12 @@
 namespace Model\ConnectedServices\Oauth;
 
 use Exception;
-use INIT;
 use Model\ConnectedServices\Oauth\Facebook\FacebookProvider;
 use Model\ConnectedServices\Oauth\Github\GithubProvider;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class OauthClient {
@@ -86,11 +86,11 @@ class OauthClient {
      */
     public function getAuthorizationUrl( ?array &$_session = [], ?string $suffixKey = '' ): string {
         $session =& $_session;
-        if ( !isset( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] ) ) {
-            $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] = Utils::uuid4();
+        if ( !isset( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] ) ) {
+            $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] = Utils::uuid4();
         }
 
-        return $this->provider->getAuthorizationUrl( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . INIT::$XSRF_TOKEN ] );
+        return $this->provider->getAuthorizationUrl( $session[ $this->provider::PROVIDER_NAME . $suffixKey . '-' . AppConfig::$XSRF_TOKEN ] );
     }
 
 }

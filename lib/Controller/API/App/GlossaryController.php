@@ -4,7 +4,6 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use DomainException;
-use INIT;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
@@ -12,6 +11,7 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -39,7 +39,7 @@ class GlossaryController extends KleinController {
      * @throws ReflectionException
      */
     public function check() {
-        $jsonSchemaPath   = INIT::$ROOT . '/inc/validation/schema/glossary/check.json';
+        $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/check.json';
         $json             = $this->createThePayloadForWorker( $jsonSchemaPath );
         $json[ 'tmKeys' ] = $this->keysBelongingToJobOwner( $json[ 'tmKeys' ] );
 
@@ -70,7 +70,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function delete() {
-        $jsonSchemaPath = INIT::$ROOT . '/inc/validation/schema/glossary/delete.json';
+        $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/delete.json';
         $json           = $this->createThePayloadForWorker( $jsonSchemaPath );
 
         $this->checkWritePermissions( [ $json[ 'term' ][ 'metadata' ][ 'key' ] ], $json[ 'userKeys' ] );
@@ -92,7 +92,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function domains() {
-        $jsonSchemaPath = INIT::$ROOT . '/inc/validation/schema/glossary/domains.json';
+        $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/domains.json';
         $json           = $this->createThePayloadForWorker( $jsonSchemaPath );
 
         $params = [
@@ -112,7 +112,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function get() {
-        $jsonSchemaPath   = INIT::$ROOT . '/inc/validation/schema/glossary/get.json';
+        $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/get.json';
         $json             = $this->createThePayloadForWorker( $jsonSchemaPath );
         $json[ 'tmKeys' ] = $this->keysBelongingToJobOwner( $json[ 'tmKeys' ] );
 
@@ -133,7 +133,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function keys() {
-        $jsonSchemaPath = INIT::$ROOT . '/inc/validation/schema/glossary/keys.json';
+        $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/keys.json';
         $json           = $this->createThePayloadForWorker( $jsonSchemaPath );
         $keysArray      = [];
 
@@ -160,7 +160,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function search() {
-        $jsonSchemaPath   = INIT::$ROOT . '/inc/validation/schema/glossary/search.json';
+        $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/search.json';
         $json             = $this->createThePayloadForWorker( $jsonSchemaPath );
         $json[ 'tmKeys' ] = $this->keysBelongingToJobOwner( $json[ 'tmKeys' ] );
 
@@ -181,7 +181,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function set() {
-        $jsonSchemaPath = INIT::$ROOT . '/inc/validation/schema/glossary/set.json';
+        $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/set.json';
         $json           = $this->createThePayloadForWorker( $jsonSchemaPath );
 
         $keys = [];
@@ -208,7 +208,7 @@ class GlossaryController extends KleinController {
      * @throws InvalidValue
      */
     public function update() {
-        $jsonSchemaPath = INIT::$ROOT . '/inc/validation/schema/glossary/update.json';
+        $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/update.json';
         $json           = $this->createThePayloadForWorker( $jsonSchemaPath );
 
         $this->checkWritePermissions( [ $json[ 'term' ][ 'metadata' ][ 'key' ] ], $json[ 'userKeys' ] );

@@ -4,12 +4,11 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
-use INIT;
 use InvalidArgumentException;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -25,6 +24,7 @@ use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\JobUrlBuilder;
 
@@ -426,7 +426,7 @@ class CommentController extends KleinController {
         ] );
 
         $queueHandler = new AMQHandler();
-        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
 
         return $message;
     }
@@ -492,7 +492,7 @@ class CommentController extends KleinController {
         ] );
 
         $queueHandler = new AMQHandler();
-        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
 
     }
 

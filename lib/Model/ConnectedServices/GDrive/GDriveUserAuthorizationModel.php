@@ -10,13 +10,13 @@ namespace Model\ConnectedServices\GDrive;
 
 use Exception;
 use Google_Service_Oauth2;
-use INIT;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class GDriveUserAuthorizationModel {
@@ -112,7 +112,7 @@ class GDriveUserAuthorizationModel {
      * @throws Exception
      */
     private function __collectProperties( $code ) {
-        $gdriveClient = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $gdriveClient = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
         $gdriveClient->fetchAccessTokenWithAuthCode( $code );
         $this->token = $gdriveClient->getAccessToken();
 

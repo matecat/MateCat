@@ -2,7 +2,7 @@
 
 namespace Model\LQA;
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;

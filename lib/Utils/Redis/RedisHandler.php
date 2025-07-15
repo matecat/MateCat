@@ -3,10 +3,10 @@
 namespace Utils\Redis;
 
 use Exception;
-use INIT;
 use Predis\Client;
 use ReflectionClass;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 /**
@@ -71,7 +71,7 @@ class RedisHandler {
      * @return Client
      */
     private function getClient(): Client {
-        $connectionParams = INIT::$REDIS_SERVERS;
+        $connectionParams = AppConfig::$REDIS_SERVERS;
 
         if ( is_string( $connectionParams ) ) {
 
@@ -89,14 +89,14 @@ class RedisHandler {
 
     protected function formatDSN( $dsnString ): string {
 
-        if ( !is_null( INIT::$INSTANCE_ID ) ) {
+        if ( !is_null( AppConfig::$INSTANCE_ID ) ) {
 
             $conf = parse_url( $dsnString );
 
             if ( isset( $conf[ 'query' ] ) ) {
-                $instanceID = "&database=" . INIT::$INSTANCE_ID;
+                $instanceID = "&database=" . AppConfig::$INSTANCE_ID;
             } else {
-                $instanceID = "?database=" . INIT::$INSTANCE_ID;
+                $instanceID = "?database=" . AppConfig::$INSTANCE_ID;
             }
 
             return $dsnString . $instanceID;

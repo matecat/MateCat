@@ -15,6 +15,7 @@ use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\Lara;
 use Utils\Engines\MMT;
 use Utils\Engines\NONE;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -107,7 +108,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
         $this->queueElement->classLoad = SetContributionMTWorker::class;
 
-        $this->contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
+        $this->contextList = ContextList::get( AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
     }
 

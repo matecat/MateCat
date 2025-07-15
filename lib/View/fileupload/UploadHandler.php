@@ -4,6 +4,7 @@ use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\FilesStorage\AbstractFilesStorage;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\ServerCheck\ServerCheck;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -30,18 +31,18 @@ class UploadHandler {
             'delete_type'             => 'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
-            'max_tmx_file_size'       => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
-            'max_file_size'           => INIT::$MAX_UPLOAD_FILE_SIZE,
+            'max_tmx_file_size'       => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
+            'max_file_size'           => AppConfig::$MAX_UPLOAD_FILE_SIZE,
             'min_file_size'           => 1,
             // The maximum number of files for the upload directory:
-            'max_number_of_files'     => INIT::$MAX_NUM_FILES,
+            'max_number_of_files'     => AppConfig::$MAX_NUM_FILES,
             // Set the following option to false to enable resumable uploads:
             'discard_aborted_uploads' => true,
         ];
     }
 
     protected function getFullUrl() {
-        $https = INIT::$PROTOCOL === 'https';
+        $https = AppConfig::$PROTOCOL === 'https';
 
         return
             ( $https ? 'https://' : 'http://' ) .
@@ -179,7 +180,7 @@ class UploadHandler {
 
             return false;
         } else {
-            if ( mb_strlen( $file->name ) > INIT::$MAX_FILENAME_LENGTH ) {
+            if ( mb_strlen( $file->name ) > AppConfig::$MAX_FILENAME_LENGTH ) {
                 $file->error = "filenameTooLong";
 
                 return false;
@@ -424,7 +425,7 @@ class UploadHandler {
             $file->size  = null;
             $file->type  = trim( $matches[ 2 ] );
             $file->error = "The file is too large. " .
-                "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
+                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max header post size value in the virtualhost configuration or php.ini.\"";
 
@@ -432,7 +433,7 @@ class UploadHandler {
 
         } elseif ( $_SERVER[ 'CONTENT_LENGTH' ] >= $uploadParams->getUploadMaxFilesize() ) {
             $info[ 0 ]->error = "The file is too large.  " .
-                "Please Contact " . INIT::$SUPPORT_MAIL . " and report these details: " .
+                "Please Contact " . AppConfig::$SUPPORT_MAIL . " and report these details: " .
                 "\"The server configuration does not conform with Matecat configuration. " .
                 "Check for max file upload value in the virtualhost configuration or php.ini.\"";
         }
@@ -556,7 +557,7 @@ class UploadHandler {
     protected function _isRightMime( $fileUp ) {
 
         //Mime White List, take them from ProjectManager.php
-        foreach ( INIT::$MIME_TYPES as $key => $value ) {
+        foreach ( AppConfig::$MIME_TYPES as $key => $value ) {
             if ( strpos( $key, $fileUp->type ) !== false ) {
                 return true;
             }
@@ -569,7 +570,7 @@ class UploadHandler {
     protected function _isRightExtension( $fileUp ) {
 
         $acceptedExtensions = [];
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key2 => $value2 ) {
+        foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $key2 => $value2 ) {
             $acceptedExtensions = array_unique( array_merge( $acceptedExtensions, array_keys( $value2 ) ) );
         }
 

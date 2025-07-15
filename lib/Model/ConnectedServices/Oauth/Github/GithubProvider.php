@@ -2,12 +2,12 @@
 
 namespace Model\ConnectedServices\Oauth\Github;
 
-use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Github;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Utils\Registry\AppConfig;
 
 class GithubProvider extends AbstractProvider {
 
@@ -20,9 +20,9 @@ class GithubProvider extends AbstractProvider {
      */
     public static function getClient( ?string $redirectUrl = null ): Github {
         return new Github( [
-                'clientId'     => INIT::$GITHUB_OAUTH_CLIENT_ID,
-                'clientSecret' => INIT::$GITHUB_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? INIT::$GITHUB_OAUTH_REDIRECT_URL,
+                'clientId'     => AppConfig::$GITHUB_OAUTH_CLIENT_ID,
+                'clientSecret' => AppConfig::$GITHUB_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? AppConfig::$GITHUB_OAUTH_REDIRECT_URL,
         ] );
     }
 

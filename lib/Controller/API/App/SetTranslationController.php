@@ -7,10 +7,9 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -41,6 +40,7 @@ use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
 use Utils\LQA\QA;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
@@ -620,7 +620,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
 
         // If volume analysis is not enabled and no translation rows exist, create the row
-        if ( !INIT::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
+        if ( !AppConfig::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
             $translation             = new SegmentTranslationStruct();
             $translation->id_segment = (int)$this->data[ 'id_segment' ];
             $translation->id_job     = (int)$this->data[ 'id_job' ];
@@ -816,7 +816,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
         $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //

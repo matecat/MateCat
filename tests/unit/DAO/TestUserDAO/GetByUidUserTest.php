@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -26,7 +27,7 @@ class GetByUidUserTest extends AbstractTest {
     protected $sql_delete_user;
     protected $sql_insert_user;
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $uid;
@@ -34,17 +35,17 @@ class GetByUidUserTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->user_Dao          = new UserDao( $this->database_instance );
 
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, 'bar@foo.net', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, 'bar@foo.net', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->uid = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
-        $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid . "';";
+        $this->sql_delete_user = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid . "';";
 
     }
 
@@ -52,7 +53,7 @@ class GetByUidUserTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }

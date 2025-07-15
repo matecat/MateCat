@@ -12,7 +12,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use INIT;
 use Model\Analysis\Constants\MatchConstantsFactory;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
@@ -23,6 +22,7 @@ use Model\QualityReport\QualityReportSegmentModel;
 use Model\QualityReport\QualityReportSegmentStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Utils\Registry\AppConfig;
 
 class QualityReportControllerAPI extends KleinController {
     use ChunkNotFoundHandlerTrait;
@@ -149,7 +149,7 @@ class QualityReportControllerAPI extends KleinController {
         $pages = ceil( $total / $step );
 
         $links = [
-                "base"            => INIT::$HTTPHOST,
+                "base"            => AppConfig::$HTTPHOST,
                 'last_segment_id' => (int)end( $segments_id ),
                 "pages"           => $pages,
                 "items_per_page"  => $step,

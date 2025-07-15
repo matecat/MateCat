@@ -3,10 +3,10 @@
 namespace Utils\Logger;
 
 use Exception;
-use INIT;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 // Be sure Monolog is installed via composer
@@ -79,9 +79,9 @@ class Log {
 
     protected static function getFileNamePath(): string {
         if ( !empty( self::$fileName ) ) {
-            $name = INIT::$LOG_REPOSITORY . "/" . self::$fileName;
+            $name = AppConfig::$LOG_REPOSITORY . "/" . self::$fileName;
         } else {
-            $name = INIT::$LOG_REPOSITORY . "/" . self::LOG_FILENAME;
+            $name = AppConfig::$LOG_REPOSITORY . "/" . self::LOG_FILENAME;
         }
 
         return $name;

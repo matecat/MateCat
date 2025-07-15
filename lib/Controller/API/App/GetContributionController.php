@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
@@ -21,6 +20,7 @@ use Model\Users\UserDao;
 use ReflectionException;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 
 class GetContributionController extends KleinController {
@@ -53,7 +53,7 @@ class GetContributionController extends KleinController {
         $cross_language      = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
-            $num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
+            $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
         $jobStruct  = ChunkDao::getByIdAndPassword( $id_job, $password );

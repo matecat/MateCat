@@ -6,7 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;

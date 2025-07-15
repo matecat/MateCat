@@ -3,10 +3,9 @@
 namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
-use INIT;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\FilesStorage\FilesStorageFactory;
@@ -30,6 +29,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
@@ -116,7 +116,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             $this->queueHandler = new AMQHandler();
-            $this->queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, [ $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID ] );
+            $this->queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, [ $this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID ] );
 
             $this->_updateConfiguration();
 
@@ -141,7 +141,7 @@ class FastAnalysis extends AbstractDaemon {
 
         do {
 
-            if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+            if ( !$this->queueHandler->getRedisClient()->sismember( RedisKeys::FAST_PID_SET, $this->myProcessPid . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID ) ) {
                 // suicide gracefully
                 $this->RUNNING = false;
                 continue;
@@ -364,7 +364,7 @@ class FastAnalysis extends AbstractDaemon {
             $this->segment_hashes[ $segment[ 'jsid' ] ] = $pos;
 
             $total_source_words += $segment[ 'raw_word_count' ];
-            if ( $total_source_words > INIT::$MAX_SOURCE_WORDS ) {
+            if ( $total_source_words > AppConfig::$MAX_SOURCE_WORDS ) {
                 throw new Exception( "Project too large. Skip.", self::ERR_TOO_LARGE );
             }
 
@@ -400,9 +400,9 @@ class FastAnalysis extends AbstractDaemon {
         $this->myProcessPid = 0;
 
         //SHUTDOWN
-        $this->queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+        $this->queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID );
 
-        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         $this->_logTimeStampedMsg( $msg );
 
         $this->queueHandler->getRedisClient()->disconnect();
@@ -924,9 +924,9 @@ HD;
         $bindParams = [ 'project_status' => ProjectStatus::STATUS_NEW ];
 
         $and_InstanceId = null;
-        if ( !is_null( INIT::$INSTANCE_ID ) ) {
+        if ( !is_null( AppConfig::$INSTANCE_ID ) ) {
             $and_InstanceId              = ' AND instance_id = :instance_id ';
-            $bindParams[ 'instance_id' ] = INIT::$INSTANCE_ID;
+            $bindParams[ 'instance_id' ] = AppConfig::$INSTANCE_ID;
         }
 
         $query = "

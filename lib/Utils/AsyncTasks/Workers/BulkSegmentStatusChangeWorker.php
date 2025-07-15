@@ -10,7 +10,7 @@ namespace Utils\AsyncTasks\Workers;
 
 
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureCodes;
 use Model\Jobs\JobStruct;
 use Model\Translations\SegmentTranslationDao;

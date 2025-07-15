@@ -5,11 +5,11 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -235,7 +235,7 @@ class PayableRateController extends KleinController {
      * @return false|string
      */
     private function getPayableRateModelSchema() {
-        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+        return file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
     }
 
     /**
@@ -261,7 +261,7 @@ class PayableRateController extends KleinController {
     private static function validateJSON( string $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/payable_rate.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
         $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
     }

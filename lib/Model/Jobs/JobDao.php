@@ -4,8 +4,8 @@ namespace Model\Jobs;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\ValidationError;
 use Model\Projects\ProjectStruct;

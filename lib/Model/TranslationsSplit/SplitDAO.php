@@ -4,8 +4,8 @@ namespace Model\TranslationsSplit;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use Model\Database;
 
 
 /**

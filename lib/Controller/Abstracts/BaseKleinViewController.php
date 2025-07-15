@@ -5,7 +5,6 @@ namespace Controller\Abstracts;
 use Bootstrap;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
-use INIT;
 use Klein\App;
 use Klein\Request;
 use Klein\Response;
@@ -17,9 +16,10 @@ use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
 use Model\ConnectedServices\Oauth\OauthClient;
 use PHPTAL;
-use PHPTalBoolean;
-use PHPTalMap;
-use PHPTALWithAppend;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
+use Utils\Templating\PHPTALWithAppend;
 use Utils\Tools\Utils;
 
 /**
@@ -33,7 +33,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     protected bool $isView = true;
 
     /**
-     * @var PHPTALWithAppend
+     * @var \Utils\Templating\PHPTALWithAppend
      */
     protected PHPTAL $view;
 
@@ -66,17 +66,17 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
      */
     public function setView( string $template_name, array $params = [], int $code = 200 ) {
 
-        $this->view     = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$template_name" );
+        $this->view     = new PHPTALWithAppend( AppConfig::$TEMPLATE_ROOT . "/$template_name" );
         $this->httpCode = $code;
 
-        $this->view->{'basepath'}             = INIT::$BASEURL;
-        $this->view->{'hostpath'}             = INIT::$HTTPHOST;
-        $this->view->{'build_number'}         = INIT::$BUILD_NUMBER;
-        $this->view->{'support_mail'}         = INIT::$SUPPORT_MAIL;
-        $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean( INIT::$ENABLE_MULTI_DOMAIN_API );
-        $this->view->{'ajaxDomainsNumber'}    = INIT::$AJAX_DOMAINS;
-        $this->view->{'maxFileSize'}          = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->view->{'maxTMXFileSize'}       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+        $this->view->{'basepath'}             = AppConfig::$BASEURL;
+        $this->view->{'hostpath'}             = AppConfig::$HTTPHOST;
+        $this->view->{'build_number'}         = AppConfig::$BUILD_NUMBER;
+        $this->view->{'support_mail'}         = AppConfig::$SUPPORT_MAIL;
+        $this->view->{'enableMultiDomainApi'} = new PHPTalBoolean( AppConfig::$ENABLE_MULTI_DOMAIN_API );
+        $this->view->{'ajaxDomainsNumber'}    = AppConfig::$AJAX_DOMAINS;
+        $this->view->{'maxFileSize'}          = AppConfig::$MAX_UPLOAD_FILE_SIZE;
+        $this->view->{'maxTMXFileSize'}       = AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->view->{'flashMessages'}        = FlashMessage::flush();
 
         if ( $this->isLoggedIn() ) {
@@ -94,21 +94,21 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'css_resources'} = [];
 
         // init oauth clients
-        $this->view->{'googleAuthURL'}    = ( INIT::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->view->{'githubAuthUrl'}    = ( INIT::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->view->{'linkedInAuthUrl'}  = ( INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->view->{'microsoftAuthUrl'} = ( INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
-        $this->view->{'facebookAuthUrl'}  = ( INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->view->{'googleAuthURL'}    = ( AppConfig::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->view->{'githubAuthUrl'}    = ( AppConfig::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->view->{'linkedInAuthUrl'}  = ( AppConfig::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->view->{'microsoftAuthUrl'} = ( AppConfig::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+        $this->view->{'facebookAuthUrl'}  = ( AppConfig::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
 
         $this->view->{'googleDriveEnabled'} = new PHPTalBoolean( Bootstrap::isGDriveConfigured() );
-        $this->view->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
+        $this->view->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, AppConfig::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
 
         /**
          * This is a unique ID generated at runtime.
          * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
          */
         $this->view->{'x_nonce_unique_id'}          = Utils::uuid4();
-        $this->view->{'x_self_ajax_location_hosts'} = INIT::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url( INIT::$HTTPHOST )[ 'host' ] : null;
+        $this->view->{'x_self_ajax_location_hosts'} = AppConfig::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url( AppConfig::$HTTPHOST )[ 'host' ] : null;
 
         $this->addParamsToView( $params );
 
@@ -152,7 +152,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     }
 
     public function redirectToWantedUrl() {
-        header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
+        header( "Location: " . AppConfig::$HTTPHOST . AppConfig::$BASEURL . $_SESSION[ 'wanted_url' ], false );
         unset( $_SESSION[ 'wanted_url' ] );
         exit;
     }

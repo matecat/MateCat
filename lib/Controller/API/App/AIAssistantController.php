@@ -3,10 +3,10 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
-use INIT;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class AIAssistantController extends KleinController {
@@ -14,7 +14,7 @@ class AIAssistantController extends KleinController {
     const AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
 
     public function index() {
-        if ( empty( INIT::$OPENAI_API_KEY ) ) {
+        if ( empty( AppConfig::$OPENAI_API_KEY ) ) {
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => 'OpenAI API key is not set'

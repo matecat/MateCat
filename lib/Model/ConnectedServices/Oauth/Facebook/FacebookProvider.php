@@ -3,12 +3,12 @@
 namespace Model\ConnectedServices\Oauth\Facebook;
 
 use Exception;
-use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\Facebook;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Utils\Registry\AppConfig;
 
 class FacebookProvider extends AbstractProvider {
 
@@ -21,9 +21,9 @@ class FacebookProvider extends AbstractProvider {
      */
     public static function getClient( ?string $redirectUrl = null ): Facebook {
         return new Facebook( [
-                'clientId'        => INIT::$FACEBOOK_OAUTH_CLIENT_ID,
-                'clientSecret'    => INIT::$FACEBOOK_OAUTH_CLIENT_SECRET,
-                'redirectUri'     => $redirectUrl ?? INIT::$FACEBOOK_OAUTH_REDIRECT_URL,
+                'clientId'        => AppConfig::$FACEBOOK_OAUTH_CLIENT_ID,
+                'clientSecret'    => AppConfig::$FACEBOOK_OAUTH_CLIENT_SECRET,
+                'redirectUri'     => $redirectUrl ?? AppConfig::$FACEBOOK_OAUTH_REDIRECT_URL,
                 'graphApiVersion' => 'v2.10',
         ] );
     }

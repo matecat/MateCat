@@ -2,9 +2,10 @@
 
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Model\Database;
+use Model\DataAccess\Database;
 use Predis\Client;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -38,7 +39,7 @@ class CreateApyKeyTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         $this->apikey_Dao          = new ApiKeyDao( $this->database_instance );
         $this->apikey_struct_param = new ApiKeyStruct();
@@ -59,7 +60,7 @@ class CreateApyKeyTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }
@@ -72,8 +73,8 @@ class CreateApyKeyTest extends AbstractTest {
 
         $this->actual_apikey     = $this->apikey_Dao->create( $this->apikey_struct_param );
         $this->apikey_id         = $this->actual_apikey->id;
-        $this->sql_select_apikey = "SELECT * FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
-        $this->sql_delete_apikey = "DELETE FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
+        $this->sql_select_apikey = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
+        $this->sql_delete_apikey = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
 
         $this->apikey_struct_param->id = $this->apikey_id;
         $this->assertEquals( $this->apikey_struct_param, $this->actual_apikey );

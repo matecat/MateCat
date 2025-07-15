@@ -4,7 +4,7 @@ namespace Model\Users\Authentication;
 
 use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;

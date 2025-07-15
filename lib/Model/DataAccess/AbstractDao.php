@@ -3,9 +3,7 @@
 namespace Model\DataAccess;
 
 use Exception;
-use Model\Database;
 use Model\Exceptions\ValidationError;
-use Model\IDatabase;
 use PDO;
 use PDOStatement;
 use ReflectionException;

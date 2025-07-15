@@ -5,11 +5,11 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\Projects\ProjectTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -32,7 +32,7 @@ class ProjectTemplateController extends KleinController {
     private function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/project_template.json' );
         $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
     }
@@ -259,6 +259,6 @@ class ProjectTemplateController extends KleinController {
      * @return string
      */
     private function getProjectTemplateModelSchema(): string {
-        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/project_template.json' );
+        return file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/project_template.json' );
     }
 }

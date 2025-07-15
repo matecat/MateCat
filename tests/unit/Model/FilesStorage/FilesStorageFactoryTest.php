@@ -4,6 +4,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\FilesStorage\FsFilesStorage;
 use Model\FilesStorage\S3FilesStorage;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 class FilesStorageFactoryTest extends AbstractTest {
 
@@ -21,7 +22,7 @@ class FilesStorageFactoryTest extends AbstractTest {
      * @test
      */
     public function test_it_initialize_FilesStorage() {
-        INIT::$FILE_STORAGE_METHOD = 'fs';
+        AppConfig::$FILE_STORAGE_METHOD = 'fs';
 
         $fileStorage = FilesStorageFactory::create();
 

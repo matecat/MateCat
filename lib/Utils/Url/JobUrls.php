@@ -2,8 +2,8 @@
 
 namespace Utils\Url;
 
-use INIT;
 use Plugins\Features\ReviewExtended\ReviewUtils;
+use Utils\Registry\AppConfig;
 
 class JobUrls {
 
@@ -138,7 +138,7 @@ class JobUrls {
      * @return string
      */
     private function httpHost( ?string $httpHost = null ): string {
-        $host = INIT::$HTTPHOST;
+        $host = AppConfig::$HTTPHOST;
 
         if ( !empty( $httpHost ) ) {
             $host = $httpHost;

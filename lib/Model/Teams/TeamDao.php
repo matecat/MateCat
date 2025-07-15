@@ -10,7 +10,7 @@ namespace Model\Teams;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;

@@ -17,7 +17,7 @@
  */
 
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Users\UserStruct;
@@ -26,6 +26,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 error_reporting( ~E_DEPRECATED );
@@ -56,7 +57,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
          */
 
 
-        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
@@ -75,7 +76,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
          * Path File initialization
          */
 
-        $path_of_the_original_file = INIT::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
+        $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
 
         $file_param = $path_of_the_original_file;
         $key_param  = "a6043e606ac9b5d7ff24";

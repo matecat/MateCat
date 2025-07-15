@@ -3,11 +3,11 @@
 namespace Model\FeaturesBase;
 
 use DirectoryIterator;
-use INIT;
 use Klein\Klein;
 use Klein\Request;
 use Plugins\Features\BaseFeature;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 
@@ -55,7 +55,7 @@ class PluginsLoader {
             static::$_INSTANCE = new static();
 
             //autoload feature codes
-            $iterator = new DirectoryIterator( INIT::$ROOT . DIRECTORY_SEPARATOR . 'plugins' );
+            $iterator = new DirectoryIterator( AppConfig::$ROOT . DIRECTORY_SEPARATOR . 'plugins' );
 
             foreach ( $iterator as $fileInfo ) {
 

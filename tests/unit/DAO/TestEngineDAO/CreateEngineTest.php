@@ -1,10 +1,11 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Predis\Client;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -29,14 +30,14 @@ class CreateEngineTest extends AbstractTest {
     protected $sql_select_engine;
     protected $id;
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $actual;
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id > 2" );
 
@@ -64,7 +65,7 @@ class CreateEngineTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_engine );
-        $this->flusher = new Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }
@@ -78,8 +79,8 @@ class CreateEngineTest extends AbstractTest {
 
         $this->actual            = $this->engine_Dao->create( $this->engine_struct_param );
         $this->id                = $this->database_instance->last_insert();
-        $this->sql_select_engine = "SELECT * FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
-        $this->sql_delete_engine = "DELETE FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
+        $this->sql_select_engine = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
+        $this->sql_delete_engine = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id='" . $this->id . "';";
 
         $this->assertEquals( $this->engine_struct_param, $this->actual );
 

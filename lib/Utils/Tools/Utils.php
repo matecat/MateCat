@@ -8,9 +8,8 @@ use DirectoryIterator;
 use DOMDocument;
 use DOMElement;
 use Exception;
-use INIT;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils as ReviewUtils;
@@ -19,6 +18,7 @@ use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
 use Utils\Constants\SourcePages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -226,13 +226,13 @@ class Utils {
     }
 
     public static function encryptPass( $clear_pass, $salt ): string {
-        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET );
 
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
     public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ): bool {
-        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+        $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, AppConfig::$AUTHSECRET );
 
         return password_verify( $pepperedPass, $db_hashed_pass );
     }
@@ -391,11 +391,11 @@ class Utils {
      */
     public static function sendErrMailReport( string $htmlContent, string $subject = null ): void {
 
-        if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
+        if ( !AppConfig::$SEND_ERR_MAIL_REPORT ) {
             return;
         }
 
-        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( empty( $subject ) ) {
             $subject = 'Alert from Matecat: ' . php_uname( 'n' );
@@ -664,7 +664,7 @@ class Utils {
      * @return string
      */
     public static function uploadDirFromSessionCookie( $guid, string $file_name = null ): string {
-        return INIT::$UPLOAD_REPOSITORY . "/" .
+        return AppConfig::$UPLOAD_REPOSITORY . "/" .
                 $guid . '/' .
                 $file_name;
     }

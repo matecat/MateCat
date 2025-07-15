@@ -13,16 +13,16 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\Abstracts\IController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use INIT;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
-use PHPTalBoolean;
-use PHPTalMap;
 use Utils\Analysis\Health;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
 use Utils\Tools\Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
@@ -133,7 +133,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
                 'daemon_misconfiguration' => new PHPTalBoolean( Health::thereIsAMisconfiguration() ),
                 'json_jobs'               => json_encode( $model ),
                 'split_enabled'           => new PHPTalBoolean( true ),
-                'enable_outsource'        => new PHPTalBoolean( INIT::$ENABLE_OUTSOURCE ),
+                'enable_outsource'        => new PHPTalBoolean( AppConfig::$ENABLE_OUTSOURCE ),
         ] );
 
         $activity             = new ActivityLogStruct();

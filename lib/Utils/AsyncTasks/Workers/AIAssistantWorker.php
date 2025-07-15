@@ -3,7 +3,6 @@
 namespace Utils\AsyncTasks\Workers;
 
 use Exception;
-use INIT;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use Predis\Response\Status;
@@ -11,6 +10,7 @@ use ReflectionException;
 use Stomp\Exception\StompException;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -39,8 +39,8 @@ class AIAssistantWorker extends AbstractWorker {
     public function __construct( AMQHandler $queueHandler ) {
         parent::__construct( $queueHandler );
 
-        $timeOut      = ( INIT::$OPEN_AI_TIMEOUT ) ?: 30;
-        $this->openAi = new OpenAi( INIT::$OPENAI_API_KEY );
+        $timeOut      = ( AppConfig::$OPEN_AI_TIMEOUT ) ?: 30;
+        $this->openAi = new OpenAi( AppConfig::$OPENAI_API_KEY );
         $this->openAi->setTimeout( $timeOut );
 
         $this->redis = $queueHandler->getRedisClient();
@@ -77,7 +77,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @throws Exception
      */
     private function explain_meaning( $payload ) {
-        $phraseTrimLimit = ceil( INIT::$OPEN_AI_MAX_TOKENS / 2 );
+        $phraseTrimLimit = ceil( AppConfig::$OPEN_AI_MAX_TOKENS / 2 );
         $phrase          = strip_tags( html_entity_decode( $payload[ 'phrase' ] ) );
         $phrase          = Utils::truncatePhrase( $phrase, $phraseTrimLimit );
         $txt             = "";

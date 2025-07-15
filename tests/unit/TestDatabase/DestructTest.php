@@ -1,12 +1,13 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Database::__destruct
+ * @covers \Model\DataAccess\Database::__destruct
  * User: dinies
  * Date: 11/04/16
  * Time: 17.56
@@ -24,12 +25,12 @@ class DestructTest extends AbstractTest {
     /**
      * It tests that the destructor works correctly.
      * @group  regression
-     * @covers Database::__destruct
+     * @covers \Model\DataAccess\Database::__destruct
      * @throws ReflectionException
      */
     public function test___destruct() {
 
-        $instance_to_destruct = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $instance_to_destruct = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $instance_to_destruct->connect();
 
         $reflector = new ReflectionClass( $instance_to_destruct );

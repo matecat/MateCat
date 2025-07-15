@@ -2,9 +2,9 @@
 
 namespace Model\Conversion;
 
-use INIT;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -55,7 +55,7 @@ class OCRCheck {
      */
     public function thereIsWarning( string $filePath ): bool {
 
-        if ( !INIT::$FILTERS_OCR_CHECK ) {
+        if ( !AppConfig::$FILTERS_OCR_CHECK ) {
             return false;
         }
 
@@ -82,7 +82,7 @@ class OCRCheck {
      */
     public function thereIsError( string $filePath ): bool {
 
-        if ( !INIT::$FILTERS_OCR_CHECK ) {
+        if ( !AppConfig::$FILTERS_OCR_CHECK ) {
             return false;
         }
 

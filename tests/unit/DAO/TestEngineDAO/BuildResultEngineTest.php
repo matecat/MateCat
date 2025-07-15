@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -22,7 +23,7 @@ class BuildResultEngineTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_buildResult" );
         $this->method->setAccessible( true );

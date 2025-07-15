@@ -3,9 +3,9 @@
 namespace Model\Conversion;
 
 use Exception;
-use INIT;
 use Model\Conversion\MimeTypes\MimeTypes;
 use stdClass;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 /**
@@ -56,7 +56,7 @@ class Upload {
             $this->uploadToken = $uploadToken;
         }
 
-        $this->dirUpload = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadToken;
+        $this->dirUpload = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadToken;
 
         if ( !file_exists( $this->dirUpload ) ) {
             mkdir( $this->dirUpload, 0775 );
@@ -81,7 +81,7 @@ class Upload {
         }
 
         if ( $this->_filesAreTooMuch( $filesToUpload ) ) {
-            throw new Exception ( "Too much files uploaded. Maximum value is " . INIT::$MAX_NUM_FILES );
+            throw new Exception ( "Too much files uploaded. Maximum value is " . AppConfig::$MAX_NUM_FILES );
         }
 
         $uploadStruct = static::getUniformGlobalFilesStructure( $filesToUpload );
@@ -230,7 +230,7 @@ class Upload {
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
 
             $filePathInfo = pathinfo( $out_filename );
-            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? INIT::$MAX_UPLOAD_TMX_FILE_SIZE : INIT::$MAX_UPLOAD_FILE_SIZE;
+            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
 
             if ( $fileSize >= $fileMaxSize ) {
                 $this->setObjectErrorOrThrowException(
@@ -313,7 +313,7 @@ class Upload {
             }
         }
 
-        return $count > INIT::$MAX_NUM_FILES;
+        return $count > AppConfig::$MAX_NUM_FILES;
 
     }
 
@@ -327,7 +327,7 @@ class Upload {
     protected function _isRightMime( object $fileUp ): bool {
 
         //Mime White List, take them from ProjectManager.php
-        foreach ( INIT::$MIME_TYPES as $key => $value ) {
+        foreach ( AppConfig::$MIME_TYPES as $key => $value ) {
             if ( strpos( $key, $fileUp->type ) !== false ) {
                 return true;
             }
@@ -347,7 +347,7 @@ class Upload {
     protected function _isRightExtension( object $fileUp ): bool {
 
         $acceptedExtensions = [];
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $value2 ) {
+        foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $value2 ) {
             $acceptedExtensions = array_unique( array_merge( $acceptedExtensions, array_keys( $value2 ) ) );
         }
 

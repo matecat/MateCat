@@ -3,8 +3,8 @@
 namespace Model\LQA;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use PDO;

@@ -11,8 +11,7 @@ namespace Utils\TaskRunner;
 
 use Bootstrap;
 use Exception;
-use INIT;
-use Model\Database;
+use Model\DataAccess\Database;
 use PDOException;
 use ReflectionException;
 use SplObserver;
@@ -20,6 +19,7 @@ use SplSubject;
 use Stomp\Transport\Frame;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -91,7 +91,7 @@ class Executor implements SplObserver {
      * @param      $_msg
      */
     protected function _logMsg( $_msg ) {
-        if ( INIT::$DEBUG ) {
+        if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
             Log::doJsonLog( $_msg );
         }
@@ -112,7 +112,7 @@ class Executor implements SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID          = posix_getpid();
-        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . INIT::$INSTANCE_ID;
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
         Log::setLogFileName( $_context->loggerName );
 
@@ -334,7 +334,7 @@ class Executor implements SplObserver {
         $this->_queueHandler->getClient()->disconnect();
 
         //SHUTDOWN
-        $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         $this->_logMsg( $msg );
 
         die();

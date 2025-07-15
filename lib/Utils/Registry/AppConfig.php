@@ -1,9 +1,11 @@
 <?php
 
 
+namespace Utils\Registry;
+
 use Utils\Constants\Mime2Extension;
 
-class INIT {
+class AppConfig {
 
     public static array $MANDATORY_KEYS = [
             'ENV',
@@ -17,10 +19,10 @@ class INIT {
     /**
      * @var string|null $ENV
      *
-     * General server environment settings to define the the usage of hard links rather than copy php method
+     * General server environment settings to define the usage of hard links rather than copy php method
      * must be one of these:
      *
-     * - production
+     * - Production
      * - development
      * - test
      *
@@ -96,11 +98,11 @@ class INIT {
     public static int    $SEGMENT_QA_CHECK_INTERVAL    = 1; //seconds
     public static bool   $SAVE_SHASUM_FOR_FILES_LOADED = true;
     public static string $AUTHCOOKIENAME               = 'matecat_login_v6';
-    public static string $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
+    public static string $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
     public static int    $ANALYSIS_WORDS_PER_DAYS      = 3000;
     public static int    $AUTHCOOKIEDURATION           = 86400 * 7;        // 24 hours
-    public static int    $MAX_UPLOAD_FILE_SIZE         = 62914560;     // 60 * 1024 * 1024;  // bytes
-    public static int    $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
+    public static int    $MAX_UPLOAD_FILE_SIZE         = 62914560;     // 60 * 1024 * 1024 // bytes
+    public static int    $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024 // bytes
     public static int    $MAX_NUM_FILES                = 100;
     public static int    $MAX_SOURCE_WORDS             = 250000;
 
@@ -113,8 +115,8 @@ class INIT {
     public static string $OPEN_AI_MAX_TOKENS = '';
 
     /**
-     * We proose that lxq_server is in a configuration file
-     * lxq_license: ${lxq_license},
+     * We propose that lxq_server is in a configuration file
+     * lxq_license: ${lxq_license}
      *
      * THIS SHOULD BE YOUR LEXIQA LICENSE, Get your license key at
      * @see http://www.lexiqa.net
@@ -123,7 +125,7 @@ class INIT {
     public static ?string $LXQ_LICENSE = null;
     public static string  $LXQ_SERVER  = "https://backend.lexiqa.net";
     /**
-     * Your partnerid will be provided along with your
+     * Your partnerId will be provided along with your
      * @see http://www.lexiqa.net
      *
      */
@@ -135,7 +137,7 @@ class INIT {
     public static string $TIME_ZONE = 'Europe/Rome';
 
     /**
-     * Use this settings to indicate the upperbuond memory limit you want to
+     * Use this setting to indicate the upperbound memory limit you want to
      * apply to fast analysis. You may want to set this to allow analysis of
      * big files.
      * @var string|null memory limit. Example "2048M"
@@ -148,7 +150,7 @@ class INIT {
     const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
 
     /**
-     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external
+     * ENABLE_OUTSOURCE set as true, will show the option to outsource to an external
      * translation provider (translated.net by default).
      * You can set it to false, but We are happy if you keep this on.
      * For each translation outsourced to Translated.net (the main Matecat developer),
@@ -173,61 +175,61 @@ class INIT {
     public static string $BUILD_NUMBER = '';
 
     /**
-     * Match Developer Email Key for the cattool
+     * Match Developer email Key for the cattool
      * @var string
      */
     public static string $MYMEMORY_API_KEY = 'demo@matecat.com';
 
     /**
-     * Match Developer Email Key for the analysis
+     * Match Developer email Key for the analysis
      * @var string
      */
     public static string $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com';
 
     /**
-     * Default key used to call the TM Server on Import TMX panel
+     * Default key used to call the TM Server on an Import TMX panel
      * @var string
      */
     public static string $DEFAULT_TM_KEY = '';
 
     /**
-     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user does not add their personal MMT license.
+     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user doesn't add their personal MMT license.
      */
     public static string $DEFAULT_MMT_KEY = '';
 
     /**
      * If you don't have a client id and client secret, please visit
-     * Google Developers Console (https://console.developers.google.com/)
+     * Google Developer Console (https://console.developers.google.com/)
      * and follow these instructions:
      * - click "Create Project" button and specify project name
      * - In the sidebar on the left, select APIs & auth.
-     * - In the displayed list of APIs, make sure "Google+ API" show a status of ON. If it doesn't, enable it.
+     * - In the displayed list of APIs, make sure "Google+ API" shows a status of ON. If it doesn't, enable it.
      * - In the sidebar on the left, select "Credentials" under "APIs & auth" menu.
      * - Click "Create new client ID" button
-     * - under APPLICATION TYPE, select "web application" option
+     * - under APPLICATION TYPE, select "web app" option
      * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
      * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
      * - click "Create client ID"
      * - Still in Credentials page, click "Create credentials" and select "API key"
      * - Click "Browser key"
      * - under Name, insert the name of your Browser API key
-     * - under "Accept requests from these HTTP referrers (web sites)", insert "<domain>/*",
+     * - under "Accept requests from these HTTP referrers (websites)", insert "<domain>/*",
      *   where <domain> is the same that you specified in the previous steps.
      * - In the sidebar select Overview and search for Google Picker
-     * - Click on the "Google Picker API" link, and then click on Enable button
+     * - Click on the "Google Picker API" link, and then click Enable button
      *
-     * Your client ID, client secret and Browser API key are now available.
+     * Your client ID, client secret, and Browser API key are now available.
      *
      * Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
-     * set:
+     * Set:
      * OAUTH_CLIENT_ID with your client ID
      * OAUTH_CLIENT_SECRET with your client secret
-     * OAUTH_CLIENT_APP_NAME with your custom app name, if you want, or leave Matecat
+     * OAUTH_CLIENT_APP_NAME with your custom app name if you want, or leave Matecat
      * OAUTH_BROWSER_API_KEY with your browser API key, required to open Google Picker
      *
-     * save and rename to oauth_config.ini file.
+     * Save and rename to oauth_config.ini file.
      *
-     * Done!
+     * Done.
      */
     public static array $OAUTH_CONFIG = [];
 
@@ -241,7 +243,7 @@ class INIT {
     public static ?string $GOOGLE_OAUTH_BROWSER_API_KEY = null;
 
     /**
-     * Github credentials
+     * GitHub credentials
      */
     public static ?string $GITHUB_OAUTH_CLIENT_ID     = null;
     public static ?string $GITHUB_OAUTH_CLIENT_SECRET = null;
@@ -289,31 +291,31 @@ class INIT {
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;
 
-    public function __construct() {
+    protected function __construct() {
 
-        self::$GITHUB_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GITHUB_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GITHUB_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GITHUB_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$LINKEDIN_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
-        self::$LINKEDIN_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$LINKEDIN_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$LINKEDIN_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$MICROSOFT_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
-        self::$MICROSOFT_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$MICROSOFT_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$MICROSOFT_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$FACEBOOK_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
-        self::$FACEBOOK_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$FACEBOOK_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$FACEBOOK_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$GOOGLE_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GOOGLE_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GOOGLE_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GOOGLE_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
 
         # Drive
-        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
-        self::$GOOGLE_OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
 
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
 
@@ -423,7 +425,7 @@ class INIT {
     /*
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
-     * During the execution a hash string can be prepended to the filename.
+     * During the execution, a hash string can be prepended to the filename.
      * So we reserve 45 chars for internal purposes.
      */
     public static int $MAX_FILENAME_LENGTH = 210;
@@ -441,7 +443,7 @@ class INIT {
     /**
      * Initialize the Class Instance
      */
-    public static function obtain() {
+    public static function init() {
         new self();
     }
 

@@ -1,12 +1,13 @@
 <?php
 
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 /**
  * @group  regression
@@ -17,7 +18,7 @@ use TestHelpers\AbstractTest;
  */
 class UpdateDBTest extends AbstractTest {
     /**
-     * @var  Database
+     * @var  \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $sql_delete_job;
@@ -55,7 +56,7 @@ class UpdateDBTest extends AbstractTest {
         $this->second_half_of_number   = "11";
         $sum_of_numbers                = number_format( (int)$this->first_half_of_number + (int)$this->second_half_of_number, 2 );
         $this->number_of_words_changed = "{$sum_of_numbers}";
-        $this->database_instance       = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance       = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         /**
          * job initialization
@@ -113,13 +114,13 @@ class UpdateDBTest extends AbstractTest {
         $this->job_Dao        = new JobDao( $this->database_instance );
         $jobStruct            = $this->job_Dao->createFromStruct( $this->job_struct );
         $this->job_id         = $jobStruct->id;
-        $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
+        $this->sql_delete_job = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id='" . $this->job_id . "';";
 
 
         /**
          * Segment initialization
          */
-        $sql_insert_first_segment = "INSERT INTO " . INIT::$DB_DATABASE . ".`segments` 
+        $sql_insert_first_segment = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`segments` 
     ( internal_id, id_file, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values
     ( '21922356366' , " . $this->job_id . ", '- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.' , 'e0170a2e381f1969056a7eb5e5bd0ac9', '" . $this->number_of_words_changed . "' , null, '', '' , '1' , null , null )";
 
@@ -127,7 +128,7 @@ class UpdateDBTest extends AbstractTest {
         $this->first_segment_id = $this->database_instance->last_insert();
 
 
-        $this->sql_delete_first_segment = "DELETE FROM " . INIT::$DB_DATABASE . ".`segments` WHERE id='" . $this->first_segment_id . "';";
+        $this->sql_delete_first_segment = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`segments` WHERE id='" . $this->first_segment_id . "';";
 
 
         $this->word_count_struct = new WordCountStruct();
@@ -145,8 +146,8 @@ class UpdateDBTest extends AbstractTest {
 
         $this->word_counter = new CounterModel( $this->word_count_struct );
 
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
-        $this->flusher->select( INIT::$INSTANCE_ID );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+        $this->flusher->select( AppConfig::$INSTANCE_ID );
         $this->flusher->flushdb();
 
     }
@@ -154,7 +155,7 @@ class UpdateDBTest extends AbstractTest {
     public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->database_instance->getConnection()->query( $this->sql_delete_first_segment );
-        $this->flusher->select( INIT::$INSTANCE_ID );
+        $this->flusher->select( AppConfig::$INSTANCE_ID );
         $this->flusher->flushDB();
         parent::tearDown();
     }

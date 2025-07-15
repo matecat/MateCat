@@ -4,9 +4,9 @@ namespace Utils\Tools;
 
 use ArrayAccess;
 use DomainException;
-use INIT;
 use JsonSerializable;
 use UnexpectedValueException;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -41,7 +41,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         }
 
         $this->storage[ 'payload' ][ 'context' ] = $hashMap;
-        self::$secretKey                         = INIT::$AUTHSECRET;
+        self::$secretKey                         = AppConfig::$AUTHSECRET;
         $this->now                               = time();
 
     }
@@ -54,7 +54,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         $_storage                       = $this->storage;
         $_storage[ 'header' ]           = [ "alg" => "HS256", "typ" => "JWT" ];
         $_storage[ 'payload' ][ 'exp' ] = $expire_date;
-        $_storage[ 'payload' ][ 'iss' ] = INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER;
+        $_storage[ 'payload' ][ 'iss' ] = AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
         $_storage[ 'payload' ][ 'iat' ] = $this->now;
         $_hash                          = hash_hmac( 'sha256', self::base64url_encode( json_encode( $_storage[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $_storage[ 'payload' ] ) ), self::$secretKey, true );
         $_storage[ 'signature' ]        = self::base64url_encode( $_hash );
@@ -100,7 +100,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     public static function getValidPayload( $jwtString ) {
 
         if ( self::$secretKey == null ) {
-            SimpleJWT::setSecretKey( INIT::$AUTHSECRET );
+            SimpleJWT::setSecretKey( AppConfig::$AUTHSECRET );
         }
 
         $jwtArray = self::parseJWTString( $jwtString );

@@ -13,7 +13,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;

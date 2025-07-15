@@ -9,7 +9,7 @@
 namespace Model\TmKeyManagement;
 
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Users\UserStruct;
 use Utils\Logger\Log;
 use Utils\TmKeyManagement\ClientTmKeyStruct;

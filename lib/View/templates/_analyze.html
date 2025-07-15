@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8"/>
     <title>Volume Analysis - Matecat</title>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with Matecat"/>
     <meta property="og:description" content="Matecat is a free, online and open source software that gives you more matches than any other CAT tool. Use it now!"/>
     <meta property="og:url" content="https://www.matecat.com"/>
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
@@ -44,7 +44,7 @@
 <div class="analyze-page">
     <header></header>
 </div>
-<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
+<div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 <div metal:use-macro="templates/common.html/footer_includes"/>
 </body>
 </html>

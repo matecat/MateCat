@@ -4,9 +4,9 @@ namespace Model\Projects;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\RemoteFiles\RemoteFileServiceNameStruct;

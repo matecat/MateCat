@@ -3,13 +3,13 @@
 namespace Utils\Validator\JSONSchema;
 
 use Exception;
-use INIT;
 use RuntimeException;
 use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\InvalidValue;
 use Swaggest\JsonSchema\RemoteRefProvider;
 use Swaggest\JsonSchema\Schema;
 use Swaggest\JsonSchema\SchemaContract;
+use Utils\Registry\AppConfig;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
@@ -37,7 +37,7 @@ class JSONValidator extends AbstractValidator {
     public function __construct( string $jsonSchema, bool $throwExceptions = false ) {
         $this->schemaContract  = Schema::import( static::getValidJSONSchema( $jsonSchema ), new Context( new class implements RemoteRefProvider {
             public function getSchemaData( $url ): object {
-                return JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/' . $url ) );
+                return JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/' . $url ) );
             }
 
         } ) );

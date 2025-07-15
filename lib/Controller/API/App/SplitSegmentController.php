@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;

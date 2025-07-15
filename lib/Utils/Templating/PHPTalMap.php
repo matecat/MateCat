@@ -1,5 +1,9 @@
 <?php
 
+namespace Utils\Templating;
+
+use ArrayAccess;
+use JsonSerializable;
 use Model\DataAccess\ArrayAccessTrait;
 
 /**

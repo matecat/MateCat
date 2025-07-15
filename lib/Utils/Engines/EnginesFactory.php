@@ -3,7 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 

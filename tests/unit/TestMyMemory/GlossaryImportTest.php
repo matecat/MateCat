@@ -15,7 +15,7 @@
  */
 
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
@@ -24,6 +24,7 @@ use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Match;
 use Utils\Tools\Utils;
 
@@ -43,7 +44,7 @@ class GlossaryImportTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
         $this->key_param   = "a6043e606ac9b5d7ff24";
-        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
@@ -67,8 +68,8 @@ class GlossaryImportTest extends AbstractTest {
      */
     public function test_glossaryImport_correct_behaviour() {
 
-        $path_of_the_original_file   = INIT::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-Glossary.csv';
-        $this->path_of_file_for_test = INIT::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-GlossaryCopy.csv';
+        $path_of_the_original_file   = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-Glossary.csv';
+        $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-GlossaryCopy.csv';
 
         chmod( $path_of_the_original_file, 0644 );
 
@@ -101,8 +102,8 @@ class GlossaryImportTest extends AbstractTest {
      */
     public function test_glossaryImport_wrong_target_lang() {
 
-        $path_of_the_original_file   = INIT::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLang.csv';
-        $this->path_of_file_for_test = INIT::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv';
+        $path_of_the_original_file   = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLang.csv';
+        $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv';
 
 
         chmod( $path_of_the_original_file, 0644 );
@@ -125,8 +126,8 @@ class GlossaryImportTest extends AbstractTest {
      */
     public function test_glossaryImport_invalid_header() {
 
-        $path_of_the_original_file   = INIT::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
-        $this->path_of_file_for_test = INIT::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeaderCopy.csv';
+        $path_of_the_original_file   = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
+        $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeaderCopy.csv';
 
 
         chmod( $path_of_the_original_file, 0644 );
@@ -168,8 +169,8 @@ class GlossaryImportTest extends AbstractTest {
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->willReturn( $rawValue_error );
 
 
-        $path_of_the_original_file   = INIT::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
-        $this->path_of_file_for_test = INIT::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeaderCopy.csv';
+        $path_of_the_original_file   = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeader.csv';
+        $this->path_of_file_for_test = AppConfig::$ROOT . '/tests/resources/files/glossary/GlossaryInvalidHeaderCopy.csv';
 
         copy( $path_of_the_original_file, $this->path_of_file_for_test );
 

@@ -14,6 +14,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -102,7 +103,7 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         $this->queueElement->params    = new Params( $this->contributionStruct->getArrayCopy() );
         $this->queueElement->classLoad = SetContributionWorker::class;
 
-        $this->contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
+        $this->contextList = ContextList::get( AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
     }
 

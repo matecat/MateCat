@@ -13,7 +13,6 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
-use INIT;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Engines\EngineDAO;
@@ -30,8 +29,6 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamModel;
 use Model\Users\UserDao;
-use PHPTalBoolean;
-use PHPTalMap;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use stdClass;
@@ -39,6 +36,9 @@ use Utils\Constants\Teams;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\Intento;
 use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
@@ -152,7 +152,7 @@ class CattoolController extends BaseKleinViewController {
                 'active_engine'                         => new PHPTalMap( $this->getActiveEngine( $chunkStruct->id_mt_engine ) ),
                 'allow_link_to_analysis'                => new PHPTalBoolean( true ),
                 'chunk_completion_undoable'             => new PHPTalBoolean( true ),
-                'comments_enabled'                      => new PHPTalBoolean( INIT::$COMMENTS_ENABLED ),
+                'comments_enabled'                      => new PHPTalBoolean( AppConfig::$COMMENTS_ENABLED ),
                 'currentPassword'                       => $isRevision ? $chunkReviewStruct->review_password : $chunkStruct->password,
                 'footer_show_revise_link'               => new PHPTalBoolean( !$isRevision ),
                 'first_job_segment'                     => $chunkStruct->job_first_segment,
@@ -161,7 +161,7 @@ class CattoolController extends BaseKleinViewController {
                 'id_team'                               => $chunkStruct->getProject()->id_team,
                 'isCJK'                                 => new PHPTalBoolean( CatUtils::isCJK( $chunkStruct->source ) ),
                 'isGDriveProject'                       => new PHPTalBoolean( ProjectDao::isGDriveProject( $chunkStruct->id_project ) ),
-                'isOpenAiEnabled'                       => new PHPTalBoolean( !empty( INIT::$OPENAI_API_KEY ) ),
+                'isOpenAiEnabled'                       => new PHPTalBoolean( !empty( AppConfig::$OPENAI_API_KEY ) ),
                 'isReview'                              => new PHPTalBoolean( $isRevision ),
                 'isSourceRTL'                           => new PHPTalBoolean( Languages::getInstance()->isRTL( $chunkStruct->source ) ),
                 'isTargetRTL'                           => new PHPTalBoolean( Languages::getInstance()->isRTL( $chunkStruct->target ) ),
@@ -169,25 +169,25 @@ class CattoolController extends BaseKleinViewController {
                 'job_is_splitted'                       => new PHPTalBoolean( $chunkStruct->isSplitted() ),
                 'lqa_categories'                        => new PHPTalMap( $model ? $model->getSerializedCategories() : [] ),
                 'lqa_flat_categories'                   => new PHPTalMap( $model ? $this->getCategoriesAsJson( $model ) : [] ),
-                'maxFileSize'                           => INIT::$MAX_UPLOAD_FILE_SIZE,
-                'maxTMXFileSize'                        => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
+                'maxFileSize'                           => AppConfig::$MAX_UPLOAD_FILE_SIZE,
+                'maxTMXFileSize'                        => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
                 'mt_enabled'                            => new PHPTalBoolean( (bool)$chunkStruct->id_mt_engine ),
-                'not_empty_default_tm_key'              => new PHPTalBoolean( !empty( INIT::$DEFAULT_TM_KEY ) ),
+                'not_empty_default_tm_key'              => new PHPTalBoolean( !empty( AppConfig::$DEFAULT_TM_KEY ) ),
                 'overall_quality_class'                 => $chunkReviewStruct ? ( $chunkReviewStruct->is_pass ? 'excellent' : 'fail' ) : '',
                 'pageTitle'                             => $this->buildPageTitle( $revisionNumber, $chunkStruct ),
                 'password'                              => $chunkStruct->password,
                 'project'                               => $chunkStruct->getProject(),
                 'project_name'                          => $chunkStruct->getProject()->name,
-                'quality_report_href'                   => INIT::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
+                'quality_report_href'                   => AppConfig::$BASEURL . "revise-summary/$chunkStruct->id-$chunkStruct->password",
                 'review_extended'                       => new PHPTalBoolean( true ),
                 'review_password'                       => $isRevision ? $chunkReviewStruct->review_password : ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $chunkStruct, Utils::getSourcePage() + 1 )[ 0 ]->review_password,
                 'revisionNumber'                        => $revisionNumber,
                 'searchable_statuses'                   => new PHPTalMap( $this->searchableStatuses() ),
                 'secondRevisionsCount'                  => count( ChunkReviewDao::findByProjectId( $chunkStruct->getProject()->id ) ),
                 'segmentFilterEnabled'                  => new PHPTalBoolean( true ),
-                'segmentQACheckInterval'                => CatUtils::isCJK( $chunkStruct->target ) ? 3000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL ) : 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL ),
+                'segmentQACheckInterval'                => CatUtils::isCJK( $chunkStruct->target ) ? 3000 * ( AppConfig::$SEGMENT_QA_CHECK_INTERVAL ) : 1000 * ( AppConfig::$SEGMENT_QA_CHECK_INTERVAL ),
                 'show_tag_projection'                   => new PHPTalBoolean( true ),
-                'socket_base_url'                       => INIT::$SOCKET_BASE_URL,
+                'socket_base_url'                       => AppConfig::$SOCKET_BASE_URL,
                 'source_code'                           => $chunkStruct->source,
                 'source_page'                           => Utils::getSourcePage(),
                 'status_labels'                         => new PHPTalMap( [
@@ -205,7 +205,7 @@ class CattoolController extends BaseKleinViewController {
                 'tms_enabled'                           => new PHPTalBoolean( (bool)$chunkStruct->id_tms ),
                 'translation_engines_intento_providers' => new PHPTalMap( Intento::getProviderList() ),
                 'translation_matches_enabled'           => new PHPTalBoolean( true ),
-                'warningPollingInterval'                => 1000 * ( INIT::$WARNING_POLLING_INTERVAL ),
+                'warningPollingInterval'                => 1000 * ( AppConfig::$WARNING_POLLING_INTERVAL ),
                 'word_count_type'                       => $chunkStruct->getProject()->getWordCountType(),
 
 
@@ -230,12 +230,12 @@ class CattoolController extends BaseKleinViewController {
 
         ] );
 
-        if ( INIT::$LXQ_LICENSE ) {
+        if ( AppConfig::$LXQ_LICENSE ) {
             $this->addParamsToView( [
-                            'lxq_license'      => INIT::$LXQ_LICENSE,
-                            'lxq_partnerid'    => INIT::$LXQ_PARTNERID,
+                            'lxq_license'      => AppConfig::$LXQ_LICENSE,
+                            'lxq_partnerid'    => AppConfig::$LXQ_PARTNERID,
                             'lexiqa_languages' => new PHPTalMap( ProjectOptionsSanitizer::$lexiQA_allowed_languages ),
-                            'lexiqaServer'     => INIT::$LXQ_SERVER,
+                            'lexiqaServer'     => AppConfig::$LXQ_SERVER,
                     ]
             );
         }
@@ -288,7 +288,7 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     private function notFound() {
-        $this->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
+        $this->setView( 'job_not_found.html', [ "support_mail" => AppConfig::$SUPPORT_MAIL ], 404 );
         $this->render();
     }
 
@@ -297,7 +297,7 @@ class CattoolController extends BaseKleinViewController {
      */
     private function cancelled( array $jobOwnership ) {
         $this->setView( 'job_cancelled.html', [
-                "support_mail" => INIT::$SUPPORT_MAIL,
+                "support_mail" => AppConfig::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
         ] );
         $this->render();
@@ -308,7 +308,7 @@ class CattoolController extends BaseKleinViewController {
      */
     private function archived( int $job_id, string $password, array $jobOwnership ) {
         $this->setView( 'job_archived.html', [
-                "support_mail" => INIT::$SUPPORT_MAIL,
+                "support_mail" => AppConfig::$SUPPORT_MAIL,
                 "owner_email"  => $jobOwnership[ 'owner_email' ],
                 "jid"          => $job_id,
                 "password"     => $password,
@@ -323,7 +323,7 @@ class CattoolController extends BaseKleinViewController {
      */
     private function findOwnerEmailAndTeam( ProjectStruct $project ): array {
 
-        $ownerMail    = INIT::$SUPPORT_MAIL;
+        $ownerMail    = AppConfig::$SUPPORT_MAIL;
         $jobOwnerIsMe = false;
 
         $team = $project->getTeam();
@@ -341,7 +341,7 @@ class CattoolController extends BaseKleinViewController {
                 if ( $assignee ) {
                     $ownerMail = $assignee->getEmail();
                 } else {
-                    $ownerMail = INIT::$SUPPORT_MAIL;
+                    $ownerMail = AppConfig::$SUPPORT_MAIL;
                 }
 
                 $membersIdList = array_map( function ( $memberStruct ) {

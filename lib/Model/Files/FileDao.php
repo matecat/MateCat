@@ -4,7 +4,7 @@ namespace Model\Files;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use ReflectionException;
 
 class FileDao extends AbstractDao {

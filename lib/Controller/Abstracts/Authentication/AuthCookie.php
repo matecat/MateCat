@@ -3,9 +3,9 @@
 namespace Controller\Abstracts\Authentication;
 
 use DomainException;
-use INIT;
 use Model\Users\UserStruct;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
 class AuthCookie {
@@ -35,11 +35,11 @@ class AuthCookie {
     public static function setCredentials( UserStruct $user ) {
 
         [ $new_cookie_data, $new_expire_date ] = static::generateSignedAuthCookie( $user );
-        CookieManager::setCookie( INIT::$AUTHCOOKIENAME, $new_cookie_data,
+        CookieManager::setCookie( AppConfig::$AUTHCOOKIENAME, $new_cookie_data,
                 [
                         'expires'  => $new_expire_date,
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'Lax',
@@ -64,7 +64,7 @@ class AuthCookie {
                 ],
         ] );
 
-        $JWT->setTimeToLive( INIT::$AUTHCOOKIEDURATION );
+        $JWT->setTimeToLive( AppConfig::$AUTHCOOKIEDURATION );
 
         return [ $JWT->jsonSerialize(), $JWT->getExpireDate() ];
     }
@@ -74,12 +74,12 @@ class AuthCookie {
      */
     public static function destroyAuthentication() {
 
-        unset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
-        CookieManager::setCookie( INIT::$AUTHCOOKIENAME, '',
+        unset( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
+        CookieManager::setCookie( AppConfig::$AUTHCOOKIENAME, '',
                 [
                         'expires' => 0,
                         'path'    => '/',
-                        'domain'  => INIT::$COOKIE_DOMAIN
+                        'domain'  => AppConfig::$COOKIE_DOMAIN
                 ]
         );
         session_destroy();
@@ -107,12 +107,12 @@ class AuthCookie {
      */
     private static function getData(): ?array {
 
-        if ( isset( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ INIT::$AUTHCOOKIENAME ] ) ) {
+        if ( isset( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) and !empty( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] ) ) {
 
             try {
-                return SimpleJWT::getValidPayload( $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
+                return SimpleJWT::getValidPayload( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
             } catch ( DomainException $e ) {
-                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ INIT::$AUTHCOOKIENAME ] );
+                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
 

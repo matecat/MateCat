@@ -4,7 +4,6 @@ namespace Utils\Engines;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use INIT;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -29,6 +28,7 @@ use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -436,7 +436,7 @@ class MyMemory extends AbstractEngine {
         $postFields = [
                 'glossary' => $this->getCurlFile( $file ),
                 'key'      => trim( $key ),
-                'de'       => INIT::$MYMEMORY_API_KEY,
+                'de'       => AppConfig::$MYMEMORY_API_KEY,
         ];
 
         if ( $name and $name !== '' ) {
@@ -520,7 +520,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryCheck( string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): CheckGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 'source'          => $source,
                 'target'          => $target,
                 'source_language' => $sourceLanguage,
@@ -539,7 +539,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryDomains( ?array $keys = [] ): DomainsResponse {
         $payload = [
-                'de'   => INIT::$MYMEMORY_API_KEY,
+                'de'   => AppConfig::$MYMEMORY_API_KEY,
                 'keys' => $keys,
         ];
         $this->call( "glossary_domains_relative_url", $payload, true, true );
@@ -557,7 +557,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryDelete( string $idSegment, string $idJob, string $password, string $term ): DeleteGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,
@@ -585,7 +585,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryGet( string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): GetGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 "id_job"          => $id_job,
                 "id_segment"      => $id_segment,
                 "source"          => $source,
@@ -609,7 +609,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossarySearch( string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): SearchGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 "source"          => $source,
                 "source_language" => $sourceLanguage,
                 "target_language" => $targetLanguage,
@@ -630,7 +630,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryKeys( string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): KeysGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 'source_language' => $sourceLanguage,
                 'target_language' => $targetLanguage,
                 'keys'            => $keys,
@@ -650,7 +650,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossarySet( string $idSegment, string $idJob, string $password, string $term ): SetGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,
@@ -672,7 +672,7 @@ class MyMemory extends AbstractEngine {
      */
     public function glossaryUpdate( string $idSegment, string $idJob, string $password, string $term ): UpdateGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,

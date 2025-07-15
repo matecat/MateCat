@@ -3,8 +3,8 @@
 namespace Model\ConnectedServices\Oauth;
 
 use Exception;
-use INIT;
 use Utils\Constants\Constants;
+use Utils\Registry\AppConfig;
 
 /**
  * Class OauthTokenEncryption.
@@ -25,7 +25,7 @@ class OauthTokenEncryption extends DefuseEncryption {
     public static function getInstance(): ?OauthTokenEncryption {
         if ( self::$instance === null ) {
             self::$instance = new OauthTokenEncryption(
-                    INIT::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
+                    AppConfig::$ROOT . Constants::OAUTH_TOKEN_KEY_FILE
             );
         }
 

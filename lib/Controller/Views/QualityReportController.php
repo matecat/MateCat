@@ -9,10 +9,10 @@ use Exception;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Jobs\JobDao;
-use PHPTalBoolean;
-use PHPTalMap;
 use Utils\Constants\TranslationStatus;
 use Utils\Langs\Languages;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 

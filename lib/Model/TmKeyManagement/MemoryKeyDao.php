@@ -10,9 +10,9 @@ namespace Model\TmKeyManagement;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Users\UserDao;
 use ReflectionException;
 use Utils\TmKeyManagement\TmKeyStruct;

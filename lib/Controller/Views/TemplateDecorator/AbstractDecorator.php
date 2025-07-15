@@ -9,7 +9,7 @@
 namespace Controller\Views\TemplateDecorator;
 use Controller\Abstracts\IController;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
-use PHPTALWithAppend;
+use Utils\Templating\PHPTALWithAppend;
 
 /**
  * Class AbstractDecorator

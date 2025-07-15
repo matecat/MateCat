@@ -12,7 +12,7 @@ namespace Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
 use PDOException;
 use RecursiveArrayIterator;

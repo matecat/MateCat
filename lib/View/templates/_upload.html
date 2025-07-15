@@ -5,7 +5,7 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
@@ -19,7 +19,7 @@
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
 
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       /*<![CDATA[*/
@@ -55,7 +55,7 @@
     <header class="upload-page-header"/>
     <div class="new_project__page"/>
     <div class="notifications-wrapper"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       var developerKey = '${developerKey}';
       var clientId = '${clientId}';

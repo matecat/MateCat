@@ -1,9 +1,10 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -29,10 +30,10 @@ class DestroyCacheEngineTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->engineDAO = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->engineDAO = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
 
         $this->engine_struct = new EngineStruct();
-        $this->cache         = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->cache         = new Predis\Client( AppConfig::$REDIS_SERVERS );
     }
 
     public function tearDown(): void {
@@ -52,7 +53,7 @@ class DestroyCacheEngineTest extends AbstractTest {
         $this->engine_struct->id   = 0;
         $this->engine_struct->type = "NONE";
 
-        $cache_key = "SELECT * FROM " . INIT::$DB_DATABASE . ".`engines` WHERE id = 0 AND active = 0 AND type = 'NONE'";
+        $cache_key = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`engines` WHERE id = 0 AND active = 0 AND type = 'NONE'";
 
         $key         = md5( $cache_key );
         $cache_value = serialize( $this->engine_struct );

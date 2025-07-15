@@ -10,9 +10,9 @@
 namespace View\API\Commons;
 
 
-use INIT;
 use JsonSerializable;
 use Throwable;
+use Utils\Registry\AppConfig;
 
 class Error implements JsonSerializable {
 
@@ -37,7 +37,7 @@ class Error implements JsonSerializable {
         $code   = $this->data->getCode();
         $output = $this->data->getMessage();
 
-        if ( INIT::$PRINT_ERRORS || $force_print_errors ) {
+        if ( AppConfig::$PRINT_ERRORS || $force_print_errors ) {
             $row[ 'errors' ][ 0 ][ 'file' ]  = $this->data->getFile();
             $row[ 'errors' ][ 0 ][ 'line' ]  = $this->data->getLine();
             $row[ 'errors' ][ 0 ][ 'trace' ] = $this->data->getTrace();

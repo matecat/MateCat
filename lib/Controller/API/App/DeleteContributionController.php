@@ -7,13 +7,13 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -61,7 +61,7 @@ class DeleteContributionController extends KleinController {
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $target );
         $config[ 'source' ]      = $source_lang;
         $config[ 'target' ]      = $target_lang;
-        $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
+        $config[ 'email' ]       = AppConfig::$MYMEMORY_API_KEY;
         $config[ 'id_user' ]     = [];
         $config[ 'id_match' ]    = $id_match;
 

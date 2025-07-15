@@ -12,12 +12,12 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\GDrive\GDriveTokenVerifyModel;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\NotFoundException;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use View\API\App\Json\ConnectedService;
 
@@ -79,7 +79,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController {
     private function __handleGDrive() {
         $verifier = new GDriveTokenVerifyModel( $this->connectedServiceStruct );
 
-        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->response->code( 200 );

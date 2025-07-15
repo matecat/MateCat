@@ -8,10 +8,9 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
-use INIT;
 use Klein\Klein;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
@@ -35,6 +34,7 @@ use ReflectionException;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use ZipArchive;
 
@@ -490,7 +490,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         if ( empty( $qa_model ) ) {
             // Use null coalescing to simplify fallback logic
-            $path     = $jsonPath ?? INIT::$ROOT . '/inc/qa_model.json';
+            $path     = $jsonPath ?? AppConfig::$ROOT . '/inc/qa_model.json';
             $qa_model = file_get_contents( $path );
         }
 

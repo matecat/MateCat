@@ -3,8 +3,8 @@
 namespace Plugins\Features\TranslationVersions\Model;
 
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
@@ -397,7 +397,7 @@ class TranslationVersionDao extends AbstractDao {
                 WHERE id_job = :id_job AND id_segment = :id_segment
                 AND version_number = :version_number ";
 
-        $conn = Database::obtain()->getConnection();
+        $conn = \Model\DataAccess\Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $stmt->execute( [

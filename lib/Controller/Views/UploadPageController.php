@@ -13,13 +13,13 @@ use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use Exception;
-use INIT;
 use Model\ProjectManager\ProjectOptionsSanitizer;
-use PHPTalBoolean;
-use PHPTalMap;
 use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Langs\LanguageDomains;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
 use Utils\Tools\Utils;
 
 class UploadPageController extends BaseKleinViewController {
@@ -38,25 +38,25 @@ class UploadPageController extends BaseKleinViewController {
         $this->setEmptyCookieValueIfNoHistory( Constants::COOKIE_TARGET_LANG );
 
         $this->setView( 'upload.html', [
-                'conversion_enabled'                    => new PHPTalBoolean( !empty( INIT::$FILTERS_ADDRESS ) ),
-                'volume_analysis_enabled'               => new PHPTalBoolean( INIT::$VOLUME_ANALYSIS_ENABLED ),
-                'maxFileSize'                           => INIT::$MAX_UPLOAD_FILE_SIZE,
-                'maxTMXFileSize'                        => INIT::$MAX_UPLOAD_TMX_FILE_SIZE,
-                'maxNumberFiles'                        => INIT::$MAX_NUM_FILES,
+                'conversion_enabled'                    => new PHPTalBoolean( !empty( AppConfig::$FILTERS_ADDRESS ) ),
+                'volume_analysis_enabled'               => new PHPTalBoolean( AppConfig::$VOLUME_ANALYSIS_ENABLED ),
+                'maxFileSize'                           => AppConfig::$MAX_UPLOAD_FILE_SIZE,
+                'maxTMXFileSize'                        => AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE,
+                'maxNumberFiles'                        => AppConfig::$MAX_NUM_FILES,
                 'subjects'                              => new PHPTalMap( LanguageDomains::getInstance()->getEnabledDomains() ),
                 'formats_number'                        => $this->countSupportedFileTypes(),
                 'translation_engines_intento_prov_json' => new PHPTalMap( Intento::getProviderList() ),
                 'tag_projection_languages'              => new PHPTalMap( ProjectOptionsSanitizer::$tag_projection_allowed_languages ),
-                'developerKey'                          => INIT::$GOOGLE_OAUTH_BROWSER_API_KEY,
-                'clientId'                              => INIT::$GOOGLE_OAUTH_CLIENT_ID
+                'developerKey'                          => AppConfig::$GOOGLE_OAUTH_BROWSER_API_KEY,
+                'clientId'                              => AppConfig::$GOOGLE_OAUTH_CLIENT_ID
         ] );
 
-        if ( INIT::$LXQ_LICENSE ) {
+        if ( AppConfig::$LXQ_LICENSE ) {
             $this->addParamsToView( [
-                            'lxq_license'      => INIT::$LXQ_LICENSE,
-                            'lxq_partnerid'    => INIT::$LXQ_PARTNERID,
+                            'lxq_license'      => AppConfig::$LXQ_LICENSE,
+                            'lxq_partnerid'    => AppConfig::$LXQ_PARTNERID,
                             'lexiqa_languages' => new PHPTalMap( ProjectOptionsSanitizer::$lexiQA_allowed_languages ),
-                            'lexiqaServer'     => INIT::$LXQ_SERVER,
+                            'lexiqaServer'     => AppConfig::$LXQ_SERVER,
                     ]
             );
         }
@@ -75,7 +75,7 @@ class UploadPageController extends BaseKleinViewController {
 
             // Get the guid from the guid if it exists, otherwise set the guid into the cookie
             if ( !empty( $_COOKIE[ 'upload_token' ] ) && Utils::isTokenValid( $_COOKIE[ 'upload_token' ] ) ) {
-                Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_token' ] . '/' );
+                Utils::deleteDir( AppConfig::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_token' ] . '/' );
             }
 
             $guid = Utils::uuid4();
@@ -83,7 +83,7 @@ class UploadPageController extends BaseKleinViewController {
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'domain'   => AppConfig::$COOKIE_DOMAIN,
                             'secure'   => true,
                             'httponly' => true,
                             'samesite' => 'Strict',
@@ -105,7 +105,7 @@ class UploadPageController extends BaseKleinViewController {
                     [
                             'expires'  => time() + ( 86400 * 365 ),
                             'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'domain'   => AppConfig::$COOKIE_DOMAIN,
                             'secure'   => true,
                             'httponly' => true,
                             'samesite' => 'None',
@@ -120,7 +120,7 @@ class UploadPageController extends BaseKleinViewController {
      * @return void
      */
     private function initUploadDir( string $guid ): void {
-        $intDir = INIT::$UPLOAD_REPOSITORY . '/' . $guid . '/';
+        $intDir = AppConfig::$UPLOAD_REPOSITORY . '/' . $guid . '/';
         if ( !is_dir( $intDir ) ) {
             mkdir( $intDir, 0775, true );
         }
@@ -131,7 +131,7 @@ class UploadPageController extends BaseKleinViewController {
      */
     private function countSupportedFileTypes(): int {
         $count = 0;
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $value ) {
+        foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $value ) {
             $count += count( $value );
         }
 

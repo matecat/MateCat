@@ -3,10 +3,10 @@
 namespace Model\Conversion;
 
 use Exception;
-use INIT;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\FilesStorage\AbstractFilesStorage;
 use RuntimeException;
+use Utils\Registry\AppConfig;
 use ZipArchive;
 
 /**
@@ -121,7 +121,7 @@ class ZipArchiveHandler extends ZipArchive {
      */
     public function createTree() {
 
-        self::$MAX_FILES = INIT::$MAX_NUM_FILES;
+        self::$MAX_FILES = AppConfig::$MAX_NUM_FILES;
 
         $Tree              = [];
         $path2numOfFolders = [];
@@ -258,7 +258,7 @@ class ZipArchiveHandler extends ZipArchive {
                 $realSize = fwrite( $tmpFp, fread( $fp, 8192 ) );
                 $fileSize += $realSize;
 
-                if ( $fileSize > INIT::$MAX_UPLOAD_FILE_SIZE ) {
+                if ( $fileSize > AppConfig::$MAX_UPLOAD_FILE_SIZE ) {
                     $sizeExceeded = true;
                 }
             }

@@ -10,10 +10,9 @@ use DomainException;
 use Engines\MMT\MMTServiceApi;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Lara\LaraException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\AltlangStruct;
 use Model\Engines\Structs\ApertiumStruct;
@@ -33,6 +32,7 @@ use RuntimeException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\Lara;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Validator\DeepLValidator;
@@ -341,7 +341,7 @@ class EngineController extends KleinController {
 
             if ( !empty( $mmtLicense ) ) {
                 $mmtClient = MMTServiceApi::newInstance()
-                        ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                        ->setIdentity( "Matecat", ltrim( AppConfig::$BUILD_NUMBER, 'v' ) )
                         ->setLicense( $mmtLicense );
 
                 try {

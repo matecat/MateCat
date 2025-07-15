@@ -1,5 +1,6 @@
 <?php
 
+namespace Utils\Templating;
 /**
  * Created by PhpStorm.
  * @author Domenico Lupinetti (hashashiyyin) domenico@translated.net / ostico@gmail.com

@@ -4,7 +4,6 @@ namespace Model\Conversion;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use INIT;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -16,6 +15,7 @@ use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -51,7 +51,7 @@ class ConversionHandler {
     }
 
     public function fileMustBeConverted() {
-        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, INIT::$FILTERS_ADDRESS );
+        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS );
     }
 
     public function getLocalFilePath(): string {
@@ -124,12 +124,12 @@ class ConversionHandler {
         $cachedXliffPath = null;
 
         //don't load from cache when a specified filter version is forced
-        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
-            INIT::$SAVE_SHASUM_FOR_FILES_LOADED = false;
+        if ( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false ) {
+            AppConfig::$SAVE_SHASUM_FOR_FILES_LOADED = false;
         }
 
         //if already present in the database cache, get the converted without convert it again
-        if ( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ) {
+        if ( AppConfig::$SAVE_SHASUM_FOR_FILES_LOADED ) {
 
             //move the file in the right directory from the packages to the file dir
             $cachedXliffPath = $fs->getXliffFromCache( $short_hash, $this->source_lang );
@@ -231,7 +231,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages (if user swapped languages)
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
+            $uploadDir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {

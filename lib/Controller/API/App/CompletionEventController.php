@@ -14,7 +14,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 
 class CompletionEventController extends KleinController {

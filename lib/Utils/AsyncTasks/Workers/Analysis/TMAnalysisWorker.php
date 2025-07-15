@@ -11,11 +11,10 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
@@ -36,6 +35,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\LQA\PostProcess;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Params;
@@ -540,7 +540,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'segment' ] = $queueElement->params->segment;
         $_config[ 'source' ]  = $queueElement->params->source;
         $_config[ 'target' ]  = $queueElement->params->target;
-        $_config[ 'email' ]   = INIT::$MYMEMORY_TM_API_KEY;
+        $_config[ 'email' ]   = AppConfig::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;

@@ -6,7 +6,7 @@
  * Time: 10:50
  */
 
-namespace Model;
+namespace Model\DataAccess;
 
 /**
  * Trait TransactionalTrait

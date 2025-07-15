@@ -5,7 +5,7 @@ namespace Model\Projects;
 use DateTime;
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Filters\FiltersConfigTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\Pagination\Pager;

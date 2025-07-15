@@ -9,10 +9,10 @@
 namespace Utils\Email;
 
 use Exception;
-use INIT;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\MailWorker;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 
 abstract class AbstractEmail {
 
@@ -33,7 +33,7 @@ abstract class AbstractEmail {
     abstract function send();
 
     protected function _setLayout( string $layout ) {
-        $this->_layout_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $layout;
+        $this->_layout_path = AppConfig::$TEMPLATE_ROOT . '/Emails/' . $layout;
     }
 
     protected function _setLayoutByPath( string $path ) {
@@ -41,7 +41,7 @@ abstract class AbstractEmail {
     }
 
     protected function _setTemplate( string $template ) {
-        $this->_template_path = INIT::$TEMPLATE_ROOT . '/Emails/' . $template;
+        $this->_template_path = AppConfig::$TEMPLATE_ROOT . '/Emails/' . $template;
     }
 
     protected function _setTemplateByPath( string $path ) {
@@ -110,14 +110,14 @@ abstract class AbstractEmail {
 
         $mailConf = [];
 
-        $mailConf[ 'Host' ]     = INIT::$SMTP_HOST;
-        $mailConf[ 'port' ]     = INIT::$SMTP_PORT;
-        $mailConf[ 'sender' ]   = INIT::$SMTP_SENDER;
-        $mailConf[ 'hostname' ] = INIT::$SMTP_HOSTNAME;
+        $mailConf[ 'Host' ]     = AppConfig::$SMTP_HOST;
+        $mailConf[ 'port' ]     = AppConfig::$SMTP_PORT;
+        $mailConf[ 'sender' ]   = AppConfig::$SMTP_SENDER;
+        $mailConf[ 'hostname' ] = AppConfig::$SMTP_HOSTNAME;
 
-        $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
-        $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
-        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'from' ]       = AppConfig::$SMTP_SENDER;
+        $mailConf[ 'fromName' ]   = AppConfig::$MAILER_FROM_NAME;
+        $mailConf[ 'returnPath' ] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
 

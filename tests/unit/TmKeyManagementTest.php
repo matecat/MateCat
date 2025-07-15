@@ -1,13 +1,13 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\Utils;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 /**
  * Created by PhpStorm.

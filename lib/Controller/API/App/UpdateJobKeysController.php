@@ -8,15 +8,15 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use DomainException;
 use Exception;
-use INIT;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\MetadataDao;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -247,7 +247,7 @@ class UpdateJobKeysController extends KleinController {
      * @throws JsonValidatorGenericException
      */
     private function validateTMKeysArray( $tm_keys ) {
-        $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/job_keys.json' );
+        $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/job_keys.json' );
 
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $tm_keys;

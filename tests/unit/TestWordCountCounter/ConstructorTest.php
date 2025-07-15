@@ -1,7 +1,7 @@
 <?php
 
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
@@ -15,7 +15,7 @@ use TestHelpers\AbstractTest;
  */
 class ConstructorTest extends AbstractTest {
     /**
-     * @var  Database
+     * @var  \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $sql_delete_job;

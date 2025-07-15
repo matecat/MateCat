@@ -6,7 +6,6 @@ use Controller\API\Commons\Exceptions\UnprocessableException;
 use DateTime;
 use DateTimeZone;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
@@ -25,6 +24,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\ExportResponse;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class TMSService {
@@ -429,7 +429,7 @@ class TMSService {
 <tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
-            creationtoolversion="' . INIT::$BUILD_NUMBER . '"
+            creationtoolversion="' . AppConfig::$BUILD_NUMBER . '"
 	    o-tmf="Matecat"
             creationid="Matecat"
             datatype="plaintext"

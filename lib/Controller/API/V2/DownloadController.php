@@ -7,7 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\DownloadOmegaTOutputDecorator;
 use Exception;
 use Google_Service_Drive_DriveFile;
-use INIT;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
 use Matecat\XliffParser\Exception\NotValidFileException;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
@@ -39,6 +38,7 @@ use ReflectionException;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\XliffReplacer\XliffReplacerCallback;
@@ -219,7 +219,7 @@ class DownloadController extends AbstractDownloadController {
                 $xliffFilePath = $file[ 'xliffFilePath' ];
 
                 $_fileName  = explode( DIRECTORY_SEPARATOR, $xliffFilePath );
-                $outputPath = INIT::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
+                $outputPath = AppConfig::$TMP_DOWNLOAD . DIRECTORY_SEPARATOR . $this->id_job . DIRECTORY_SEPARATOR . $fileID . DIRECTORY_SEPARATOR . uniqid( '', true ) . "_.out." . array_pop( $_fileName );
 
                 //make dir if it doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
@@ -244,7 +244,7 @@ class DownloadController extends AbstractDownloadController {
                 // if FileStorage is on S3, download the file on a temp dir
                 if ( AbstractFilesStorage::isOnS3() ) {
                     $s3Client            = S3FilesStorage::getStaticS3Client();
-                    $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+                    $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;
                     $params[ 'key' ]     = $xliffFilePath;
                     $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $xliffFilePath, PATHINFO_BASENAME );
                     $s3Client->downloadItem( $params );
@@ -317,7 +317,7 @@ class DownloadController extends AbstractDownloadController {
                 // directly inside MateCAT.
                 $xliffWasNotConverted = ( $fileType[ 'proprietary' ] === false );
 
-                if ( empty( INIT::$FILTERS_ADDRESS ) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
+                if ( empty( AppConfig::$FILTERS_ADDRESS ) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                     $convertBackToOriginal = false;
                     Log::doJsonLog( "SDLXLIFF: {$file['filename']} --- FALSE" );
                 } else {
@@ -471,7 +471,7 @@ class DownloadController extends AbstractDownloadController {
                 $this->unlockToken(
                         [
                                 "code"    => -110,
-                                "message" => "Download failed. Please, try again in 5 minutes. If it still fails, please, contact " . INIT::$SUPPORT_MAIL
+                                "message" => "Download failed. Please, try again in 5 minutes. If it still fails, please, contact " . AppConfig::$SUPPORT_MAIL
                         ]
                 );
 
@@ -479,7 +479,7 @@ class DownloadController extends AbstractDownloadController {
             }
 
             try {
-                Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+                Utils::deleteDir( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
             } catch ( Exception $e ) {
                 Log::doJsonLog( 'Failed to delete dir:' . $e->getMessage() );
             }
@@ -686,7 +686,7 @@ class DownloadController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+        $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
 
         if ( $verifier->validOrRefreshed( $client ) ) {
             $this->remoteFileService = new RemoteFileService( $raw_token, $client );
@@ -849,7 +849,7 @@ class DownloadController extends AbstractDownloadController {
 
         // this is the filesystem path
         $zipFile  = ( new FsFilesStorage() )->getOriginalZipPath( $project->create_date, $this->job[ 'id_project' ], $zipFileName );
-        $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
+        $tmpFName = tempnam( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
 
         $isFsOnS3 = AbstractFilesStorage::isOnS3();
         if ( $isFsOnS3 and false === file_exists( $zipFile ) ) {
@@ -956,7 +956,7 @@ class DownloadController extends AbstractDownloadController {
         Log::doJsonLog( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
 
         $s3Client            = S3FilesStorage::getStaticS3Client();
-        $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+        $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;
         $params[ 'key' ]     = $zipPath;
         $params[ 'save_as' ] = $tmpDir;
         $s3Client->downloadItem( $params );

@@ -1,6 +1,6 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
@@ -8,6 +8,7 @@ use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Match;
 
 
@@ -44,7 +45,7 @@ class GetMyMemoryTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $engineDAO         = new EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );

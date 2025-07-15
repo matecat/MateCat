@@ -7,7 +7,6 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
-use INIT;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -17,6 +16,7 @@ use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -470,8 +470,8 @@ class FeatureSet implements FeatureSetInterface {
     private function getAutoloadPlugins(): array {
         $features = [];
 
-        if ( !empty( INIT::$AUTOLOAD_PLUGINS ) ) {
-            foreach ( INIT::$AUTOLOAD_PLUGINS as $plugin ) {
+        if ( !empty( AppConfig::$AUTOLOAD_PLUGINS ) ) {
+            foreach ( AppConfig::$AUTOLOAD_PLUGINS as $plugin ) {
                 $features[ $plugin ] = new BasicFeatureStruct( [ 'feature_code' => $plugin ] );
             }
         }

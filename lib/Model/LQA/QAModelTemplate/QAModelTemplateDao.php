@@ -4,10 +4,9 @@ namespace Model\LQA\QAModelTemplate;
 
 use DateTime;
 use Exception;
-use INIT;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
@@ -15,6 +14,7 @@ use PDO;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Date\DateTimeUtil;
+use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
@@ -55,7 +55,7 @@ class QAModelTemplateDao extends AbstractDao {
     private static function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
         $validator             = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
@@ -164,7 +164,7 @@ class QAModelTemplateDao extends AbstractDao {
      * @throws Exception
      */
     public static function getDefaultTemplate( $uid ): array {
-        $defaultTemplate      = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
+        $defaultTemplate      = file_get_contents( AppConfig::$ROOT . '/inc/qa_model.json' );
         $defaultTemplateModel = json_decode( $defaultTemplate, true );
 
         $categories      = [];

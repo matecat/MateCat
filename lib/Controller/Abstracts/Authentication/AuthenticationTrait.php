@@ -4,12 +4,12 @@ namespace Controller\Abstracts\Authentication;
 
 use Bootstrap;
 use Exception;
-use INIT;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Stomp\Transport\Message;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -73,7 +73,7 @@ trait AuthenticationTrait {
     /**
      * Explicitly disable sessions for ajax call
      *
-     * Sessions enabled on INIT Class
+     * Sessions enabled on AppConfig Class
      *
      */
     public function disableSessions() {
@@ -103,7 +103,7 @@ trait AuthenticationTrait {
                         ]
                 ]
         ] );
-        $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+        $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
     }
 
     public function logout() {

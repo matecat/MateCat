@@ -10,13 +10,13 @@
 namespace unit\DAO;
 
 use Exception;
-use INIT;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use TestHelpers\AbstractTest;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class CacheSystemThroughConcreteClassesTest extends AbstractTest {
@@ -33,11 +33,11 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
          * user insertion
          */
         self::$email     = Utils::uuid4() . "bar@foo.net";
-        $sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . self::$email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . self::$email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         Database::obtain()->getConnection()->query( $sql_insert_user );
         self::$uid = Database::obtain()->getConnection()->lastInsertId();
 
-        self::$sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . self::$uid . "';";
+        self::$sql_delete_user = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='" . self::$uid . "';";
 
     }
 

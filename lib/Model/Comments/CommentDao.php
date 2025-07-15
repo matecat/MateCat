@@ -4,7 +4,7 @@ namespace Model\Comments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;

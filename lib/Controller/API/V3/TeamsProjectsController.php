@@ -14,10 +14,10 @@ use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Exception;
-use INIT;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
+use Utils\Registry\AppConfig;
 use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {
@@ -93,7 +93,7 @@ class TeamsProjectsController extends KleinController {
         $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
         $links = [
-                "base"        => INIT::$HTTPHOST,
+                "base"        => AppConfig::$HTTPHOST,
                 "self"        => $_SERVER[ 'REQUEST_URI' ],
                 "page"        => $page,
                 "step"        => $step,

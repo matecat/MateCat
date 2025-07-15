@@ -4,8 +4,8 @@ namespace Model\Segments;
 
 use Exception;
 use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use Model\DataAccess\ShapelessConcreteStruct;
-use Model\Database;
 use Model\Files\FileStruct;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -13,6 +13,7 @@ use Model\QualityReport\QualityReportSegmentStruct;
 use PDO;
 use PDOException;
 use ReflectionException;
+use Utils\Constants\SegmentSize;
 use Utils\Constants\TranslationStatus;
 use Utils\Logger\Log;
 

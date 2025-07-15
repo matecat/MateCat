@@ -11,7 +11,7 @@ namespace Utils\Engines\Traits;
 
 
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 
 trait Oauth {

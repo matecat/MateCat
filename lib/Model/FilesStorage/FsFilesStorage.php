@@ -3,7 +3,6 @@
 namespace Model\FilesStorage;
 
 use FilesystemIterator;
-use INIT;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\FilesStorage\Exceptions\FileSystemException;
@@ -11,6 +10,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use UnexpectedValueException;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 /**
@@ -57,7 +57,7 @@ class FsFilesStorage extends AbstractFilesStorage {
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //don't save in cache when a specified filter version is forced
-        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && file_exists( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
+        if ( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && file_exists( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
             return true;
         }
 
@@ -367,13 +367,13 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public static function moveFileFromUploadSessionToQueuePath( $uploadSession ) {
 
-        $destination = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+        $destination = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
         self::ensureDirectoryExists( $destination );
 
         /** @var RecursiveDirectoryIterator $iterator */
         foreach (
                 $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
+                        new RecursiveDirectoryIterator( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
 
@@ -399,7 +399,7 @@ class FsFilesStorage extends AbstractFilesStorage {
             }
         }
 
-        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+        Utils::deleteDir( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
 
     }
 
@@ -416,7 +416,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public static function storeFastAnalysisFile( $id_project, array $segments_metadata = [] ) {
 
-        $storedBytes = file_put_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize( $segments_metadata ) );
+        $storedBytes = file_put_contents( AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser", serialize( $segments_metadata ) );
         if ( $storedBytes === false ) {
             throw new UnexpectedValueException( 'Internal Error: Failed to store segments for fast analysis on disk.', -14 );
         }
@@ -432,7 +432,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      */
     public static function getFastAnalysisData( $id_project ) {
 
-        $analysisData = unserialize( file_get_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" ) );
+        $analysisData = unserialize( file_get_contents( AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" ) );
         if ( $analysisData === false ) {
             throw new UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from disk.', -15 );
         }
@@ -447,7 +447,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      * @return bool
      */
     public static function deleteFastAnalysisFile( $id_project ) {
-        return unlink( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" );
+        return unlink( AppConfig::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_$id_project.ser" );
     }
 
     /**

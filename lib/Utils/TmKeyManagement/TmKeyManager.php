@@ -4,7 +4,7 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;

@@ -1,7 +1,7 @@
 <?php
 
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Projects\MetadataDao;
 use TestHelpers\AbstractTest;
 

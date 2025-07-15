@@ -10,11 +10,11 @@
 namespace Utils\Analysis;
 
 use Exception;
-use INIT;
 use Predis\Client;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 
 /**
  * Class Analysis_Manager
@@ -56,7 +56,7 @@ class Health {
             $redisHandler = new RedisHandler();
             $redisHandler = $redisHandler->getConnection();
 
-            return ( INIT::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
+            return ( AppConfig::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
         } catch ( Exception $ex ) {
             $msg = "****** No REDIS instances found. ******";
             Log::doJsonLog( $msg );

@@ -4,7 +4,7 @@ namespace Controller\API\V2;
 
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;

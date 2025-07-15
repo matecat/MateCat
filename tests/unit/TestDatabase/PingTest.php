@@ -1,8 +1,9 @@
 <?php
 
-use Model\Database;
-use Model\IDatabase;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -21,7 +22,7 @@ class PingTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
     }
 
     public function tearDown(): void {

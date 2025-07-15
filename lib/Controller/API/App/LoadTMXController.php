@@ -5,12 +5,12 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use InvalidArgumentException;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\FilesStorage\AbstractFilesStorage;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
@@ -54,7 +54,7 @@ class LoadTMXController extends KleinController {
              *
              * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
              */
-            if ( $request[ 'tm_key' ] != INIT::$DEFAULT_TM_KEY ) {
+            if ( $request[ 'tm_key' ] != AppConfig::$DEFAULT_TM_KEY ) {
 
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
@@ -111,7 +111,7 @@ class LoadTMXController extends KleinController {
 
         if ( empty( $tm_key ) ) {
 
-            if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
+            if ( empty( AppConfig::$DEFAULT_TM_KEY ) ) {
                 throw new InvalidArgumentException( "Please specify a TM key.", -2 );
             }
 
@@ -119,7 +119,7 @@ class LoadTMXController extends KleinController {
              * Added the default Key.
              * This means if no private key are provided the TMX will be loaded in the default Match key
              */
-            $tm_key = INIT::$DEFAULT_TM_KEY;
+            $tm_key = AppConfig::$DEFAULT_TM_KEY;
 
         }
 

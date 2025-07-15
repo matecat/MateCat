@@ -10,9 +10,9 @@
 namespace Utils\ActiveMQ;
 
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Stomp\Transport\Message;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -34,8 +34,8 @@ class WorkerClient {
      * @throws Exception
      */
     public static function init( AMQHandler $handler = null ) {
-        if ( INIT::$TASK_RUNNER_CONFIG ) {
-            $contextList   = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
+        if ( AppConfig::$TASK_RUNNER_CONFIG ) {
+            $contextList   = ContextList::get( AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
             self::$_QUEUES = $contextList->list;
             if ( !is_null( $handler ) ) {
                 self::$_HANDLER = $handler;

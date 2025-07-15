@@ -8,13 +8,14 @@
  *
  */
 
-use Model\Database;
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -109,7 +110,7 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source
@@ -120,7 +121,7 @@ class SetContributionTest extends AbstractTest {
         $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
         $queueElement->classLoad = SetContributionWorker::class;
 
-        $contextList = ContextList::get( INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
+        $contextList = ContextList::get( AppConfig::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
 
         $amqHandlerMock = @$this->getMockBuilder( AMQHandler::class )->getMock();
 
@@ -146,7 +147,7 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
         $contributionStruct->oldTranslationStatus = 'NEW';
         $contributionStruct->oldSegment           = $contributionStruct->segment; //we do not change the segment source

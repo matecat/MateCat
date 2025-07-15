@@ -4,12 +4,12 @@ namespace Model\ConnectedServices\Oauth\LinkedIn;
 
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
-use INIT;
 use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Provider\LinkedIn;
 use League\OAuth2\Client\Token\AccessToken;
 use Model\ConnectedServices\Oauth\AbstractProvider;
 use Model\ConnectedServices\Oauth\ProviderUser;
+use Utils\Registry\AppConfig;
 
 class LinkedInProvider extends AbstractProvider {
 
@@ -22,9 +22,9 @@ class LinkedInProvider extends AbstractProvider {
      */
     public static function getClient( ?string $redirectUrl = null ): LinkedIn {
         return new LinkedIn( [
-                'clientId'     => INIT::$LINKEDIN_OAUTH_CLIENT_ID,
-                'clientSecret' => INIT::$LINKEDIN_OAUTH_CLIENT_SECRET,
-                'redirectUri'  => $redirectUrl ?? INIT::$LINKEDIN_OAUTH_REDIRECT_URL,
+                'clientId'     => AppConfig::$LINKEDIN_OAUTH_CLIENT_ID,
+                'clientSecret' => AppConfig::$LINKEDIN_OAUTH_CLIENT_SECRET,
+                'redirectUri'  => $redirectUrl ?? AppConfig::$LINKEDIN_OAUTH_REDIRECT_URL,
         ] );
     }
 

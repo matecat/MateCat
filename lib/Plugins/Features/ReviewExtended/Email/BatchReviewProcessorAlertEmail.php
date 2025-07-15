@@ -3,10 +3,10 @@
 namespace Plugins\Features\ReviewExtended\Email;
 
 use Exception;
-use INIT;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Utils\Email\AbstractEmail;
+use Utils\Registry\AppConfig;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
@@ -53,7 +53,7 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
      * @throws Exception
      */
     public function send() {
-        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( !empty( $mailConf[ 'email_list' ] ) ) {
             foreach ( $mailConf[ 'email_list' ] as $email => $uName ) {

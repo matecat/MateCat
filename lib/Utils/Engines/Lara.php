@@ -3,7 +3,6 @@
 namespace Utils\Engines;
 
 use Exception;
-use INIT;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
@@ -29,6 +28,7 @@ use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -92,7 +92,7 @@ class Lara extends AbstractEngine {
         $mmtStruct                   = MMTStruct::getStruct();
         $mmtStruct->type             = EngineConstants::MT;
         $mmtStruct->extra_parameters = [
-                'MMT-License'      => $extraParams[ 'MMT-License' ] ?: INIT::$DEFAULT_MMT_KEY,
+                'MMT-License'      => $extraParams[ 'MMT-License' ] ?: AppConfig::$DEFAULT_MMT_KEY,
                 'MMT-pretranslate' => true,
                 'MMT-preimport'    => false,
         ];
@@ -274,7 +274,7 @@ class Lara extends AbstractEngine {
                 ] );
 
                 $queueHandler = AMQHandler::getNewInstanceForDaemons();
-                $queueHandler->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
+                $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
 
                 return [];
             } elseif ( $t->getCode() == 401 || $t->getCode() == 403 ) {

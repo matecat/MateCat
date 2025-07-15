@@ -7,7 +7,6 @@ use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;
 use Exception;
 use Google_Service_Exception;
-use INIT;
 use Model\ConnectedServices\GDrive\Session;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -16,6 +15,7 @@ use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 class GDriveController extends AbstractStatefulKleinController {
@@ -141,7 +141,7 @@ class GDriveController extends AbstractStatefulKleinController {
                     [
                             'expires'  => time() + 86400,
                             'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'domain'   => AppConfig::$COOKIE_DOMAIN,
                             'secure'   => true,
                             'httponly' => true,
                             'samesite' => 'Strict',
@@ -167,7 +167,7 @@ class GDriveController extends AbstractStatefulKleinController {
 
         for ( $i = 0; $i < count( $listOfIds ) && $this->isImportingSuccessful === true; $i++ ) {
             try {
-                $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+                $client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
                 $this->gdriveUserSession->importFile( $listOfIds[ $i ], $client );
             } catch ( Exception $e ) {
                 $this->isImportingSuccessful = false;
@@ -235,7 +235,7 @@ class GDriveController extends AbstractStatefulKleinController {
                 [
                         'expires'  => time() + 86400,
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => false,
                         'samesite' => 'None',
@@ -247,7 +247,7 @@ class GDriveController extends AbstractStatefulKleinController {
                 [
                         'expires'  => time() + 86400,
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => true,
                         'samesite' => 'Strict',
@@ -303,7 +303,7 @@ class GDriveController extends AbstractStatefulKleinController {
                     [
                             'expires'  => time() - 3600,
                             'path'     => '/',
-                            'domain'   => INIT::$COOKIE_DOMAIN,
+                            'domain'   => AppConfig::$COOKIE_DOMAIN,
                             'secure'   => true,
                             'httponly' => false,
                             'samesite' => 'None',

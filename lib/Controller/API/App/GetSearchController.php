@@ -5,11 +5,10 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -24,6 +23,7 @@ use Plugins\Features\TranslationVersions;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
+use Utils\Registry\AppConfig;
 use Utils\Search\ReplaceHistory;
 use Utils\Search\ReplaceHistoryFactory;
 use Utils\Tools\Utils;
@@ -203,8 +203,8 @@ class GetSearchController extends AbstractStatefulKleinController {
      */
     private function getReplaceHistory( $job_id ): ReplaceHistory {
         // ReplaceHistory init
-        $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
-        $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and 0 !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
+        $srh_driver = ( isset( AppConfig::$REPLACE_HISTORY_DRIVER ) and '' !== AppConfig::$REPLACE_HISTORY_DRIVER ) ? AppConfig::$REPLACE_HISTORY_DRIVER : 'redis';
+        $srh_ttl    = ( isset( AppConfig::$REPLACE_HISTORY_TTL ) and 0 !== AppConfig::$REPLACE_HISTORY_TTL ) ? AppConfig::$REPLACE_HISTORY_TTL : 300;
 
         return ReplaceHistoryFactory::create( $job_id, $srh_driver, $srh_ttl );
     }

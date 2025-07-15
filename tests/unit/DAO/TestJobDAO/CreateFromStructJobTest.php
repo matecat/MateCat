@@ -1,10 +1,11 @@
 <?php
 
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -21,7 +22,7 @@ class CreateFromStructJobTest extends AbstractTest {
      */
     protected $job_struct;
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
     /**
@@ -86,7 +87,7 @@ class CreateFromStructJobTest extends AbstractTest {
                 ]
         );
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->job_Dao           = new JobDao( $this->database_instance );
 
 
@@ -111,7 +112,7 @@ class CreateFromStructJobTest extends AbstractTest {
         $result   = $this->job_Dao->createFromStruct( $this->job_struct );
         $this->id = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
-        $this->sql_delete_job = "DELETE FROM " . INIT::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
+        $this->sql_delete_job = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`jobs` WHERE id='" . $this->id . "';";
 
         $this->assertEquals( $this->id, $result->id );
         $this->assertEquals( $this->job_password, $result->password );

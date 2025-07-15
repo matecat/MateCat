@@ -5,11 +5,11 @@ namespace Controller\API\V3;
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use Klein\Response;
 use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
+use Utils\Registry\AppConfig;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -32,7 +32,7 @@ class XliffConfigTemplateController extends KleinController {
     private function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
         $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
     }
@@ -237,8 +237,8 @@ class XliffConfigTemplateController extends KleinController {
      * @return object|mixed
      */
     private function getModelSchema(): object {
-        $skeletonSchema = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' ) );
-        $contentSchema  = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' ) );
+        $skeletonSchema = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' ) );
+        $contentSchema  = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' ) );
 
         $skeletonSchema->properties->rules->properties = $contentSchema->properties;
         $skeletonSchema->definitions                   = $contentSchema->definitions;

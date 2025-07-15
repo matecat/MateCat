@@ -2,8 +2,8 @@
 namespace Model\ApiKeys;
 
 use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use Model\Database;
 use Model\Users\UserDao;
 use ReflectionException;
 

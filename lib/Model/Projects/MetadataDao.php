@@ -3,7 +3,7 @@
 namespace Model\Projects;
 
 use Model\DataAccess\AbstractDao;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\ChunkOptionsModel;

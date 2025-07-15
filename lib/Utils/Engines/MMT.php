@@ -4,8 +4,7 @@ namespace Utils\Engines;
 
 use DomainException;
 use Exception;
-use INIT;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
@@ -22,6 +21,7 @@ use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
 
 /**
@@ -88,7 +88,7 @@ class MMT extends AbstractEngine {
         $license     = $extraParams[ 'MMT-License' ];
 
         return MMTServiceApi::newInstance()
-                ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
+                ->setIdentity( "Matecat", ltrim( AppConfig::$BUILD_NUMBER, 'v' ) )
                 ->setLicense( $license );
     }
 

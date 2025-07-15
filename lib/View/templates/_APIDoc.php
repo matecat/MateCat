@@ -3,6 +3,7 @@
 use Model\FeaturesBase\FeatureSet;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
 require_once '../../inc/Bootstrap.php';
@@ -13,16 +14,16 @@ try {
 }
 
 $count = 0;
-foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
+foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $key => $value ) {
     $count += count( $value );
 }
 
 $nr_supoported_files = $count;
 
-$max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
+$max_file_size_in_MB = AppConfig::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
 
 $csp_nonce = Utils::uuid4();
-$csp       = file_get_contents( INIT::$ROOT . "/" . INIT::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html" );
+$csp       = file_get_contents( AppConfig::$ROOT . "/" . AppConfig::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html" );
 $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
 
 ?>

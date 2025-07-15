@@ -15,8 +15,7 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
-use INIT;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\MMTStruct;
@@ -34,6 +33,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -177,7 +177,7 @@ class Mmt extends BaseFeature {
 
     public static function getG2FallbackSecretKey() {
         $secret_key       = [ 'secret_key' => null ];
-        $config_file_path = realpath( INIT::$ROOT . '/inc/mmt_fallback_key.ini' );
+        $config_file_path = realpath( AppConfig::$ROOT . '/inc/mmt_fallback_key.ini' );
         if ( file_exists( $config_file_path ) ) {
             $secret_key = parse_ini_file( $config_file_path );
         }

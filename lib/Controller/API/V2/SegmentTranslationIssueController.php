@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\SegmentTranslationIssueValidator;
 use Exception;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\ValidationError;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryDao as EntryDao;

@@ -7,11 +7,10 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
-use Model\Database;
+use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -48,6 +47,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -104,8 +104,8 @@ class NewController extends KleinController {
         }
 
         $uploadTokenValue = $uploadFile->getDirUploadToken();
-        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
-        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $converter = new FilesConverter(
                 $arFiles,
@@ -165,7 +165,7 @@ class NewController extends KleinController {
         $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
 
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'HTTP_HOST' ]                             = AppConfig::$HTTPHOST;
         $projectStructure[ 'due_date' ]                              = ( empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
         $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
@@ -672,7 +672,7 @@ class NewController extends KleinController {
                     throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
-                $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
+                $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
 
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $private_tm_key_json;
@@ -1065,7 +1065,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "filters_extraction_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $filters_extraction_parameters;
@@ -1112,7 +1112,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "mt_qe_workflow_template_raw_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $mt_qe_workflow_template_raw_parameters;
@@ -1178,7 +1178,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "xliff_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $xliff_parameters;

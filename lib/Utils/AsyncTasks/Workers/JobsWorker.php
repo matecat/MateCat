@@ -10,7 +10,7 @@ use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\Tools\Utils;
 
-//include_once INIT::$UTILS_ROOT . "/Match.copyrighted.php";
+//include_once AppConfig::$UTILS_ROOT . "/Match.copyrighted.php";
 
 /**
  * Created by PhpStorm.
