@@ -891,6 +891,9 @@ class QA {
     /**
      * Class constructor
      *
+     * To avoid side effects, this constructor
+     * Should be used to create an instance of the QA class with LAYER 1 sentences
+     *
      * Arguments: raw XML source string and raw XML target string
      *
      * @param string $source_seg
@@ -1885,7 +1888,7 @@ class QA {
         if ( ( count( $source_tags[ 0 ] ) != count( $target_tags[ 0 ] ) ) && !empty( $source_tags[ 0 ] ) || $source_tags[ 1 ] != $target_tags[ 1 ] ) {
 
             // check if source has a trailing space at the end
-            $sourceHasTrailingSpace = (strlen($this->source_seg) !== strlen(rtrim($this->source_seg)));
+            $sourceHasTrailingSpace = ( strlen( $this->source_seg ) !== strlen( rtrim( $this->source_seg ) ) );
 
             if ( $sourceHasTrailingSpace ) {
 
@@ -2480,6 +2483,13 @@ class QA {
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
              * return stripslashes( $matches[1] );
              */
+
+            // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
+            // re-encode control special characters
+            $matches[ 1 ] = preg_replace( '/\n/u', '&#10;', $matches[ 1 ] );
+            $matches[ 1 ] = preg_replace( '/\r/u', '&#13;', $matches[ 1 ] );
+            $matches[ 1 ] = preg_replace( '/\t/u', '&#09;', $matches[ 1 ] );
+            $matches[ 1 ] = preg_replace( '/ /u', '&#160;', $matches[ 1 ] ); //NBSP character
 
             return $matches[ 1 ];
         }

@@ -159,7 +159,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         $bestMatch  = $this->getHighestNotMT_OrPickTheFirstOne();
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
-        $suggestion = $bestMatch[ 'raw_translation' ]; //No layering needed
+        $suggestion = $bestMatch[ 'translation' ]; //No layering needed, whe use Layer 1 here
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
 
@@ -189,7 +189,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // realign MT Spaces
             $check = $this->initPostProcess(
-                    $bestMatch[ 'raw_segment' ],
+                    $bestMatch[ 'segment' ], // Layer 1 here
                     $suggestion,
                     $queueElement->params->source,
                     $queueElement->params->target
@@ -219,14 +219,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $suggestion = $check->getTargetSeg();
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
-        $suggestion = $filter->fromLayer2ToLayer0( $suggestion );
-
-        foreach ( $this->_matches as $k => $m ) {
-            $this->_matches[ $k ][ 'raw_segment' ]     = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_segment' ] );
-            $this->_matches[ $k ][ 'segment' ]         = $filter->fromLayer2ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'segment' ] ) );
-            $this->_matches[ $k ][ 'translation' ]     = $filter->fromLayer2ToLayer0( html_entity_decode( $this->_matches[ $k ][ 'translation' ] ) );
-            $this->_matches[ $k ][ 'raw_translation' ] = $filter->fromLayer2ToLayer0( $this->_matches[ $k ][ 'raw_translation' ] );
-        }
+        $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
         $suggestion_json = json_encode( $this->_matches );
 
