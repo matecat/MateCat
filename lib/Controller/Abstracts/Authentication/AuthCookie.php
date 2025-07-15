@@ -4,9 +4,9 @@ namespace Controller\Abstracts\Authentication;
 
 use DomainException;
 use INIT;
-use Log;
 use Model\Users\UserStruct;
-use SimpleJWT;
+use Utils\Logger\Log;
+use Utils\Tools\SimpleJWT;
 
 class AuthCookie {
 

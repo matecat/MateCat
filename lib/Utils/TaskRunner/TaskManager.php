@@ -11,9 +11,9 @@ namespace Utils\TaskRunner;
 
 use Exception;
 use INIT;
-use Log;
 use ReflectionException;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
 

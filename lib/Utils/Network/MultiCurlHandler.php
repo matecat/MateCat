@@ -3,6 +3,11 @@
  * Created by PhpStorm.
  */
 
+namespace Utils\Network;
+
+use LogicException;
+use Utils\Logger\Log;
+
 /**
  * Manager for a Multi Curl connection
  *
@@ -25,44 +30,44 @@ class MultiCurlHandler {
      *
      * @var array
      */
-    protected $curl_handlers = [];
+    protected array $curl_handlers = [];
 
     /**
      * Array to manage the requests for headers
      *
      * @var array
      */
-    protected $curl_headers_requests = [];
+    protected array $curl_headers_requests = [];
 
     /**
      * Array to store the options passed when creating the resource, for debug purpose
      *
      * @var array
      */
-    protected $curl_options_requests = [];
+    protected array $curl_options_requests = [];
 
     /**
      * Container for the curl results
      *
      * @var array
      */
-    protected $multi_curl_results = [];
+    protected array $multi_curl_results = [];
 
     /**
      * Container for the curl info results
      *
      * @var array
      */
-    protected $multi_curl_info = [];
+    protected array $multi_curl_info = [];
 
     /**
      * Container for the curl logs
      * @var array
      */
-    protected $multi_curl_log = [];
+    protected array $multi_curl_log = [];
 
-    public $verbose        = false;
-    public $high_verbosity = false;
+    public bool $verbose        = false;
+    public bool $high_verbosity = false;
 
     /**
      * Class Constructor, init the multi curl handler
@@ -70,13 +75,8 @@ class MultiCurlHandler {
      */
     public function __construct() {
         $this->multi_handler = curl_multi_init();
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-//          curl_multi_setopt only for (PHP 5 >= 5.5.0) Default 10
-
-            curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
-        }
-
+        // Default is 10
+        curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
     }
 
     /**
@@ -109,7 +109,7 @@ class MultiCurlHandler {
     }
 
     /**
-     * Execute all curl in multiple parallel calls
+     * Execute all curl in multiple parallel calls,
      * Run the sub-connections of the current cURL handle and store the results
      * to a container
      *
@@ -124,11 +124,11 @@ class MultiCurlHandler {
             curl_multi_select( $this->multi_handler ); //Prevent eating CPU
 
             /*
-             * curl_errno does not return any value in case of error ( always 0 )
+             * curl_errno doesn't return any value in case of error (always 0)
              * We need to call curl_multi_info_read
              */
             if ( ( $info = curl_multi_info_read( $this->multi_handler ) ) !== false ) {
-                //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
+                //Strict standards: resource ID#16 used as offset, casting to integer (16)
                 $_info[ (int)$info[ 'handle' ] ] = $info;
             }
 
@@ -156,7 +156,7 @@ class MultiCurlHandler {
                     ), 5
             );
 
-            //Strict standards:  Resource ID#16 used as offset, casting to integer (16)
+            //Strict standards: resource ID#16 used as offset, casting to integer (16)
             $this->multi_curl_info[ $tokenHash ][ 'errno' ] = @$_info[ (int)$curl_resource ][ 'result' ];
 
             //HEADERS
@@ -171,7 +171,7 @@ class MultiCurlHandler {
             }
 
             //TIMING nad LOGGING
-            $this->multi_curl_log[ $tokenHash ] = [];
+            $this->multi_curl_log[ $tokenHash ]             = [];
             $this->multi_curl_log[ $tokenHash ][ 'timing' ] = [
                     'Total Time'          => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_total_time' ],
                     'Connect Time'        => $this->multi_curl_info[ $tokenHash ][ 'curlinfo_connect_time' ],
@@ -188,11 +188,11 @@ class MultiCurlHandler {
             $this->multi_curl_log[ $tokenHash ][ "url" ]           = $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ];
 
             if ( $this->high_verbosity ) {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = isset( $this->curl_options_requests[ $tokenHash ] ) ? $this->curl_options_requests[ $tokenHash ] : null;
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = isset( $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ) ? $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] : null;
+                $this->multi_curl_log[ $tokenHash ][ 'options' ]                      = $this->curl_options_requests[ $tokenHash ] ?? null;
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ?? null;
                 unset( $this->multi_curl_info[ $tokenHash ][ 'logging' ][ 'options' ][ CURLOPT_POSTFIELDS ] );
             } else {
-                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = isset( $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ) ? $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] : null;
+                $this->multi_curl_log[ $tokenHash ][ 'options' ][ "post_parameters" ] = $this->curl_options_requests[ $tokenHash ][ CURLOPT_POSTFIELDS ] ?? null;
             }
 
             if ( $this->hasError( $tokenHash ) ) {
@@ -215,11 +215,11 @@ class MultiCurlHandler {
     /**
      * Explicitly set that we want the response header for this token
      *
-     * @param $tokenHash
+     * @param string $tokenHash
      *
      * @return $this
      */
-    public function setRequestHeader( $tokenHash ) {
+    public function setRequestHeader( string $tokenHash ): MultiCurlHandler {
 
         $resource = $this->curl_handlers[ $tokenHash ];
         curl_setopt( $resource, CURLOPT_HEADER, true );
@@ -231,34 +231,33 @@ class MultiCurlHandler {
     /**
      * Get the response header for the requested token
      *
-     * @param $tokenHash
+     * @param string $tokenHash
      *
-     * @return mixed
+     * @return string[]
      */
-    public function getSingleHeader( $tokenHash ) {
+    public function getSingleHeader( string $tokenHash ): array {
         return $this->curl_headers_requests[ $tokenHash ];
     }
 
     /**
      * Get the response header for the requested token
      *
-     * @return mixed
+     * @return array
      */
-    public function getAllHeaders() {
+    public function getAllHeaders(): array {
         return $this->curl_headers_requests;
     }
 
     /**
-     * Create a curl resource and add it to the pool indexing it with an unique identifier
+     * Create a curl resource and add it to the pool indexing it with a unique identifier
      *
-     * @param $url       string
-     * @param $options   array
-     * @param $tokenHash string
+     * @param             $url       string
+     * @param array|null  $options   array
+     * @param string|null $tokenHash string
      *
      * @return string Curl identifier
-     *
      */
-    public function createResource( $url, $options, $tokenHash = null ) {
+    public function createResource( string $url, ?array $options = [], ?string $tokenHash = null ): ?string {
 
         if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( "", true ) );
@@ -276,7 +275,7 @@ class MultiCurlHandler {
     }
 
     /**
-     * Add an already existent curl resource to the pool indexing it with an unique identifier
+     * Add an already existent curl resource to the pool indexing it with a unique identifier
      *
      * @param resource    $curl_resource
      * @param null|string $tokenHash
@@ -284,7 +283,7 @@ class MultiCurlHandler {
      * @return string
      * @throws LogicException
      */
-    public function addResource( $curl_resource, $tokenHash = null ) {
+    public function addResource( $curl_resource, ?string $tokenHash = null ): ?string {
 
         if ( $tokenHash === null ) {
             $tokenHash = md5( uniqid( '', true ) );
@@ -308,11 +307,11 @@ class MultiCurlHandler {
     /**
      * Return all server responses
      *
-     * @param callable $function
+     * @param callable|null $function
      *
      * @return array
      */
-    public function getAllContents( Callable $function = null ) {
+    public function getAllContents( ?callable $function = null ): array {
         return $this->_callbackExecute( $this->multi_curl_results, $function );
     }
 
@@ -321,7 +320,7 @@ class MultiCurlHandler {
      *
      * @return array[]
      */
-    public function getAllInfo() {
+    public function getAllInfo(): array {
         return $this->multi_curl_info;
     }
 
@@ -334,37 +333,38 @@ class MultiCurlHandler {
      *
      * @return string|bool|null
      */
-    public function getSingleContent( $tokenHash, Callable $function = null ) {
+    public function getSingleContent( $tokenHash, callable $function = null ) {
         if ( array_key_exists( $tokenHash, $this->multi_curl_results ) ) {
             return $this->_callbackExecute( $this->multi_curl_results[ $tokenHash ], $function );
         }
+
         return null;
     }
 
-    public function getSingleLog( $tokenHash ){
+    public function getSingleLog( $tokenHash ) {
         return @$this->multi_curl_log[ $tokenHash ];
     }
 
-    public function getAllLogs(){
+    public function getAllLogs(): array {
         return $this->multi_curl_log;
     }
 
     /**
-     * Get single info from curl handlers array by it's unique Index
+     * Get single info from curl handlers array by its unique Index
      *
      * @param $tokenHash
      *
      * @return array|null
      */
-    public function getSingleInfo( $tokenHash ) {
-        return @$this->multi_curl_info[ $tokenHash ];
+    public function getSingleInfo( $tokenHash ): ?array {
+        return $this->multi_curl_info[ $tokenHash ] ?? null;
     }
 
     public function getOptionRequest( $tokenHash ) {
         return $this->curl_options_requests[ $tokenHash ];
     }
 
-    public function getError( $tokenHash ) {
+    public function getError( $tokenHash ): array {
         $res                = [];
         $res[ 'http_code' ] = $this->multi_curl_info[ $tokenHash ][ 'http_code' ];
         $res[ 'error' ]     = $this->multi_curl_info[ $tokenHash ][ 'error' ];
@@ -374,13 +374,13 @@ class MultiCurlHandler {
     }
 
     /**
-     * Check for error in curl resource by passing it's unique index
+     * Check for error in curl resource by passing its unique index
      *
      * @param string $tokenHash
      *
      * @return bool
      */
-    public function hasError( $tokenHash ) {
+    public function hasError( string $tokenHash ): bool {
         return ( !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0 ) || (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ] >= 400;
     }
 
@@ -389,38 +389,40 @@ class MultiCurlHandler {
      *
      * @return array
      */
-    public function getErrors() {
+    public function getErrors(): array {
         $map = array_map( function ( $tokenHash ) {
             if ( $this->hasError( $tokenHash ) ) {
                 return $this->getError( $tokenHash );
             }
+
+            return null;
         }, array_keys( $this->multi_curl_info ) );
 
         return array_filter( $map );  // <- remove null array entries
     }
 
-    public function clear(){
+    public function clear() {
         $this->multiCurlCloseAll();
         $this->curl_headers_requests = [];
         $this->curl_options_requests = [];
-        $this->multi_curl_results = [];
-        $this->multi_curl_info = [];
-        $this->multi_curl_log = [];
+        $this->multi_curl_results    = [];
+        $this->multi_curl_info       = [];
+        $this->multi_curl_log        = [];
     }
 
-    protected function _callbackExecute( $record, Callable $function = null ){
+    protected function _callbackExecute( $record, callable $function = null ) {
 
-        if( is_callable( $function ) ){
+        if ( is_callable( $function ) ) {
 
             $is_array = is_array( $record );
-            if( !$is_array ){
+            if ( !$is_array ) {
                 $record = [ $record ];
             }
 
             $record = array_map( $function, $record );
 
-            if( !$is_array ){
-                $record = $record[0];
+            if ( !$is_array ) {
+                $record = $record[ 0 ];
             }
 
         }

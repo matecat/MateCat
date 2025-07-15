@@ -18,10 +18,10 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Model\Segments\SegmentUIStruct;
 use ReflectionException;
-use Utils\CatUtils;
 use Utils\Langs\Languages;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController {
 

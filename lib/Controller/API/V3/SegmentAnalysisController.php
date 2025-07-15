@@ -22,7 +22,7 @@ use Model\Segments\SegmentMetadataDao;
 use Model\Segments\SegmentNoteDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 use Utils\Url\JobUrls;
 
 class SegmentAnalysisController extends KleinController {

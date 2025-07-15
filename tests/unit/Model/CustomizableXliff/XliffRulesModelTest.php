@@ -13,6 +13,7 @@ use Model\Xliff\DTO\Xliff12Rule;
 use Model\Xliff\DTO\Xliff20Rule;
 use Model\Xliff\DTO\XliffRulesModel;
 use TestHelpers\AbstractTest;
+use Utils\Collections\RecursiveArrayObject;
 
 class XliffRulesModelTest extends AbstractTest {
 

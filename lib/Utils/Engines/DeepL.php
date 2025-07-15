@@ -3,10 +3,10 @@
 namespace Utils\Engines;
 
 use DomainException;
-use Engines\DeepL\DeepLApiClient;
-use Engines\DeepL\DeepLApiException;
 use Exception;
 use Model\Projects\MetadataDao;
+use Utils\Engines\DeepL\DeepLApiClient;
+use Utils\Engines\DeepL\DeepLApiException;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 
@@ -157,6 +157,7 @@ class DeepL extends AbstractEngine {
      *
      * @return mixed
      * @throws DeepLApiException
+     * @throws Exception
      */
     public function getGlossary( string $id ) {
         return $this->_getClient()->getGlossary( $id );
@@ -167,6 +168,7 @@ class DeepL extends AbstractEngine {
      *
      * @return mixed
      * @throws DeepLApiException
+     * @throws Exception
      */
     public function deleteGlossary( string $id ) {
         return $this->_getClient()->deleteGlossary( $id );
@@ -188,6 +190,7 @@ class DeepL extends AbstractEngine {
      *
      * @return mixed
      * @throws DeepLApiException
+     * @throws Exception
      */
     public function getGlossaryEntries( string $id ) {
         return $this->_getClient()->getGlossaryEntries( $id );

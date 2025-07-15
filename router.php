@@ -12,6 +12,7 @@ use Model\Exceptions\ValidationError as Model_ValidationError;
 use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Langs\InvalidLanguageException;
+use Utils\Logger\Log;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use View\API\Commons\Error;

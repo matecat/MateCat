@@ -46,7 +46,13 @@
         "ext-openssl": "*",
         "ext-simplexml": "*"
     },
+    "autoload": {
+      "files": [
+        "inc/INIT.php"
+      ]
+    },
     "config": {
+        "use-include-path": true,
         "allow-plugins": {
             "php-http/discovery": true
         }

@@ -8,7 +8,6 @@ use Controller\Views\TemplateDecorator\AbstractDecorator;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
 use Exception;
 use INIT;
-use Log;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -17,6 +16,7 @@ use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 

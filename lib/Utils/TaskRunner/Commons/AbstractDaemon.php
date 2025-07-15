@@ -11,8 +11,8 @@ namespace Utils\TaskRunner\Commons;
 
 use Exception;
 use INIT;
-use Log;
 use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\Log;
 
 /**
  * The abstract Daemon definition.

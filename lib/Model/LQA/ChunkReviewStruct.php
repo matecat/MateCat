@@ -6,7 +6,7 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

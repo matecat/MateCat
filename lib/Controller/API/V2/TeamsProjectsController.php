@@ -17,8 +17,8 @@ use Controller\API\Commons\Validators\ProjectExistsInTeamValidator;
 use Controller\API\Commons\Validators\TeamAccessValidator;
 use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
-use ManageUtils;
 use Model\Exceptions\ValidationError;
+use Model\Projects\ManageModel;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\TeamStruct;
@@ -112,7 +112,7 @@ class TeamsProjectsController extends KleinController {
         $assignee              = null;
         $no_assignee           = null;
 
-        $projects = ManageUtils::getProjects( $this->user, $start, $step,
+        $projects = ManageModel::getProjects( $this->user, $start, $step,
                 $search_in_pname,
                 $search_source, $search_target, $search_status,
                 $search_only_completed, $project_id,

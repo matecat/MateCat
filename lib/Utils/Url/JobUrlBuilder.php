@@ -6,7 +6,7 @@ use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 class JobUrlBuilder {
 

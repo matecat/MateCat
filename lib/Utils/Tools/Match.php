@@ -1,17 +1,10 @@
 <?php
 
-/*
-   This code is copyrighted and property of Translated s.r.l.
-   Should not be distrubuted.
-   This is made available for Matecat partners for executing the field test.
-   Thank you for keeping is confidential.
- */
+namespace Utils\Tools;
 
-use Utils\CatUtils;
+class Match {
 
-class MyMemory {
-
-    public static function TMS_MATCH( $seg1, $seg2, $language = false ) {
+    public static function get( $seg1, $seg2, $language = false ) {
 
         $originalSeg1 = $seg1;
         $originalSeg2 = $seg2;
@@ -28,7 +21,7 @@ class MyMemory {
         // Tag Penalties
         preg_match_all( '/<.*?>/s', $seg1, $temp1 );
         preg_match_all( '/<.*?>/s', $seg2, $temp2 );
-        $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
+        $c = count( self::array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
         $seg1 = preg_replace( '/<.*?>/s', ' ', $seg1 );
         $seg2 = preg_replace( '/<.*?>/s', ' ', $seg2 );
@@ -40,31 +33,31 @@ class MyMemory {
         $temp2 = '';
         preg_match_all( '/(0-9|,|\.)+/u', $seg1, $temp1 );
         preg_match_all( '/(0-9|,|\.)+/u', $seg2, $temp2 );
-        $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
+        $c = count( self::array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
         $seg1 = preg_replace( '/(0-9|,|\.)+/u', ' ', $seg1 );
         $seg2 = preg_replace( '/(0-9|,|\.)+/u', ' ', $seg2 );
 
         $penalty_placeable = 0.01 * $c;
 
-        // Penalties Punctuation
-        // Differs from numbers because if A has punt and B does not, it's not that bad as if a number is missing.
+        // Penalty Punctuation
+        // Differs from numbers because if A has punt and B doesn't, it's not that bad as if a number is missing.
         $temp1 = '';
         $temp2 = '';
         preg_match_all( '/(\p{P}|\p{S}|\x{00a0})+/u', $seg1, $temp1 );
         preg_match_all( '/(\p{P}|\p{S}|\x{00a0})+/u', $seg2, $temp2 );
-        $c = count( self::my_array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
+        $c = count( self::array_xor( $temp1[ 0 ], $temp2[ 0 ] ) );
 
         $seg1              = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg1 );
         $seg2              = preg_replace( '/(\p{P}|\p{S}|\x{00a0})+/u', ' ', $seg2 );
         $penalty_placeable += 0.02 * $c;
 
-        // penalty per case sensitive / formatting
+        // penalty per case-sensitive / formatting
         $penalty_formatting = 0.00;
 
-        // I remove all double spaces I introduced
-        $seg1 = preg_replace( '/[ ]+/u', ' ', $seg1 );
-        $seg2 = preg_replace( '/[ ]+/u', ' ', $seg2 );
+        // Remove all double spaces
+        $seg1 = preg_replace( '/ +/u', ' ', $seg1 );
+        $seg2 = preg_replace( '/ +/u', ' ', $seg2 );
 
         if ( $language !== false && CatUtils::isCJK( $language ) ) {
             $a = self::CJK_tokenizer( $seg1 );
@@ -82,9 +75,9 @@ class MyMemory {
             $penalty_formatting = 0.02;
         }
 
-        $tms_match = self::TMS_ARRAY_MATCH( $a_lower, $b_lower );
-        // if ($tms_match > 0 ) is true, the following member is considered, otherwise it is multiplied by 0 ( = false)
-        // This is useful to skip penalty in case that one of the 2 strings is empty;
+        $tms_match = self::arrayDistance( $a_lower, $b_lower );
+        // if ($tms_match > 0) is true, the following member is considered, otherwise it's multiplied by 0 (= false)
+        // This is useful to skip penalty in case that one of the 2 strings is empty
         $result = $tms_match - ( $penalty + $penalty_formatting + $penalty_placeable );
         if ( trim( $originalSeg1 ) != trim( $originalSeg2 ) && $result == 1 ) {
             $result -= 0.01;
@@ -93,18 +86,19 @@ class MyMemory {
         return min( 1, max( 0, $result ) );
     }
 
-    public static function TMS_ARRAY_MATCH( $array1, $array2 ) {
+    protected static function arrayDistance( $array1, $array2 ) {
 
         // No Longer symmetric
-        // Important:
+        // *** Important
         // Array1 is the segment to translate
         // Array2 is the suggestion
-        // es. control panel -> panel = lev match 75%
+        // es.
+        // Control panel -> panel = lev match 75%
         $min_words_norm = 4;
 
         $aliases = array_flip( array_values( array_unique( array_merge( $array1, $array2 ) ) ) );
 
-        // Is the string is longer than 254 words (does not make sense) I cannot use levenshtein of oliver.
+        // If the string is longer than 254 words (doesn't make sense), can't use levenshtein of oliver.
         if ( count( $aliases ) > 254 ) {
             return -1;
         }
@@ -138,8 +132,7 @@ class MyMemory {
 
     protected static function CJK_tokenizer( $text ): array {
         $words = explode( ' ', ( $text ) );
-        //$words = preg_split("/\\p{Z}+/", ($text));
-        //If characters are not latin then use bigram
+        //If characters aren't latin, then use bigram
         if ( preg_match( '/[^\\p{Common}\\p{Latin}]/u', $text ) ) {
             $number_of_words = count( $words );
             $tokens          = [];
@@ -160,53 +153,28 @@ class MyMemory {
     protected static function compute_bigram( $text ) {
         $chrArray = preg_split( '//u', $text, -1, PREG_SPLIT_NO_EMPTY );
         $length   = count( $chrArray );
-        if ( $length <= 1 ) {
-            return $chrArray;
-        } else {
+        if ( $length > 1 ) {
             for ( $i = 0; $i < $length - 1; $i++ ) {
                 $chrArray[ $i ] = $chrArray[ $i ] . $chrArray[ $i + 1 ];
             }
             array_pop( $chrArray );
-
-            return $chrArray;
         }
+
+        return $chrArray;
     }
 
-    // I expect this to be in PHP in the future...
-    public static function my_array_xor( $array_a, $array_b ): array {
+    /**
+     * @param array $array_a
+     * @param array $array_b
+     *
+     * @return array
+     */
+    // Expect this to be in PHP in the future
+    protected static function array_xor( array $array_a, array $array_b ): array {
         $union_array     = array_merge( $array_a, $array_b );
         $intersect_array = array_intersect( $array_a, $array_b );
 
         return array_diff( $union_array, $intersect_array );
-    }
-
-    public static function diff( $old, $new ) {
-
-        $maxlen = 0;
-        $omax   = $nmax = null;
-        foreach ( $old as $oindex => $ovalue ) {
-            $nkeys = array_keys( $new, $ovalue );
-            foreach ( $nkeys as $nindex ) {
-                $matrix[ $oindex ][ $nindex ] = isset( $matrix[ $oindex - 1 ][ $nindex - 1 ] ) ? $matrix[ $oindex - 1 ][ $nindex - 1 ] + 1 : 1;
-                if ( $matrix[ $oindex ][ $nindex ] > $maxlen ) {
-                    $maxlen = $matrix[ $oindex ][ $nindex ];
-                    $omax   = $oindex + 1 - $maxlen;
-                    $nmax   = $nindex + 1 - $maxlen;
-                }
-            }
-        }
-
-        if ( $maxlen == 0 ) {
-            return [ [ 'd' => $old, 'i' => $new ] ];
-        }
-
-        return array_merge(
-                self::diff( array_slice( $old, 0, $omax ), array_slice( $new, 0, $nmax ) ),
-                array_slice( $new, $nmax, $maxlen ),
-                self::diff( array_slice( $old, $omax + $maxlen ),
-                        array_slice( $new, $nmax + $maxlen ) )
-        );
-
     }
 
 }

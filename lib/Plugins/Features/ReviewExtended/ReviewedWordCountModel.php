@@ -22,8 +22,8 @@ use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
-use Routes;
-use Utils;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class ReviewedWordCountModel implements IReviewedWordCountModel {
 
@@ -350,7 +350,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
 
         if( !empty( $revision ) ){
-            $url = Routes::revise(
+            $url = CanonicalRoutes::revise(
                     $this->_chunk->getProject()->name,
                     $revision->id_job,
                     $revision->review_password,
@@ -364,7 +364,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         } else {
             // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
             // use the event chunk to generate the link.
-            $url = Routes::translate(
+            $url = CanonicalRoutes::translate(
                     $this->_chunk->getProject()->name,
                     $this->_chunk->id,
                     $this->_chunk->password,

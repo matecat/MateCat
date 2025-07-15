@@ -3,7 +3,7 @@
 namespace Utils\Langs;
 
 use INIT;
-use Log;
+use Utils\Logger\Log;
 
 class Languages {
 

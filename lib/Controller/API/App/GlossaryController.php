@@ -5,16 +5,16 @@ namespace Controller\API\App;
 use Controller\Abstracts\KleinController;
 use DomainException;
 use INIT;
-use Log;
 use Model\TmKeyManagement\UserKeysModel;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use Utils;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
-use Utils\CatUtils;
 use Utils\Langs\Languages;
+use Utils\Logger\Log;
 use Utils\TmKeyManagement\Filter;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 
@@ -64,7 +64,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Delete action on MyMemory
+     * Delete action on Match
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -86,7 +86,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Get the domains from MyMemory
+     * Get the domains from Match
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -106,7 +106,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Get action on MyMemory
+     * Get action on Match
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -127,7 +127,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Retrieve from MyMemory the information if keys have at least one glossary associated
+     * Retrieve from Match the information if keys have at least one glossary associated
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -154,7 +154,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Search for a specific sentence in MyMemory
+     * Search for a specific sentence in Match
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -175,7 +175,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Set action on MyMemory
+     * Set action on Match
      *
      * @throws ReflectionException
      * @throws InvalidValue
@@ -202,7 +202,7 @@ class GlossaryController extends KleinController {
     }
 
     /**
-     * Update action on MyMemory
+     * Update action on Match
      *
      * @throws ReflectionException
      * @throws InvalidValue

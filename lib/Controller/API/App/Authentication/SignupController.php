@@ -5,19 +5,19 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Controller\Views\CustomPageView;
 use Exception;
-use FlashMessage;
 use INIT;
 use Klein\Response;
 use Model\Teams\InvitedUser;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Model\Users\RedeemableProject;
-use Utils;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class SignupController extends AbstractStatefulKleinController {
 

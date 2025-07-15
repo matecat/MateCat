@@ -4,8 +4,8 @@
 namespace Model\Jobs;
 
 use Exception;
+use Model\ProjectManager\ProjectOptionsSanitizer;
 use Model\Projects\MetadataDao;
-use ProjectOptionsSanitizer;
 use ReflectionException;
 
 class ChunkOptionsModel {

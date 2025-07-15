@@ -23,10 +23,10 @@ use Model\TransactionalTrait;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils;
 use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
 use Utils\Email\SendToTranslatorForJobSplitEmail;
 use Utils\Email\SendToTranslatorForNewJobEmail;
+use Utils\Tools\Utils;
 
 class TranslatorsModel {
 

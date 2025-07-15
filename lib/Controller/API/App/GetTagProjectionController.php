@@ -7,15 +7,15 @@ use Controller\API\Commons\Exceptions\ExternalServiceException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Exceptions\NotFoundException;
 use Model\Jobs\ChunkDao;
 use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
-use Utils;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class GetTagProjectionController extends KleinController {
 

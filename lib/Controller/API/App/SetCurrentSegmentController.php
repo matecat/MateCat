@@ -13,8 +13,8 @@ use Model\Segments\SegmentDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
-use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class SetCurrentSegmentController extends KleinController {
 

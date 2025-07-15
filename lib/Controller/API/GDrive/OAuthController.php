@@ -9,7 +9,6 @@
 namespace Controller\API\GDrive;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
-use Exception;
 use INIT;
 use Model\ConnectedServices\GDrive\GDriveUserAuthorizationModel;
 use Model\Exceptions\ValidationError;

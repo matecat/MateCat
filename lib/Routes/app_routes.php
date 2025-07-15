@@ -91,7 +91,7 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_update', 'POST', [ '\Controller\API\App\GlossaryController', 'update' ] );
 } );
 
-// MyMemory
+// Match
 $klein->with( '/api/app/mymemory', function () {
     route( '/status/[:uuid]', 'GET', [ '\Controller\API\App\MyMemoryController', 'status' ] );
 } );

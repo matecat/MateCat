@@ -18,8 +18,8 @@ use INIT;
 use Klein\Response;
 use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
-use SimpleJWT;
-use Utils;
+use Utils\Tools\SimpleJWT;
+use Utils\Tools\Utils;
 
 class LoginController extends AbstractStatefulKleinController {
 

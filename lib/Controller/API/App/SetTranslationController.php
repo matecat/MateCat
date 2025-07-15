@@ -31,11 +31,8 @@ use Model\WordCount\WordCountStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
 use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
-use RedisHandler;
 use ReflectionException;
 use RuntimeException;
-use Utils;
-use Utils\CatUtils;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\JobStatus;
 use Utils\Constants\ProjectStatus;
@@ -43,8 +40,11 @@ use Utils\Constants\TranslationStatus;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
 use Utils\LQA\QA;
+use Utils\Redis\RedisHandler;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController {
 
@@ -463,7 +463,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $this->filter = $filter;
 
         // decode and normalize the suggestion array coming from the client
-        $suggestion_array = json_decode( $suggestion_array );
+        $suggestion_array = json_decode( $suggestion_array ) ?? [];
         foreach ( $suggestion_array as $match ) {
             $match->segment     = $this->filter->fromLayer2ToLayer1( $match->segment );
             $match->translation = $this->filter->fromLayer2ToLayer1( $match->translation );

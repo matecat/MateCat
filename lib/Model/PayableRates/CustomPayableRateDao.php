@@ -13,8 +13,8 @@ use Model\Projects\ProjectTemplateDao;
 use PDO;
 use ReflectionException;
 use Swaggest\JsonSchema\InvalidValue;
-use Utils;
 use Utils\Date\DateTimeUtil;
+use Utils\Tools\Utils;
 
 class CustomPayableRateDao extends AbstractDao {
     const TABLE           = 'payable_rate_templates';

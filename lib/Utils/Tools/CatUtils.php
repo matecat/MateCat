@@ -1,8 +1,9 @@
 <?php
 
-namespace Utils;
+namespace Utils\Tools;
 
-use Log;
+use Exception;
+use InvalidArgumentException;
 use Matecat\SubFiltering\Enum\CTypeEnum;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
@@ -19,9 +20,11 @@ use Model\Translations\SegmentTranslationDao;
 use Model\Translations\SegmentTranslationStruct;
 use Model\WordCount\CounterModel;
 use Model\WordCount\WordCountStruct;
+use ReflectionException;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
+use Utils\Logger\Log;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\IsJobRevisionValidator;
 

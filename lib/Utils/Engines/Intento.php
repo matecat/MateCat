@@ -4,10 +4,10 @@ namespace Utils\Engines;
 
 use Exception;
 use INIT;
-use RedisHandler;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
+use Utils\Redis\RedisHandler;
 
 class Intento extends AbstractEngine {
 

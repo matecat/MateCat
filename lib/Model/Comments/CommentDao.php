@@ -3,13 +3,13 @@
 namespace Model\Comments;
 
 use Exception;
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
 use ReflectionException;
+use Utils\Logger\Log;
 
 class CommentDao extends AbstractDao {
 

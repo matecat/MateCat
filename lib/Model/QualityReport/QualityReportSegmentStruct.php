@@ -13,8 +13,8 @@ use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
-use MyMemory;
 use Utils\LQA\QA;
+use Utils\Tools\Match;
 use View\API\V2\Json\QALocalWarning;
 
 
@@ -147,7 +147,7 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
 
     static function calculatePEE( $str_1, $str_2, $target ): int {
         $post_editing_effort = round(
-                ( 1 - MyMemory::TMS_MATCH(
+                ( 1 - Match::get(
                                 self::cleanSegmentForPee( $str_1 ),
                                 self::cleanSegmentForPee( $str_2 ),
                                 $target

@@ -2,10 +2,10 @@
 
 namespace Utils\Validator;
 
-use Engines\DeepL\DeepLApiClient;
 use Exception;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\DeepLStruct;
+use Utils\Engines\DeepL\DeepLApiClient;
 
 class DeepLValidator {
     /**

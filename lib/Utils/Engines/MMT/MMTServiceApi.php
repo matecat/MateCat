@@ -6,11 +6,11 @@
  * Time: 14:14
  */
 
-namespace Engines\MMT;
+namespace Utils\Engines\MMT;
 
 use CURLFile;
-use Log;
-use MultiCurlHandler;
+use Utils\Logger\Log;
+use Utils\Network\MultiCurlHandler;
 
 class MMTServiceApi {
 

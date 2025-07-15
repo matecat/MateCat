@@ -5,8 +5,8 @@ namespace Model\Search;
 use Model\DataAccess\AbstractDao;
 use Model\Translations\SegmentTranslationDao;
 use Predis\Client;
-use RedisHandler;
 use ReflectionException;
+use Utils\Redis\RedisHandler;
 
 class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
 

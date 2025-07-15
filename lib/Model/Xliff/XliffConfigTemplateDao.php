@@ -12,7 +12,7 @@ use Model\Pagination\PaginationParameters;
 use Model\Projects\ProjectTemplateDao;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class XliffConfigTemplateDao extends AbstractDao {
 

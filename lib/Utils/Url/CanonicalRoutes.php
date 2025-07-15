@@ -1,16 +1,23 @@
 <?php
 
 
-class Routes {
+namespace Utils\Url;
+
+use Exception;
+use INIT;
+use Utils\Tools\SimpleJWT;
+use Utils\Tools\Utils;
+
+class CanonicalRoutes {
 
     /**
-     * @param       $requestInfo
+     * @param array $requestInfo
      * @param array $options
      *
      * @return string
      * @throws Exception
      */
-    public static function inviteToTeamConfirm( $requestInfo, array $options = [] ): string {
+    public static function inviteToTeamConfirm( array $requestInfo, array $options = [] ): string {
 
         $host = self::httpHost( $options );
 
@@ -27,56 +34,56 @@ class Routes {
     }
 
     /**
-     * @param       $confirmation_token
-     * @param array $options
+     * @param string $confirmation_token
+     * @param array  $options
      *
      * @return string
      * @throws Exception
      */
-    public static function passwordReset( $confirmation_token, array $options = [] ): string {
+    public static function passwordReset( string $confirmation_token, array $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/api/app/user/password_reset/$confirmation_token";
     }
 
     /**
-     * @param       $confirmation_token
-     * @param array $options
+     * @param string $confirmation_token
+     * @param array  $options
      *
      * @return string
      * @throws Exception
      */
-    public static function signupConfirmation( $confirmation_token, $options = [] ): string {
+    public static function signupConfirmation( string $confirmation_token, array $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/api/app/user/confirm/$confirmation_token";
     }
 
     /**
-     * @param       $id_job
-     * @param       $password
-     * @param array $options
-     *
-     * @return string
-     * @throws Exception
-     */
-    public static function downloadXliff( $id_job, $password, array $options = [] ): string {
-        $host = self::httpHost( $options );
-
-        return "$host/api/v2/SDLXLIFF/$id_job/$password/$id_job.zip";
-    }
-
-    /**
-     * @param        $id_job
-     * @param        $password
-     * @param null   $filename
-     * @param string $download_type
+     * @param int    $id_job
+     * @param string $password
      * @param array  $options
      *
      * @return string
      * @throws Exception
      */
-    public static function downloadOriginal( $id_job, $password, $filename = null, string $download_type = 'all', array $options = [] ): string {
+    public static function downloadXliff( int $id_job, string $password, array $options = [] ): string {
+        $host = self::httpHost( $options );
+
+        return "$host/api/v2/xliff/$id_job/$password/$id_job.zip";
+    }
+
+    /**
+     * @param int         $id_job
+     * @param string      $password
+     * @param string|null $filename
+     * @param string      $download_type
+     * @param array       $options
+     *
+     * @return string
+     * @throws Exception
+     */
+    public static function downloadOriginal( int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = [] ): string {
         $host = self::httpHost( $options );
 
         $params = [
@@ -91,16 +98,16 @@ class Routes {
     }
 
     /**
-     * @param        $id_job
-     * @param        $password
-     * @param null   $filename
-     * @param string $download_type
-     * @param array  $options
+     * @param int         $id_job
+     * @param string      $password
+     * @param string|null $filename
+     * @param string      $download_type
+     * @param array       $options
      *
      * @return string
      * @throws Exception
      */
-    public static function downloadTranslation( $id_job, $password, $filename = null, string $download_type = 'all', array $options = [] ): string {
+    public static function downloadTranslation( int $id_job, string $password, ?string $filename = null, string $download_type = 'all', array $options = [] ): string {
         $host = self::httpHost( $options );
 
         $params = [
@@ -115,17 +122,17 @@ class Routes {
     }
 
     /**
-     * @param       $project_name
-     * @param       $id_job
-     * @param       $password
-     * @param       $source
-     * @param       $target
-     * @param array $options
+     * @param string $project_name
+     * @param int    $id_job
+     * @param string $password
+     * @param string $source
+     * @param string $target
+     * @param array  $options
      *
      * @return string
      * @throws Exception
      */
-    public static function revise( $project_name, $id_job, $password, $source, $target, array $options = [] ): string {
+    public static function revise( string $project_name, int $id_job, string $password, string $source, string $target, array $options = [] ): string {
         $host   = self::httpHost( $options );
         $revise = 'revise';
 
@@ -143,30 +150,30 @@ class Routes {
     }
 
     /**
-     * @param       $project_name
-     * @param       $id_job
-     * @param       $password
-     * @param       $source
-     * @param       $target
-     * @param array $options
+     * @param string $project_name
+     * @param int    $id_job
+     * @param string $password
+     * @param string $source
+     * @param string $target
+     * @param array  $options
      *
      * @return string
      * @throws Exception
      */
-    public static function translate( $project_name, $id_job, $password, $source, $target, array $options = [] ): string {
+    public static function translate( string $project_name, int $id_job, string $password, string $source, string $target, array $options = [] ): string {
         $host = self::httpHost( $options );
 
         return "$host/translate/$project_name/$source-$target/$id_job-$password";
     }
 
     /**
-     * @param       $params
+     * @param array $params
      * @param array $options
      *
      * @return string
      * @throws Exception
      */
-    public static function analyze( $params, array $options = [] ): string {
+    public static function analyze( array $params, array $options = [] ): string {
         $params = Utils::ensure_keys( $params,
                 [ 'project_name', 'id_project', 'password' ]
         );

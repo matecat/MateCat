@@ -11,13 +11,14 @@ namespace Utils\ActiveMQ\ClientHelpers;
 
 use ArrayObject;
 use Exception;
-use Log;
+use Model\ProjectManager\ProjectManager;
 use Predis\Response\Status;
-use RedisHandler;
 use ReflectionException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
 use Utils\Constants\ProjectStatus;
+use Utils\Logger\Log;
+use Utils\Redis\RedisHandler;
 
 /**
  * Class Enqueue

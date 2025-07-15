@@ -11,10 +11,10 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\Jobs\JobDao;
 use PHPTalBoolean;
 use PHPTalMap;
-use Utils;
-use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
 use Utils\Langs\Languages;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 /**
  *

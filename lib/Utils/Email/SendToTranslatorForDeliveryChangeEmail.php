@@ -11,7 +11,7 @@ namespace Utils\Email;
 
 use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class SendToTranslatorForDeliveryChangeEmail extends SendToTranslatorAbstract {
 
@@ -19,7 +19,7 @@ class SendToTranslatorForDeliveryChangeEmail extends SendToTranslatorAbstract {
         parent::__construct( $user, $translator, $projectName );
         $this->title = "Matecat - Job delivery updated.";
         $this->_setTemplate( 'Translator/job_change_delivery_send_to_translator_content.html' );
-        $this->_RoutesMethod = [ Routes::class, 'translate' ];
+        $this->_RoutesMethod = [ CanonicalRoutes::class, 'translate' ];
     }
 
 }

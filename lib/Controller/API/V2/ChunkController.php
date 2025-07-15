@@ -19,8 +19,8 @@ use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
-use Utils;
 use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
 use View\API\V2\Json\Chunk;
 
 class ChunkController extends KleinController {

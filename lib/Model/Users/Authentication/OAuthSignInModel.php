@@ -4,9 +4,9 @@ namespace Model\Users\Authentication;
 
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\FlashMessage;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
-use FlashMessage;
 use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\Teams\TeamDao;
 use Model\Users\MetadataDao;
@@ -14,8 +14,8 @@ use Model\Users\RedeemableProject;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils;
 use Utils\Email\WelcomeEmail;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.

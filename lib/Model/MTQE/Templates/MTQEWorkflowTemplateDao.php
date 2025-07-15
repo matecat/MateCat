@@ -19,7 +19,7 @@ use Model\Pagination\Pager;
 use Model\Pagination\PaginationParameters;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class MTQEWorkflowTemplateDao extends AbstractDao {
 

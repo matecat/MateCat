@@ -4,11 +4,11 @@ namespace Controller\API\Commons\Validators;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
-use Log;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
+use Utils\Logger\Log;
 
 /**
  * @daprecated this should extend Base

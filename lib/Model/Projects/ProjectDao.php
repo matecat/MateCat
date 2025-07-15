@@ -3,7 +3,6 @@
 namespace Model\Projects;
 
 use Exception;
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\IDaoStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -15,7 +14,8 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class ProjectDao extends AbstractDao {
     const TABLE = "projects";

@@ -5,14 +5,14 @@ namespace Utils\OutsourceTo;
 use Bootstrap;
 use Exception;
 use INIT;
-use Log;
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
-use MultiCurlHandler;
 use ReflectionException;
 use Utils\Langs\LanguageDomains;
+use Utils\Logger\Log;
+use Utils\Network\MultiCurlHandler;
 use Utils\Shop\Cart;
 use Utils\Shop\ItemHTSQuoteJob;
 

@@ -3,8 +3,10 @@
 use Model\Conversion\MimeTypes\MimeTypes;
 use Model\Conversion\ZipArchiveHandler;
 use Model\FilesStorage\AbstractFilesStorage;
-use Utils\CatUtils;
+use Utils\Logger\Log;
 use Utils\ServerCheck\ServerCheck;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 const DIRSEP = "//";
 

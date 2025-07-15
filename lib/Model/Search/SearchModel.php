@@ -10,7 +10,6 @@
 namespace Model\Search;
 
 use Exception;
-use Log;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Database;
@@ -18,6 +17,7 @@ use Model\IDatabase;
 use PDO;
 use PDOException;
 use stdClass;
+use Utils\Logger\Log;
 
 class SearchModel {
 

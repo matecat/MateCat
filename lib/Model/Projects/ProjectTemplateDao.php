@@ -20,10 +20,10 @@ use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
 use ReflectionException;
 use stdClass;
-use Utils;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\Utils;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -272,7 +272,7 @@ class ProjectTemplateDao extends AbstractDao {
                 $keyRing = $mkDao->read(
                         ( new MemoryKeyStruct( [
                                 'uid'    => $projectTemplateStruct->uid,
-                                'tm_key' => new TmKeyStruct( $tmKey->key )
+                                'tm_key' => new TmKeyStruct( $tmKey )
                         ] )
                         )
                 );

@@ -6,7 +6,7 @@ use Exception;
 use INIT;
 use Model\Conversion\MimeTypes\MimeTypes;
 use stdClass;
-use Utils;
+use Utils\Tools\Utils;
 
 /**
  *

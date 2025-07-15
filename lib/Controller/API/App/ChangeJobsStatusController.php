@@ -11,8 +11,8 @@ use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Utils;
 use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
 
 class ChangeJobsStatusController extends KleinController {
 

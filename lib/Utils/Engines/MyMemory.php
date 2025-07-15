@@ -5,7 +5,6 @@ namespace Utils\Engines;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use INIT;
-use Log;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -29,6 +28,7 @@ use Utils\Engines\Results\MyMemory\TagProjectionResponse;
 use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 
@@ -178,7 +178,7 @@ class MyMemory extends AbstractEngine {
     }
 
     /**
-     * This method is used for help to rebuild result from MyMemory.
+     * This method is used for help to rebuild result from Match.
      * Because when in CURL you send something using method POST and value's param start with "@"
      * he assumes you are sending a file.
      *
@@ -319,7 +319,7 @@ class MyMemory extends AbstractEngine {
             return false;
         }
 
-        return $this->result->responseDetails[ 0 ]; // return the MyMemory ID
+        return $this->result->responseDetails[ 0 ]; // return the Match ID
 
     }
 
@@ -423,7 +423,7 @@ class MyMemory extends AbstractEngine {
      * Post a file to myMemory
      *
      * Remove the first line from csv (source and target)
-     * and rewrite the csv because MyMemory doesn't want the header line
+     * and rewrite the csv because Match doesn't want the header line
      *
      * @param string $file
      * @param string $key
@@ -717,7 +717,7 @@ class MyMemory extends AbstractEngine {
     }
 
     /**
-     * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
+     * Calls the Match endpoint to send the TMX download URL to the user e-mail
      *
      * @param string    $key
      * @param string    $name
@@ -780,7 +780,7 @@ class MyMemory extends AbstractEngine {
     }
 
     /**
-     * Checks for MyMemory Api Key correctness
+     * Checks for Match Api Key correctness
      *
      * Filter Validate returns true/false for correct/not correct key and NULL is returned for all non-boolean values. ( 404, html, etc. )
      *
@@ -800,7 +800,7 @@ class MyMemory extends AbstractEngine {
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            Log::doJsonLog( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 
@@ -816,7 +816,7 @@ class MyMemory extends AbstractEngine {
 
     /******************************************/
     /**
-     * Calls the MyMemory Fast Analysis endpoint to analyze a document
+     * Calls the Match Fast Analysis endpoint to analyze a document
      *
      * @param array $segs_array
      *
@@ -839,7 +839,7 @@ class MyMemory extends AbstractEngine {
     }
 
     /**
-     * MyMemory private endpoint
+     * Match private endpoint
      *
      * @param array $config
      *

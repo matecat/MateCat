@@ -4,7 +4,7 @@ namespace Model\Projects;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 

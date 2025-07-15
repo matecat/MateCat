@@ -13,8 +13,8 @@ use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
-use Utils;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class ChangePasswordController extends ChunkController {
     protected function afterConstruct() {

@@ -13,8 +13,8 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Utils;
 use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
 use View\API\V2\Json\Project;
 
 /**

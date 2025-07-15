@@ -6,15 +6,15 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use ManageUtils;
 use Model\Exceptions\NotFoundException;
+use Model\Projects\ManageModel;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils\Constants\Teams;
 use Utils\Constants\JobStatus;
+use Utils\Constants\Teams;
 
 class GetProjectsController extends KleinController {
 
@@ -53,7 +53,7 @@ class GetProjectsController extends KleinController {
             $assignee = $this->filterAssignee( $team, $id_assignee );
         }
 
-        $projects = ManageUtils::getProjects(
+        $projects = ManageModel::getProjects(
                 $this->user,
                 $start,
                 $step,
@@ -68,8 +68,7 @@ class GetProjectsController extends KleinController {
                 $no_assignee
         );
 
-        $projnum = ManageUtils::getProjectsNumber(
-                $this->user,
+        $projnum = ManageModel::getProjectsNumber(
                 $search_in_pname,
                 $source,
                 $target,

@@ -1,5 +1,8 @@
 <?php
 
+namespace Model\ProjectManager;
+use Exception;
+
 class ProjectOptionsSanitizer {
 
     private array $options;

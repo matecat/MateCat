@@ -12,10 +12,10 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
-use Log;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
+use Utils\Logger\Log;
 
 abstract class KleinController implements IController {
 

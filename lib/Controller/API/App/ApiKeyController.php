@@ -7,7 +7,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ApiKeyController extends KleinController {
 

@@ -7,7 +7,7 @@ use Exception;
 use JsonSerializable;
 use LogicException;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
-use RecursiveArrayObject;
+use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\TranslationStatus;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
@@ -142,7 +142,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param RecursiveArrayObject $structure
+     * @param \Utils\Collections\RecursiveArrayObject $structure
      *
      * @return AbstractXliffRule
      */

@@ -9,11 +9,11 @@ use Model\Teams\TeamDao;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Routes;
-use Utils;
 use Utils\Email\ForgotPasswordEmail;
 use Utils\Email\SignupEmail;
 use Utils\Email\WelcomeEmail;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class SignupModel {
 
@@ -107,7 +107,7 @@ class SignupModel {
      * @throws Exception
      */
     public function flushWantedURL(): string {
-        $url = $this->session[ 'wanted_url' ] ?? Routes::appRoot();
+        $url = $this->session[ 'wanted_url' ] ?? CanonicalRoutes::appRoot();
         unset( $this->session[ 'wanted_url' ] );
 
         return $url;

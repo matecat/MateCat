@@ -8,7 +8,7 @@ use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 class CatDecorator extends AbstractDecorator {
 

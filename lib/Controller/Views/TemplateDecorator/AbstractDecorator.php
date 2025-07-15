@@ -8,8 +8,8 @@
  */
 namespace Controller\Views\TemplateDecorator;
 use Controller\Abstracts\IController;
-use PHPTALWithAppend;
 use Controller\Views\TemplateDecorator\Arguments\ArgumentInterface;
+use PHPTALWithAppend;
 
 /**
  * Class AbstractDecorator

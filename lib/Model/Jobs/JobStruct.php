@@ -29,9 +29,9 @@ use Model\Translators\JobsTranslatorsStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
 use ReflectionException;
-use Utils;
-use Utils\CatUtils;
 use Utils\Constants\JobStatus;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 

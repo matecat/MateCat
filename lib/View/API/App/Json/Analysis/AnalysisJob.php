@@ -12,8 +12,8 @@ namespace View\API\App\Json\Analysis;
 use Exception;
 use JsonSerializable;
 use stdClass;
-use Utils\CatUtils;
 use Utils\Langs\Languages;
+use Utils\Tools\CatUtils;
 
 class AnalysisJob implements JsonSerializable {
 

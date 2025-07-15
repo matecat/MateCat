@@ -7,7 +7,7 @@ namespace Utils\Langs;
 
 use Exception;
 use INIT;
-use Utils;
+use Utils\Tools\Utils;
 
 class LanguageDomains {
 

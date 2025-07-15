@@ -13,7 +13,7 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Model\Teams\InvitedUser;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 /**
  * Endpoint to get the call from emails link in the invitation emails
@@ -30,7 +30,7 @@ class TeamsInvitationsController extends AbstractStatefulKleinController {
 
         $invite = new InvitedUser( $this->request->param( 'jwt' ), $this->response );
         $invite->prepareUserInvitedSignUpRedirect();
-        $this->response->redirect( Routes::appRoot() );
+        $this->response->redirect( CanonicalRoutes::appRoot() );
 
     }
 

@@ -14,13 +14,13 @@ use Controller\Abstracts\BaseKleinViewController;
 use Controller\API\GDrive\GDriveController;
 use Exception;
 use INIT;
+use Model\ProjectManager\ProjectOptionsSanitizer;
 use PHPTalBoolean;
 use PHPTalMap;
-use ProjectOptionsSanitizer;
-use Utils;
 use Utils\Constants\Constants;
 use Utils\Engines\Intento;
 use Utils\Langs\LanguageDomains;
+use Utils\Tools\Utils;
 
 class UploadPageController extends BaseKleinViewController {
 

@@ -5,6 +5,7 @@ use Model\ApiKeys\ApiKeyStruct;
 use Model\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
+use Utils\Tools\Utils;
 
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once $root . "/inc/Bootstrap.php";

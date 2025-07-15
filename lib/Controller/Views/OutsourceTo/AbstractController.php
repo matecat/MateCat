@@ -7,11 +7,11 @@ namespace Controller\Views\OutsourceTo;
 
 use Controller\Abstracts\BaseKleinViewController;
 use Exception;
-use Log;
 use LogicException;
 use Model\Outsource\ConfirmationStruct;
-use SimpleJWT;
+use Utils\Logger\Log;
 use Utils\Shop\Cart;
+use Utils\Tools\SimpleJWT;
 
 /**
  * Class AbstractController

@@ -1,7 +1,10 @@
 <?php
 
-use Utils\CatUtils;
-use Utils\LQA\QA;
+namespace Utils\LQA;
+
+use DOMException;
+use Exception;
+use Utils\Tools\CatUtils;
 
 class PostProcess extends QA {
 
@@ -9,19 +12,21 @@ class PostProcess extends QA {
     /**
      * Perform all integrity check and comparisons on source and target string
      *
+     * @throws Exception
      */
-    public function realignMTSpaces() {
+    public function realignMTSpaces(): void {
 
         try {
             $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
-            return $this->getErrors();
+            return;
         }
 
         $this->_checkTagMismatch();
 
-        if( $this->thereAreErrors() ){
+        if ( $this->thereAreErrors() ) {
             $this->_getTagDiff();
+
             return; //fail
         }
 
@@ -39,48 +44,50 @@ class PostProcess extends QA {
             $this->_prepareDOMStructures();
             //ALL RIGHT
         } else {
-
             $this->addError( self::ERR_TAG_MISMATCH );
-
         }
 
     }
 
-    protected function _realignTMSpaces(){
+    protected function _realignTMSpaces(): array {
 
-        $source_seg = preg_split( "/>/", $this->source_seg );
-        $target_seg = preg_split( "/>/", $this->target_seg );
+        $source_seg = explode( ">", $this->source_seg );
+        $target_seg = explode( ">", $this->target_seg );
 
-        foreach( $source_seg as $pos => $_str  ){
+        foreach ( $source_seg as $pos => $_str ) {
 
-            if( $_str == "" ) continue;
-            $target_seg[$pos] = $this->_normalizeHeadSpaces( $_str, $target_seg[$pos] );
+            if ( $_str == "" ) {
+                continue;
+            }
+            $target_seg[ $pos ] = $this->_normalizeHeadSpaces( $_str, $target_seg[ $pos ] );
 
         }
 
         $source_seg = implode( ">", $source_seg );
-        $target_seg = implode( ">", $target_seg ) ;
+        $target_seg = implode( ">", $target_seg );
 
         //RESET another cycle
 
-        $source_seg = preg_split( "/</", $source_seg );
-        $target_seg = preg_split( "/</", $target_seg );
+        $source_seg = explode( "<", $source_seg );
+        $target_seg = explode( "<", $target_seg );
 
-        foreach( $source_seg as $pos => $_str  ){
+        foreach ( $source_seg as $pos => $_str ) {
 
-            if( $_str == "" ) continue;
-            $target_seg[$pos] = $this->_normalizeTailSpaces( $_str, $target_seg[$pos] );
+            if ( $_str == "" ) {
+                continue;
+            }
+            $target_seg[ $pos ] = $this->_normalizeTailSpaces( $_str, $target_seg[ $pos ] );
 
         }
 
         $source_seg = ( implode( "<", $source_seg ) );
         $target_seg = ( implode( "<", $target_seg ) );
 
-        return array( $source_seg, $target_seg );
+        return [ $source_seg, $target_seg ];
 
     }
 
-    protected function _normalizeHeadSpaces( $srcNodeContent, $trgNodeContent ){
+    protected function _normalizeHeadSpaces( string $srcNodeContent, string $trgNodeContent ) {
 
         $_srcNodeContent = $srcNodeContent;
         $_trgNodeContent = $trgNodeContent; //not Used
@@ -97,51 +104,53 @@ class PostProcess extends QA {
 
         //normalize the target first space according to the source type
         if ( $srcHasHeadNBSP != $trgHasHeadNBSP && $srcHasHeadNBSP ) {
-            $_trgNodeContent = preg_replace( '/^\x{20}{1}/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/^\x{20}/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
         } elseif ( $srcHasHeadNBSP != $trgHasHeadNBSP && $trgHasHeadNBSP ) {
-            $_trgNodeContent = preg_replace( '/^\x{a0}{1}/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/^\x{a0}/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
         }
 
         if ( ( $headSrcWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces ) {
             $_trgNodeContent = " " . $_trgNodeContent;
-        } elseif ( ( $headSrcWhiteSpaces !== 0 && $headTrgWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces ){
-            $_trgNodeContent = mb_substr( $_trgNodeContent, 1, mb_strlen($_trgNodeContent) );
+        } elseif ( ( $headSrcWhiteSpaces !== 0 && $headTrgWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces ) {
+            $_trgNodeContent = mb_substr( $_trgNodeContent, 1, mb_strlen( $_trgNodeContent ) );
         }
 
         return $_trgNodeContent;
 
     }
 
-    protected function _normalizeTailSpaces( $srcNodeContent, $trgNodeContent ){
+    protected function _normalizeTailSpaces( string $srcNodeContent, string $trgNodeContent ) {
 
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
         $_trgNodeContent = $trgNodeContent; //not used
 
-        $srcHasTailNBSP = $this->_hasTailNBSP($srcNodeContent);
-        $trgHasTailNBSP = $this->_hasTailNBSP($trgNodeContent);
+        $srcHasTailNBSP = $this->_hasTailNBSP( $srcNodeContent );
+        $trgHasTailNBSP = $this->_hasTailNBSP( $trgNodeContent );
 
         //normalize spaces
-        $srcNodeContent = $this->_nbspToSpace($srcNodeContent);
-        $trgNodeContent = $this->_nbspToSpace($trgNodeContent);
+        $srcNodeContent = $this->_nbspToSpace( $srcNodeContent );
+        $trgNodeContent = $this->_nbspToSpace( $trgNodeContent );
 
-        $srcLen = mb_strlen($srcNodeContent);
-        $trgLen = mb_strlen($trgNodeContent);
+        $srcLen = mb_strlen( $srcNodeContent );
+        $trgLen = mb_strlen( $trgNodeContent );
 
-        $trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8');
-        $trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8');
+        $trailingSrcChar = mb_substr( $srcNodeContent, $srcLen - 1, 1, 'utf-8' );
+        $trailingTrgChar = mb_substr( $trgNodeContent, $trgLen - 1, 1, 'utf-8' );
 
         //normalize the target first space according to the source type
         if ( $srcHasTailNBSP != $trgHasTailNBSP && $srcHasTailNBSP ) {
-            $_trgNodeContent = preg_replace( '/\x{20}{1}$/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/\x{20}$/u', CatUtils::unicode2chr( 0Xa0 ), $_trgNodeContent );
         } elseif ( $srcHasTailNBSP != $trgHasTailNBSP && $trgHasTailNBSP ) {
-            $_trgNodeContent = preg_replace( '/\x{a0}{1}$/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
+            $_trgNodeContent = preg_replace( '/\x{a0}$/u', CatUtils::unicode2chr( 0X20 ), $_trgNodeContent );
         }
 
         if ( $trailingSrcChar == " " && $trailingSrcChar != $trailingTrgChar ) {
             $_trgNodeContent = $_trgNodeContent . " ";
-        } else if( ( $trailingSrcChar != " " && $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar  ){
-            $_trgNodeContent = mb_substr( $_trgNodeContent, 0, $trgLen - 1 );
+        } else {
+            if ( ( $trailingSrcChar != " " && $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar ) {
+                $_trgNodeContent = mb_substr( $_trgNodeContent, 0, $trgLen - 1 );
+            }
         }
 
         return $_trgNodeContent;

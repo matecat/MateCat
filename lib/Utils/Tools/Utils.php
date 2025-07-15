@@ -1,6 +1,15 @@
 <?php
 
+namespace Utils\Tools;
+
 use Behat\Transliterator\Transliterator;
+use DateTime;
+use DirectoryIterator;
+use DOMDocument;
+use DOMElement;
+use Exception;
+use INIT;
+use InvalidArgumentException;
 use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
@@ -9,6 +18,7 @@ use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ErrMailWorker;
 use Utils\Constants\Constants;
 use Utils\Constants\SourcePages;
+use Utils\Logger\Log;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 
@@ -182,7 +192,7 @@ class Utils {
         $string = Transliterator::transliterate( $string );
 
         // avoid empty strings
-        if(empty($string)){
+        if ( empty( $string ) ) {
             $string = "-";
         }
 
@@ -510,7 +520,7 @@ class Utils {
      */
     protected static function upCountName( string $name ): string {
         return preg_replace_callback(
-                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
+                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils\Tools\Utils', 'upCountNameCallback' ], $name, 1
         );
     }
 
@@ -675,8 +685,8 @@ class Utils {
             // Enter this case if created_by is matecat, we show PUBLIC_TM
             $description = Constants::PUBLIC_TM;
 
-        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "MyMemory" ) === false ) {
-            // This case if for other sources from MyMemory that are public, but we must
+        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "Match" ) === false ) {
+            // This case if for other sources from Match that are public, but we must
             // show the specific name of the source.
             $description = $sug_source;
 
@@ -813,7 +823,7 @@ class Utils {
 
         @$htmlDom->loadHTML( $html );
 
-        $links = $htmlDom->getElementsByTagName( 'a' );
+        $links  = $htmlDom->getElementsByTagName( 'a' );
         $images = $htmlDom->getElementsByTagName( 'img' );
 
         // replace <a> with a label(href)
@@ -826,11 +836,11 @@ class Utils {
 
         // replace <img> with src
         $i = $images->length - 1;
-        while ($i > -1) {
-            $image = $images->item($i);
-            $src = $image->getAttribute( 'src' );
-            $newElement = $htmlDom->createTextNode($src);
-            $image->parentNode->replaceChild($newElement, $image);
+        while ( $i > -1 ) {
+            $image      = $images->item( $i );
+            $src        = $image->getAttribute( 'src' );
+            $newElement = $htmlDom->createTextNode( $src );
+            $image->parentNode->replaceChild( $newElement, $image );
             $i--;
         }
 
@@ -870,18 +880,20 @@ class Utils {
 
     /**
      * @param array $arr
+     *
      * @return bool
      */
-    public static function arrayIsList(array $arr): bool {
-        if ($arr === []) {
+    public static function arrayIsList( array $arr ): bool {
+        if ( $arr === [] ) {
             return true;
         }
 
-        return array_keys($arr) === range(0, count($arr) - 1);
+        return array_keys( $arr ) === range( 0, count( $arr ) - 1 );
     }
 
     /**
      * @param $nameString
+     *
      * @return bool|string
      */
     public static function sanitizeName( $nameString ) {

@@ -9,13 +9,13 @@
 namespace Controller\API\V2;
 
 
+use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
-use Controller\Abstracts\KleinController;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Model\ApiKeys\ApiKeyDao;
-use Utils;
+use Utils\Tools\Utils;
 
 class KeyCheckController extends KleinController {
 

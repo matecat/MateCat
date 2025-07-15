@@ -8,12 +8,12 @@ use InvalidArgumentException;
 use Model\Database;
 use Model\Projects\ProjectDao;
 use Model\Users\UserStruct;
-use RedisHandler;
 use ReflectionException;
 use Utils\Constants\Teams;
 use Utils\Email\InvitedToTeamEmail;
 use Utils\Email\MembershipCreatedEmail;
 use Utils\Email\MembershipDeletedEmail;
+use Utils\Redis\RedisHandler;
 
 class TeamModel {
 

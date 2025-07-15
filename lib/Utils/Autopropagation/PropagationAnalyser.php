@@ -4,7 +4,7 @@ namespace Utils\Autopropagation;
 
 use Model\Propagation\PropagationTotalStruct;
 use Model\Translations\SegmentTranslationStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class PropagationAnalyser {
 

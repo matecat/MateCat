@@ -10,19 +10,19 @@
 namespace Controller\API\App\Authentication;
 
 use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
-use FlashMessage;
 use INIT;
 use Klein\Response;
-use Log;
 use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
-use Routes;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class ForgotPasswordController extends AbstractStatefulKleinController {
 
@@ -120,7 +120,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
 
             $this->incrementRateLimitCounter( $this->request->param( 'token' ), '/api/app/user/password_reset' );
             FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
-            $this->response->redirect( Routes::appRoot() );
+            $this->response->redirect( CanonicalRoutes::appRoot() );
 
         }
     }

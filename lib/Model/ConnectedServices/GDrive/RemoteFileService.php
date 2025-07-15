@@ -12,8 +12,8 @@ use Exception;
 use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
-use Log;
 use Model\RemoteFiles\RemoteFileStruct;
+use Utils\Logger\Log;
 
 class RemoteFileService {
 

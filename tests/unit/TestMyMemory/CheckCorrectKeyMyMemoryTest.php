@@ -6,6 +6,7 @@ use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\AuthKeyResponse;
+use Utils\Tools\Match;
 
 
 /**
@@ -125,7 +126,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
         /**
          * creation of the engine
-         * @var MyMemory
+         * @var Match
          */
         $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_raw_value );
@@ -194,7 +195,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
         /**
          * creation of the engine
-         * @var MyMemory
+         * @var Match
          */
         $engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );

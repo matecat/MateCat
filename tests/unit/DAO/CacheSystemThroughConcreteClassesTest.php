@@ -14,10 +14,10 @@ use INIT;
 use Model\Database;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use RedisHandler;
 use ReflectionException;
 use TestHelpers\AbstractTest;
-use Utils;
+use Utils\Redis\RedisHandler;
+use Utils\Tools\Utils;
 
 class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     private static string $email;

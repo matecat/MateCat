@@ -12,7 +12,7 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamStruct;
 use ReflectionException;
 use stdClass;
-use Utils;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.

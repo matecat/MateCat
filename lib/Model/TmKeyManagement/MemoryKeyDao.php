@@ -91,10 +91,9 @@ class MemoryKeyDao extends AbstractDao {
                              GROUP BY m1.key_value
 			                 ORDER BY m1.creation_date desc";
 
-        if ( $obj->uid !== null ) {
-            $condition[]           = "m1.uid = :uid";
-            $where_params[ 'uid' ] = $obj->uid;
-        }
+
+        $condition[]           = "m1.uid = :uid";
+        $where_params[ 'uid' ] = $obj->uid;
 
         //tm_key conditions
         if ( $obj->tm_key !== null ) {

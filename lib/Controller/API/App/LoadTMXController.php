@@ -50,7 +50,7 @@ class LoadTMXController extends KleinController {
             $this->featureSet->run( 'postPushTMX', $file, $this->user );
 
             /*
-             * We update the KeyRing only if this is NOT the Default MyMemory Key
+             * We update the KeyRing only if this is NOT the Default Match Key
              *
              * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
              */
@@ -117,7 +117,7 @@ class LoadTMXController extends KleinController {
 
             /*
              * Added the default Key.
-             * This means if no private key are provided the TMX will be loaded in the default MyMemory key
+             * This means if no private key are provided the TMX will be loaded in the default Match key
              */
             $tm_key = INIT::$DEFAULT_TM_KEY;
 

@@ -15,8 +15,8 @@ use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use Model\WordCount\WordCountStruct;
-use Routes;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
+use Utils\Url\CanonicalRoutes;
 
 class ProjectAssignedEmail extends AbstractEmail {
 
@@ -62,7 +62,7 @@ class ProjectAssignedEmail extends AbstractEmail {
                 'sender'      => $this->user->toArray(),
                 'project'     => $this->project->toArray(),
                 'words_count' => number_format( array_sum( $words_count ) ),
-                'project_url' => Routes::analyze( [
+                'project_url' => CanonicalRoutes::analyze( [
                         'project_name' => $this->project->name,
                         'id_project'   => $this->project->id,
                         'password'     => $this->project->password

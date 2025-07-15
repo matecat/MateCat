@@ -10,11 +10,11 @@
 namespace Model\WordCount;
 
 
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\Database;
 use PDO;
 use PDOException;
+use Utils\Logger\Log;
 
 class WordCounterDao extends AbstractDao {
 

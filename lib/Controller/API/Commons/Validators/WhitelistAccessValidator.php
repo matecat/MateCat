@@ -11,7 +11,7 @@ namespace Controller\API\Commons\Validators;
 
 
 use DomainException;
-use Utils;
+use Utils\Tools\Utils;
 
 class WhitelistAccessValidator extends Base {
 

@@ -9,8 +9,8 @@ use Model\Jobs\JobStruct;
 use Model\QualityReport\SegmentEventsStruct;
 use Model\Translations\SegmentTranslationStruct;
 use PDO;
-use Utils;
 use Utils\Constants\SourcePages;
+use Utils\Tools\Utils;
 
 class TranslationVersionDao extends AbstractDao {
 

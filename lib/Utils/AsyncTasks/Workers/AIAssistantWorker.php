@@ -9,12 +9,12 @@ use Predis\Client;
 use Predis\Response\Status;
 use ReflectionException;
 use Stomp\Exception\StompException;
-use Utils;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AIAssistant\Client as AIAssistantClient;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker {
     const EXPLAIN_MEANING_ACTION = 'explain_meaning';

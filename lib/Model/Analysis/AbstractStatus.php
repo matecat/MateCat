@@ -15,13 +15,13 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Routes;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\ProjectStatus;
 use Utils\Langs\LanguageDomains;
 use Utils\OutsourceTo\OutsourceAvailable;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Url\CanonicalRoutes;
 use View\API\App\Json\Analysis\AnalysisChunk;
 use View\API\App\Json\Analysis\AnalysisFile;
 use View\API\App\Json\Analysis\AnalysisJob;
@@ -308,7 +308,7 @@ abstract class AbstractStatus {
      * @throws Exception
      */
     private function getAnalyzeLink(): string {
-        return Routes::analyze( [
+        return CanonicalRoutes::analyze( [
                 'project_name' => $this->project->name,
                 'id_project'   => $this->project->id,
                 'password'     => $this->project->password,

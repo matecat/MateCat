@@ -12,8 +12,8 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Exception;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
-use Routes;
-use Utils;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 
 class PasswordResetModel {
@@ -132,7 +132,7 @@ class PasswordResetModel {
      * @throws Exception
      */
     public function flushWantedURL(): string {
-        $url = $this->session[ 'wanted_url' ] ?? Routes::appRoot();
+        $url = $this->session[ 'wanted_url' ] ?? CanonicalRoutes::appRoot();
         unset( $this->session[ 'wanted_url' ] );
 
         return $url;

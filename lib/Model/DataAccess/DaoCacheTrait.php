@@ -11,10 +11,10 @@ namespace Model\DataAccess;
 
 use Exception;
 use INIT;
-use Log;
 use Predis\Client;
-use RedisHandler;
 use ReflectionException;
+use Utils\Logger\Log;
+use Utils\Redis\RedisHandler;
 
 trait DaoCacheTrait {
 

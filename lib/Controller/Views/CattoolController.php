@@ -24,6 +24,7 @@ use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\ModelStruct;
+use Model\ProjectManager\ProjectOptionsSanitizer;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipStruct;
@@ -32,15 +33,14 @@ use Model\Users\UserDao;
 use PHPTalBoolean;
 use PHPTalMap;
 use Plugins\Features\ReviewExtended\ReviewUtils;
-use ProjectOptionsSanitizer;
 use ReflectionException;
 use stdClass;
-use Utils;
-use Utils\CatUtils;
 use Utils\Constants\Teams;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\Intento;
 use Utils\Langs\Languages;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class CattoolController extends BaseKleinViewController {
 

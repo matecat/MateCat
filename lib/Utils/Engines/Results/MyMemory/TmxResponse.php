@@ -2,8 +2,8 @@
 
 namespace Utils\Engines\Results\MyMemory;
 
-use Log;
 use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\Log;
 
 /**
  * Created by PhpStorm.

@@ -2,8 +2,8 @@
 
 namespace migrations;
 
-use Log;
 use Phinx\Migration\AbstractMigration;
+use Utils\Logger\Log;
 
 /**
  * Class AbstractMatecatMigration

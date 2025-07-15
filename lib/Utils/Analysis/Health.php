@@ -11,10 +11,10 @@ namespace Utils\Analysis;
 
 use Exception;
 use INIT;
-use Log;
 use Predis\Client;
-use RedisHandler;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
+use Utils\Logger\Log;
+use Utils\Redis\RedisHandler;
 
 /**
  * Class Analysis_Manager

@@ -9,7 +9,6 @@
 namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Log;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectStruct;
@@ -19,6 +18,7 @@ use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
 use Plugins\Features\RevisionFactory;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
+use Utils\Logger\Log;
 
 class BatchReviewProcessor {
 

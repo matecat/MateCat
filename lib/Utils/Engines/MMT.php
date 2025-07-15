@@ -3,13 +3,8 @@
 namespace Utils\Engines;
 
 use DomainException;
-use Engines;
-use Engines\MMT\MMTServiceApi;
-use Engines\MMT\MMTServiceApiException;
-use Engines\MMT\MMTServiceApiRequestException;
 use Exception;
 use INIT;
-use Log;
 use Model\Database;
 use Model\Jobs\MetadataDao;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
@@ -22,7 +17,11 @@ use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\MMT\MMTServiceApi;
+use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\Log;
 use Utils\TmKeyManagement\TmKeyManager;
 
 /**
@@ -88,7 +87,7 @@ class MMT extends AbstractEngine {
         $extraParams = $this->getEngineRecord()->getExtraParamsAsArray();
         $license     = $extraParams[ 'MMT-License' ];
 
-        return Engines\MMT\MMTServiceApi::newInstance()
+        return MMTServiceApi::newInstance()
                 ->setIdentity( "Matecat", ltrim( INIT::$BUILD_NUMBER, 'v' ) )
                 ->setLicense( $license );
     }
@@ -108,13 +107,13 @@ class MMT extends AbstractEngine {
     /**
      * @param $_config
      *
-     * @return array|\Utils\Engines\Results\TMSAbstractResponse
+     * @return array|TMSAbstractResponse
      * @throws ReflectionException
      * @throws Exception
      */
     public function get( $_config ) {
 
-        //This is not really needed because by default in analysis the Engine_MMT is accepted by MyMemory
+        //This is not really needed because by default in analysis the Engine_MMT is accepted by Match
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             return [];
         }
@@ -588,11 +587,12 @@ class MMT extends AbstractEngine {
     }
 
     /**
-     * @param $id
-     * @param $data
+     * @param string $id
+     * @param array  $data
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
     public function updateGlossary( string $id, array $data  ) {
         $client = $this->_getClient();
@@ -647,10 +647,10 @@ class MMT extends AbstractEngine {
     /**
      * @param array|null $config
      *
-     * @return mixed
+     * @return array|null
      * @throws ReflectionException
      */
-    private function configureAnalysisContribution( ?array $config = [] ) {
+    private function configureAnalysisContribution( ?array $config = [] ): ?array {
         $id_job = $config[ 'job_id' ] ?? null;
 
         if ( $id_job and $this->_isAnalysis ) {

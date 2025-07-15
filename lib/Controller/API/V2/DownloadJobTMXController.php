@@ -9,8 +9,8 @@ use Model\ActivityLog\ActivityLogStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
 use SplTempFileObject;
-use Utils;
 use Utils\TMS\TMSService;
+use Utils\Tools\Utils;
 
 class DownloadJobTMXController extends AbstractDownloadController {
 

@@ -5,7 +5,6 @@ namespace Controller\API\App;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Log;
 use Model\Database;
 use Model\Engines\Structs\EngineStruct;
 use Model\TmKeyManagement\MemoryKeyDao;
@@ -13,12 +12,13 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\TmKeyManagement\UserKeysModel;
 use Model\Users\MetadataDao;
 use ReflectionException;
-use Utils\CatUtils;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
+use Utils\Logger\Log;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\CatUtils;
 
 class TmKeyManagementController extends AbstractStatefulKleinController {
 

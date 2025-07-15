@@ -15,9 +15,9 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
-use Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
+use Utils\Logger\Log;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 use Utils\Validator\Contracts\ValidatorObject;
@@ -137,7 +137,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                 $glossaryCsvValidator = $this->validateCSVFile( $fileInfo->file_path );
 
-                // load it into MyMemory
+                // load it into Match
 
                 $file = new TMSFile(
                         $fileInfo->file_path,

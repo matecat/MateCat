@@ -7,6 +7,7 @@ use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
+use Utils\Tools\Match;
 
 
 /**
@@ -116,7 +117,7 @@ T;
 
         /**
          * creation of the engine
-         * @var MyMemory
+         * @var Match
          */
         $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
 

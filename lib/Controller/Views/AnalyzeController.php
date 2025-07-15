@@ -22,8 +22,8 @@ use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use PHPTalBoolean;
 use PHPTalMap;
-use Utils;
 use Utils\Analysis\Health;
+use Utils\Tools\Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
 

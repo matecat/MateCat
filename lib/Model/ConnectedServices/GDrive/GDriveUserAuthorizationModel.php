@@ -11,13 +11,13 @@ namespace Model\ConnectedServices\GDrive;
 use Exception;
 use Google_Service_Oauth2;
 use INIT;
-use Log;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class GDriveUserAuthorizationModel {
 

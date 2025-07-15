@@ -14,6 +14,7 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
+use Utils\Redis\RedisHandler;
 use Utils\TaskRunner\Commons\ContextList;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;

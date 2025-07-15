@@ -6,7 +6,7 @@ use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
 use Model\Jobs\JobStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ProjectCompletion extends BaseFeature {
 

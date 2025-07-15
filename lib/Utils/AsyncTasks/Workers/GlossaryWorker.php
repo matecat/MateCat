@@ -63,7 +63,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on MyMemory
+     * Check a key on Match
      *
      * @param $payload
      *
@@ -93,7 +93,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Delete a key from MyMemory
+     * Delete a key from Match
      *
      * @param $payload
      *
@@ -116,7 +116,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:
@@ -145,7 +145,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Exposes domains from MyMemory
+     * Exposes domains from Match
      *
      * @param $payload
      *
@@ -175,7 +175,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Get a key from MyMemory
+     * Get a key from Match
      *
      * @param $payload
      *
@@ -222,7 +222,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on MyMemory
+     * Check a key on Match
      *
      * @param $payload
      *
@@ -248,7 +248,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Search sentence in MyMemory
+     * Search sentence in Match
      *
      * @param $payload
      *
@@ -299,7 +299,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Set a key in MyMemory
+     * Set a key in Match
      *
      * @param $payload
      *
@@ -322,7 +322,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:
@@ -374,7 +374,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Update a key from MyMemory
+     * Update a key from Match
      *
      * @param $payload
      *
@@ -397,7 +397,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:

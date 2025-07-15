@@ -5,7 +5,6 @@ namespace Model\Conversion;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
 use INIT;
-use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
@@ -16,6 +15,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 

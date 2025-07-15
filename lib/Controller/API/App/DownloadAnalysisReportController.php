@@ -13,7 +13,7 @@ use Model\Analysis\XTRFStatus;
 use Model\FeaturesBase\FeatureSet;
 use Model\Projects\ProjectDao;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
 class DownloadAnalysisReportController extends AbstractDownloadController {

@@ -1,12 +1,16 @@
 <?php
 
+namespace Utils\Collections;
+
+use ArrayIterator;
+use ArrayObject;
+
 /**
  * User: domenico
  * Date: 23/10/13
  * Time: 16.14
  *
  */
-
 class RecursiveArrayObject extends ArrayObject {
 
     /**
@@ -46,16 +50,17 @@ class RecursiveArrayObject extends ArrayObject {
      */
     public function toArray( array $mask = null ): array {
         $collector = [];
-        foreach( $this as $key => $value ){
-            if( !empty( $mask ) && !in_array( $key, $mask ) ){
+        foreach ( $this as $key => $value ) {
+            if ( !empty( $mask ) && !in_array( $key, $mask ) ) {
                 continue;
             }
-            if( $value instanceof RecursiveArrayObject ){
+            if ( $value instanceof RecursiveArrayObject ) {
                 $collector[ $key ] = $value->toArray();
             } else {
                 $collector[ $key ] = $value;
             }
         }
+
         return $collector;
     }
 

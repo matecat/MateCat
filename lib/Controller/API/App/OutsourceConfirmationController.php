@@ -27,7 +27,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
                 'payload'  => FILTER_SANITIZE_STRING,
         ] );
 
-        $payload = \SimpleJWT::getValidPayload( $params[ 'payload' ] );
+        $payload = \Utils\Tools\SimpleJWT::getValidPayload( $params[ 'payload' ] );
 
         if ( $params[ 'id_job' ] != $payload[ 'id_job' ] || $params[ 'password' ] != $payload[ 'password' ] ) {
             throw new AuthorizationError( "Invalid Job" );

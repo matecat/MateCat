@@ -5,7 +5,6 @@ namespace Controller\Abstracts;
 use Bootstrap;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
-use FlashMessage;
 use INIT;
 use Klein\App;
 use Klein\Request;
@@ -21,7 +20,7 @@ use PHPTAL;
 use PHPTalBoolean;
 use PHPTalMap;
 use PHPTALWithAppend;
-use Utils;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.

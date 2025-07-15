@@ -18,7 +18,7 @@ use Model\Projects\ProjectStruct;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class TranslationIssueModel {
 

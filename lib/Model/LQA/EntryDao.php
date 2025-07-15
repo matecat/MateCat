@@ -2,7 +2,6 @@
 
 namespace Model\LQA;
 
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
@@ -10,7 +9,8 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class EntryDao extends AbstractDao {
     protected function _buildResult( array $array_result ) {

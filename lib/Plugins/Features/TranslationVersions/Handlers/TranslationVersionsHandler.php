@@ -17,8 +17,8 @@ use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 use RuntimeException;
-use Utils;
 use Utils\Constants\TranslationStatus;
+use Utils\Tools\Utils;
 
 /**
  * Class TranslationVersionsHandler

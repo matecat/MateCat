@@ -22,9 +22,9 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
-use Utils\CatUtils;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class QualityReportSegmentModel {
 

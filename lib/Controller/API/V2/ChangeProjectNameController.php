@@ -10,7 +10,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ChangeProjectNameController extends ChunkController {
     /**

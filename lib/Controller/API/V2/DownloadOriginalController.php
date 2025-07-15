@@ -4,7 +4,6 @@ namespace Controller\API\V2;
 
 use Controller\Abstracts\AbstractDownloadController;
 use Exception;
-use Log;
 use Model\ActivityLog\Activity;
 use Model\ActivityLog\ActivityLogStruct;
 use Model\Conversion\ZipArchiveHandler;
@@ -13,7 +12,8 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
 set_time_limit( 180 );

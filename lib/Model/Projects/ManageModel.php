@@ -1,47 +1,51 @@
 <?php
 
+namespace Model\Projects;
+
+use DateInterval;
+use DateTime;
+use Exception;
 use Model\Database;
-use Model\Projects\ProjectDao;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
+use PDO;
+use ReflectionException;
 use Utils\Constants\ProjectStatus;
 use View\API\V2\Json\Project;
 
-class ManageUtils {
+class ManageModel {
 
 
     /**
-     * @param UserStruct            $user
      * @param                       $start                int
      * @param                       $step                 int
-     * @param                       $search_in_pname      string
-     * @param                       $search_source        string
-     * @param                       $search_target        string
-     * @param                       $search_status        string
-     * @param                       $search_only_completed
-     * @param                       $project_id           int
+     * @param string|null           $search_in_pname      string
+     * @param string|null           $search_source        string
+     * @param string|null           $search_target        string
+     * @param string|null           $search_status        string
+     * @param bool|null             $search_only_completed
+     * @param int|null              $project_id           int
      *
-     * @param TeamStruct            $team
+     * @param TeamStruct|null       $team
      *
      * @param UserStruct|null       $assignee
-     * @param                       $no_assignee
+     * @param bool                  $no_assignee
      *
      * @return array
      */
     protected static function _getProjects(
-            UserStruct $user,
-                       $start,
-                       $step,
-                       $search_in_pname,
-                       $search_source,
-                       $search_target,
-                       $search_status,
-                       $search_only_completed,
-                       $project_id,
-            TeamStruct $team = null,
-            UserStruct $assignee = null,
-                       $no_assignee = false
-    ) {
+            int         $start,
+            int         $step,
+            ?string     $search_in_pname,
+            ?string     $search_source,
+            ?string     $search_target,
+            ?string     $search_status,
+            ?bool       $search_only_completed,
+            ?int        $project_id,
+            ?TeamStruct $team = null,
+            ?UserStruct $assignee = null,
+            ?bool       $no_assignee = false
+    ): array {
 
         [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname,
@@ -68,7 +72,7 @@ class ManageUtils {
             $data [ 'id_assignee' ] = $assignee->uid;
         }
 
-        $conditions[]           = " p.status_analysis != :not_to_analyze ";
+        $conditions[]              = " p.status_analysis != :not_to_analyze ";
         $data [ 'not_to_analyze' ] = ProjectStatus::STATUS_NOT_TO_ANALYZE;
 
         $where_query = implode( " AND ", $conditions );
@@ -93,38 +97,37 @@ class ManageUtils {
     }
 
     /**
-     * @param UserStruct             $user
-     * @param                        $start
-     * @param                        $step
-     * @param                        $search_in_pname
-     * @param                        $search_source
-     * @param                        $search_target
-     * @param                        $search_status
-     * @param                        $search_only_completed
-     * @param                        $project_id
-     * @param TeamStruct|null        $team
-     * @param UserStruct|null        $assignee
-     * @param bool                   $no_assignee
+     * @param UserStruct      $user
+     * @param int             $start
+     * @param int             $step
+     * @param string|null     $search_in_pname
+     * @param string|null     $search_source
+     * @param string|null     $search_target
+     * @param string|null     $search_status
+     * @param bool|null       $search_only_completed
+     * @param int|null        $project_id
+     * @param TeamStruct|null $team
+     * @param UserStruct|null $assignee
+     * @param bool            $no_assignee
      *
      * @return array
      * @throws ReflectionException
      */
     public static function getProjects(
-            UserStruct $user,
-                       $start,
-                       $step,
-                       $search_in_pname,
-                       $search_source,
-                       $search_target,
-                       $search_status,
-                       $search_only_completed,
-                       $project_id,
-            TeamStruct $team = null,
-            UserStruct $assignee = null,
-                       $no_assignee = false
+            UserStruct  $user,
+            int         $start,
+            int         $step,
+            ?string     $search_in_pname,
+            ?string     $search_source,
+            ?string     $search_target,
+            ?string     $search_status,
+            ?bool       $search_only_completed,
+            ?int        $project_id,
+            ?TeamStruct $team = null,
+            ?UserStruct $assignee = null,
+            ?bool       $no_assignee = false
     ): array {
         $id_list = static::_getProjects(
-                $user,
                 $start,
                 $step,
                 $search_in_pname,
@@ -153,18 +156,18 @@ class ManageUtils {
      * Very bound to the query SQL which is used to retrieve project jobs or just the count
      * of records for the pagination and other stuff in manage page.
      *
-     * @param $search_in_pname
-     * @param $search_source
-     * @param $search_target
-     * @param $search_status
-     * @param $search_only_completed
+     * @param string|null $search_in_pname
+     * @param string|null $search_source
+     * @param string|null $search_target
+     * @param string|null $search_status
+     * @param bool        $search_only_completed
      *
      * @return array
      */
     protected static function conditionsForProjectsQuery(
-            $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed
-    ) {
+            ?string $search_in_pname, ?string $search_source, ?string $search_target,
+            ?string $search_status, ?bool $search_only_completed = false
+    ): array {
         $conditions = [];
         $data       = [];
 
@@ -197,7 +200,6 @@ class ManageUtils {
     }
 
     /**
-     * @param UserStruct             $user
      * @param                        $search_in_pname
      * @param                        $search_source
      * @param                        $search_target
@@ -209,12 +211,13 @@ class ManageUtils {
      *
      * @return array
      */
-    public static function getProjectsNumber( UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status,
-                                                         $search_only_completed,
-                                              TeamStruct $team = null,
-                                              UserStruct $assignee = null,
-                                                         $no_assignee = false
-    ) {
+    public static function getProjectsNumber(
+            $search_in_pname, $search_source, $search_target, $search_status,
+            $search_only_completed,
+            TeamStruct $team = null,
+            UserStruct $assignee = null,
+            bool $no_assignee = false
+    ): array {
 
         [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname, $search_source, $search_target,
@@ -252,13 +255,13 @@ class ManageUtils {
     /**
      * Formats a date for user visualization.
      *
-     * @param $my_date        string A date in mysql format. <br/>
-     *                        <b>E,g.</b> 2014-01-01 23:59:48
+     * @param string|null $my_date string A date in mysql format. <br/>
+     *                             <b>E,g.</b> 2014-01-01 23:59:48
      *
      * @return string A formatted date
      * @throws Exception
      */
-    public static function formatJobDate( $my_date ) {
+    public static function formatJobDate( ?string $my_date = 'now' ): string {
 
         $date          = new DateTime( $my_date );
         $formattedDate = $date->format( 'Y M d H:i' );

@@ -6,16 +6,16 @@ use CURLFile;
 use DomainException;
 use Exception;
 use INIT;
-use Log;
 use Model\Engines\Structs\EngineStruct;
 use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
-use MultiCurlHandler;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Logger\Log;
+use Utils\Network\MultiCurlHandler;
 
 /**
  * Created by PhpStorm.

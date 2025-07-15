@@ -17,8 +17,8 @@ use Model\Database;
 use Model\Teams\PendingInvitations;
 use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
-use RedisHandler;
 use ReflectionException;
+use Utils\Redis\RedisHandler;
 use View\API\V2\Json\Membership;
 
 class TeamMembersController extends KleinController {

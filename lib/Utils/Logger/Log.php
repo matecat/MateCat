@@ -1,18 +1,18 @@
 <?php
 
-if ( !defined( 'LOG_REPOSITORY' ) ) {
-    define( 'LOG_REPOSITORY', INIT::$LOG_REPOSITORY );
-}
+namespace Utils\Logger;
 
-// Be sure Monolog is installed via composer
-const LOG_FILENAME = 'log.txt';
-if ( class_exists( 'Monolog\Logger' ) ) {
-    Log::setUseMonolog();
-}
-
+use Exception;
+use INIT;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Utils\Tools\Utils;
+
+// Be sure Monolog is installed via composer
+if ( class_exists( 'Monolog\Logger' ) ) {
+    Log::setUseMonolog();
+}
 
 class Log {
 
@@ -26,8 +26,10 @@ class Log {
      */
     protected static bool $useMonolog = false;
 
-    public static string $fileName    = LOG_FILENAME;
-    public static string $oldFileName = LOG_FILENAME;
+    const LOG_FILENAME = 'log.txt';
+
+    public static string $fileName    = self::LOG_FILENAME;
+    public static string $oldFileName = self::LOG_FILENAME;
 
     public static ?string $uniqID = null;
 
@@ -77,9 +79,9 @@ class Log {
 
     protected static function getFileNamePath(): string {
         if ( !empty( self::$fileName ) ) {
-            $name = LOG_REPOSITORY . "/" . self::$fileName;
+            $name = INIT::$LOG_REPOSITORY . "/" . self::$fileName;
         } else {
-            $name = LOG_REPOSITORY . "/" . LOG_FILENAME;
+            $name = INIT::$LOG_REPOSITORY . "/" . self::LOG_FILENAME;
         }
 
         return $name;

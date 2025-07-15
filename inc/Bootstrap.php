@@ -7,6 +7,8 @@ use Model\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -40,8 +42,6 @@ class Bootstrap {
             self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
         }
 
-        $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
-
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
         set_exception_handler( [ 'Bootstrap', 'exceptionHandler' ] );
 
@@ -49,20 +49,17 @@ class Bootstrap {
         self::$_INI_VERSION = $mv[ 'version' ];
 
         $this->_setIncludePath();
-        spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
-        @include_once self::$_ROOT . '/vendor/autoload.php';
-
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
+        include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
-        INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
         INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View/templates";
 
         //get the environment configuration
         self::initConfig();
+        PluginsLoader::setIncludePath();
 
         if ( $task_runner_config_file != null ) {
             INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
@@ -91,13 +88,12 @@ class Bootstrap {
         INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
         INIT::$QUEUE_PROJECT_REPOSITORY        = INIT::$STORAGE_DIR . "/files_storage/queueProjects";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
-        INIT::$CONVERSIONERRORS_REPOSITORY_WEB = INIT::$BASEURL . "storage/conversion_errors";
         INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
-        INIT::$REFERENCE_REPOSITORY            = INIT::$STORAGE_DIR . "/reference_files";
         INIT::$TEMPLATE_ROOT                   = INIT::$ROOT . "/lib/View";
-        INIT::$MODEL_ROOT                      = INIT::$ROOT . '/lib/Model';
-        INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
+
+        $OAUTH_CONFIG       = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
+        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
 
         try {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
@@ -252,7 +248,7 @@ class Bootstrap {
                 case E_RECOVERABLE_ERROR:
 
                     Log::setLogFileName( 'fatal_errors.txt' );
-                    $exception     = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
+                    $exception = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
                     try {
                         $reflector = new ReflectionProperty( $exception, 'trace' );
@@ -290,10 +286,7 @@ class Bootstrap {
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = [
                 self::$_ROOT . "/inc/PHPTAL",
-                self::$_ROOT . "/lib",
-                self::$_ROOT . "/lib/Utils",
-                self::$_ROOT . "/lib/Plugins",
-
+                self::$_ROOT . "/lib"
         ];
         if ( !empty( $custom_paths ) ) {
             $def_path = array_merge( $def_path, $custom_paths );
@@ -405,8 +398,6 @@ class Bootstrap {
         INIT::$HTTPHOST = INIT::$CLI_HTTP_HOST;
 
         INIT::obtain(); //load configurations
-
-        PluginsLoader::setIncludePath();
 
     }
 

@@ -2,7 +2,7 @@
 
 use Matecat\SubFiltering\MateCatFilter;
 use TestHelpers\AbstractTest;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 
 /**

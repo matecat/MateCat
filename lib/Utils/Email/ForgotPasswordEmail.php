@@ -11,7 +11,7 @@ namespace Utils\Email;
 use Exception;
 use INIT;
 use Model\Users\UserStruct;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class  ForgotPasswordEmail extends AbstractEmail {
 
@@ -47,7 +47,7 @@ class  ForgotPasswordEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         return [
                 'user'               => $this->user->toArray(),
-                'password_reset_url' => Routes::passwordReset( $this->user->confirmation_token )
+                'password_reset_url' => CanonicalRoutes::passwordReset( $this->user->confirmation_token )
         ];
     }
 

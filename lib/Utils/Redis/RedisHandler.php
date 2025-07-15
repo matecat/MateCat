@@ -1,6 +1,13 @@
 <?php
 
+namespace Utils\Redis;
+
+use Exception;
+use INIT;
 use Predis\Client;
+use ReflectionClass;
+use ReflectionException;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -72,7 +79,7 @@ class RedisHandler {
 
         } elseif ( is_array( $connectionParams ) ) {
 
-            $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
+            $connectionParams = array_map( 'Utils\Redis\RedisHandler', $connectionParams );
 
         }
 

@@ -13,7 +13,7 @@ use Model\Projects\ProjectTemplateDao;
 use Model\Projects\ProjectTemplateStruct;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class FiltersConfigTemplateDao extends AbstractDao {
     const TABLE = 'filters_config_templates';

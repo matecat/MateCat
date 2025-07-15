@@ -10,7 +10,7 @@ use Model\Database;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao {
 

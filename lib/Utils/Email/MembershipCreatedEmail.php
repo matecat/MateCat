@@ -12,7 +12,7 @@ use Exception;
 use Model\Teams\MembershipStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class MembershipCreatedEmail extends AbstractEmail {
 
@@ -83,7 +83,7 @@ class MembershipCreatedEmail extends AbstractEmail {
                 'user'      => $this->user->toArray(),
                 'sender'    => $this->sender->toArray(),
                 'team'      => $this->membership->getTeam()->toArray(),
-                'manageUrl' => Routes::manage()
+                'manageUrl' => CanonicalRoutes::manage()
         ];
 
     }

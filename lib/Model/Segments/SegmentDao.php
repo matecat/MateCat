@@ -3,7 +3,6 @@
 namespace Model\Segments;
 
 use Exception;
-use Log;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\ShapelessConcreteStruct;
 use Model\Database;
@@ -15,6 +14,7 @@ use PDO;
 use PDOException;
 use ReflectionException;
 use Utils\Constants\TranslationStatus;
+use Utils\Logger\Log;
 
 class SegmentDao extends AbstractDao {
     const TABLE = 'segments';

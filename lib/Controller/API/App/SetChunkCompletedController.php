@@ -11,7 +11,7 @@ use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Jobs\JobDao;
 use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class SetChunkCompletedController extends KleinController {
 

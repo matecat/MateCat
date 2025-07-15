@@ -12,10 +12,10 @@ use Model\Filters\FiltersConfigTemplateDao;
 use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
-use Utils;
 use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
+use Utils\Tools\Utils;
 
 class ConvertFileController extends KleinController {
 

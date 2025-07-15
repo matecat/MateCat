@@ -96,7 +96,7 @@ var spec = {
             name: 'tms_engine',
             in: 'formData',
             description:
-              'Identifier for Memory Server 0 means disabled, 1 means MyMemory)',
+              'Identifier for Memory Server 0 means disabled, 1 means Match)',
             required: false,
             type: 'integer',
             default: 1,
@@ -114,7 +114,7 @@ var spec = {
             name: 'private_tm_key',
             in: 'formData',
             description:
-              'Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create' +
+              'Private key(s) for Match.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing Match private keys or new to create' +
               ' a new key. - Multiple keys must be comma separated. Up to 10 keys allowed. (xxx345cvf,new,s342f234fc) - If you want to set read, write or both on your private key you can' +
               " add after the key 'r' for read, 'w' for write or 'rw' for both  separated by ':' (xxx345cvf:r,new:w,s342f234fc:rw) - Only available if tms_engine is set to 1 or if is not used",
             required: false,

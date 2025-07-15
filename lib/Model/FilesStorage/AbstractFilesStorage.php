@@ -5,11 +5,11 @@ namespace Model\FilesStorage;
 use DirectoryIterator;
 use Exception;
 use INIT;
-use Log;
 use Model\Database;
 use PDO;
 use Predis\Connection\ConnectionException;
 use ReflectionException;
+use Utils\Logger\Log;
 
 /**
  * Class FsFilesStorage

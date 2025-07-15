@@ -12,7 +12,7 @@ namespace Utils\Email;
 use Exception;
 use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class InvitedToTeamEmail extends AbstractEmail {
 
@@ -39,7 +39,7 @@ class InvitedToTeamEmail extends AbstractEmail {
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),
-                'signup_url' => Routes::inviteToTeamConfirm( [
+                'signup_url' => CanonicalRoutes::inviteToTeamConfirm( [
                         'invited_by_uid' => $this->user->uid,
                         'email'          => $this->invited_email,
                         'team_id'        => $this->team->id

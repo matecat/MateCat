@@ -4,14 +4,14 @@ namespace Utils\TmKeyManagement;
 
 use DomainException;
 use Exception;
-use Log;
 use Model\Database;
 use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.

@@ -11,10 +11,7 @@ namespace Utils\ActiveMQ;
 
 use Exception;
 use INIT;
-use Log;
-use MultiCurlHandler;
 use Predis;
-use RedisHandler;
 use ReflectionException;
 use Stomp\Client;
 use Stomp\Exception\ConnectionException;
@@ -22,9 +19,12 @@ use Stomp\Network\Connection;
 use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
-use Utils;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
+use Utils\Logger\Log;
+use Utils\Network\MultiCurlHandler;
+use Utils\Redis\RedisHandler;
 use Utils\TaskRunner\Commons\Context;
+use Utils\Tools\Utils;
 
 class AMQHandler {
 

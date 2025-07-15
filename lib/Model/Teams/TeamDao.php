@@ -14,8 +14,8 @@ use Model\Database;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Utils;
 use Utils\Constants\Teams;
+use Utils\Tools\Utils;
 
 class TeamDao extends AbstractDao {
 

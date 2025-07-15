@@ -4,7 +4,6 @@ namespace Utils\AsyncTasks\Workers\Analysis;
 
 use Exception;
 use INIT;
-use Log;
 use Model\Analysis\AnalysisDao;
 use Model\Analysis\PayableRates as PayableRates;
 use Model\Database;
@@ -22,7 +21,6 @@ use PDOException;
 use ReflectionException;
 use Stomp\Transport\Message;
 use UnexpectedValueException;
-use Utils;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
@@ -31,10 +29,12 @@ use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
 use Utils\TaskRunner\Commons\Params;
 use Utils\TaskRunner\Commons\QueueElement;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -183,7 +183,7 @@ class FastAnalysis extends AbstractDaemon {
                 if ( $disable_Tms_Analysis ) {
 
                     /**
-                     * MyMemory disabled and MT Disabled Too
+                     * Match disabled and MT Disabled Too
                      * So don't perform TMS Analysis ( don't send segments in queue ), only fill segment_translation table
                      */
                     $perform_Tms_Analysis = false;
@@ -319,7 +319,7 @@ class FastAnalysis extends AbstractDaemon {
         /**
          * @var $myMemory \Utils\Engines\MyMemory
          */
-        $myMemory = EnginesFactory::getInstance( 1 /* MyMemory */ );
+        $myMemory = EnginesFactory::getInstance( 1 /* Match */ );
 
         $fs = $this->files_storage;
 
@@ -372,7 +372,7 @@ class FastAnalysis extends AbstractDaemon {
 
         $this->_logTimeStampedMsg( "Done." );
         $this->_logTimeStampedMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
-        $this->_logTimeStampedMsg( "Sending query to MyMemory analysis..." );
+        $this->_logTimeStampedMsg( "Sending query to Match analysis..." );
 
         /**
          * @var $result AnalyzeResponse
@@ -380,11 +380,11 @@ class FastAnalysis extends AbstractDaemon {
         $result = $myMemory->fastAnalysis( $fastSegmentsRequest );
 
         if ( isset( $result->error->code ) && $result->error->code == -28 ) { //curl timed out
-            throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
+            throw new Exception( "Match Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 504 ) { //Gateway time out
-            throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
+            throw new Exception( "Match Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 || $result->responseStatus == 502 ) { // server error, could depend on request
-            throw new Exception( "MyMemory Internal Server Error. Pid: " . $pid, self::ERR_500 );
+            throw new Exception( "Match Internal Server Error. Pid: " . $pid, self::ERR_500 );
         }
 
         return $result;

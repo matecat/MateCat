@@ -17,7 +17,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class MembershipDao extends AbstractDao {
 

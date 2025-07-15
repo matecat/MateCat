@@ -6,9 +6,9 @@ use DirectoryIterator;
 use INIT;
 use Klein\Klein;
 use Klein\Request;
-use Log;
 use Plugins\Features\BaseFeature;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 
 /**

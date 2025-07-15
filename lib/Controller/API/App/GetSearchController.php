@@ -23,10 +23,10 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationVersions;
 use ReflectionException;
 use RuntimeException;
-use Utils;
 use Utils\Constants\TranslationStatus;
 use Utils\Search\ReplaceHistory;
 use Utils\Search\ReplaceHistoryFactory;
+use Utils\Tools\Utils;
 
 class GetSearchController extends AbstractStatefulKleinController {
 
@@ -204,7 +204,7 @@ class GetSearchController extends AbstractStatefulKleinController {
     private function getReplaceHistory( $job_id ): ReplaceHistory {
         // ReplaceHistory init
         $srh_driver = ( isset( INIT::$REPLACE_HISTORY_DRIVER ) and '' !== INIT::$REPLACE_HISTORY_DRIVER ) ? INIT::$REPLACE_HISTORY_DRIVER : 'redis';
-        $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and '' !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
+        $srh_ttl    = ( isset( INIT::$REPLACE_HISTORY_TTL ) and 0 !== INIT::$REPLACE_HISTORY_TTL ) ? INIT::$REPLACE_HISTORY_TTL : 300;
 
         return ReplaceHistoryFactory::create( $job_id, $srh_driver, $srh_ttl );
     }

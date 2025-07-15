@@ -10,7 +10,6 @@ use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
 use INIT;
 use Klein\Klein;
-use Log;
 use Model\ChunksCompletion\ChunkCompletionEventStruct;
 use Model\Database;
 use Model\Exceptions\NotFoundException;
@@ -32,11 +31,11 @@ use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Predis\Connection\ConnectionException;
-use RecursiveArrayObject;
 use ReflectionException;
-use Utils;
+use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
-use View\API\V2\Json\Json\ProjectUrls;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
@@ -64,10 +63,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     public static function loadRoutes( Klein $klein ) {
         route( '/project/[:id_project]/[:password]/reviews', 'POST', [ 'Controller\API\V2\ReviewsController', 'createReview' ] );
-    }
-
-    public static function projectUrls( $formatted ) {
-        return new ProjectUrls( $formatted->getData() );
     }
 
     public function filterGetSegmentsResult( $data, JobStruct $chunk ) {
@@ -419,7 +414,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
-        /** @var RecursiveArrayObject $model_json */
+        /** @var \Utils\Collections\RecursiveArrayObject $model_json */
         $model_json = $projectStructure[ 'features' ][ 'quality_framework' ];
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json->toArray() );

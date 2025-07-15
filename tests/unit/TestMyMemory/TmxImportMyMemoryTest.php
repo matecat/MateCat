@@ -25,6 +25,8 @@ use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\TmxResponse;
 use Utils\Langs\Languages;
+use Utils\Network\MultiCurlHandler;
+use Utils\Tools\Utils;
 
 error_reporting( ~E_DEPRECATED );
 

@@ -17,13 +17,12 @@ use Model\LQA\QAModelTemplate\QAModelTemplateDao;
 use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
 use Model\PayableRates\CustomPayableRateDao;
 use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
 use Model\Xliff\XliffConfigTemplateDao;
 use Plugins\Features\ProjectCompletion;
-use ProjectManager;
-use Utils;
 use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
@@ -33,6 +32,7 @@ use Utils\Engines\MMT;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\EngineValidator;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -309,7 +309,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->setMetadataFromPostInput( $data );
 
         if ( $disable_tms_engine_flag ) {
-            $data[ 'tms_engine' ] = 0; //remove default MyMemory
+            $data[ 'tms_engine' ] = 0; //remove default Match
         }
 
         if ( empty( $file_name ) ) {
@@ -424,7 +424,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     }
 
     /**
-     * Check if MT engine (except MyMemory) belongs to user
+     * Check if MT engine (except Match) belongs to user
      *
      * @param int $mt_engine
      *

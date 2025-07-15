@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use Log;
 use Model\ApiKeys\ApiKeyDao;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\ConnectedServices\ConnectedServiceDao;
@@ -13,6 +12,7 @@ use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use Throwable;
+use Utils\Logger\Log;
 use View\API\App\Json\UserProfile;
 
 /**
@@ -69,7 +69,7 @@ class AuthenticationHelper {
             } else {
                 // Credentials from AuthCookie
                 /**
-                 * @var $user \Model\Users\UserStruct
+                 * @var $user UserStruct
                  */
                 $user_cookie_credentials = AuthCookie::getCredentials();
                 if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {

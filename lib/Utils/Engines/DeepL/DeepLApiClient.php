@@ -1,10 +1,10 @@
 <?php
 
-namespace Engines\DeepL;
+namespace Utils\Engines\DeepL;
 
 use InvalidArgumentException;
-use Log;
-use MultiCurlHandler;
+use Utils\Logger\Log;
+use Utils\Network\MultiCurlHandler;
 
 class DeepLApiClient {
     const DEFAULT_BASE_URL = 'https://api.deepl.com/v1';

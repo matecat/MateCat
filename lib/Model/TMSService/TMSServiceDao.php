@@ -10,12 +10,12 @@
 namespace Model\TMSService;
 
 
-use Log;
 use Model\Database;
 use PDO;
 use PDOException;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
+use Utils\Logger\Log;
 
 class TMSServiceDao {
 

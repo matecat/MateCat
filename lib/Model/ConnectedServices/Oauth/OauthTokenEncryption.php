@@ -2,7 +2,6 @@
 
 namespace Model\ConnectedServices\Oauth;
 
-use DefuseEncryption;
 use Exception;
 use INIT;
 use Utils\Constants\Constants;

@@ -43,7 +43,7 @@ class Activity {
                     'id'         => (int)$record->ID,
                     'action'     => $record->action,
                     'email'      => $record->email,
-                    'event_date' => \Utils::api_timestamp( $record->event_date ),
+                    'event_date' => \Utils\Tools\Utils::api_timestamp( $record->event_date ),
                     'first_name' => $record->first_name,
                     'id_job'     => (int)$record->id_job,
                     'id_project' => (int)$record->id_project,

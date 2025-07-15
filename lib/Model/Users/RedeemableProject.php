@@ -13,7 +13,7 @@ use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use ReflectionException;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class RedeemableProject {
     /**
@@ -102,7 +102,7 @@ class RedeemableProject {
      */
     public function getDestinationURL(): ?string {
         if ( $this->isPresent() ) {
-            return Routes::analyze( [
+            return CanonicalRoutes::analyze( [
                     'project_name' => $this->project->name,
                     'id_project'   => $this->project->id,
                     'password'     => $this->project->password

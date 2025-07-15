@@ -2,9 +2,9 @@
 
 namespace Utils\Validator;
 
-use Utils;
 use Utils\Files\CSV;
 use Utils\Langs\Languages;
+use Utils\Tools\Utils;
 use Utils\Validator\Contracts\AbstractValidator;
 use Utils\Validator\Contracts\ValidatorObject;
 
@@ -45,7 +45,7 @@ class GlossaryCSVValidator extends AbstractValidator {
      */
     private function getHeaders( string $filePath ): array {
         $headers = CSV::headers( $filePath );
-        $headers = array_map( 'Utils::trimAndLowerCase', $headers );
+        $headers = array_map( 'Utils\Utils', $headers );
 
         return Utils::removeEmptyStringFromTail( $headers );
     }

@@ -6,7 +6,6 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use INIT;
 use InvalidArgumentException;
-use Log;
 use Model\Comments\CommentDao;
 use Model\Comments\CommentStruct;
 use Model\DataAccess\ShapelessConcreteStruct;
@@ -21,11 +20,12 @@ use ReflectionException;
 use RuntimeException;
 use Stomp\Exception\ConnectionException;
 use Stomp\Transport\Message;
-use Utils;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Email\CommentEmail;
 use Utils\Email\CommentMentionEmail;
 use Utils\Email\CommentResolveEmail;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 use Utils\Url\JobUrlBuilder;
 
 class CommentController extends KleinController {

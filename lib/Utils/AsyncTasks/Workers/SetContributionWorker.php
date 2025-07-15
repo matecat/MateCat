@@ -122,7 +122,7 @@ class SetContributionWorker extends AbstractWorker {
     protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
-            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load MyMemory
+            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load Match
         }
 
     }

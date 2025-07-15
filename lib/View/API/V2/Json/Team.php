@@ -25,12 +25,12 @@ class Team {
                 'id'         => (int)$team->id,
                 'name'       => $team->name,
                 'type'       => $team->type,
-                'created_at' => \Utils::api_timestamp( $team->created_at ),
+                'created_at' => \Utils\Tools\Utils::api_timestamp( $team->created_at ),
                 'created_by' => (int)$team->created_by
         ];
 
         $members     = $team->getMembers();
-        $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
+        $invitations = ( new PendingInvitations( ( new \Utils\Redis\RedisHandler() )->getConnection(), [] ) )->hasPengingInvitation( (int)$team->id );
 
         if ( !empty( $members ) ) {
             $memberShipFormatter = new Membership( $members );

@@ -9,11 +9,11 @@
 
 namespace Utils\AsyncTasks\Workers\Traits;
 
-use Log;
 use Model\Database;
 use PDO;
 use PDOException;
 use RuntimeException;
+use Utils\Logger\Log;
 
 trait ProjectWordCount {
 

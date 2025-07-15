@@ -10,13 +10,13 @@
 namespace Model\Teams;
 
 
+use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
-use FlashMessage;
 use Klein\Response;
-use RedisHandler;
 use ReflectionException;
-use SimpleJWT;
+use Utils\Redis\RedisHandler;
+use Utils\Tools\SimpleJWT;
 
 class InvitedUser {
 

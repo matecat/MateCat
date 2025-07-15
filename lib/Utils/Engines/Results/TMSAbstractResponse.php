@@ -59,7 +59,7 @@ abstract class TMSAbstractResponse {
          */
         $instance = new $class( $result, $dataRefMap );
 
-        if ( array_key_exists( "error", $result ) ) {
+        if ( is_array( $result ) && array_key_exists( "error", $result ) ) {
             $instance->error = new ErrorResponse( $result[ 'error' ] );
         }
 

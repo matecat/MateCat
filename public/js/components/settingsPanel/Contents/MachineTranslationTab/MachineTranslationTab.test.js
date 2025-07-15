@@ -75,10 +75,10 @@ xtest('Render Machine translation tab - not logged', async () => {
 
   expect(screen.queryByTitle('Add MT engine')).not.toBeInTheDocument()
 
-  const mtName = screen.getByText('MyMemory')
+  const mtName = screen.getByText('Match')
   expect(mtName).toBeInTheDocument()
 
-  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-MyMemory')
+  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-Match')
   expect(checkboxMtActive).toBeChecked()
 })
 
@@ -180,7 +180,7 @@ test('Activate MT', async () => {
     </SettingsPanelContext.Provider>,
   )
   let activeMTContainert = screen.getByTestId('active-mt')
-  let mtName = within(activeMTContainert).getByText('MyMemory')
+  let mtName = within(activeMTContainert).getByText('Match')
   expect(mtName).toBeInTheDocument()
   const checkboxMtActive = screen.getByTestId(
     `checkbox-mt-active-${mtEnginesMock[1].name}`,

@@ -12,7 +12,7 @@ namespace Utils\Email;
 use Exception;
 use INIT;
 use Model\Users\UserStruct;
-use Routes;
+use Utils\Url\CanonicalRoutes;
 
 class SignupEmail extends AbstractEmail {
 
@@ -48,8 +48,8 @@ class SignupEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         return [
                 'user'           => $this->user->toArray(),
-                'activation_url' => Routes::signupConfirmation( $this->user->confirmation_token ),
-                'signup_url'     => Routes::appRoot()
+                'activation_url' => CanonicalRoutes::signupConfirmation( $this->user->confirmation_token ),
+                'signup_url'     => CanonicalRoutes::appRoot()
         ];
     }
 

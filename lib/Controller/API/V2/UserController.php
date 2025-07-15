@@ -10,7 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Model\Users\MetadataDao;
 use Model\Users\UserDao;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 class UserController extends AbstractStatefulKleinController {
     public function afterConstruct() {

@@ -1,7 +1,7 @@
 <?php
 
 use TestHelpers\AbstractTest;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 
 /**

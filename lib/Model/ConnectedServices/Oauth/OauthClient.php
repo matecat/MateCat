@@ -16,7 +16,7 @@ use Model\ConnectedServices\Oauth\Github\GithubProvider;
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\ConnectedServices\Oauth\LinkedIn\LinkedInProvider;
 use Model\ConnectedServices\Oauth\Microsoft\MicrosoftProvider;
-use Utils;
+use Utils\Tools\Utils;
 
 class OauthClient {
 

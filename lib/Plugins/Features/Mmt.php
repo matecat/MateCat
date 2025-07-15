@@ -16,7 +16,6 @@ use Controller\API\V1\NewController;
 use Engines\MMT\MMTServiceApiException;
 use Exception;
 use INIT;
-use Log;
 use Model\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
@@ -34,6 +33,7 @@ use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
+use Utils\Logger\Log;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -97,7 +97,7 @@ class Mmt extends BaseFeature {
         try {
 
             // if the MMT-preimport flag is enabled,
-            // then all the user's MyMemory keys must be sent to MMT
+            // then all the user's Match keys must be sent to MMT
             // when the engine is created
             if ( !empty( $newTestCreatedMT->extra_parameters[ 'MMT-preimport' ] ) ) {
                 $newTestCreatedMT->connectKeys( self::_getKeyringOwnerKeysByUid( $userStruct->uid ) );
@@ -305,7 +305,7 @@ class Mmt extends BaseFeature {
      *
      * @throws Exception
      * @throws MMTServiceApiException
-     * @see      \ProjectManager::setPrivateTMKeys()
+     * @see      \Model\ProjectManager\ProjectManager::setPrivateTMKeys()
      * Called in @see \userKeysController::doAction()
      *
      * @internal param UserStruct $userStruct

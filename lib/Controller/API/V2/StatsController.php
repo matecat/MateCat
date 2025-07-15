@@ -8,7 +8,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Model\Jobs\JobStruct;
 use Model\WordCount\WordCountStruct;
-use Utils\CatUtils;
+use Utils\Tools\CatUtils;
 
 class StatsController extends KleinController {
 

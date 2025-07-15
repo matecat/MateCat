@@ -11,8 +11,8 @@ namespace Controller\Traits;
 
 
 use Controller\Abstracts\IController;
-use Log;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 trait TimeLoggerTrait {
 

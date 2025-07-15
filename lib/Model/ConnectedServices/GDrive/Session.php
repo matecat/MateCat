@@ -17,7 +17,6 @@ use Google_Service_Drive;
 use Google_Service_Drive_Permission;
 use GuzzleHttp\Psr7\Response;
 use INIT;
-use Log;
 use Model\ConnectedServices\ConnectedServiceDao;
 use Model\ConnectedServices\ConnectedServiceStruct;
 use Model\Conversion\FilesConverter;
@@ -34,9 +33,10 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
-use Utils;
-use Utils\CatUtils;
 use Utils\Constants\Constants;
+use Utils\Logger\Log;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 /**
  * Class Session

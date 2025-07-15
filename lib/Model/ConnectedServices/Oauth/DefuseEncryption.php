@@ -1,10 +1,13 @@
 <?php
 
+namespace Model\ConnectedServices\Oauth;
+
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\BadFormatException;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
+use Exception;
 
 /**
  * Class DefuseEncryption.

@@ -17,20 +17,20 @@ use Model\Jobs\JobStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
-use PostProcess;
 use ReflectionException;
-use Utils;
 use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\LQA\PostProcess;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\TmKeyManager;
+use Utils\Tools\Utils;
 
 class GetContributionWorker extends AbstractWorker {
 
@@ -146,7 +146,7 @@ class GetContributionWorker extends AbstractWorker {
         foreach ( $content as &$match ) {
 
             if ( $match[ 'created_by' ] == 'MT!' ) {
-                $match[ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
+                $match[ 'created_by' ] = EngineConstants::MT; //Match returns MT!
             }
 
             // Convert &#10; to layer2 placeholder for the UI
@@ -393,14 +393,14 @@ class GetContributionWorker extends AbstractWorker {
         if ( $jobStruct->id_tms == 1 ) {
 
             /**
-             * MyMemory Enabled
+             * Match Enabled
              */
 
             $_config[ 'get_mt' ]  = true;
             $_config[ 'mt_only' ] = false;
             if ( $jobStruct->id_mt_engine != 1 ) {
                 /**
-                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 * Don't get MT contribution from Match ( Custom MT )
                  */
                 $_config[ 'get_mt' ] = false;
             }
@@ -409,19 +409,19 @@ class GetContributionWorker extends AbstractWorker {
                 $_config[ 'onlyprivate' ] = true;
             }
 
-            $_TMS = true; /* MyMemory */
+            $_TMS = true; /* Match */
 
         } else {
             if ( $jobStruct->id_tms == 0 && $jobStruct->id_mt_engine == 1 ) {
 
                 /**
-                 * MyMemory disabled but MT Enabled, and it is NOT a Custom one
-                 * So tell to MyMemory to get MT only
+                 * Match disabled but MT Enabled, and it is NOT a Custom one
+                 * So tell to Match to get MT only
                  */
                 $_config[ 'get_mt' ]  = true;
                 $_config[ 'mt_only' ] = true;
 
-                $_TMS = true; /* MyMemory */
+                $_TMS = true; /* Match */
 
             }
         }
@@ -558,7 +558,7 @@ class GetContributionWorker extends AbstractWorker {
                     // normalize data for saving `suggestions_array`
 
                     if ( $m[ 'created_by' ] == 'MT!'  ) {
-                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //MyMemory returns MT!
+                        $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //Match returns MT!
                     } else {
                         $user = new UserStruct();
 

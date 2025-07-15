@@ -8,7 +8,6 @@ use DateTimeZone;
 use Exception;
 use INIT;
 use InvalidArgumentException;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
 use Model\Engines\Structs\EngineStruct;
@@ -20,12 +19,13 @@ use Model\Users\UserStruct;
 use ReflectionException;
 use SplTempFileObject;
 use stdClass;
-use Utils;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class TMSService {
 
@@ -59,7 +59,7 @@ class TMSService {
      */
     public function __construct( FeatureSet $featureSet = null ) {
 
-        //get MyMemory service
+        //get Match service
         /** @var $mymemory_engine MyMemory */
         $mymemory_engine       = EnginesFactory::getInstance( 1 );
         $this->mymemory_engine = $mymemory_engine;
@@ -106,7 +106,7 @@ class TMSService {
     }
 
     /**
-     * Create a new MyMemory Key
+     * Create a new Match Key
      *
      * @return stdClass
      * @throws Exception
@@ -145,7 +145,7 @@ class TMSService {
     }
 
     /**
-     * Import TMX file in MyMemory
+     * Import TMX file in Match
      * @throws Exception
      */
     public function addTmxInMyMemory( TMSFile $file, UserStruct $user ): array {
@@ -222,7 +222,7 @@ class TMSService {
     }
 
     /**
-     * Import TMX file in MyMemory
+     * Import TMX file in Match
      *
      * @param TMSFile $file
      *
@@ -255,7 +255,7 @@ class TMSService {
                     throw new UnprocessableException( $message, $importStatus->responseStatus );
                 }
 
-                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
+                $message = 'Invalid TM key provided, please provide a valid Match key.';
                 throw new InvalidArgumentException( $message, $importStatus->responseStatus );
 
             default:
@@ -286,13 +286,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;
@@ -337,13 +337,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;

@@ -3,13 +3,13 @@
 namespace Model\DataAccess;
 
 use Exception;
-use Log;
 use Model\Database;
 use Model\Exceptions\ValidationError;
 use Model\IDatabase;
 use PDO;
 use PDOStatement;
 use ReflectionException;
+use Utils\Logger\Log;
 
 /**
  * Created by PhpStorm.

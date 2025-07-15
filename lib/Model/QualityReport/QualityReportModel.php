@@ -19,7 +19,7 @@ use Model\Users\UserDao;
 use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\RevisionFactory;
-use Utils;
+use Utils\Tools\Utils;
 
 
 class QualityReportModel {

@@ -13,7 +13,7 @@ use Controller\API\Commons\Exceptions\ValidationError;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class ChangePasswordModel {
 

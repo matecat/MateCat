@@ -12,7 +12,7 @@ namespace View\API\App\Json;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
 use Model\ConnectedServices\ConnectedServiceStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ConnectedService {
 

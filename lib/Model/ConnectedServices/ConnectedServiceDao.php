@@ -8,7 +8,7 @@ use Model\DataAccess\AbstractDao;
 use Model\Exceptions\ValidationError;
 use Model\Users\UserStruct;
 use PDO;
-use Utils;
+use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao {
 

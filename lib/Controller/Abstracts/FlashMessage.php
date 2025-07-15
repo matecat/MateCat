@@ -1,5 +1,9 @@
 <?php
 
+namespace Controller\Abstracts;
+use Bootstrap;
+use Exception;
+
 class FlashMessage {
 
     const KEY = 'flashMessages';

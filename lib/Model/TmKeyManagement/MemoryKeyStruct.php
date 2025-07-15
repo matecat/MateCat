@@ -39,14 +39,12 @@ class MemoryKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
     public function toArray( array $mask = null ): array {
         $result = (array)$this;
 
-        if ( $this->tm_key !== null ) {
-            /*
-             * this should already be done by '$result = (array)$this;'
-             * because TmKeyStruct as toArray method too
-             */
-            if ( $this->tm_key instanceof TmKeyStruct ) {
-                $result[ 'tm_key' ] = $this->tm_key->toArray();
-            }
+        /*
+         * this should already be done by '$result = (array)$this;'
+         * because TmKeyStruct as toArray method too
+         */
+        if ( $this->tm_key instanceof TmKeyStruct ) {
+            $result[ 'tm_key' ] = $this->tm_key->toArray();
         }
 
         return $result;

@@ -12,8 +12,8 @@ use Model\Jobs\ChunkDao;
 use Model\TranslationsSplit\SegmentSplitStruct;
 use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
-use Utils\CatUtils;
 use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class SplitSegmentController extends KleinController {
 

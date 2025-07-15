@@ -12,13 +12,13 @@ namespace Model\ProjectManager;
 
 use ArrayObject;
 use Exception;
-use Log;
 use Model\Database;
 use Model\Projects\ProjectDao;
 use PDOException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class ProjectManagerModel {
 

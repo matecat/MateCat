@@ -7,7 +7,10 @@
  *
  */
 
+namespace Model\ProjectManager;
+
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffParser;
@@ -34,7 +37,6 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\PayableRates\CustomPayableRateDao;
-use Model\ProjectManager\ProjectManagerModel;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -57,11 +59,12 @@ use Model\Xliff\XliffConfigTemplateStruct;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
-use Utils\CatUtils;
+use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
+use Utils\Logger\Log;
 use Utils\LQA\QA;
 use Utils\Shop\Cart;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -70,7 +73,12 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 use View\API\Commons\Error;
+use Model\Conversion\ZipArchiveHandler;
+use ArrayObject;
 
 class ProjectManager {
 
@@ -1170,7 +1178,7 @@ class ProjectManager {
      * @throws Exception
      */
     public function getAnalyzeURL() {
-        return Routes::analyze(
+        return CanonicalRoutes::analyze(
                 [
                         'project_name' => $this->projectStructure[ 'project_name' ],
                         'id_project'   => $this->projectStructure[ 'id_project' ],
@@ -1267,14 +1275,14 @@ class ProjectManager {
 
                     if ( $result[ 'completed' ] || strtotime( 'now' ) > $time ) {
 
-                        //"$fileName" has been loaded into MyMemory"
+                        //"$fileName" has been loaded into Match"
                         // OR the indexer is down or stopped for maintenance
                         // exit the loop, the import will be executed in a later time
                         break;
 
                     }
 
-                    //"waiting for "$fileName" to be loaded into MyMemory"
+                    //"waiting for "$fileName" to be loaded into Match"
                     sleep( 3 );
 
                 } catch ( Exception $e ) {
@@ -3056,7 +3064,7 @@ class ProjectManager {
         }
 
 
-        //check if the MyMemory keys provided by the user are already associated to him.
+        //check if the Match keys provided by the user are already associated to him.
         if ( $this->projectStructure[ 'userIsLogged' ] ) {
 
             $mkDao = new MemoryKeyDao( $this->dbHandler );
