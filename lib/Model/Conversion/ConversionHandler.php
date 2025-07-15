@@ -126,14 +126,14 @@ class ConversionHandler {
         // Convert the file
         $ocrCheck = new OCRCheck( $this->source_lang );
         if ( $ocrCheck->thereIsError( $file_path ) ) {
-            $this->result->changeCode( ConversionHandlerStatus::OCR_ERROR );
-            $this->result->addError( "File is not valid. OCR for RTL languages is not supported." );
+            $this->result->setErrorCode( ConversionHandlerStatus::OCR_ERROR );
+            $this->result->setErrorMessage( "File is not valid. OCR for RTL languages is not supported." );
 
             return null; //break project creation
         }
         if ( $ocrCheck->thereIsWarning( $file_path ) ) {
-            $this->result->changeCode( ConversionHandlerStatus::OCR_WARNING );
-            $this->result->addWarning( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
+            $this->result->setErrorCode( ConversionHandlerStatus::OCR_WARNING );
+            $this->result->setErrorMessage( "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental." );
         }
 
         if ( strpos( $this->target_lang, ',' ) !== false ) {
@@ -172,8 +172,8 @@ class ConversionHandler {
                     //custom error message passed directly to JavaScript client and displayed as is
                     $convertResult[ 'errorMessage' ] = "Error: File upload failed because you have Matecat running in multiple tabs. Please close all other Matecat tabs in your browser.";
 
-                    $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
-                    $this->result->addError( $convertResult[ 'errorMessage' ], AbstractFilesStorage::basename_fix( $this->file_name ) );
+                    $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
+                    $this->result->setErrorMessage( $convertResult[ 'errorMessage' ] );
 
                     unset( $cachedXliffPath );
 
@@ -184,8 +184,8 @@ class ConversionHandler {
 
                 Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
 
-                $this->result->changeCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
-                $this->result->addError( $e->getMessage() );
+                $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
+                $this->result->setErrorMessage( $e->getMessage() );
 
                 return null;
 
@@ -193,16 +193,16 @@ class ConversionHandler {
 
                 Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
 
-                $this->result->changeCode( ConversionHandlerStatus::S3_ERROR );
-                $this->result->addError( 'Sorry, file name too long. Try shortening it and try again.' );
+                $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
+                $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
 
                 return;
             }
 
         } else {
 
-            $this->result->changeCode( ConversionHandlerStatus::GENERIC_ERROR );
-            $this->result->addError( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ), AbstractFilesStorage::basename_fix( $this->file_name ) );
+            $this->result->setErrorCode( ConversionHandlerStatus::GENERIC_ERROR );
+            $this->result->setErrorMessage( $this->formatConversionFailureMessage( $convertResult[ 'errorMessage' ] ) );
 
             return null;
         }
@@ -211,7 +211,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->cookieDir;
+            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadDir;
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
             if ( is_file( $file_path ) ) {
