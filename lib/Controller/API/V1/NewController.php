@@ -62,7 +62,7 @@ class NewController extends KleinController {
 
     use ScanDirectoryForConvertedFiles;
 
-    const MAX_NUM_KEYS = 10;
+    const MAX_NUM_KEYS = 13;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -289,7 +289,6 @@ class NewController extends KleinController {
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
-        $instructions                              = filter_var( $this->request->param( 'instructions' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
@@ -321,7 +320,9 @@ class NewController extends KleinController {
         // Strip tags from instructions
         $instructions = [];
         if ( is_array( $this->request->param( 'instructions' ) ) ) {
-            foreach ( $this->request->param( 'instructions' ) as $value ) {
+            /** @var array $instructions */
+            $instructions = $this->request->param( 'instructions' );
+            foreach ( $instructions as $value ) {
                 $instructions[] = Utils::stripTagsPreservingHrefs( $value );
             }
 

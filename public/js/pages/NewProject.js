@@ -56,7 +56,7 @@ import {
 } from '../components/header/OnboardingTooltips'
 import {UploadFile} from '../components/createProject/UploadFile'
 import {flushSync} from 'react-dom'
-import DriveIcon from '../../../../img/icons/DriveIcon'
+import DriveIcon from '../../img/icons/DriveIcon'
 import useTemplates from '../hooks/useTemplates'
 import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFrameworkTab'
 import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'

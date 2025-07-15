@@ -14,7 +14,7 @@ import IconClose from '../icons/IconClose'
 import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
-import DriveIcon from '../../../../../img/icons/DriveIcon'
+import DriveIcon from '../../../img/icons/DriveIcon'
 import {isEqual} from 'lodash'
 
 export const UploadGdrive = () => {
