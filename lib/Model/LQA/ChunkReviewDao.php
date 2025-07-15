@@ -581,8 +581,8 @@ class ChunkReviewDao extends AbstractDao {
         total_tte = GREATEST( total_tte + VALUES( total_tte ), 0 ),        
         is_pass = IF( 
 				COALESCE(
-					( GREATEST( COALESCE( penalty_points, 0 ) + COALESCE( VALUES( penalty_points ), 0 ), 0 ) ) 
-					/ GREATEST( reviewed_words_count + VALUES( reviewed_words_count ), 0 ) * 1000 
+					penalty_points
+					/ reviewed_words_count * 1000 
 					, 0
 				) <= {$data[ 'force_pass_at' ]}, 1, 0
 		);";

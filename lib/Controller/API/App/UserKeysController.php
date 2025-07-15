@@ -8,6 +8,7 @@ use Database;
 use Exception;
 use Exceptions\NotFoundException;
 use InvalidArgumentException;
+use PDOException;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
@@ -69,6 +70,7 @@ class UserKeysController extends KleinController {
         $memoryKeyToUpdate = $this->getMemoryToUpdate( $request[ 'key' ], $request[ 'description' ] );
         $mkDao             = $this->getMkDao();
         $userMemoryKeys    = $mkDao->create( $memoryKeyToUpdate );
+
         $this->featureSet->run( 'postTMKeyCreation', [ $userMemoryKeys ], $this->user->uid );
 
         $this->response->json( [
@@ -122,6 +124,15 @@ class UserKeysController extends KleinController {
      * @return array
      */
     protected function getKeyUsersInfo( array $userMemoryKeys ): array {
+
+        if(empty($userMemoryKeys)){
+            return [
+                    'errors'  => [],
+                    "data"    => [],
+                    "success" => true
+            ];
+        }
+
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
             $_userStructs[] = new Users_ClientUserFacade( $userStruct );
@@ -154,7 +165,7 @@ class UserKeysController extends KleinController {
         // <details x=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:2 open ontoggle="prompt(document.cookie);">
         // in this case, an error MUST be thrown
         if ( $_POST[ 'description' ] and $_POST[ 'description' ] !== $description ) {
-            throw new InvalidArgumentException( "Invalid key description", -3 );
+            throw new InvalidArgumentException( "<span>Resource names cannot contain the following characters:</span><ul><li><</li><li>\"</li><li>'</li></ul>", -3 );
         }
 
         return [

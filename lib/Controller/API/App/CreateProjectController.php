@@ -3,6 +3,7 @@
 namespace API\App;
 
 use AbstractControllers\AbstractStatefulKleinController;
+use API\Commons\Traits\ScanDirectoryForConvertedFiles;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use ConnectedServices\Google\GDrive\Session;
@@ -14,13 +15,10 @@ use Engine;
 use Engines_DeepL;
 use Engines_MMT;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use INIT;
 use InvalidArgumentException;
 use Langs\Languages;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use PayableRates\CustomPayableRateDao;
 use PayableRates\CustomPayableRateStruct;
 use ProjectManager;
@@ -41,6 +39,8 @@ use Xliff\XliffConfigTemplateDao;
 use Xliff\XliffConfigTemplateStruct;
 
 class CreateProjectController extends AbstractStatefulKleinController {
+
+    use ScanDirectoryForConvertedFiles;
 
     private array $data     = [];
     private array $metadata = [];
@@ -96,45 +96,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 ]
         );
 
-        //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
-
-        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
-        $newArFiles = [];
+        //Search in fileNames if there's a zip file. If it's present, get filenames and add them instead of the zip file.
         $fs         = FilesStorageFactory::create();
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-                $fs->cacheZipArchive( sha1_file( $uploadDir . DIRECTORY_SEPARATOR . $__fName ), $uploadDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $uploadDir );
-
-                //fetch cache links, created by converter, from upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //check if file begins with the name of the zip file.
-                    // If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName ) {
-                        //add file name to the files array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //this file was not in a zip. Add it normally
-
-                if ( file_exists( $uploadDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $uploadDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $uploadDir  = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE[ 'upload_token' ];
+        $filesFound = $this->getFilesList( $fs, $arFiles, $uploadDir );
 
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
@@ -142,8 +107,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'project_name' ]                          = $this->data[ 'project_name' ];
         $projectStructure[ 'private_tm_key' ]                        = $this->data[ 'private_tm_key' ];
         $projectStructure[ 'uploadToken' ]                           = $_COOKIE[ 'upload_token' ];
-        $projectStructure[ 'array_files' ]                           = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]                      = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]                           = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]                      = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
         $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
@@ -158,10 +123,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'target_language_mt_engine_association' ] = $this->data[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
         $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
-        $projectStructure[ 'dictation' ]                             = ( !empty( $this->data[ 'dictation' ] ) ) ? $this->data[ 'dictation' ] : null;
-        $projectStructure[ 'show_whitespace' ]                       = ( !empty( $this->data[ 'show_whitespace' ] ) ) ? $this->data[ 'show_whitespace' ] : null;
-        $projectStructure[ 'character_counter' ]                     = ( !empty( $this->data[ 'character_counter' ] ) ) ? $this->data[ 'character_counter' ] : null;
-        $projectStructure[ 'ai_assistant' ]                          = ( !empty( $this->data[ 'ai_assistant' ] ) ) ? $this->data[ 'ai_assistant' ] : null;
         $projectStructure[ 'tm_prioritization' ]                     = ( !empty( $this->data[ 'tm_prioritization' ] ) ) ? $this->data[ 'tm_prioritization' ] : null;
         $projectStructure[ 'character_counter_mode' ]                = ( !empty( $this->data[ 'character_counter_mode' ] ) ) ? $this->data[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ]          = ( !empty( $this->data[ 'character_counter_count_tags' ] ) ) ? $this->data[ 'character_counter_count_tags' ] : null;
@@ -213,7 +174,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
         $projectStructure[ 'owner' ]        = $this->user->email;
-        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid useless query
+        $projectManager->setTeam( $this->data[ 'team' ] ); // set the team object to avoid a useless query
 
         //set features override
         $projectStructure[ 'project_features' ] = $this->data[ 'project_features' ];
@@ -263,12 +224,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $deepl_formality               = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $project_completion            = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $get_public_matches            = filter_var( $this->request->param( 'get_public_matches' ), FILTER_VALIDATE_BOOLEAN );
-        $dictation                     = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
-        $show_whitespace               = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
-        $character_counter             = filter_var( $this->request->param( 'character_counter' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags  = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode        = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
-        $ai_assistant                  = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
         $dialect_strict                = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
         $filters_extraction_parameters = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING );
         $xliff_parameters              = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING );
@@ -295,14 +252,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $private_tm_key = [];
         }
 
-        if ( $array_keys ) { // some keys are selected from panel
+        if ( $array_keys ) { // some keys are selected from the panel
 
             //remove duplicates
             foreach ( $array_keys as $value ) {
                 if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
                         && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
                 ) {
-                    //same key was get from keyring, remove
+                    //the same key was get from keyring, remove
                     $private_tm_key = [];
                 }
             }
@@ -334,12 +291,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,
                 'get_public_matches'            => $get_public_matches,
-                'dictation'                     => ( !empty( $dictation ) ) ? $dictation : null,
-                'show_whitespace'               => ( !empty( $show_whitespace ) ) ? $show_whitespace : null,
-                'character_counter'             => ( !empty( $character_counter ) ) ? $character_counter : null,
                 'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
                 'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'ai_assistant'                  => ( !empty( $ai_assistant ) ) ? $ai_assistant : null,
                 'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
                 'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
                 'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
@@ -420,16 +373,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // new raw counter model
         $options = [ Projects_MetadataDao::WORD_COUNT_TYPE_KEY => Projects_MetadataDao::WORD_COUNT_RAW ];
 
-        if ( isset( $data[ 'lexiqa' ] ) ) {
-            $options[ 'lexiqa' ] = $data[ 'lexiqa' ];
-        }
-
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
-        }
-
-        if ( isset( $data[ 'tag_projection' ] ) ) {
-            $options[ 'tag_projection' ] = $data[ 'tag_projection' ];
         }
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
@@ -786,47 +731,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $team;
-    }
-
-    /**
-     * @param $filename
-     *
-     * @return array
-     *
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
     }
 
     private function clearSessionFiles(): void {

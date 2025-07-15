@@ -16,6 +16,7 @@ use Database;
 use Exception;
 use Jobs_JobStruct;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use ReflectionException;
 
 class SegmentFilterDao extends AbstractDao {
 
@@ -23,9 +24,10 @@ class SegmentFilterDao extends AbstractDao {
      * @param Jobs_JobStruct   $chunk
      * @param FilterDefinition $filter
      *
-     * @return array
+     * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      */
-    public static function findSegmentIdsBySimpleFilter( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
+    public static function findSegmentIdsBySimpleFilter( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
 
         $sql = "SELECT st.id_segment AS id
             FROM
@@ -37,9 +39,6 @@ class SegmentFilterDao extends AbstractDao {
                BETWEEN :job_first_segment AND :job_last_segment
                AND st.status = :status";
 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
         $data = [
                 'id_job'            => $chunk->id,
                 'job_first_segment' => $chunk->job_first_segment,
@@ -48,9 +47,11 @@ class SegmentFilterDao extends AbstractDao {
                 'status'            => $filter->getSegmentStatus()
         ];
 
-        $stmt->execute( $data );
+        $thisDao = new self();
+        $stmt    = $thisDao->_getStatementForQuery( $sql );
 
-        return $stmt->fetchAll();
+        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $data );
+
     }
 
     /**
@@ -58,7 +59,7 @@ class SegmentFilterDao extends AbstractDao {
      *
      * @return object
      */
-    private static function __getWhereFromFilter( FilterDefinition $filter ) {
+    private static function __getWhereFromFilter( FilterDefinition $filter ): object {
         $where      = '';
         $where_data = [];
 
@@ -71,7 +72,7 @@ class SegmentFilterDao extends AbstractDao {
     }
 
 
-    private static function __getData( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
+    private static function __getData( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
         $data = [
                 'id_job'            => $chunk->id,
                 'job_first_segment' => $chunk->job_first_segment,
@@ -138,7 +139,7 @@ class SegmentFilterDao extends AbstractDao {
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
                                 'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
@@ -157,7 +158,7 @@ class SegmentFilterDao extends AbstractDao {
      *
      * @return object
      */
-    private static function __getLimit( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
+    private static function __getLimit( Jobs_JobStruct $chunk, FilterDefinition $filter ): object {
 
         $where = self::__getWhereFromFilter( $filter );
 
@@ -184,10 +185,6 @@ class SegmentFilterDao extends AbstractDao {
         $stmt->execute( $data );
         $count = $stmt->rowCount();
 
-        if ( $count == 0 ) {
-            // TODO: handle case
-        }
-
         $limit = round( ( $count / 100 ) * $filter->sampleSize() );
 
         return (object)[
@@ -204,7 +201,7 @@ class SegmentFilterDao extends AbstractDao {
      * @return IDaoStruct[]
      * @throws Exception
      */
-    public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
+    public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter );
@@ -276,20 +273,20 @@ class SegmentFilterDao extends AbstractDao {
         $thisDao = new self();
         $stmt    = $thisDao->_getStatementForQuery( $sql );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct, $data );
+        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $data );
     }
 
     /**
-     * @param $limit
-     * @param $where
+     * @param object $limit
+     * @param object $where
      *
      * @return string
      */
-    public static function getSqlForRegularIntervals( $limit, $where ) {
+    public static function getSqlForRegularIntervals( object $limit, object $where ): string {
 
         $ratio = round( $limit->count / $limit->limit );
 
-        $sql = "SELECT id FROM (
+        return "SELECT id FROM (
             SELECT st.id_segment AS id,
             @curRow := @curRow + 1 AS row_number
 
@@ -305,12 +302,10 @@ class SegmentFilterDao extends AbstractDao {
            WHERE 1
            $where->sql
            ORDER BY st.id_segment ASC
-           ) sub WHERE row_number % $ratio = 0 ";
-
-        return $sql;
+           ) sub WHERE `row_number` % $ratio = 0 ";
     }
 
-    public static function getSqlForEditDistance( $limit, $where, $sort ) {
+    public static function getSqlForEditDistance( object $limit, object $where, string $sort ): string {
 
         $sqlSort = '';
 
@@ -322,7 +317,7 @@ class SegmentFilterDao extends AbstractDao {
             }
         }
 
-        $sql = "SELECT st.id_segment AS id
+        return "SELECT st.id_segment AS id
               FROM
                segment_translations st JOIN jobs
                ON jobs.id = st.id_job
@@ -334,12 +329,10 @@ class SegmentFilterDao extends AbstractDao {
             WHERE 1
                $where->sql
                ORDER BY st.edit_distance $sqlSort
-               LIMIT $limit->limit order by id ";
-
-        return $sql;
+               LIMIT $limit->limit ;";
     }
 
-    public static function getSqlForSegmentLength( $limit, $where, $sort ) {
+    public static function getSqlForSegmentLength( object $limit, object $where, string $sort ): string {
 
         $sqlSort = '';
 
@@ -351,7 +344,7 @@ class SegmentFilterDao extends AbstractDao {
             }
         }
 
-        $sql = "SELECT st.id_segment AS id
+        return "SELECT st.id_segment AS id
           FROM
            segment_translations st
            JOIN jobs ON jobs.id = st.id_job
@@ -364,12 +357,10 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY CHAR_LENGTH(s.segment) $sqlSort
            LIMIT $limit->limit";
-
-        return $sql;
     }
 
-    public static function getSqlForUnlocked( $where ) {
-        $sql = "
+    public static function getSqlForUnlocked( object $where ): string {
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -383,13 +374,11 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
-    public static function getSqlForMatchType( $where ) {
+    public static function getSqlForMatchType( object $where ): string {
 
-        $sql = "
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -403,13 +392,11 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
-    public static function getSqlForIce( $where ) {
+    public static function getSqlForIce( object $where ): string {
 
-        $sql = "
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -426,13 +413,11 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
-    public static function getSqlForModifiedIce( $where ) {
+    public static function getSqlForModifiedIce( object $where ): string {
 
-        $sql = "
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -449,14 +434,12 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
 
-    public static function getSqlForRepetition( $where ) {
+    public static function getSqlForRepetition( object $where ): string {
 
-        $sql = "
+        return "
             SELECT id_segment AS id, segment_hash FROM segment_translations JOIN(
                 SELECT 
                     GROUP_CONCAT( st.id_segment ) AS id,
@@ -476,13 +459,11 @@ class SegmentFilterDao extends AbstractDao {
             ) AS REPETITIONS ON REPETITIONS.hash = segment_translations.segment_hash AND FIND_IN_SET( id_segment, REPETITIONS.id )
             GROUP BY id_segment
         ";
-
-        return $sql;
     }
 
-    public static function getSqlForMatches( $where ) {
+    public static function getSqlForMatches( object $where ): string {
 
-        $sql = "
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -497,24 +478,22 @@ class SegmentFilterDao extends AbstractDao {
            $where->sql
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
-    public static function getSqlForToDo( $where, $isReview = false, $isSecondPassReview = false ) {
+    public static function getSqlForToDo( object $where, bool $isReview = false, bool $isSecondPassReview = false ): string {
 
         $sql_condition = "";
         $sql_sp        = "";
 
-        if($isReview) {
+        if ( $isReview ) {
             $sql_condition = " OR st.status = :status_translated ";
         }
 
-        if($isSecondPassReview) {
+        if ( $isSecondPassReview ) {
             $sql_condition = " OR st.status = :status_translated OR st.status = :status_approved ";
         }
 
-        $sql = "
+        return "
           SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
@@ -530,8 +509,6 @@ class SegmentFilterDao extends AbstractDao {
            " . $sql_sp . "
            ORDER BY st.id_segment
         ";
-
-        return $sql;
     }
 
     protected function _buildResult( array $array_result ) {

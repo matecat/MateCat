@@ -292,7 +292,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
     /**
      * @return string
      */
-    public function getStandardPenaltyString(): string { //YYY check all engines to honor this new feature (variable penalty)
+    public function getStandardMtPenaltyString(): string {
         return 100 - $this->getMtPenalty() . "%";
     }
 
@@ -443,7 +443,7 @@ abstract class  Engines_AbstractEngine implements Engines_EngineInterface {
         $mt_match_res = new Engines_Results_MyMemory_Matches( [
                 'raw_segment'     => $raw_segment,
                 'raw_translation' => $mt_result->translatedText,
-                'match'           => $this->getStandardPenaltyString(),
+                'match'           => $this->getStandardMtPenaltyString(),
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" )
         ] );

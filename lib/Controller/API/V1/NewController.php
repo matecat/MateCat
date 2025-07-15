@@ -4,15 +4,14 @@ namespace API\V1;
 
 use AbstractControllers\KleinController;
 use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Traits\ScanDirectoryForConvertedFiles;
 use API\Commons\Validators\LoginValidator;
 use BasicFeatureStruct;
 use Constants;
-use Constants\ConversionHandlerStatus;
 use Constants_ProjectStatus;
 use Constants_TmKeyPermissions;
-use Conversion\ConvertedFileModel;
-use ConversionHandler;
-use ConvertFile;
+use Conversion\FilesConverter;
+use Conversion\Upload;
 use Database;
 use Engine;
 use Engines_DeepL;
@@ -30,8 +29,6 @@ use Langs\Languages;
 use Log;
 use LQA\ModelDao;
 use LQA\ModelStruct;
-use Matecat\XliffParser\Utils\Files as XliffFiles;
-use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 use MTQE\PayableRate\MTQEPayableRateTemplateDao;
 use MTQE\Templates\DTO\MTQEWorkflowParams;
@@ -45,7 +42,6 @@ use QAModelTemplate\QAModelTemplateDao;
 use QAModelTemplate\QAModelTemplateStruct;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
-use stdClass;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 use Teams\MembershipDao;
@@ -55,18 +51,18 @@ use TmKeyManagement_MemoryKeyStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use TMS\TMSService;
-use Upload;
 use Utils;
 use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
 use Validator\MMTValidator;
 use Xliff\XliffConfigTemplateDao;
-use ZipArchiveExtended;
 
 class NewController extends KleinController {
 
-    const MAX_NUM_KEYS = 13;
+    use ScanDirectoryForConvertedFiles;
+
+    const MAX_NUM_KEYS = 10;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -105,195 +101,41 @@ class NewController extends KleinController {
             $request[ 'project_name' ] = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        $cookieDir = $uploadFile->getDirUploadToken();
-        $intDir    = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $cookieDir;
-        $errDir    = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $cookieDir;
+        $uploadTokenValue = $uploadFile->getDirUploadToken();
+        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
-        $status = [];
+        $converter = new FilesConverter(
+                $arFiles,
+                $request[ 'source_lang' ],
+                $request[ 'target_lang' ],
+                $uploadDir,
+                $errDir,
+                $uploadTokenValue,
+                $request[ 'segmentation_rule' ],
+                $this->featureSet,
+                $request[ 'filters_extraction_parameters' ],
+        );
 
-        foreach ( $arFiles as $file_name ) {
-            $ext = AbstractFilesStorage::pathinfo_fix( $file_name, PATHINFO_EXTENSION );
+        $converter->convertFiles();
 
-            $conversionHandler = new ConversionHandler();
-            $conversionHandler->setFileName( $file_name );
-            $conversionHandler->setSourceLang( $request[ 'source_lang' ] );
-            $conversionHandler->setTargetLang( $request[ 'target_lang' ] );
-            $conversionHandler->setSegmentationRule( $request[ 'segmentation_rule' ] );
-            $conversionHandler->setCookieDir( $cookieDir );
-            $conversionHandler->setIntDir( $intDir );
-            $conversionHandler->setErrDir( $errDir );
-            $conversionHandler->setFeatures( $this->featureSet );
-            $conversionHandler->setUserIsLogged( $this->userIsLogged );
-            $conversionHandler->setFiltersExtractionParameters( $request[ 'filters_extraction_parameters' ] );
-
-            if ( $ext == "zip" ) {
-                // this makes the ConversionHandler accumulate eventual errors on files and continue
-                $conversionHandler->setStopOnFileException( false );
-                $fileObjects = $conversionHandler->extractZipFile();
-                Log::doJsonLog( 'fileObjets', $fileObjects );
-
-                // call convertFileWrapper and start conversions for each file
-                if ( $conversionHandler->uploadError ) {
-                    $fileErrors = $conversionHandler->getUploadedFiles();
-
-                    foreach ( $fileErrors as $fileError ) {
-                        if ( count( $fileError->error ) == 0 ) {
-                            continue;
-                        }
-
-                        $brokenFileName = ZipArchiveExtended::getFileName( $fileError->name );
-                        $result         = new ConvertedFileModel( $fileError->error[ 'code' ] );
-                        $result->addError( $fileError->error[ 'message' ], $brokenFileName );
-                    }
-                }
-
-                $realFileObjectInfo  = $fileObjects;
-                $realFileObjectNames = array_map(
-                        [ 'ZipArchiveExtended', 'getFileName' ],
-                        $fileObjects
-                );
-
-                foreach ( $realFileObjectNames as $i => &$fileObject ) {
-                    $__fileName     = $fileObject;
-                    $__realFileName = $realFileObjectInfo[ $i ];
-                    $filesize       = filesize( $intDir . DIRECTORY_SEPARATOR . $__realFileName );
-
-                    $fileObject               = [
-                            'name' => $__fileName,
-                            'size' => $filesize
-                    ];
-                    $realFileObjectInfo[ $i ] = $fileObject;
-                }
-
-                $result[ 'data' ][ $file_name ] = json_encode( $realFileObjectNames );
-                $stdFileObjects                 = [];
-
-                if ( $fileObjects !== null ) {
-                    foreach ( $fileObjects as $fName ) {
-
-                        if ( isset( $fileErrors->{$fName} ) && !empty( $fileErrors->{$fName}->error ) ) {
-                            continue;
-                        }
-
-                        $newStdFile       = new stdClass();
-                        $newStdFile->name = $fName;
-                        $stdFileObjects[] = $newStdFile;
-
-                    }
-                } else {
-                    $errors             = $conversionHandler->getResult();
-                    $errors             = array_map( [ 'Upload', 'formatExceptionMessage' ], $errors->getErrors() );
-                    $result[ 'errors' ] = array_merge( $result[ 'errors' ], $errors );
-                    Log::doJsonLog( "Zip error:" . json_encode( $result[ 'errors' ] ) );
-
-                    throw new RuntimeException( "Zip Error" );
-                }
-
-                /* Do conversions here */
-                foreach ( $stdFileObjects as $stdFileObject ) {
-
-                    $converter = new ConvertFile(
-                            [ $stdFileObject->name ],
-                            $request[ 'source_lang' ],
-                            $request[ 'target_lang' ],
-                            $intDir,
-                            $errDir,
-                            $cookieDir,
-                            $request[ 'segmentation_rule' ],
-                            $this->featureSet,
-                            $request[ 'filters_extraction_parameters' ],
-                            false );
-
-                    $converter->setUser( $this->user );
-                    $converter->convertFiles();
-
-                    $status = $errors = $converter->getErrors();
-
-                    if ( !empty( $errors ) ) {
-
-                        $result = new ConvertedFileModel( ConversionHandlerStatus::ZIP_HANDLING );
-                        $result->changeCode( 500 );
-                        $savedErrors    = $result->getErrors();
-                        $brokenFileName = ZipArchiveExtended::getFileName( array_keys( $errors )[ 0 ] );
-
-                        if ( !isset( $savedErrors[ $brokenFileName ] ) ) {
-                            $result->addError( $errors[ 0 ][ 'message' ], $brokenFileName );
-                        }
-
-                        $result = $status = [
-                                'code'   => 500,
-                                'data'   => [], // Is it correct????
-                                'errors' => $errors,
-                        ];
-                    }
-
-                }
-            } else {
-                $conversionHandler->processConversion();
-                $res = $conversionHandler->getResult();
-                if ( $res->getCode() < 0 ) {
-                    $status[] = [
-                            'code'     => $res->getCode(),
-                            'data'     => $res->getData(), // Is it correct????
-                            'errors'   => $res->getErrors(),
-                            'warnings' => $res->getWarnings(),
-                    ];
-                }
-            }
+        $result      = $converter->getResult();
+        $errorStatus = [];
+        if ( $result->hasErrors() ) {
+            $errorStatus = $result->getErrors();
         }
-
-        $status = array_values( $status );
 
         // Upload errors handling
-        if ( !empty( $status ) ) {
-            throw new RuntimeException( 'Project Conversion Failure' );
+        if ( !empty( $errorStatus ) ) {
+            $this->response->code( 400 );
+            $this->response->json( [ 'status' => 'KO', 'errors' => $errorStatus ] );
+
+            return;
         }
 
-        /* Do conversions here */
-        if ( !empty( $result[ 'data' ] ) ) {
-            foreach ( $result[ 'data' ] as $zipFiles ) {
-                $zipFiles  = json_decode( $zipFiles, true );
-                $fileNames = array_column( $zipFiles, 'name' );
-                $arFiles   = array_merge( $arFiles, $fileNames );
-            }
-        }
+        $result = $result->getData();
 
-        $newArFiles = [];
-
-        foreach ( $arFiles as $__fName ) {
-            if ( 'zip' == AbstractFilesStorage::pathinfo_fix( $__fName, PATHINFO_EXTENSION ) ) {
-
-
-                $fs->cacheZipArchive( sha1_file( $intDir . DIRECTORY_SEPARATOR . $__fName ), $intDir . DIRECTORY_SEPARATOR . $__fName );
-
-                $linkFiles = scandir( $intDir );
-
-                //fetch cache links, created by converter, from the upload directory
-                foreach ( $linkFiles as $storedFileName ) {
-                    //Check if the file begins with the name of the zip file.
-                    //If so, then it was stored in the zip file.
-                    if ( strpos( $storedFileName, $__fName ) !== false &&
-                            substr( $storedFileName, 0, strlen( $__fName ) ) == $__fName
-                    ) {
-                        //add the file name to the file's array
-                        $newArFiles[] = $storedFileName;
-                    }
-                }
-
-            } else { //This file was not in a zip. Add it normally
-                if ( file_exists( $intDir . DIRECTORY_SEPARATOR . $__fName ) ) {
-                    $newArFiles[] = $__fName;
-                }
-            }
-        }
-
-        $arFiles = $newArFiles;
-        $arMeta  = [];
-
-        // create array_files_meta
-        foreach ( $arFiles as $arFile ) {
-            $arMeta[] = $this->getFileMetadata( $intDir . DIRECTORY_SEPARATOR . $arFile );
-        }
+        $filesFound = $this->getFilesList( FilesStorageFactory::create(), $arFiles, $uploadDir );
 
         $projectManager                                 = new ProjectManager();
         $projectStructure                               = $projectManager->getProjectStructure();
@@ -305,8 +147,8 @@ class NewController extends KleinController {
         $projectStructure[ 'private_tm_pass' ]          = $request[ 'private_tm_pass' ];
         $projectStructure[ 'tm_prioritization' ]        = $request[ 'tm_prioritization' ];
         $projectStructure[ 'uploadToken' ]              = $uploadFile->getDirUploadToken();
-        $projectStructure[ 'array_files' ]              = $arFiles; //list of file name
-        $projectStructure[ 'array_files_meta' ]         = $arMeta; //list of file metadata
+        $projectStructure[ 'array_files' ]              = $filesFound[ 'arrayFiles' ]; //list of file names
+        $projectStructure[ 'array_files_meta' ]         = $filesFound[ 'arrayFilesMeta' ]; //list of file metadata
         $projectStructure[ 'source_language' ]          = $request[ 'source_lang' ];
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
@@ -331,10 +173,6 @@ class NewController extends KleinController {
         $projectStructure[ 'id_customer' ]  = $this->user->getEmail();
         $projectManager->setTeam( $request[ 'team' ] );
 
-        $projectStructure[ 'ai_assistant' ]                 = ( !empty( $request[ 'ai_assistant' ] ) ) ? $request[ 'ai_assistant' ] : null;
-        $projectStructure[ 'dictation' ]                    = ( !empty( $request[ 'dictation' ] ) ) ? $request[ 'dictation' ] : null;
-        $projectStructure[ 'show_whitespace' ]              = ( !empty( $request[ 'show_whitespace' ] ) ) ? $request[ 'show_whitespace' ] : null;
-        $projectStructure[ 'character_counter' ]            = ( !empty( $request[ 'character_counter' ] ) ) ? $request[ 'character_counter' ] : null;
         $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
@@ -439,15 +277,12 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $ai_assistant                              = filter_var( $this->request->param( 'ai_assistant' ), FILTER_VALIDATE_BOOLEAN );
-        $character_counter                         = filter_var( $this->request->param( 'character_counter' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_count_tags              = filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN );
         $character_counter_mode                    = filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $due_date                                  = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $deepl_formality                           = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING );
         $deepl_id_glossary                         = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING );
         $dialect_strict                            = filter_var( $this->request->param( 'dialect_strict' ), FILTER_SANITIZE_STRING );
-        $dictation                                 = filter_var( $this->request->param( 'dictation' ), FILTER_VALIDATE_BOOLEAN );
         $filters_extraction_parameters             = filter_var( $this->request->param( 'filters_extraction_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $get_public_matches                        = (bool)filter_var( $this->request->param( 'get_public_matches' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0, 'max_range' => 1 ] ] ); // used to set the default value of get_public_matches to 1
@@ -455,7 +290,6 @@ class NewController extends KleinController {
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $instructions                              = filter_var( $this->request->param( 'instructions' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
-        $lexiqa                                    = filter_var( $this->request->param( 'lexiqa' ), FILTER_VALIDATE_BOOLEAN );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
@@ -476,20 +310,26 @@ class NewController extends KleinController {
         $project_completion                        = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
         $qa_model_template_id                      = filter_var( $this->request->param( 'qa_model_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $show_whitespace                           = filter_var( $this->request->param( 'show_whitespace' ), FILTER_VALIDATE_BOOLEAN );
         $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
         $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $tag_projection                            = filter_var( $this->request->param( 'tag_projection' ), FILTER_VALIDATE_BOOLEAN );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
-        /**
-         * Uber plugin callback
-         */
-        $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        // Strip tags from instructions
+        $instructions = [];
+        if ( is_array( $this->request->param( 'instructions' ) ) ) {
+            foreach ( $this->request->param( 'instructions' ) as $value ) {
+                $instructions[] = Utils::stripTagsPreservingHrefs( $value );
+            }
+
+            /**
+             * Uber plugin callback
+             */
+            $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        }
 
         if ( empty( $_FILES ) ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
@@ -540,16 +380,8 @@ class NewController extends KleinController {
             $metadata[ 'dialect_strict' ] = $dialect_strict;
         }
 
-        if ( !empty( $lexiqa ) ) {
-            $metadata[ 'lexiqa' ] = $lexiqa;
-        }
-
         if ( !empty( $speech2text ) ) {
             $metadata[ 'speech2text' ] = $speech2text;
-        }
-
-        if ( !empty( $tag_projection ) ) {
-            $metadata[ 'tag_projection' ] = $tag_projection;
         }
 
         if ( !empty( $project_completion ) ) {
@@ -603,17 +435,11 @@ class NewController extends KleinController {
                 'qaModelTemplate'                           => $qaModelTemplate,
                 'payableRateModelTemplate'                  => $payableRateModelTemplate,
                 'instructions'                              => $instructions,
-                'lexiqa'                                    => $lexiqa,
                 'speech2text'                               => $speech2text,
-                'tag_projection'                            => $tag_projection,
                 'project_features'                          => $project_features,
                 'mt_evaluation'                             => $mt_evaluation,
-                '$character_counter'                        => $character_counter,
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
-                'dictation'                                 => $dictation,
-                'show_whitespace'                           => $show_whitespace,
-                'ai_assistant'                              => $ai_assistant,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null
         ];
@@ -899,7 +725,7 @@ class NewController extends KleinController {
         if ( empty( $private_tm_key ) ) {
             $uniformedFileObject = Upload::getUniformGlobalFilesStructure( $_FILES );
             foreach ( $uniformedFileObject as $_fileinfo ) {
-                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                $pathinfo = AbstractFilesStorage::pathinfo_fix( $_fileinfo->name );
                 if ( $pathinfo[ 'extension' ] == 'tmx' ) {
                     $private_tm_key[] = [ 'key' => 'new' ];
                     break;
@@ -1224,10 +1050,10 @@ class NewController extends KleinController {
      * @param null $filters_extraction_parameters
      * @param null $filters_extraction_parameters_template_id
      *
-     * @return FiltersConfigTemplateStruct|mixed|null
+     * @return FiltersConfigTemplateStruct|null
      * @throws Exception
      */
-    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ) {
+    private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
             // first check if `filters_extraction_parameters` is a valid JSON
@@ -1416,43 +1242,4 @@ class NewController extends KleinController {
         ];
     }
 
-    /**
-     * @param $filename
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function getFileMetadata( $filename ): array {
-        $info          = XliffProprietaryDetect::getInfo( $filename );
-        $isXliff       = XliffFiles::isXliff( $filename );
-        $isGlossary    = XliffFiles::isGlossaryFile( $filename );
-        $isTMX         = XliffFiles::isTMXFile( $filename );
-        $getMemoryType = XliffFiles::getMemoryFileType( $filename );
-
-        $forceXliff      = $this->getFeatureSet()->filter(
-                'forceXLIFFConversion',
-                INIT::$FORCE_XLIFF_CONVERSION,
-                $this->userIsLogged,
-                $info[ 'info' ][ 'dirname' ] . DIRECTORY_SEPARATOR . "$filename"
-        );
-        $mustBeConverted = XliffProprietaryDetect::fileMustBeConverted( $filename, $forceXliff, INIT::$FILTERS_ADDRESS );
-
-        $metadata                      = [];
-        $metadata[ 'basename' ]        = $info[ 'info' ][ 'basename' ];
-        $metadata[ 'dirname' ]         = $info[ 'info' ][ 'dirname' ];
-        $metadata[ 'extension' ]       = $info[ 'info' ][ 'extension' ];
-        $metadata[ 'filename' ]        = $info[ 'info' ][ 'filename' ];
-        $metadata[ 'mustBeConverted' ] = $mustBeConverted;
-        $metadata[ 'getMemoryType' ]   = $getMemoryType;
-        $metadata[ 'isXliff' ]         = $isXliff;
-        $metadata[ 'isGlossary' ]      = $isGlossary;
-        $metadata[ 'isTMX' ]           = $isTMX;
-        $metadata[ 'proprietary' ]     = [
-                'proprietary'            => $info[ 'proprietary' ],
-                'proprietary_name'       => $info[ 'proprietary_name' ],
-                'proprietary_short_name' => $info[ 'proprietary_short_name' ],
-        ];
-
-        return $metadata;
-    }
 }
