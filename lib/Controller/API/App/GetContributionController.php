@@ -3,12 +3,14 @@
 namespace API\App;
 
 use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
 use API\Commons\Validators\LoginValidator;
 use Chunks_ChunkDao;
 use Contribution\ContributionRequestStruct;
 use Contribution\Request;
 use Exception;
 use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use FeatureSet;
 use Files\FilesPartsDao;
 use INIT;
@@ -19,12 +21,14 @@ use Projects_MetadataDao;
 use ReflectionException;
 use Segments_SegmentDao;
 use Segments_SegmentOriginalDataDao;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use TmKeyManagement_Filter;
 use Users_UserDao;
 
 class GetContributionController extends KleinController {
 
-    protected int $id_job;
+    protected int    $id_job;
     protected string $received_password;
 
     protected function afterConstruct() {
@@ -48,8 +52,6 @@ class GetContributionController extends KleinController {
         $received_password   = $request[ 'received_password' ];
         $concordance_search  = $request[ 'concordance_search' ];
         $switch_languages    = $request[ 'switch_languages' ];
-        $context_list_before = $request[ 'context_list_before' ];
-        $context_list_after  = $request[ 'context_list_after' ];
         $cross_language      = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
@@ -62,11 +64,23 @@ class GetContributionController extends KleinController {
         $projectStruct = $jobStruct->getProject();
         $this->featureSet->loadForProject( $projectStruct );
 
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
+
+        $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
+            return $Filter->fromLayer2ToLayer1( $context );
+        }, $request[ 'context_list_before' ] );
+
+        $context_list_after = array_map( function ( string $context ) use ( $Filter ) {
+            return $Filter->fromLayer2ToLayer1( $context );
+        }, $request[ 'context_list_after' ] );
+
         $contributionRequest = new ContributionRequestStruct();
 
         if ( !$concordance_search ) {
 
-            $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
+            $this->rewriteContributionContexts( $request, $Filter );
 
             $contributionRequest->mt_evaluation =
                     (bool)$projectStruct->getMetadataValue( Projects_MetadataDao::MT_EVALUATION ) ??
@@ -250,13 +264,16 @@ class GetContributionController extends KleinController {
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $request
+     * @param array         $request
+     * @param MateCatFilter $Filter
      *
-     * @throws Exception
+     * @throws NotFoundException
+     * @throws AuthenticationError
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    private function rewriteContributionContexts( $source, $target, &$request ): void {
+    private function rewriteContributionContexts( array &$request, MateCatFilter $Filter ): void {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
@@ -269,8 +286,6 @@ class GetContributionController extends KleinController {
         );
 
         $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $request );
-
-        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target );
 
         if ( $segmentsList->id_before ) {
             $request[ 'context_before' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
