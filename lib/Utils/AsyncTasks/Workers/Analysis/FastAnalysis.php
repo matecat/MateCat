@@ -24,6 +24,7 @@ use Utils\ActiveMQ\AMQHandler;
 use Utils\AsyncTasks\Workers\Traits\ProjectWordCount;
 use Utils\Constants\ProjectStatus as ProjectStatus;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
@@ -317,7 +318,7 @@ class FastAnalysis extends AbstractDaemon {
     protected function _fetchMyMemoryFast( $pid ): AnalyzeResponse {
 
         /**
-         * @var $myMemory \Utils\Engines\MyMemory
+         * @var $myMemory MyMemory
          */
         $myMemory = EnginesFactory::getInstance( 1 /* Match */ );
 
@@ -374,9 +375,6 @@ class FastAnalysis extends AbstractDaemon {
         $this->_logTimeStampedMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         $this->_logTimeStampedMsg( "Sending query to Match analysis..." );
 
-        /**
-         * @var $result AnalyzeResponse
-         */
         $result = $myMemory->fastAnalysis( $fastSegmentsRequest );
 
         if ( isset( $result->error->code ) && $result->error->code == -28 ) { //curl timed out
@@ -894,7 +892,7 @@ HD;
 
         //use this kind of construct to easily add/remove queues and to disable feature by: comment rows or change the switch flag to false
         switch ( true ) {
-            case ( $mtEngine instanceof MMT || $mtEngine instanceof Utils\Engines\Lara ):
+            case ( $mtEngine instanceof MMT || $mtEngine instanceof Lara ):
                 $context = $contextList[ 'P4' ];
                 break;
             case ( !$mtEngine instanceof MyMemory && !$mtEngine instanceof NONE ):

@@ -685,7 +685,7 @@ class Utils {
             // Enter this case if created_by is matecat, we show PUBLIC_TM
             $description = Constants::PUBLIC_TM;
 
-        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "Match" ) === false ) {
+        } elseif ( !empty( $sug_source ) && stripos( $sug_source, "Mymemory" ) === false ) {
             // This case if for other sources from Match that are public, but we must
             // show the specific name of the source.
             $description = $sug_source;
