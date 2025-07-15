@@ -29,60 +29,67 @@ class SegmentFooterTabMessages extends React.Component {
         )
       : note
   }
+  getNoteStructure(item, index) {
+    if (item.note && item.note !== '') {
+      if (
+        this.excludeMatchingNotesRegExp &&
+        this.excludeMatchingNotesRegExp.test(item.note)
+      ) {
+        return
+      }
+      let note = item.note
+      const noteStructure = this.getNoteContentStructure(note)
+      let html =
+        typeof noteStructure === 'string' ? (
+          <div className="note" key={'note-' + index}>
+            <span className="note-label">Note: </span>
+            <span
+              dangerouslySetInnerHTML={{
+                __html: noteStructure,
+              }}
+            />
+          </div>
+        ) : (
+          <div className="note" key={'note-' + index}>
+            <span className="note-label">Note: </span>
+            <span>{noteStructure}</span>
+          </div>
+        )
+      return html
+    } else if (
+      item.json &&
+      typeof item.json === 'object' &&
+      Object.keys(item.json).length > 0
+    ) {
+      Object.keys(item.json).forEach(function (key, index) {
+        let html = (
+          <div className="note" key={'note-json' + index}>
+            <span className="note-label">
+              {key.charAt(0).toUpperCase() + key.slice(1)}:{' '}
+            </span>
+            <span> {item.json[key]} </span>
+          </div>
+        )
+        return html
+      })
+    } else if (typeof item.json === 'string') {
+      let text = item.json
+      let html = (
+        <div key={'note-json' + index} className="note">
+          {text}
+        </div>
+      )
+      return html
+    }
+    return null
+  }
   getNotes() {
     let notesHtml = []
     if (this.props.notes) {
       this.props.notes.forEach((item, index) => {
-        if (item.note && item.note !== '') {
-          if (
-            this.excludeMatchingNotesRegExp &&
-            this.excludeMatchingNotesRegExp.test(item.note)
-          ) {
-            return
-          }
-          let note = item.note
-          const noteStructure = this.getNoteContentStructure(note)
-          let html =
-            typeof noteStructure === 'string' ? (
-              <div className="note" key={'note-' + index}>
-                <span className="note-label">Note: </span>
-                <span
-                  dangerouslySetInnerHTML={{
-                    __html: noteStructure,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="note" key={'note-' + index}>
-                <span className="note-label">Note: </span>
-                <span>{noteStructure}</span>
-              </div>
-            )
-          notesHtml.push(html)
-        } else if (
-          item.json &&
-          typeof item.json === 'object' &&
-          Object.keys(item.json).length > 0
-        ) {
-          Object.keys(item.json).forEach(function (key, index) {
-            let html = (
-              <div className="note" key={'note-json' + index}>
-                <span className="note-label">
-                  {key.charAt(0).toUpperCase() + key.slice(1)}:{' '}
-                </span>
-                <span> {item.json[key]} </span>
-              </div>
-            )
-            notesHtml.push(html)
-          })
-        } else if (typeof item.json === 'string') {
-          let text = item.json
-          let html = (
-            <div key={'note-json' + index} className="note">
-              {text}
-            </div>
-          )
-          notesHtml.push(html)
+        const noteHtml = this.getNoteStructure(item, index)
+        if (noteHtml) {
+          notesHtml.push(noteHtml)
         }
       })
     }
