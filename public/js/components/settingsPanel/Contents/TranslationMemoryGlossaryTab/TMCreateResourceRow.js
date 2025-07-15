@@ -82,7 +82,20 @@ export const TMCreateResourceRow = ({row}) => {
   const onSubmit = (e) => {
     e.preventDefault()
     const isValid = validateForm()
-    if (!isValid) return
+    if (!isValid) {
+      CatToolActions.addNotification({
+        title: 'Error adding resource',
+        type: 'error',
+        text:
+          !name || name.trim() === ''
+            ? 'Resource name cannot be empty. Please provide a valid name.'
+            : 'Invalid key',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      })
+      return
+    }
 
     if (row.id === SPECIAL_ROWS_ID.newResource) createNewResource()
     else addSharedResource()
@@ -91,6 +104,7 @@ export const TMCreateResourceRow = ({row}) => {
   const validateForm = () => {
     if (
       !name ||
+      name.trim() === '' ||
       (row.id === SPECIAL_ROWS_ID.addSharedResource && (!name || !keyCode))
     )
       return false
@@ -112,7 +126,7 @@ export const TMCreateResourceRow = ({row}) => {
     }))
   }
 
-  const getNewItem = (key) => ({
+  const getNewItem = (key, shared = false) => ({
     r: isLookup,
     w: isUpdating,
     tm: true,
@@ -120,7 +134,7 @@ export const TMCreateResourceRow = ({row}) => {
     owner: true,
     name,
     key,
-    is_shared: false,
+    is_shared: shared,
     id: key,
     isActive: isLookup ? isLookup : !isLookup && !isUpdating ? false : true,
   })
@@ -174,7 +188,7 @@ export const TMCreateResourceRow = ({row}) => {
         description: name,
       })
         .then(() => {
-          const updatedKeys = [getNewItem(key), ...tmKeys]
+          const updatedKeys = [getNewItem(key, true), ...tmKeys]
           setTmKeys(updatedKeys)
           executeModifyCurrentTemplate(updatedKeys)
           onReset()
