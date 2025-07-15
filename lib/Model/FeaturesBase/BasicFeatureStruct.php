@@ -34,7 +34,10 @@ class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public function toNewObject(): IBaseFeature {
         $name = PluginsLoader::getPluginClass( $this->feature_code );
 
-        return new $name( $this );
-    }
+        if ( class_exists( $name ) ) {
+            return new $name( $this );
+        }
 
+        return null;
+    }
 }

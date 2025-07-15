@@ -1,4 +1,4 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react'
+import React, {useContext, useEffect, useMemo, useRef, useState} from 'react'
 import UserStore from '../../stores/UserStore'
 import ModalsActions from '../../actions/ModalsActions'
 import {getUserConnectedService} from '../../api/getUserConnectedService'
@@ -15,6 +15,7 @@ import {usePrevious} from '../../hooks/usePrevious'
 import {CreateProjectContext} from './CreateProjectContext'
 import {changeGDriveSourceLang} from '../../api/changeGDriveSourceLang'
 import DriveIcon from '../../../img/icons/DriveIcon'
+import {isEqual} from 'lodash'
 
 export const UploadGdrive = () => {
   const [authApiLoaded, setAuthApiLoaded] = useState(false)
@@ -29,11 +30,26 @@ export const UploadGdrive = () => {
     setUploadedFilesNames,
     setOpenGDrive,
     setIsGDriveEnabled,
+    fileImportFiltersParamsTemplates,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
   const openGDrivePrev = usePrevious(openGDrive)
+
+  const currentFiltersExtractionParameters = useMemo(() => {
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
+      (template) =>
+        template.id === extractionParameterTemplateId && template.isTemporary,
+    )
+
+    return unsavedTemplate
+  }, [
+    extractionParameterTemplateId,
+    fileImportFiltersParamsTemplates?.templates,
+  ])
+
+  const previousFiltersExtrationParameters = useRef()
 
   useEffect(() => {
     try {
@@ -68,6 +84,19 @@ export const UploadGdrive = () => {
   useEffect(() => {
     restartGDriveConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+
+  useEffect(() => {
+    if (
+      !isEqual(
+        currentFiltersExtractionParameters,
+        previousFiltersExtrationParameters.current,
+      )
+    )
+      restartGDriveConversions()
+
+    previousFiltersExtrationParameters.current =
+      currentFiltersExtractionParameters
+  }, [currentFiltersExtractionParameters])
 
   const gdriveInitComplete = () => {
     return pickerApiLoaded && authApiLoaded
@@ -145,8 +174,16 @@ export const UploadGdrive = () => {
         sourceLang: sourceLang.code,
         targetLang: targetLangs.map((lang) => lang.id).join(),
         segmentation_rule: segmentationRule,
-        filters_extraction_parameters_template_id:
-          extractionParameterTemplateId,
+        ...(typeof currentFiltersExtractionParameters === 'object'
+          ? {
+              filters_extraction_parameters_template: JSON.stringify(
+                currentFiltersExtractionParameters,
+              ),
+            }
+          : {
+              filters_extraction_parameters_template_id:
+                extractionParameterTemplateId,
+            }),
       }).then((response) => {
         CreateProjectActions.hideErrors()
         if (response.success) {
@@ -246,8 +283,16 @@ export const UploadGdrive = () => {
       changeGDriveSourceLang({
         sourceLang: sourceLang.code,
         segmentation_rule: segmentationRule,
-        filters_extraction_parameters_template_id:
-          extractionParameterTemplateId,
+        ...(typeof currentFiltersExtractionParameters === 'object'
+          ? {
+              filters_extraction_parameters_template: JSON.stringify(
+                currentFiltersExtractionParameters,
+              ),
+            }
+          : {
+              filters_extraction_parameters_template_id:
+                extractionParameterTemplateId,
+            }),
       }).then((response) => {
         setLoading(false)
         if (response.success) {

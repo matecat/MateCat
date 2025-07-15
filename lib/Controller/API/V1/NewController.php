@@ -322,7 +322,9 @@ class NewController extends KleinController {
         // Strip tags from instructions
         $instructions = [];
         if ( is_array( $this->request->param( 'instructions' ) ) ) {
-            foreach ( $this->request->param( 'instructions' ) as $value ) {
+            /** @var array $instructions */
+            $instructions = $this->request->param( 'instructions' );
+            foreach ( $instructions as $value ) {
                 $instructions[] = Utils::stripTagsPreservingHrefs( $value );
             }
 

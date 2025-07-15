@@ -105,7 +105,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             //get an original source segment, first
             $this->data[ 'segment' ] = $this->segment;
 
-            $segment     = $this->filter->fromLayer2ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
+            $segment     = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); // this segment comes from the database when getting contexts
             $translation = $this->filter->fromLayer2ToLayer1( $this->data[ 'translation' ] );
 
             $check = new QA( $segment, $translation ); // Layer 1 here
@@ -454,21 +454,6 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $this->password         = $password;
         $this->request_password = $received_password;
 
-        //init filters and features set
-        $featureSet = $this->getFeatureSet();
-        $featureSet->loadForProject( $chunk->getProject() );
-
-        /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $id_segment ) );
-        $this->filter = $filter;
-
-        // decode and normalize the suggestion array coming from the client
-        $suggestion_array = json_decode( $suggestion_array ) ?? [];
-        foreach ( $suggestion_array as $match ) {
-            $match->segment     = $this->filter->fromLayer2ToLayer1( $match->segment );
-            $match->translation = $this->filter->fromLayer2ToLayer1( $match->translation );
-        }
-
         $data = [
                 'id_job'                  => $id_job,
                 'password'                => $password,
@@ -529,6 +514,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     protected function checkData(): void {
+
+        $featureSet = $this->getFeatureSet();
+        $featureSet->loadForProject( $this->data[ 'project' ] );
+
+        /** @var MateCatFilter $filter */
+        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
+        $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
 

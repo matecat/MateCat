@@ -40,6 +40,7 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
 use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
@@ -1353,6 +1354,14 @@ class ProjectManager {
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
                 $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model' ] ) and !empty( $projectStructure[ 'payable_rate_model' ] ) ) {
+
+                // get payable rates
+                $payableRatesTemplate = new CustomPayableRateStruct();
+                $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
+                $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = json_encode( $payableRates );
+
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );
@@ -2395,11 +2404,15 @@ class ProjectManager {
     }
 
     /**
-     * @throws NotFoundException
-     * @throws EndQueueException
-     * @throws ReQueueException
-     * @throws ValidationError
+     * @param $fid
+     * @param $value
+     *
      * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     protected function _insertInstructions( $fid, $value ) {
 

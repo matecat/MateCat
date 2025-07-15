@@ -16,6 +16,8 @@ use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ConvertFileController extends KleinController {
 
@@ -82,6 +84,7 @@ class ConvertFileController extends KleinController {
         $source_lang                               = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $segmentation_rule                         = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $filters_extraction_parameters_template    = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $filters_extraction_parameters_template_id = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $restarted_conversion                      = filter_var( $this->request->param( 'restarted_conversion' ), FILTER_VALIDATE_BOOLEAN );
 
@@ -106,7 +109,7 @@ class ConvertFileController extends KleinController {
         }
 
         $segmentation_rule             = Constants::validateSegmentationRules( $segmentation_rule );
-        $filters_extraction_parameters = $this->validateFiltersExtractionParametersTemplateId( $filters_extraction_parameters_template_id );
+        $filters_extraction_parameters = $this->validateFiltersExtractionParametersTemplateId( $filters_extraction_parameters_template, $filters_extraction_parameters_template_id );
         $source_lang                   = $this->validateSourceLang( $source_lang );
         $target_lang                   = $this->validateTargetLangs( $target_lang );
 
@@ -146,15 +149,31 @@ class ConvertFileController extends KleinController {
     }
 
     /**
+     * @param null $filters_extraction_parameters_template
      * @param null $filters_extraction_parameters_template_id
      *
      * @return FiltersConfigTemplateStruct|null
      * @throws ReflectionException
      * @throws Exception
      */
-    private function validateFiltersExtractionParametersTemplateId( $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
+    private function validateFiltersExtractionParametersTemplateId( $filters_extraction_parameters_template = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
 
-        if ( empty( $filters_extraction_parameters_template_id ) ) {
+        if ( !empty( $filters_extraction_parameters_template ) ) {
+            $json   = html_entity_decode( $filters_extraction_parameters_template );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+
+            $validatorObject       = new JSONValidatorObject();
+            $validatorObject->json = $json;
+
+            $validator = new JSONValidator( $schema, true );
+            $validator->validate( $validatorObject );
+
+            $filtersTemplate = new FiltersConfigTemplateStruct();
+            $filtersTemplate->hydrateFromJSON( $json );
+            $filtersTemplate->uid = $this->user->uid;
+
+            return $filtersTemplate;
+        } elseif ( empty( $filters_extraction_parameters_template_id ) ) {
             return null;
         }
 
@@ -165,7 +184,6 @@ class ConvertFileController extends KleinController {
         }
 
         return $filtersTemplate;
-
     }
 
 }
