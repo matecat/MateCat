@@ -7,19 +7,13 @@ import {OtherTab} from './Contents/OtherTab'
 import {TranslationMemoryGlossaryTab} from './Contents/TranslationMemoryGlossaryTab'
 import {ProjectTemplate} from './ProjectTemplate/ProjectTemplate'
 import {SCHEMA_KEYS, isStandardTemplate} from '../../hooks/useProjectTemplates'
-import {ANALYSIS_SCHEMA_KEYS, AnalysisTab} from './Contents/AnalysisTab'
-import {
-  QF_SCHEMA_KEYS,
-  QualityFrameworkTab,
-} from './Contents/QualityFrameworkTab'
-import useTemplates from '../../hooks/useTemplates'
+import {AnalysisTab} from './Contents/AnalysisTab'
+import {QualityFrameworkTab} from './Contents/QualityFrameworkTab'
 import {updateProjectTemplate} from '../../api/updateProjectTemplate'
 import {flushSync} from 'react-dom'
 import CreateProjectStore from '../../stores/CreateProjectStore'
 import NewProjectConstants from '../../constants/NewProjectConstants'
 import {FileImportTab} from './Contents/FileImportTab/FileImportTab'
-import {FILTERS_PARAMS_SCHEMA_KEYS} from './Contents/FileImportTab/FiltersParams/FiltersParams'
-import {XLIFF_SETTINGS_SCHEMA_KEYS} from './Contents/FileImportTab/XliffSettings/XliffSettings'
 import {EditorSettingsTab} from './Contents/EditorSettingsTab'
 import ModalsActions from '../../actions/ModalsActions'
 import {getFiltersParamsTemplates} from '../../api/getFiltersParamsTemplates'
@@ -171,6 +165,10 @@ export const SettingsPanel = ({
   setProjectTemplates,
   modifyingCurrentTemplate,
   checkSpecificTemplatePropsAreModified,
+  qualityFrameworkTemplates = {},
+  analysisTemplates = {},
+  fileImportFiltersParamsTemplates = {},
+  fileImportXliffSettingsTemplates = {},
 }) => {
   const [isVisible, setIsVisible] = useState(false)
   const [tabs, setTabs] = useState(() => {
@@ -186,16 +184,6 @@ export const SettingsPanel = ({
     tabOpenFromQueryString = false
     return initialState
   })
-
-  // templates quality framework
-  const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
-  const analysisTemplates = useTemplates(ANALYSIS_SCHEMA_KEYS)
-  const fileImportFiltersParamsTemplates = useTemplates(
-    FILTERS_PARAMS_SCHEMA_KEYS,
-  )
-  const fileImportXliffSettingsTemplates = useTemplates(
-    XLIFF_SETTINGS_SCHEMA_KEYS,
-  )
 
   // Sync filters template with conversion file
   useSyncTemplateWithConvertFile({
@@ -402,4 +390,8 @@ SettingsPanel.propTypes = {
   setProjectTemplates: PropTypes.func,
   modifyingCurrentTemplate: PropTypes.func,
   checkSpecificTemplatePropsAreModified: PropTypes.func,
+  qualityFrameworkTemplates: PropTypes.object,
+  analysisTemplates: PropTypes.object,
+  fileImportFiltersParamsTemplates: PropTypes.object,
+  fileImportXliffSettingsTemplates: PropTypes.object,
 }

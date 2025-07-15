@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useRef,
+  useMemo,
 } from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
@@ -18,6 +19,7 @@ import IconClose from '../icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {getPrintableFileSize} from './UploadFile'
 import {CreateProjectContext} from './CreateProjectContext'
+import {isEqual} from 'lodash'
 
 const EXTENSIONS = {
   tmx: 'tmx',
@@ -49,14 +51,44 @@ function UploadFileLocal() {
     tmKeys,
     setTmKeys,
     modifyingCurrentTemplate,
+    fileImportFiltersParamsTemplates,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
+
+  const currentFiltersExtractionParameters = useMemo(() => {
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
+      (template) =>
+        template.id === extractionParameterTemplateId && template.isTemporary,
+    )
+
+    return unsavedTemplate
+  }, [
+    extractionParameterTemplateId,
+    fileImportFiltersParamsTemplates?.templates,
+  ])
+
   const filesInterval = useRef([])
+
+  const previousFiltersExtrationParameters = useRef()
+
   useEffect(() => {
     restartConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+
+  useEffect(() => {
+    if (
+      !isEqual(
+        currentFiltersExtractionParameters,
+        previousFiltersExtrationParameters.current,
+      )
+    )
+      restartConversions()
+
+    previousFiltersExtrationParameters.current =
+      currentFiltersExtractionParameters
+  }, [currentFiltersExtractionParameters])
 
   useEffect(() => {
     const hasIncompleteFiles =
@@ -71,6 +103,7 @@ function UploadFileLocal() {
       )
     }
   }, [files])
+
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
       let name = file.name
@@ -144,13 +177,22 @@ function UploadFileLocal() {
           )
           const interval = startConvertFakeProgress(file)
           filesInterval.current.push(interval)
+
           convertFileRequest({
             file_name: name,
             source_lang: sourceLang.code,
             target_lang: targetLangs.map((lang) => lang.id).join(),
             segmentation_rule: segmentationRule,
-            filters_extraction_parameters_template_id:
-              extractionParameterTemplateId,
+            ...(typeof currentFiltersExtractionParameters === 'object'
+              ? {
+                  filters_extraction_parameters_template: JSON.stringify(
+                    currentFiltersExtractionParameters,
+                  ),
+                }
+              : {
+                  filters_extraction_parameters_template_id:
+                    extractionParameterTemplateId,
+                }),
             restarted_conversion: false,
           })
             .then(({data, warnings}) => {
@@ -298,6 +340,7 @@ function UploadFileLocal() {
     setFiles((prevFiles) =>
       prevFiles.map((f) => ({...f, converted: false, convertedProgress: 0})),
     )
+
     files.forEach((f) => {
       if (f.uploaded && !f.error) {
         const interval = startConvertFakeProgress(f.file)
@@ -307,9 +350,17 @@ function UploadFileLocal() {
           source_lang: sourceLang.code,
           target_lang: targetLangs.map((lang) => lang.id).join(),
           segmentation_rule: segmentationRule,
-          filters_extraction_parameters_template_id:
-            extractionParameterTemplateId,
-        }).then(({warnings}) => {
+          ...(typeof currentFiltersExtractionParameters === 'object'
+            ? {
+                filters_extraction_parameters_template: JSON.stringify(
+                  currentFiltersExtractionParameters,
+                ),
+              }
+            : {
+                filters_extraction_parameters_template_id:
+                  extractionParameterTemplateId,
+              }),
+        }).then(({data, errors, warnings}) => {
           clearInterval(interval)
           setFiles((prevFiles) =>
             prevFiles.map((file) =>
