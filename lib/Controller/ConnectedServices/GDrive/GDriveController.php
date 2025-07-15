@@ -45,8 +45,9 @@ class GDriveController extends AbstractStatefulKleinController {
      */
     public function open() {
 
-        $filtersTemplateId = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
-        $this->isAsyncReq  = filter_var( $this->request->param( 'isAsync' ), FILTER_VALIDATE_BOOLEAN );
+        $filtersTemplateString = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $filtersTemplateId     = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
+        $this->isAsyncReq      = filter_var( $this->request->param( 'isAsync' ), FILTER_VALIDATE_BOOLEAN );
 
         try {
 
@@ -55,11 +56,24 @@ class GDriveController extends AbstractStatefulKleinController {
             $this->source_lang = $this->getValidSourceLanguage();
             $this->target_lang = $this->getValidTargetLanguages();
 
-            if ( !empty( $filtersTemplateId ) ) {
+            if ( !empty( $filtersTemplateString ) ) {
+
+                $filtersTemplate = new FiltersConfigTemplateStruct();
+                $filtersTemplate->hydrateFromJSON( html_entity_decode($filtersTemplateString) );
+
+                if ( $filtersTemplate === null ) {
+                    throw new Exception( "filters_extraction_parameters_template not valid" );
+                }
+
+                $this->filters_extraction_parameters = $filtersTemplate;
+
+            } elseif ( !empty( $filtersTemplateId ) ) {
                 $filtersTemplate = FiltersConfigTemplateDao::getByIdAndUser( $filtersTemplateId, $this->getUser()->uid );
+
                 if ( empty( $filtersTemplate ) ) {
                     throw new Exception( "filters_extraction_parameters_template_id not valid" );
                 }
+
                 $this->filters_extraction_parameters = $filtersTemplate;
             }
 
@@ -336,17 +350,28 @@ class GDriveController extends AbstractStatefulKleinController {
      */
     public function changeConversionParameters() {
         $originalSourceLang             = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-        $newSourceLang                  = $this->request->param( 'source' );
-        $newSegmentationRule            = $this->request->param( 'segmentation_rule' );
-        $newFiltersExtractionTemplateId = $this->request->param( 'filters_extraction_parameters_template_id' );
-        $filtersExtractionParameters    = null;
+        $newSourceLang                  = filter_var( $this->request->param( 'source' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newSegmentationRule            = filter_var( $this->request->param( 'segmentation_rule' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newFiltersExtractionTemplate   = filter_var( $this->request->param( 'filters_extraction_parameters_template' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $newFiltersExtractionTemplateId = filter_var( $this->request->param( 'filters_extraction_parameters_template_id' ), FILTER_VALIDATE_INT );
+
+        $filtersExtractionParameters = null;
 
         try {
 
             $languageHandler = Languages::getInstance();
             $newSourceLang   = $languageHandler->validateLanguage( $newSourceLang );
 
-            if ( !empty( $newFiltersExtractionTemplateId ) ) {
+            if ( !empty( $newFiltersExtractionTemplate ) ) {
+
+                $filtersExtractionParameters = new FiltersConfigTemplateStruct();
+                $filtersExtractionParameters->hydrateFromJSON( html_entity_decode($newFiltersExtractionTemplate) );
+
+                if ( $filtersExtractionParameters === null ) {
+                    throw new Exception( "filters_extraction_parameters_template not valid" );
+                }
+
+            } elseif ( !empty( $newFiltersExtractionTemplateId ) ) {
 
                 $filtersExtractionParameters = FiltersConfigTemplateDao::getByIdAndUser( $newFiltersExtractionTemplateId, $this->getUser()->uid );
 
@@ -402,7 +427,7 @@ class GDriveController extends AbstractStatefulKleinController {
         } else {
             $success = $this->gdriveUserSession->removeFile( $fileId, $source, $segmentationRule, $filtersTemplate );
 
-            if($success){
+            if ( $success ) {
                 if ( !$this->gdriveUserSession->hasFiles() ) {
                     unset( $_SESSION[ "gdrive_session" ] );
                 } else {
