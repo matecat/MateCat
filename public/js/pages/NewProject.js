@@ -442,6 +442,7 @@ const NewProject = () => {
       characterCounterCountTags,
       characterCounterMode,
       dialectStrict,
+      mtQualityValueInEditor,
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
@@ -526,6 +527,7 @@ const NewProject = () => {
           ),
         ),
       }),
+      mt_quality_value_in_editor: mtQualityValueInEditor,
     })
 
     if (!projectSent) {
