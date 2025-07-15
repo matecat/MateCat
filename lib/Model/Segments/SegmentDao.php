@@ -1,5 +1,6 @@
 <?php
 
+use Utils\Constants\SegmentSize;
 use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
 use Files\FileStruct;
@@ -200,7 +201,7 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param Jobs_JobStruct     $chunk
      * @param int                $step
      * @param                    $ref_segment
      * @param string             $where
@@ -487,7 +488,7 @@ class Segments_SegmentDao extends AbstractDao {
      */
     public function createList( array $obj_arr ) {
 
-        $obj_arr = array_chunk( $obj_arr, 100 );
+        $obj_arr            = array_chunk( $obj_arr, 100 );
 
         $baseQuery = "INSERT INTO segments ( 
                             id, 
@@ -508,7 +509,7 @@ class Segments_SegmentDao extends AbstractDao {
 
         Log::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
+        $tuple_marks = "( " . rtrim( str_repeat( "?,  ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -516,6 +517,10 @@ class Segments_SegmentDao extends AbstractDao {
 
             $values = [];
             foreach ( $chunk as $segStruct ) {
+
+                if ( strlen( $segStruct->segment ) > SegmentSize::LIMIT ) {
+                    throw new Exception( "Segment size limit reached. One or more segments in the uploaded file(s) are larger than 65kb.", -2 );
+                }
 
                 $values[] = $segStruct->id;
                 $values[] = $segStruct->internal_id;
@@ -683,6 +688,7 @@ class Segments_SegmentDao extends AbstractDao {
 
         /** @var SegmentUIStruct[] $r */
         $r = $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
+
         return $r;
 
     }
@@ -744,7 +750,7 @@ class Segments_SegmentDao extends AbstractDao {
         return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'        => $job->id,
                 'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
-                'st_approved2' => Constants_TranslationStatus::STATUS_APPROVED2,
+                'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
                 'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
@@ -978,11 +984,12 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param $idJob
-     * @param $password
-     * @param $limit
-     * @param $offset
+     * @param     $idJob
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
      * @param int $ttl
+     *
      * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
@@ -1052,7 +1059,7 @@ class Segments_SegmentDao extends AbstractDao {
                             j.id = :id_job 
                         AND
                             j.password = :password
-                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ($limit+$offset) . " )
+                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ( $limit + $offset ) . " )
                             GROUP BY id_segment
                             LIMIT " . $limit . "
                         ) AS X ON _m_id = segment_translation_events.id
@@ -1072,11 +1079,12 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param $idProject
-     * @param $password
-     * @param $limit
-     * @param $offset
+     * @param     $idProject
+     * @param     $password
+     * @param     $limit
+     * @param     $offset
      * @param int $ttl
+     *
      * @return array|\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
@@ -1143,7 +1151,7 @@ class Segments_SegmentDao extends AbstractDao {
                             projects p ON p.id = j.id_project
                         WHERE
                             p.id = :id_project
-                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ($limit+$offset) . " )
+                        AND id_segment BETWEEN (j.job_first_segment + " . $offset . ") AND ( j.job_first_segment + " . ( $limit + $offset ) . " )
                             GROUP BY id_segment
                             LIMIT " . $limit . "
                         ) AS X ON _m_id = segment_translation_events.id

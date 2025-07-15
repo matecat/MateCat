@@ -43,7 +43,7 @@ export const convertFileRequest = async ({
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {
       const data = await response.json()
-      return Promise.reject({response, errors: data.errors ?? data})
+      return Promise.reject({response, errors: data.errors ?? [], data})
     } else {
       return Promise.reject({response})
     }

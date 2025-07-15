@@ -16,11 +16,11 @@ class PayableRateStructTest extends AbstractTest {
      */
     public function getPayableRates() {
         $languageCombos = [
-                [ 'en', 'zh', 82 ],
-                [ 'en-GB', 'zh', 82 ],
-                [ 'en-GB', 'zh', 82 ],
-                [ 'en-US', 'zh', 82 ],
-                [ 'en-US', 'zh-CN', 82 ],
+                [ 'en', 'zh', 77 ],
+                [ 'en-GB', 'zh', 77 ],
+                [ 'en-GB', 'zh', 77 ],
+                [ 'en-US', 'zh', 77 ],
+                [ 'en-US', 'zh-CN', 77 ],
                 [ 'en-US', 'zh-HK', 90 ],
                 [ 'en', 'zh-HK', 90 ],
         ];

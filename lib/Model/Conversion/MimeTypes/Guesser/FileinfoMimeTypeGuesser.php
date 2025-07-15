@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace MimeTypes\Guesser;
+namespace Conversion\MimeTypes\Guesser;
 
 use finfo;
 use InvalidArgumentException;
@@ -41,7 +41,7 @@ class FileinfoMimeTypeGuesser implements MimeTypeGuesserInterface {
      * @return bool
      */
     public function isGuesserSupported(): bool {
-        return \function_exists( 'finfo_open' );
+        return function_exists( 'finfo_open' );
     }
 
     /**
