@@ -50,7 +50,7 @@ class FilesConverter {
      * @param string                           $errDir
      * @param string                           $uploadTokenValue
      * @param string|null                      $segmentation_rule
-     * @param \Model\FeaturesBase\FeatureSet   $featureSet
+     * @param FeatureSet                       $featureSet
      * @param FiltersConfigTemplateStruct|null $filters_extraction_parameters
      */
     public function __construct(

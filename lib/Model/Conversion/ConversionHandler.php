@@ -39,7 +39,7 @@ class ConversionHandler {
     protected ?FiltersConfigTemplateStruct $filters_extraction_parameters = null;
 
     /**
-     * @var \Model\FeaturesBase\FeatureSet
+     * @var FeatureSet
      */
     public FeatureSet $features;
 
@@ -519,7 +519,7 @@ class ConversionHandler {
     }
 
     /**
-     * @param \Model\FeaturesBase\FeatureSet $features
+     * @param FeatureSet $features
      *
      * @return $this
      */

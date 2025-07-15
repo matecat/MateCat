@@ -69,7 +69,7 @@ class Session {
     protected AbstractFilesStorage $files_storage;
 
     /**
-     * @var \Model\FeaturesBase\FeatureSet
+     * @var FeatureSet
      */
     protected FeatureSet $featureSet;
 
@@ -228,7 +228,7 @@ class Session {
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct $user
      *
      * @return array|null
      * @throws Exception
@@ -349,16 +349,16 @@ class Session {
     }
 
     /**
-     * @param string $fileId
-     * @param string $source
-     * @param string $segmentationRule
-     * @param int $filtersTemplate
+     * @param string      $fileId
+     * @param string      $source
+     * @param string|null $segmentationRule
+     * @param int         $filtersTemplate
      *
      * @return bool
      * @throws ConnectionException
      * @throws ReflectionException
      */
-    public function removeFile( string $fileId, $source, $segmentationRule = null, $filtersTemplate = 0 ): bool {
+    public function removeFile( string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0 ): bool {
         $success = false;
 
         if ( isset( $this->session[ self::FILE_LIST ][ $fileId ] ) ) {
@@ -389,7 +389,7 @@ class Session {
                 $hashFile = $file[ 'fileHash' ] . "|" . end( $target );
 
                 if ( $item->getFilename() === $file[ 'fileName' ] or $item->getFilename() === $hashFile ) {
-                    CatUtils::deleteSha($tempUploadedFileDir."/". $file[ 'fileName' ], $source, $segmentationRule, $filtersTemplate);
+                    CatUtils::deleteSha( $tempUploadedFileDir . "/" . $file[ 'fileName' ], $source, $segmentationRule, $filtersTemplate );
                     unlink( $item );
                 }
             }
@@ -405,13 +405,14 @@ class Session {
     }
 
     /**
-     * @param $source
-     * @param null $segmentationRule
-     * @param int $filtersTemplate
+     * @param string      $source
+     * @param string|null $segmentationRule
+     * @param int         $filtersTemplate
+     *
      * @throws ConnectionException
      * @throws ReflectionException
      */
-    public function removeAllFiles($source, $segmentationRule = null, $filtersTemplate = 0) {
+    public function removeAllFiles( string $source, ?string $segmentationRule = null, int $filtersTemplate = 0 ) {
         foreach ( $this->session[ self::FILE_LIST ] as $singleFileId => $file ) {
             $this->removeFile( $singleFileId, $source, $segmentationRule, $filtersTemplate );
         }

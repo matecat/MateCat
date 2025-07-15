@@ -10,6 +10,8 @@
 namespace Model\ProjectManager;
 
 use Controller\API\Commons\Exceptions\AuthenticationError;
+use DomainException;
+use Exception;
 use INIT;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
@@ -56,6 +58,9 @@ use Model\Users\UserStruct;
 use Model\WordCount\CounterModel;
 use Model\Xliff\DTO\XliffRulesModel;
 use Model\Xliff\XliffConfigTemplateStruct;
+use Plugins\Features\SecondPassReview;
+use ReflectionException;
+use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\JobsWorker;
@@ -610,7 +615,7 @@ class ProjectManager {
          * Validations should populate the projectStructure with errors and codes.
          */
         $featureSet = ( $this->features !== null ) ? $this->features : new FeatureSet();
-        \Plugins\Features\SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
+        SecondPassReview::loadAndValidateQualityFramework( $this->projectStructure );
         $featureSet->run( 'validateProjectCreation', $this->projectStructure );
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
@@ -2676,15 +2681,15 @@ class ProjectManager {
             }
 
             if ( !empty( $xliff_trans_unit[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliffInfo );
+                $source_extract_external = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] ); //WIP to remove function
             }
 
             //Override with the alt-trans source value
             if ( !empty( $altTrans[ 'source' ] ) ) {
-                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ], $xliffInfo );
+                $source_extract_external = $this->_strip_external( $altTrans[ 'source' ] ); //WIP to remove function
             }
 
-            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ], $xliffInfo );
+            $target_extract_external = $this->_strip_external( $altTrans[ 'target' ] ); //WIP to remove function
 
             //wrong alt-trans content: source == target
             if ( $source_extract_external[ 'seg' ] == $target_extract_external[ 'seg' ] ) {
@@ -2785,11 +2790,11 @@ class ProjectManager {
                         'suggestion'             => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
-                        'eq_word_count'          => $rule->asEquivalentWordCount( (int)$segment->raw_word_count, $payable_rates ),
+                        'eq_word_count'          => $rule->asEquivalentWordCount( $segment->raw_word_count, $payable_rates ),
                         'serialized_errors_list' => ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '',
                         'warning'                => ( $check->thereAreErrors() ) ? 1 : 0,
                         'suggestion_match'       => null,
-                        'standard_word_count'    => $rule->asStandardWordCount( (int)$segment->raw_word_count, $payable_rates ),
+                        'standard_word_count'    => $rule->asStandardWordCount( $segment->raw_word_count, $payable_rates ),
                         'version_number'         => 0,
                 ];
 
@@ -3031,12 +3036,7 @@ class ProjectManager {
      *
      * @param $firstTMXFileName
      *
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
-     * @throws Exception
+     * @throws ReflectionException
      */
     private function setPrivateTMKeys( $firstTMXFileName ) {
 
@@ -3079,9 +3079,6 @@ class ProjectManager {
 
             //extract user tm keys
             foreach ( $userMemoryKeys as $_memoKey ) {
-                /**
-                 * @var $_memoKey MemoryKeyStruct
-                 */
                 $userTmKeys[] = $_memoKey->tm_key->key;
             }
 

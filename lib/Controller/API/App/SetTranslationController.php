@@ -58,12 +58,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
     protected ?string $password = null;
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     protected JobStruct $chunk;
 
     /**
-     * @var \Model\Segments\SegmentStruct|null
+     * @var SegmentStruct|null
      */
     protected ?SegmentStruct $segment = null;  // this comes from DAO
 
@@ -608,7 +608,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return \Model\Translations\SegmentTranslationStruct
+     * @return SegmentTranslationStruct
      * @throws Exception
      */
     private function getOldTranslation(): ?SegmentTranslationStruct {
@@ -660,9 +660,9 @@ class SetTranslationController extends AbstractStatefulKleinController {
      *      - NEW
      *      - DRAFT
      *
-     * @param \Model\Translations\SegmentTranslationStruct $new_translation
-     * @param SegmentTranslationStruct                     $old_translation
-     * @param null                                         $old_suggestion
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
+     * @param null                     $old_suggestion
      *
      * @return bool
      */

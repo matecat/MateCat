@@ -701,7 +701,7 @@ class TMAnalysisWorker extends AbstractWorker {
      *
      * @return array
      */
-    protected function _getMT( AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ) {
+    protected function _getMT( AbstractEngine $mtEngine, array $_config, QueueElement $queueElement, ?MTQEWorkflowParams $mt_qe_config ): array {
 
         $mt_result = [];
 

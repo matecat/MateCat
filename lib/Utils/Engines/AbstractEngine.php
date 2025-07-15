@@ -14,6 +14,7 @@ use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
 use Utils\Network\MultiCurlHandler;
 
@@ -353,7 +354,7 @@ abstract class  AbstractEngine implements EngineInterface {
     /**
      * @param array $_config
      *
-     * @return array|\Utils\Engines\Results\TMSAbstractResponse
+     * @return array|TMSAbstractResponse
      * @throws Exception
      */
     protected function GoogleTranslateFallback( array $_config ) {

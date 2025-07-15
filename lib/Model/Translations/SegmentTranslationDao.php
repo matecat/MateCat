@@ -19,6 +19,7 @@ use ReflectionException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\PropagationWorker;
 use Utils\Autopropagation\PropagationAnalyser;
+use Utils\Constants\SegmentSize;
 use Utils\Constants\TranslationStatus;
 use View\API\V2\Json\Propagation as PropagationApi;
 
@@ -98,6 +99,10 @@ class SegmentTranslationDao extends AbstractDao {
             $values = [];
 
             foreach ( $list as $row ) {
+
+                if ( strlen( $row->translation ) > SegmentSize::LIMIT ) {
+                    throw new PDOException( "Translation size limit reached. Translation is larger than 65kb.", -2 );
+                }
                 $values[] = $row->id_segment;
                 $values[] = $row->id_job;
                 $values[] = $row->translation;
@@ -400,6 +405,10 @@ class SegmentTranslationDao extends AbstractDao {
         if ( empty( $translation[ 'translation' ] ) && !is_numeric( $translation[ 'translation' ] ) ) {
             $msg = "Error setTranslationUpdate. Empty translation found." . var_export( $_POST, true );
             throw new PDOException( $msg );
+        }
+
+        if ( strlen( $translation[ 'translation' ] ) > SegmentSize::LIMIT ) {
+            throw new PDOException( "Translation size limit reached. Translation is larger than 65kb.", -2 );
         }
 
         $db   = Database::obtain();

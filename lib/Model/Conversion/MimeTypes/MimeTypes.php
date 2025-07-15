@@ -11,6 +11,12 @@
 
 namespace Model\Conversion\MimeTypes;
 
+use Conversion\MimeTypes\Constants\MimeTypesMap;
+use Conversion\MimeTypes\Guesser\FileBinaryMimeTypeGuesser;
+use Conversion\MimeTypes\Guesser\FileExtensionMimeTypeGuesser;
+use Conversion\MimeTypes\Guesser\FileinfoMimeTypeGuesser;
+use Conversion\MimeTypes\Guesser\MimeTypeGuesserInterface;
+use Conversion\MimeTypes\Guesser\SimpleMarkupMimeTypeGuesser;
 use LogicException;
 use Model\Conversion\MimeTypes\Constants\MimeTypesMap;
 use Model\Conversion\MimeTypes\Guesser\FileBinaryMimeTypeGuesser;

@@ -220,12 +220,12 @@ class MyMemory extends AbstractEngine {
     /**
      * @param $_config
      *
-     * @return array
-     * @throws NotFoundException
+     * @return GetMemoryResponse
      * @throws AuthenticationError
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
     public function get( $_config ): GetMemoryResponse {
 
@@ -820,7 +820,7 @@ class MyMemory extends AbstractEngine {
      *
      * @param array $segs_array
      *
-     * @return \Utils\Engines\Results\MyMemory\AnalyzeResponse
+     * @return AnalyzeResponse
      * @throws Exception
      */
     public function fastAnalysis( array $segs_array ): AnalyzeResponse {

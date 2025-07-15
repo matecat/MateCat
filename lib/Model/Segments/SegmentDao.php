@@ -450,7 +450,7 @@ class SegmentDao extends AbstractDao {
      */
     public function createList( array $obj_arr ) {
 
-        $obj_arr = array_chunk( $obj_arr, 100 );
+        $obj_arr            = array_chunk( $obj_arr, 100 );
 
         $baseQuery = "INSERT INTO segments ( 
                             id, 
@@ -471,7 +471,7 @@ class SegmentDao extends AbstractDao {
 
         Log::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
-        $tuple_marks = "( " . rtrim( str_repeat( "?, ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
+        $tuple_marks = "( " . rtrim( str_repeat( "?,  ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
 
         foreach ( $obj_arr as $i => $chunk ) {
 
@@ -479,6 +479,10 @@ class SegmentDao extends AbstractDao {
 
             $values = [];
             foreach ( $chunk as $segStruct ) {
+
+                if ( strlen( $segStruct->segment ) > SegmentSize::LIMIT ) {
+                    throw new Exception( "Segment size limit reached. One or more segments in the uploaded file(s) are larger than 65kb.", -2 );
+                }
 
                 $values[] = $segStruct->id;
                 $values[] = $segStruct->internal_id;

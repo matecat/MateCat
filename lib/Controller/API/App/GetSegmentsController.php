@@ -183,8 +183,8 @@ class GetSegmentsController extends KleinController {
     }
 
     /**
-     * @param \Model\Segments\SegmentUIStruct $segment
-     * @param array                           $segment_notes
+     * @param SegmentUIStruct $segment
+     * @param array           $segment_notes
      */
     private function attachNotes( SegmentUIStruct &$segment, array $segment_notes ) {
         $segment[ 'notes' ] = $segment_notes[ (int)$segment[ 'sid' ] ] ?? null;

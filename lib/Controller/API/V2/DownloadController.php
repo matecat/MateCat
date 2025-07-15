@@ -736,7 +736,7 @@ class DownloadController extends AbstractDownloadController {
     }
 
     /**
-     * @param \View\API\Commons\ZipContentObject[] $output_content
+     * @param ZipContentObject[] $output_content
      *
      * @throws Exception
      */

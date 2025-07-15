@@ -537,7 +537,6 @@ class GetContributionWorker extends AbstractWorker {
      * @param GetContributionRequest $contributionStruct
      *
      * @throws ReflectionException
-     * @throws Exception
      */
     private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ) {
 

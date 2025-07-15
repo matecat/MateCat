@@ -291,7 +291,6 @@ class NewController extends KleinController {
         $id_qa_model                               = filter_var( $this->request->param( 'id_qa_model' ), FILTER_SANITIZE_NUMBER_INT );
         $id_qa_model_template                      = filter_var( $this->request->param( 'id_qa_model_template' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
-        $instructions                              = filter_var( $this->request->param( 'instructions' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_REQUIRE_ARRAY ] );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
@@ -320,10 +319,18 @@ class NewController extends KleinController {
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
 
-        /**
-         * Uber plugin callback
-         */
-        $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        // Strip tags from instructions
+        $instructions = [];
+        if ( is_array( $this->request->param( 'instructions' ) ) ) {
+            foreach ( $this->request->param( 'instructions' ) as $value ) {
+                $instructions[] = Utils::stripTagsPreservingHrefs( $value );
+            }
+
+            /**
+             * Uber plugin callback
+             */
+            $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
+        }
 
         if ( empty( $_FILES ) ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
@@ -671,6 +678,7 @@ class NewController extends KleinController {
                 $validatorObject->json = $private_tm_key_json;
 
                 $validator  = new JSONValidator( $schema );
+                /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
                 $tm_prioritization = $jsonObject->decoded->tm_prioritization;
@@ -1112,6 +1120,7 @@ class NewController extends KleinController {
             $validator  = new JSONValidator( $schema, true );
             $jsonObject = $validator->validate( $validatorObject );
 
+            /** @var JSONValidatorObject $jsonObject */
             return new MTQEWorkflowParams( (array)( $jsonObject->decoded ) );
 
         } elseif ( !empty( $mt_qe_workflow_template_id ) ) {
