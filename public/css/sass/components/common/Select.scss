@@ -66,6 +66,11 @@
     color: colors.$grey1;
     opacity: 1;
   }
+  .icon-reset {
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
 }
 
 .select--is-focused {
@@ -145,7 +150,7 @@ label
 
 // Disabled state
 .select--is-disabled {
-  background-color: colors.$grey6;
+  //background-color: colors.$grey6;
   box-shadow: none;
   color: colors.$grey7;
   cursor: not-allowed;
@@ -164,4 +169,27 @@ label
   position: absolute;
   z-index: 12;
   top: 0;
+}
+.select, .select__dropdown-wrapper {
+    .new-color {
+      box-shadow: 0px 0px 0px 1px rgba(34, 36, 38, 0.25) inset;
+      background: #ffffff;
+    }
+    .draft-color {
+      background: colors.$grey1;
+    }
+    .translated-color,
+    .post-edited-color {
+      background: colors.$translatedBlue;
+    }
+    .approved-color {
+      background: colors.$approvedGreen;
+    }
+    .approved-2ndpass-color, .approved2-color {
+      background: colors.$approved2Green;
+    }
+    .rejected-color {
+      background: colors.$rebuttedRed;
+    }
+
 }
