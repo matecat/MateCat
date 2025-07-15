@@ -913,6 +913,7 @@ class Editarea extends React.Component {
           : this.state.editorState,
         direction,
         isShiftPressed: true,
+        isBackspacePressed: e.key === 'Backspace',
       })
 
       if (updatedStateNearEntity) {
@@ -1127,9 +1128,15 @@ class Editarea extends React.Component {
       isCaretInsideEntity() ||
       this.compositionEventChecks.current?.startIsInsideEntity
     ) {
+      const updatedStateNearEntity = checkCaretIsNearEntity({
+        editorState,
+      })
+
       this.setState(
         () => ({
-          editorState: prevEditorState,
+          editorState: updatedStateNearEntity
+            ? updatedStateNearEntity
+            : prevEditorState,
         }),
         () => {
           this.onCompositionStopDebounced()
