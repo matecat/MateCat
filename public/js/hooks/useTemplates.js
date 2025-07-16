@@ -66,6 +66,17 @@ const createTemplateProxy = ({template, schema}) => {
   }
 }
 
+const orderTemplates = (templates) => {
+  return [...templates]
+    .sort((a, b) =>
+      (a.name ?? a.label ?? a.payable_rate_template_name).toLowerCase() >
+      (b.name ?? b.label ?? b.payable_rate_template_name).toLowerCase()
+        ? 1
+        : -1,
+    )
+    .reduce((acc, cur) => (cur.id === 0 ? [cur, ...acc] : [...acc, cur]), [])
+}
+
 function useTemplates(schema) {
   const [templates, setTemplatesState] = useState([])
   const [currentTemplate, setCurrentTemplate] = useState()
@@ -78,7 +89,9 @@ function useTemplates(schema) {
     (value) => {
       setTemplatesState((prevState) => {
         const result = typeof value === 'function' ? value(prevState) : value
-        return result.map((template) => createTemplateProxy({template, schema}))
+        return orderTemplates(
+          result.map((template) => createTemplateProxy({template, schema})),
+        )
       })
     },
     [schema],

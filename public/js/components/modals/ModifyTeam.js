@@ -287,7 +287,7 @@ export const ModifyTeam = ({team}) => {
           <EmailsBadge
             name="team"
             value={emailsCollection}
-            separators={[',', SPECIALS_SEPARATORS.EnterKey]}
+            separators={[',', ' ', SPECIALS_SEPARATORS.EnterKey]}
             onChange={onChangeAddMembers}
             placeholder="Add new members by entering their email addresses"
           />
