@@ -50,5 +50,8 @@
         "allow-plugins": {
             "php-http/discovery": true
         }
+    },
+    "autoload": {
+        "psr-4": { "": "lib/" }
     }
 }

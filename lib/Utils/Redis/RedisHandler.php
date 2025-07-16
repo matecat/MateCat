@@ -26,6 +26,9 @@ class RedisHandler {
     private string $instanceHash;
     private string $instanceUUID;
 
+    /**
+     * @throws Exception
+     */
     public function __construct() {
         $this->instanceHash = spl_object_hash( $this );
         $this->instanceUUID = Utils::uuid4();

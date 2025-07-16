@@ -19,7 +19,7 @@ use Model\Analysis\Status;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
-use Utils\Analysis\Health;
+use Utils\AsyncTasks\Workers\Analysis\Health;
 use Utils\Registry\AppConfig;
 use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;

@@ -3,17 +3,26 @@
 
 namespace Utils\Registry;
 
+use Exception;
+use RuntimeException;
 use Utils\Constants\Mime2Extension;
 
 class AppConfig {
 
     public static array $MANDATORY_KEYS = [
             'ENV',
-            'CHECK_FS',
             'DB_SERVER',
             'DB_DATABASE',
             'DB_USER',
-            'DB_PASS'
+            'DB_PASS',
+            'REDIS_SERVERS',
+            'QUEUE_BROKER_ADDRESS',
+            'QUEUE_JMX_ADDRESS',
+            'QUEUE_CREDENTIALS',
+            'HTTPHOST',
+            'CLI_HTTP_HOST',
+            'COOKIE_DOMAIN',
+            'AUTHSECRET',
     ];
 
     /**
@@ -83,7 +92,7 @@ class AppConfig {
     public static string  $ZIP_REPOSITORY;
     public static string  $ANALYSIS_FILES_REPOSITORY;
     public static string  $QUEUE_PROJECT_REPOSITORY;
-    public static string  $CONVERSIONERRORS_REPOSITORY;
+    public static string  $CONVERSION_ERRORS_REPOSITORY;
     public static string  $TMP_DOWNLOAD;
     public static string  $TEMPLATE_ROOT;
     public static string  $UTILS_ROOT;
@@ -91,20 +100,19 @@ class AppConfig {
     public static string  $AUTHSECRET;
     public static string  $AUTHSECRET_PATH;
 
-    public static bool   $FORCE_XLIFF_CONVERSION       = false;
-    public static bool   $FILTERS_OCR_CHECK            = true;
-    public static bool   $VOLUME_ANALYSIS_ENABLED      = true;
-    public static int    $WARNING_POLLING_INTERVAL     = 20; //seconds
-    public static int    $SEGMENT_QA_CHECK_INTERVAL    = 1; //seconds
-    public static bool   $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static string $AUTHCOOKIENAME               = 'matecat_login_v6';
-    public static string $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
-    public static int    $ANALYSIS_WORDS_PER_DAYS      = 3000;
-    public static int    $AUTHCOOKIEDURATION           = 86400 * 7;        // 24 hours
-    public static int    $MAX_UPLOAD_FILE_SIZE         = 62914560;     // 60 * 1024 * 1024 // bytes
-    public static int    $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024 // bytes
-    public static int    $MAX_NUM_FILES                = 100;
-    public static int    $MAX_SOURCE_WORDS             = 250000;
+    public static bool   $FORCE_XLIFF_CONVERSION    = false;
+    public static bool   $FILTERS_OCR_CHECK         = true;
+    public static bool   $VOLUME_ANALYSIS_ENABLED   = true;
+    public static int    $WARNING_POLLING_INTERVAL  = 20; //seconds
+    public static int    $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
+    public static string $AUTHCOOKIENAME            = 'matecat_login_v6';
+    public static string $SUPPORT_MAIL              = 'the owner of this MateCat instance.';//the default string is 'the owner of this Matecat instance'
+    public static int    $ANALYSIS_WORDS_PER_DAYS   = 3000;
+    public static int    $AUTHCOOKIEDURATION        = 86400 * 7;        // 24 hours
+    public static int    $MAX_UPLOAD_FILE_SIZE      = 62914560;     // 60 * 1024 * 1024 // bytes
+    public static int    $MAX_UPLOAD_TMX_FILE_SIZE  = 314572800;    // 300 * 1024 * 1024 // bytes
+    public static int    $MAX_NUM_FILES             = 100;
+    public static int    $MAX_SOURCE_WORDS          = 250000;
 
     /**
      * OPENAI configuration
@@ -291,31 +299,116 @@ class AppConfig {
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;
 
-    protected function __construct() {
+    private static ?AppConfig $MYSELF = null;
 
-        self::$GITHUB_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GITHUB_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GITHUB_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
+    protected function __construct( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
 
-        self::$LINKEDIN_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
-        self::$LINKEDIN_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$LINKEDIN_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
+        self::$ENV                = $envName;
+        self::$BUILD_NUMBER       = $matecatVersion;
+        self::$TASK_RUNNER_CONFIG = $taskManagerConfiguration;
 
-        self::$MICROSOFT_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
-        self::$MICROSOFT_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$MICROSOFT_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
+        // Overridable defaults
+        self::$ROOT                        = $rootPath; // Accessible by Apache/PHP
+        self::$BASEURL                     = "/"; // Accessible by the browser
+        self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
+        self::$TRACKING_CODES_VIEW_PATH    = self::$ROOT . "/lib/View/templates";
 
-        self::$FACEBOOK_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
-        self::$FACEBOOK_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$FACEBOOK_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
+        //Override default configuration
+        foreach ( $configuration as $KEY => $value ) {
+            if ( property_exists( self::class, $KEY ) ) {
+                AppConfig::${$KEY} = $value;
+            }
+        }
 
-        self::$GOOGLE_OAUTH_CLIENT_ID     = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
-        self::$GOOGLE_OAUTH_CLIENT_SECRET = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
-        self::$GOOGLE_OAUTH_REDIRECT_URL  = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
+        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+            // Get HTTPS server status
+            // Override if the header is set from load balancer
+            $localProto = 'http';
+            foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
+                if ( isset( $_SERVER[ $_key ] ) ) {
+                    $localProto = 'https';
+                    break;
+                }
+            }
+            self::$PROTOCOL = $localProto;
+        }
+
+        if ( empty( self::$STORAGE_DIR ) ) {
+            self::$STORAGE_DIR = self::$ROOT . "/local_storage";
+        }
+
+        self::$HTTPHOST                     = self::$CLI_HTTP_HOST;
+        self::$LOG_REPOSITORY               = self::$STORAGE_DIR . "/log_archive";
+        self::$UPLOAD_REPOSITORY            = self::$STORAGE_DIR . "/upload";
+        self::$FILES_REPOSITORY             = self::$STORAGE_DIR . "/files_storage/files";
+        self::$CACHE_REPOSITORY             = self::$STORAGE_DIR . "/files_storage/cache";
+        self::$ZIP_REPOSITORY               = self::$STORAGE_DIR . "/files_storage/originalZip";
+        self::$ANALYSIS_FILES_REPOSITORY    = self::$STORAGE_DIR . "/files_storage/fastAnalysis";
+        self::$QUEUE_PROJECT_REPOSITORY     = self::$STORAGE_DIR . "/files_storage/queueProjects";
+        self::$CONVERSION_ERRORS_REPOSITORY = self::$STORAGE_DIR . "/conversion_errors";
+        self::$TMP_DOWNLOAD                 = self::$STORAGE_DIR . "/tmp_download";
+        self::$TEMPLATE_ROOT                = self::$ROOT . "/lib/View";
+        self::$UTILS_ROOT                   = self::$ROOT . '/lib/Utils';
+
+        $oauth_config_file = self::$ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini';
+
+        if ( file_exists( $oauth_config_file ) ) {
+            self::$OAUTH_CONFIG = parse_ini_file( $oauth_config_file, true ) ?? [];
+        }
+
+        //auth sections
+        self::$AUTHSECRET_PATH = self::$ROOT . '/inc/login_secret.dat';
+
+        //if a secret is set in file
+        if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+            //fetch it
+            self::$AUTHSECRET = file_get_contents( self::$AUTHSECRET_PATH );
+        } else {
+
+            //generates pass
+            try {
+                $x                = random_bytes( 256 );
+                self::$AUTHSECRET = bin2Hex( $x );
+            } catch ( Exception $e ) {
+                throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+            }
+
+            //put the file
+            file_put_contents( self::$AUTHSECRET_PATH, self::$AUTHSECRET );
+            //if put succeeds
+            if ( file_exists( self::$AUTHSECRET_PATH ) ) {
+                //restrict permissions
+                chmod( self::$AUTHSECRET_PATH, 0400 );
+            } else {
+                //if we couldn't create due to permissions, use default secret
+                self::$AUTHSECRET = 'ScavengerOfHumanSorrow';
+            }
+
+        }
+
+        self::$GITHUB_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GITHUB_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$LINKEDIN_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$LINKEDIN_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$MICROSOFT_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$MICROSOFT_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$FACEBOOK_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$FACEBOOK_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$GOOGLE_OAUTH_CLIENT_ID     = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_SECRET = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GOOGLE_OAUTH_REDIRECT_URL  = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
 
         # Drive
-        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
-        self::$GOOGLE_OAUTH_BROWSER_API_KEY = AppConfig::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = self::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
 
         self::$MIME_TYPES = Mime2Extension::getMimeTypes();
 
@@ -442,9 +535,51 @@ class AppConfig {
 
     /**
      * Initialize the Class Instance
+     *
+     * @param string $rootPath
+     * @param string $envName
+     * @param string $matecatVersion
+     * @param array  $configuration
+     * @param array  $taskManagerConfiguration
      */
-    public static function init() {
-        new self();
+    public static function init( string $rootPath, string $envName, string $matecatVersion, array $configuration, array $taskManagerConfiguration ) {
+        if ( empty( self::$MYSELF ) ) {
+            self::$MYSELF = new self( $rootPath, $envName, $matecatVersion, $configuration, $taskManagerConfiguration );
+        }
+    }
+
+    /**
+     * Check if all mandatory keys are present
+     *
+     * @return bool true if all mandatory keys are present, false otherwise
+     */
+    public static function areMandatoryKeysPresent(): bool {
+
+        foreach ( self::$MANDATORY_KEYS as $key ) {
+            if ( !property_exists( self::class, $key ) || self::$$key === null ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if Google Drive is properly configured.
+     *
+     * This method verifies the presence of the required configuration values
+     * for Google Drive integration.
+     * Specifically, it checks if the `GOOGLE_OAUTH_CLIENT_ID`
+     * and `GOOGLE_OAUTH_BROWSER_API_KEY` properties are set and not empty.
+     *
+     * @return bool Returns `true` if both required properties are configured, `false` otherwise.
+     */
+    public static function isGDriveConfigured(): bool {
+        if ( empty( self::$GOOGLE_OAUTH_CLIENT_ID ) || empty( self::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
+            return false;
+        }
+
+        return true;
     }
 
 }

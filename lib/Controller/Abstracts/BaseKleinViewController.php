@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts;
 
-use Bootstrap;
 use Controller\API\Commons\ViewValidators\MandatoryKeysValidator;
 use Exception;
 use Klein\App;
@@ -100,8 +99,8 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->view->{'microsoftAuthUrl'} = ( AppConfig::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
         $this->view->{'facebookAuthUrl'}  = ( AppConfig::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
 
-        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean( Bootstrap::isGDriveConfigured() );
-        $this->view->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, AppConfig::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
+        $this->view->{'googleDriveEnabled'} = new PHPTalBoolean( AppConfig::isGDriveConfigured() );
+        $this->view->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && AppConfig::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, AppConfig::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
 
         /**
          * This is a unique ID generated at runtime.

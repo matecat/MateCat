@@ -41,7 +41,6 @@ class PluginsLoader {
     protected array $PLUGIN_CLASSES = [];
 
     protected array $PLUGIN_PATHS      = [];
-    protected array $DECORATOR_CLASSES = [];
 
     public static function getValidCodes(): array {
         return static::getInstance()->VALID_CODES;
@@ -127,7 +126,7 @@ class PluginsLoader {
         $instance = static::getInstance();
 
         if ( !isset( $instance->PLUGIN_CLASSES[ $feature->feature_code ] ) ) {
-            //try default auto loading for internal plugins
+            //try default autoloading for internal plugins
             $baseClass = '\\Features\\' . Utils::underscoreToCamelCase( $feature->feature_code );
         } else {
             $baseClass = $instance->PLUGIN_CLASSES[ $feature->feature_code ];
@@ -136,8 +135,8 @@ class PluginsLoader {
         //convention for decorators
         $cls = "$baseClass\\Decorator\\$decoratorName";
 
-        // if this line is missing it won't log load errors.
-        Log::doJsonLog( 'loading Decorator ' . $cls );
+        // if this line is missing, it won't log load errors.
+        Log::doJsonLog( 'Loading Decorator ' . $cls );
 
         if ( class_exists( $cls ) ) {
             return $cls;
