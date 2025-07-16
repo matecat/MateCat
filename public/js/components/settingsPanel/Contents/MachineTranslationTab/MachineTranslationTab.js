@@ -30,7 +30,6 @@ import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
-import Tooltip from '../../../common/Tooltip'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
 
 let engineIdFromFromQueryString = new URLSearchParams(

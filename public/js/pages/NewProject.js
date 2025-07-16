@@ -63,7 +63,6 @@ import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/Analysi
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
 
-
 const SELECT_HEIGHT = 324
 
 const urlParams = new URLSearchParams(window.location.search)

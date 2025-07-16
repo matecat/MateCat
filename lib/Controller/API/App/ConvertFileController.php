@@ -18,8 +18,6 @@ use RuntimeException;
 use Utils;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
-use ZipArchiveExtended;
-
 
 class ConvertFileController extends KleinController {
 

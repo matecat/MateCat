@@ -176,12 +176,14 @@ class ConversionHandler {
                     $this->result->setErrorMessage( $convertResult[ 'errorMessage' ] );
 
                     unset( $cachedXliffPath );
+
                     return;
                 }
 
             } catch ( FileSystemException $e ) {
 
                 Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
 
@@ -193,6 +195,7 @@ class ConversionHandler {
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
+
                 return;
             }
 
@@ -208,7 +211,7 @@ class ConversionHandler {
         if ( !empty( $cachedXliffPath ) ) {
 
             //FILE Found in cache, destroy the already present shasum for other languages ( if user swapped languages )
-            $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadTokenValue;
+            $uploadDir = $this->uploadDir;
 
             $fs->deleteHashFromUploadDir( $uploadDir, $hash_name_for_disk );
 
