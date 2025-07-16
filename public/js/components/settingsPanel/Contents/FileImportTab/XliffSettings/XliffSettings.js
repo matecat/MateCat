@@ -107,7 +107,9 @@ export const XliffSettings = () => {
     if (!config.is_cattool) {
       getXliffSettingsTemplates().then((templates) => {
         // sort by name
-        templates.items.sort((a, b) => (a.name > b.name ? 1 : -1))
+        templates.items.sort((a, b) =>
+          a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1,
+        )
         const items = [defaultXliffSettings, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =

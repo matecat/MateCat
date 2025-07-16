@@ -125,7 +125,9 @@ export const QualityFrameworkTab = () => {
         getQualityFrameworkTemplates(),
       ]).then(([templateDefault, templates]) => {
         // sort by name
-        templates.items.sort((a, b) => (a.label > b.label ? 1 : -1))
+        templates.items.sort((a, b) =>
+          a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1,
+        )
         const items = [templateDefault, ...templates.items]
         if (!cleanup) {
           const selectedTemplateId =

@@ -107,7 +107,9 @@ function useProjectTemplates(tmKeys, isCattool = config.is_cattool) {
       Promise.all([getProjectTemplateDefault(), getProjectTemplates()]).then(
         ([templateDefault, {items}]) => {
           // sort by name
-          items.sort((a, b) => (a.name > b.name ? 1 : -1))
+          items.sort((a, b) =>
+            a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1,
+          )
           if (!cleanup) {
             const shouldUsePresetCharacterMode = Object.values(
               CHARS_SIZE_COUNTER_TYPES,
