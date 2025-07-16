@@ -459,7 +459,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         Add penalty
       </Button>
     )
-  console.log(isLookup)
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">

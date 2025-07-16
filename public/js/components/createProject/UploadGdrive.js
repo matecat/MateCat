@@ -38,10 +38,23 @@ export const UploadGdrive = () => {
   const openGDrivePrev = usePrevious(openGDrive)
 
   const currentFiltersExtractionParameters = useMemo(() => {
-    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
-      (template) =>
-        template.id === extractionParameterTemplateId && template.isTemporary,
-    )
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates
+      .filter(
+        (template) =>
+          template.id === extractionParameterTemplateId && template.isTemporary,
+      )
+      .map(
+        ({
+          /* eslint-disable */
+          isSelected,
+          isTemporary,
+          id,
+          created_at,
+          modified_at,
+          /* eslint-enable */
+          ...result
+        }) => result,
+      )[0]
 
     return unsavedTemplate
   }, [
