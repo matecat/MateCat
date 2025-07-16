@@ -15,6 +15,7 @@ use EnginesModel_MMTStruct;
 use Exception;
 use Features\Mmt;
 use INIT;
+use Lara\Glossary;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
@@ -550,6 +551,16 @@ class Lara extends Engines_AbstractEngine {
 
         return $_keys;
 
+    }
+
+    /**
+     * @return Glossary[]
+     * @throws LaraException
+     */
+    public function getGlossaries() {
+        $client = $this->_getClient();
+
+        return $client->glossaries->getAll();
     }
 
 }
