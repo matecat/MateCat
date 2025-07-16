@@ -69,8 +69,6 @@ function UploadFileLocal() {
           isSelected,
           isTemporary,
           id,
-          uid,
-          name,
           created_at,
           modified_at,
           /* eslint-enable */
