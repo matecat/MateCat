@@ -16,7 +16,7 @@ class MultiCurlHandlerTest extends AbstractTest {
 
     public function testInstance() {
         $mh = new MultiCurlHandler();
-        $this->assertInstanceOf( 'MultiCurlHandler', $mh );
+        $this->assertInstanceOf( MultiCurlHandler::class, $mh );
     }
 
     public function testCreateSingle() {

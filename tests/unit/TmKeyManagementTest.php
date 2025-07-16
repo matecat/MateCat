@@ -125,7 +125,7 @@ class TmKeyManagementTest extends AbstractTest {
     public function testGetTmKeyStructure_noArgs() {
         $structure = TmKeyManager::getTmKeyStructure();
 
-        $this->assertInstanceOf( "TmKeyStruct", $structure );
+        $this->assertInstanceOf( TmKeyStruct::class, $structure );
         $this->assertObjectHasProperty( "tm", $structure );
         $this->assertObjectHasProperty( "glos", $structure );
         $this->assertObjectHasProperty( "owner", $structure );
@@ -142,8 +142,8 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertObjectHasProperty( "source", $structure );
         $this->assertObjectHasProperty( "target", $structure );
 
-        $this->assertNull( $structure->tm );
-        $this->assertNull( $structure->glos );
+        $this->assertTrue( $structure->tm );
+        $this->assertTrue( $structure->glos );
         $this->assertNull( $structure->owner );
         $this->assertNull( $structure->uid_transl );
         $this->assertNull( $structure->uid_rev );

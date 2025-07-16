@@ -5,6 +5,8 @@ use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\MMT;
+use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Registry\AppConfig;
 
 /**
@@ -75,10 +77,10 @@ H;
         $stmt = $this->database_instance->getConnection()->prepare( "select * from engines where id = :id" );
         $stmt->execute( [ 'id' => $this->engine_id ] );
         $record    = $stmt->fetch( PDO::FETCH_ASSOC );
-        $mmtClient = @$this->getMockBuilder( '\Engines\MMT\MMTServiceApi' )->disableOriginalConstructor()->getMock();
+        $mmtClient = @$this->getMockBuilder( MMTServiceApi::class )->disableOriginalConstructor()->getMock();
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
-        $mmtEngine = @$this->getMockBuilder( '\Utils\Engines\MMT' )
+        $mmtEngine = @$this->getMockBuilder( MMT::class )
                 ->setConstructorArgs( [ new EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 

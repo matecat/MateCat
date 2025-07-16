@@ -413,7 +413,7 @@ CREATE TABLE `engines`
     DISABLE KEYS */;
 INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
 VALUES (10, 'NONE', 'NONE', 'No MT', '', '', null, null, null,
-        '{"gloss_get_relative_url":"glossary/get","gloss_set_relative_url":"glossary/set","gloss_update_relative_url":"glossary/update","glossary_import_relative_url":"glossary/import","glossary_export_relative_url":"glossary/export","gloss_delete_relative_url":"glossary/delete","tmx_import_relative_url":"tmx/import","tmx_status_relative_url":"tmx/status","tmx_export_create_url":"tmx/export/create","tmx_export_check_url":"tmx/export/check","tmx_export_download_url":"tmx/export/download","tmx_export_list_url":"tmx/export/list","tmx_export_email_url":"tmx/export/create","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}',
+        '{}',
         'NONE', '{}', null, 100, 0, null);
 INSERT INTO engines (id, name, type, description, base_url, translate_relative_url, contribute_relative_url, update_relative_url, delete_relative_url, others, class_load, extra_parameters, google_api_compliant_version, penalty, active, uid)
 VALUES (11, 'ModernMT Lite', 'TM', 'Smart machine translation that learns from your corrections for enhanced quality and productivity thanks to ModernMT’s basic features. To unlock all features, <a href="https://www.modernmt.com/pricing#translators">click here</a>.', 'https://api.mymemory.translated.net', 'get', 'set', 'update', 'delete_by_id',

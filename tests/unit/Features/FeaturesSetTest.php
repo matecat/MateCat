@@ -1,8 +1,8 @@
 <?php
 
+use Features\Airbnb;
 use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
-use Plugins\Features\Airbnb;
 use TestHelpers\AbstractTest;
 
 
@@ -15,7 +15,7 @@ use TestHelpers\AbstractTest;
  */
 class FeaturesSetTest extends AbstractTest {
 
-    protected static $airbnbDependencies = [
+    protected static array $airbnbDependencies = [
             FeatureCodes::TRANSLATION_VERSIONS,
 //            FeatureCodes::REVIEW_EXTENDED  // FIX: Undefined index: review_extended
     ];
@@ -37,7 +37,7 @@ class FeaturesSetTest extends AbstractTest {
     /**
      * This test is dependant from shuffle, to get a better coverage ( heuristic ) let's run it 2000 times.
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSortFeatures() {
 
@@ -53,8 +53,8 @@ class FeaturesSetTest extends AbstractTest {
 
             $set = array_flip( array_values( $featureSet->getCodes() ) );
 
-            $this->assertEquals( 8, count( $featureSet->getCodes() ) );
-            $this->assertEquals( 8, count( $set ) );
+            $this->assertCount( 8, $featureSet->getCodes() );
+            $this->assertCount( 8, $set );
 
             $this->assertTrue( $this->_testForDependenciesOrder( $set ) );
 

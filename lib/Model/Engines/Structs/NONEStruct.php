@@ -24,7 +24,7 @@ class NONEStruct extends EngineStruct {
     public ?string $delete_relative_url          = "";
     public         $others                       = [];
     public         $extra_parameters             = [];
-    public ?string $class_load                   = None::class;
+    public ?string $class_load                   = NONE::class;
     public ?int    $google_api_compliant_version = null;
     public ?int    $penalty                      = 100;
     public ?bool   $active                       = false;

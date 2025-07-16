@@ -288,8 +288,8 @@ class AppConfig {
     /**
      * S3FilesStorage Configuration
      */
-    public static string $AWS_ACCESS_KEY_ID;
-    public static string $AWS_SECRET_KEY;
+    public static ?string $AWS_ACCESS_KEY_ID = null;
+    public static ?string $AWS_SECRET_KEY = null;
     public static string $AWS_VERSION;
     public static string $AWS_REGION;
     public static bool   $AWS_SSL_VERIFY = false;

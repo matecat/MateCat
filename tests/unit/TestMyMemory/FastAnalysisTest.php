@@ -255,7 +255,7 @@ Z;
         $engine_struct_param = $eng[ 0 ];
 
         $engine_MyMemory = new MyMemory( $engine_struct_param );
-        $this->assertNull( $engine_MyMemory->fastAnalysis( $array_paramemeter ) );
+        $this->assertInstanceOf( AnalyzeResponse::class, $engine_MyMemory->fastAnalysis( $array_paramemeter ) );
     }
 
 

@@ -3,8 +3,8 @@
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
 use Model\Engines\Structs\EngineStruct;
-use Model\Engines\Structs\NONEStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\NONE;
 use Utils\Registry\AppConfig;
 
 
@@ -63,10 +63,8 @@ class ReadEngineTest extends AbstractTest {
     }
 
     /**
-     * @param EngineStruct
-     *
-     * @return array
-     * It reads a struct of an engine and @return an array of properties of the engine
+     * It reads a struct of an engine and returns an array of engine's properties
+     * @throws Exception
      * @group  regression
      * @covers EngineDAO::read
      */
@@ -80,28 +78,24 @@ class ReadEngineTest extends AbstractTest {
         $this->engine_struct_simple->type                         = "NONE";
         $this->engine_struct_simple->base_url                     = "";
         $this->engine_struct_simple->translate_relative_url       = "";
-        $this->engine_struct_simple->contribute_relative_url      = "";
-        $this->engine_struct_simple->delete_relative_url          = "";
+        $this->engine_struct_simple->contribute_relative_url      = null;
+        $this->engine_struct_simple->delete_relative_url          = null;
         $this->engine_struct_simple->others                       = [];
-        $this->engine_struct_simple->class_load                   = "NONE";
-        $this->engine_struct_simple->extra_parameters             = null;
-        $this->engine_struct_simple->google_api_compliant_version = 1;
+        $this->engine_struct_simple->class_load                   = NONE::class;
+        $this->engine_struct_simple->extra_parameters             = [];
+        $this->engine_struct_simple->google_api_compliant_version = null;
         $this->engine_struct_simple->penalty                      = "100";
         $this->engine_struct_simple->active                       = "0";
-        $this->engine_struct_simple->uid                          = 0;
+        $this->engine_struct_simple->uid                          = null;
 
-        $expected_engine_obj_output = new NONEStruct();
+        $this->assertEquals( [ clone $this->engine_struct_simple ], $this->engine_Dao->read( $this->engine_struct_simple ) );
 
-
-        $this->assertEquals( [ $expected_engine_obj_output ], $this->engine_Dao->read( $this->engine_struct_simple ) );
     }
 
 
     /**
-     * @param EngineStruct
      *
-     * @return array
-     * It reads a struct of an engine and @return an array of properties of the engine
+     * It reads a struct of an engine and returns an array engine's properties
      * @group  regression
      * @covers EngineDAO::read
      */

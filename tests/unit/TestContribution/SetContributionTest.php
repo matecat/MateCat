@@ -12,6 +12,7 @@ use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
+use Utils\AsyncTasks\Workers\SetContributionWorker;
 use Utils\Contribution\Set;
 use Utils\Contribution\SetContributionRequest;
 use Utils\Redis\RedisHandler;
@@ -155,11 +156,11 @@ class SetContributionTest extends AbstractTest {
 
         // Create a stub for the \AMQHandler class.
         //we want to test that Set::contribution will call send with these parameters
-        $stub = @$this->getMockBuilder( '\Utils\ActiveMQ\AMQHandler' )->getMock();
+        $stub = @$this->getMockBuilder( AMQHandler::class )->getMock();
 
         $queueElement            = new QueueElement();
         $queueElement->params    = new Params( $contributionStruct->getArrayCopy() );
-        $queueElement->classLoad = '\AsyncTasks\Workers\SetContributionWorker';
+        $queueElement->classLoad = SetContributionWorker::class;
 
         $stub->expects( $this->once() )
                 ->method( 'publishToQueues' )

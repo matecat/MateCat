@@ -25,15 +25,15 @@ class HtmlentitiesFromUnicodeTest extends AbstractTest {
      * @group  regression
      * @covers CatUtils::htmlentitiesFromUnicode
      */
-    public function testhtmlentitiesFromUnicode1() {
+    public function testHtmlentitiesFromUnicode1() {
 
-        $this->source_segment = <<<'LAB'
+        $this->source_segment   = <<<'LAB'
 𐍇
 LAB;
         $this->expected_segment = <<<'LAB'
 &#66375;
 LAB;
-        $this->actual_segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
+        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ CatUtils::class, 'htmlentitiesFromUnicode' ], $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }
@@ -43,14 +43,14 @@ LAB;
      * @covers CatUtils::htmlentitiesFromUnicode
      * original_segment=  <g 𐎆 𐏉</g>
      */
-    public function testhtmlentitiesFromUnicode2() {
+    public function testHtmlentitiesFromUnicode2() {
         $this->source_segment   = <<<'LAB'
 <g 𐎆 𐏉##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
         $this->expected_segment = <<<'LAB'
 <g &#66438; &#66505;##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
+        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ CatUtils::class, 'htmlentitiesFromUnicode' ], $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }
@@ -60,14 +60,14 @@ LAB;
      * @covers CatUtils::htmlentitiesFromUnicode
      * original_segment= <g id="1">ψ</g>😴<g 😆id="2">🛠λ</g>
      */
-    public function testhtmlentitiesFromUnicode3() {
+    public function testHtmlentitiesFromUnicode3() {
         $this->source_segment   = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ψ##LESSTHAN##L2c=##GREATERTHAN##😴<g 😆id="2">🛠λ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
         $this->expected_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ψ##LESSTHAN##L2c=##GREATERTHAN##&#128564;<g &#128518;id="2">&#128736;λ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'Utils\CatUtils', $this->source_segment );
+        $this->actual_segment   = preg_replace_callback( '/([\xF0-\xF7]...)/s',  [ CatUtils::class, 'htmlentitiesFromUnicode' ], $this->source_segment );
 
         $this->assertEquals( $this->expected_segment, $this->actual_segment );
     }
@@ -76,7 +76,7 @@ LAB;
      * @group  regression
      * @covers CatUtils::htmlentitiesFromUnicode
      */
-    public function testhtmlentitiesFromUnicode4() {
+    public function testHtmlentitiesFromUnicode4() {
         $source_array      = [];
         $source_alfa       = "😴";
         $source_array[ 0 ] = $source_alfa;
