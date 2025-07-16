@@ -3,6 +3,8 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
@@ -21,6 +23,8 @@ use ReflectionException;
 use Utils\Contribution\Get;
 use Utils\Contribution\GetContributionRequest;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
 
 class GetContributionController extends KleinController {
@@ -48,8 +52,6 @@ class GetContributionController extends KleinController {
         $received_password   = $request[ 'received_password' ];
         $concordance_search  = $request[ 'concordance_search' ];
         $switch_languages    = $request[ 'switch_languages' ];
-        $context_list_before = $request[ 'context_list_before' ];
-        $context_list_after  = $request[ 'context_list_after' ];
         $cross_language      = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
@@ -63,10 +65,21 @@ class GetContributionController extends KleinController {
         $this->featureSet->loadForProject( $projectStruct );
 
         $contributionRequest = new GetContributionRequest();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        /** @var MateCatFilter $Filter */
+        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
+
+        $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
+            return $Filter->fromLayer2ToLayer1( $context );
+        }, $request[ 'context_list_before' ] );
+
+        $context_list_after = array_map( function ( string $context ) use ( $Filter ) {
+            return $Filter->fromLayer2ToLayer1( $context );
+        }, $request[ 'context_list_after' ] );
 
         if ( !$concordance_search ) {
 
-            $this->rewriteContributionContexts( $jobStruct->source, $jobStruct->target, $request );
+            $this->rewriteContributionContexts( $request, $Filter );
 
             $contributionRequest->mt_evaluation =
                     (bool)$projectStruct->getMetadataValue( ProjectsMetadataDao::MT_EVALUATION ) ??
@@ -194,8 +207,8 @@ class GetContributionController extends KleinController {
         $switch_languages    = filter_var( $this->request->param( 'from_target' ), FILTER_VALIDATE_BOOLEAN );
         $context_before      = filter_var( $this->request->param( 'context_before' ), FILTER_UNSAFE_RAW );
         $context_after       = filter_var( $this->request->param( 'context_after' ), FILTER_UNSAFE_RAW );
-        $context_list_before = filter_var( $this->request->param( 'context_list_before' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
-        $context_list_after  = filter_var( $this->request->param( 'context_list_after' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
+        $context_list_before = filter_var( $this->request->param( 'context_list_before' ), FILTER_UNSAFE_RAW );
+        $context_list_after  = filter_var( $this->request->param( 'context_list_after' ), FILTER_UNSAFE_RAW );
         $id_before           = filter_var( $this->request->param( 'id_before' ), FILTER_SANITIZE_NUMBER_INT );
         $id_after            = filter_var( $this->request->param( 'id_after' ), FILTER_SANITIZE_NUMBER_INT );
         $cross_language      = filter_var( $this->request->param( 'cross_language' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FORCE_ARRAY ] );
@@ -250,13 +263,18 @@ class GetContributionController extends KleinController {
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $request
+     * @param array         $request
+     * @param MateCatFilter $Filter
      *
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws \Model\Exceptions\ValidationError
      * @throws Exception
      */
-    private function rewriteContributionContexts( $source, $target, &$request ): void {
+    private function rewriteContributionContexts( array &$request, MateCatFilter $Filter ): void {
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
 
         //Get contexts
@@ -269,8 +287,6 @@ class GetContributionController extends KleinController {
         );
 
         $featureSet->filter( 'rewriteContributionContexts', $segmentsList, $request );
-
-        $Filter = MateCatFilter::getInstance( $featureSet, $source, $target );
 
         if ( $segmentsList->id_before ) {
             $request[ 'context_before' ] = $Filter->fromLayer0ToLayer1( $segmentsList->id_before->segment );
