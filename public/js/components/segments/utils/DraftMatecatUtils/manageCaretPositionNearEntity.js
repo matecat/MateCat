@@ -89,10 +89,39 @@ export const checkCaretIsNearZwsp = ({
   }
 }
 
+const backspaceKeyPressedSkipCheckZwsp = ({
+  editorState,
+  entities,
+  entityMatched,
+}) => {
+  const step = getStepByDirection('left')
+  const start = entityMatched.start + step
+
+  const selection = editorState.getSelection()
+  const contentState = editorState.getCurrentContent()
+  const focusKey = selection.getFocusKey()
+  const currentBlock = contentState.getBlockForKey(focusKey)
+
+  const point = {
+    ...(step > 0 ? {start, end: start + 1} : {start: start - 1, end: start}),
+  }
+
+  const textPortion = currentBlock.getText().substring(point.start, point.end)
+
+  if (
+    textPortion === ZWSP &&
+    entities.some((entity) => entity.end === start - 1)
+  )
+    return false
+
+  return true
+}
+
 export const checkCaretIsNearEntity = ({
   editorState,
   direction = 'right',
   isShiftPressed = false,
+  isBackspacePressed,
 }) => {
   const selection = editorState.getSelection()
   const focusKey = selection.getFocusKey()
@@ -110,12 +139,18 @@ export const checkCaretIsNearEntity = ({
       : false,
   )
 
+  const shouldSkipCheckZwsp =
+    isBackspacePressed &&
+    entityMatched &&
+    backspaceKeyPressedSkipCheckZwsp({editorState, entities, entityMatched})
+
   return entityMatched
     ? moveCaretOutsideEntity({
         editorState,
         entity: entityMatched,
         direction,
         isShiftPressed,
+        shouldSkipCheckZwsp,
       })
     : undefined
 }
@@ -125,6 +160,7 @@ export const moveCaretOutsideEntity = ({
   entity,
   direction = 'right',
   isShiftPressed = false,
+  shouldSkipCheckZwsp,
 }) => {
   const step = getStepByDirection(direction)
 
@@ -145,11 +181,13 @@ export const moveCaretOutsideEntity = ({
   })
 
   const updatedState = EditorState.forceSelection(editorState, updatedSelection)
-  const updatedStateNearZwsp = checkCaretIsNearZwsp({
-    editorState: updatedState,
-    direction,
-    isShiftPressed,
-  })
+  const updatedStateNearZwsp =
+    !shouldSkipCheckZwsp &&
+    checkCaretIsNearZwsp({
+      editorState: updatedState,
+      direction,
+      isShiftPressed,
+    })
   return updatedStateNearZwsp ? updatedStateNearZwsp : updatedState
 }
 
