@@ -147,7 +147,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $old_translation = $this->getOldTranslation();
 
-            $client_suggestion_array = $this->data[ 'suggestion_array' ];
+            $client_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
             $client_old_suggestion   = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
             $new_translation                         = new Translations_SegmentTranslationStruct();
@@ -157,11 +157,11 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->segment_hash           = $this->data[ 'segment' ]->segment_hash;
             $new_translation->translation            = $translation;
             $new_translation->serialized_errors_list = $err_json;
-            $new_translation->suggestions_array      = ( $this->data[ 'chosen_suggestion_index' ] !== null ? json_encode( $client_suggestion_array ) : $old_translation->suggestions_array );
+            $new_translation->suggestions_array      = ( $this->data[ 'chosen_suggestion_index' ] !== null ? $this->data[ 'suggestion_array' ] : $old_translation->suggestions_array );
             $new_translation->suggestion_position    = ( $this->data[ 'chosen_suggestion_index' ] !== null ? $this->data[ 'chosen_suggestion_index' ] : $old_translation->suggestion_position );
             $new_translation->warning                = $check->thereAreWarnings();
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-            $new_translation->suggestion             = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; // raw_translation is in layer 0 and suggestion too
+            $new_translation->suggestion             = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
             $new_translation->suggestion_source      = $old_translation->suggestion_source;
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
