@@ -182,7 +182,7 @@ class NewController extends KleinController {
         }
 
         // mmtGlossaries
-        if ( $request[ 'mmt_glossaries' ] ) {
+         if ( $request[ 'mmt_glossaries' ] ) {
             $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
         }
 

@@ -215,6 +215,7 @@ class Lara extends Engines_AbstractEngine {
                 $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'lara_glossaries' );
 
                 if ( $metadata !== null ) {
+                    $metadata            = html_entity_decode( $metadata->value );
                     $laraGlossariesArray = json_decode( $metadata, true );
                     $translateOptions->setGlossaries($laraGlossariesArray);
                 }
