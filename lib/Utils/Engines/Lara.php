@@ -23,6 +23,7 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use RedisHandler;
 use ReflectionException;
@@ -207,6 +208,17 @@ class Lara extends Engines_AbstractEngine {
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setMultiline( false );
             $translateOptions->setContentType( 'application/xliff+xml' );
+
+            $metadata = null;
+            if ( !empty( $_config[ 'project_id' ] ) ) {
+                $metadataDao = new Projects_MetadataDao();
+                $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'lara_glossaries' );
+
+                if ( $metadata !== null ) {
+                    $laraGlossariesArray = json_decode( $metadata, true );
+                    $translateOptions->setGlossaries($laraGlossariesArray);
+                }
+            }
 
             $request_translation = [];
 
