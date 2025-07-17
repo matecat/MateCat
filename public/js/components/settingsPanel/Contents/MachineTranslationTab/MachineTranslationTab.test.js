@@ -180,7 +180,7 @@ test('Activate MT', async () => {
     </SettingsPanelContext.Provider>,
   )
   let activeMTContainert = screen.getByTestId('active-mt')
-  let mtName = within(activeMTContainert).getByText('Match')
+  let mtName = within(activeMTContainert).getByText('MyMemory')
   expect(mtName).toBeInTheDocument()
   const checkboxMtActive = screen.getByTestId(
     `checkbox-mt-active-${mtEnginesMock[1].name}`,
