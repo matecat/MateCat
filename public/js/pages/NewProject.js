@@ -528,6 +528,9 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
+      ...(mt?.extra?.lara_glossaries?.length && {
+        lara_glossaries: JSON.stringify(mt.extra.lara_glossaries),
+      }),
     })
 
     if (!projectSent) {
