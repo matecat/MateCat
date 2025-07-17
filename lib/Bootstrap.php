@@ -39,8 +39,8 @@ class Bootstrap {
         self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-        set_exception_handler( [ 'Bootstrap', 'exceptionHandler' ] );
-        register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
+        set_exception_handler( [ Bootstrap::class, 'exceptionHandler' ] );
+        register_shutdown_function( [ Bootstrap::class, 'shutdownFunctionHandler' ] );
 
         $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
 
@@ -85,7 +85,7 @@ class Bootstrap {
      * It also loads the app version from a separate
      * `version.ini` file.
      *
-     * @param SplFileInfo|null $config_file The main configuration file. If null, a default path is used.
+     * @param SplFileInfo|null $config_file             The main configuration file. If null, a default path is used.
      * @param SplFileInfo|null $task_runner_config_file The task runner configuration file. If null, a default path is used.
      *
      * @throws RuntimeException If any of the required configuration files are not found.
@@ -113,7 +113,12 @@ class Bootstrap {
         }
 
         // Load the app version from 'version.ini'
-        $mv                 = parse_ini_file( 'version.ini' );
+        $matecatVesrsionFile = new SplFileInfo( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/version.ini' );
+        if ( $matecatVesrsionFile->isFile() ) {
+            $mv = parse_ini_file( $matecatVesrsionFile->getRealPath() );
+        } else {
+            throw new RuntimeException( "MateCat version file not found: " . $matecatVesrsionFile->getPathname() );
+        }
         self::$_INI_VERSION = $mv[ 'version' ];
 
     }
@@ -241,18 +246,6 @@ class Bootstrap {
     }
 
     /**
-     * @throws Exception
-     */
-    public static function sessionStart() {
-        $session_status = session_status();
-        if ( $session_status == PHP_SESSION_NONE ) {
-            session_start();
-        } elseif ( $session_status == PHP_SESSION_DISABLED ) {
-            throw new Exception( "MateCat needs to have sessions. Sessions must be enabled." );
-        }
-    }
-
-    /**
      * Returns an array of configuration params as parsed from the config.ini file.
      * The returned array only returns entries that match the current environment.
      *
@@ -331,7 +324,7 @@ class Bootstrap {
     }
 
     private function unsetVariables() {
-        self::$CONFIG = [];
+        self::$CONFIG             = [];
         self::$TASK_RUNNER_CONFIG = [];
     }
 

@@ -191,7 +191,7 @@ TAB;
         /**
          * @var Match
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->exactly( 1 ) )->method( '_call' )->with( $url_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
@@ -257,7 +257,7 @@ TAB;
         /**
          * @var Match
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );
@@ -408,7 +408,7 @@ TAB;
         /**
          * @var Match
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(  $url_mock_param, $curl_mock_param  )->willReturn( $mock_json_return );
 
         /**
@@ -559,7 +559,7 @@ TAB;
         /**
          * @var Match
          */
-        $this->engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param )->willReturn( $rawValue_error );
 
         $result = $this->engine_MyMemory->get( $this->config_param_of_get );

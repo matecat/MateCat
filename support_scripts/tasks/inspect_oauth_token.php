@@ -1,12 +1,13 @@
 <?php
 
+
 use Model\ConnectedServices\Oauth\OauthTokenEncryption;
 use Model\DataAccess\Database;
 use Model\Users\UserDao;
 use Utils\Registry\AppConfig;
 
 $root = realpath(dirname(__FILE__) . '/../../');
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 $db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);

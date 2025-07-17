@@ -32,7 +32,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
     protected bool $isView = true;
 
     /**
-     * @var \Utils\Templating\PHPTALWithAppend
+     * @var PHPTALWithAppend
      */
     protected PHPTAL $view;
 

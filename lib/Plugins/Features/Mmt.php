@@ -13,7 +13,6 @@ namespace Plugins\Features;
 use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
-use Engines\MMT\MMTServiceApiException;
 use Exception;
 use Model\DataAccess\Database;
 use Model\Engines\EngineDAO;
@@ -32,6 +31,7 @@ use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
+use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
@@ -220,16 +220,17 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param $projectFeatures
+     * Called in
+     * @see createProjectController::__appendFeaturesToProject()
+     * @see NewController::__appendFeaturesToProject()
+     *
+     * @param $projectFeatures
      *
      * @param $controller NewController|CreateProjectController
+     * @param $mt_engine_id
      *
      * @return array
-     * @throws MMTServiceApiException
      * @throws Exception
-     * @see createProjectController::__appendFeaturesToProject()
-     *      Called in @see NewController::__appendFeaturesToProject()
-     *
      */
     public function filterCreateProjectFeatures( $projectFeatures, $controller, $mt_engine_id ) {
 

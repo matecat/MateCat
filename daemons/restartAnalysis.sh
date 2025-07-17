@@ -3,6 +3,12 @@
 ################
 #  DEPRECATED  #
 ################
+# Only for development environment
+
+
+export MATECAT_HOME="/var/www/matecat"
+task_config_path=/var/www/matecat/inc/task_manager_config.ini
+php_script_path=/var/www/matecat/daemons/
 
 DIR=$( cd "$( dirname "$0")" || exit; pwd )
 cd "${DIR}" || exit
@@ -15,9 +21,8 @@ if [[ ${rc} -eq 0 ]]; then
     sleep 10
 fi
 
-
-pid_fast=$(ps faux|grep -E ".* FastAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}')
-pid_tm=$(ps faux|grep -E ".* TmAnalysis.php" |grep -v grep|grep -i SCREEN|awk '{print $2}')
+pid_fast=$(pgrep --full FastAnalysis.php)
+pid_tm=$(pgrep --full TmAnalysis.php)
 
 #if up, exit, ERROR
 if [[ -n ${pid_fast} ]] || [[ -n ${pid_tm} ]];
@@ -29,7 +34,7 @@ fi
 
 #spawn new
 echo "spawning daemons"
-screen -d -m -S fast php FastAnalysis.php ../../../inc/task_manager_config.ini
-screen -d -m -S tm php TmAnalysis.php ../../../inc/task_manager_config.ini
+screen -d -m -S fast php ${php_script_path}FastAnalysis.php "${task_config_path}"
+screen -d -m -S tm php ${php_script_path}TmAnalysis.php "${task_config_path}"
 
 exit 0;

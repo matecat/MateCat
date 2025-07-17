@@ -2,8 +2,8 @@
 
 namespace Utils\OutsourceTo;
 
-use Bootstrap;
 use Exception;
+
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;

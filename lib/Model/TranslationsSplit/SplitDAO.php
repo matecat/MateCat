@@ -37,15 +37,11 @@ class SplitDAO extends AbstractDao {
                                     target_chunk_lengths
                              FROM " . self::TABLE . " WHERE ";
 
-        if ( $obj->id_segment !== null ) {
-            $where_conditions[]     = "id_segment = :id_segment";
-            $values[ 'id_segment' ] = $obj->id_segment;
-        }
+        $where_conditions[]     = "id_segment = :id_segment";
+        $values[ 'id_segment' ] = $obj->id_segment;
 
-        if ( $obj->id_job !== null ) {
-            $where_conditions[] = "id_job = :id_job";
-            $values[ 'id_job' ] = $obj->id_job;
-        }
+        $where_conditions[] = "id_job = :id_job";
+        $values[ 'id_job' ] = $obj->id_job;
 
         if ( count( $where_conditions ) ) {
             $query .= implode( " AND ", $where_conditions );
@@ -72,8 +68,6 @@ class SplitDAO extends AbstractDao {
     public function atomicUpdate( SegmentSplitStruct $obj ): ?SegmentSplitStruct {
 
         $obj = $this->sanitize( $obj );
-
-        $this->_validatePrimaryKey( $obj );
 
         $res = self::insertStruct( $obj, [
                 'no_nulls'            => true,
@@ -103,8 +97,6 @@ class SplitDAO extends AbstractDao {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->id_segment           = ( $input->id_segment !== null ) ? $input->id_segment : null;
-        $input->id_job               = ( $input->id_job !== null ) ? $input->id_job : null;
         $input->source_chunk_lengths = ( $input->source_chunk_lengths !== null ) ? json_encode( $input->source_chunk_lengths ) : null;
         $input->target_chunk_lengths = ( $input->target_chunk_lengths !== null ) ? json_encode( $input->target_chunk_lengths ) : null;
 
@@ -120,16 +112,6 @@ class SplitDAO extends AbstractDao {
      */
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
-        /**
-         * @var $obj SegmentSplitStruct
-         */
-        if ( $obj->id_segment === null ) {
-            throw new Exception( "ID segment required" );
-        }
-
-        if ( $obj->id_job === null ) {
-            throw new Exception( "ID job required" );
-        }
     }
 
 

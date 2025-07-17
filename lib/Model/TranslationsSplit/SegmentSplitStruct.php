@@ -13,8 +13,17 @@ use Model\DataAccess\IDaoStruct;
  */
 class SegmentSplitStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
+    /**
+     * Primary key (Part 1)
+     * @var int
+     */
     public int $id_segment;
 
+    /**
+     * Primary key (Part 2)
+     *
+     * @var int
+     */
     public int $id_job;
 
     /**

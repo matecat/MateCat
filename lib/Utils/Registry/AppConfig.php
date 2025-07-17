@@ -84,7 +84,7 @@ class AppConfig {
     public static string $MAILER_FROM_NAME   = 'Matecat';
     public static string $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
-    public static string  $LOG_REPOSITORY;
+    public static ?string $LOG_REPOSITORY              = null;
     public static ?string $STORAGE_DIR                 = null;
     public static string  $UPLOAD_REPOSITORY;
     public static string  $FILES_REPOSITORY;
@@ -289,12 +289,12 @@ class AppConfig {
      * S3FilesStorage Configuration
      */
     public static ?string $AWS_ACCESS_KEY_ID = null;
-    public static ?string $AWS_SECRET_KEY = null;
-    public static string $AWS_VERSION;
-    public static string $AWS_REGION;
-    public static bool   $AWS_SSL_VERIFY = false;
-    public static bool   $AWS_CACHING    = false;
-    public static string $AWS_STORAGE_BASE_BUCKET;
+    public static ?string $AWS_SECRET_KEY    = null;
+    public static string  $AWS_VERSION;
+    public static string  $AWS_REGION;
+    public static bool    $AWS_SSL_VERIFY    = false;
+    public static bool    $AWS_CACHING       = false;
+    public static string  $AWS_STORAGE_BASE_BUCKET;
 
     public static string $REPLACE_HISTORY_DRIVER = '';
     public static int    $REPLACE_HISTORY_TTL    = 0;

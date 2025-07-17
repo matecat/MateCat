@@ -1,11 +1,12 @@
 <?php
 
+
 use Model\ConnectedServices\Oauth\Google\GoogleProvider;
 use Model\DataAccess\Database;
 use Utils\Registry\AppConfig;
 
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 $db        = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );

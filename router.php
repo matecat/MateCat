@@ -17,7 +17,7 @@ use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use View\API\Commons\Error;
 
-require_once './inc/Bootstrap.php';
+require_once './lib/Bootstrap.php';
 
 Bootstrap::start();
 

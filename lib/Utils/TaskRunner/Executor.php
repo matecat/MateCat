@@ -31,7 +31,7 @@ use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TaskRunner\Exceptions\WorkerClassException;
 use Utils\Tools\Utils;
 
-include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
+include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 /**

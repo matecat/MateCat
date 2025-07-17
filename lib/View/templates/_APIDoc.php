@@ -1,15 +1,16 @@
 <?php
 
+
 use Model\FeaturesBase\FeatureSet;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
-require_once '../../inc/Bootstrap.php';
+require_once '../../lib/Bootstrap.php';
 try {
     Bootstrap::start();
-    Bootstrap::sessionStart();
+    session_start();
 } catch ( Exception $e ) {
 }
 

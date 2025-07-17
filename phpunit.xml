@@ -5,22 +5,16 @@
       <directory suffix=".php">./lib</directory>
     </include>
     <exclude>
-      <file>./lib/Utils/Analysis/FastAnalysis.php</file>
-      <file>./lib/Utils/Analysis/TmAnalysis.php</file>
       <file>./lib/Utils/TaskRunner/Executor.php</file>
       <file>./lib/Utils/fileupload/index.php</file>
       <file>./lib/View/APIDoc.php</file>
       <file>./lib/View/templates/_APIDoc.php</file>
-      <file>./lib/View/fileupload/upload.class.php</file>
     </exclude>
   </coverage>
   <php>
     <includePath>tests/TestHelpers</includePath>
   </php>
   <testsuites>
-    <!--<testsuite name="cURL based tests">-->
-    <!--<directory>test/integration</directory>-->
-    <!--</testsuite>-->
     <testsuite name="Unit tests">
       <directory>tests/unit</directory>
     </testsuite>

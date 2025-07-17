@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts\Authentication;
 
-use Bootstrap;
 use Exception;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\Users\UserStruct;
@@ -19,6 +18,8 @@ use Utils\Registry\AppConfig;
  *
  */
 trait AuthenticationTrait {
+
+    use SessionStarter;
 
     protected bool       $userIsLogged;
     protected UserStruct $user;
@@ -41,7 +42,7 @@ trait AuthenticationTrait {
         $_session = [];
         if ( $useSession ) {
             //Warning, sessions enabled, disable them after check, $_SESSION is in read-only mode after disable
-            Bootstrap::sessionStart();
+            static::sessionStart();
             $_session =& $_SESSION;
         }
 
@@ -70,22 +71,12 @@ trait AuthenticationTrait {
 
     }
 
-    /**
-     * Explicitly disable sessions for ajax call
-     *
-     * Sessions enabled on AppConfig Class
-     *
-     */
-    public function disableSessions() {
-        Bootstrap::sessionClose();
-    }
-
     public function isLoggedIn(): bool {
         return $this->userIsLogged;
     }
 
     /**
-     * @return ?\Model\Users\UserStruct
+     * @return ?UserStruct
      */
     public function getUser(): UserStruct {
         return $this->user;

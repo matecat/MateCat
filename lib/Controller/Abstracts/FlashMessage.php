@@ -1,8 +1,8 @@
 <?php
 
 namespace Controller\Abstracts;
-use Bootstrap;
 use Exception;
+
 
 class FlashMessage {
 
@@ -17,8 +17,6 @@ class FlashMessage {
      * @throws Exception
      */
     public static function set( $key, $value, $type = self::WARNING ) {
-
-        Bootstrap::sessionStart();
 
         if ( !isset( $_SESSION[ self::KEY ] ) ) {
             $_SESSION[ self::KEY ] = [

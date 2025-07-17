@@ -2,7 +2,6 @@
 
 namespace Controller\Abstracts;
 
-use Bootstrap;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
 use Controller\Abstracts\Authentication\AuthenticationTrait;
 use Controller\API\Commons\Validators\Base;
@@ -12,6 +11,7 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
+
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
