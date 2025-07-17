@@ -4,9 +4,6 @@
 [submodule "plugins/aligner"]
 	path = plugins/aligner
 	url = git@github.com:matecat/aligner_plugin.git
-[submodule "plugins/skyscanner"]
-	path = plugins/skyscanner
-	url = git@github.com:matecat/skyscanner_plugin.git
 [submodule "plugins/translated"]
 	path = plugins/translated
 	url = git@github.com:matecat/translated_plugin.git

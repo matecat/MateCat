@@ -31,6 +31,7 @@ import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {LaraGlossary} from './LaraGlossary/LaraGlossary'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -290,7 +291,9 @@ export const MachineTranslationTab = () => {
         ? MTGlossary
         : activeMTEngineData.engine_type === 'DeepL'
           ? DeepLGlossary
-          : undefined
+          : activeMTEngineData.engine_type === 'Lara'
+            ? LaraGlossary
+            : undefined
 
     return {
       ...((shouldShowDeleteConfirmation || GlossaryComponent) && {

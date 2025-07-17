@@ -15,6 +15,7 @@ use EnginesModel_MMTStruct;
 use Exception;
 use Features\Mmt;
 use INIT;
+use Lara\Glossary;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
@@ -22,6 +23,7 @@ use Lara\TextBlock;
 use Lara\TranslateOptions;
 use Lara\Translator;
 use Log;
+use Projects_MetadataDao;
 use Projects_ProjectDao;
 use RedisHandler;
 use ReflectionException;
@@ -186,6 +188,18 @@ class Lara extends Engines_AbstractEngine {
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setMultiline( false );
             $translateOptions->setContentType( 'application/xliff+xml' );
+
+            $metadata = null;
+            if ( !empty( $_config[ 'project_id' ] ) ) {
+                $metadataDao = new Projects_MetadataDao();
+                $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'lara_glossaries' );
+
+                if ( $metadata !== null ) {
+                    $metadata            = html_entity_decode( $metadata->value );
+                    $laraGlossariesArray = json_decode( $metadata, true );
+                    $translateOptions->setGlossaries($laraGlossariesArray);
+                }
+            }
 
             $request_translation = [];
 
@@ -444,6 +458,21 @@ class Lara extends Engines_AbstractEngine {
 
         return $_keys;
 
+    }
+
+    /**
+     * @return Glossary[]
+     * @throws LaraException
+     */
+    public function getGlossaries() {
+        $client = $this->_getClient();
+        $glossaries = $client->glossaries;
+
+        if(empty($glossaries)){
+            return [];
+        }
+
+        return $glossaries->getAll();
     }
 
 }

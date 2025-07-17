@@ -176,8 +176,13 @@ class NewController extends KleinController {
         $projectStructure[ 'character_counter_mode' ]       = ( !empty( $request[ 'character_counter_mode' ] ) ) ? $request[ 'character_counter_mode' ] : null;
         $projectStructure[ 'character_counter_count_tags' ] = ( !empty( $request[ 'character_counter_count_tags' ] ) ) ? $request[ 'character_counter_count_tags' ] : null;
 
+        // Lara glossaries
+        if ( $request[ 'lara_glossaries' ] ) {
+            $projectStructure[ 'lara_glossaries' ] = $request[ 'lara_glossaries' ];
+        }
+
         // mmtGlossaries
-        if ( $request[ 'mmt_glossaries' ] ) {
+         if ( $request[ 'mmt_glossaries' ] ) {
             $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
         }
 
@@ -291,6 +296,7 @@ class NewController extends KleinController {
         $id_team                                   = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $metadata                                  = filter_var( $this->request->param( 'metadata' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $mmt_glossaries                            = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING );
+        $lara_glossaries                           = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING );
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
@@ -411,6 +417,7 @@ class NewController extends KleinController {
                 'id_team'                                   => $id_team,
                 'team'                                      => $team,
                 'mmt_glossaries'                            => $mmt_glossaries,
+                'lara_glossaries'                           => $lara_glossaries,
                 'deepl_id_glossary'                         => $deepl_id_glossary,
                 'deepl_formality'                           => $deepl_formality,
                 'project_completion'                        => $project_completion,
