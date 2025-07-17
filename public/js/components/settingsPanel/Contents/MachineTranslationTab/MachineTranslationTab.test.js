@@ -75,10 +75,10 @@ xtest('Render Machine translation tab - not logged', async () => {
 
   expect(screen.queryByTitle('Add MT engine')).not.toBeInTheDocument()
 
-  const mtName = screen.getByText('Match')
+  const mtName = screen.getByText('MyMemory')
   expect(mtName).toBeInTheDocument()
 
-  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-Match')
+  const checkboxMtActive = screen.getByTestId('checkbox-mt-active-MyMemory')
   expect(checkboxMtActive).toBeChecked()
 })
 

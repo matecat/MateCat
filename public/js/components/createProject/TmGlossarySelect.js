@@ -45,7 +45,7 @@ export const TmGlossarySelect = () => {
       options={tmKeys}
       multipleSelect={'dropdown'}
       activeOptions={tmKeyActive}
-      placeholder={'Match Collaborative TM'}
+      placeholder={'MyMemory Collaborative TM'}
       checkSpaceToReverse={false}
       onToggleOption={(option) => {
         const isKeyAlreadyActive = tmKeyActive?.some(

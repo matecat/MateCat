@@ -174,7 +174,7 @@ const executeMswServer = () => {
     }),
   )
 }
-test('Operation about Match row', async () => {
+test('Operation about MyMemory row', async () => {
   const user = userEvent.setup()
   const contextValues = contextMockValues()
 
