@@ -572,8 +572,13 @@ class Lara extends Engines_AbstractEngine {
      */
     public function getGlossaries() {
         $client = $this->_getClient();
+        $glossaries = $client->glossaries;
 
-        return $client->glossaries->getAll();
+        if(empty($glossaries)){
+            return [];
+        }
+
+        return $glossaries->getAll();
     }
 
 }
