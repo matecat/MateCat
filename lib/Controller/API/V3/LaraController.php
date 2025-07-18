@@ -47,12 +47,12 @@ class LaraController extends BaseChunkController {
     }
 
     /**
-     * @param $engineId
+     * @param int $engineId
      *
      * @return Engines_AbstractEngine
      * @throws Exception
      */
-    private function getLaraClient( $engineId ): Engines_AbstractEngine {
+    private function getLaraClient( int $engineId ): Engines_AbstractEngine {
         return EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Lara::class );
     }
 }
