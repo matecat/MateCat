@@ -11,6 +11,9 @@ class Projects_MetadataStruct extends \DataAccess\AbstractDaoSilentStruct implem
      * @return mixed
      */
     public function getValue() {
+
+        $this->value = html_entity_decode($this->value);
+
         if ( Utils::isJson( $this->value ) ) {
             return json_decode( $this->value );
         }

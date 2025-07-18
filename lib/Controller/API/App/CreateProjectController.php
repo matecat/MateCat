@@ -31,6 +31,7 @@ use Teams\TeamStruct;
 use TmKeyManagement_TmKeyManagement;
 use TmKeyManagement_TmKeyStruct;
 use Utils;
+use Utils\Engines\Lara;
 use Validator\EngineValidator;
 use Validator\JSONValidator;
 use Validator\JSONValidatorObject;
@@ -136,8 +137,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // MMT Glossaries
         // (if $engine is not an MMT instance, ignore 'mmt_glossaries')
         $engine = Engine::getInstance( $this->data[ 'mt_engine' ] );
+
         if ( $engine instanceof Engines_MMT and $this->data[ 'mmt_glossaries' ] !== null ) {
             $projectStructure[ 'mmt_glossaries' ] = $this->data[ 'mmt_glossaries' ];
+        }
+
+        // Lara
+        if ( $engine instanceof Lara and $this->data[ 'lara_glossaries' ] !== null ) {
+            $projectStructure[ 'lara_glossaries' ] = $this->data[ 'lara_glossaries' ];
         }
 
         // DeepL
@@ -220,6 +227,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
         $id_team                       = filter_var( $this->request->param( 'id_team' ), FILTER_SANITIZE_NUMBER_INT, [ 'flags' => FILTER_REQUIRE_SCALAR ] );
         $mmt_glossaries                = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $lara_glossaries               = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $deepl_id_glossary             = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $deepl_formality               = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $project_completion            = filter_var( $this->request->param( 'project_completion' ), FILTER_VALIDATE_BOOLEAN );
@@ -289,6 +297,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'tm_prioritization'             => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
                 'id_team'                       => $id_team,
                 'mmt_glossaries'                => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+                'lara_glossaries'               => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
                 'deepl_id_glossary'             => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
                 'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
                 'project_completion'            => $project_completion,

@@ -62,7 +62,6 @@ const LabelWithTooltip = ({
 
   const mouseEnter = () => {
     const rect = ref.current.getBoundingClientRect()
-    console.log(rect)
     tooltipDelayRef.current = setTimeout(() => {
       setTooltipCoords({
         left: rect.left + rect.width / 2,
