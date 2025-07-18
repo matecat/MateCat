@@ -1,73 +1,71 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
-use CatUtils;
-use Chunks_ChunkDao;
-use Constants_Engines;
-use Constants_JobStatus;
-use Constants_ProjectStatus;
-use Constants_TranslationStatus;
-use Contribution\ContributionSetStruct;
-use Contribution\Set;
-use Database;
-use EditLog\EditLogSegmentStruct;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use Exceptions\ControllerReturnException;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions;
-use Features\TranslationVersions\Handlers\TranslationVersionsHandler;
-use Files\FilesPartsDao;
-use INIT;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use LQA\QA;
 use Matecat\SubFiltering\MateCatFilter;
-use Projects_MetadataDao;
-use Projects_ProjectStruct;
-use RedisHandler;
+use Model\DataAccess\Database;
+use Model\EditLog\EditLogSegmentStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Files\FilesPartsDao;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectStruct;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
+use Model\Segments\SegmentStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
+use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
+use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationVersions;
+use Plugins\Features\TranslationVersions\Handlers\TranslationVersionsHandler;
 use ReflectionException;
 use RuntimeException;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
-use Segments_SegmentStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
-use Utils;
-use WordCount\WordCountStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Constants\JobStatus;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TranslationStatus;
+use Utils\Contribution\Set;
+use Utils\Contribution\SetContributionRequest;
+use Utils\LQA\QA;
+use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class SetTranslationController extends AbstractStatefulKleinController {
+
+    use APISourcePageGuesserTrait;
 
     /**
      * @var array
      */
     protected array $data;
 
-    protected ?int $id_job = null;
-
     protected ?string $password = null;
 
-    protected ?string $received_password = null;
+    /**
+     * @var JobStruct
+     */
+    protected JobStruct $chunk;
 
     /**
-     * @var Jobs_JobStruct
+     * @var SegmentStruct|null
      */
-    protected Jobs_JobStruct $chunk;
-
-    /**
-     * @var Segments_SegmentStruct|null
-     */
-    protected ?Segments_SegmentStruct $segment = null;  // this comes from DAO
+    protected ?SegmentStruct $segment = null;  // this comes from DAO
 
     /**
      * @var MateCatFilter
@@ -90,7 +88,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      * @throws NotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
-     * @throws ControllerReturnException
+     * @throws Exception
      */
     public function translate(): void {
 
@@ -150,7 +148,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $client_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
             $client_old_suggestion   = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
-            $new_translation                         = new Translations_SegmentTranslationStruct();
+            $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $this->data[ 'id_segment' ];
             $new_translation->id_job                 = $this->data[ 'id_job' ];
             $new_translation->status                 = $this->data[ 'status' ];
@@ -174,19 +172,19 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 if ( $client_old_suggestion->match == "MT" ) {
 
                     /**
-                     * @var $project Projects_ProjectStruct
+                     * @var $project ProjectStruct
                      */
                     $project = $this->data[ 'project' ];
                     // case 1. is MT
-                    $new_translation->suggestion_match  = $project->getMetadataValue( Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
-                    $new_translation->suggestion_source = Constants_Engines::MT;
+                    $new_translation->suggestion_match  = $project->getMetadataValue( MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
+                    $new_translation->suggestion_source = EngineConstants::MT;
                 } elseif ( $client_old_suggestion->match == 'NO_MATCH' ) {
                     // case 2. no match
                     $new_translation->suggestion_source = 'NO_MATCH';
                 } else {
                     // case 3. otherwise is TM
                     $new_translation->suggestion_match  = (int)$client_old_suggestion->match; // cast '71%' to int 71
-                    $new_translation->suggestion_source = Constants_Engines::TM;
+                    $new_translation->suggestion_source = EngineConstants::TM;
                 }
             }
 
@@ -216,11 +214,11 @@ class SetTranslationController extends AbstractStatefulKleinController {
              * must be removed
              */
             if ( $new_translation->translation != $old_translation->translation or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_TRANSLATED or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED or
-                    $this->data[ 'status' ] == Constants_TranslationStatus::STATUS_APPROVED2
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_TRANSLATED or
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_APPROVED or
+                    $this->data[ 'status' ] == TranslationStatus::STATUS_APPROVED2
             ) {
-                $new_translation->autopropagated_from = 'NULL';
+                $new_translation->autopropagated_from = null;
             }
 
             /**
@@ -244,14 +242,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
             ];
 
             if ( $this->data[ 'propagate' ] && in_array( $this->data[ 'status' ], [
-                            Constants_TranslationStatus::STATUS_TRANSLATED,
-                            Constants_TranslationStatus::STATUS_APPROVED,
-                            Constants_TranslationStatus::STATUS_APPROVED2,
-                            Constants_TranslationStatus::STATUS_REJECTED
+                            TranslationStatus::STATUS_TRANSLATED,
+                            TranslationStatus::STATUS_APPROVED,
+                            TranslationStatus::STATUS_APPROVED2,
+                            TranslationStatus::STATUS_REJECTED
                     ] )
             ) {
                 //propagate translations
-                $TPropagation                             = new Translations_SegmentTranslationStruct();
+                $TPropagation                             = new SegmentTranslationStruct();
                 $TPropagation[ 'status' ]                 = $this->data[ 'status' ];
                 $TPropagation[ 'id_job' ]                 = $this->data[ 'id_job' ];
                 $TPropagation[ 'translation' ]            = $translation;
@@ -269,7 +267,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             if ( $this->isSplittedSegment() ) {
                 /* put the split inside the transaction if they are present */
-                $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+                $translationStruct             = SegmentSplitStruct::getStruct();
                 $translationStruct->id_segment = $this->data[ 'id_segment' ];
                 $translationStruct->id_job     = $this->data[ 'id_job' ];
 
@@ -278,7 +276,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                         'statuses' => $this->data[ 'split_statuses' ]
                 ];
 
-                $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+                $translationDao = new SplitDAO( Database::obtain() );
                 $translationDao->atomicUpdate( $translationStruct );
             }
 
@@ -308,8 +306,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $job_stats                        = CatUtils::getFastStatsForJob( $newTotals );
             $job_stats[ 'analysis_complete' ] = (
-                    $this->data[ 'project' ][ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE or
-                    $this->data[ 'project' ][ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+                    $this->data[ 'project' ][ 'status_analysis' ] == ProjectStatus::STATUS_DONE or
+                    $this->data[ 'project' ][ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE
             );
 
             $file_stats = [];
@@ -361,8 +359,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
             if (
                     (
                             (
-                                    $job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
-                                    $job_stats[ Projects_MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
+                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'draft' ] +
+                                    $job_stats[ MetadataDao::WORD_COUNT_RAW ][ 'new' ] == 0
                             )
                             and empty( $job_status )
                     )
@@ -370,7 +368,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 $redisHandler->getConnection()->setex( 'job_completeness:' . $this->data[ 'id_job' ], 60 * 60 * 24 * 15, true ); //15 days
 
                 try {
-                    Jobs_JobDao::setJobComplete( $this->data[ 'chunk' ] );
+                    JobDao::setJobComplete( $this->data[ 'chunk' ] );
                 } catch ( Exception $e ) {
                     $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                     $redisHandler->getConnection()->del( 'job_completeness:' . $this->data[ 'id_job' ] );
@@ -440,22 +438,22 @@ class SetTranslationController extends AbstractStatefulKleinController {
         }
 
         //to get Job Info, we need only a row of jobs (split)
-        $chunk       = Chunks_ChunkDao::getByIdAndPassword( (int)$id_job, $password );
+        $chunk       = ChunkDao::getByIdAndPassword( (int)$id_job, $password );
         $this->chunk = $chunk;
 
         //add check for job status archived.
-        if ( strtolower( $chunk[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( strtolower( $chunk[ 'status' ] ) == JobStatus::STATUS_ARCHIVED ) {
             throw new NotFoundException( "Job archived", -3 );
         }
 
         //check tag mismatch
         //get the original source segment, first
-        $dao           = new Segments_SegmentDao( Database::obtain() );
+        $dao           = new SegmentDao( Database::obtain() );
         $this->segment = $dao->getById( (int)$id_segment ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
-        $this->id_job            = $id_job;
-        $this->password          = $password;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->password         = $password;
+        $this->request_password = $received_password;
 
         $data = [
                 'id_job'                  => $id_job,
@@ -509,7 +507,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
             // we take the status for the entire segment
             $this->data[ 'status' ] = $this->data[ 'split_statuses' ][ 0 ];
         } else {
-            $this->data[ 'status' ] = Constants_TranslationStatus::STATUS_DRAFT;
+            $this->data[ 'status' ] = TranslationStatus::STATUS_DRAFT;
         }
     }
 
@@ -522,7 +520,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $featureSet->loadForProject( $this->data[ 'project' ] );
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
+        $filter       = MateCatFilter::getInstance( $featureSet, $this->data[ 'chunk' ]->source, $this->data[ 'chunk' ]->target, SegmentOriginalDataDao::getSegmentDataRefMap( $this->data[ 'id_segment' ] ) );
         $this->filter = $filter;
 
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
@@ -556,14 +554,13 @@ class SetTranslationController extends AbstractStatefulKleinController {
      */
     private function checkStatus( $status ): void {
         switch ( $status ) {
-            case Constants_TranslationStatus::STATUS_TRANSLATED:
-            case Constants_TranslationStatus::STATUS_APPROVED:
-            case Constants_TranslationStatus::STATUS_APPROVED2:
-            case Constants_TranslationStatus::STATUS_REJECTED:
-            case Constants_TranslationStatus::STATUS_DRAFT:
-            case Constants_TranslationStatus::STATUS_NEW:
-            case Constants_TranslationStatus::STATUS_FIXED:
-            case Constants_TranslationStatus::STATUS_REBUTTED:
+            case TranslationStatus::STATUS_TRANSLATED:
+            case TranslationStatus::STATUS_APPROVED:
+            case TranslationStatus::STATUS_APPROVED2:
+            case TranslationStatus::STATUS_REJECTED:
+            case TranslationStatus::STATUS_DRAFT:
+            case TranslationStatus::STATUS_NEW:
+            case TranslationStatus::STATUS_FIXED:
                 break;
 
             default:
@@ -577,7 +574,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
      */
     private function getContexts(): void {
         //Get contexts
-        $segmentsList = ( new Segments_SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
+        $segmentsList = ( new SegmentDao )->setCacheTTL( 60 * 60 * 24 )->getContextAndSegmentByIDs(
                 [
                         'id_before'  => $this->data[ 'id_before' ],
                         'id_segment' => $this->data[ 'id_segment' ],
@@ -604,23 +601,23 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @return Translations_SegmentTranslationStruct
+     * @return SegmentTranslationStruct
      * @throws Exception
      */
-    private function getOldTranslation(): ?Translations_SegmentTranslationStruct {
-        $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->data[ 'id_segment' ], $this->data[ 'id_job' ] );
+    private function getOldTranslation(): ?SegmentTranslationStruct {
+        $old_translation = SegmentTranslationDao::findBySegmentAndJob( $this->data[ 'id_segment' ], $this->data[ 'id_job' ] );
 
         if ( empty( $old_translation ) ) {
-            $old_translation = new Translations_SegmentTranslationStruct();
+            $old_translation = new SegmentTranslationStruct();
         } // $old_translation if `false` sometimes
 
 
         // If volume analysis is not enabled and no translation rows exist, create the row
-        if ( !INIT::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
-            $translation             = new Translations_SegmentTranslationStruct();
+        if ( !AppConfig::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation[ 'status' ] ) ) {
+            $translation             = new SegmentTranslationStruct();
             $translation->id_segment = (int)$this->data[ 'id_segment' ];
             $translation->id_job     = (int)$this->data[ 'id_job' ];
-            $translation->status     = Constants_TranslationStatus::STATUS_NEW;
+            $translation->status     = TranslationStatus::STATUS_NEW;
 
             $translation->segment_hash        = $this->data[ 'segment' ][ 'segment_hash' ];
             $translation->translation         = $this->data[ 'segment' ][ 'segment' ];
@@ -633,7 +630,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             try {
                 CatUtils::addSegmentTranslation( $translation, $this->isRevision() );
-            } catch ( ControllerReturnException $e ) {
+            } catch ( Exception $e ) {
                 Database::obtain()->rollback();
                 throw new RuntimeException( $e->getMessage() );
             }
@@ -656,24 +653,24 @@ class SetTranslationController extends AbstractStatefulKleinController {
      *      - NEW
      *      - DRAFT
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
-     * @param null                                  $old_suggestion
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
+     * @param null                     $old_suggestion
      *
      * @return bool
      */
     private function canUpdateSuggestion(
-            Translations_SegmentTranslationStruct $new_translation,
-            Translations_SegmentTranslationStruct $old_translation,
-                                                  $old_suggestion = null ): bool {
+            SegmentTranslationStruct $new_translation,
+            SegmentTranslationStruct $old_translation,
+                                     $old_suggestion = null ): bool {
         if ( $old_suggestion === null ) {
             return false;
         }
 
         $allowedStatuses = [
-                Constants_TranslationStatus::STATUS_NEW,
-                Constants_TranslationStatus::STATUS_DRAFT,
-                Constants_TranslationStatus::STATUS_TRANSLATED,
+                TranslationStatus::STATUS_NEW,
+                TranslationStatus::STATUS_DRAFT,
+                TranslationStatus::STATUS_TRANSLATED,
         ];
 
         if ( !in_array( $new_translation->status, $allowedStatuses ) ) {
@@ -737,7 +734,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted + $newPee_weighted );
             }
 
-            Jobs_JobDao::updateFields(
+            JobDao::updateFields(
 
                     [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
@@ -749,14 +746,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
         elseif ( $oldSegmentStatus->isValidForEditLog() ) {
             $newTotalJobPee = ( $this->chunk[ 'avg_post_editing_effort' ] - $oldPee_weighted );
 
-            Jobs_JobDao::updateFields(
+            JobDao::updateFields(
                     [ 'avg_post_editing_effort' => $newTotalJobPee, 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
                             'password' => $this->password
                     ] );
         } elseif ( $jobTotalTTEForTranslation != 0 ) {
-            Jobs_JobDao::updateFields(
+            JobDao::updateFields(
                     [ 'total_time_to_edit' => $jobTotalTTEForTranslation ],
                     [
                             'id'       => $this->id_job,
@@ -792,19 +789,19 @@ class SetTranslationController extends AbstractStatefulKleinController {
      */
     private function evalSetContribution( $_Translation, $old_translation ): void {
         if ( in_array( $this->data[ 'status' ], [
-                Constants_TranslationStatus::STATUS_DRAFT,
-                Constants_TranslationStatus::STATUS_NEW
+                TranslationStatus::STATUS_DRAFT,
+                TranslationStatus::STATUS_NEW
         ] ) ) {
             return;
         }
 
-        $ownerUid   = Jobs_JobDao::getOwnerUid( (int)$this->data[ 'id_job' ], $this->data[ 'password' ] );
+        $ownerUid   = JobDao::getOwnerUid( (int)$this->data[ 'id_job' ], $this->data[ 'password' ] );
         $filesParts = ( new FilesPartsDao() )->getBySegmentId( (int)$this->data[ 'id_segment' ] ); // Cast to int to remove eventually split positions. Ex: id_segment = 123-1
 
         /**
          * Set the new contribution in the queue
          */
-        $contributionStruct                       = new ContributionSetStruct();
+        $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = $this->isRevision();
         $contributionStruct->id_file              = $filesParts->id_file ?? null;
         $contributionStruct->id_job               = $this->data[ 'id_job' ];
@@ -812,7 +809,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->id_segment           = $this->data[ 'id_segment' ];
         $contributionStruct->segment              = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] );
         $contributionStruct->translation          = $this->filter->fromLayer0ToLayer1( $_Translation[ 'translation' ] );
-        $contributionStruct->api_key              = INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = ( $ownerUid !== null ) ? $ownerUid : 0;
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //

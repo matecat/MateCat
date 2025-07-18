@@ -1,10 +1,10 @@
 <?php
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use Features\ReviewExtended\ReviewUtils;
-use LQA\EntryCommentDao;
-use LQA\EntryStruct;
+use Model\LQA\EntryCommentDao;
+use Model\LQA\EntryStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use SplFileObject;
 
 class SegmentTranslationIssue {
@@ -39,7 +39,6 @@ class SegmentTranslationIssue {
                 'translation_version' => $record->translation_version,
                 'target_text'         => $record->target_text,
                 'penalty_points'      => $record->penalty_points,
-                'rebutted_at'         => $this->getDateValue( $record->rebutted_at ),
                 'diff'                => $record->getDiff(),
                 'comments'            => $comments,
                 'revision_number'     => ReviewUtils::sourcePageToRevisionNumber( $record->source_page )

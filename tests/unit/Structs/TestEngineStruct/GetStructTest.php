@@ -1,11 +1,12 @@
 <?php
 
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineStruct::getStruct
+ * @covers EngineStruct::getStruct
  * User: dinies
  * Date: 20/04/16
  * Time: 18.57
@@ -17,18 +18,18 @@ class GetStructTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = new EnginesModel_EngineStruct;
+        $this->databaseInstance = new EngineStruct;
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "getStruct" );
     }
 
     /**
-     * @return EnginesModel_EngineStruct
-     * It returns a EnginesModel_EngineStruct
+     * @return EngineStruct
+     * It returns a EngineStruct
      * @group  regression
-     * @covers EnginesModel_EngineStruct::getStruct
+     * @covers EngineStruct::getStruct
      */
     public function test_getStruct_simple() {
-        $this->assertTrue( $this->method->invoke( $this->databaseInstance, null ) instanceof EnginesModel_EngineStruct );
+        $this->assertTrue( $this->method->invoke( $this->databaseInstance, null ) instanceof EngineStruct );
     }
 }

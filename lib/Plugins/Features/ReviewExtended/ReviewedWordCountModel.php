@@ -6,24 +6,24 @@
  * Time: 10:21 AM
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationEvents\Model\TranslationEventStruct;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
-use LQA\EntryCommentStruct;
-use LQA\EntryDao;
-use LQA\EntryStruct;
-use Projects_ProjectStruct;
-use Routes;
-use TransactionalTrait;
-use Users_UserDao;
-use Utils;
-use WordCount\CounterModel;
+use Model\DataAccess\TransactionalTrait;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryCommentStruct;
+use Model\LQA\EntryDao;
+use Model\LQA\EntryStruct;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
+use Model\WordCount\CounterModel;
+use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class ReviewedWordCountModel implements IReviewedWordCountModel {
 
@@ -35,14 +35,14 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     protected TranslationEvent $_event;
 
     /**
-     * @var ?Jobs_JobStruct
+     * @var ?JobStruct
      */
-    protected ?Jobs_JobStruct $_chunk;
+    protected ?JobStruct $_chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $_project;
+    protected ProjectStruct $_project;
 
     /**
      * @var ChunkReviewStruct[]
@@ -57,7 +57,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @var array
      */
-    private $_finalRevisions;
+    private array $_finalRevisions;
     /**
      * @var CounterModel
      */
@@ -322,7 +322,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
                 continue;
             }
 
-            $user = ( new Users_UserDao() )->getByUid( $finalRevision->uid );
+            $user = ( new UserDao() )->getByUid( $finalRevision->uid );
             if ( $user ) {
                 $emails[] = [
                         'isPreviousChangeAuthor' => true,
@@ -331,7 +331,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
             }
         }
 
-        $projectOwner = ( new Users_UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer );
+        $projectOwner = ( new UserDao() )->getByEmail( $this->_chunk->getProject()->id_customer );
         if ( $projectOwner ) {
             $emails[] = [
                     'isPreviousChangeAuthor' => false,
@@ -339,7 +339,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
             ];
         }
 
-        $projectAssignee = ( new Users_UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee );
+        $projectAssignee = ( new UserDao() )->getByUid( $this->_chunk->getProject()->id_assignee );
         if ( $projectAssignee ) {
             $emails[] = [
                     'isPreviousChangeAuthor' => false,
@@ -350,7 +350,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
 
         if( !empty( $revision ) ){
-            $url = Routes::revise(
+            $url = CanonicalRoutes::revise(
                     $this->_chunk->getProject()->name,
                     $revision->id_job,
                     $revision->review_password,
@@ -364,7 +364,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         } else {
             // handle the case when an ICE OR a pre-translated segment (no previous events) changes its status to a lower status
             // use the event chunk to generate the link.
-            $url = Routes::translate(
+            $url = CanonicalRoutes::translate(
                     $this->_chunk->getProject()->name,
                     $this->_chunk->id,
                     $this->_chunk->password,

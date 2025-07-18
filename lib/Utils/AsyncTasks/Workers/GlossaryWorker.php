@@ -1,23 +1,21 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Engine;
-use Engines_MyMemory;
-use Engines_Results_MyMemory_CheckGlossaryResponse;
-use Engines_Results_MyMemory_DomainsResponse;
-use Engines_Results_MyMemory_GetGlossaryResponse;
-use Engines_Results_MyMemory_KeysGlossaryResponse;
-use Engines_Results_MyMemory_SearchGlossaryResponse;
-use Engines_Results_MyMemory_SetGlossaryResponse;
-use Engines_Results_MyMemory_UpdateGlossaryResponse;
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
+use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Exceptions\EndQueueException;
-use Users_UserStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\DomainsResponse;
+use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
+use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
+use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
+use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class GlossaryWorker extends AbstractWorker {
 
@@ -65,7 +63,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on MyMemory
+     * Check a key on Match
      *
      * @param $payload
      *
@@ -75,7 +73,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_CheckGlossaryResponse $response */
+        /** @var \Utils\Engines\Results\MyMemory\CheckGlossaryResponse $response */
         $response = $client->glossaryCheck( $payload[ 'source' ], $payload[ 'target' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
         $matches  = $response->matches;
 
@@ -95,7 +93,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Delete a key from MyMemory
+     * Delete a key from Match
      *
      * @param $payload
      *
@@ -105,7 +103,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_UpdateGlossaryResponse $response */
+        /** @var UpdateGlossaryResponse $response */
         $response   = $client->glossaryDelete( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
         $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
 
@@ -118,7 +116,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:
@@ -147,7 +145,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Exposes domains from MyMemory
+     * Exposes domains from Match
      *
      * @param $payload
      *
@@ -160,7 +158,7 @@ class GlossaryWorker extends AbstractWorker {
         $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
         $client     = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_DomainsResponse $domains */
+        /** @var DomainsResponse $domains */
         $domains = $client->glossaryDomains( $payload[ 'keys' ] );
 
         $message[ 'entries' ]    = ( !empty( $domains->entries ) ) ? $domains->entries : [];
@@ -177,7 +175,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Get a key from MyMemory
+     * Get a key from Match
      *
      * @param $payload
      *
@@ -202,7 +200,6 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet(
                 $payload[ 'id_job' ],
                 $payload[ 'id_segment' ],
@@ -225,7 +222,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Check a key on MyMemory
+     * Check a key on Match
      *
      * @param $payload
      *
@@ -235,7 +232,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_KeysGlossaryResponse $response */
+        /** @var KeysGlossaryResponse $response */
         $response = $client->glossaryKeys( $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
 
         $this->publishToNodeJsClients(
@@ -251,7 +248,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Search sentence in MyMemory
+     * Search sentence in Match
      *
      * @param $payload
      *
@@ -266,7 +263,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_SearchGlossaryResponse $response */
+        /** @var SearchGlossaryResponse $response */
         $response = $client->glossarySearch( $payload[ 'sentence' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $keys );
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
@@ -302,7 +299,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Set a key in MyMemory
+     * Set a key in Match
      *
      * @param $payload
      *
@@ -312,7 +309,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_SetGlossaryResponse $response */
+        /** @var SetGlossaryResponse $response */
         $response   = $client->glossarySet( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
         $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
 
@@ -325,7 +322,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:
@@ -377,7 +374,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * Update a key from MyMemory
+     * Update a key from Match
      *
      * @param $payload
      *
@@ -387,7 +384,7 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var Engines_Results_MyMemory_UpdateGlossaryResponse $response */
+        /** @var UpdateGlossaryResponse $response */
         $response   = $client->glossaryUpdate( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
         $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
 
@@ -400,7 +397,7 @@ class GlossaryWorker extends AbstractWorker {
 
             switch ( $response->responseStatus ) {
                 case 202:
-                    $errMessage = "MyMemory is busy, please try later";
+                    $errMessage = "Match is busy, please try later";
                     break;
 
                 default:
@@ -476,24 +473,24 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_MyMemory
+     * @return \Utils\Engines\MyMemory
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
-        $_TMS = Engine::getInstance( 1 );
+        $_TMS = EnginesFactory::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
-        /** @var Engines_MyMemory $_TMS */
+        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 
     /**
      * @param $array
      *
-     * @return Users_UserStruct
+     * @return \Model\Users\UserStruct
      */
     private function getUser( $array ) {
-        return new Users_UserStruct( [
+        return new UserStruct( [
                 'uid'         => $array[ 'uid' ],
                 'email'       => $array[ 'email' ],
                 '$first_name' => $array[ 'first_name' ],
@@ -502,7 +499,7 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @return Engines_MyMemory
+     * @return MyMemory
      * @throws Exception
      */
     private function getMyMemoryClient() {

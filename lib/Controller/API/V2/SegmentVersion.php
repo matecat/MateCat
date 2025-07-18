@@ -1,30 +1,45 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\SegmentValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use ReflectionException;
+use View\API\V2\Json\SegmentVersion as JsonFormatter;
 
-use API\Commons\Validators\JobPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\SegmentValidator;
-use API\V2\Json\SegmentVersion as JsonFormatter;
-use Features\TranslationVersions\Model\TranslationVersionDao;
 
-
-class SegmentVersion extends BaseChunkController {
-
+class SegmentVersion extends KleinController {
+    use ChunkNotFoundHandlerTrait;
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     protected function afterConstruct() {
         $this->appendValidator( new JobPasswordValidator( $this ) );
         $this->appendValidator( new SegmentValidator( $this ) );
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function index() {
 
         $results = TranslationVersionDao::getVersionsForTranslation(
-                $this->request->id_job,
-                $this->request->id_segment
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'id_segment' )
         );
 
-        $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = ChunkDao::getByIdAndPassword( $this->params[ 'id_job' ], $this->params[ 'password' ] );
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -37,15 +52,20 @@ class SegmentVersion extends BaseChunkController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function detail() {
 
         $results = TranslationVersionDao::getVersionsForTranslation(
-                $this->request->id_job,
-                $this->request->id_segment,
-                $this->request->version_number
+                $this->request->param( 'id_job' ),
+                $this->request->param( 'id_segment' ),
+                $this->request->param( 'version_number' )
         );
 
-        $chunk = \Chunks_ChunkDao::getByIdAndPassword($this->params[ 'id_job' ], $this->params[ 'password' ]);
+        $chunk = ChunkDao::getByIdAndPassword( $this->params[ 'id_job' ], $this->params[ 'password' ] );
 
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
@@ -63,9 +83,9 @@ class SegmentVersion extends BaseChunkController {
      * To maintain compatibility with JobPasswordValidator
      * (line 36)
      *
-     * @param \Jobs_JobStruct $jobs_JobStruct
+     * @param JobStruct $jobs_JobStruct
      */
-    public function setChunk(\Jobs_JobStruct $jobs_JobStruct) {
+    public function setChunk( JobStruct $jobs_JobStruct ) {
         $this->chunk = $jobs_JobStruct;
     }
 }

@@ -6,28 +6,28 @@
  * Time: 11:25 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
-use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
 use Exception;
-use Jobs_JobStruct;
 use Model\Analysis\Constants\InternalMatchesConstants;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class SegmentFilterDao extends AbstractDao {
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param JobStruct        $chunk
+     * @param FilterDefinition $filter
      *
      * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    public static function findSegmentIdsBySimpleFilter( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
+    public static function findSegmentIdsBySimpleFilter( JobStruct $chunk, FilterDefinition $filter ): array {
 
         $sql = "SELECT st.id_segment AS id
             FROM
@@ -72,7 +72,7 @@ class SegmentFilterDao extends AbstractDao {
     }
 
 
-    private static function __getData( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
+    private static function __getData( JobStruct $chunk, FilterDefinition $filter ): array {
         $data = [
                 'id_job'            => $chunk->id,
                 'job_first_segment' => $chunk->job_first_segment,
@@ -127,20 +127,20 @@ class SegmentFilterDao extends AbstractDao {
 
                 case 'todo':
                     $data = array_merge( $data, [
-                            'status_new'   => Constants_TranslationStatus::STATUS_NEW,
-                            'status_draft' => Constants_TranslationStatus::STATUS_DRAFT
+                            'status_new'   => TranslationStatus::STATUS_NEW,
+                            'status_draft' => TranslationStatus::STATUS_DRAFT
                     ] );
 
                     if ( $chunk->getIsReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated'   => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'status_translated' => TranslationStatus::STATUS_TRANSLATED,
                         ] );
                     }
 
                     if ( $chunk->isSecondPassReview() ) {
                         $data = array_merge( $data, [
-                                'status_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
-                                'status_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
+                                'status_translated'   => TranslationStatus::STATUS_TRANSLATED,
+                                'status_approved'   => TranslationStatus::STATUS_APPROVED,
                         ] );
                     }
 
@@ -153,12 +153,12 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param JobStruct        $chunk
+     * @param FilterDefinition $filter
      *
      * @return object
      */
-    private static function __getLimit( Jobs_JobStruct $chunk, FilterDefinition $filter ): object {
+    private static function __getLimit( JobStruct $chunk, FilterDefinition $filter ): object {
 
         $where = self::__getWhereFromFilter( $filter );
 
@@ -195,13 +195,13 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition   $filter
+     * @param JobStruct        $chunk
+     * @param FilterDefinition $filter
      *
      * @return IDaoStruct[]
      * @throws Exception
      */
-    public static function findSegmentIdsForSample( Jobs_JobStruct $chunk, FilterDefinition $filter ): array {
+    public static function findSegmentIdsForSample( JobStruct $chunk, FilterDefinition $filter ): array {
 
         if ( $filter->sampleSize() > 0 ) {
             $limit = self::__getLimit( $chunk, $filter );
@@ -483,7 +483,7 @@ class SegmentFilterDao extends AbstractDao {
     public static function getSqlForToDo( object $where, bool $isReview = false, bool $isSecondPassReview = false ): string {
 
         $sql_condition = "";
-        $sql_sp = "";
+        $sql_sp        = "";
 
         if ( $isReview ) {
             $sql_condition = " OR st.status = :status_translated ";
@@ -503,10 +503,10 @@ class SegmentFilterDao extends AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND (st.status = :status_new
-           OR st.status = :status_draft ".$sql_condition.")
+           OR st.status = :status_draft " . $sql_condition . ")
            WHERE 1
-           ".$where->sql."
-           ".$sql_sp."
+           " . $where->sql . "
+           " . $sql_sp . "
            ORDER BY st.id_segment
         ";
     }

@@ -6,31 +6,31 @@
  * Time: 18:13
  */
 
-namespace Features\ProjectCompletion\Model;
+namespace Plugins\Features\ProjectCompletion\Model;
 
 
-use API\Commons\Exceptions\AuthenticationError;
-use Chunks_ChunkCompletionEventDao;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use Utils;
+use Model\ChunksCompletion\ChunkCompletionEventDao;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\Utils;
 
 class ProjectCompletionStatusModel {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project ;
 
     protected $cachedStatus;
 
-    public function __construct( Projects_ProjectStruct $project ) {
+    public function __construct( ProjectStruct $project ) {
         $this->project = $project ;
     }
 
@@ -92,8 +92,8 @@ class ProjectCompletionStatusModel {
     /**
      * @throws Exception
      */
-    private function dataForChunkStatus ( Jobs_JobStruct $chunk, $is_review ) {
-        $record = Chunks_ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
+    private function dataForChunkStatus ( JobStruct $chunk, $is_review ) {
+        $record = ChunkCompletionEventDao::lastCompletionRecord( $chunk, array(
                 'is_review' => $is_review
         ) );
 

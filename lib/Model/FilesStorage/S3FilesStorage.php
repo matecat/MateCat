@@ -1,23 +1,23 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
 use DirectoryIterator;
 use DomainException;
 use Exception;
 use FilesystemIterator;
-use INIT;
-use Log;
 use Matecat\SimpleS3\Client;
 use Matecat\SimpleS3\Components\Cache\RedisCache;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Predis\Connection\ConnectionException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use RedisHandler;
 use ReflectionException;
 use UnexpectedValueException;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 /**
  * Class S3FilesStorage
@@ -84,31 +84,31 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         if ( empty( self::$CLIENT ) ) {
             // init the S3Client
-            $awsVersion = INIT::$AWS_VERSION;
-            $awsRegion  = INIT::$AWS_REGION;
+            $awsVersion = AppConfig::$AWS_VERSION;
+            $awsRegion  = AppConfig::$AWS_REGION;
 
             $config = [
                     'version' => $awsVersion,
                     'region'  => $awsRegion,
             ];
 
-            if ( null !== INIT::$AWS_ACCESS_KEY_ID and null !== INIT::$AWS_SECRET_KEY ) {
+            if ( null !== AppConfig::$AWS_ACCESS_KEY_ID and null !== AppConfig::$AWS_SECRET_KEY ) {
                 $config[ 'credentials' ] = [
-                        'key'    => INIT::$AWS_ACCESS_KEY_ID,
-                        'secret' => INIT::$AWS_SECRET_KEY,
+                        'key'    => AppConfig::$AWS_ACCESS_KEY_ID,
+                        'secret' => AppConfig::$AWS_SECRET_KEY,
                 ];
             }
 
             self::$CLIENT = new Client( $config );
 
             // add caching
-            if ( INIT::$AWS_CACHING ) {
+            if ( AppConfig::$AWS_CACHING ) {
                 $redis = new RedisHandler();
                 self::$CLIENT->addCache( new RedisCache( $redis->getConnection() ) );
             }
 
             // disable SSL verify from configuration
-            if ( false === INIT::$AWS_SSL_VERIFY ) {
+            if ( false === AppConfig::$AWS_SSL_VERIFY ) {
                 self::$CLIENT->disableSslVerify();
             }
         }
@@ -122,11 +122,11 @@ class S3FilesStorage extends AbstractFilesStorage {
      * set $FILES_STORAGE_BUCKET
      */
     protected static function setFilesStorageBucket() {
-        if ( null === INIT::$AWS_STORAGE_BASE_BUCKET ) {
-            throw new DomainException( '$AWS_STORAGE_BASE_BUCKET param is missing in INIT.php.' );
+        if ( null === AppConfig::$AWS_STORAGE_BASE_BUCKET ) {
+            throw new DomainException( '$AWS_STORAGE_BASE_BUCKET param is missing in AppConfig.php.' );
         }
 
-        static::$FILES_STORAGE_BUCKET = INIT::$AWS_STORAGE_BASE_BUCKET;
+        static::$FILES_STORAGE_BUCKET = AppConfig::$AWS_STORAGE_BASE_BUCKET;
     }
 
     /**
@@ -162,7 +162,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         $file   = $prefix . '/work/' . $this->getTheLastPartOfKey( $xliffPath );
         $valid  = $this->s3Client->hasItem( [ 'bucket' => static::$FILES_STORAGE_BUCKET, 'key' => $file ] );
 
-        if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid ) {
+        if ( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false && $valid ) {
             return true;
         }
 
@@ -459,7 +459,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         /** @var RecursiveDirectoryIterator $iterator */
         foreach (
                 $iterator = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
+                        new RecursiveDirectoryIterator( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession, FilesystemIterator::SKIP_DOTS ),
                         RecursiveIteratorIterator::SELF_FIRST ) as $item
         ) {
 
@@ -497,7 +497,7 @@ class S3FilesStorage extends AbstractFilesStorage {
         }
 
         ( new RedisHandler() )->getConnection()->hset( self::getUploadSessionSafeName( $uploadSession ), 'file_map', serialize( $hasSet ) );
-        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
+        Utils::deleteDir( AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession );
 
     }
 

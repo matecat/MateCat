@@ -1,11 +1,8 @@
 <?php
 
-namespace Features\TranslationVersions\Model;
+namespace Plugins\Features\TranslationVersions\Model;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-
-class TranslationVersionStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class TranslationVersionStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct {
 
     public $id;
     public $id_segment;

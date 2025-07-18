@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateTableForDqfProjects extends AbstractMatecatMigration
 {
     public $sql_up = "CREATE TABLE `dqf_child_projects_map` (

@@ -1,15 +1,15 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
-use Database;
 use DirectoryIterator;
 use Exception;
-use INIT;
-use Log;
+use Model\DataAccess\Database;
 use PDO;
 use Predis\Connection\ConnectionException;
 use ReflectionException;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 
 /**
  * Class FsFilesStorage
@@ -39,19 +39,19 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         if ( $files ) {
             $this->filesDir = $files;
         } else {
-            $this->filesDir = INIT::$FILES_REPOSITORY;
+            $this->filesDir = AppConfig::$FILES_REPOSITORY;
         }
 
         if ( $cache ) {
             $this->cacheDir = $cache;
         } else {
-            $this->cacheDir = INIT::$CACHE_REPOSITORY;
+            $this->cacheDir = AppConfig::$CACHE_REPOSITORY;
         }
 
         if ( $zip ) {
             $this->zipDir = $zip;
         } else {
-            $this->zipDir = INIT::$ZIP_REPOSITORY;
+            $this->zipDir = AppConfig::$ZIP_REPOSITORY;
         }
     }
 
@@ -83,12 +83,12 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      *    'filename'  => PATHINFO_FILENAME
      * ]
      *
-     * @param     $path
-     * @param int $options
+     * @param string $path
+     * @param int    $options
      *
      * @return array|mixed
      */
-    public static function pathinfo_fix( $path, $options = 15 ) {
+    public static function pathinfo_fix( string $path, int $options = 15 ) {
         $rawPath = explode( DIRECTORY_SEPARATOR, $path );
 
         $basename = array_pop( $rawPath );
@@ -159,7 +159,6 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * // XXX use constructor parameters to define the cache dir and remove the condition
      * @return string
      */
     public static function getStorageCachePath(): string {
@@ -167,7 +166,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             return S3FilesStorage::CACHE_PACKAGE_FOLDER;
         }
 
-        return INIT::$CACHE_REPOSITORY;
+        return AppConfig::$CACHE_REPOSITORY;
     }
 
     /**
@@ -246,7 +245,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
     public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $uid, $realFileName ) {
         //get upload dir
-        $dir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+        $dir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
         return $this->_linkToCache( $dir, $hash, $realFileName );
@@ -261,7 +260,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
     public function linkSessionToCacheForOriginalFiles( $hash, $uid, $realFileName ): int {
         //get upload dir
-        $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+        $dir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
         //create a file in it, which is called as the hash that indicates the location of the cache for storage
         return $this->_linkToCache( $dir, $hash, $realFileName );
@@ -296,16 +295,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             }
 
             ftruncate( $fp, 0 );
-            rewind($fp); // Move the pointer to the beginning
+            rewind( $fp ); // Move the pointer to the beginning
 
             if ( !in_array( $realFileName, $content ) ) {
                 $content[] = $realFileName;
             }
 
             // remove empty lines
-            $content = array_filter($content, function ($filename){
-                return !empty($filename);
-            });
+            $content = array_filter( $content, function ( $filename ) {
+                return !empty( $filename );
+            } );
 
             $contentString = implode( "\n", $content ) . "\n";
 
@@ -427,7 +426,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                     'prefix' => S3FilesStorage::QUEUE_FOLDER . DIRECTORY_SEPARATOR . S3FilesStorage::getUploadSessionSafeName( $uploadToken )
             ] );
         } else {
-            $files = scandir( INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
+            $files = scandir( AppConfig::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
         }
 
         $zip_name = null;
@@ -446,7 +445,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                     'prefix' => S3FilesStorage::ZIP_FOLDER . DIRECTORY_SEPARATOR . 'cache' . DIRECTORY_SEPARATOR . static::pathinfo_fix( $zip_name, PATHINFO_BASENAME )
             ] );
         } else {
-            $files = scandir( INIT::$ZIP_REPOSITORY . '/' . $zip_name );
+            $files = scandir( AppConfig::$ZIP_REPOSITORY . '/' . $zip_name );
         }
 
         foreach ( $files as $file ) {
@@ -459,14 +458,14 @@ abstract class AbstractFilesStorage implements IFilesStorage {
         if ( $zip_name == null && $zip_file == null ) {
             return false;
         } elseif ( $isFsOnS3 ) {
-            $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
+            $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;
             $params[ 'key' ]     = $zip_file;
             $params[ 'save_as' ] = "/tmp/" . static::pathinfo_fix( $zip_file, PATHINFO_BASENAME );
             $s3Client->downloadItem( $params );
 
             return $params[ 'save_as' ];
         } else {
-            return INIT::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
+            return AppConfig::$ZIP_REPOSITORY . '/' . $zip_name . '/' . $zip_file;
         }
     }
 
@@ -480,7 +479,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      * @return bool
      */
     public static function isOnS3() {
-        return ( INIT::$FILE_STORAGE_METHOD === 's3' );
+        return ( AppConfig::$FILE_STORAGE_METHOD === 's3' );
     }
 
 }

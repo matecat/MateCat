@@ -7,15 +7,16 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use Utils;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Tools\Utils;
 
 class ManageController extends BaseKleinViewController implements IController {
 
@@ -32,8 +33,8 @@ class ManageController extends BaseKleinViewController implements IController {
 
         $this->setView( "manage.html", [
                 'outsource_service_login' => $this->_outsource_login_API,
-                'split_enabled'           => true,
-                'enable_outsource'        => true
+                'split_enabled'           => new PHPTalBoolean( true ),
+                'enable_outsource'        => new PHPTalBoolean( true )
         ] );
 
         $activity             = new ActivityLogStruct();

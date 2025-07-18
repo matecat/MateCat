@@ -6,22 +6,22 @@
  * Time: 17:12
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\LoginValidator;
-use Bootstrap;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
-use Log;
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use TMS\TMSFile;
-use TMS\TMSService;
-use Validator\GlossaryCSVValidator;
-use Validator\GlossaryCSVValidatorObject;
+use Utils\Logger\Log;
+use Utils\TMS\TMSFile;
+use Utils\TMS\TMSService;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\GlossaryCSVValidator;
 
 class GlossariesController extends AbstractStatefulKleinController {
 
@@ -95,7 +95,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
         $this->extractCSV( $stdResult );
 
-        $results              = [];
+        $results = [];
 
         foreach ( $stdResult as $fileInfo ) {
 
@@ -137,7 +137,7 @@ class GlossariesController extends AbstractStatefulKleinController {
 
                 $glossaryCsvValidator = $this->validateCSVFile( $fileInfo->file_path );
 
-                // load it into MyMemory
+                // load it into Match
 
                 $file = new TMSFile(
                         $fileInfo->file_path,
@@ -178,10 +178,10 @@ class GlossariesController extends AbstractStatefulKleinController {
      */
     private function validateCSVFile( $file ) {
 
-        $validatorObject      = new GlossaryCSVValidatorObject();
-        $validatorObject->csv = $file;
-        $validator            = new GlossaryCSVValidator();
-        $validator->validate( $validatorObject );
+        $validator = new GlossaryCSVValidator();
+        $validator->validate( ValidatorObject::fromArray( [
+                'csv' => $file
+        ] ) );
 
         if ( count( $validator->getExceptions() ) > 0 ) {
             throw new ValidationError( $validator->getExceptions()[ 0 ] );

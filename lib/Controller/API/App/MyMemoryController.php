@@ -1,13 +1,13 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Engine;
-use Engines_MyMemory;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use FeatureSet;
+use Model\FeaturesBase\FeatureSet;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
 
 class MyMemoryController extends KleinController {
 
@@ -16,14 +16,14 @@ class MyMemoryController extends KleinController {
      */
     public function status() {
         try {
-            $uuid = $this->request->uuid;
-            $mmEngine = $this->getMMEngine($this->featureSet);
-            $status = $mmEngine->entryStatus($uuid);
+            $uuid     = $this->request->param( 'uuid' );
+            $mmEngine = $this->getMMEngine( $this->featureSet );
+            $status   = $mmEngine->entryStatus( $uuid );
             $this->response->json( $status );
-        } catch (Exception $exception){
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( 500 );
             $this->response->json( [
-                'error' => $exception->getMessage()
+                    'error' => $exception->getMessage()
             ] );
         }
     }
@@ -35,14 +35,14 @@ class MyMemoryController extends KleinController {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_MyMemory
+     * @return MyMemory
      * @throws Exception
      */
-    private function getMMEngine(FeatureSet $featureSet ) {
-        $_TMS = Engine::getInstance( 1 );
+    private function getMMEngine( FeatureSet $featureSet ): MyMemory {
+        $_TMS = EnginesFactory::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
-        /** @var Engines_MyMemory $_TMS */
+        /** @var MyMemory $_TMS */
         return $_TMS;
     }
 }

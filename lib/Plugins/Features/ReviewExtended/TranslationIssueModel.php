@@ -6,25 +6,24 @@
  * Time: 11:36
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Exceptions\ValidationError;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Features\TranslationVersions\Model\TranslationVersionStruct;
-use Jobs_JobStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\EntryDao;
-use LQA\EntryStruct;
-use Projects_ProjectStruct;
-use Utils;
+use Model\Exceptions\ValidationError;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryDao;
+use Model\LQA\EntryStruct;
+use Model\Projects\ProjectStruct;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
+use Utils\Tools\Utils;
 
 class TranslationIssueModel {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
@@ -41,7 +40,7 @@ class TranslationIssueModel {
     protected $chunk_review;
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk;
 

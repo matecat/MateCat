@@ -1,15 +1,16 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
-use Exceptions\ValidationError;
-use Jobs_JobStruct;
-use Log;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use PDO;
-use Utils;
+use ReflectionException;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class EntryDao extends AbstractDao {
     protected function _buildResult( array $array_result ) {
@@ -84,9 +85,9 @@ class EntryDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return EntryStruct
+     * @return ?EntryStruct
      */
-    public static function findById( $id ) {
+    public static function findById( $id ): ?EntryStruct {
         $sql = "SELECT qa_entries.*, qa_categories.label AS category " .
                 " FROM qa_entries " .
                 " LEFT JOIN qa_categories ON qa_categories.id = id_category " .
@@ -95,17 +96,17 @@ class EntryDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, EntryStruct::class );
 
         return $stmt->fetch();
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return EntryStruct[]
      */
-    public static function findAllByChunk( Jobs_JobStruct $chunk ) {
+    public static function findAllByChunk( JobStruct $chunk ) {
         $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
@@ -323,47 +324,16 @@ class EntryDao extends AbstractDao {
     }
 
     /**
-     * Function to update the rebutted_at column
+     * @param int      $id_job
+     * @param string   $password
+     * @param int      $revisionNumber
+     * @param int|null $idFilePart
+     * @param int      $ttl
      *
-     * @param Integer $id        ID of the Entry
-     * @param Boolean $isToRebut If true rebut, else undo rebut
-     *
-     * @return EntryStruct
-     *
+     * @return ShapelessConcreteStruct[]
+     * @throws ReflectionException
      */
-    public function updateRebutted( $id, $isToRebut ) {
-        $rebutted_at = null;
-
-        if ( $isToRebut === true ) {
-            $rebutted_at = date( 'Y-m-d H:i:s' );
-        }
-
-        $sql = "  UPDATE qa_entries "
-                . "   SET rebutted_at = :rebutted_at "
-                . " WHERE id = :id ; ";
-
-        $opts = [
-                'rebutted_at' => $rebutted_at,
-                'id'          => $id
-        ];
-
-        $stmt = $this->database->prepare( $sql );
-
-        $stmt->execute( $opts );
-
-        return $this->findById( $opts[ 'id' ] );
-    }
-
-    /**
-     * @param      $id_job
-     * @param      $password
-     * @param      $revisionNumber
-     * @param null $idFilePart
-     * @param int  $ttl
-     *
-     * @return \DataAccess\IDaoStruct[]
-     */
-    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0 ) {
+    public function getIssuesGroupedByIdFilePart( int $id_job, string $password, int $revisionNumber, int $idFilePart = null, int $ttl = 0 ): array {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -403,6 +373,6 @@ class EntryDao extends AbstractDao {
 
         $stmt = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), $params );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $params );
     }
 }

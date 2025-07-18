@@ -6,14 +6,13 @@
  * Time: 17:20
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
-use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
 use PDO;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEventDao extends AbstractDao {
 
@@ -104,7 +103,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         return $stmt->fetchAll();
@@ -132,7 +131,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         $res = $stmt->fetchAll();
@@ -145,7 +144,7 @@ class TranslationEventDao extends AbstractDao {
      * @param array $id_segment_list
      * @param int   $id_job
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return \Model\DataAccess\IDaoStruct[]
      * @throws ReflectionException
      */
     public function getTteForSegments( $id_segment_list, $id_job ) {
@@ -213,7 +212,7 @@ class TranslationEventDao extends AbstractDao {
         }
 
         if ( !empty( $bind_values ) ) {
-            $conn = Database::obtain()->getConnection();
+            $conn = \Model\DataAccess\Database::obtain()->getConnection();
             $stmt = $conn->prepare( $sql );
 
             return $stmt->execute( $bind_values );

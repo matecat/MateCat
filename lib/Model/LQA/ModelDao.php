@@ -1,9 +1,9 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDao;
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use ReflectionException;
 
 class ModelDao extends AbstractDao {

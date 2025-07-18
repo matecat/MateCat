@@ -6,16 +6,16 @@
  * Time: 16:28
  */
 
-namespace Jobs;
+namespace Model\Jobs;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 
 class MetadataStruct extends AbstractDaoObjectStruct implements IDaoStruct {
-    public $id;
-    public $id_job;
-    public $password;
-    public $key;
-    public $value;
+    public ?int   $id = null;
+    public int    $id_job;
+    public string $password;
+    public string $key;
+    public string $value;
 
 }

@@ -7,42 +7,42 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
-use Jobs_JobStruct;
 use JsonSerializable;
-use Projects_MetadataDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 
 class WordCountStruct implements JsonSerializable {
 
-    protected $id_job;
-    protected $job_password;
-    protected $new_words        = 0;
-    protected $draft_words      = 0;
-    protected $translated_words = 0;
-    protected $approved_words   = 0;
-    protected $rejected_words   = 0;
-    protected $approved2_words  = 0;
+    protected int    $id_job;
+    protected string $job_password;
+    protected float  $new_words        = 0;
+    protected float  $draft_words      = 0;
+    protected float  $translated_words = 0;
+    protected float  $approved_words   = 0;
+    protected float  $rejected_words   = 0;
+    protected float  $approved2_words  = 0;
 
-    protected $new_raw_words        = 0;
-    protected $draft_raw_words      = 0;
-    protected $translated_raw_words = 0;
-    protected $approved_raw_words   = 0;
-    protected $approved2_raw_words  = 0;
-    protected $rejected_raw_words   = 0;
+    protected float $new_raw_words        = 0;
+    protected float $draft_raw_words      = 0;
+    protected float $translated_raw_words = 0;
+    protected float $approved_raw_words   = 0;
+    protected float $approved2_raw_words  = 0;
+    protected float $rejected_raw_words   = 0;
 
-    protected $id_segment = null;
-    protected $old_status = null;
-    protected $new_status = null;
+    protected ?int    $id_segment = null;
+    protected ?string $old_status = null;
+    protected ?string $new_status = null;
 
-    protected $total;
+    protected float $total = 0;
 
     /**
-     * @param Jobs_JobStruct $jobOrChunk
+     * @param JobStruct $jobOrChunk
      *
      * @return WordCountStruct
      */
-    public static function loadFromJob( Jobs_JobStruct $jobOrChunk ) {
+    public static function loadFromJob( JobStruct $jobOrChunk ): WordCountStruct {
         $wordCountStruct                       = new WordCountStruct();
         $wordCountStruct->id_job               = (int)$jobOrChunk->id;
         $wordCountStruct->job_password         = $jobOrChunk->password;
@@ -63,11 +63,11 @@ class WordCountStruct implements JsonSerializable {
     }
 
     /**
-     * @param null $id_segment
+     * @param int|null $id_segment
      *
      * @return $this
      */
-    public function setIdSegment( $id_segment ) {
+    public function setIdSegment( ?int $id_segment = null ): WordCountStruct {
         $this->id_segment = $id_segment;
 
         return $this;
@@ -76,16 +76,16 @@ class WordCountStruct implements JsonSerializable {
     /**
      * @return int
      */
-    public function getIdSegment() {
+    public function getIdSegment(): ?int {
         return $this->id_segment;
     }
 
     /**
-     * @param null $status
+     * @param string $status
      *
      * @return $this
      */
-    public function setOldStatus( $status ) {
+    public function setOldStatus( string $status ): WordCountStruct {
         $this->old_status = $status;
 
         return $this;
@@ -94,16 +94,16 @@ class WordCountStruct implements JsonSerializable {
     /**
      * @return string
      */
-    public function getOldStatus() {
+    public function getOldStatus(): ?string {
         return $this->old_status;
     }
 
     /**
-     * @param null $new_status
+     * @param string $new_status
      *
      * @return $this
      */
-    public function setNewStatus( $new_status ) {
+    public function setNewStatus( string $new_status ): WordCountStruct {
         $this->new_status = $new_status;
 
         return $this;
@@ -112,36 +112,54 @@ class WordCountStruct implements JsonSerializable {
     /**
      * @return null
      */
-    public function getNewStatus() {
+    public function getNewStatus(): ?string {
         return $this->new_status;
     }
 
 
     /**
-     * @param $approved_words
+     * @param float $approved_words
      *
      * @return $this
      */
-    public function setApprovedWords( $approved_words ) {
-        $this->approved_words = (float)$approved_words;
+    public function setApprovedWords( float $approved_words ): WordCountStruct {
+        $this->approved_words = $approved_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getApprovedWords() {
+    public function getApprovedWords(): float {
         return $this->approved_words;
     }
 
     /**
-     * @param $draft_words
+     * @param float $draft_words
      *
      * @return $this
      */
-    public function setDraftWords( $draft_words ) {
-        $this->draft_words = (float)$draft_words;
+    public function setDraftWords( float $draft_words ): WordCountStruct {
+        $this->draft_words = $draft_words;
+
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getDraftWords(): float {
+        return $this->draft_words;
+    }
+
+    /**
+     * @param int $id_job
+     *
+     * @return $this
+     */
+    public function setIdJob( int $id_job ): WordCountStruct {
+        $this->id_job = $id_job;
 
         return $this;
     }
@@ -149,231 +167,213 @@ class WordCountStruct implements JsonSerializable {
     /**
      * @return int
      */
-    public function getDraftWords() {
-        return $this->draft_words;
-    }
-
-    /**
-     * @param $id_job
-     *
-     * @return $this
-     */
-    public function setIdJob( $id_job ) {
-        $this->id_job = (int)$id_job;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIdJob() {
+    public function getIdJob(): int {
         return $this->id_job;
     }
 
     /**
-     * @param $job_password
+     * @param string $job_password
      *
      * @return $this
      */
-    public function setJobPassword( $job_password ) {
+    public function setJobPassword( string $job_password ): WordCountStruct {
         $this->job_password = $job_password;
 
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getJobPassword() {
+    public function getJobPassword(): string {
         return $this->job_password;
     }
 
     /**
-     * @param $new_words
+     * @param float $new_words
      *
      * @return $this
      */
-    public function setNewWords( $new_words ) {
-        $this->new_words = (float)$new_words;
+    public function setNewWords( float $new_words ): WordCountStruct {
+        $this->new_words = $new_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getNewWords() {
+    public function getNewWords(): float {
         return $this->new_words;
     }
 
     /**
-     * @param $rejected_words
+     * @param float $rejected_words
      *
      * @return $this
      */
-    public function setRejectedWords( $rejected_words ) {
-        $this->rejected_words = (float)$rejected_words;
+    public function setRejectedWords( float $rejected_words ): WordCountStruct {
+        $this->rejected_words = $rejected_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getRejectedWords() {
+    public function getRejectedWords(): float {
         return $this->rejected_words;
     }
 
     /**
-     * @param $translated_words
+     * @param float $translated_words
      *
      * @return $this
      */
-    public function setTranslatedWords( $translated_words ) {
-        $this->translated_words = (float)$translated_words;
+    public function setTranslatedWords( float $translated_words ): WordCountStruct {
+        $this->translated_words = $translated_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getTranslatedWords() {
+    public function getTranslatedWords(): float {
         return $this->translated_words;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getApproved2Words() {
+    public function getApproved2Words(): float {
         return $this->approved2_words;
     }
 
     /**
-     * @param int $approved2_words
+     * @param float $approved2_words
      *
      * @return $this
      */
-    public function setApproved2Words( $approved2_words ) {
-        $this->approved2_words = (float)$approved2_words;
+    public function setApproved2Words( float $approved2_words ): WordCountStruct {
+        $this->approved2_words = $approved2_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getNewRawWords() {
+    public function getNewRawWords(): float {
         return $this->new_raw_words;
     }
 
     /**
-     * @param int $new_raw_words
+     * @param float $new_raw_words
      *
      * @return $this
      */
-    public function setNewRawWords( $new_raw_words ) {
-        $this->new_raw_words = (float)$new_raw_words;
+    public function setNewRawWords( float $new_raw_words ): WordCountStruct {
+        $this->new_raw_words = $new_raw_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getDraftRawWords() {
+    public function getDraftRawWords(): float {
         return $this->draft_raw_words;
     }
 
     /**
-     * @param int $draft_raw_words
+     * @param float $draft_raw_words
      *
      * @return $this
      */
-    public function setDraftRawWords( $draft_raw_words ) {
-        $this->draft_raw_words = (float)$draft_raw_words;
+    public function setDraftRawWords( float $draft_raw_words ): WordCountStruct {
+        $this->draft_raw_words = $draft_raw_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getTranslatedRawWords() {
+    public function getTranslatedRawWords(): float {
         return $this->translated_raw_words;
     }
 
     /**
-     * @param int $translated_raw_words
+     * @param float $translated_raw_words
      *
      * @return $this
      */
-    public function setTranslatedRawWords( $translated_raw_words ) {
-        $this->translated_raw_words = (float)$translated_raw_words;
+    public function setTranslatedRawWords( float $translated_raw_words ): WordCountStruct {
+        $this->translated_raw_words = $translated_raw_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getApprovedRawWords() {
+    public function getApprovedRawWords(): float {
         return $this->approved_raw_words;
     }
 
     /**
-     * @param int $approved_raw_words
+     * @param float $approved_raw_words
      *
      * @return $this
      */
-    public function setApprovedRawWords( $approved_raw_words ) {
-        $this->approved_raw_words = (float)$approved_raw_words;
+    public function setApprovedRawWords( float $approved_raw_words ): WordCountStruct {
+        $this->approved_raw_words = $approved_raw_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getApproved2RawWords() {
+    public function getApproved2RawWords(): float {
         return $this->approved2_raw_words;
     }
 
     /**
-     * @param int $approved2_raw_words
+     * @param float $approved2_raw_words
      *
      * @return $this
      */
-    public function setApproved2RawWords( $approved2_raw_words ) {
-        $this->approved2_raw_words = (float)$approved2_raw_words;
+    public function setApproved2RawWords( float $approved2_raw_words ): WordCountStruct {
+        $this->approved2_raw_words = $approved2_raw_words;
 
         return $this;
     }
 
     /**
-     * @return int
+     * @return float
      */
-    public function getRejectedRawWords() {
+    public function getRejectedRawWords(): float {
         return $this->rejected_raw_words;
     }
 
     /**
-     * @param int $rejected_raw_words
+     * @param float $rejected_raw_words
      *
      * @return $this
      */
-    public function setRejectedRawWords( $rejected_raw_words ) {
-        $this->rejected_raw_words = (float)$rejected_raw_words;
+    public function setRejectedRawWords( float $rejected_raw_words ): WordCountStruct {
+        $this->rejected_raw_words = $rejected_raw_words;
 
         return $this;
     }
 
 
     /**
-     * @return int
+     * @return float
      */
-    public function getTotal() {
+    public function getTotal(): float {
 
         $this->total = (
                 $this->new_words +
@@ -387,7 +387,7 @@ class WordCountStruct implements JsonSerializable {
         return $this->total;
     }
 
-    public function getRawTotal() {
+    public function getRawTotal(): float {
 
         $this->total = (
                 $this->new_raw_words +
@@ -402,12 +402,12 @@ class WordCountStruct implements JsonSerializable {
     }
 
     /**
-     * @return array|mixed
+     * @return array
      */
     public function jsonSerialize() {
 
         return [
-                Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                MetadataDao::WORD_COUNT_EQUIVALENT => [
                         'new'        => $this->new_words,
                         'draft'      => $this->draft_words,
                         'translated' => $this->translated_words,
@@ -415,7 +415,7 @@ class WordCountStruct implements JsonSerializable {
                         'approved2'  => $this->approved2_words,
                         'total'      => $this->getTotal()
                 ],
-                Projects_MetadataDao::WORD_COUNT_RAW        => [
+                MetadataDao::WORD_COUNT_RAW        => [
                         'new'        => $this->new_raw_words,
                         'draft'      => $this->draft_raw_words,
                         'translated' => $this->translated_raw_words,
@@ -431,7 +431,7 @@ class WordCountStruct implements JsonSerializable {
      */
     public function toArray() {
         return [
-                Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                MetadataDao::WORD_COUNT_EQUIVALENT => [
                         'new'        => $this->new_words,
                         'draft'      => $this->draft_words,
                         'translated' => $this->translated_words,
@@ -439,7 +439,7 @@ class WordCountStruct implements JsonSerializable {
                         'approved2'  => $this->approved2_words,
                         'total'      => $this->getTotal()
                 ],
-                Projects_MetadataDao::WORD_COUNT_RAW        => [
+                MetadataDao::WORD_COUNT_RAW        => [
                         'new'        => $this->new_raw_words,
                         'draft'      => $this->draft_raw_words,
                         'translated' => $this->translated_raw_words,

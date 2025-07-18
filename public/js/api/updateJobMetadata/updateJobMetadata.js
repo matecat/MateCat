@@ -4,7 +4,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * Update job metadata
  *
  * @param {Object} options
- * @param {string} [options.idJob=config.job_id]
+ * @param {string} [options.idJob=config.id_job]
  * @param {string} [options.password=config.password]
  * @param {boolean} options.tmPrioritization
  * @param {boolean} options.characterCounterCountTags
@@ -12,7 +12,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  * @returns {Promise<object>}
  */
 export const updateJobMetadata = async ({
-  idJob = config.job_id,
+  idJob = config.id_job,
   password = config.password,
   tmPrioritization,
   characterCounterCountTags,

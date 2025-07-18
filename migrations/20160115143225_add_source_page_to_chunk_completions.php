@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddSourcePageToChunkCompletions extends AbstractMatecatMigration {
 
     public $sql_up = "ALTER TABLE `chunk_completion_events` ADD COLUMN `is_review` tinyint(1) NOT NULL; " ;

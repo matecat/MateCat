@@ -1,6 +1,6 @@
 <?php
 
-namespace Exceptions;
+namespace Model\Exceptions;
 
 use Exception;
 

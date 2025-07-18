@@ -6,13 +6,10 @@
  * Time: 17:24
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-
-class TranslationEventStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct  {
+class TranslationEventStruct extends \Model\DataAccess\AbstractDaoSilentStruct implements \Model\DataAccess\IDaoStruct  {
 
     public $id ;
     public $uid ;

@@ -7,25 +7,27 @@
  *
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\FlashMessage;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
-use FlashMessage;
-use INIT;
 use Klein\Response;
-use Log;
+use Model\Users\Authentication\PasswordResetModel;
+use Model\Users\Authentication\PasswordRules;
+use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
-use Routes;
-use Traits\RateLimiterTrait;
-use Users\Authentication\PasswordResetModel;
-use Users\Authentication\SignupModel;
-use Utils;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class ForgotPasswordController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * Step 1
@@ -64,7 +66,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
                                 'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
                                     $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
 
-                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
+                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( AppConfig::$HTTPHOST )[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
                                 }
                         ]
                 ] );
@@ -118,7 +120,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
 
             $this->incrementRateLimitCounter( $this->request->param( 'token' ), '/api/app/user/password_reset' );
             FlashMessage::set( 'passwordReset', $e->getMessage(), FlashMessage::ERROR );
-            $this->response->redirect( Routes::appRoot() );
+            $this->response->redirect( CanonicalRoutes::appRoot() );
 
         }
     }
@@ -134,7 +136,8 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
         $reset                 = new PasswordResetModel( $_SESSION );
         $new_password          = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING );
         $password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
-        $reset->resetPassword( $new_password, $password_confirmation );
+        $this->validatePasswordRequirements( $new_password, $password_confirmation );
+        $reset->resetPassword( $new_password );
         $this->user = $reset->getUser();
         $this->broadcastLogout();
 

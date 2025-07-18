@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AlterQAModelSeverities extends AbstractMatecatMigration {
 
     public $sql_up = [ '

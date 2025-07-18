@@ -1,16 +1,15 @@
 <?php
 
-use ConnectedServices\Google\GDrive\Session;
+use Model\ConnectedServices\GDrive\Session;
 
 error_reporting( E_ALL | E_STRICT );
 
 ini_set( 'max_input_time', 3600 );
 
-require_once realpath( dirname( __FILE__ ) . '/../../../' ) . '/inc/Bootstrap.php';
-@Bootstrap::start();
-@Bootstrap::sessionStart();
-@Bootstrap::sessionClose();
-require_once( 'upload.class.php' );
+require_once realpath( dirname( __FILE__ ) . '/../../../' ) . '/lib/Bootstrap.php';
+Bootstrap::start();
+
+require_once( 'UploadHandler.php' );
 
 $upload_handler = new UploadHandler();
 

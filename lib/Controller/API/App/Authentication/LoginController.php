@@ -6,20 +6,20 @@
  * Time: 09:38
  */
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use Controller\Authentication\AuthCookie;
-use Controller\Authentication\AuthenticationHelper;
-use CookieManager;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\AuthCookie;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\CookieManager;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
-use INIT;
 use Klein\Response;
-use SimpleJWT;
-use Traits\RateLimiterTrait;
-use Users\RedeemableProject;
-use Users_UserDao;
-use Utils;
+use Model\Users\RedeemableProject;
+use Model\Users\UserDao;
+use Utils\Registry\AppConfig;
+use Utils\Tools\SimpleJWT;
+use Utils\Tools\Utils;
 
 class LoginController extends AbstractStatefulKleinController {
 
@@ -56,7 +56,7 @@ class LoginController extends AbstractStatefulKleinController {
         }
 
         // XSRF-Token
-        $xsrfToken = $this->request->headers()->get( INIT::$XSRF_TOKEN );
+        $xsrfToken = $this->request->headers()->get( AppConfig::$XSRF_TOKEN );
 
         if ( $xsrfToken === null ) {
             $this->incrementRateLimitCounter( $params[ 'email' ] ?? 'BLANK_EMAIL', '/api/app/user/login' );
@@ -76,15 +76,15 @@ class LoginController extends AbstractStatefulKleinController {
             return;
         }
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, '',
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, '',
                 [
                         'expires' => 0,
                         'path'    => '/',
-                        'domain'  => INIT::$COOKIE_DOMAIN
+                        'domain'  => AppConfig::$COOKIE_DOMAIN
                 ]
         );
 
-        $dao  = new Users_UserDao();
+        $dao  = new UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
         if ( $user && $user->passwordMatch( $params[ 'password' ] ) && !is_null( $user->email_confirmed_at ) ) {
@@ -118,11 +118,11 @@ class LoginController extends AbstractStatefulKleinController {
         $jwt = new SimpleJWT( [ "csrf" => Utils::uuid4() ] );
         $jwt->setTimeToLive( 60 );
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
                 [
                         'expires'  => time() + 60, /* now + 60 seconds */
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => false,
                         'samesite' => 'Strict',
@@ -140,17 +140,18 @@ class LoginController extends AbstractStatefulKleinController {
 
         if ( empty( $_SESSION[ 'user' ] ) ) {
             $this->response->code( 406 );
+
             return;
         }
 
         $jwt = new SimpleJWT( [ "uid" => $_SESSION[ 'user' ]->uid ] );
         $jwt->setTimeToLive( 60 );
 
-        CookieManager::setCookie( INIT::$XSRF_TOKEN, $jwt->jsonSerialize(),
+        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
                 [
                         'expires'  => time() + 60, /* now + 60 seconds */
                         'path'     => '/',
-                        'domain'   => INIT::$COOKIE_DOMAIN,
+                        'domain'   => AppConfig::$COOKIE_DOMAIN,
                         'secure'   => true,
                         'httponly' => false,
                         'samesite' => 'Strict',

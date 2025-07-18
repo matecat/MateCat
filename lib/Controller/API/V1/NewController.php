@@ -1,62 +1,64 @@
 <?php
 
-namespace API\V1;
+namespace Controller\API\V1;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Traits\ScanDirectoryForConvertedFiles;
-use API\Commons\Validators\LoginValidator;
-use BasicFeatureStruct;
-use Constants;
-use Constants_ProjectStatus;
-use Constants_TmKeyPermissions;
-use Conversion\FilesConverter;
-use Conversion\Upload;
-use Database;
-use Engine;
-use Engines_DeepL;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
-use INIT;
 use InvalidArgumentException;
-use Langs\LanguageDomains;
-use Langs\Languages;
-use Log;
-use LQA\ModelDao;
-use LQA\ModelStruct;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
-use MTQE\PayableRate\MTQEPayableRateTemplateDao;
-use MTQE\Templates\DTO\MTQEWorkflowParams;
-use MTQE\Templates\MTQEWorkflowTemplateDao;
-use PayableRates\CustomPayableRateDao;
-use PayableRates\CustomPayableRateStruct;
-use ProjectManager;
-use ProjectQueue\Queue;
-use Projects_MetadataDao;
-use QAModelTemplate\QAModelTemplateDao;
-use QAModelTemplate\QAModelTemplateStruct;
+use Model\Conversion\FilesConverter;
+use Model\Conversion\Upload;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\BasicFeatureStruct;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\MTQE\PayableRate\MTQEPayableRateTemplateDao;
+use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\MTQE\Templates\MTQEWorkflowTemplateDao;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\PayableRates\CustomPayableRateStruct;
+use Model\ProjectManager\ProjectManager;
+use Model\Projects\MetadataDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamStruct;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Xliff\XliffConfigTemplateDao;
+use Plugins\Features\ProjectCompletion;
 use RuntimeException;
 use SebastianBergmann\Invoker\TimeoutException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use Teams\MembershipDao;
-use Teams\TeamStruct;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
-use Utils;
-use Validator\EngineValidator;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Validator\MMTValidator;
-use Xliff\XliffConfigTemplateDao;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use Utils\Constants\Constants;
+use Utils\Constants\ProjectStatus;
+use Utils\Constants\TmKeyPermissions;
+use Utils\Engines\DeepL;
+use Utils\Engines\EnginesFactory;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
+use Utils\Tools\Utils;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\EngineValidator;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
+use Utils\Validator\MMTValidator;
 
 class NewController extends KleinController {
 
@@ -102,8 +104,8 @@ class NewController extends KleinController {
         }
 
         $uploadTokenValue = $uploadFile->getDirUploadToken();
-        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
-        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         $converter = new FilesConverter(
                 $arFiles,
@@ -153,7 +155,7 @@ class NewController extends KleinController {
         $projectStructure[ 'target_language' ]          = explode( ',', $request[ 'target_lang' ] );
         $projectStructure[ 'mt_engine' ]                = $request[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
-        $projectStructure[ 'status' ]                   = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
+        $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
@@ -163,7 +165,7 @@ class NewController extends KleinController {
         $projectStructure[ 'only_private' ] = ( isset( $request[ 'get_public_matches' ] ) && !$request[ 'get_public_matches' ] );
 
         $projectStructure[ 'user_ip' ]                               = Utils::getRealIpAddr();
-        $projectStructure[ 'HTTP_HOST' ]                             = INIT::$HTTPHOST;
+        $projectStructure[ 'HTTP_HOST' ]                             = AppConfig::$HTTPHOST;
         $projectStructure[ 'due_date' ]                              = ( empty( $request[ 'due_date' ] ) ? null : Utils::mysqlTimestamp( $request[ 'due_date' ] ) );
         $projectStructure[ 'target_language_mt_engine_association' ] = $request[ 'target_language_mt_engine_association' ];
         $projectStructure[ 'instructions' ]                          = $request[ 'instructions' ];
@@ -187,12 +189,12 @@ class NewController extends KleinController {
         }
 
         // DeepL
-        $engine = Engine::getInstance( $request[ 'mt_engine' ] );
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_formality' ] !== null ) {
+        $engine = EnginesFactory::getInstance( $request[ 'mt_engine' ] );
+        if ( $engine instanceof DeepL and $request[ 'deepl_formality' ] !== null ) {
             $projectStructure[ 'deepl_formality' ] = $request[ 'deepl_formality' ];
         }
 
-        if ( $engine instanceof Engines_DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
+        if ( $engine instanceof DeepL and $request[ 'deepl_id_glossary' ] !== null ) {
             $projectStructure[ 'deepl_id_glossary' ] = $request[ 'deepl_id_glossary' ];
         }
 
@@ -245,7 +247,7 @@ class NewController extends KleinController {
         // flag to mark the project "from API"
         $projectStructure[ 'from_api' ] = true;
 
-        Queue::sendProject( $projectStructure );
+        ProjectQueue::sendProject( $projectStructure );
 
         $result[ 'errors' ] = $this->pollForCreationResult( $projectStructure );
 
@@ -370,11 +372,11 @@ class NewController extends KleinController {
 
             // engines restrictions
             if ( $mt_engine <= 1 ) {
-                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
+                throw new InvalidArgumentException( "MT EnginesFactory id $mt_engine is not supported for QE Workflows" );
             }
 
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
-            $metadata[ Projects_MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
+            $metadata[ MetadataDao::MT_QE_WORKFLOW_PARAMETERS ] = $this->validateMTQEParametersOrDefault( $mt_qe_workflow_template_id, $mt_qe_workflow_template_raw_parameters ); // or default
             // does not put this in the options, we do not want to save it in the DB as metadata
             $mt_qe_PayableRate = $this->validateMTQEPayableRateBreakdownsOrDefault( $mt_qe_workflow_payable_rate_template_id );
             $mt_evaluation     = true; // force mt_evaluation because it is the default for mt_qe_workflows
@@ -400,10 +402,10 @@ class NewController extends KleinController {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
         }
 
-        $metadata[ Projects_MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
+        $metadata[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
 
         if ( $mt_evaluation ) {
-            $metadata[ Projects_MetadataDao::MT_EVALUATION ] = true;
+            $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
 
         return [
@@ -484,7 +486,7 @@ class NewController extends KleinController {
         }
 
         // new raw counter model
-        $metadata[ Projects_MetadataDao::WORD_COUNT_TYPE_KEY ] = Projects_MetadataDao::WORD_COUNT_RAW;
+        $metadata[ MetadataDao::WORD_COUNT_TYPE_KEY ] = MetadataDao::WORD_COUNT_RAW;
 
         return $metadata;
 
@@ -495,7 +497,7 @@ class NewController extends KleinController {
      *
      * @return string|null
      */
-    private function validateCharacterCounterMode( ?string $character_counter_mode = null ) {
+    private function validateCharacterCounterMode( ?string $character_counter_mode = null ): ?string {
 
         if ( empty( $character_counter_mode ) ) {
             return null;
@@ -524,13 +526,13 @@ class NewController extends KleinController {
     private function validateEngines( int $tms_engine, int $mt_engine ): array {
 
         if ( $tms_engine > 1 ) {
-            throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
+            throw new InvalidArgumentException( "Invalid TM EnginesFactory.", -21 );
         }
 
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
-                throw new InvalidArgumentException( "Invalid MT Engine.", -2 );
+                throw new InvalidArgumentException( "Invalid MT EnginesFactory.", -2 );
             }
 
             try {
@@ -620,7 +622,7 @@ class NewController extends KleinController {
 
         if ( $project_completion ) {
             $feature                                   = new BasicFeatureStruct();
-            $feature->feature_code                     = 'project_completion';
+            $feature->feature_code                     = ProjectCompletion::FEATURE_CODE;
             $projectFeatures[ $feature->feature_code ] = $feature;
         }
 
@@ -680,12 +682,13 @@ class NewController extends KleinController {
                     throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
-                $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
+                $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
 
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $private_tm_key_json;
 
                 $validator  = new JSONValidator( $schema );
+                /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
                 $tm_prioritization = $jsonObject->decoded->tm_prioritization;
@@ -785,15 +788,12 @@ class NewController extends KleinController {
                  * Get the key description/name from the user keyring
                  */
                 if ( $uid ) {
-                    $mkDao = new TmKeyManagement_MemoryKeyDao();
+                    $mkDao = new MemoryKeyDao();
 
-                    /**
-                     * @var $keyRing TmKeyManagement_MemoryKeyStruct[]
-                     */
                     $keyRing = $mkDao->read(
-                            ( new TmKeyManagement_MemoryKeyStruct( [
+                            ( new MemoryKeyStruct( [
                                     'uid'    => $uid,
-                                    'tm_key' => new TmKeyManagement_TmKeyStruct( $this_tm_key )
+                                    'tm_key' => new TmKeyStruct( $this_tm_key )
                             ] )
                             )
                     );
@@ -825,9 +825,9 @@ class NewController extends KleinController {
      */
     private static function sanitizeTmKeyArr( $elem ): array {
 
-        $element                  = new TmKeyManagement_TmKeyStruct( $elem );
+        $element                  = new TmKeyStruct( $elem );
         $element->complete_format = true;
-        $elem                     = TmKeyManagement_TmKeyManagement::sanitize( $element );
+        $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
     }
@@ -956,7 +956,7 @@ class NewController extends KleinController {
      * @throws Exception
      */
     private function validateUserMTEngine( $mt_engine = null ): ?string {
-        // any other engine than MyMemory
+        // any other engine than Match
         if ( $mt_engine !== null and $mt_engine > 1 ) {
             try {
                 EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
@@ -977,7 +977,12 @@ class NewController extends KleinController {
         if ( !empty( $mmt_glossaries ) ) {
             try {
                 $mmtGlossaries = html_entity_decode( $mmt_glossaries );
-                MMTValidator::validateGlossary( $mmtGlossaries );
+
+                ( new MMTValidator )->validate(
+                        ValidatorObject::fromArray( [
+                                'glossaryString' => $mmtGlossaries,
+                        ] )
+                );
 
                 return $mmtGlossaries;
             } catch ( Exception $exception ) {
@@ -1070,7 +1075,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "filters_extraction_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $filters_extraction_parameters;
@@ -1117,7 +1122,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "mt_qe_workflow_template_raw_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $mt_qe_workflow_template_raw_parameters;
@@ -1125,6 +1130,7 @@ class NewController extends KleinController {
             $validator  = new JSONValidator( $schema, true );
             $jsonObject = $validator->validate( $validatorObject );
 
+            /** @var JSONValidatorObject $jsonObject */
             return new MTQEWorkflowParams( (array)( $jsonObject->decoded ) );
 
         } elseif ( !empty( $mt_qe_workflow_template_id ) ) {
@@ -1182,7 +1188,7 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "xliff_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $xliff_parameters;
@@ -1240,7 +1246,7 @@ class NewController extends KleinController {
                 break;
             //permission string value is not allowed
             default:
-                $allowed_permissions = implode( ", ", Constants_TmKeyPermissions::$_accepted_grants );
+                $allowed_permissions = implode( ", ", TmKeyPermissions::$_accepted_grants );
                 throw new Exception( "Invalid permission modifier string. Allowed: <empty>, $allowed_permissions" );
         }
 

@@ -6,7 +6,7 @@
  * Time: 12:07
  */
 
-namespace Features;
+namespace Plugins\Features;
 
 
 interface IBaseFeature {

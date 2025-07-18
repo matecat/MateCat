@@ -7,7 +7,7 @@
  *
  */
 
-namespace Engines\MMT;
+namespace Utils\Engines\MMT;
 
 class MMTServiceApiRequestException extends MMTServiceApiException {
 

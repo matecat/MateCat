@@ -1,23 +1,23 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use API\Commons\Exceptions\AuthenticationError;
-use Constants\ConversionHandlerStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\Exceptions\FileSystemException;
-use FilesStorage\FilesStorageFactory;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateStruct;
-use INIT;
-use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\Exceptions\FileSystemException;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Utils\Constants\ConversionHandlerStatus;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class ConversionHandler {
 
@@ -51,7 +51,7 @@ class ConversionHandler {
     }
 
     public function fileMustBeConverted() {
-        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, INIT::$FILTERS_ADDRESS );
+        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS );
     }
 
     public function getLocalFilePath(): string {
@@ -119,9 +119,6 @@ class ConversionHandler {
                 $this->source_lang;
 
         $short_hash = sha1( $hash_name_for_disk );
-
-        // Initialize path variable
-        $cachedXliffPath = null;
 
         // Convert the file
         $ocrCheck = new OCRCheck( $this->source_lang );

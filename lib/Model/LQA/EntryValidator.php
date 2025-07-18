@@ -1,13 +1,13 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use Database;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use Jobs_JobDao;
-use Projects_ProjectDao;
-use Segments_SegmentDao;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Segments\SegmentDao;
 
 class EntryValidator {
 
@@ -70,15 +70,15 @@ class EntryValidator {
      */
 
     public function validate() {
-        $dao           = new Segments_SegmentDao( Database::obtain() );
+        $dao           = new SegmentDao( Database::obtain() );
         $this->segment = $dao->getById( $this->struct->id_segment );
 
         if ( !$this->segment ) {
             throw new NotFoundException( 'segment not found' );
         }
 
-        $this->job     = Jobs_JobDao::getById( $this->struct->id_job )[ 0 ];
-        $this->project = Projects_ProjectDao::findById( $this->job->id_project );
+        $this->job     = JobDao::getById( $this->struct->id_job )[ 0 ];
+        $this->project = ProjectDao::findById( $this->job->id_project );
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();

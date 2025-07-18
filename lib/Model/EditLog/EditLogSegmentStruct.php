@@ -1,10 +1,10 @@
 <?php
 
-namespace EditLog;
+namespace Model\EditLog;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
-use MyMemory;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
+use Utils\Tools\Match;
 
 /**
  * Created by PhpStorm.
@@ -73,7 +73,7 @@ class EditLogSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct
     public function getPEE(): float {
 
         $post_editing_effort = round(
-                ( 1 - MyMemory::TMS_MATCH(
+                ( 1 - Match::get(
                                 self::cleanSegmentForPee( $this->suggestion ),
                                 self::cleanSegmentForPee( $this->translation ),
                                 $this->target_language_code
