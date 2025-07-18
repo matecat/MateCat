@@ -75,7 +75,7 @@ route( '/api/v3/create-key',  'POST', [ 'API\V3\MyMemoryController', 'create' ] 
 
 // LARA
 $klein->with( '/api/v3/lara/[i:engineId]', function () {
-    route( '/glossaries', 'GET', [ '\API\V3\LaraController', 'glossaries' ] );
+    route( '/glossaries', 'GET', [ 'Controller\API\V3\LaraController', 'glossaries' ] );
 } );
 
 // MMT
