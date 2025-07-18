@@ -4,7 +4,6 @@ namespace Plugins\Features;
 
 use Exception;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Model\FeaturesBase\FeatureCodes;
 use Model\FeaturesBase\FeatureSet;
 use Model\LQA\ChunkReviewStruct;
 use Model\Projects\ProjectStruct;
@@ -67,11 +66,11 @@ class RevisionFactory {
      *
      * This method is invoked to update/reset the features before invoking filter callbacks.
      * This is needed because, by default, 'mandatory_plugins' section, in the configuration ini file,
-     * always load 'review_extended' or 'second_pass_review' ( which has 'review_extended' as dependency ) when the application bootstraps.
+     * always load 'review_extended' or 'second_pass_review' (which has 'review_extended' as dependency) when the application bootstraps.
      *
-     * If the old 'review_improved' feature is enabled for the project, a singleton instance every time would returns 'review_extended'
+     * If the old 'review_improved' feature is enabled for the project, a singleton instance every time would return 'review_extended'
      *
-     * This works because revision plugins are by default not forcedly injected on projects ( $forceOnProject == false ).
+     * This works because revision plugins are by default not forcedly injected on projects ($forceOnProject == false).
      *
      * @param ProjectStruct $project
      *
@@ -87,9 +86,7 @@ class RevisionFactory {
         }
 
         /**
-         * This return should never happens if the review_extended plugin is load as mandatory
-         * When the OLD revision is set, this factory should be never invoked
-         * When review_improved or review_extended is loaded by initProject we never reach this line
+         * This return should never happen if the review_extended plugin is loaded as mandatory (or as dependency of mandatory second_pass_review plugin)
          */
         return static::getInstance(
                 new SecondPassReview( new BasicFeatureStruct( [ 'feature_code' => ReviewExtended::FEATURE_CODE ] ) )
@@ -99,12 +96,8 @@ class RevisionFactory {
     /**
      * @return AbstractRevisionFeature
      */
-    public function getRevisionFeature() {
+    public function getRevisionFeature(): AbstractRevisionFeature {
         return $this->revision;
-    }
-
-    protected function _isSecondPass() {
-        return in_array( FeatureCodes::SECOND_PASS_REVIEW, $this->_featureSet->getCodes() );
     }
 
 }

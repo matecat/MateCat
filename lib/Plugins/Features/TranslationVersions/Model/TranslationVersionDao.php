@@ -26,7 +26,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return array
      */
-    public static function getVersionsForJob( $id_job ) {
+    public static function getVersionsForJob( int $id_job ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job " .
                 " ORDER BY creation_date DESC ";
@@ -73,7 +73,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return null|TranslationVersionStruct
      */
-    public function getVersionNumberForTranslation( $id_job, $id_segment, $version_number ) {
+    public function getVersionNumberForTranslation( int $id_job, int $id_segment, int $version_number ) {
         $sql = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment " .
                 " AND version_number = :version_number ;";
@@ -103,7 +103,7 @@ class TranslationVersionDao extends AbstractDao {
      *
      * @return TranslationVersionStruct[]
      */
-    public static function getVersionsForTranslation( $id_job, $id_segment, $version_number = null ) {
+    public static function getVersionsForTranslation( int $id_job, int $id_segment, ?int $version_number = null ) {
         $sql    = "SELECT * FROM segment_translation_versions " .
                 " WHERE id_job = :id_job AND id_segment = :id_segment ";
         $params = [ 'id_job' => $id_job, 'id_segment' => $id_segment ];

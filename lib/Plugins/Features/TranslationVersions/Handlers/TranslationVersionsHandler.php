@@ -3,6 +3,7 @@
 namespace Plugins\Features\TranslationVersions\Handlers;
 
 use Exception;
+use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
@@ -55,10 +56,10 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
     /**
      * TranslationVersionsHandler constructor.
      *
-     * @param JobStruct               $chunkStruct
-     * @param int|null                $id_segment
-     * @param \Model\Users\UserStruct $userStruct
-     * @param ProjectStruct           $projectStruct
+     * @param JobStruct     $chunkStruct
+     * @param int|null      $id_segment
+     * @param UserStruct    $userStruct
+     * @param ProjectStruct $projectStruct
      */
     public function __construct( JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct ) {
 
@@ -184,7 +185,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
         /** @var JobStruct $chunk */
         $chunk = $params[ 'chunk' ];
 
-        /** @var \Model\FeaturesBase\FeatureSet $features */
+        /** @var FeatureSet $features */
         $features = $params[ 'features' ];
 
         /** @var ProjectStruct $project */

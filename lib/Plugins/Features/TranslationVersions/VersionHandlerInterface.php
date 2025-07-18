@@ -18,8 +18,8 @@ interface VersionHandlerInterface {
      * Evaluates the need to save a new translation version to database.
      * If so, sets the new version number on $new_translation.
      *
-     * @param \Model\Translations\SegmentTranslationStruct $new_translation
-     * @param \Model\Translations\SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return mixed
      */

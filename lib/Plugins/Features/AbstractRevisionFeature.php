@@ -3,9 +3,7 @@
 namespace Plugins\Features;
 
 use ArrayObject;
-use Controller\API\App\CreateProjectController;
 use Controller\API\Commons\Exceptions\ValidationError;
-use Controller\API\V1\NewController;
 use Controller\Features\ProjectCompletion\CompletionEventStruct;
 use Exception;
 use Klein\Klein;
@@ -14,8 +12,6 @@ use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
 use Model\FeaturesBase\BasicFeatureStruct;
 use Model\FeaturesBase\FeatureCodes;
-use Model\FilesStorage\AbstractFilesStorage;
-use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
@@ -29,14 +25,12 @@ use Plugins\Features\ReviewExtended\ChunkReviewModel;
 use Plugins\Features\ReviewExtended\IChunkReviewModel;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
-use Predis\Connection\ConnectionException;
 use ReflectionException;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
 use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
-use ZipArchive;
 
 abstract class AbstractRevisionFeature extends BaseFeature {
 
@@ -50,12 +44,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
     /**
      * @param array $projectFeatures
-     * @param       $controller NewController|CreateProjectController
      *
      * @return array
      * @throws Exception
      */
-    public function filterCreateProjectFeatures( array $projectFeatures, $controller ): array {
+    public function filterCreateProjectFeatures( array $projectFeatures ): array {
         $projectFeatures[ static::FEATURE_CODE ] = new BasicFeatureStruct( [ 'feature_code' => static::FEATURE_CODE ] );
 
         return $projectFeatures;
@@ -65,7 +58,13 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         route( '/project/[:id_project]/[:password]/reviews', 'POST', [ 'Controller\API\V2\ReviewsController', 'createReview' ] );
     }
 
-    public function filterGetSegmentsResult( $data, JobStruct $chunk ) {
+    /**
+     * @param array     $data
+     * @param JobStruct $chunk
+     *
+     * @return array
+     */
+    public function filterGetSegmentsResult( array $data, JobStruct $chunk ): array {
 
         if ( empty( $data[ 'files' ] ) ) {
             // this means that there are no more segments after
@@ -112,6 +111,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @return mixed
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function filter_job_password_to_review_password( $password, $id_job ) {
 
@@ -129,7 +129,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     }
 
     /**
-     * Performs post project creation tasks for the current project.
+     * Performs post-project creation tasks for the current project.
      * Evaluates if a qa model is present in the feature options.
      * If so, then try to assign the defined qa_model.
      * If not, then try to find the qa_model from the project structure.
@@ -194,11 +194,11 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $project = ProjectDao::findById( $projectStructure[ 'id_project' ], 86400 );
         foreach ( $projectStructure[ 'array_jobs' ][ 'job_list' ] as $id_job ) {
 
-            $chunkStruct = JobDao::getById( $id_job, 0 );
+            $chunkStruct = JobDao::getById( $id_job );
 
             $iMax = 3;
 
-            if ( isset( $projectStructure[ 'create_2_pass_review' ] ) && (bool)$projectStructure[ 'create_2_pass_review' ] ) {
+            if ( isset( $projectStructure[ 'create_2_pass_review' ] ) && $projectStructure[ 'create_2_pass_review' ] ) {
                 $iMax = 4;
             }
 
@@ -222,7 +222,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
     public function postJobSplitted( ArrayObject $projectStructure ) {
 
         /**
-         * By definition, when running postJobSplitted callback the job is not splitted.
+         * By definition, when running postJobSplitted callback, the job is not split.
          * So we expect to find just one record in chunk_reviews for the job.
          * If we find more than one record, it's one record for each revision.
          *
@@ -234,7 +234,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $chunksStructArray = JobDao::getById( $id_job, 0 );
+        $chunksStructArray = JobDao::getById( $id_job );
 
         $reviews = [];
         foreach ( $previousRevisionRecords as $review ) {
@@ -287,7 +287,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
-        $chunksStructArray = JobDao::getById( $id_job, 0 );
+        $chunksStructArray = JobDao::getById( $id_job );
 
         $reviews = [];
         foreach ( $reviewGroupedData as $source_page => $data ) {
@@ -329,6 +329,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      *
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     public function alter_chunk_review_struct( ChunkCompletionEventStruct $event ) {
 
@@ -414,7 +415,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      */
     private function setQaModelFromJsonFile( $projectStructure ) {
 
-        /** @var \Utils\Collections\RecursiveArrayObject $model_json */
+        /** @var RecursiveArrayObject $model_json */
         $model_json = $projectStructure[ 'features' ][ 'quality_framework' ];
 
         $model_record = ModelDao::createModelFromJsonDefinition( $model_json->toArray() );
@@ -437,9 +438,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
      * @param ArrayObject $projectStructure
      * @param string|null $jsonPath
      *
-     * @throws ConnectionException
-     * @throws ReflectionException
-     * @throws Exception
      */
     public static function loadAndValidateQualityFramework( ArrayObject &$projectStructure, ?string $jsonPath = null ) {
         
@@ -449,11 +447,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
 
         // Use Null Coalescing Operator to simplify checks for template or model
         $decoded_model = $projectStructure[ 'qa_model_template' ] ?? $projectStructure[ 'qa_model' ];
-
-        // Try to load from ZIP file if no model is injected
-        if ( empty( $decoded_model ) ) {
-            $decoded_model = self::extractQaModelFromZip( $projectStructure[ 'uploadToken' ] );
-        }
 
         // Still empty?
         if ( empty( $decoded_model ) ) {
@@ -499,35 +492,6 @@ abstract class AbstractRevisionFeature extends BaseFeature {
         $decoded_model[ 'model' ][ 'uid' ] = $projectStructure[ 'uid' ];
 
         return $decoded_model;
-    }
-
-    /**
-     * Extract QA model from ZIP file
-     *
-     * @throws ReflectionException
-     * @throws ConnectionException
-     * @throws Exception
-     */
-    private static function extractQaModelFromZip( $uploadToken ) {
-        $fs       = FilesStorageFactory::create();
-        $zip_file = $fs->getTemporaryUploadedZipFile( $uploadToken );
-
-        if ( $zip_file === false ) {
-            return null;
-        }
-
-        $zip      = new ZipArchive();
-        $qa_model = null;
-        if ( $zip->open( $zip_file ) === true ) {
-            $qa_model = $zip->getFromName( '__meta/qa_model.json' );
-            $zip->close();
-        }
-
-        if ( AbstractFilesStorage::isOnS3() ) {
-            unlink( $zip_file );
-        }
-
-        return $qa_model;
     }
 
     /**

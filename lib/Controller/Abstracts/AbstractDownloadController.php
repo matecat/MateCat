@@ -38,7 +38,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     /**
      * @param int $ttl
      *
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      * @throws ReflectionException
      */
     public function getJob( int $ttl = 0 ): JobStruct {
@@ -50,7 +50,7 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param \View\API\Commons\ZipContentObject $content
+     * @param ZipContentObject $content
      *
      * @return $this
      * @throws Exception
@@ -205,10 +205,10 @@ abstract class AbstractDownloadController extends AbstractStatefulKleinControlle
     }
 
     /**
-     * @param \View\API\Commons\ZipContentObject[] $output_content
-     * @param string|null                          $outputFile
+     * @param ZipContentObject[] $output_content
+     * @param string|null        $outputFile
      *
-     * @param ?bool                                $isOriginalFile
+     * @param ?bool              $isOriginalFile
      *
      * @return string The zip binary
      * @throws Exception

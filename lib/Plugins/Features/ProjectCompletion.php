@@ -2,6 +2,7 @@
 
 namespace Plugins\Features;
 
+use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateDao;
 use Model\ChunksCompletion\ChunkCompletionUpdateStruct;
@@ -12,12 +13,15 @@ class ProjectCompletion extends BaseFeature {
 
     const FEATURE_CODE = 'project_completion';
 
-    public function postAddSegmentTranslation( $params ) {
+    /**
+     * @throws Exception
+     */
+    public function postAddSegmentTranslation( array $params ) {
         $params = Utils::ensure_keys( $params, [ 'is_review', 'chunk' ] );
 
         // Here we need to find or update the corresponding record,
         // to register the event of the segment translation being updated
-        // from a review page or a translate page.
+        // from a "review" page or a "translate" page.
 
         /** @var JobStruct $chunk */
         $chunk                                     = $params[ 'chunk' ];
@@ -36,7 +40,7 @@ class ProjectCompletion extends BaseFeature {
         $current_phase = $dao->currentPhase( $chunk );
 
         /**
-         * Only save the record if current phase is compatible
+         * Only save the record if the current phase is compatible
          */
         if (
                 ( $current_phase == ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review ) ||

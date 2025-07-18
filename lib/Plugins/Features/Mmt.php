@@ -10,7 +10,10 @@
 namespace Plugins\Features;
 
 
+use Controller\Abstracts\KleinController;
 use Controller\API\App\CreateProjectController;
+use Controller\API\App\EngineController;
+use Controller\API\App\UserKeysController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\V1\NewController;
 use Exception;
@@ -27,6 +30,7 @@ use Model\TmKeyManagement\MemoryKeyDao;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
+use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
@@ -52,16 +56,20 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param EngineStruct $newCreatedDbRowStruct
+     * Called in
      *
-     * @param UserStruct $userStruct
+     * @param EngineStruct $newCreatedDbRowStruct
      *
-     * @return null
+     * @param UserStruct   $userStruct
+     *
+     * @return EngineStruct
+     * @throws MMTServiceApiException
+     * @throws ReflectionException
      * @throws Exception
-     * @see engineController::add()
      *
+     * @see engineController::add()
      */
-    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, UserStruct $userStruct ) {
+    public static function postEngineCreation( EngineStruct $newCreatedDbRowStruct, UserStruct $userStruct ): EngineStruct {
 
         if ( !$newCreatedDbRowStruct instanceof MMTStruct ) {
             return $newCreatedDbRowStruct;
@@ -74,7 +82,7 @@ class Mmt extends BaseFeature {
             throw new Exception( "MMT license not valid" );
         }
 
-        // Check account
+        // Check the account
         try {
             $checkAccount = $newTestCreatedMT->checkAccount();
 
@@ -116,23 +124,6 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param $errorObject
-     *
-     * @param $class_load
-     *
-     * @return array
-     * @see engineController::add()
-     *
-     */
-    public function engineCreationFailed( $errorObject, $class_load ) {
-        if ( $class_load == EngineConstants::MMT ) {
-            return [ 'code' => 403, 'message' => "Creation failed. Only one ModernMT engine is allowed." ];
-        }
-
-        return $errorObject;
-    }
-
-    /**
      * Called in
      *
      * @param array          $config
@@ -144,7 +135,7 @@ class Mmt extends BaseFeature {
      * @see getContributionController::doAction()
      *
      */
-    public static function beforeGetContribution( $config, AbstractEngine $engine, JobStruct $jobStruct ) {
+    public static function beforeGetContribution( array $config, AbstractEngine $engine, JobStruct $jobStruct ): array {
 
         if ( $engine instanceof MMTEngine ) {
 
@@ -186,12 +177,11 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param $uid
+     * @param int $uid
      *
      * @return MemoryKeyStruct[]
-     * @throws Exception
      */
-    private static function _getKeyringOwnerKeysByUid( $uid ) {
+    private static function _getKeyringOwnerKeysByUid( int $uid ): array {
 
         /*
          * Take the keys of the user
@@ -209,30 +199,19 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * @param UserStruct $LoggedUser
-     *
-     * @return MemoryKeyStruct[]
-     * @throws Exception
-     */
-    protected static function _getKeyringOwnerKeys( UserStruct $LoggedUser ) {
-
-        return self::_getKeyringOwnerKeysByUid( $LoggedUser->uid );
-    }
-
-    /**
      * Called in
-     * @see createProjectController::__appendFeaturesToProject()
-     * @see NewController::__appendFeaturesToProject()
      *
-     * @param $projectFeatures
-     *
-     * @param $controller NewController|CreateProjectController
-     * @param $mt_engine_id
+     * @param array                                 $projectFeatures
+     * @param NewController|CreateProjectController $controller
+     * @param int                                   $mt_engine_id
      *
      * @return array
      * @throws Exception
+     * @see NewController::__appendFeaturesToProject()
+     *
+     * @see createProjectController::__appendFeaturesToProject()
      */
-    public function filterCreateProjectFeatures( $projectFeatures, $controller, $mt_engine_id ) {
+    public function filterCreateProjectFeatures( array $projectFeatures, KleinController $controller, int $mt_engine_id ): array {
 
         $engine = EnginesFactory::getInstance( $mt_engine_id );
         if ( $engine instanceof MMTEngine ) {
@@ -246,9 +225,9 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param $isValid
+     * @param bool   $isValid
      *
-     * @param $data             (object)[
+     * @param object $data      [
      *                          'providerName' => '',
      *                          'logged_user'  => UserStruct,
      *                          'engineData'   => []
@@ -256,14 +235,15 @@ class Mmt extends BaseFeature {
      *
      * @return EngineStruct|bool
      * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
-     * @see engineController::add()
+     * @throws ValidationError
+     *
+     * @see EngineController
      *
      */
-    public function buildNewEngineStruct( $isValid, $data ) {
+    public function buildNewEngineStruct( bool $isValid, object $data ) {
 
         if ( strtolower( EngineConstants::MMT ) == $data->providerName ) {
 
@@ -300,18 +280,18 @@ class Mmt extends BaseFeature {
     }
 
     /**
-     * Called in @param                  $memoryKeyStructs MemoryKeyStruct[]
+     * C@param                  $memoryKeyStructs MemoryKeyStruct[]
      *
      * @param                  $uid              integer
      *
      * @throws Exception
      * @throws MMTServiceApiException
      * @see      \Model\ProjectManager\ProjectManager::setPrivateTMKeys()
-     * Called in @see \userKeysController::doAction()
+     * @see      UserKeysController::newKey()
      *
      * @internal param UserStruct $userStruct
      */
-    public function postTMKeyCreation( $memoryKeyStructs, $uid ) {
+    public function postTMKeyCreation( array $memoryKeyStructs, int $uid ) {
 
         if ( empty( $memoryKeyStructs ) or empty( $uid ) ) {
             return;
