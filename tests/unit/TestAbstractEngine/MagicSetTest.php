@@ -1,41 +1,45 @@
 <?php
 
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\NONE;
 
 
 /**
  * @group   regression
- * @covers  Engines_AbstractEngine::__set
+ * @covers  AbstractEngine::__set
  * User: dinies
  * Date: 26/04/16
  * Time: 17.12
  */
 class MagicSetTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
     protected $reflector;
     /**
-     * @var Engines_NONE
+     * @var NONE
      */
     protected $engine;
 
     public function setUp(): void {
         parent::setUp();
-        $this->engine_struct_param                   = new EnginesModel_EngineStruct();
-        $this->engine_struct_param->type             = Constants_Engines::MT;
+        $this->engine_struct_param                   = new EngineStruct();
+        $this->engine_struct_param->type             = EngineConstants::MT;
         $this->engine_struct_param->name             = "DeepLingoTestEngine";
         $this->engine_struct_param->others           = [ 'alfa' => "one", 'beta' => "two" ];
         $this->engine_struct_param->extra_parameters = [ 'gamma' => "three", 'delta' => "four" ];
-        $this->engine                                = new Engines_NONE( $this->engine_struct_param );
+        $this->engine                                = new NONE( $this->engine_struct_param );
 
 
     }
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::__set
+     * @covers  AbstractEngine::__set
      */
     public function test_magic__set_protected_variable_in_engine_struct() {
 
@@ -49,7 +53,7 @@ class MagicSetTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::__set
+     * @covers  AbstractEngine::__set
      */
     public function test_magic__set_values_in_array_variable_others() {
 
@@ -66,7 +70,7 @@ class MagicSetTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::__set
+     * @covers  AbstractEngine::__set
      */
     public function test_magic__set_values_in_array_variable_extra_parameters() {
 
@@ -82,7 +86,7 @@ class MagicSetTest extends AbstractTest {
 
     /**
      * @group   regression
-     * @covers  Engines_AbstractEngine::__set
+     * @covers  AbstractEngine::__set
      */
     public function test_magic__set_values_with_not_existent_variable() {
 

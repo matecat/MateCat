@@ -1,10 +1,10 @@
 <?php
 
-namespace Files;
+namespace Model\Files;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
 use ReflectionException;
 
 class FilesPartsDao extends AbstractDao {
@@ -62,7 +62,11 @@ class FilesPartsDao extends AbstractDao {
 
         $stmt = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+        /** @var  ShapelessConcreteStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+
+        return $result;
+
     }
 
     /**
@@ -78,7 +82,9 @@ class FilesPartsDao extends AbstractDao {
         $sql     = "SELECT * FROM files_parts  WHERE id = :id ";
         $stmt    = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FilesPartsStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+        /** @var  FilesPartsStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FilesPartsStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+        return $result;
     }
 
     /**
@@ -119,6 +125,9 @@ class FilesPartsDao extends AbstractDao {
 
         $stmt = $conn->prepare( $sql );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FilesPartsStruct::class, [ 'segmentId' => $segmentId ] )[ 0 ] ?? null;
+        /** @var  FilesPartsStruct $result */
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FilesPartsStruct::class, [ 'segmentId' => $segmentId ] )[ 0 ] ?? null;
+
+        return $result;
     }
 }

@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Filters\FiltersConfigTemplateDao;
-use INIT;
 use Klein\Response;
+use Model\Filters\FiltersConfigTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils\Registry\AppConfig;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class FiltersConfigTemplateController extends KleinController {
     protected function afterConstruct() {
@@ -32,7 +32,7 @@ class FiltersConfigTemplateController extends KleinController {
     private function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
         $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
     }
@@ -108,7 +108,7 @@ class FiltersConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $json = $this->request->body();
@@ -160,7 +160,7 @@ class FiltersConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $id  = (int)$this->request->param( 'id' );
@@ -237,6 +237,6 @@ class FiltersConfigTemplateController extends KleinController {
      * @return object|mixed
      */
     private function getModelSchema(): object {
-        return json_decode( file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' ) );
+        return json_decode( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' ) );
     }
 }

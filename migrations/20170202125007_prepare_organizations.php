@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class PrepareOrganizations extends AbstractMatecatMigration  {
 
     public $sql_up = array(

@@ -7,7 +7,7 @@
  *
  */
 
-namespace Conversion\MimeTypes\Guesser;
+namespace Model\Conversion\MimeTypes\Guesser;
 
 use RuntimeException;
 

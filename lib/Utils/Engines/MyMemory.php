@@ -1,11 +1,36 @@
 <?php
 
-use API\Commons\Exceptions\AuthenticationError;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
+namespace Utils\Engines;
+
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\Users\UserStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\AnalyzeResponse;
+use Utils\Engines\Results\MyMemory\AuthKeyResponse;
+use Utils\Engines\Results\MyMemory\CheckGlossaryResponse;
+use Utils\Engines\Results\MyMemory\CreateUserResponse;
+use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
+use Utils\Engines\Results\MyMemory\DomainsResponse;
+use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Engines\Results\MyMemory\GetGlossaryResponse;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
+use Utils\Engines\Results\MyMemory\Matches;
+use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
+use Utils\Engines\Results\MyMemory\SetContributionResponse;
+use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
+use Utils\Engines\Results\MyMemory\TagProjectionResponse;
+use Utils\Engines\Results\MyMemory\TmxResponse;
+use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -14,11 +39,11 @@ use TaskRunner\Exceptions\ReQueueException;
  * Time: 18.53
  *
  */
-class Engines_MyMemory extends Engines_AbstractEngine {
+class MyMemory extends AbstractEngine {
 
     /**
      * @inheritdoc
-     * @see Engines_AbstractEngine::$_isAdaptiveMT
+     * @see AbstractEngine::$_isAdaptiveMT
      * @var bool
      */
     protected bool $_isAdaptiveMT = false;
@@ -59,8 +84,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::TM ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+        if ( $this->getEngineRecord()->type != EngineConstants::TM ) {
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a TMS engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -69,9 +94,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * @param array $parameters
      * @param null  $function
      *
-     * @return Engines_Results_AbstractResponse
+     * @return TMSAbstractResponse
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ): TMSAbstractResponse {
 
         $functionName = $function;
 
@@ -86,55 +111,55 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         switch ( $functionName ) {
 
             case 'glossary_domains_relative_url':
-                $result_object = Engines_Results_MyMemory_DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = DomainsResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_check_relative_url':
-                $result_object = Engines_Results_MyMemory_CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = CheckGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_update_relative_url':
-                $result_object = Engines_Results_MyMemory_UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = UpdateGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_delete_relative_url':
-                $result_object = Engines_Results_MyMemory_DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = DeleteGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_set_relative_url':
-                $result_object = Engines_Results_MyMemory_SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = SetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_get_relative_url':
-                $result_object = Engines_Results_MyMemory_GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = GetGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_search_relative_url':
-                $result_object = Engines_Results_MyMemory_SearchGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = SearchGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'glossary_keys_relative_url':
-                $result_object = Engines_Results_MyMemory_KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tags_projection' :
-                $result_object = Engines_Results_MyMemory_TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'api_key_check_auth_url':
-                $result_object = Engines_Results_MyMemory_AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'api_key_create_user_url':
-                $result_object = Engines_Results_MyMemory_CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = CreateUserResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
 
             case 'glossary_import_status_relative_url':
             case 'glossary_import_relative_url':
             case 'tmx_import_relative_url':
             case 'tmx_status_relative_url':
-                $result_object = Engines_Results_MyMemory_TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = TmxResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tmx_export_email_url' :
             case 'glossary_export_relative_url' :
-                $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = ExportResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'analyze_url':
-                $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = AnalyzeResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'contribute_relative_url':
             case 'update_relative_url':
-                $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = SetContributionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             default:
 
@@ -145,7 +170,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                     }
                 }
 
-                $result_object = Engines_Results_MyMemory_TMS::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $result_object = GetMemoryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
         }
 
@@ -153,7 +178,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * This method is used for help to rebuild result from MyMemory.
+     * This method is used for help to rebuild result from Match.
      * Because when in CURL you send something using method POST and value's param start with "@"
      * he assumes you are sending a file.
      *
@@ -182,7 +207,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     private function possiblyOverrideMtPenalty(): void {
         if ( !empty( $this->result->matches ) ) {
-            /** @var $match Engines_Results_MyMemory_Matches */
+            /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
                 if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
                     $match->match = $this->getStandardMtPenaltyString();
@@ -195,18 +220,14 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     /**
      * @param $_config
      *
-     * @return array
-     * @throws NotFoundException
+     * @return GetMemoryResponse
      * @throws AuthenticationError
-     * @throws ValidationError
      * @throws EndQueueException
+     * @throws NotFoundException
      * @throws ReQueueException
+     * @throws ValidationError
      */
-    public function get( $_config ) {
-
-        if ( preg_match( "/^(-?@-?)/", $_config[ 'segment' ], $segment_file_chr ) ) {
-            $_config[ 'segment' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'segment' ] );
-        }
+    public function get( $_config ): GetMemoryResponse {
 
         $parameters                = [];
         $parameters[ 'q' ]         = $_config[ 'segment' ];
@@ -214,10 +235,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'de' ]        = $_config[ 'email' ];
         $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]    = $_config[ 'num_result' ];
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
 
         // TM prioritization
-        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] == true ) ? 1 : 0;
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
 
         if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
             $penalties = [];
@@ -258,10 +279,6 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
         $this->call( "translate_relative_url", $parameters, true );
 
-        if ( isset( $segment_file_chr[ 1 ] ) ) {
-            $this->rebuildResults( $segment_file_chr[ 1 ] );
-        }
-
         $this->possiblyOverrideMtPenalty();
 
         return $this->result;
@@ -280,8 +297,8 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'tnote' ]     = $_config[ 'tnote' ];
         $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
-        $parameters[ 'client_id' ] = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'mt' ]        = $_config[ 'set_mt' ] ?? true;
+        $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
         $parameters[ 'prop' ]      = $_config[ 'prop' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
@@ -302,7 +319,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
             return false;
         }
 
-        return $this->result->responseDetails[ 0 ]; // return the MyMemory ID
+        return $this->result->responseDetails[ 0 ]; // return the Match ID
 
     }
 
@@ -315,9 +332,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $parameters[ 'newtra' ]     = preg_replace( "/^(-?@-?)/", "", $_config[ 'newtranslation' ] );
         $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'prop' ]       = $_config[ 'prop' ];
-        $parameters[ 'client_id' ]  = isset( $_config[ 'uid' ] ) ? $_config[ 'uid' ] : 0;
+        $parameters[ 'client_id' ]  = $_config[ 'uid' ] ?? 0;
         $parameters[ 'de' ]         = $_config[ 'email' ];
-        $parameters[ 'mt' ]         = isset( $_config[ 'set_mt' ] ) ? $_config[ 'set_mt' ] : true;
+        $parameters[ 'mt' ]         = $_config[ 'set_mt' ] ?? true;
         $parameters[ 'spiceMatch' ] = $_config[ 'spiceMatch' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
@@ -344,7 +361,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @return bool
      */
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         $parameters               = [];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
@@ -384,12 +401,9 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      *
      * @param string $uuid
      *
-     * @return array
+     * @return TmxResponse
      */
-    public function entryStatus( string $uuid ) {
-        $this->call( "entry_status_relative_url", [
-                'uuid' => $uuid
-        ], false );
+    public function entryStatus( string $uuid ): TmxResponse {
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
@@ -397,8 +411,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
                 ]
         );
 
+        $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
+
         /**
-         * @var Engines_Results_MyMemory_TmxResponse
+         * @var TmxResponse
          */
         return $this->result;
     }
@@ -407,20 +423,20 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * Post a file to myMemory
      *
      * Remove the first line from csv (source and target)
-     * and rewrite the csv because MyMemory doesn't want the header line
+     * and rewrite the csv because Match doesn't want the header line
      *
      * @param string $file
      * @param string $key
      * @param string $name
      *
-     * @return Engines_Results_MyMemory_TmxResponse
+     * @return TmxResponse
      */
-    public function glossaryImport( string $file, string $key, string $name = '' ): Engines_Results_MyMemory_TmxResponse {
+    public function glossaryImport( string $file, string $key, string $name = '' ): TmxResponse {
 
         $postFields = [
                 'glossary' => $this->getCurlFile( $file ),
                 'key'      => trim( $key ),
-                'de'       => INIT::$MYMEMORY_API_KEY,
+                'de'       => AppConfig::$MYMEMORY_API_KEY,
         ];
 
         if ( $name and $name !== '' ) {
@@ -430,17 +446,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( "glossary_import_relative_url", $postFields, true );
 
         /**
-         * @var Engines_Results_MyMemory_TmxResponse
+         * @var TmxResponse
          */
         return $this->result;
     }
 
     /**
-     * @param $uuid
+     * @param string $uuid
      *
-     * @return array
+     * @return TmxResponse
      */
-    public function getGlossaryImportStatus( $uuid ) {
+    public function getGlossaryImportStatus( string $uuid ): TmxResponse {
         $this->call( 'glossary_import_status_relative_url', [
                 'uuid' => $uuid
         ] );
@@ -449,14 +465,14 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $key
-     * @param $keyName
-     * @param $userEmail
-     * @param $userName
+     * @param string $key
+     * @param string $keyName
+     * @param string $userEmail
+     * @param string $userName
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return ExportResponse
      */
-    public function glossaryExport( $key, $keyName, $userEmail, $userName ) {
+    public function glossaryExport( string $key, string $keyName, string $userEmail, string $userName ): ExportResponse {
         $this->call( 'glossary_export_relative_url', [
                 'key'        => $key,
                 'key_name'   => $keyName,
@@ -472,10 +488,10 @@ class Engines_MyMemory extends Engines_AbstractEngine {
      * using a cyclic barrier
      * (import, update, set, delete)
      *
-     * @param $uuid
-     * @param $relativeUrl
+     * @param string $uuid
+     * @param string $relativeUrl
      */
-    private function pollForStatus( $uuid, $relativeUrl ) {
+    private function pollForStatus( string $uuid, string $relativeUrl ) {
         $limit     = 10;
         $sleep     = 1;
         $startTime = time();
@@ -494,17 +510,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param       $source
-     * @param       $target
-     * @param       $sourceLanguage
-     * @param       $targetLanguage
-     * @param array $keys
+     * @param string     $source
+     * @param string     $target
+     * @param string     $sourceLanguage
+     * @param string     $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return CheckGlossaryResponse
      */
-    public function glossaryCheck( $source, $target, $sourceLanguage, $targetLanguage, $keys = [] ) {
+    public function glossaryCheck( string $source, string $target, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): CheckGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 'source'          => $source,
                 'target'          => $target,
                 'source_language' => $sourceLanguage,
@@ -517,13 +533,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param array $keys
+     * @param array|null $keys
      *
-     * @return array
+     * @return DomainsResponse
      */
-    public function glossaryDomains( $keys = [] ) {
+    public function glossaryDomains( ?array $keys = [] ): DomainsResponse {
         $payload = [
-                'de'   => INIT::$MYMEMORY_API_KEY,
+                'de'   => AppConfig::$MYMEMORY_API_KEY,
                 'keys' => $keys,
         ];
         $this->call( "glossary_domains_relative_url", $payload, true, true );
@@ -532,16 +548,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param string $term
      *
-     * @return array
+     * @return DeleteGlossaryResponse
      */
-    public function glossaryDelete( $idSegment, $idJob, $password, $term ) {
+    public function glossaryDelete( string $idSegment, string $idJob, string $password, string $term ): DeleteGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,
@@ -558,18 +574,18 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $id_job
-     * @param $id_segment
-     * @param $source
-     * @param $sourceLanguage
-     * @param $targetLanguage
-     * @param $keys
+     * @param string     $id_job
+     * @param string     $id_segment
+     * @param string     $source
+     * @param string     $sourceLanguage
+     * @param string     $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return GetGlossaryResponse
      */
-    public function glossaryGet( $id_job, $id_segment, $source, $sourceLanguage, $targetLanguage, $keys ) {
+    public function glossaryGet( string $id_job, string $id_segment, string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): GetGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 "id_job"          => $id_job,
                 "id_segment"      => $id_segment,
                 "source"          => $source,
@@ -584,16 +600,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $source
-     * @param $sourceLanguage
-     * @param $targetLanguage
-     * @param $keys
+     * @param string     $source
+     * @param string     $sourceLanguage
+     * @param string     $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return SearchGlossaryResponse
      */
-    public function glossarySearch( $source, $sourceLanguage, $targetLanguage, $keys ) {
+    public function glossarySearch( string $source, string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): SearchGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 "source"          => $source,
                 "source_language" => $sourceLanguage,
                 "target_language" => $targetLanguage,
@@ -606,15 +622,15 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param string $sourceLanguage
-     * @param string $targetLanguage
-     * @param array  $keys
+     * @param string     $sourceLanguage
+     * @param string     $targetLanguage
+     * @param array|null $keys
      *
-     * @return array
+     * @return KeysGlossaryResponse
      */
-    public function glossaryKeys( $sourceLanguage, $targetLanguage, $keys = [] ) {
+    public function glossaryKeys( string $sourceLanguage, string $targetLanguage, ?array $keys = [] ): KeysGlossaryResponse {
         $payload = [
-                'de'              => INIT::$MYMEMORY_API_KEY,
+                'de'              => AppConfig::$MYMEMORY_API_KEY,
                 'source_language' => $sourceLanguage,
                 'target_language' => $targetLanguage,
                 'keys'            => $keys,
@@ -625,16 +641,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param string $term
      *
-     * @return array
+     * @return SetGlossaryResponse
      */
-    public function glossarySet( $idSegment, $idJob, $password, $term ) {
+    public function glossarySet( string $idSegment, string $idJob, string $password, string $term ): SetGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,
@@ -647,16 +663,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * @param $idSegment
-     * @param $idJob
-     * @param $password
-     * @param $term
+     * @param string $idSegment
+     * @param string $idJob
+     * @param string $password
+     * @param string $term
      *
-     * @return array
+     * @return UpdateGlossaryResponse
      */
-    public function glossaryUpdate( $idSegment, $idJob, $password, $term ) {
+    public function glossaryUpdate( string $idSegment, string $idJob, string $password, string $term ): UpdateGlossaryResponse {
         $payload = [
-                'de'         => INIT::$MYMEMORY_API_KEY,
+                'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
                 "id_job"     => $idJob,
                 "password"   => $password,
@@ -674,13 +690,13 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 
     /**
      *
-     * @param string           $filePath
-     * @param string           $memoryKey
-     * @param Users_UserStruct $user * Not used
+     * @param string     $filePath
+     * @param string     $memoryKey
+     * @param UserStruct $user * Not used
      *
      * @return array|mixed
      */
-    public function importMemory( string $filePath, string $memoryKey, Users_UserStruct $user ) {
+    public function importMemory( string $filePath, string $memoryKey, UserStruct $user ) {
 
         $postFields = [
                 'tmx' => $this->getCurlFile( $filePath ),
@@ -701,20 +717,19 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
+     * Calls the Match endpoint to send the TMX download URL to the user e-mail
      *
-     * @param $key
-     * @param $name
-     * @param $userEmail
-     * @param $userName
-     * @param $userSurname
-     * @param $strip_tags
+     * @param string    $key
+     * @param string    $name
+     * @param string    $userEmail
+     * @param string    $userName
+     * @param string    $userSurname
+     * @param bool|null $strip_tags
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return ExportResponse
      * @throws Exception
-     *
      */
-    public function emailExport( $key, $name, $userEmail, $userName, $userSurname, $strip_tags = false ) {
+    public function emailExport( string $key, string $name, string $userEmail, string $userName, string $userSurname, ?bool $strip_tags = false ): ExportResponse {
         $parameters = [];
 
         $parameters[ 'key' ]        = trim( $key );
@@ -730,7 +745,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( 'tmx_export_email_url', $parameters );
 
         /**
-         * $result Engines_Results_MyMemory_ExportResponse
+         * $result ExportResponse
          */
         if ( $this->result->responseStatus >= 400 ) {
             throw new Exception( $this->result->error->message, $this->result->responseStatus );
@@ -750,7 +765,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         //query db
         $this->call( 'api_key_create_user_url' );
 
-        if ( !$this->result instanceof Engines_Results_MyMemory_CreateUserResponse ) {
+        if ( !$this->result instanceof CreateUserResponse ) {
             if ( empty( $this->result ) || $this->result[ 'error' ] || $this->result[ 'error' ][ 'code' ] != 200 ) {
                 throw new Exception( "Private TM key .", -1 );
             }
@@ -765,16 +780,16 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * Checks for MyMemory Api Key correctness
+     * Checks for Match Api Key correctness
      *
      * Filter Validate returns true/false for correct/not correct key and NULL is returned for all non-boolean values. ( 404, html, etc. )
      *
-     * @param $apiKey
+     * @param string $apiKey
      *
      * @return bool|null
      * @throws Exception
      */
-    public function checkCorrectKey( $apiKey ) {
+    public function checkCorrectKey( string $apiKey ): ?bool {
 
         $postFields = [
                 'key' => trim( $apiKey )
@@ -785,7 +800,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for MyMemory private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            Log::doJsonLog( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 
@@ -800,12 +815,15 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /******************************************/
-
-    public function fastAnalysis( $segs_array ) {
-
-        if ( !is_array( $segs_array ) ) {
-            return null;
-        }
+    /**
+     * Calls the Match Fast Analysis endpoint to analyze a document
+     *
+     * @param array $segs_array
+     *
+     * @return AnalyzeResponse
+     * @throws Exception
+     */
+    public function fastAnalysis( array $segs_array ): AnalyzeResponse {
 
         $this->_setAdditionalCurlParams( [
                         CURLOPT_TIMEOUT => 300
@@ -821,17 +839,17 @@ class Engines_MyMemory extends Engines_AbstractEngine {
     }
 
     /**
-     * MyMemory private endpoint
+     * Match private endpoint
      *
-     * @param $config
+     * @param array $config
      *
-     * @return array|Engines_Results_MyMemory_TagProjectionResponse
+     * @return array|TagProjectionResponse
      */
-    public function getTagProjection( $config ) {
+    public function getTagProjection( array $config ) {
 
         // set dataRefMap needed to instance
-        // Engines_Results_MyMemory_TagProjectionResponse class
-        $this->_config[ 'dataRefMap' ] = isset( $config[ 'dataRefMap' ] ) ? $config[ 'dataRefMap' ] : [];
+        // TagProjectionResponse class
+        $this->_config[ 'dataRefMap' ] = $config[ 'dataRefMap' ] ?? [];
 
         //tag replace
         $source_string = $config[ 'source' ];
@@ -853,7 +871,7 @@ class Engines_MyMemory extends Engines_AbstractEngine {
 //        }
 
         //formatting strip
-        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\x{21E5}|\xc2\xa0|\xE2|\x81|\xA0)+';
+        $re = '(&#09;|\p{Zs}|&#10;|\n|\t|⇥|\xc2\xa0|\xE2|\x81|\xA0)+';
         //trim chars that would have been lost with the guess tag
         preg_match( "/" . $re . '$/', $target_string, $r_matches, PREG_OFFSET_CAPTURE );
         preg_match( "/^" . $re . '/', $target_string, $l_matches, PREG_OFFSET_CAPTURE );

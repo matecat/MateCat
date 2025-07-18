@@ -18,7 +18,7 @@ class ReviewExtendedIssue extends React.Component {
       visible:
         isUndefined(this.props.issue.visible) || this.props.issue.visible,
     }
-    this.issueCategories = JSON.parse(config.lqa_nested_categories).categories
+    this.issueCategories = config.lqa_nested_categories.categories
   }
 
   getCategory() {

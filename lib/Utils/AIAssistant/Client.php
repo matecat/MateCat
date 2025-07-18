@@ -1,10 +1,10 @@
 <?php
 
-namespace AIAssistant;
+namespace Utils\AIAssistant;
 
 use Exception;
-use INIT;
 use Orhanerday\OpenAi\OpenAi;
+use Utils\Registry\AppConfig;
 
 class Client {
     /**
@@ -33,8 +33,8 @@ class Client {
     public function findContextForAWord( $word, $phrase, $target, callable $callback ) {
         $phrase        = strip_tags( $phrase );
         $content       = "Explain, in " . $target . ", the meaning of '" . $word . "' when used in this context : '" . $phrase . "'";
-        $model         = ( INIT::$OPEN_AI_MODEL and INIT::$OPEN_AI_MODEL !== '' ) ? INIT::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
-        $maxTokens     = ( INIT::$OPEN_AI_MAX_TOKENS and INIT::$OPEN_AI_MAX_TOKENS !== '' ) ? (int)INIT::$OPEN_AI_MAX_TOKENS : 500;
+        $model         = ( AppConfig::$OPEN_AI_MODEL and AppConfig::$OPEN_AI_MODEL !== '' ) ? AppConfig::$OPEN_AI_MODEL : 'gpt-3.5-turbo';
+        $maxTokens     = ( AppConfig::$OPEN_AI_MAX_TOKENS and AppConfig::$OPEN_AI_MAX_TOKENS !== '' ) ? (int)AppConfig::$OPEN_AI_MAX_TOKENS : 500;
         $realMaxTokens = ( 4000 - (int)$maxTokens );
 
         $opts = [

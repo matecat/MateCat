@@ -1,6 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use migrations\AbstractMatecatMigration;
 
 class AddStandardWcToJobTable extends AbstractMatecatMigration
 {

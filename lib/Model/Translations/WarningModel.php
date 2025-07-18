@@ -1,6 +1,6 @@
 <?php
 
-namespace Translations;
+namespace Model\Translations;
 
 
 /**

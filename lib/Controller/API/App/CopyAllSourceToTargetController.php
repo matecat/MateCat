@@ -1,24 +1,24 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Constants_TranslationStatus;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Features;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\TranslationEventsHandler;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Model\DataAccess\Database;
+use Model\FeaturesBase\FeatureCodes;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\WordCount\CounterModel;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
 use RuntimeException;
-use Translations_SegmentTranslationDao;
-use WordCount\CounterModel;
+use Utils\Constants\TranslationStatus;
 
 class CopyAllSourceToTargetController extends KleinController {
 
@@ -46,8 +46,8 @@ class CopyAllSourceToTargetController extends KleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $pass   = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $id_job = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
+        $pass            = filter_var( $this->request->param( 'pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+        $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
 
         $this->log( "Requested massive copy-source-to-target for job $id_job." );
@@ -60,7 +60,7 @@ class CopyAllSourceToTargetController extends KleinController {
             throw new InvalidArgumentException( "Empty job password", -2 );
         }
 
-        $job_data = Jobs_JobDao::getByIdAndPassword( $id_job, $pass );
+        $job_data = JobDao::getByIdAndPassword( $id_job, $pass );
 
         if ( empty( $job_data ) ) {
             throw new InvalidArgumentException( "Wrong id_job-password couple. Job not found", -3 );
@@ -75,14 +75,14 @@ class CopyAllSourceToTargetController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct      $chunk
      * @param                $revision_number
      *
      * @return array
      * @throws ReflectionException
      * @throws Exception
      */
-    private function saveEventsAndUpdateTranslations( Jobs_JobStruct $chunk, $revision_number ): array {
+    private function saveEventsAndUpdateTranslations( JobStruct $chunk, $revision_number ): array {
 
         // BEGIN TRANSACTION
         $database = Database::obtain();
@@ -104,27 +104,27 @@ class CopyAllSourceToTargetController extends KleinController {
             $segment_id = (int)$segment->id;
             $chunk_id   = (int)$chunk->id;
 
-            $old_translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
+            $old_translation = SegmentTranslationDao::findBySegmentAndJob( $segment_id, $chunk_id );
 
-            if ( empty( $old_translation ) || ( $old_translation->status !== Constants_TranslationStatus::STATUS_NEW ) ) {
+            if ( empty( $old_translation ) || ( $old_translation->status !== TranslationStatus::STATUS_NEW ) ) {
                 //no segment found
                 continue;
             }
 
             $new_translation                   = clone $old_translation;
             $new_translation->translation      = $segment->segment;
-            $new_translation->status           = Constants_TranslationStatus::STATUS_DRAFT;
+            $new_translation->status           = TranslationStatus::STATUS_DRAFT;
             $new_translation->translation_date = date( "Y-m-d H:i:s" );
 
             try {
-                $affected_rows += Translations_SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
+                $affected_rows += SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
             } catch ( Exception $e ) {
                 $database->rollback();
 
                 throw new RuntimeException( $e->getMessage(), -4 );
             }
 
-            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+            if ( $chunk->getProject()->hasFeature( FeatureCodes::TRANSLATION_VERSIONS ) ) {
                 try {
                     $segmentTranslationEventModel = new TranslationEvent( $old_translation, $new_translation, $this->user, $source_page );
                     $batchEventCreator->addEvent( $segmentTranslationEventModel );

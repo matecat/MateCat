@@ -12,8 +12,8 @@ export const getVolumeAnalysis = async (
   password = config.password,
 ) => {
   const dataParams = {
-    pid: idProject,
-    ppassword: password,
+    id_project: idProject,
+    password: password,
   }
 
   const formData = new FormData()

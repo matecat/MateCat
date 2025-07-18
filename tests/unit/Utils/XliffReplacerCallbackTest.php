@@ -1,7 +1,8 @@
 <?php
 
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
-use XliffReplacer\XliffReplacerCallback;
+use Utils\XliffReplacer\XliffReplacerCallback;
 
 class XliffReplacerCallbackTest extends AbstractTest {
     /**

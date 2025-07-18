@@ -1,5 +1,8 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 
 
@@ -13,20 +16,20 @@ use TestHelpers\AbstractTest;
 class JobStructTest extends AbstractTest {
 
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     public $databaseInstance;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    public Jobs_JobStruct $originalJobStruct;
+    public JobStruct $originalJobStruct;
 
     public function setUp(): void {
 
         parent::setUp();
 
-        $this->originalJobStruct = new Jobs_JobStruct(
+        $this->originalJobStruct = new JobStruct(
                 [
                         'id'                                  => null, //SET NULL FOR AUTOINCREMENT
                         'password'                            => "0f020dee031d",
@@ -74,7 +77,7 @@ class JobStructTest extends AbstractTest {
                 ]
         );
 
-        $this->databaseInstance = new Jobs_JobDao( Database::obtain() );
+        $this->databaseInstance = new JobDao( Database::obtain() );
 
     }
 
@@ -82,7 +85,7 @@ class JobStructTest extends AbstractTest {
 
         $jobStruct = $this->databaseInstance->createFromStruct( $this->originalJobStruct );
 
-        $this->assertInstanceOf( 'Jobs_JobStruct', $jobStruct );
+        $this->assertInstanceOf( 'Model\Jobs\JobStruct', $jobStruct );
         $this->assertNotEquals( $jobStruct, $this->originalJobStruct );
         $this->assertTrue( (int)$jobStruct->id != 0 ); //PDO returns integers as string without mysqlnd
 

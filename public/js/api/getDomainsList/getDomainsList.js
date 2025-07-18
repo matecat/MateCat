@@ -1,7 +1,7 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Retrieve domains list from MyMemory
+ * Retrieve domains list from Match
  *
  * @param {Object} options
  * @param {Array} options.keys

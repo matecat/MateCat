@@ -1,8 +1,8 @@
 <?php
 
-namespace Conversion\MimeTypes\Guesser;
+namespace Model\Conversion\MimeTypes\Guesser;
 
-use Conversion\MimeTypes\Constants\MimeTypesMap;
+use Model\Conversion\MimeTypes\Constants\MimeTypesMap;
 
 class FileExtensionMimeTypeGuesser implements MimeTypeGuesserInterface {
     /**

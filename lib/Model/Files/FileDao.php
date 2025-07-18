@@ -1,10 +1,10 @@
 <?php
-namespace Files;
 
-use DataAccess\AbstractDao;
-use Database;
+namespace Model\Files;
+
 use Exception;
-use PDO;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use ReflectionException;
 
 class FileDao extends AbstractDao {
@@ -31,7 +31,7 @@ class FileDao extends AbstractDao {
         );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_job' => $id_job ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_job' => $id_job ] );
 
     }
 
@@ -49,7 +49,7 @@ class FileDao extends AbstractDao {
         $stmt    = $conn->prepare( "SELECT * FROM files where id_project = :id_project " );
 
         /** @var FileStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new FileStruct, [ 'id_project' => $id_project ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id_project' => $id_project ] );
     }
 
     public static function updateField( $file, $field, $value ): bool {
@@ -80,17 +80,21 @@ class FileDao extends AbstractDao {
     }
 
     /**
-     * @param $id
+     * @param int      $id
+     * @param int|null $ttl
      *
      * @return FileStruct
+     * @throws ReflectionException
      */
-    public static function getById( $id ): FileStruct {
+    public static function getById( int $id, ?int $ttl = 0 ): ?FileStruct {
+        $thisDao = new self();
+
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM files where id = :id " );
         $stmt->execute( [ 'id' => $id ] );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, FileStruct::class );
 
-        return $stmt->fetch();
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, FileStruct::class, [ 'id' => $id ] )[ 0 ] ?? null;
+
     }
 
     /**

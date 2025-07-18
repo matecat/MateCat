@@ -7,10 +7,10 @@
  *
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use API\Commons\Exceptions\NotFoundException;
-use Segments_SegmentDao;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Model\Segments\SegmentDao;
 
 class SegmentValidator extends Base {
 
@@ -29,7 +29,7 @@ class SegmentValidator extends Base {
         // }
 
         // Ensure chunk is in project
-        $dao = new Segments_SegmentDao( \Database::obtain() );
+        $dao = new SegmentDao( \Model\DataAccess\Database::obtain() );
 
         $segment = $dao->getByChunkIdAndSegmentId(
                 $this->controller->getParams()[ 'id_job' ],

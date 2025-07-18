@@ -5,7 +5,7 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <link rel="apple-touch-icon" sizes="180x180" href="${basepath}public/img/meta/apple-touch-icon.png"/>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
@@ -19,44 +19,30 @@
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png" />
 
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       /*<![CDATA[*/
       var config = {
         basepath: '${basepath | string:/}',
         hostpath: '${hostpath | string:/}',
-        unsupportedFileTypes: '${unsupported_file_types}',
-        isOpenAiEnabled: ${isOpenAiEnabled},
         conversionEnabled: ${conversion_enabled},
         analysisEnabled: ${volume_analysis_enabled},
         maxFileSize: ${maxFileSize},
         maxTMXFileSize: ${maxTMXFileSize},
         maxNumberFiles: ${maxNumberFiles},
         ownerIsMe: true,
-        blueimp_dataType: 'json',
-        defaults : {
-          tag_projection : ${tag_projection_default},
-          speech2text : false,
-          lexiqa : ${php: var_export( !empty( INIT::$LXQ_LICENSE ), true )}
-        },
         lxq_license: '${lxq_license | string:}',
-        lexiqa_languages: ${lexiqa_languages| string:[]},
+        lexiqa_languages: ${lexiqa_languages},
         tag_projection_languages: ${tag_projection_languages},
-        user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-        private_keys: ${user_keys_obj | string: []},
-        currentTargetLang: '${currentTargetLang | string: []}',
-        currentSourceLang: '${currentSourceLang | string: []}',
-        enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-        ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-        subject_array: ${subjects | string:[]]},
+        user_plugins: ${user_plugins},
+        enableMultiDomainApi: ${enableMultiDomainApi},
+        ajaxDomainsNumber: ${ajaxDomainsNumber},
+        subject_array: ${subjects},
         formats_number: ${formats_number},
-        isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-        not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
-        intento_providers: JSON.parse('${translation_engines_intento_prov_json}'),
-        show_tag_projection: ${show_tag_projection | string: false},
-        get_public_matches: ${get_public_matches | string: false}
-      };
+        isAnInternalUser: ${isAnInternalUser},
+        intento_providers: ${translation_engines_intento_prov_json},
+      }
       /*]]>*/
     </script>
 </head>
@@ -69,7 +55,7 @@
     <header class="upload-page-header"/>
     <div class="new_project__page"/>
     <div class="notifications-wrapper"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
       var developerKey = '${developerKey}';
       var clientId = '${clientId}';

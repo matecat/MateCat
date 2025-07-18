@@ -6,27 +6,32 @@
  * Time: 11:50
  */
 
-namespace API\App\Json;
+namespace View\API\App\Json;
 
 
-use ConnectedServices\ConnectedServiceStruct;
-use Utils;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
+use Exception;
+use Model\ConnectedServices\ConnectedServiceStruct;
+use Utils\Tools\Utils;
 
 class ConnectedService {
 
     /**
      * @var ConnectedServiceStruct[]
      */
-    protected $data;
+    protected array $data;
 
     public function __construct( $data ) {
         $this->data = $data;
     }
 
-    public function render() {
+    /**
+     * @throws EnvironmentIsBrokenException
+     */
+    public function render(): array {
         $out = [];
         if ( !empty( $this->data ) ) {
-            foreach ( $this->data as $k => $v ) {
+            foreach ( $this->data as $v ) {
                 $out[] = $this->renderItem( $v );
             }
         }
@@ -34,7 +39,11 @@ class ConnectedService {
         return $out;
     }
 
-    public function renderItem( ConnectedServiceStruct $item ) {
+    /**
+     * @throws EnvironmentIsBrokenException
+     * @throws Exception
+     */
+    public function renderItem( ConnectedServiceStruct $item ): array {
         /*
          * @var $item ConnectedServiceStruct
          */

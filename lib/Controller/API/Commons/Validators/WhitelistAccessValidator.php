@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
 use DomainException;
-use Utils;
+use Utils\Tools\Utils;
 
 class WhitelistAccessValidator extends Base {
 
@@ -32,7 +32,7 @@ class WhitelistAccessValidator extends Base {
         ];
 
         if ( preg_replace( $ipWhiteList, 'ALLOW', Utils::getRealIpAddr() ) !== 'ALLOW' ) {
-            throw new DomainException( "Invalid Request: not authorized domain: " . Utils::getRealIpAddr(), 403 );
+            throw new DomainException( "Invalid Get: not authorized domain: " . Utils::getRealIpAddr(), 403 );
         }
 
     }

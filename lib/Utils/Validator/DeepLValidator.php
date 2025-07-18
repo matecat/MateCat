@@ -1,11 +1,11 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
-use Engines\DeepL\DeepLApiClient;
-use EnginesModel\DeepLStruct;
-use EnginesModel_EngineDAO;
 use Exception;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\DeepLStruct;
+use Utils\Engines\DeepL\DeepLApiClient;
 
 class DeepLValidator {
     /**
@@ -14,7 +14,7 @@ class DeepLValidator {
      * @throws Exception
      */
     public static function validate( DeepLStruct $struct ) {
-        $dao = new EnginesModel_EngineDAO();
+        $dao = new EngineDAO();
         $dao->validateForUser( $struct );
 
         $apiKey      = $struct->extra_parameters[ 'DeepL-Auth-Key' ];

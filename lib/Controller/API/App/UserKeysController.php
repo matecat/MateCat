@@ -1,21 +1,21 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
-use PDOException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
-use Users_ClientUserFacade;
-use Utils;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\ClientUserFacade;
+use ReflectionException;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
+use Utils\Tools\Utils;
 
 class UserKeysController extends KleinController {
 
@@ -81,6 +81,10 @@ class UserKeysController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function info(): void {
 
         $request           = $this->validateTheRequest();
@@ -108,7 +112,7 @@ class UserKeysController extends KleinController {
             throw new NotFoundException( "No user memory keys found" );
         }
 
-        ( new TmKeyManagement_TmKeyManagement() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
+        ( new TmKeyManager() )->shareKey( $emailList, $userMemoryKeys[ 0 ], $this->user );
 
         $this->response->json( [
                 'errors'  => [],
@@ -135,7 +139,7 @@ class UserKeysController extends KleinController {
 
         $_userStructs = [];
         foreach ( $userMemoryKeys[ 0 ]->tm_key->getInUsers() as $userStruct ) {
-            $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+            $_userStructs[] = new ClientUserFacade( $userStruct );
         }
 
         return [
@@ -176,32 +180,32 @@ class UserKeysController extends KleinController {
     }
 
     /**
-     * @return TmKeyManagement_MemoryKeyDao
+     * @return MemoryKeyDao
      */
-    private function getMkDao(): TmKeyManagement_MemoryKeyDao {
-        return new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+    private function getMkDao(): MemoryKeyDao {
+        return new MemoryKeyDao( Database::obtain() );
     }
 
     /**
      * @param      $key
      * @param null $description
      *
-     * @return TmKeyManagement_MemoryKeyStruct
+     * @return MemoryKeyStruct
      * @throws Exception
      */
-    private function getMemoryToUpdate( $key, $description = null ): TmKeyManagement_MemoryKeyStruct {
+    private function getMemoryToUpdate( $key, $description = null ): MemoryKeyStruct {
         $tmService = new TMSService();
 
         //validate the key
         $tmService->checkCorrectKey( $key );
 
-        $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
+        $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->key  = $key;
         $tmKeyStruct->name = $description;
         $tmKeyStruct->tm   = true;
         $tmKeyStruct->glos = true;
 
-        $memoryKeyToUpdate         = new TmKeyManagement_MemoryKeyStruct();
+        $memoryKeyToUpdate         = new MemoryKeyStruct();
         $memoryKeyToUpdate->uid    = $this->user->uid;
         $memoryKeyToUpdate->tm_key = $tmKeyStruct;
 

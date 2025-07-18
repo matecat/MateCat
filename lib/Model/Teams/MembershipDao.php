@@ -6,18 +6,18 @@
  * Time: 10:45
  */
 
-namespace Teams;
+namespace Model\Teams;
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
-use Database;
 use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use Model\Users\MetadataDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Users\MetadataDao;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class MembershipDao extends AbstractDao {
 
@@ -27,29 +27,29 @@ class MembershipDao extends AbstractDao {
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
 
-    protected static $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
+    protected static string $_query_team_from_uid_and_id = " SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams_users.uid = ? AND teams.id = ?
             ";
 
-    protected static $_query_team_from_id_and_name = " SELECT teams.* FROM teams
+    protected static string $_query_team_from_id_and_name = " SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams.id = ? AND teams.name = ?
             ";
 
-    protected static $_query_user_teams = " 
+    protected static string $_query_user_teams = " 
           SELECT teams.* FROM teams
               JOIN teams_users ON teams_users.id_team = teams.id
             WHERE teams_users.uid = :uid 
     ";
 
-    protected static $_query_member_list = "
+    protected static string $_query_member_list = "
           SELECT ou.id, ou.id_team, ou.uid, ou.is_admin
           FROM teams_users ou
           WHERE ou.id_team = :id_team
     ";
 
-    protected static $_delete_member = "
+    protected static string $_delete_member = "
         DELETE FROM teams_users WHERE uid = :uid AND id_team = :id_team
     ";
 
@@ -66,18 +66,17 @@ class MembershipDao extends AbstractDao {
      * Find ONE team for the given user. This is to enforce the temporary requirement to
      * have just one team per user.
      *
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return null|TeamStruct[]
      * @throws ReflectionException
      */
-    public function findUserTeams( Users_UserStruct $user ): ?array {
+    public function findUserTeams( UserStruct $user ): ?array {
 
-        $stmt      = $this->_getStatementForQuery( self::$_query_user_teams );
-        $teamQuery = new TeamStruct();
+        $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
-        return static::resultOrNull( $this->_fetchObject( $stmt,
-                $teamQuery,
+        return static::resultOrNull( $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
                         'uid' => $user->uid,
                 ]
@@ -86,14 +85,14 @@ class MembershipDao extends AbstractDao {
     }
 
     /**
-     * Cache deletion for @param Users_UserStruct $user
+     * Cache deletion for @param UserStruct $user
      *
      * @return bool
      * @throws ReflectionException
      * @see MembershipDao::findUserTeams
      *
      */
-    public function destroyCacheUserTeams( Users_UserStruct $user ): bool {
+    public function destroyCacheUserTeams( UserStruct $user ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
         return $this->_destroyObjectCache( $stmt,
@@ -107,63 +106,62 @@ class MembershipDao extends AbstractDao {
     /**
      * Finds an team in user scope.
      *
-     * @param int              $id
-     * @param Users_UserStruct $user
+     * @param int                     $id
+     * @param \Model\Users\UserStruct $user
      *
      * @return null|TeamStruct
      * @throws ReflectionException
      */
-    public function findTeamByIdAndUser( $id, Users_UserStruct $user ): ?TeamStruct {
+    public function findTeamByIdAndUser( int $id, UserStruct $user ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
-        return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $user->uid, $id ] )[ 0 ] );
+        return static::resultOrNull( $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $user->uid, $id ] )[ 0 ] ?? null );
     }
 
     /**
-     * @param                  $id
-     * @param                  $name
+     * @param int    $id
+     * @param string $name
      *
      * @return TeamStruct|null
      * @throws ReflectionException
      */
-    public function findTeamByIdAndName( $id, $name ): ?TeamStruct {
+    public function findTeamByIdAndName( int $id, string $name ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_id_and_name );
 
-        return static::resultOrNull( $this->_fetchObject( $stmt, ( new TeamStruct() ), [ $id, $name ] )[ 0 ] );
+        return static::resultOrNull( $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $id, $name ] )[ 0 ] );
     }
 
     /**
      * Cache deletion for @param int $id
      *
-     * @param Users_UserStruct $user
+     * @param \Model\Users\UserStruct $user
      *
-     * @return bool|int
+     * @return bool
      * @throws ReflectionException
      * @see MembershipDao::findTeamByIdAndUser
      *
      */
-    public function destroyCacheTeamByIdAndUser( $id, Users_UserStruct $user ) {
+    public function destroyCacheTeamByIdAndUser( int $id, UserStruct $user ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
         return $this->_destroyObjectCache( $stmt, TeamStruct::class, [ $user->uid, $id ] );
     }
 
     /**
-     * @param $id_team
-     * @param $traverse
+     * @param int  $id_team
+     * @param bool $traverse
      *
      * @return IDaoStruct[]|MembershipStruct[]
      * @throws ReflectionException
      */
-    public function getMemberListByTeamId( $id_team, $traverse = true ) {
-        $stmt             = $this->_getStatementForQuery( self::$_query_member_list );
-        $membershipStruct = new MembershipStruct();
+    public function getMemberListByTeamId( int $id_team, bool $traverse = true ): array {
+        $stmt = $this->_getStatementForQuery( self::$_query_member_list );
 
         /**
          * @var $members MembershipStruct[]
          */
-        $members = $this->_fetchObject( $stmt,
-                $membershipStruct,
+        $members = $this->_fetchObjectMap( $stmt,
+                MembershipStruct::class,
                 [
                         'id_team' => $id_team,
                 ]
@@ -176,7 +174,7 @@ class MembershipDao extends AbstractDao {
                 $membersUIDs[] = $member->uid;
             }
 
-            $users    = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUids( $membersUIDs );
+            $users    = ( new UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUids( $membersUIDs );
             $metadata = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 )->getAllByUidList( $membersUIDs );
 
             foreach ( $members as $member ) {
@@ -194,13 +192,14 @@ class MembershipDao extends AbstractDao {
 
 
     /**
-     * Destroy cache for @param $id_team
+     * Destroy cache for
      *
-     * @return bool|int
-     * @see MembershipDao::getMemberListByTeamId()
+     * @param int $id_team
      *
+     * @return bool
+     * @throws ReflectionException  @see MembershipDao::getMemberListByTeamId()
      */
-    public function destroyCacheForListByTeamId( $id_team ) {
+    public function destroyCacheForListByTeamId( int $id_team ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_member_list );
 
         return $this->_destroyObjectCache( $stmt,
@@ -212,15 +211,16 @@ class MembershipDao extends AbstractDao {
     }
 
     /**
-     * @param $uid
-     * @param $teamId
+     * @param int $uid
+     * @param int $teamId
      *
-     * @return Users_UserStruct|null
+     * @return \Model\Users\UserStruct|null
+     * @throws ReflectionException
      */
-    public function deleteUserFromTeam( $uid, $teamId ) {
-        $user = ( new Users_UserDao() )->setCacheTTL( 3600 )->getByUid( $uid );
+    public function deleteUserFromTeam( int $uid, int $teamId ): ?UserStruct {
+        $user = ( new UserDao() )->setCacheTTL( 3600 )->getByUid( $uid );
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_delete_member );
         $stmt->execute( [
                 'uid'     => $uid,
@@ -241,15 +241,15 @@ class MembershipDao extends AbstractDao {
      * This method takes a list of email addresses as argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param array [
+     * @param $obj_arr array [
      *            'team'     => TeamStruct,
      *            'members'  => emails[]
-     *            ] $obj_arr
+     *            ]
      *
      * @return MembershipStruct[]
      * @throws Exception
      */
-    public function createList( array $obj_arr ) {
+    public function createList( array $obj_arr ): array {
 
         if ( !Database::obtain()->getConnection()->inTransaction() ) {
             throw new Exception( 'this method requires to be wrapped in a transaction' );
@@ -257,7 +257,7 @@ class MembershipDao extends AbstractDao {
 
         $obj_arr = Utils::ensure_keys( $obj_arr, [ 'members', 'team' ] );
 
-        $users = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
+        $users = ( new UserDao )->getByEmails( $obj_arr[ 'members' ] );
 
         if ( empty( $users ) ) {
             return [];
@@ -272,7 +272,7 @@ class MembershipDao extends AbstractDao {
             $membershipStruct = ( new MembershipStruct( [
                     'id_team'  => $teamStruct->id,
                     'uid'      => $user->uid,
-                    'is_admin' => ( $teamStruct->created_by == $user->uid ? true : false )
+                    'is_admin' => $teamStruct->created_by == $user->uid
             ] ) );
 
             $lastId = self::insertStruct( $membershipStruct, [ 'ignore' => true ] );

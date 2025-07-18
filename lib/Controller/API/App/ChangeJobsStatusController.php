@@ -1,18 +1,18 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobDao;
-use Projects_ProjectDao;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use Translations_SegmentTranslationDao;
-use Utils;
+use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
 
 class ChangeJobsStatusController extends KleinController {
 
@@ -32,7 +32,7 @@ class ChangeJobsStatusController extends KleinController {
         if ( $request[ 'res_type' ] == "prj" ) {
 
             try {
-                $project = Projects_ProjectDao::findByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
+                $project = ProjectDao::findByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
                 $this->log( $msg );
@@ -42,17 +42,17 @@ class ChangeJobsStatusController extends KleinController {
 
             $chunks = $project->getJobs();
 
-            Jobs_JobDao::updateAllJobsStatusesByProjectId( $project->id, $request[ 'new_status' ] );
+            JobDao::updateAllJobsStatusesByProjectId( $project->id, $request[ 'new_status' ] );
 
             foreach ( $chunks as $chunk ) {
-                $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
-                Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+                $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
+                SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
             }
 
         } else {
 
             try {
-                $firstChunk = Chunks_ChunkDao::getByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
+                $firstChunk = ChunkDao::getByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
                 $this->log( $msg );
@@ -60,9 +60,9 @@ class ChangeJobsStatusController extends KleinController {
                 throw new NotFoundException( "Job not found" );
             }
 
-            Jobs_JobDao::updateJobStatus( $firstChunk, $request[ 'new_status' ] );
-            $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
-            Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+            JobDao::updateJobStatus( $firstChunk, $request[ 'new_status' ] );
+            $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $firstChunk );
+            SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         }
 
         $this->response->json( [
@@ -85,7 +85,7 @@ class ChangeJobsStatusController extends KleinController {
         $password   = filter_var( $this->request->param( 'password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $new_status = filter_var( $this->request->param( 'new_status' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
 
-        if ( !Constants_JobStatus::isAllowedStatus( $new_status ) ) {
+        if ( !JobStatus::isAllowedStatus( $new_status ) ) {
             throw new Exception( "Invalid Status" );
         }
 

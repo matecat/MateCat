@@ -1,8 +1,14 @@
 <?php
 
-use Matecat\SubFiltering\MateCatFilter;
+namespace Utils\Engines\Results\MyMemory;
 
-class Engines_Results_MyMemory_Matches {
+use Exception;
+use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
+use ReflectionObject;
+use ReflectionProperty;
+
+class Matches {
 
     public $id;
     public $raw_segment;
@@ -27,9 +33,9 @@ class Engines_Results_MyMemory_Matches {
     public $source_note;
 
     /**
-     * @var FeatureSet
+     * @var FeatureSet|null
      */
-    protected $featureSet;
+    protected ?FeatureSet $featureSet = null;
 
     public $source;
     public $target;
@@ -41,11 +47,11 @@ class Engines_Results_MyMemory_Matches {
     public $match;
 
     /**
-     * Engines_Results_MyMemory_Matches constructor.
+     * Matches constructor.
      *
      * @param array $data
      */
-    public function __construct( $data = [] ) {
+    public function __construct( array $data = [] ) {
         $this->id               = array_key_exists( 'id', $data ) ? $data[ 'id' ] : '0';
         $this->create_date      = array_key_exists( 'create-date', $data ) ? $data[ 'create-date' ] : '1970-01-01 00:00:00';
         $this->segment          = array_key_exists( 'segment', $data ) ? $data[ 'segment' ] : '';
@@ -63,7 +69,7 @@ class Engines_Results_MyMemory_Matches {
         $this->last_update_date = array_key_exists( 'last-update-date', $data ) ? $data[ 'last-update-date' ] : '1970-01-01 00:00:00';
         $this->match            = array_key_exists( 'match', $data ) ? $data[ 'match' ] : 0;
         $this->memory_key       = array_key_exists( 'key', $data ) ? $data[ 'key' ] : '';
-        $this->ICE              = array_key_exists( 'ICE', $data ) ? (bool)$data[ 'ICE' ] : false;
+        $this->ICE              = array_key_exists( 'ICE', $data ) && $data[ 'ICE' ];
         $this->tm_properties    = array_key_exists( 'tm_properties', $data ) ? json_decode( $data[ 'tm_properties' ], true ) : [];
         $this->target           = array_key_exists( 'target', $data ) ? $data[ 'target' ] : null;
         $this->source           = array_key_exists( 'source', $data ) ? $data[ 'source' ] : null;

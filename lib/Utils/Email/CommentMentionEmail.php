@@ -6,11 +6,11 @@
  * Time: 14:52
  */
 
-namespace Email;
+namespace Utils\Email;
 
 class CommentMentionEmail extends BaseCommentEmail {
 
-    protected $title = "New mention on a comment";
+    protected ?string $title = "New mention on a comment";
 
     protected function _getTemplateVariables(): array {
         $vars                 = parent::_getTemplateVariables();

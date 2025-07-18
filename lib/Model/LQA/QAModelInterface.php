@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
 interface QAModelInterface {
 

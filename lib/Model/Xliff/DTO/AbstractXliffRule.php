@@ -1,14 +1,14 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
-use Constants_TranslationStatus;
 use DomainException;
 use Exception;
 use JsonSerializable;
 use LogicException;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
-use RecursiveArrayObject;
+use Utils\Collections\RecursiveArrayObject;
+use Utils\Constants\TranslationStatus;
 
 abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable {
     protected static array $_STATE_QUALIFIERS = [];
@@ -66,7 +66,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      * @param string|null $editor
      * @param string|null $matchCategory
      */
-    public function __construct( array $states, string $analysis, string $editor = null, string $matchCategory = null ) {
+    public function __construct( array $states, string $analysis, ?string $editor = null, ?string $matchCategory = null ) {
         // follow exact assignment order
         $this->setStates( $states );
         $this->setAnalysis( $analysis );
@@ -98,9 +98,9 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param $analysis
+     * @param string $analysis
      */
-    protected function setAnalysis( $analysis ): void {
+    protected function setAnalysis( string $analysis ): void {
         if ( !in_array( $analysis, static::ALLOWED_ANALYSIS_VALUES ) ) {
             throw new DomainException( "Wrong analysis value", 400 );
         }
@@ -142,7 +142,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
     }
 
     /**
-     * @param RecursiveArrayObject $structure
+     * @param \Utils\Collections\RecursiveArrayObject $structure
      *
      * @return AbstractXliffRule
      */
@@ -183,7 +183,7 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
      *
      * @return string|array
      */
-    public function getStates( $type = null ): array {
+    public function getStates( ?string $type = null ): array {
         switch ( $type ) {
             case 'states':
                 return $this->states[ 'states' ];
@@ -218,27 +218,27 @@ abstract class AbstractXliffRule implements XliffRuleInterface, JsonSerializable
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_PRE_TRANSLATED ) {
             switch ( $this->getEditor() ) {
                 case AbstractXliffRule::_DRAFT:
-                    return Constants_TranslationStatus::STATUS_DRAFT;
+                    return TranslationStatus::STATUS_DRAFT;
                 case AbstractXliffRule::_TRANSLATED:
-                    return Constants_TranslationStatus::STATUS_TRANSLATED;
+                    return TranslationStatus::STATUS_TRANSLATED;
                 case AbstractXliffRule::_APPROVED:
-                    return Constants_TranslationStatus::STATUS_APPROVED;
+                    return TranslationStatus::STATUS_APPROVED;
                 case AbstractXliffRule::_APPROVED2:
-                    return Constants_TranslationStatus::STATUS_APPROVED2;
+                    return TranslationStatus::STATUS_APPROVED2;
             }
         }
 
-        return Constants_TranslationStatus::STATUS_NEW;
+        return TranslationStatus::STATUS_NEW;
 
     }
 
     /**
-     * @param string|null $source
-     * @param string|null $target
+     * @param string $source
+     * @param string $target
      *
      * @return bool
      */
-    public function isTranslated( string $source = null, string $target = null ): bool {
+    public function isTranslated( string $source, string $target ): bool {
         if ( $this->getAnalysis() == AbstractXliffRule::_ANALYSIS_NEW ) {
             return false;
         } else {

@@ -1,8 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
+use migrations\AbstractMatecatMigration;
 
-class CreateJobsTolalWordCount extends AbstractMigration
+class CreateJobsTolalWordCount extends AbstractMatecatMigration
 {
     public $sql_up = <<<EOF
 ALTER TABLE `jobs` ADD COLUMN `total_raw_wc` bigint(20) DEFAULT 1 ;

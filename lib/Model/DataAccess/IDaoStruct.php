@@ -6,7 +6,7 @@
  * Time: 17.55
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 /**
  * Interface IDaoStruct A generic interface that will be used by any DataAccess\AbstractDao extended object

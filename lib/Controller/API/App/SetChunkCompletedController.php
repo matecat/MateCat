@@ -1,21 +1,21 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkCompletionEventStruct;
-use Features\ProjectCompletion\CompletionEventStruct;
-use Features\ProjectCompletion\Model\EventModel;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Features\ProjectCompletion\CompletionEventStruct;
+use Controller\Traits\APISourcePageGuesserTrait;
 use InvalidArgumentException;
-use Jobs_JobDao;
+use Model\ChunksCompletion\ChunkCompletionEventStruct;
+use Model\Jobs\JobDao;
+use Plugins\Features\ProjectCompletion\Model\EventModel;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class SetChunkCompletedController extends KleinController {
 
-    protected int    $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -31,7 +31,7 @@ class SetChunkCompletedController extends KleinController {
         $struct = new CompletionEventStruct( [
                 'uid'               => $this->user->getUid(),
                 'remote_ip_address' => Utils::getRealIpAddr(),
-                'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+                'source'            => ChunkCompletionEventStruct::SOURCE_USER,
                 'is_review'         => $this->isRevision()
         ] );
 
@@ -65,14 +65,14 @@ class SetChunkCompletedController extends KleinController {
             throw new InvalidArgumentException( "Missing id password", -2 );
         }
 
-        $job = Jobs_JobDao::getByIdAndPassword( $id_job, $password );
+        $job = JobDao::getByIdAndPassword( $id_job, $password );
 
         if ( empty( $job ) ) {
             throw new InvalidArgumentException( "wrong password", -10 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_job'            => $id_job,

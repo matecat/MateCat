@@ -1,37 +1,44 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use AjaxPasswordCheck;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Response;
 use Model\Analysis\Status;
-use Projects_ProjectDao;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use ReflectionException;
 
 class GetVolumeAnalysisController extends KleinController {
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     * @throws Exception
+     */
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
+
+        $this->validateTheRequest();
+
+        if ( empty( $this->request->param( 'id_job' ) ) ) {
+            $this->appendValidator( new ProjectPasswordValidator( $this ) );
+        } else {
+            $this->appendValidator( new JobPasswordValidator( $this, false ) );
+        }
     }
 
     /**
-     * @throws AuthenticationError
      * @throws Exception
      */
     public function analysis(): Response {
 
-        $request       = $this->validateTheRequest();
-        $_project_data = Projects_ProjectDao::getProjectAndJobData( $request[ 'pid' ] );
-        $passCheck     = new AjaxPasswordCheck();
-        $access        = $passCheck->grantProjectAccess( $_project_data, $request[ 'ppassword' ] ) || $passCheck->grantProjectJobAccessOnJobPass( $_project_data, null, $request[ 'jpassword' ] );
-
-        if ( !$access ) {
-            throw new AuthenticationError( "Wrong Password. Access denied", -10 );
-        }
+        $_project_data = ProjectDao::getProjectAndJobData( $this->params[ 'id_project' ] );
 
         $analysisStatus = new Status( $_project_data, $this->featureSet, $this->user );
 
@@ -43,23 +50,15 @@ class GetVolumeAnalysisController extends KleinController {
      * @return array
      * @throws Exception
      */
-    private function validateTheRequest(): array {
-        $pid       = filter_var( $this->request->param( 'pid' ), FILTER_SANITIZE_NUMBER_INT );
-        $ppassword = filter_var( $this->request->param( 'ppassword' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $jpassword = filter_var( $this->request->param( 'jpassword' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+    private function validateTheRequest(): void {
 
-        if ( empty( $pid ) ) {
+        if ( empty( $this->request->param( 'id_project' ) ) ) {
             throw new InvalidArgumentException( "No id project provided", -1 );
         }
 
-        if ( empty( $ppassword ) and empty( $jpassword ) ) {
-            throw new InvalidArgumentException( "No project of job password provided", -2 );
+        if ( empty( $this->request->param( 'password' ) ) ) {
+            throw new InvalidArgumentException( "No password provided", -2 );
         }
 
-        return [
-                'pid'       => $pid,
-                'ppassword' => $ppassword,
-                'jpassword' => $jpassword,
-        ];
     }
 }

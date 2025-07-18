@@ -1,5 +1,5 @@
 ; MateCat configuration File
-; more configurations in INIT.php
+; more configurations in Utils\Registry\AppConfig.php
 
 
 ;These two parameter are meant to check for a wrong configuration of the filesystems either

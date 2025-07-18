@@ -1,11 +1,11 @@
 <?php
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
-use FeatureSet;
-use Jobs_JobStruct;
-use LQA\EntryStruct;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\LQA\EntryStruct;
 
 class SegmentVersion {
 
@@ -14,21 +14,21 @@ class SegmentVersion {
     private $with_issues;
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     private $chunk;
 
     /**
      * SegmentVersion constructor.
      *
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct                           $chunk
      * @param                    $data
-     * @param bool               $with_issues
-     * @param FeatureSet|null    $featureSet
+     * @param bool                                $with_issues
+     * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( Jobs_JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
+    public function __construct( JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
         $this->data        = $data;
         $this->with_issues = $with_issues;
         $this->chunk       = $chunk;
@@ -105,7 +105,6 @@ class SegmentVersion {
                         'comment'             => $record->qa_comment,
                         'create_date'         => $record->qa_create_date,
                         'target_text'         => $record->qa_target_text,
-                        'rebutted_at'         => $record->qa_rebutted_at,
                         'source_page'         => $record->qa_source_page
                 ] ) )->setDiff( $version[ 'diff' ] );
             }
@@ -145,7 +144,7 @@ class SegmentVersion {
      */
     public function renderItem( $version ) {
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
+        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \Model\FeaturesBase\FeatureSet();
         $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         return [

@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\Commons\ViewValidators;
+namespace Controller\API\Commons\ViewValidators;
 
-use AbstractControllers\BaseKleinViewController;
-use API\Commons\Validators\Base;
-use Bootstrap;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\API\Commons\Validators\Base;
+use Utils\Registry\AppConfig;
 
 class MandatoryKeysValidator extends Base {
 
@@ -26,7 +26,7 @@ class MandatoryKeysValidator extends Base {
      * @inheritDoc
      */
     protected function _validate(): void {
-        if ( !Bootstrap::areMandatoryKeysPresent() ) {
+        if ( !AppConfig::areMandatoryKeysPresent() ) {
             /** @var BaseKleinViewController $controller */
             $controller = $this->controller;
             $controller->setView( 'badConfiguration.html', [], 503 );

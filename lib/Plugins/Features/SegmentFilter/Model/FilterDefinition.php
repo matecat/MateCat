@@ -6,7 +6,7 @@
  * Time: 11:20 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
 
 class FilterDefinition {

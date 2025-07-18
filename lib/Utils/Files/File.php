@@ -7,9 +7,9 @@
  *
  */
 
-namespace Files;
+namespace Utils\Files;
 
-use FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\AbstractFilesStorage;
 
 class File {
 
@@ -41,7 +41,8 @@ class File {
     }
 
     /**
-     * @param $filepath
+     * @param      $filepath
+     * @param null $options
      *
      * @return string|string[]
      */

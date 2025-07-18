@@ -7,21 +7,22 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Contribution\ContributionSetStruct;
-use Engine;
-use Engines_EngineInterface;
 use Exception;
-use Exceptions\ValidationError;
-use Jobs_JobStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
+use Utils\Contribution\SetContributionRequest;
+use Utils\Engines\AbstractEngine;
+use Utils\Engines\EngineInterface;
+use Utils\Engines\EnginesFactory;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class SetContributionWorker extends AbstractWorker {
 
@@ -30,16 +31,16 @@ class SetContributionWorker extends AbstractWorker {
     const ERR_NO_TM_ENGINE  = 5;
 
     /**
-     * @var ?Engines_EngineInterface
+     * @var ?EngineInterface
      */
-    protected ?Engines_EngineInterface $_engine = null;
+    protected ?EngineInterface $_engine = null;
 
     /**
      * This method is for testing purpose. Set a dependency injection
      *
-     * @param Engines_EngineInterface $_tms
+     * @param EngineInterface $_tms
      */
-    public function setEngine( Engines_EngineInterface $_tms ) {
+    public function setEngine( EngineInterface $_tms ) {
         $this->_engine = $_tms;
     }
 
@@ -58,7 +59,7 @@ class SetContributionWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $contributionStruct = new ContributionSetStruct( $queueElement->params->toArray() );
+        $contributionStruct = new SetContributionRequest( $queueElement->params->toArray() );
 
         $this->_checkDatabaseConnection();
 
@@ -67,13 +68,13 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param ContributionSetStruct $contributionStruct
+     * @param SetContributionRequest $contributionStruct
      *
      * @throws ReQueueException
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _execContribution( ContributionSetStruct $contributionStruct ) {
+    protected function _execContribution( SetContributionRequest $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
@@ -84,7 +85,7 @@ class SetContributionWorker extends AbstractWorker {
         $this->_loadEngine( $jobStruct );
 
         /**
-         * @see Engines_AbstractEngine::$_isAdaptiveMT
+         * @see AbstractEngine::$_isAdaptiveMT
          */
         if ( !$this->_engine->isAdaptiveMT() && !$this->_engine->isTMS() ) {
             return;
@@ -113,28 +114,28 @@ class SetContributionWorker extends AbstractWorker {
      * !Important Refresh the engine ID for each queueElement received
      * to avoid set contributions to the wrong engine ID
      *
-     * @param Jobs_JobStruct $jobStruct
+     * @param JobStruct $jobStruct
      *
      * @throws Exception
      * @throws ValidationError
      */
-    protected function _loadEngine( Jobs_JobStruct $jobStruct ) {
+    protected function _loadEngine( JobStruct $jobStruct ) {
 
         if ( empty( $this->_engine ) || $jobStruct->id_tms != $this->_engine->getEngineRecord()->id ) {
-            $this->_engine = Engine::getInstance( $jobStruct->id_tms ); //Load MyMemory
+            $this->_engine = EnginesFactory::getInstance( $jobStruct->id_tms ); //Load Match
         }
 
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
+     * @param array                  $config
+     * @param SetContributionRequest $contributionStruct
      *
      * @throws ReQueueException
      * @throws ValidationError
      * @throws EndQueueException
      */
-    protected function _set( array $config, ContributionSetStruct $contributionStruct ) {
+    protected function _set( array $config, SetContributionRequest $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
@@ -143,7 +144,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'translation' ]    = $contributionStruct->translation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'set_mt' ]         = ( $jobStruct->id_mt_engine != 1 ) ? false : true;
+        $config[ 'set_mt' ]         = !( ( $jobStruct->id_mt_engine != 1 ) );
 
         //get the Props
         $config[ 'prop' ] = json_encode( $contributionStruct->getProp() );
@@ -161,15 +162,15 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param array                 $config
-     * @param ContributionSetStruct $contributionStruct
-     * @param int                   $id_mt_engine
+     * @param array                  $config
+     * @param SetContributionRequest $contributionStruct
+     * @param int                    $id_mt_engine
      *
      * @throws ReQueueException
      * @throws ValidationError
      * @throws EndQueueException
      */
-    protected function _update( array $config, ContributionSetStruct $contributionStruct, $id_mt_engine = 1 ) {
+    protected function _update( array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 1 ) {
 
         // update the contribution for every key in the job belonging to the user
         $config[ 'uid' ]            = $contributionStruct->uid;
@@ -178,7 +179,7 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
         $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
-        $config[ 'set_mt' ]         = ( $id_mt_engine != 1 ) ? false : true;
+        $config[ 'set_mt' ]         = !( ( $id_mt_engine != 1 ) );
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;
         $config[ 'newtranslation' ] = $contributionStruct->translation;
@@ -198,22 +199,22 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * @param ContributionSetStruct $contributionStruct
-     * @param Jobs_JobStruct        $jobStruct
+     * @param SetContributionRequest $contributionStruct
+     * @param JobStruct              $jobStruct
      *
      * @return array
      * @throws Exception
      */
-    protected function _extractAvailableKeysForUser( ContributionSetStruct $contributionStruct, Jobs_JobStruct $jobStruct ) {
+    protected function _extractAvailableKeysForUser( SetContributionRequest $contributionStruct, JobStruct $jobStruct ): array {
 
         if ( $contributionStruct->fromRevision ) {
-            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            $userRole = Filter::ROLE_REVISOR;
         } else {
-            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = Filter::ROLE_TRANSLATOR;
         }
 
         //find all the job's TMs with write grants and make a contribution to them
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole );
+        $tm_keys = TmKeyManager::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole );
 
         $config = [];
         if ( !empty( $tm_keys ) ) {
@@ -259,7 +260,7 @@ class SetContributionWorker extends AbstractWorker {
      *
      * @throws EndQueueException
      */
-    protected function _raiseEndQueueException( $type, array $config ) {
+    protected function _raiseEndQueueException( string $type, array $config ) {
         //reset the engine
         $engineName    = get_class( $this->_engine );
         $this->_engine = null;

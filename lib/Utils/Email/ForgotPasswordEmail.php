@@ -6,22 +6,23 @@
  * Time: 17:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
 use Exception;
-use INIT;
-use Routes;
+use Model\Users\UserStruct;
+use Utils\Registry\AppConfig;
+use Utils\Url\CanonicalRoutes;
 
 class  ForgotPasswordEmail extends AbstractEmail {
 
-    protected $title = 'Password reset';
+    protected ?string $title = 'Password reset';
 
     /**
-     * @var \Users_UserStruct
+     * @var UserStruct
      */
-    private $user;
+    private UserStruct $user;
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );
@@ -46,7 +47,7 @@ class  ForgotPasswordEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         return [
                 'user'               => $this->user->toArray(),
-                'password_reset_url' => Routes::passwordReset( $this->user->confirmation_token )
+                'password_reset_url' => CanonicalRoutes::passwordReset( $this->user->confirmation_token )
         ];
     }
 
@@ -61,9 +62,9 @@ class  ForgotPasswordEmail extends AbstractEmail {
     protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;
-        $mailConf[ 'sender' ]     = INIT::$MAILER_RETURN_PATH;
-        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'from' ]       = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf[ 'sender' ]     = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf[ 'returnPath' ] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
     }

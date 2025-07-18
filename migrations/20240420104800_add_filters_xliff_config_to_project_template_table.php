@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddFiltersXliffConfigToProjectTemplateTable extends AbstractMatecatMigration {
 
     public $sql_up = [

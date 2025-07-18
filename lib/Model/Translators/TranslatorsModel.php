@@ -7,65 +7,66 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
-use AbstractControllers\KleinController;
-use Email\SendToTranslatorForDeliveryChangeEmail;
-use Email\SendToTranslatorForJobSplitEmail;
-use Email\SendToTranslatorForNewJobEmail;
+use Controller\Abstracts\KleinController;
 use Exception;
-use FeatureSet;
 use InvalidArgumentException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Outsource\ConfirmationDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use TransactionalTrait;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
+use Model\DataAccess\TransactionalTrait;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Outsource\ConfirmationDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use Utils\Email\SendToTranslatorForDeliveryChangeEmail;
+use Utils\Email\SendToTranslatorForJobSplitEmail;
+use Utils\Email\SendToTranslatorForNewJobEmail;
+use Utils\Tools\Utils;
 
 class TranslatorsModel {
 
     use TransactionalTrait;
 
     /**
-     * @var Users_UserStruct
+     * @var ?\Model\Users\UserStruct
      */
-    protected $callingUser;
+    protected ?UserStruct $callingUser = null;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected $jStruct;
+    protected JobStruct $jStruct;
 
     /**
      * @var KleinController
      */
-    protected $controller;
+    protected KleinController $controller;
 
     /**
      * @var array
      */
-    protected $mailsToBeSent = [ 'new' => null, 'update' => null, 'split' => null ];
+    protected array $mailsToBeSent = [ 'new' => null, 'update' => null, 'split' => null ];
 
-    protected $delivery_date;
-    protected $job_owner_timezone = 0;
-    protected $id_job;
-    protected $email;
-    protected $job_password;
+    protected int    $delivery_date;
+    protected int    $job_owner_timezone = 0;
+    protected ?int   $id_job;
+    protected string $email;
+    protected string $job_password;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
     /**
      * @var FeatureSet
      */
-    protected $featureSet;
+    protected FeatureSet $featureSet;
 
     /**
      * Override the Job Password from Outside
@@ -74,23 +75,23 @@ class TranslatorsModel {
      *
      * @return $this
      */
-    public function setNewJobPassword( $job_password ) {
+    public function setNewJobPassword( string $job_password ): TranslatorsModel {
         $this->job_password = $job_password;
 
         return $this;
     }
 
     /**
-     * @var JobsTranslatorsStruct
+     * @var JobsTranslatorsStruct|null
      */
-    protected $jobTranslator;
+    protected ?JobsTranslatorsStruct $jobTranslator = null;
 
     /**
-     * @param mixed $delivery_date
+     * @param string|int $delivery_date
      *
      * @return $this
      */
-    public function setDeliveryDate( $delivery_date ) {
+    public function setDeliveryDate( $delivery_date ): TranslatorsModel {
 
         if ( is_numeric( $delivery_date ) && (int)$delivery_date == $delivery_date ) {
             $this->delivery_date = $delivery_date;
@@ -106,24 +107,24 @@ class TranslatorsModel {
      *
      * @return $this
      */
-    public function setJobOwnerTimezone( $job_owner_timezone ) {
+    public function setJobOwnerTimezone( int $job_owner_timezone ): TranslatorsModel {
         $this->job_owner_timezone = $job_owner_timezone;
 
         return $this;
     }
 
     /**
-     * @param mixed $email
+     * @param string $email
      *
      * @return $this
      */
-    public function setEmail( $email ) {
+    public function setEmail( string $email ): TranslatorsModel {
         $this->email = $email;
 
         return $this;
     }
 
-    public function setUserInvite( Users_UserStruct $user ) {
+    public function setUserInvite( UserStruct $user ): TranslatorsModel {
         $this->callingUser = $user;
 
         return $this;
@@ -132,10 +133,10 @@ class TranslatorsModel {
     /**
      * TranslatorsModel constructor.
      *
-     * @param Jobs_JobStruct $jStruct
-     * @param float|int      $project_cache_TTL
+     * @param JobStruct $jStruct
+     * @param float|int $project_cache_TTL
      */
-    public function __construct( Jobs_JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
+    public function __construct( JobStruct $jStruct, $project_cache_TTL = 60 * 60 ) {
 
         //get the job
         $this->jStruct = $jStruct;
@@ -148,7 +149,10 @@ class TranslatorsModel {
 
     }
 
-    public function getTranslator( $cache = 86400 ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function getTranslator( int $cache = 86400 ) {
 
         $jTranslatorsDao = new JobsTranslatorsDao();
 
@@ -160,7 +164,7 @@ class TranslatorsModel {
      * @return JobsTranslatorsStruct
      * @throws Exception
      */
-    public function update() {
+    public function update(): JobsTranslatorsStruct {
 
         $confDao            = new ConfirmationDao();
         $confirmationStruct = $confDao->getConfirmation( $this->jStruct );
@@ -172,7 +176,7 @@ class TranslatorsModel {
         //create jobs_translator struct to call inside the dao
         $translatorStruct = new JobsTranslatorsStruct();
 
-        $translatorUser = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+        $translatorUser = ( new UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
         if ( !empty( $translatorUser ) ) {
             //associate the translator with an existent user and create a profile if not exists
             $translatorStruct->id_translator_profile = $this->saveProfile( $translatorUser );
@@ -248,7 +252,7 @@ class TranslatorsModel {
     /**
      * @throws Exception
      */
-    protected function saveProfile( Users_UserStruct $existentUser ) {
+    protected function saveProfile( UserStruct $existentUser ): int {
 
         //associate the translator with an existent user and create a profile
         $profileStruct                 = new TranslatorProfilesStruct();
@@ -277,7 +281,7 @@ class TranslatorsModel {
     /**
      * @throws Exception
      */
-    public function changeJobPassword( $newPassword = null ) {
+    public function changeJobPassword( ?string $newPassword = null ) {
 
         if ( empty( $newPassword ) ) {
             $newPassword = Utils::randomString();
@@ -286,7 +290,7 @@ class TranslatorsModel {
         $oldPassword = $this->jStruct->password;
 
         $this->openTransaction();
-        $jobDao = new Jobs_JobDao();
+        $jobDao = new JobDao();
         $jobDao->changePassword( $this->jStruct, $newPassword );
         $jobDao->destroyCache( $this->jStruct );
         $this->featureSet->run( 'job_password_changed', $this->jStruct, $oldPassword );
@@ -294,13 +298,16 @@ class TranslatorsModel {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function sendEmail() {
 
         if ( empty( $this->callingUser ) ) {
             throw new InvalidArgumentException( "Who invites can not be empty. Try TranslatorsModel::setUser() " );
         }
 
-        $project = Projects_ProjectDao::findByJobId( $this->jStruct->id );
+        $project = ProjectDao::findByJobId( $this->jStruct->id );
 
         foreach ( $this->mailsToBeSent as $type => $email ) {
 

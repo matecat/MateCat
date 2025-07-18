@@ -1,7 +1,6 @@
 {
     "require-dev": {
-        "phpunit/phpunit": "^9",
-        "robmorgan/phinx": "^0"
+        "phpunit/phpunit": "^9"
     },
     "require": {
         "php": ">=7.4",
@@ -47,8 +46,12 @@
         "ext-simplexml": "*"
     },
     "config": {
+        "use-include-path": true,
         "allow-plugins": {
             "php-http/discovery": true
         }
+    },
+    "autoload": {
+        "psr-4": { "": "lib/" }
     }
 }

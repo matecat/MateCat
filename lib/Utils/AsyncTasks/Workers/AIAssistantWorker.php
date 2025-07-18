@@ -1,20 +1,20 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use AIAssistant\Client as AIAssistantClient;
-use AMQHandler;
 use Exception;
-use INIT;
 use Orhanerday\OpenAi\OpenAi;
 use Predis\Client;
 use Predis\Response\Status;
 use ReflectionException;
 use Stomp\Exception\StompException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Exceptions\EndQueueException;
-use Utils;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\AIAssistant\Client as AIAssistantClient;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\Tools\Utils;
 
 class AIAssistantWorker extends AbstractWorker {
     const EXPLAIN_MEANING_ACTION = 'explain_meaning';
@@ -39,8 +39,8 @@ class AIAssistantWorker extends AbstractWorker {
     public function __construct( AMQHandler $queueHandler ) {
         parent::__construct( $queueHandler );
 
-        $timeOut      = ( INIT::$OPEN_AI_TIMEOUT ) ?: 30;
-        $this->openAi = new OpenAi( INIT::$OPENAI_API_KEY );
+        $timeOut      = ( AppConfig::$OPEN_AI_TIMEOUT ) ?: 30;
+        $this->openAi = new OpenAi( AppConfig::$OPENAI_API_KEY );
         $this->openAi->setTimeout( $timeOut );
 
         $this->redis = $queueHandler->getRedisClient();
@@ -77,7 +77,7 @@ class AIAssistantWorker extends AbstractWorker {
      * @throws Exception
      */
     private function explain_meaning( $payload ) {
-        $phraseTrimLimit = ceil( INIT::$OPEN_AI_MAX_TOKENS / 2 );
+        $phraseTrimLimit = ceil( AppConfig::$OPEN_AI_MAX_TOKENS / 2 );
         $phrase          = strip_tags( html_entity_decode( $payload[ 'phrase' ] ) );
         $phrase          = Utils::truncatePhrase( $phrase, $phraseTrimLimit );
         $txt             = "";
@@ -88,74 +88,80 @@ class AIAssistantWorker extends AbstractWorker {
         $this->generateLock( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $lockValue );
         $this->_doLog( "Generated lock for id_segment " . $payload[ 'id_segment' ] );
 
-        ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload[ 'word' ], $phrase, $payload[ 'localized_target' ], function ( $curl_info, $data ) use ( &$txt, $payload, $lockValue ) {
+        try {
 
-            $currentLockValue = $this->getLockValue( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
-            if ( $currentLockValue !== $lockValue ) {
-                $this->_doLog( "Current lock invalid. Current value is: " . $currentLockValue . ", " . $lockValue . " was expected for id_segment " . $payload[ 'id_segment' ] );
+            ( new AIAssistantClient( $this->openAi ) )->findContextForAWord( $payload[ 'word' ], $phrase, $payload[ 'localized_target' ], function ( $curl_info, $data ) use ( &$txt, $payload, $lockValue ) {
 
-                return 0;
-            }
+                $currentLockValue = $this->getLockValue( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
+                if ( $currentLockValue !== $lockValue ) {
+                    $this->_doLog( "Current lock invalid. Current value is: " . $currentLockValue . ", " . $lockValue . " was expected for id_segment " . $payload[ 'id_segment' ] );
 
-            //
-            // $data returned from Open AI is a string like this:
-            //
-            // data: {"id":"chatcmpl-7GSjecxhnbf7oZfoYahurued904vj","object":"chat.completion.chunk","created":1684158062,"model":"gpt-4-0314","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
-            //
-            // so we need the explode here:
-            //
-            $_d = explode( "data: ", $data );
+                    return 0;
+                }
 
-            if ( is_array( $_d ) ) {
-                foreach ( $_d as $clean ) {
+                //
+                // $data returned from Open AI is a string like this:
+                //
+                // data: {"id":"chatcmpl-7GSjecxhnbf7oZfoYahurued904vj","object":"chat.completion.chunk","created":1684158062,"model":"gpt-4-0314","choices":[{"delta":{"role":"assistant"},"index":0,"finish_reason":null}]}
+                //
+                // so we need the explode here:
+                //
+                $_d = explode( "data: ", $data );
 
-                    if ( strpos( $data, "[DONE]\n\n" ) !== false ) {
-                        $this->_doLog( "Stream from Open Ai is terminated. Segment id:  " . $payload[ 'id_segment' ] );
-                        $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt, false, true );
-                        $this->destroyLock( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
+                if ( is_array( $_d ) ) {
+                    foreach ( $_d as $clean ) {
 
-                        return 0; // exit
-                    } else {
-                        $this->_doLog( "Received data stream from OpenAI for id_segment " . $payload[ 'id_segment' ] );
-                        $arr = json_decode( $clean, true );
+                        if ( strpos( $data, "[DONE]\n\n" ) !== false ) {
+                            $this->_doLog( "Stream from Open Ai is terminated. Segment id:  " . $payload[ 'id_segment' ] );
+                            $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt, false, true );
+                            $this->destroyLock( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ] );
 
-                        if ( $data != "data: [DONE]\n\n" and isset( $arr[ "choices" ][ 0 ][ "delta" ][ "content" ] ) ) {
-                            $txt .= $arr[ "choices" ][ 0 ][ "delta" ][ "content" ];
-                            $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt );
+                            return 0; // exit
                         } else {
-                            // Trigger error only if $clean is not empty
-                            if ( !empty( $clean ) and $clean !== '' ) {
+                            $this->_doLog( "Received data stream from OpenAI for id_segment " . $payload[ 'id_segment' ] );
+                            $arr = json_decode( $clean, true );
 
-                                // Trigger real errors here
-                                if ( Utils::isJson( $clean ) ) {
-                                    $clean = json_decode( $clean, true );
+                            if ( $data != "data: [DONE]\n\n" and isset( $arr[ "choices" ][ 0 ][ "delta" ][ "content" ] ) ) {
+                                $txt .= $arr[ "choices" ][ 0 ][ "delta" ][ "content" ];
+                                $this->emitMessage( $payload[ 'id_client' ], $payload[ 'id_segment' ], $txt );
+                            } else {
+                                // Trigger error only if $clean is not empty
+                                if ( !empty( $clean ) and $clean !== '' ) {
 
-                                    if (
-                                            isset( $clean[ 'error' ] ) and
-                                            isset( $clean[ 'error' ][ "message" ] )
-                                    ) {
-                                        $message = "Received wrong JSON data from OpenAI for id_segment " . $payload[ 'id_segment' ] . ":" . $clean[ 'error' ][ "message" ] . " was received";
-                                        $this->emitErrorMessage( $message, $payload );
+                                    // Trigger real errors here
+                                    if ( Utils::isJson( $clean ) ) {
+                                        $clean = json_decode( $clean, true );
 
-                                        return 0; // exit
+                                        if (
+                                                isset( $clean[ 'error' ] ) and
+                                                isset( $clean[ 'error' ][ "message" ] )
+                                        ) {
+                                            $message = "Received wrong JSON data from OpenAI for id_segment " . $payload[ 'id_segment' ] . ":" . $clean[ 'error' ][ "message" ] . " was received";
+                                            $this->emitErrorMessage( $message, $payload );
+
+                                            return 0; // exit
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                } else {
+                    $message = "Data received from OpenAI is not as array: " . $_d . " was received for id_segment " . $payload[ 'id_segment' ];
+                    $this->emitErrorMessage( $message, $payload );
+
+                    return 0; // exit
                 }
-            } else {
-                $message = "Data received from OpenAI is not as array: " . $_d . " was received for id_segment " . $payload[ 'id_segment' ];
-                $this->emitErrorMessage( $message, $payload );
 
-                return 0; // exit
-            }
+                // NEEDED by CURLOPT_WRITEFUNCTION function
+                //
+                // For more info see here: https://stackoverflow.com/questions/2294344/what-for-do-we-use-curlopt-writefunction-in-phps-curl
+                return strlen( $data );
+            } );
 
-            // NEEDED by CURLOPT_WRITEFUNCTION function
-            //
-            // For more info see here: https://stackoverflow.com/questions/2294344/what-for-do-we-use-curlopt-writefunction-in-phps-curl
-            return strlen( $data );
-        } );
+        } catch ( Exception $ignore ) {
+        }
+
     }
 
     /**

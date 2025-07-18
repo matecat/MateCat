@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateProjectTemplateTable extends AbstractMatecatMigration {
 
     public $sql_up = [ '

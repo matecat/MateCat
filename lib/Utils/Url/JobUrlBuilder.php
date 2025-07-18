@@ -1,16 +1,17 @@
 <?php
 
-namespace Url;
+namespace Utils\Url;
 
-use CatUtils;
-use Jobs_JobStruct;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use ReflectionException;
+use Utils\Tools\CatUtils;
 
 class JobUrlBuilder {
 
     /**
-     * Build the job url from Jobs_JobStruct
+     * Build the job url from JobStruct
      *
      * Optional parameters:
      * - id_segment
@@ -18,20 +19,20 @@ class JobUrlBuilder {
      *
      * Returns null in case of wrong parameters
      *
-     * @param Jobs_JobStruct $job
-     * @param string         $projectName
-     * @param array          $options
+     * @param JobStruct $job
+     * @param string    $projectName
+     * @param array     $options
      *
-     * @return JobUrlStruct
+     * @return JobUrls
      */
-    public static function createFromJobStructAndProjectName( Jobs_JobStruct $job, $projectName, $options = [] ) {
+    public static function createFromJobStructAndProjectName( JobStruct $job, string $projectName, array $options = [] ): JobUrls {
 
         // 3. get passwords array
         $passwords   = [];
         $sourcePages = [
-                JobUrlStruct::LABEL_T  => 1,
-                JobUrlStruct::LABEL_R1 => 2,
-                JobUrlStruct::LABEL_R2 => 3
+                JobUrls::LABEL_T  => 1,
+                JobUrls::LABEL_R1 => 2,
+                JobUrls::LABEL_R2 => 3
         ];
 
         foreach ( $sourcePages as $label => $sourcePage ) {
@@ -53,7 +54,7 @@ class JobUrlBuilder {
             }
         }
 
-        return new JobUrlStruct(
+        return new JobUrls(
                 $job->id,
                 $projectName,
                 $job->source,
@@ -66,7 +67,7 @@ class JobUrlBuilder {
     }
 
     /**
-     * Build the job url from Jobs_JobStruct
+     * Build the job url from JobStruct
      *
      * Optional parameters:
      * - id_segment
@@ -74,18 +75,19 @@ class JobUrlBuilder {
      *
      * Returns null in case of wrong parameters
      *
-     * @param Jobs_JobStruct              $job
-     * @param array                       $options
-     * @param Projects_ProjectStruct|null $project
+     * @param JobStruct          $job
+     * @param array              $options
+     * @param ProjectStruct|null $project
      *
-     * @return JobUrlStruct
+     * @return JobUrls
+     * @throws ReflectionException
      */
-    public static function createFromJobStruct( Jobs_JobStruct $job, $options = [], Projects_ProjectStruct $project = null ) {
+    public static function createFromJobStruct( JobStruct $job, array $options = [], ProjectStruct $project = null ): ?JobUrls {
 
         // 1. if project is passed we gain a query
         if ( $project == null ) {
             // 2. find the correlated project, if not passed
-            $project = Projects_ProjectDao::findById( $job->id_project, 60 * 10 );
+            $project = ProjectDao::findById( $job->id_project, 60 * 10 );
         }
 
         if ( !$project ) {

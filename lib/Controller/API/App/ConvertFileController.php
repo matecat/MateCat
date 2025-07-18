@@ -1,24 +1,23 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Constants;
-use Conversion\FilesConverter;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Filters\FiltersConfigTemplateDao;
-use Filters\FiltersConfigTemplateStruct;
-use INIT;
 use InvalidArgumentException;
-use Langs\InvalidLanguageException;
-use Langs\Languages;
+use Model\Conversion\FilesConverter;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\Filters\FiltersConfigTemplateStruct;
 use ReflectionException;
 use RuntimeException;
-use Utils;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use ZipArchiveExtended;
+use Utils\Constants\Constants;
+use Utils\Langs\InvalidLanguageException;
+use Utils\Langs\Languages;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ConvertFileController extends KleinController {
 
@@ -32,8 +31,8 @@ class ConvertFileController extends KleinController {
     public function handle(): void {
         $data             = $this->validateTheRequest();
         $uploadTokenValue = $_COOKIE[ 'upload_token' ];
-        $uploadDir        = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
-        $errDir           = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $uploadDir        = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uploadTokenValue;
+        $errDir           = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $uploadTokenValue;
 
         if ( !Utils::isTokenValid( $uploadTokenValue ) ) {
             throw new RuntimeException( "Invalid Upload Token." );
@@ -161,7 +160,7 @@ class ConvertFileController extends KleinController {
 
         if ( !empty( $filters_extraction_parameters_template ) ) {
             $json   = html_entity_decode( $filters_extraction_parameters_template );
-            $schema = file_get_contents( INIT::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
+            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
             $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;

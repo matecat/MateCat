@@ -1,18 +1,20 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
-use CatUtils;
-use Constants_TranslationStatus;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use Jobs_JobDao;
-use Langs\Languages;
-use Utils;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Jobs\JobDao;
+use Utils\Constants\TranslationStatus;
+use Utils\Langs\Languages;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 /**
  *
@@ -34,7 +36,7 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
         $request = $this->validateTheRequest();
 
-        $jobStruct = Jobs_JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
+        $jobStruct = JobDao::getByIdAndPassword( $request[ 'jid' ], $request[ 'password' ] );
 
         if ( empty( $jobStruct ) ) {
             $this->setView( "project_not_found.html", [], 404 );
@@ -65,9 +67,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
 
                 'source_code'         => $jobStruct[ 'source' ],
                 'target_code'         => $jobStruct[ 'target' ],
-                'source_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ),
-                'target_rtl'          => Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ),
-                'searchable_statuses' => $this->searchableStatuses(),
+                'source_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'source' ] ) ),
+                'target_rtl'          => new PHPTalBoolean( Languages::getInstance()->isRTL( $jobStruct[ 'target' ] ) ),
+                'searchable_statuses' => new PHPTalMap( $this->searchableStatuses() ),
 
         ] );
 
@@ -106,9 +108,9 @@ class QualityReportController extends BaseKleinViewController implements IContro
      */
     private function searchableStatuses(): array {
         $statuses = array_merge(
-                Constants_TranslationStatus::$INITIAL_STATUSES,
-                Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                Constants_TranslationStatus::$REVISION_STATUSES
+                TranslationStatus::$INITIAL_STATUSES,
+                TranslationStatus::$TRANSLATION_STATUSES,
+                TranslationStatus::$REVISION_STATUSES
         );
 
         return array_map( function ( $item ) {

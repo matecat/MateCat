@@ -1,24 +1,26 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use ConnectedServices\ConnectedServiceUserModel;
-use ConnectedServices\OauthClient;
+use Controller\Abstracts\BaseKleinViewController;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
-use INIT;
-use OAuthSignInModel;
+use Model\ConnectedServices\Oauth\OauthClient;
+use Model\ConnectedServices\Oauth\ProviderUser;
+use Model\Users\Authentication\OAuthSignInModel;
 use ReflectionException;
+use Utils\Registry\AppConfig;
 
 class OauthResponseHandlerController extends BaseKleinViewController {
 
     /**
-     * @var ConnectedServiceUserModel
+     * @var ProviderUser
      */
-    private ConnectedServiceUserModel $remoteUser;
+    private ProviderUser $remoteUser;
 
     /**
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
     public function response() {
 
@@ -29,7 +31,7 @@ class OauthResponseHandlerController extends BaseKleinViewController {
                 'error'    => [ 'filter' => FILTER_SANITIZE_STRING ]
         ] );
 
-        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . INIT::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
+        if ( empty( $params[ 'state' ] ) || $_SESSION[ $params[ 'provider' ] . '-' . AppConfig::$XSRF_TOKEN ] !== $params[ 'state' ] ) {
             $this->render( 401 );
         }
 
@@ -56,6 +58,7 @@ class OauthResponseHandlerController extends BaseKleinViewController {
      * @param null $provider
      *
      * @throws ReflectionException
+     * @throws EnvironmentIsBrokenException
      */
     protected function _processSuccessfulOAuth( $code, $provider = null ) {
 
@@ -63,9 +66,9 @@ class OauthResponseHandlerController extends BaseKleinViewController {
         $this->_initRemoteUser( $code, $provider );
 
         $model = new OAuthSignInModel(
+                $this->remoteUser->email,
                 $this->remoteUser->name,
-                $this->remoteUser->lastName,
-                $this->remoteUser->email
+                $this->remoteUser->lastName
         );
 
         $model->setProvider( $this->remoteUser->provider );

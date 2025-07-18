@@ -1,4 +1,5 @@
 <?php
+
 putenv( 'phpunit=1' );
 error_reporting( E_ALL & ~E_NOTICE & ~E_DEPRECATED );
 
@@ -9,7 +10,7 @@ define( 'PROJECT_ROOT', realpath( dirname( __FILE__ ) . '/../' ) . DIRECTORY_SEP
 define( 'TEST_DIR', realpath( dirname( __FILE__ ) ) );
 
 set_include_path( get_include_path() . PATH_SEPARATOR . TEST_DIR );
-require_once( PROJECT_ROOT . 'inc/Bootstrap.php' );
+require_once( PROJECT_ROOT . 'lib/Bootstrap.php' );
 
 if ( getenv( 'USE_LOCAL_DEVELOPMENT_ENV' ) ) {
     Bootstrap::start();

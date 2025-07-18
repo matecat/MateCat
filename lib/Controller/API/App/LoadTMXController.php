@@ -1,19 +1,19 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use INIT;
 use InvalidArgumentException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSFile;
-use TMS\TMSService;
+use Model\DataAccess\Database;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\Registry\AppConfig;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSFile;
+use Utils\TMS\TMSService;
 
 class LoadTMXController extends KleinController {
 
@@ -50,18 +50,18 @@ class LoadTMXController extends KleinController {
             $this->featureSet->run( 'postPushTMX', $file, $this->user );
 
             /*
-             * We update the KeyRing only if this is NOT the Default MyMemory Key
+             * We update the KeyRing only if this is NOT the Default Match Key
              *
              * If it is NOT the default the key belongs to the user, so it's correct to update the user keyring.
              */
-            if ( $request[ 'tm_key' ] != INIT::$DEFAULT_TM_KEY ) {
+            if ( $request[ 'tm_key' ] != AppConfig::$DEFAULT_TM_KEY ) {
 
                 /*
                  * Update a memory key with the name of th TMX if the key name is empty
                  */
-                $mkDao           = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $searchMemoryKey = new TmKeyManagement_MemoryKeyStruct();
-                $key             = new TmKeyManagement_TmKeyStruct();
+                $mkDao           = new MemoryKeyDao( Database::obtain() );
+                $searchMemoryKey = new MemoryKeyStruct();
+                $key             = new TmKeyStruct();
                 $key->key        = $request[ 'tm_key' ];
 
                 $searchMemoryKey->uid    = $this->user->uid;
@@ -111,15 +111,15 @@ class LoadTMXController extends KleinController {
 
         if ( empty( $tm_key ) ) {
 
-            if ( empty( INIT::$DEFAULT_TM_KEY ) ) {
+            if ( empty( AppConfig::$DEFAULT_TM_KEY ) ) {
                 throw new InvalidArgumentException( "Please specify a TM key.", -2 );
             }
 
             /*
              * Added the default Key.
-             * This means if no private key are provided the TMX will be loaded in the default MyMemory key
+             * This means if no private key are provided the TMX will be loaded in the default Match key
              */
-            $tm_key = INIT::$DEFAULT_TM_KEY;
+            $tm_key = AppConfig::$DEFAULT_TM_KEY;
 
         }
 

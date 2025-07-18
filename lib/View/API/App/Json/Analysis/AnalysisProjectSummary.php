@@ -7,11 +7,11 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
-use Constants_ProjectStatus;
-use INIT;
 use JsonSerializable;
+use Utils\Constants\ProjectStatus;
+use Utils\Registry\AppConfig;
 
 class AnalysisProjectSummary implements JsonSerializable {
 
@@ -30,7 +30,7 @@ class AnalysisProjectSummary implements JsonSerializable {
     /**
      * @var string
      */
-    protected string $analysis_status = Constants_ProjectStatus::STATUS_NEW;
+    protected string $analysis_status = ProjectStatus::STATUS_NEW;
     /**
      * @var float
      */
@@ -78,7 +78,7 @@ class AnalysisProjectSummary implements JsonSerializable {
 
     private function getEstimatedWorkTime(): string {
 
-        $wc_time = $this->total_equivalent / INIT::$ANALYSIS_WORDS_PER_DAYS;
+        $wc_time = $this->total_equivalent / AppConfig::$ANALYSIS_WORDS_PER_DAYS;
         $wc_unit = 'day';
 
         if ( $wc_time > 0 and $wc_time < 1 ) {

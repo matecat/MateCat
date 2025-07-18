@@ -1,8 +1,9 @@
 <?php
 
 use TestHelpers\AbstractTest;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
+use Utils\Registry\AppConfig;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class JSONValidatorTest extends AbstractTest {
 
@@ -56,7 +57,7 @@ class JSONValidatorTest extends AbstractTest {
     }
 
     public function testValidUberQAModelFile() {
-        $jsonSchema  = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $jsonSchema  = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
         $uberQaModel = file_get_contents( __DIR__ . '/../../resources/files/json/files/uber_qa_model.json' );
 
         $validatorObject       = new JSONValidatorObject();

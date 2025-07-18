@@ -1,9 +1,9 @@
 <?php
 
-namespace ActivityLog;
+namespace Model\ActivityLog;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -11,14 +11,14 @@ use \DataAccess\IDaoStruct;
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class ActivityLogStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     /**
      * MAP to convert the values to the right string definition
-     * ( easy to put in another file or change localization )
+     * (easy to put in another file or change localization)
      * @var array
      */
-    protected static $actionsStrings = [
+    protected static array $actionsStrings = [
 
         /* DOWNLOADS */
             self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded",
@@ -141,7 +141,7 @@ class ActivityLogStruct extends \DataAccess\AbstractDaoSilentStruct implements \
      *
      * @return string
      */
-    public static function getAction( $actionID ) {
+    public static function getAction( $actionID ): string {
         return self::$actionsStrings[ $actionID ];
     }
 

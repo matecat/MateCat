@@ -7,7 +7,7 @@
  *
  */
 
-namespace Constants;
+namespace Utils\Constants;
 
 
 class Ices {

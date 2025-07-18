@@ -1,25 +1,29 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Predis\Client;
-use Search\ReplaceEventStruct;
+namespace Model\Search;
 
-class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceEventDAOInterface {
+use Model\DataAccess\AbstractDao;
+use Model\Translations\SegmentTranslationDao;
+use Predis\Client;
+use ReflectionException;
+use Utils\Redis\RedisHandler;
+
+class RedisReplaceEventDAO extends AbstractDao implements ReplaceEventDAOInterface {
 
     const TABLE = 'replace_events';
 
     /**
      * @var Client
      */
-    private $redis;
+    private Client $redis;
 
     /**
      * @var int
      */
-    private $ttl = 10800; // 3 hours
+    private int $ttl = 10800; // 3 hours
 
     /**
-     * Search_RedisReplaceEventDAO constructor.
+     * RedisReplaceEventDAO constructor.
      *
      * @param null $con
      *
@@ -32,15 +36,15 @@ class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceE
     }
 
     /**
-     * @param $idJob
-     * @param $version
+     * @param int $id_job
+     * @param int $version
      *
      * @return ReplaceEventStruct[]
      */
-    public function getEvents( $idJob, $version ) {
+    public function getEvents( int $id_job, int $version ): array {
         $results = [];
 
-        foreach ( $this->redis->hgetAll( $this->getRedisKey( $idJob, $version ) ) as $value ) {
+        foreach ( $this->redis->hgetAll( $this->getRedisKey( $id_job, $version ) ) as $value ) {
             $results[] = unserialize( $value );
         }
 
@@ -52,11 +56,11 @@ class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceE
      *
      * @return int
      */
-    public function save( ReplaceEventStruct $eventStruct ) {
+    public function save( ReplaceEventStruct $eventStruct ): int {
         // if not directly passed
         // try to assign the current version of the segment if it exists
         if ( null === $eventStruct->segment_version ) {
-            $segment                      = ( new Translations_SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
+            $segment                      = ( new SegmentTranslationDao() )->getByJobId( $eventStruct->id_job )[ 0 ];
             $eventStruct->segment_version = $segment->version_number;
         }
 
@@ -73,12 +77,12 @@ class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceE
     }
 
     /**
-     * @param $idJob
-     * @param $version
+     * @param int $idJob
+     * @param int $version
      *
      * @return string
      */
-    private function getRedisKey( $idJob, $version ) {
+    private function getRedisKey( int $idJob, int $version ): string {
         return md5( self::TABLE . '::' . $idJob . '::' . $version );
     }
 

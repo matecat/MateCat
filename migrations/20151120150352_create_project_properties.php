@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateProjectProperties extends AbstractMatecatMigration {
   public $sql_up = <<<EOF
 CREATE TABLE `project_metadata` (

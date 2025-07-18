@@ -6,37 +6,40 @@
  * Time: 10:39
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectAccessValidator;
-use API\V2\Json\Chunk;
-use Constants_JobStatus;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectAccessValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Exceptions\NotFoundException;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
-use Translations_SegmentTranslationDao;
-use Utils;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Translations\SegmentTranslationDao;
+use Utils\Constants\JobStatus;
+use Utils\Tools\Utils;
+use View\API\V2\Json\Chunk;
 
-class ChunkController extends BaseChunkController {
+class ChunkController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     private $project;
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
     public function getProject() {
         return $this->project;
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
@@ -68,7 +71,7 @@ class ChunkController extends BaseChunkController {
     public function delete() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_DELETED );
+        $this->changeStatus( JobStatus::STATUS_DELETED );
     }
 
     /**
@@ -77,7 +80,7 @@ class ChunkController extends BaseChunkController {
     public function cancel() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_CANCELLED );
+        $this->changeStatus( JobStatus::STATUS_CANCELLED );
     }
 
     /**
@@ -86,7 +89,7 @@ class ChunkController extends BaseChunkController {
     public function archive() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ARCHIVED );
+        $this->changeStatus( JobStatus::STATUS_ARCHIVED );
     }
 
     /**
@@ -95,7 +98,7 @@ class ChunkController extends BaseChunkController {
     public function active() {
         $this->return404IfTheJobWasDeleted();
 
-        $this->changeStatus( Constants_JobStatus::STATUS_ACTIVE );
+        $this->changeStatus( JobStatus::STATUS_ACTIVE );
     }
 
     /**
@@ -105,9 +108,9 @@ class ChunkController extends BaseChunkController {
 
         ( new ProjectAccessValidator( $this, $this->project ) )->validate();
 
-        Jobs_JobDao::updateJobStatus( $this->chunk, $status );
-        $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
-        Translations_SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
+        JobDao::updateJobStatus( $this->chunk, $status );
+        $lastSegmentsList = SegmentTranslationDao::getMaxSegmentIdsFromJob( $this->chunk );
+        SegmentTranslationDao::updateLastTranslationDateByIdList( $lastSegmentsList, Utils::mysqlTimestamp( time() ) );
         $this->response->json( [ 'code' => 1, 'data' => "OK", 'status' => $status ] );
 
     }

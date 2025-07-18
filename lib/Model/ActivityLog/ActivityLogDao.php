@@ -6,32 +6,33 @@
  * Time: 17:59
  */
 
-namespace ActivityLog;
+namespace Model\ActivityLog;
 
-use DataAccess\AbstractDao;
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
 use PDO;
 use ReflectionException;
 
 class ActivityLogDao extends AbstractDao {
 
-    public $epilogueString  = "";
-    public $whereConditions = " id_project = :id_project ";
+    public string $epilogueString  = "";
+    public string $whereConditions = " id_project = :id_project ";
 
-    public function getAllForProject( $id_project ) {
+    public function getAllForProject( $id_project ): array {
         $conn = Database::obtain()->getConnection();
         $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN users on activity_log.uid = users.uid WHERE id_project = :id_project ORDER BY activity_log.event_date DESC ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
 
         $stmt->execute( [ 'id_project' => $id_project ] );
 
         return $stmt->fetchAll();
     }
 
-    public function getLastActionInProject( $id_project ) {
+    public function getLastActionInProject( $id_project ): array {
         $conn = Database::obtain()->getConnection();
         $sql  = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
@@ -39,14 +40,14 @@ class ActivityLogDao extends AbstractDao {
           ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC ";
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
 
         $stmt->execute( [ 'id_project' => $id_project ] );
 
         return $stmt->fetchAll();
     }
 
-    public function create( ActivityLogStruct $activityStruct ) {
+    public function create( ActivityLogStruct $activityStruct ): int {
 
         $conn             = Database::obtain()->getConnection();
         $jobStructToArray = $activityStruct->toArray(
@@ -80,15 +81,15 @@ class ActivityLogDao extends AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * @param array $whereKeys
+     * @param IDaoStruct $activityQuery
+     * @param array      $whereKeys
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return IDaoStruct[]
      * @throws ReflectionException
-     * @see      \AsyncTasks\Workers\ActivityLogWorker
+     * @see      \Utils\AsyncTasks\Workers\ActivityLogWorker
      * @see      ActivityLogStruct
-     *
      */
-    public function read( \DataAccess\IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
+    public function read( IDaoStruct $activityQuery, array $whereKeys = [ 'id_project' => 0 ] ): array {
 
         $stmt = $this->_getStatementForQuery(
                 "SELECT * FROM activity_log " .
@@ -98,8 +99,8 @@ class ActivityLogDao extends AbstractDao {
                 $this->epilogueString
         );
 
-        return $this->_fetchObject( $stmt,
-                $activityQuery,
+        return $this->_fetchObjectMap( $stmt,
+                get_class( $activityQuery ),
                 $whereKeys
         );
 
@@ -108,7 +109,7 @@ class ActivityLogDao extends AbstractDao {
     /**
      * @param array $array_result
      *
-     * @return \DataAccess\IDaoStruct|\DataAccess\IDaoStruct[]|void
+     * @return void
      */
     protected function _buildResult( array $array_result ) {
     }
@@ -122,7 +123,7 @@ class ActivityLogDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM activity_log WHERE id = ?" );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ActivityLogStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ActivityLogStruct::class );
         $stmt->execute( [ $activity_id ] );
 
         return $stmt->fetch();

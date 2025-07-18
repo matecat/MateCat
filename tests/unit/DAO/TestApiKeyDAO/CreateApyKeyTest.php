@@ -1,26 +1,31 @@
 <?php
 
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+use Predis\Client;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers ApiKeys_ApiKeyDao::create
+ * @covers ApiKeyDao::create
  * User: dinies
  * Date: 16/06/16
  * Time: 18.57
  */
 class CreateApyKeyTest extends AbstractTest {
     /**
-     * @var \Predis\Client
+     * @var Client
      */
     protected $flusher;
     /**
-     * @var ApiKeys_ApiKeyDao
+     * @var ApiKeyDao
      */
     protected $apikey_Dao;
     /**
-     * @var ApiKeys_ApiKeyStruct
+     * @var ApiKeyStruct
      */
     protected $apikey_struct_param;
     protected $sql_delete_apikey;
@@ -34,10 +39,10 @@ class CreateApyKeyTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
-        $this->apikey_Dao          = new ApiKeys_ApiKeyDao( $this->database_instance );
-        $this->apikey_struct_param = new ApiKeys_ApiKeyStruct();
+        $this->apikey_Dao          = new ApiKeyDao( $this->database_instance );
+        $this->apikey_struct_param = new ApiKeyStruct();
 
 
         $this->apikey_struct_param->uid         = '1999';
@@ -55,21 +60,21 @@ class CreateApyKeyTest extends AbstractTest {
     public function tearDown(): void {
 
         $this->database_instance->getConnection()->query( $this->sql_delete_apikey );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }
 
     /**
      * @group  regression
-     * @covers ApiKeys_ApiKeyDao::create
+     * @covers ApiKeyDao::create
      */
     public function test_create_with_success() {
 
         $this->actual_apikey     = $this->apikey_Dao->create( $this->apikey_struct_param );
         $this->apikey_id         = $this->actual_apikey->id;
-        $this->sql_select_apikey = "SELECT * FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
-        $this->sql_delete_apikey = "DELETE FROM " . INIT::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
+        $this->sql_select_apikey = "SELECT * FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
+        $this->sql_delete_apikey = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`api_keys` WHERE id='" . $this->apikey_id . "';";
 
         $this->apikey_struct_param->id = $this->apikey_id;
         $this->assertEquals( $this->apikey_struct_param, $this->actual_apikey );

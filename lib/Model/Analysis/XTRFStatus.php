@@ -2,9 +2,8 @@
 
 namespace Model\Analysis;
 
-use API\App\Json\Analysis\AnalysisProject;
-use API\App\Json\Analysis\MatchContainerInterface;
 use Model\Analysis\Constants\StandardMatchTypeNamesConstants;
+use View\API\App\Json\Analysis\MatchContainerInterface;
 
 /**
  * Created by PhpStorm.

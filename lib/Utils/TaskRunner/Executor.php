@@ -7,31 +7,31 @@
  *
  */
 
-namespace TaskRunner;
+namespace Utils\TaskRunner;
 
-use AMQHandler;
 use Bootstrap;
-use Database;
 use Exception;
-use INIT;
-use Log;
+use Model\DataAccess\Database;
 use PDOException;
 use ReflectionException;
 use SplObserver;
 use SplSubject;
 use Stomp\Transport\Frame;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Context;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Commons\SignalHandlerTrait;
-use TaskRunner\Exceptions\EmptyElementException;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\FrameException;
-use TaskRunner\Exceptions\ReQueueException;
-use TaskRunner\Exceptions\WorkerClassException;
-use Utils;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\Context;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Commons\SignalHandlerTrait;
+use Utils\TaskRunner\Exceptions\EmptyElementException;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\FrameException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\TaskRunner\Exceptions\WorkerClassException;
+use Utils\Tools\Utils;
 
-include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
+include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/lib/Bootstrap.php";
 Bootstrap::start();
 
 /**
@@ -67,7 +67,7 @@ class Executor implements SplObserver {
     protected int $_frameID = 0;
 
     /**
-     * Flag for control the instance running status. Setting to false cause the Executor process to stop.
+     * Flag for control the instance running status. Setting to false causes the Executor process to stop.
      *
      * @var bool
      */
@@ -91,7 +91,7 @@ class Executor implements SplObserver {
      * @param      $_msg
      */
     protected function _logMsg( $_msg ) {
-        if ( INIT::$DEBUG ) {
+        if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
             Log::doJsonLog( $_msg );
         }
@@ -112,9 +112,9 @@ class Executor implements SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID          = posix_getpid();
-        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . INIT::$INSTANCE_ID;
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
-        Log::$fileName = $_context->loggerName;
+        Log::setLogFileName( $_context->loggerName );
 
         $this->_executionContext = $_context;
 
@@ -122,7 +122,7 @@ class Executor implements SplObserver {
 
             $this->_queueHandler = AMQHandler::getNewInstanceForDaemons();
 
-            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executor_instance_id ) ) {
+            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, [ $this->_executor_instance_id ] ) ) {
                 throw new Exception( "(Executor " . $this->_executor_instance_id . ") : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
                 $this->_logMsg( "(Executor " . $this->_executor_instance_id . ") : spawned !!!" );
@@ -187,7 +187,7 @@ class Executor implements SplObserver {
 
             } catch ( Exception $e ) {
 
-//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
+//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in the next cycle." );
 //                $this->_logMsg( $e->getMessage() );
                 continue;
 
@@ -199,7 +199,7 @@ class Executor implements SplObserver {
             try {
 
                 /**
-                 * Do not re-instantiate an already existent object
+                 * Don't re-instantiate an already existent object
                  */
                 if ( $this->_worker == null || ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ) {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
@@ -276,7 +276,7 @@ class Executor implements SplObserver {
             if ( $msgFrame instanceof Frame && ( $msgFrame->getCommand() == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->getHeaders() ) ) ) {
 
                 $this->_frameID++;
-                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame {$this->_frameID}" );
+                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame $this->_frameID" );
 
                 $queueElement = json_decode( $msgFrame->body, true );
 
@@ -334,7 +334,7 @@ class Executor implements SplObserver {
         $this->_queueHandler->getClient()->disconnect();
 
         //SHUTDOWN
-        $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         $this->_logMsg( $msg );
 
         die();
@@ -365,9 +365,9 @@ class Executor implements SplObserver {
         /**
          * @var $subject AbstractWorker
          */
-        Log::$fileName = $subject->getLoggerName();
+        Log::setLogFileName( $subject->getLoggerName() );
         $this->_logMsg( $subject->getLogMsg() );
-        Log::$fileName = $this->_executionContext->loggerName;
+        Log::setLogFileName( $this->_executionContext->loggerName );
 
     }
 

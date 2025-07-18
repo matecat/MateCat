@@ -1,24 +1,25 @@
 <?php
 
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 
 
 /**
  * @group  regression
- * @covers EnginesModel_EngineStruct::offsetExists
+ * @covers EngineStruct::offsetExists
  * User: dinies
  * Date: 20/04/16
  * Time: 19.10
  */
 class OffsetExistsTest extends AbstractTest {
     /**
-     * @var EnginesModel_EngineStruct
+     * @var EngineStruct
      */
     protected $engine_struct_param;
 
     public function setUp(): void {
         parent::setUp();
-        $this->engine_struct_param                          = new EnginesModel_EngineStruct();
+        $this->engine_struct_param                          = new EngineStruct();
         $this->engine_struct_param->id                      = 999; //sample value
         $this->engine_struct_param->name                    = "Moses_bar_and_foo";
         $this->engine_struct_param->description             = "Machine translation from bar and foo.";
@@ -40,7 +41,7 @@ class OffsetExistsTest extends AbstractTest {
      * @return bool
      * It controls if the given field exists ( != NULL)  in the struct.
      * @group  regression
-     * @covers EnginesModel_EngineStruct::getStruct
+     * @covers EngineStruct::getStruct
      */
     public function test_offsetExists_id_field() {
 
