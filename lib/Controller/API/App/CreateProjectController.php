@@ -28,6 +28,7 @@ use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara;
 use Utils\Engines\MMT;
 use Utils\Langs\Languages;
 use Utils\Registry\AppConfig;

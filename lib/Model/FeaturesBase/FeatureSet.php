@@ -184,6 +184,8 @@ class FeatureSet implements FeatureSetInterface {
             if ( $concreteClass !== null ) {
                 return $concreteClass->isForceableOnProject();
             }
+
+            return false;
         } );
 
         $this->merge( $returnable );
@@ -219,6 +221,7 @@ class FeatureSet implements FeatureSetInterface {
             if($obj !== null){
                 return $obj->isAutoActivableOnProject();
             }
+            return false;
         } );
 
         $this->merge( array_map( function ( BaseFeature $feature ) {
