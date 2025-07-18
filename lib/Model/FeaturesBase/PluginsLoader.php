@@ -6,6 +6,7 @@ use DirectoryIterator;
 use Klein\Klein;
 use Klein\Request;
 use Plugins\Features\BaseFeature;
+use Plugins\Features\UnknownFeature;
 use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -40,7 +41,7 @@ class PluginsLoader {
 
     protected array $PLUGIN_CLASSES = [];
 
-    protected array $PLUGIN_PATHS      = [];
+    protected array $PLUGIN_PATHS = [];
 
     public static function getValidCodes(): array {
         return static::getInstance()->VALID_CODES;
@@ -105,14 +106,15 @@ class PluginsLoader {
      *
      * @return string
      */
-    public static function getPluginClass( string $code ): string {
-        $instance = static::getInstance();
-        if ( !isset( $instance->PLUGIN_CLASSES[ $code ] ) ) {
+    public static function getPluginClass( string $code ): ?string {
+        $instance  = static::getInstance();
+        $className = $instance->PLUGIN_CLASSES[ $code ] ?? null;
+        if ( !$className ) {
             //try default autoloading for internal plugins
-            return '\\Plugins\\Features\\' . Utils::underscoreToCamelCase( $code );
+            $className = '\\Plugins\\Features\\' . Utils::underscoreToCamelCase( $code );
         }
 
-        return $instance->PLUGIN_CLASSES[ $code ];
+        return class_exists( $className ) ? $className : UnknownFeature::class;
     }
 
     /**
@@ -179,13 +181,14 @@ class PluginsLoader {
              *             http://xxxx/review_extended/quality_report/xxx/xxxxxxx
              */
             $cls = static::getPluginClass( $path[ 2 ] );
-
-            $klein->with( "/plugins/" . $path[ 2 ], function () use ( $cls, $klein ) {
-                /**
-                 * @var $cls BaseFeature
-                 */
-                $cls::loadRoutes( $klein );
-            } );
+            if ( $cls ) {
+                $klein->with( "/plugins/" . $path[ 2 ], function () use ( $cls, $klein ) {
+                    /**
+                     * @var $cls BaseFeature
+                     */
+                    $cls::loadRoutes( $klein );
+                } );
+            }
 
         }
 

@@ -153,8 +153,8 @@ class SegmentFilterDao extends AbstractDao {
     }
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
-     * @param FilterDefinition      $filter
+     * @param JobStruct        $chunk
+     * @param FilterDefinition $filter
      *
      * @return object
      */

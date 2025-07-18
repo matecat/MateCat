@@ -2,11 +2,13 @@
 
 
 namespace Plugins\Features\SegmentFilter\Controller\API;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
+use Model\Jobs\JobStruct;
 use Plugins\Features\SegmentFilter\Model\FilterDefinition;
 use Plugins\Features\SegmentFilter\Model\SegmentFilterModel;
 
@@ -25,11 +27,11 @@ class FilterController extends KleinController {
     private FilterDefinition $filter;
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): FilterController {
+    public function setChunk( JobStruct $chunk ): FilterController {
         $this->chunk = $chunk;
 
         return $this;

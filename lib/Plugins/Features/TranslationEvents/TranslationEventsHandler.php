@@ -153,7 +153,7 @@ class TranslationEventsHandler {
         if ( !$event->isFinalRevisionFlagAllowed() ) {
             $eventStruct->final_revision = 0;
         } else {
-            $eventStruct->final_revision = (int)$eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
+            $eventStruct->final_revision = $eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
         }
 
         $eventStruct->id = TranslationEventDao::insertStruct( $eventStruct );

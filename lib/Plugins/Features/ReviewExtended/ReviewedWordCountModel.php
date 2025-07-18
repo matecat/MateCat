@@ -292,7 +292,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
         $emails                   = [];
         $userWhoChangedTheSegment = $this->_event->getUser();
-        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ];
+        $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ] ?? null;
 
         $serialized_issues = [];
 

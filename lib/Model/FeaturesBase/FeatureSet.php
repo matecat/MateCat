@@ -214,9 +214,7 @@ class FeatureSet implements FeatureSetInterface {
         }, $features );
 
         $returnable = array_filter( $objs, function ( ?BaseFeature $obj ) {
-            if($obj !== null){
-                return $obj->isAutoActivableOnProject();
-            }
+            return $obj->isAutoActivableOnProject();
         } );
 
         $this->merge( array_map( function ( BaseFeature $feature ) {
@@ -246,29 +244,27 @@ class FeatureSet implements FeatureSetInterface {
 
             $obj = $feature->toNewObject();
 
-            if ( !is_null( $obj ) ) {
-                if ( method_exists( $obj, $method ) ) {
-                    array_shift( $args );
-                    array_unshift( $args, $filterable );
+            if ( method_exists( $obj, $method ) ) {
+                array_shift( $args );
+                array_unshift( $args, $filterable );
 
-                    try {
-                        /**
-                         * There may be the need to avoid a filter to be executed before or after other ones.
-                         * To solve this problem we could always pass last argument to call_user_func_array which
-                         * contains a list of executed feature codes.
-                         *
-                         * Example: $args + [ $executed_features ]
-                         *
-                         * This way plugins have the chance to decide wether to change the value, throw an exception or
-                         * do whatever they need to based on the behaviour of the other features.
-                         *
-                         */
-                        $filterable = call_user_func_array( [ $obj, $method ], $args );
-                    } catch ( ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e ) {
-                        throw $e;
-                    } catch ( Exception $e ) {
-                        Log::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
-                    }
+                try {
+                    /**
+                     * There may be the need to avoid a filter to be executed before or after other ones.
+                     * To solve this problem we could always pass last argument to call_user_func_array which
+                     * contains a list of executed feature codes.
+                     *
+                     * Example: $args + [ $executed_features ]
+                     *
+                     * This way plugins have the chance to decide wether to change the value, throw an exception or
+                     * do whatever they need to based on the behaviour of the other features.
+                     *
+                     */
+                    $filterable = call_user_func_array( [ $obj, $method ], $args );
+                } catch ( ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e ) {
+                    throw $e;
+                } catch ( Exception $e ) {
+                    Log::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
                 }
             }
         }
@@ -417,19 +413,17 @@ class FeatureSet implements FeatureSetInterface {
             // flat dependency management
             $baseFeature = $feature->toNewObject();
 
-            if($baseFeature !== null){
-                $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
 
-                $deps = [];
+            $deps = [];
 
-                if ( !$this->_ignoreDependencies ) {
-                    $deps = array_map( function ( $code ) {
-                        return new BasicFeatureStruct( [ 'feature_code' => $code ] );
-                    }, $baseFeature->getDependencies() );
-                }
-
-                $all_features = array_merge( $all_features, $deps, [ $feature ] );
+            if ( !$this->_ignoreDependencies ) {
+                $deps = array_map( function ( $code ) {
+                    return new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                }, $baseFeature->getDependencies() );
             }
+
+            $all_features = array_merge( $all_features, $deps, [ $feature ] );
         }
 
         /** @var BasicFeatureStruct $feature */

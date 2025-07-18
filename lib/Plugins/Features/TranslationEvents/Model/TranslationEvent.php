@@ -4,6 +4,7 @@ namespace Plugins\Features\TranslationEvents\Model;
 
 use Error;
 use Exception;
+use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryWithCategoryStruct;
@@ -11,6 +12,7 @@ use Model\Segments\SegmentDao;
 use Model\Segments\SegmentStruct;
 use Model\Translations\SegmentTranslationStruct;
 use Model\Users\UserStruct;
+use ReflectionException;
 use RuntimeException;
 use Utils\Constants\SourcePages;
 use Utils\Constants\TranslationStatus;
@@ -28,7 +30,7 @@ class TranslationEvent {
     protected SegmentTranslationStruct $wanted_translation;
 
     /**
-     * @var \Model\Users\UserStruct|null
+     * @var UserStruct|null
      */
     protected ?UserStruct $user;
 
@@ -80,10 +82,10 @@ class TranslationEvent {
     private array $issues_to_delete = [];
 
     /**
-     * @param \Model\Translations\SegmentTranslationStruct $old_translation
-     * @param SegmentTranslationStruct                     $translation
-     * @param \Model\Users\UserStruct|null                 $user
-     * @param int                                          $source_page_code
+     * @param SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $translation
+     * @param UserStruct|null          $user
+     * @param int                      $source_page_code
      *
      */
     public function __construct( SegmentTranslationStruct $old_translation,
@@ -108,14 +110,14 @@ class TranslationEvent {
 
 
     /**
-     * @return \Model\Translations\SegmentTranslationStruct
+     * @return SegmentTranslationStruct
      */
     public function getWantedTranslation(): SegmentTranslationStruct {
         return $this->wanted_translation;
     }
 
     /**
-     * @return \Model\Users\UserStruct|null
+     * @return UserStruct|null
      * @throws Exception
      */
     public function getUser(): ?UserStruct {
@@ -158,10 +160,11 @@ class TranslationEvent {
     }
 
     /**
-     * @return \Model\Segments\SegmentStruct
+     * @return SegmentStruct
+     * @throws ReflectionException
      */
     public function getSegmentStruct(): ?SegmentStruct {
-        $dao = new SegmentDao( \Model\DataAccess\Database::obtain() );
+        $dao = new SegmentDao( Database::obtain() );
 
         return $dao->getByChunkIdAndSegmentId(
                 $this->chunk->id,
@@ -171,7 +174,7 @@ class TranslationEvent {
     }
 
     /**
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      */
     public function getChunk(): ?JobStruct {
         return $this->chunk;
@@ -326,7 +329,7 @@ class TranslationEvent {
 
     /**
      * This flag is meant to force setting the final_revision flag to 0
-     * For events like a "GREEN" ICE acceptance without modification in R1 phase.
+     * For events like a "GREEN" ICE acceptance without modification in the R1 phase.
      * These events by definition should be registered but not set as final_revision (no modification means any revision)
      *
      * @return bool
