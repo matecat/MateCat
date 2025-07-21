@@ -250,6 +250,7 @@ export const ModifyTeam = ({team}) => {
                 type="text"
                 value={teamName}
                 onChange={(e) => setTeamName(e.currentTarget.value)}
+                autoFocus
               />
               <Button
                 type={BUTTON_TYPE.PRIMARY}
@@ -261,7 +262,10 @@ export const ModifyTeam = ({team}) => {
               <Button
                 type={BUTTON_TYPE.WARNING}
                 size={BUTTON_SIZE.ICON_STANDARD}
-                onClick={() => setIsModifyingName(false)}
+                onClick={() => {
+                  setIsModifyingName(false)
+                  setTeamName(teamState.get('name'))
+                }}
               >
                 <IconClose />
               </Button>
