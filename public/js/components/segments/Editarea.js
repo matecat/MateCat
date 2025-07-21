@@ -1194,6 +1194,10 @@ class Editarea extends React.Component {
           [DraftMatecatConstants.QA_BLACKLIST_DECORATOR]: false,
         }
       }
+      editorState = EditorState.acceptSelection(
+        editorState,
+        editorState.getSelection().set('hasFocus', true),
+      )
       this.setState(
         () => ({
           activeDecorators: newActiveDecorators,
