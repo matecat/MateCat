@@ -161,13 +161,14 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->suggestion_position    = ( $this->data[ 'chosen_suggestion_index' ] !== null ? $this->data[ 'chosen_suggestion_index' ] : $old_translation->suggestion_position );
             $new_translation->warning                = $check->thereAreWarnings();
             $new_translation->translation_date       = date( "Y-m-d H:i:s" );
-            $new_translation->suggestion             = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
+            $new_translation->suggestion             = $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
             $new_translation->suggestion_source      = $old_translation->suggestion_source;
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
             if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_old_suggestion ) ) {
-                $new_translation->suggestion = $client_old_suggestion->translation;
+
+                $new_translation->suggestion = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
                 // update suggestion match
                 if ( $client_old_suggestion->match == "MT" ) {
@@ -685,7 +686,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
         if (
                 !empty( $old_suggestion ) and
-                isset( $old_suggestion->translation ) and
+                isset( $old_suggestion->raw_translation ) and
                 isset( $old_suggestion->match ) and
                 isset( $old_suggestion->created_by )
         ) {
