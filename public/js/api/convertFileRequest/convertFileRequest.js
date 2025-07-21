@@ -17,6 +17,7 @@ export const convertFileRequest = async ({
   target_lang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
+  filters_extraction_parameters_template,
   restarted_conversion,
 }) => {
   const dataParams = {
@@ -26,6 +27,7 @@ export const convertFileRequest = async ({
     target_lang,
     segmentation_rule,
     filters_extraction_parameters_template_id,
+    filters_extraction_parameters_template,
     restarted_conversion,
   }
   const formData = new FormData()
@@ -43,7 +45,7 @@ export const convertFileRequest = async ({
   if (!response.ok) {
     if (response.headers.get('Content-Length') !== '0') {
       const data = await response.json()
-      return Promise.reject({response, errors: data.errors ?? data})
+      return Promise.reject({response, errors: data.errors ?? [], data})
     } else {
       return Promise.reject({response})
     }

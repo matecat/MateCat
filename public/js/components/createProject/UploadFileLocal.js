@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useContext,
   useRef,
+  useMemo,
 } from 'react'
 import {fileUpload} from '../../api/fileUpload'
 import {convertFileRequest} from '../../api/convertFileRequest'
@@ -18,6 +19,7 @@ import IconClose from '../icons/IconClose'
 import {PROGRESS_BAR_SIZE, ProgressBar} from '../common/ProgressBar'
 import {getPrintableFileSize} from './UploadFile'
 import {CreateProjectContext} from './CreateProjectContext'
+import {isEqual} from 'lodash'
 
 const EXTENSIONS = {
   tmx: 'tmx',
@@ -49,14 +51,44 @@ function UploadFileLocal() {
     tmKeys,
     setTmKeys,
     modifyingCurrentTemplate,
+    fileImportFiltersParamsTemplates,
   } = useContext(CreateProjectContext)
   const segmentationRule = currentProjectTemplate?.segmentationRule.id
   const extractionParameterTemplateId =
     currentProjectTemplate?.filters_template_id
+
+  const currentFiltersExtractionParameters = useMemo(() => {
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
+      (template) =>
+        template.id === extractionParameterTemplateId && template.isTemporary,
+    )
+
+    return unsavedTemplate
+  }, [
+    extractionParameterTemplateId,
+    fileImportFiltersParamsTemplates?.templates,
+  ])
+
   const filesInterval = useRef([])
+
+  const previousFiltersExtrationParameters = useRef()
+
   useEffect(() => {
     restartConversions()
   }, [sourceLang, extractionParameterTemplateId, segmentationRule])
+
+  useEffect(() => {
+    if (
+      !isEqual(
+        currentFiltersExtractionParameters,
+        previousFiltersExtrationParameters.current,
+      )
+    )
+      restartConversions()
+
+    previousFiltersExtrationParameters.current =
+      currentFiltersExtractionParameters
+  }, [currentFiltersExtractionParameters])
 
   useEffect(() => {
     const hasIncompleteFiles =
@@ -71,6 +103,7 @@ function UploadFileLocal() {
       )
     }
   }, [files])
+
   const handleFiles = (selectedFiles) => {
     const fileList = Array.from(selectedFiles).map((file) => {
       let name = file.name
@@ -144,34 +177,54 @@ function UploadFileLocal() {
           )
           const interval = startConvertFakeProgress(file)
           filesInterval.current.push(interval)
+
           convertFileRequest({
             file_name: name,
             source_lang: sourceLang.code,
             target_lang: targetLangs.map((lang) => lang.id).join(),
             segmentation_rule: segmentationRule,
-            filters_extraction_parameters_template_id:
-              extractionParameterTemplateId,
+            ...(typeof currentFiltersExtractionParameters === 'object'
+              ? {
+                  filters_extraction_parameters_template: JSON.stringify(
+                    currentFiltersExtractionParameters,
+                  ),
+                }
+              : {
+                  filters_extraction_parameters_template_id:
+                    extractionParameterTemplateId,
+                }),
             restarted_conversion: false,
           })
             .then(({data, warnings}) => {
               clearInterval(interval)
               setUploadedFilesNames((prev) => prev.concat([name]))
               if (data.data.zipFiles) {
-                const zipFiles = JSON.parse(data.data.zipFiles)
-                zipFiles.forEach((zipFile) => {
-                  setFiles((prevFiles) =>
-                    prevFiles.concat({
-                      name: zipFile.name,
-                      uploadProgress: 100,
-                      convertedProgress: 100,
-                      converted: true,
-                      uploaded: true,
-                      error: null,
-                      zipFolder: true,
-                      size: zipFile.size,
-                    }),
-                  )
-                  setUploadedFilesNames((prev) => prev.concat([zipFile.name]))
+                data.data.zipFiles.reverse().forEach((zipFile) => {
+                  setFiles((prevFiles) => {
+                    const index = prevFiles.findIndex((cf) => cf.name === name)
+                    return [
+                      ...prevFiles.slice(0, index + 1),
+                      {
+                        name: zipFile.name,
+                        uploadProgress: 100,
+                        convertedProgress: 100,
+                        converted: true,
+                        uploaded: true,
+                        error: null,
+                        zipFolder: true,
+                        size: zipFile.size,
+                      },
+                      ...prevFiles.slice(index + 1),
+                    ]
+                  })
+                  setUploadedFilesNames((prev) => {
+                    const index = prev.findIndex((cf) => cf === name)
+                    return [
+                      ...prev.slice(0, index + 1),
+                      zipFile.name,
+                      ...prev.slice(index + 1),
+                    ]
+                  })
                 })
               }
               setFiles((prevFiles) =>
@@ -193,8 +246,39 @@ function UploadFileLocal() {
               }
               CreateProjectActions.enableAnalyzeButton(true)
             })
-            .catch(({errors}) => {
-              if (errors?.length > 0) {
+            .catch(({data, errors}) => {
+              clearInterval(interval)
+              if (data.data.zipFiles && data) {
+                data.data.zipFiles.forEach((zipFile) => {
+                  setFiles((prevFiles) =>
+                    prevFiles.concat({
+                      name: zipFile.name,
+                      uploadProgress: 100,
+                      convertedProgress: 100,
+                      converted: true,
+                      uploaded: true,
+                      error: errors.find((item) => item.name === zipFile.name)
+                        ? errors.find((item) => item.name === zipFile.name)
+                            .message
+                        : false,
+                      zipFolder: true,
+                      size: zipFile.size,
+                    }),
+                  )
+                  setFiles((prevFiles) =>
+                    prevFiles.map((f) =>
+                      f.file === file
+                        ? {
+                            ...f,
+                            convertedProgress: 100,
+                            converted: true,
+                          }
+                        : f,
+                    ),
+                  )
+                  setUploadedFilesNames((prev) => prev.concat([zipFile.name]))
+                })
+              } else if (errors?.length > 0) {
                 setFiles((prevFiles) =>
                   prevFiles.map((f) =>
                     f.file === file
@@ -206,19 +290,19 @@ function UploadFileLocal() {
                       : f,
                   ),
                 )
-                return
+              } else {
+                setFiles((prevFiles) =>
+                  prevFiles.map((f) =>
+                    f.file === file
+                      ? {
+                          ...f,
+                          uploaded: false,
+                          error: 'Server error, try again.',
+                        }
+                      : f,
+                  ),
+                )
               }
-              setFiles((prevFiles) =>
-                prevFiles.map((f) =>
-                  f.file === file
-                    ? {
-                        ...f,
-                        uploaded: false,
-                        error: 'Server error, try again.',
-                      }
-                    : f,
-                ),
-              )
             })
         }
       }
@@ -256,6 +340,7 @@ function UploadFileLocal() {
     setFiles((prevFiles) =>
       prevFiles.map((f) => ({...f, converted: false, convertedProgress: 0})),
     )
+
     files.forEach((f) => {
       if (f.uploaded && !f.error) {
         const interval = startConvertFakeProgress(f.file)
@@ -265,8 +350,16 @@ function UploadFileLocal() {
           source_lang: sourceLang.code,
           target_lang: targetLangs.map((lang) => lang.id).join(),
           segmentation_rule: segmentationRule,
-          filters_extraction_parameters_template_id:
-            extractionParameterTemplateId,
+          ...(typeof currentFiltersExtractionParameters === 'object'
+            ? {
+                filters_extraction_parameters_template: JSON.stringify(
+                  currentFiltersExtractionParameters,
+                ),
+              }
+            : {
+                filters_extraction_parameters_template_id:
+                  extractionParameterTemplateId,
+              }),
         }).then(({data, errors, warnings}) => {
           clearInterval(interval)
           setFiles((prevFiles) =>
@@ -471,7 +564,10 @@ function UploadFileLocal() {
         <>
           <div className="upload-files-list">
             {files.map((f, idx) => (
-              <div key={idx} className="file-item">
+              <div
+                key={idx}
+                className={`file-item ${f.zipFolder ? 'zip-folder' : ''}`}
+              >
                 <div className="file-item-name">
                   <span
                     className={`file-icon ${CommonUtils.getIconClass(f.ext)}`}
