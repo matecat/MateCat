@@ -6,20 +6,20 @@
  * Time: 16:29
  */
 
-namespace Features\TranslationEvents;
+namespace Plugins\Features\TranslationEvents;
 
-use Constants;
-use Constants_TranslationStatus;
 use Exception;
-use Exceptions\ValidationError;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\Model\TranslationEventDao;
-use Features\TranslationEvents\Model\TranslationEventStruct;
-use FeatureSet;
-use Jobs_JobStruct;
-use Projects_ProjectStruct;
-use TransactionalTrait;
+use Model\DataAccess\TransactionalTrait;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
+use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use Utils\Constants\SourcePages;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEventsHandler {
 
@@ -36,21 +36,21 @@ class TranslationEventsHandler {
     protected FeatureSet $_featureSet;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected Jobs_JobStruct $_chunk;
+    protected JobStruct $_chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $_project;
+    protected ProjectStruct $_project;
 
     /**
      * TranslationEventsHandler constructor.
      *
-     * @param Jobs_JobStruct $chunkStruct
+     * @param JobStruct $chunkStruct
      */
-    public function __construct( Jobs_JobStruct $chunkStruct ) {
+    public function __construct( JobStruct $chunkStruct ) {
         $this->_chunk = $chunkStruct;
     }
 
@@ -85,18 +85,18 @@ class TranslationEventsHandler {
     }
 
     /**
-     * @return Projects_ProjectStruct
+     * @return ProjectStruct
      */
-    public function getProject(): Projects_ProjectStruct {
+    public function getProject(): ProjectStruct {
         return $this->_project;
     }
 
     /**
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      * @return $this
      */
-    public function setProject( Projects_ProjectStruct $project ): TranslationEventsHandler {
+    public function setProject( ProjectStruct $project ): TranslationEventsHandler {
         $this->_project = $project;
 
         return $this;
@@ -110,15 +110,15 @@ class TranslationEventsHandler {
     public function prepareEventStruct( TranslationEvent $event ) {
 
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], Constants_TranslationStatus::$REVISION_STATUSES ) &&
-                $event->getSourcePage() < Constants::SOURCE_PAGE_REVISION
+                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$REVISION_STATUSES ) &&
+                $event->getSourcePage() < SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting revised state from translation is not allowed.', -2000 );
         }
 
         if (
-                in_array( $event->getWantedTranslation()[ 'status' ], Constants_TranslationStatus::$TRANSLATION_STATUSES ) &&
-                $event->getSourcePage() >= Constants::SOURCE_PAGE_REVISION
+                in_array( $event->getWantedTranslation()[ 'status' ], TranslationStatus::$TRANSLATION_STATUSES ) &&
+                $event->getSourcePage() >= SourcePages::SOURCE_PAGE_REVISION
         ) {
             throw new ValidationError( 'Setting translated state from revision is not allowed.', -2000 );
         }
@@ -153,7 +153,7 @@ class TranslationEventsHandler {
         if ( !$event->isFinalRevisionFlagAllowed() ) {
             $eventStruct->final_revision = 0;
         } else {
-            $eventStruct->final_revision = (int)$eventStruct->source_page > Constants::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
+            $eventStruct->final_revision = $eventStruct->source_page > SourcePages::SOURCE_PAGE_TRANSLATE && !$event->isADraftChange();
         }
 
         $eventStruct->id = TranslationEventDao::insertStruct( $eventStruct );
@@ -211,9 +211,9 @@ class TranslationEventsHandler {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getChunk(): Jobs_JobStruct {
+    public function getChunk(): JobStruct {
         return $this->_chunk;
     }
 

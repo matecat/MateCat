@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use INIT;
 use Klein\Response;
+use Model\Xliff\XliffConfigTemplateDao;
 use PDOException;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
-use Validator\JSONValidator;
-use Validator\JSONValidatorObject;
-use Xliff\XliffConfigTemplateDao;
+use Utils\Registry\AppConfig;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class XliffConfigTemplateController extends KleinController {
     protected function afterConstruct() {
@@ -32,7 +32,7 @@ class XliffConfigTemplateController extends KleinController {
     private function validateJSON( $json ) {
         $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
+        $jsonSchema            = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
         $validator             = new JSONValidator( $jsonSchema, true );
         $validator->validate( $validatorObject );
     }
@@ -108,7 +108,7 @@ class XliffConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $json = $this->request->body();
@@ -161,7 +161,7 @@ class XliffConfigTemplateController extends KleinController {
 
             // accept only JSON
             if ( !$this->isJsonRequest() ) {
-                throw new Exception( 'Bad Request', 400 );
+                throw new Exception( 'Bad Get', 400 );
             }
 
             $id  = (int)$this->request->param( 'id' );
@@ -203,7 +203,7 @@ class XliffConfigTemplateController extends KleinController {
 
         try {
 
-            $id  = (int)$this->request->paramsNamed()->get('id');
+            $id  = (int)$this->request->paramsNamed()->get( 'id' );
             $uid = $this->getUser()->uid;
 
             $count = XliffConfigTemplateDao::remove( $id, $uid );
@@ -237,8 +237,8 @@ class XliffConfigTemplateController extends KleinController {
      * @return object|mixed
      */
     private function getModelSchema(): object {
-        $skeletonSchema = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' ) );
-        $contentSchema  = JSONValidator::getValidJSONSchema( file_get_contents( INIT::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' ) );
+        $skeletonSchema = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' ) );
+        $contentSchema  = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' ) );
 
         $skeletonSchema->properties->rules->properties = $contentSchema->properties;
         $skeletonSchema->definitions                   = $contentSchema->definitions;

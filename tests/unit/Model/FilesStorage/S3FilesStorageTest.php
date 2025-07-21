@@ -1,9 +1,10 @@
 <?php
 
-use FilesStorage\S3FilesStorage;
 use Matecat\SimpleS3\Client;
+use Model\FilesStorage\S3FilesStorage;
 use Predis\Connection\ConnectionException;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 class S3FilesStorageTest extends AbstractTest {
 
@@ -33,9 +34,9 @@ class S3FilesStorageTest extends AbstractTest {
      * @throws Exception
      */
     public function test_creation_of_cache_package_into_a_bucket() {
-        $filePath        = INIT::$ROOT . '/tests/resources/files/txt/hello.txt';
-        $xliffPath       = INIT::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
-        $xliffPathTarget = INIT::$STORAGE_DIR . '/file-with-hello-world(1).xliff';
+        $filePath        = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
+        $xliffPath       = AppConfig::$ROOT . '/tests/resources/files/xliff/file-with-hello-world.xliff';
+        $xliffPathTarget = AppConfig::$STORAGE_DIR . '/file-with-hello-world(1).xliff';
 
         copy( $xliffPath, $xliffPathTarget ); // I copy the original xliff file because then
 
@@ -57,7 +58,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @throws Exception
      */
     public function test_copying_a_file_from_cache_package_bucket_to_file_bucket() {
-        $filePath     = INIT::$ROOT . '/tests/resources/files/txt/hello.txt';
+        $filePath     = AppConfig::$ROOT . '/tests/resources/files/txt/hello.txt';
         $sha1         = sha1_file( $filePath );
         $dateHashPath = '20191212' . DIRECTORY_SEPARATOR . $sha1;
         $lang         = 'it-IT';
@@ -89,9 +90,9 @@ class S3FilesStorageTest extends AbstractTest {
 
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
         $uploadSession     = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-        $source            = INIT::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/test.txt';
-        $source2           = INIT::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
-        $destinationFolder = INIT::$STORAGE_DIR . "/upload/" . $uploadSession;
+        $source            = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/test.txt';
+        $source2           = AppConfig::$ROOT . '/tests/resources/files/queue/' . $uploadSession . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
+        $destinationFolder = AppConfig::$STORAGE_DIR . "/upload/" . $uploadSession;
         $destination       = $destinationFolder . '/test.txt';
         $destination2      = $destinationFolder . '/aad03b600bc4792b3dc4bf3a2d7191327a482d4a|it-IT';
 
@@ -130,7 +131,7 @@ class S3FilesStorageTest extends AbstractTest {
      */
     public function test_get_hashes_from_dir() {
         $uploadSession = '{CAD1B6E1-B312-8713-E8C3-97145410FD37}';
-        $dirToScan     = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
+        $dirToScan     = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uploadSession;
 
         $hashes = $this->fs->getHashesFromDir( $dirToScan );
 
@@ -186,8 +187,8 @@ class S3FilesStorageTest extends AbstractTest {
     public function test_cache_zip_archive() {
 
         // create a backup file from fixtures folder because the folder in upload folder is deleted every time
-        $source            = INIT::$ROOT . '/tests/resources/files/zip-with-model-json.zip';
-        $destinationFolder = INIT::$STORAGE_DIR . "/files_storage/originalZip";
+        $source            = AppConfig::$ROOT . '/tests/resources/files/zip-with-model-json.zip';
+        $destinationFolder = AppConfig::$STORAGE_DIR . "/files_storage/originalZip";
         $destination       = $destinationFolder . '/zip-with-model-json.zip';
 
         if ( !file_exists( $destinationFolder ) ) {
@@ -205,7 +206,7 @@ class S3FilesStorageTest extends AbstractTest {
      * @throws Exception
      */
     public function test_link_zip_to_project() {
-        $filePath  = INIT::$ROOT . '/tests/resources/files/zip-with-model-json.zip';
+        $filePath  = AppConfig::$ROOT . '/tests/resources/files/zip-with-model-json.zip';
         $sha1      = sha1_file( $filePath );
         $date      = '2019-12-12 10:00:00';
         $idProject = 13;

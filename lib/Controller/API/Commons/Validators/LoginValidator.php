@@ -7,10 +7,10 @@
  *
  */
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
 
-use API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 
 class LoginValidator extends Base {
 

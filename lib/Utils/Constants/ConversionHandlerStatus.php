@@ -1,6 +1,6 @@
 <?php
 
-namespace Constants;
+namespace Utils\Constants;
 
 class ConversionHandlerStatus {
 

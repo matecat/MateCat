@@ -1,14 +1,14 @@
 <?php
 
-namespace XliffReplacer;
+namespace Utils\XliffReplacer;
 
 use Exception;
-use Features;
-use FeatureSet;
-use LQA\QA;
+use Matecat\SubFiltering\AbstractFilter;
 use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
+use Model\FeaturesBase\FeatureSet;
+use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 
@@ -21,17 +21,14 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     /**
      * @var string
      */
-    private $sourceLang;
+    private string $sourceLang;
 
     /**
      * @var string
      */
-    private $targetLang;
+    private string $targetLang;
 
-    /**
-     * @var Features
-     */
-    private $featureSet;
+    private FeatureSet $featureSet;
 
     /**
      * XliffReplacerCallback constructor.
@@ -42,7 +39,7 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      *
      * @throws Exception
      */
-    public function __construct( FeatureSet $featureSet, $sourceLang, $targetLang ) {
+    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang ) {
         $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
@@ -97,4 +94,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
 
         return $check->thereAreErrors();
     }
+
+    /**
+     * @param AbstractFilter|MateCatFilter $filter
+     *
+     * @return XliffReplacerCallback
+     */
+    public function setFilter( AbstractFilter $filter ): XliffReplacerCallback {
+        $this->filter = $filter;
+
+        return $this;
+}
 }

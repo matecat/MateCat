@@ -7,10 +7,10 @@
  *
  */
 
-namespace QualityReport;
+namespace Model\QualityReport;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\IDaoStruct;
 
 /**
  * @property int    $id_segment

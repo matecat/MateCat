@@ -1,11 +1,16 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Projects_ProjectDao::findByJobId
+ * @covers ProjectDao::findByJobId
  * User: dinies
  * Date: 01/07/16
  * Time: 12.02
@@ -13,17 +18,17 @@ use TestHelpers\AbstractTest;
 class FindProjectTest extends AbstractTest {
 
     /**
-     * @var Projects_ProjectDao
+     * @var ProjectDao
      */
     protected $projectDao;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
     /**
@@ -35,8 +40,8 @@ class FindProjectTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->projectDao        = new Projects_ProjectDao( $this->database_instance );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->projectDao        = new ProjectDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
@@ -49,7 +54,7 @@ class FindProjectTest extends AbstractTest {
                     )"
         );
         $pId           = $this->database_instance->getConnection()->lastInsertId();
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
+        $this->project = new ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -69,19 +74,19 @@ class FindProjectTest extends AbstractTest {
         );
 
         $jobId     = $this->database_instance->getConnection()->lastInsertId();
-        $this->job = new Jobs_JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
+        $this->job = new JobStruct( $this->database_instance->getConnection()->query( "SELECT * FROM jobs WHERE id = $jobId LIMIT 1" )->fetch() );
 
 
     }
 
     /**
      * @group  regression
-     * @covers Projects_ProjectDao::findByJobId
+     * @covers ProjectDao::findByJobId
      */
     function test_findByJobId() {
 
         $result = $this->projectDao->findByJobId( $this->job[ 'id' ] );
-        $this->assertTrue( $result instanceof Projects_ProjectStruct );
+        $this->assertTrue( $result instanceof ProjectStruct );
 
         $this->assertEquals( $this->project[ 'id' ], $result->id );
         $this->assertEquals( $this->project[ 'password' ], $result->password );
@@ -101,12 +106,12 @@ class FindProjectTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Projects_ProjectDao::findById
+     * @covers ProjectDao::findById
      */
     function test_findById() {
 
         $result = $this->projectDao->findById( $this->project[ 'id' ] );
-        $this->assertTrue( $result instanceof Projects_ProjectStruct );
+        $this->assertTrue( $result instanceof ProjectStruct );
 
         $this->assertEquals( $this->project[ 'id' ], $result->id );
         $this->assertEquals( $this->project[ 'password' ], $result->password );
@@ -126,7 +131,7 @@ class FindProjectTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Projects_ProjectDao::findByIdCustomer
+     * @covers ProjectDao::findByIdCustomer
      */
     function test_findByIdCustomer() {
 
@@ -134,7 +139,7 @@ class FindProjectTest extends AbstractTest {
         $found        = false;
         foreach ( $result_array as $first_elem_result ) {
 
-            $this->assertTrue( $first_elem_result instanceof Projects_ProjectStruct );
+            $this->assertTrue( $first_elem_result instanceof ProjectStruct );
 
             if ( $this->project[ 'id' ] == $first_elem_result->id ) { // we found the right project
 
@@ -166,12 +171,12 @@ class FindProjectTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Projects_ProjectDao::findByIdAndPassword
+     * @covers ProjectDao::findByIdAndPassword
      */
     function test_findByIdAndPassword() {
 
         $result = $this->projectDao->findByIdAndPassword( $this->project[ 'id' ], $this->project[ 'password' ] );
-        $this->assertTrue( $result instanceof Projects_ProjectStruct );
+        $this->assertTrue( $result instanceof ProjectStruct );
 
         $this->assertEquals( $this->project[ 'id' ], $result->id );
         $this->assertEquals( $this->project[ 'password' ], $result->password );

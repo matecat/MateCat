@@ -1,6 +1,7 @@
 <?php
 
 use TestHelpers\AbstractTest;
+use Utils\Tools\Utils;
 
 class StripTagsPreservingHrefsTest extends AbstractTest {
     public function testCanStripTagsFromMdaString() {

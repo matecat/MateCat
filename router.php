@@ -1,21 +1,23 @@
 <?php
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\KleinController;
-use API\Commons\Error;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Exceptions\UnprocessableException;
-use API\Commons\Exceptions\ValidationError;
-use Exceptions\ValidationError as Model_ValidationError;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\UnprocessableException;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Views\CustomPageView;
 use Klein\Klein;
-use Langs\InvalidLanguageException;
+use Model\Exceptions\ValidationError as Model_ValidationError;
+use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
-use Validator\Errors\JSONValidatorException;
-use Validator\Errors\JsonValidatorGenericException;
+use Utils\Langs\InvalidLanguageException;
+use Utils\Logger\Log;
+use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
+use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
+use View\API\Commons\Error;
 
-require_once './inc/Bootstrap.php';
+require_once './lib/Bootstrap.php';
 
 Bootstrap::start();
 
@@ -35,17 +37,39 @@ function route( string $path, string $method, array $callback ) {
         $reflect = new ReflectionClass( $callback[ 0 ] );
         /** @var KleinController $instance */
         $instance = $reflect->newInstanceArgs( func_get_args() );
-        $isView   = $instance instanceof BaseKleinViewController;
+        $isView   = $instance->isView();
         $instance->respond( $callback[ 1 ] );
     } );
 }
+
+/**
+ * Handles HTTP errors for the Klein router.
+ * Since the Klein router now manages all requests (see .htaccess),
+ * this function is triggered whenever an HTTP error occurs.
+ *
+ * Specifically, it handles 404 errors (when no routes match in Klein)
+ * by rendering a custom view for the 404 error page.
+ *
+ * @param int $code The HTTP error code.
+ */
+$klein->onHttpError( function ( int $code, Klein $klein ) {
+    // Check if the error code is 404 (page not found)
+    if ( $code == 404 ) {
+        // Create a new instance of the custom page view
+        $view = new CustomPageView();
+        // Set the view file for the 404 error page
+        $view->setView( '404.html' );
+        // Render the view with the 404 error code
+        $view->render( 404 );
+    }
+} );
 
 $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $exception ) use ( &$isView ) {
 
     if ( !$isView ) {
 
         $klein->response()->noCache();
-        Log::$fileName = 'fatal_errors.txt';
+        Log::setLogFileName( 'fatal_errors.txt' );
 
         switch ( get_class( $exception ) ) {
             case \Swaggest\JsonSchema\Exception::class:
@@ -65,12 +89,12 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
             case AuthorizationError::class: // invalid permissions to access the resource
-            case \Exceptions\AuthorizationError::class:
+            case \Model\Exceptions\AuthorizationError::class:
                 $klein->response()->code( 403 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
             case NotFoundException::class:
-            case Exceptions\NotFoundException::class:
+            case Model\Exceptions\NotFoundException::class:
                 Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
                 Log::doJsonLog( json_encode( ( new Error( $exception ) )->render( true ) ) );
                 $klein->response()->code( 404 );
@@ -106,6 +130,6 @@ require './lib/Routes/api_v3_routes.php';
 require './lib/Routes/gdrive_routes.php';
 require './lib/Routes/oauth_routes.php';
 require './lib/Routes/app_routes.php';
-Features::loadRoutes( $klein );
+PluginsLoader::loadRoutes( $klein );
 
 $klein->dispatch();

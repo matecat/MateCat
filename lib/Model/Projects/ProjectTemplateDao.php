@@ -1,29 +1,29 @@
 <?php
 
-namespace Projects;
+namespace Model\Projects;
 
-use DataAccess\AbstractDao;
-use Database;
 use DateTime;
-use Engine;
 use Exception;
-use Filters\FiltersConfigTemplateDao;
-use Langs\Languages;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
-use PayableRates\CustomPayableRateDao;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\Filters\FiltersConfigTemplateDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\PayableRates\CustomPayableRateDao;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Model\Users\UserStruct;
+use Model\Xliff\XliffConfigTemplateDao;
 use PDO;
-use QAModelTemplate\QAModelTemplateDao;
 use ReflectionException;
 use stdClass;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
-use Users_UserStruct;
-use Utils;
-use Xliff\XliffConfigTemplateDao;
+use Utils\Engines\EnginesFactory;
+use Utils\Langs\Languages;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\Tools\Utils;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -107,13 +107,13 @@ class ProjectTemplateDao extends AbstractDao {
     }
 
     /**
-     * @param string           $json
-     * @param Users_UserStruct $user
+     * @param string     $json
+     * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function createFromJSON( string $json, Users_UserStruct $user ): ProjectTemplateStruct {
+    public static function createFromJSON( string $json, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct = new ProjectTemplateStruct();
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid );
@@ -127,12 +127,12 @@ class ProjectTemplateDao extends AbstractDao {
      * @param ProjectTemplateStruct $projectTemplateStruct
      * @param string                $json
      * @param int                   $id
-     * @param Users_UserStruct      $user
+     * @param UserStruct            $user
      *
      * @return ProjectTemplateStruct
      * @throws Exception
      */
-    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, Users_UserStruct $user ): ProjectTemplateStruct {
+    public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
@@ -153,12 +153,12 @@ class ProjectTemplateDao extends AbstractDao {
      * - tm
      *
      * @param ProjectTemplateStruct $projectTemplateStruct
-     * @param Users_UserStruct      $user
+     * @param UserStruct            $user
      *
      * @throws ReflectionException
      * @throws Exception
      */
-    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, Users_UserStruct $user ) {
+    private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
@@ -250,7 +250,7 @@ class ProjectTemplateDao extends AbstractDao {
             $mt = $projectTemplateStruct->getMt();
 
             if ( isset( $mt->id ) ) {
-                $engine = Engine::getInstance( $mt->id );
+                $engine = EnginesFactory::getInstance( $mt->id );
 
                 if ( empty( $engine ) ) {
                     throw new Exception( "Not existing engine." );
@@ -259,7 +259,7 @@ class ProjectTemplateDao extends AbstractDao {
                 $engineRecord = $engine->getEngineRecord();
 
                 if ( $engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid ) {
-                    throw new Exception( "Engine doesn't belong to the user.", 403 );
+                    throw new Exception( "EnginesFactory doesn't belong to the user.", 403 );
                 }
             }
         }
@@ -267,13 +267,13 @@ class ProjectTemplateDao extends AbstractDao {
         // check tm
         if ( $projectTemplateStruct->tm !== null ) {
             $tmKeys = $projectTemplateStruct->getTm();
-            $mkDao  = new TmKeyManagement_MemoryKeyDao();
+            $mkDao  = new MemoryKeyDao();
 
             foreach ( $tmKeys as $tmKey ) {
                 $keyRing = $mkDao->read(
-                        ( new TmKeyManagement_MemoryKeyStruct( [
+                        ( new MemoryKeyStruct( [
                                 'uid'    => $projectTemplateStruct->uid,
-                                'tm_key' => new TmKeyManagement_TmKeyStruct( $tmKey->key )
+                                'tm_key' => new TmKeyStruct( $tmKey )
                         ] )
                         )
                 );

@@ -1,20 +1,24 @@
 <?php
 
-use DataAccess\AbstractDao;
+namespace Model\ApiKeys;
 
-class ApiKeys_ApiKeyDao extends AbstractDao {
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use PDO;
+
+class ApiKeyDao extends AbstractDao {
 
     /**
      * @param       $key
      *
-     * @return ApiKeys_ApiKeyStruct|null
+     * @return ApiKeyStruct|null
      */
-    static function findByKey( $key ): ?ApiKeys_ApiKeyStruct {
+    static function findByKey( $key ): ?ApiKeyStruct {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND api_key = :key " );
         $stmt->execute( [ 'key' => $key ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ApiKeyStruct::class );
 
         return $stmt->fetch() ?? null;
     }
@@ -44,7 +48,7 @@ class ApiKeys_ApiKeyDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return ApiKeys_ApiKeyStruct[]
+     * @return ApiKeyStruct[]
      */
     public function getById( $id ) {
         $conn = $this->database->getConnection();
@@ -52,20 +56,20 @@ class ApiKeys_ApiKeyDao extends AbstractDao {
         $stmt = $conn->prepare( " SELECT * FROM api_keys WHERE id = ? " );
         $stmt->execute( [ $id ] );
 
-        return $stmt->fetchAll( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
+        return $stmt->fetchAll( PDO::FETCH_CLASS, ApiKeyStruct::class );
     }
 
     /**
      * @param $uid
      *
-     * @return ApiKeys_ApiKeyStruct
+     * @return ApiKeyStruct
      */
     public function getByUid( $uid ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND uid = :uid " );
         $stmt->execute( [ 'uid' => $uid ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ApiKeyStruct::class );
 
         return $stmt->fetch();
     }

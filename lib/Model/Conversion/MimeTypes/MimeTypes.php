@@ -9,15 +9,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Conversion\MimeTypes;
+namespace Model\Conversion\MimeTypes;
 
-use Conversion\MimeTypes\Constants\MimeTypesMap;
-use Conversion\MimeTypes\Guesser\FileBinaryMimeTypeGuesser;
-use Conversion\MimeTypes\Guesser\FileExtensionMimeTypeGuesser;
-use Conversion\MimeTypes\Guesser\FileinfoMimeTypeGuesser;
-use Conversion\MimeTypes\Guesser\MimeTypeGuesserInterface;
-use Conversion\MimeTypes\Guesser\SimpleMarkupMimeTypeGuesser;
 use LogicException;
+use Model\Conversion\MimeTypes\Constants\MimeTypesMap;
+use Model\Conversion\MimeTypes\Guesser\FileBinaryMimeTypeGuesser;
+use Model\Conversion\MimeTypes\Guesser\FileExtensionMimeTypeGuesser;
+use Model\Conversion\MimeTypes\Guesser\FileinfoMimeTypeGuesser;
+use Model\Conversion\MimeTypes\Guesser\MimeTypeGuesserInterface;
+use Model\Conversion\MimeTypes\Guesser\SimpleMarkupMimeTypeGuesser;
 
 /**
  * Manages MIME types and file extensions.

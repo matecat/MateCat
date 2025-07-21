@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA\SizeRestriction;
+namespace Utils\LQA\SizeRestriction;
 class EmojiUtils {
     /**
      * @see https://github.com/spatie/emoji/blob/main/src/Emoji.php
@@ -3770,7 +3770,7 @@ class EmojiUtils {
      *
      * @return int
      */
-    public static function getMatches( $string ) {
+    public static function getMatches( $string ): int {
         $count = 0;
 
         preg_match_all( self::regex(), $string, $emojiMatches );
@@ -3797,7 +3797,7 @@ class EmojiUtils {
     /**
      * @return string
      */
-    private static function regex() {
+    private static function regex(): string {
         return '/' . implode( "|", self::EMOJI_LIST ) . '/iu';
     }
 }

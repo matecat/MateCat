@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddRebuttedAtToQaEntries extends AbstractMatecatMigration {
     public $sql_up = 'ALTER TABLE `qa_entries` ADD COLUMN `rebutted_at` DATETIME;';
 

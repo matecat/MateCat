@@ -2,7 +2,7 @@
 <html dir="ltr" lang="it-IT">
     <!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
     <head>
-        <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+        <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <meta property="og:title" content="Translate a file with Matecat" />
@@ -14,113 +14,80 @@
         <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
         <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
 
-        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+        <tal:block metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
         <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
             /*<![CDATA[*/
-
-            var getStackTrace = function() {
-              var obj = {};
-              var stack;
-              //Error.captureStackTrace works on Firefox and Chrome
-              //the else for Safari
-              if (typeof Error.captureStackTrace === "function")
-                  Error.captureStackTrace(obj, getStackTrace);
-              else if (stack = new Error().stack)
-                  obj.stack = stack;
-              return obj.stack;
-            };
-            var config = {
-                job_is_splitted: ${job_is_splitted | string:false},
-                is_cattool : true,
-                basepath: '${basepath | string:/}',
-                isOpenAiEnabled: ${isOpenAiEnabled},
-                maxFileSize: ${maxFileSize},
-                maxTMXFileSize: ${maxTMXFileSize},
-                first_job_segment: '${first_job_segment}',
-                server_load_time: '${load_time}',
-                tms_enabled: ${tms_enabled | string:true},
-                mt_enabled: ${mt_enabled | string:true},
-                id_job: '${jid}',
-                id_project: '${pid}',
-                allow_link_to_analysis: '${allow_link_to_analysis}',
-                analysis_enabled: '${analysis_enabled}',
-                not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
-                footer_show_revise_link: ${footer_show_revise_link || string: false},
-                intento_providers: JSON.parse(String.raw`${php: json_encode(translation_engines_intento_providers)}`),
-                get job_id() {
-                  console.info('job_id is deprecated, use id_job instead', getStackTrace().split("\n")[2]);
-                  return this.id_job ;
-                },
-                password: '${password}',
-                currentPassword: '${currentPassword}',
-                source_rfc: '${source_code}',
-                target_rfc: '${target_code}',
-                source_code: '${source_code}',
-                target_code: '${target_code}',
-                targetIsCJK: ${targetIsCJK|string:false},
-                ownerIsMe: ${jobOwnerIsMe},
-                id_team: ${id_team | string:null},
-                team_name: '${team_name | string:null}',
-                build_number: '${build_number}',
-                warningPollingInterval: '${warningPollingInterval}',
-                segmentQACheckInterval: '${segmentQACheckInterval}',
-                alternativesEnabled: true,
-                isReview: ${isReview | string: false},
-                user_plugins: JSON.parse( '${ php: json_encode(user_plugins)}'),
-                project_plugins: JSON.parse( '${ php: json_encode(project_plugins)}'),
-                offlineModeEnabled: true,
-                splitSegmentEnabled: ${splitSegmentEnabled},
-                project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
-                mark_as_complete_button_enabled : ${mark_as_complete_button_enabled | 'false'},
-                status_labels : JSON.parse( '${status_labels}' ),
-                searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
-                active_engine: JSON.parse(String.raw`${php: json_encode(active_engine)}`),
-                isGDriveProject : ${isGDriveProject|string:false},
-                translation_matches_enabled : ${translation_matches_enabled} ,
-                isCJK: ${isCJK},
-                isAnInternalUser: ${php: var_export( !empty( isAnInternalUser ), true )},
-                isTargetRTL: ${isTargetRTL},
-                isSourceRTL: ${isSourceRTL},
-                /**
-                 * We proose that lxq_server is in a configuration file
-                 * lxq_license: {lxq_license},
-                 *
-                 * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
-                 * @see http://www.lexiqa.net
-                 *
-                */
-                lxq_license: '${lxq_license | string:}',
-                lxq_partnerid: '${lxq_partnerid | string:}',
-                lexiqa_languages: ${lexiqa_languages | string:[]},
-                lexiqaServer: '${lexiqaServer | string:}',
-
-                support_mail : '${support_mail}',
-                tag_projection_languages: ${tag_projection_languages},
-                segmentation_rule : '${segmentation_rule}',
-                segmentFilterEnabled: true,
-                enableMultiDomainApi: ${enableMultiDomainApi | string:false},
-                ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
-                revisionNumber : ${revisionNumber | string:null},
-                secondRevisionsCount : ${ secondRevisionsCount | string: 0},
-                project_name: '${pname | string: 0}',
-                review_password: '${review_password}',
-                show_tag_projection: ${show_tag_projection | string: false},
-                get_public_matches: ${get_public_matches | string: false},
-                word_count_type: '${word_count_type}'
-            };
-
-            var renderStart = new Date();
+                const config = {
+                    active_engine: ${active_engine},
+                    ajaxDomainsNumber: ${ajaxDomainsNumber | string:false},
+                    alternativesEnabled: true,
+                    allow_link_to_analysis: ${allow_link_to_analysis},
+                    basepath: '${basepath | string:/}',
+                    build_number: '${build_number}',
+                    currentPassword: '${currentPassword}',
+                    enableMultiDomainApi: ${enableMultiDomainApi | string:false},
+                    first_job_segment: '${first_job_segment}',
+                    footer_show_revise_link: ${footer_show_revise_link || string: false},
+                    get_public_matches: ${get_public_matches | string: false},
+                    id_job: ${id_job},
+                    id_project: ${id_project},
+                    id_team: ${id_team},
+                    intento_providers: ${translation_engines_intento_providers},
+                    isAnInternalUser: ${isAnInternalUser},
+                    is_cattool: true,
+                    isCJK: ${isCJK},
+                    isGDriveProject: ${isGDriveProject|string:false},
+                    isOpenAiEnabled: ${isOpenAiEnabled},
+                    isReview: ${isReview | string: false},
+                    isSourceRTL: ${isSourceRTL},
+                    isTargetRTL: ${isTargetRTL},
+                    job_is_splitted: ${job_is_splitted | string:false},
+                    lexiqaServer: '${lexiqaServer | string:}',
+                    lexiqa_languages: ${lexiqa_languages | string:[]},
+                    lxq_license: '${lxq_license | string:}',
+                    lxq_partnerid: '${lxq_partnerid | string:}',
+                    mark_as_complete_button_enabled: ${mark_as_complete_button_enabled | 'false'},
+                    maxFileSize: ${maxFileSize},
+                    maxTMXFileSize: ${maxTMXFileSize},
+                    mt_enabled: ${mt_enabled | string:true},
+                    not_empty_default_tm_key: ${not_empty_default_tm_key|string:false},
+                    offlineModeEnabled: true,
+                    ownerIsMe: ${jobOwnerIsMe},
+                    password: '${password}',
+                    project_completion_feature_enabled: ${project_completion_feature_enabled | 'false'},
+                    project_name: '${project_name | string: 0}',
+                    project_plugins: ${project_plugins},
+                    revisionNumber: ${revisionNumber | string:null},
+                    review_password: '${review_password}',
+                    searchable_statuses: ${searchable_statuses},
+                    secondRevisionsCount: ${secondRevisionsCount},
+                    segmentFilterEnabled: true,
+                    segmentQACheckInterval: ${segmentQACheckInterval},
+                    show_tag_projection: ${show_tag_projection | string: false},
+                    source_code: '${source_code}',
+                    source_rfc: '${source_code}',
+                    splitSegmentEnabled: true,
+                    status_labels: ${status_labels},
+                    support_mail: '${support_mail}',
+                    tag_projection_languages: ${tag_projection_languages},
+                    targetIsCJK: ${targetIsCJK|string:false},
+                    target_code: '${target_code}',
+                    target_rfc: '${target_code}',
+                    team_name: '${team_name | string: 0}',
+                    tms_enabled: ${tms_enabled},
+                    translation_matches_enabled: ${translation_matches_enabled},
+                    user_plugins: ${user_plugins},
+                    warningPollingInterval: ${warningPollingInterval},
+                    word_count_type: '${word_count_type}'
+                }
             /*]]>*/
         </script>
 
         <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:review_extended" type="text/javascript">
-
           /*<![CDATA[*/
-          // TODO: remove the nested one, should be nested on the client.
-          config.lqa_nested_categories = '${lqa_categories}';
-          config.lqa_flat_categories = '${lqa_flat_categories}';
+          config.lqa_nested_categories = ${lqa_categories}
+          config.lqa_flat_categories = ${lqa_flat_categories}
           /*]]>*/
-
         </script>
 
         <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
@@ -128,7 +95,6 @@
             config.overall_quality_class = '${overall_quality_class}';
             config.quality_report_href = '${quality_report_href}';
             /*]]>*/
-
         </script>
 
         <script tal:attributes="nonce x_nonce_unique_id" tal:condition="true:comments_enabled" type="text/javascript">
@@ -155,27 +121,27 @@
             config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
             config.crPlaceholderClass = '${crPlaceholderClass | null}';
             config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
-            config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
-            config.crPlaceholderRegex = ${crPlaceholderRegex | null};
-            config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
+            config.lfPlaceholderRegex = '${lfPlaceholderRegex | null}';
+            config.crPlaceholderRegex = '${crPlaceholderRegex | null}';
+            config.crlfPlaceholderRegex = '${crlfPlaceholderRegex | null}';
 
             config.tabPlaceholder       = '${tabPlaceholder | null}';
             config.tabPlaceholderClass  = '${tabPlaceholderClass | null}';
-            config.tabPlaceholderRegex  = ${tabPlaceholderRegex | null};
+            config.tabPlaceholderRegex  = '${tabPlaceholderRegex | null}';
 
             config.nbspPlaceholder       = '${nbspPlaceholder | null}';
             config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
-            config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
+            config.nbspPlaceholderRegex  = '${nbspPlaceholderRegex | null}';
             /*]]>*/
         </script>
 
 
     </head>
 
-    <body class="cattool ${job_archived}${source_rtl}${target_rtl}" tal:condition="php: !job_not_found && !job_cancelled && !job_archived">
+    <body class="cattool">
         <div class="page-content"></div>
         <tal:block metal:use-macro="templates/common.html/footer_includes" />
-        <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+        <tal:block metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
         <!--Container for Matecat Notifications-->
         <div class="notifications-wrapper"></div>
     </body>

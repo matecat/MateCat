@@ -6,10 +6,10 @@
  * Time: 17:36
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use EnginesModel_EngineStruct;
+use Model\Engines\Structs\EngineStruct;
 
 class Engine {
 
@@ -20,11 +20,11 @@ class Engine {
     }
 
     /**
-     * @param EnginesModel_EngineStruct $engine
+     * @param EngineStruct $engine
      *
      * @return array
      */
-    public function renderItem( EnginesModel_EngineStruct $engine ) {
+    public function renderItem( EngineStruct $engine ) {
         $engine_type = explode( "\\", $engine->class_load );
         return [
                 'id'          => $engine->id,
@@ -43,7 +43,7 @@ class Engine {
         }
 
         /**
-         * @var $data EnginesModel_EngineStruct[]
+         * @var $data EngineStruct[]
          */
         foreach ( $data as $k => $engine ) {
             $out[] = $this->renderItem( $engine );

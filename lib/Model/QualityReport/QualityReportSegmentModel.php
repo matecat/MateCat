@@ -6,27 +6,25 @@
  * Time: 11:21
  */
 
-namespace QualityReport;
+namespace Model\QualityReport;
 
-use CatUtils;
-use Comments_CommentDao;
-use Constants;
-use Constants_TranslationStatus;
 use Exception;
-use Features\ReviewExtended\Model\QualityReportDao;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use FeatureSet;
-use Jobs_JobStruct;
-use LQA\CategoryDao;
-use LQA\CategoryStruct;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use LQA\EntryCommentDao;
 use Matecat\SubFiltering\MateCatFilter;
-use QualityReport_QualityReportSegmentStruct;
-use Segments_SegmentDao;
-use Segments_SegmentOriginalDataDao;
+use Model\Comments\CommentDao;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobStruct;
+use Model\LQA\CategoryDao;
+use Model\LQA\CategoryStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryCommentDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentOriginalDataDao;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Utils\Constants\SourcePages;
+use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class QualityReportSegmentModel {
 
@@ -34,7 +32,7 @@ class QualityReportSegmentModel {
 
     protected $_chunkReviews;
 
-    public function __construct( Jobs_JobStruct $chunk ) {
+    public function __construct( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -47,7 +45,7 @@ class QualityReportSegmentModel {
      * @return array
      * @throws Exception
      */
-    public function getSegmentsIdForQR( $step, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( $step, int $ref_segment, $where = "after", $options = [] ) {
         if ( isset( $options[ 'filter' ][ 'issue_category' ] ) && $options[ 'filter' ][ 'issue_category' ] != 'all' ) {
             $subCategories = ( new CategoryDao() )->findByIdModelAndIdParent(
                     $this->chunk->getProject()->id_qa_model,
@@ -64,7 +62,7 @@ class QualityReportSegmentModel {
         /**
          * Validate revision_number param
          */
-        if ( !empty( $options[ 'filter' ] ) && in_array( ( $options[ 'filter' ] [ 'status' ] ?? '' ), Constants_TranslationStatus::$REVISION_STATUSES ) ) {
+        if ( !empty( $options[ 'filter' ] ) && in_array( ( $options[ 'filter' ] [ 'status' ] ?? '' ), TranslationStatus::$REVISION_STATUSES ) ) {
             if ( isset( $options[ 'filter' ][ 'revision_number' ] ) ) {
 
                 $validRevisionNumbers = array_map( function ( $chunkReview ) {
@@ -77,7 +75,7 @@ class QualityReportSegmentModel {
             }
         }
 
-        $segmentsDao = new Segments_SegmentDao();
+        $segmentsDao = new SegmentDao();
         $segments_id = $segmentsDao->getSegmentsIdForQR(
                 $this->chunk, $step, $ref_segment, $where, $options
         );
@@ -86,15 +84,15 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param QualityReport_QualityReportSegmentStruct $seg
-     * @param MateCatFilter                            $Filter
-     * @param FeatureSet                               $featureSet
-     * @param Jobs_JobStruct                           $chunk
-     * @param bool                                     $isForUI
+     * @param QualityReportSegmentStruct     $seg
+     * @param MateCatFilter                  $Filter
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
+     * @param JobStruct                      $chunk
+     * @param bool                           $isForUI
      *
      * @throws Exception
      */
-    protected function _commonSegmentAssignments( QualityReport_QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, Jobs_JobStruct $chunk, $isForUI = false ) {
+    protected function _commonSegmentAssignments( QualityReportSegmentStruct $seg, MateCatFilter $Filter, FeatureSet $featureSet, JobStruct $chunk, $isForUI = false ) {
         $seg->warnings            = $seg->getLocalWarning( $featureSet, $chunk );
         $seg->pee                 = $seg->getPEE();
         $seg->ice_modified        = $seg->isICEModified();
@@ -130,7 +128,7 @@ class QualityReportSegmentModel {
 
     /**
      * @param                               $seg
-     * @param \Comments_BaseCommentStruct[] $comments
+     * @param \Model\Comments\BaseCommentStruct[] $comments
      */
     protected function _assignComments( $seg, array $comments ) {
         foreach ( $comments as $comment ) {
@@ -152,7 +150,7 @@ class QualityReportSegmentModel {
      * @throws Exception
      */
     public function getSegmentsForQR( array $segment_ids, $isForUI = false ) {
-        $segmentsDao = new Segments_SegmentDao;
+        $segmentsDao = new SegmentDao;
         $data        = $segmentsDao->getSegmentsForQr( $segment_ids, $this->chunk->id, $this->chunk->password );
 
         $featureSet = new FeatureSet();
@@ -169,7 +167,7 @@ class QualityReportSegmentModel {
             );
         }
 
-        $commentsDao = new Comments_CommentDao;
+        $commentsDao = new CommentDao;
         $comments    = $commentsDao->getThreadsBySegments( $segment_ids, $this->chunk->id );
 
         $all_events = [];
@@ -181,7 +179,7 @@ class QualityReportSegmentModel {
 
         foreach ( $data as $index => $seg ) {
 
-            $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
+            $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
 
             /** @var MateCatFilter $Filter */
             $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap );
@@ -214,18 +212,18 @@ class QualityReportSegmentModel {
     }
 
     /**
-     * @param QualityReport_QualityReportSegmentStruct $seg
-     * @param MateCatFilter                            $Filter
-     * @param SegmentEventsStruct[]                    $events
-     * @param bool                                     $isForUI
+     * @param QualityReportSegmentStruct $seg
+     * @param MateCatFilter              $Filter
+     * @param SegmentEventsStruct[]      $events
+     * @param bool                       $isForUI
      *
      * @throws Exception
      */
     protected function _populateLastTranslationAndRevision(
-            QualityReport_QualityReportSegmentStruct $seg,
-            MateCatFilter                            $Filter,
-            array                                    $events,
-            bool                                     $isForUI = false
+            QualityReportSegmentStruct $seg,
+            MateCatFilter              $Filter,
+            array                      $events,
+            bool                       $isForUI = false
     ): void {
 
         // If the segment is pre-translated (maybe from a previously XLIFF file) and NOT modified
@@ -237,19 +235,19 @@ class QualityReportSegmentModel {
             $seg->last_revisions    = [];
             $seg->is_pre_translated = true;
             switch ( $seg->status ) {
-                case Constants_TranslationStatus::STATUS_APPROVED:
+                case TranslationStatus::STATUS_APPROVED:
                     $seg->last_revisions[] = [
                             'revision_number' => 1,
                             'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
                     ];
                     break;
-                case Constants_TranslationStatus::STATUS_APPROVED2:
+                case TranslationStatus::STATUS_APPROVED2:
                     $seg->last_revisions[] = [
                             'revision_number' => 2,
                             'translation'     => ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation
                     ];
                     break;
-                case Constants_TranslationStatus::STATUS_TRANSLATED:
+                case TranslationStatus::STATUS_TRANSLATED:
                     $seg->last_translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $seg->translation ) : $seg->translation;
                     break;
                 default:
@@ -257,7 +255,7 @@ class QualityReportSegmentModel {
                     break;
             }
 
-        } elseif ( Constants_TranslationStatus::isNotInitialStatus( $seg->status ) ) {
+        } elseif ( TranslationStatus::isNotInitialStatus( $seg->status ) ) {
 
             foreach ( $events as $event ) {
 
@@ -267,7 +265,7 @@ class QualityReportSegmentModel {
 
                 $translation = ( $isForUI ) ? $Filter->fromLayer0ToLayer2( $event->translation ) : $event->translation;
 
-                if ( $event->source_page == Constants::SOURCE_PAGE_TRANSLATE ) {
+                if ( $event->source_page == SourcePages::SOURCE_PAGE_TRANSLATE ) {
                     $seg->last_translation = $translation;
                 } else {
                     $seg->last_revisions[] = [

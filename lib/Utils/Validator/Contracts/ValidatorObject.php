@@ -1,42 +1,61 @@
 <?php
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
 use ArrayAccess;
-use DataAccess\ArrayAccessTrait;
+use Model\DataAccess\ArrayAccessTrait;
 use stdClass;
 
-abstract class ValidatorObject implements ArrayAccess {
+class ValidatorObject implements ArrayAccess {
 
     use ArrayAccessTrait;
 
     /**
      * @param stdClass $object
+     *
+     * @return ValidatorObject
      */
-    public function hydrateFromObject( stdClass $object ) {
+    public static function fromObject( stdClass $object ): ValidatorObject {
+        $that = new static();
         foreach ( get_object_vars( $object ) as $key => $value ) {
-            $this->$key = $value;
+            $that->$key = $value;
         }
+
+        return $that;
+    }
+
+    /**
+     * @param array $array
+     *
+     * @return ValidatorObject
+     */
+    public static function fromArray( array $array ): ValidatorObject {
+        $that = new static();
+        foreach ( $array as $key => $value ) {
+            $that->$key = $value;
+        }
+
+        return $that;
     }
 
     /**
      * Magic setter
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed  $value
      */
-    public function __set( $name, $value ) {
+    public function __set( string $name, $value ) {
         $this->$name = $value;
     }
 
     /**
      * Magic getter
      *
-     * @param $name
+     * @param string $name
      *
      * @return mixed
      */
-    public function __get( $name ) {
+    public function __get( string $name ) {
         if ( !property_exists( $this, $name ) ) {
             return null;
         }

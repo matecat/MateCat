@@ -7,23 +7,23 @@
  *
  */
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use AbstractControllers\IController;
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use Analysis\Health;
-use API\App\Json\Analysis\AnalysisProject;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
-use Chunks_ChunkDao;
+use Controller\Abstracts\BaseKleinViewController;
+use Controller\Abstracts\IController;
+use Controller\API\Commons\ViewValidators\ViewLoginRedirectValidator;
 use Exception;
-use INIT;
-use Jobs_JobDao;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
 use Model\Analysis\Status;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Utils;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Projects\ProjectDao;
+use Utils\AsyncTasks\Workers\Analysis\Health;
+use Utils\Registry\AppConfig;
+use Utils\Templating\PHPTalBoolean;
+use Utils\Templating\PHPTalMap;
+use Utils\Tools\Utils;
 
 class AnalyzeController extends BaseKleinViewController implements IController {
 
@@ -38,8 +38,8 @@ class AnalyzeController extends BaseKleinViewController implements IController {
      *
      * That token will be sent back to the review/confirm page on the provider website to grant it logged
      *
-     * The success Page must be set in the concrete subclass of "OutsourceTo_AbstractProvider"
-     *  Ex: "OutsourceTo_Translated"
+     * The success Page must be set in the concrete subclass of "AbstractProvider"
+     *  Ex: "OutsourceTo\Translated"
      *
      *
      * Values from the quote result will be posted there anyway.
@@ -72,7 +72,7 @@ class AnalyzeController extends BaseKleinViewController implements IController {
         $jid  = $postInput[ 'jid' ];
         $pass = $postInput[ 'password' ];
 
-        $projectStruct = Projects_ProjectDao::findById( $pid, 60 * 60 );
+        $projectStruct = ProjectDao::findById( $pid, 60 * 60 );
 
         if ( empty( $projectStruct ) ) {
             $this->setView( "project_not_found.html", [], 404 );
@@ -82,21 +82,21 @@ class AnalyzeController extends BaseKleinViewController implements IController {
         if ( !empty( $jid ) ) {
 
             // we are looking for a chunk
-            $chunkStruct = Jobs_JobDao::getByIdAndPassword( $jid, $pass );
+            $chunkStruct = JobDao::getByIdAndPassword( $jid, $pass );
             if ( empty( $chunkStruct ) || $chunkStruct->isDeleted() ) {
-                $this->setView( "project_not_found.html", [], 404 );
+                $this->setView( "job_not_found.html", [], 404 );
                 $this->render();
             }
 
             $this->setView( "jobAnalysis.html", [
-                    'jid'              => $jid,
-                    'job_password'     => $pass,
-                    'project_password' => $projectStruct->password,
+                    'jid'                  => $jid,
+                    'job_password'         => $chunkStruct->password,
+                    'project_access_token' => sha1( $projectStruct->id . $projectStruct->password ),
             ] );
 
         } else {
 
-            $chunks = ( new Chunks_ChunkDao )->getByProjectID( $projectStruct->id );
+            $chunks = ( new ChunkDao )->getByProjectID( $projectStruct->id );
 
             $notDeleted = array_filter( $chunks, function ( $element ) {
                 return !$element->isDeleted(); //retain only jobs which are not deleted
@@ -117,29 +117,23 @@ class AnalyzeController extends BaseKleinViewController implements IController {
             $this->featureSet->loadForProject( $projectStruct );
         }
 
-        $projectMetaDataDao = new Projects_MetadataDao();
-        $projectMetaData    = $projectMetaDataDao->get( $projectStruct->id, Projects_MetadataDao::FEATURES_KEY );
-
-        $projectData    = Projects_ProjectDao::getProjectAndJobData( $pid );
+        $projectData    = ProjectDao::getProjectAndJobData( $pid );
         $analysisStatus = new Status( $projectData, $this->featureSet, $this->user );
 
-        /**
-         * @var AnalysisProject $model
-         */
         $model = $analysisStatus->fetchData()->getResult();
 
         $this->addParamsToView( [
                 'pid'                     => $projectStruct->id,
                 'project_status'          => $projectStruct->status_analysis,
                 'outsource_service_login' => $this->_outsource_login_API,
-                'showModalBoxLogin'       => !$this->isLoggedIn(),
-                'project_plugins'         => $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) ?? [],
+                'showModalBoxLogin'       => new PHPTalBoolean( !$this->isLoggedIn() ),
+                'project_plugins'         => new PHPTalMap( $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() ) ?? [] ),
                 'num_segments'            => $model->getSummary()->getTotalSegments(),
                 'num_segments_analyzed'   => $model->getSummary()->getSegmentsAnalyzed(),
-                'daemon_misconfiguration' => var_export( Health::thereIsAMisconfiguration(), true ),
+                'daemon_misconfiguration' => new PHPTalBoolean( Health::thereIsAMisconfiguration() ),
                 'json_jobs'               => json_encode( $model ),
-                'split_enabled'           => true,
-                'enable_outsource'        => INIT::$ENABLE_OUTSOURCE,
+                'split_enabled'           => new PHPTalBoolean( true ),
+                'enable_outsource'        => new PHPTalBoolean( AppConfig::$ENABLE_OUTSOURCE ),
         ] );
 
         $activity             = new ActivityLogStruct();

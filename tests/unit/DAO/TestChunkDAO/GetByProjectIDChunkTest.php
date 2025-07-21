@@ -1,11 +1,16 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Chunks_ChunkDao::getByProjectID
+ * @covers ChunkDao::getByProjectID
  * User: dinies
  * Date: 30/06/16
  * Time: 18.22
@@ -13,28 +18,28 @@ use TestHelpers\AbstractTest;
 class GetByProjectIdChunkTest extends AbstractTest {
 
     /**
-     * @var Chunks_ChunkDao
+     * @var ChunkDao
      */
     protected $chunk_Dao;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
     protected $project;
 
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $database_instance;
 
 
-    /** @var Jobs_JobStruct */
+    /** @var JobStruct */
     protected $job;
 
     public function setUp(): void {
         parent::setUp();
 
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->chunk_Dao         = new Chunks_ChunkDao( $this->database_instance );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->chunk_Dao         = new ChunkDao( $this->database_instance );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO projects
@@ -48,7 +53,7 @@ class GetByProjectIdChunkTest extends AbstractTest {
         );
 
         $pId           = $this->database_instance->getConnection()->lastInsertId();
-        $this->project = new Projects_ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
+        $this->project = new ProjectStruct( $this->database_instance->getConnection()->query( "SELECT * FROM projects WHERE id = $pId LIMIT 1" )->fetch() );
 
         $this->database_instance->getConnection()->query(
                 "INSERT INTO jobs
@@ -75,13 +80,13 @@ class GetByProjectIdChunkTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Chunks_ChunkDao::getByProjectID
+     * @covers ChunkDao::getByProjectID
      */
     function test_getByJobId() {
 
         $wrapped_result = $this->chunk_Dao->getByProjectID( $this->project[ 'id' ] );
         $result         = $wrapped_result[ 0 ];
-        $this->assertTrue( $result instanceof Jobs_JobStruct );
+        $this->assertTrue( $result instanceof JobStruct );
         $this->assertEquals( $this->job[ 'id' ], $result[ 'id' ] );
         $this->assertEquals( $this->job[ 'password' ], $result[ 'password' ] );
         $this->assertEquals( $this->job[ 'id_project' ], $result[ 'id_project' ] );

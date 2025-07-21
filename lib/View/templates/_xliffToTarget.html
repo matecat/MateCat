@@ -5,7 +5,7 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
     <title>Matecat XLIFF-to-target utility</title>
     <link rel="icon" type="image/png" sizes="32x32" href="${basepath}public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="${basepath}public/img/meta/favicon-16x16.svg"/>
@@ -16,7 +16,7 @@
     <meta property="og:url" content="https://www.matecat.com"/>
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.png"/>
 
-    <tal:block metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+    <tal:block metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
         var config = {
@@ -29,7 +29,7 @@
     <header class="upload-page-header"/>
     <div class="xliff_to_target__page"/>
     <div class="notifications-wrapper"></div>
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
+    <div metal:use-macro="${php: Utils\Registry\AppConfig::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
     <div metal:use-macro="templates/common.html/footer_includes"/>
 </body>
 </html>

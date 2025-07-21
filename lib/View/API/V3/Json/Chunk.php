@@ -6,39 +6,39 @@
  * Time: 16:16
  */
 
-namespace API\V3\Json;
+namespace View\API\V3\Json;
 
-use API\App\Json\OutsourceConfirmation;
-use API\V2\Json\JobTranslator;
-use Constants;
 use Exception;
-use Exceptions\NotFoundException;
-use Features\ReviewExtended\ReviewUtils;
-use FeatureSet;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use Langs\LanguageDomains;
-use Langs\Languages;
-use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\LQA\ChunkReviewStruct;
+use Model\Projects\ProjectStruct;
+use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
-use Utils;
-use WordCount\WordCountStruct;
+use Utils\Constants\SourcePages;
+use Utils\Langs\LanguageDomains;
+use Utils\Langs\Languages;
+use Utils\Tools\Utils;
+use View\API\App\Json\OutsourceConfirmation;
+use View\API\V2\Json\JobTranslator;
 
-class Chunk extends \API\V2\Json\Chunk {
+class Chunk extends \View\API\V2\Json\Chunk {
 
-    protected array          $chunk_reviews = [];
-    protected Jobs_JobStruct $chunk;
+    protected array     $chunk_reviews = [];
+    protected JobStruct $chunk;
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return array
      * @throws Exception
      * @throws NotFoundException
      */
-    public function renderOne( Jobs_JobStruct $chunk ): array {
+    public function renderOne( JobStruct $chunk ): array {
         $project    = $chunk->getProject();
         $featureSet = $project->getFeaturesSet();
 
@@ -51,15 +51,15 @@ class Chunk extends \API\V2\Json\Chunk {
     }
 
     /**
-     * @param                         $chunk Jobs_JobStruct
+     * @param                         $chunk JobStruct
      *
-     * @param Projects_ProjectStruct  $project
+     * @param ProjectStruct           $project
      * @param FeatureSet              $featureSet
      *
      * @return array
      * @throws Exception
      */
-    public function renderItem( Jobs_JobStruct $chunk, Projects_ProjectStruct $project, FeatureSet $featureSet ): array {
+    public function renderItem( JobStruct $chunk, ProjectStruct $project, FeatureSet $featureSet ): array {
 
         $this->chunk   = $chunk;
         $outsourceInfo = $chunk->getOutsource();
@@ -152,7 +152,7 @@ class Chunk extends \API\V2\Json\Chunk {
      */
     protected function getTimeToEditArray( $chunk_id ): array {
 
-        $jobDao   = new Jobs_JobDao();
+        $jobDao   = new JobDao();
         $tteT     = (int)$jobDao->getTimeToEdit( $chunk_id, 1 )[ 'tte' ];
         $tteR1    = (int)$jobDao->getTimeToEdit( $chunk_id, 2 )[ 'tte' ];
         $tteR2    = (int)$jobDao->getTimeToEdit( $chunk_id, 3 )[ 'tte' ];
@@ -178,7 +178,7 @@ class Chunk extends \API\V2\Json\Chunk {
             $result[ 'revise_passwords' ] = [];
         }
 
-        if ( $chunk_review->source_page <= Constants::SOURCE_PAGE_REVISION ) {
+        if ( $chunk_review->source_page <= SourcePages::SOURCE_PAGE_REVISION ) {
             $result[ 'revise_passwords' ][] = [
                     'revision_number' => 1,
                     'password'        => $chunk_review->review_password

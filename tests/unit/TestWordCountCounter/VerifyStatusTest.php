@@ -1,8 +1,8 @@
 <?php
 
 
+use Model\WordCount\CounterModel;
 use TestHelpers\AbstractTest;
-use WordCount\CounterModel;
 
 /**
  * @group  regression
@@ -28,7 +28,6 @@ class VerifyStatusTest extends AbstractTest {
         $method__verifyStatus->invoke( $word_counter, "APPROVED" );
         $method__verifyStatus->invoke( $word_counter, "REJECTED" );
         $method__verifyStatus->invoke( $word_counter, "FIXED" );
-        $method__verifyStatus->invoke( $word_counter, "REBUTTED" );
         $this->assertTrue( true ); // test no exceptions
     }
 

@@ -7,37 +7,36 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-use Users_UserDao;
-use Users_UserStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
 
-class JobsTranslatorsStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class JobsTranslatorsStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id_job;
-    public $job_password;
-    public $id_translator_profile;
-    public $email;
-    public $added_by;
-    public $delivery_date;
-    public $job_owner_timezone = 0;
-    public $source;
-    public $target;
+    public int    $id_job;
+    public string $job_password;
+    public int    $id_translator_profile;
+    public string $email;
+    public int    $added_by;
+    public string $delivery_date;
+    public float  $job_owner_timezone = 0;
+    public string $source;
+    public string $target;
 
     /**
-     * @return Users_UserStruct
-     *
+     * @return UserStruct
+     * @throws ReflectionException
      */
-    public function getUser() {
+    public function getUser(): UserStruct {
         if ( !empty( $this->id_translator_profile ) ) {
-            $existentUser = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
-
-            return $existentUser;
+            return ( new UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
         }
 
-        return new Users_UserStruct();
+        return new UserStruct();
     }
 
 }

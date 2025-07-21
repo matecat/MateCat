@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 /**
  * Class Params
@@ -27,7 +27,7 @@ class Params extends AbstractElement {
     }
 
     /**
-     * __set() is run when writing data to inaccessible ( or not existent ) properties
+     * __set() is run when writing data to inaccessible (or not existent) properties
      *
      * @param $name
      * @param $value

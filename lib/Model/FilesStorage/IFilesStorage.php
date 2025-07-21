@@ -1,9 +1,9 @@
 <?php
 
-namespace FilesStorage;
+namespace Model\FilesStorage;
 
 use Exception;
-use FilesStorage\Exceptions\FileSystemException;
+use Model\FilesStorage\Exceptions\FileSystemException;
 
 /**
  * Interface IFilesStorage

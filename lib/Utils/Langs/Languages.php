@@ -1,9 +1,9 @@
 <?php
 
-namespace Langs;
+namespace Utils\Langs;
 
-use INIT;
-use Log;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 
 class Languages {
 
@@ -37,7 +37,7 @@ class Languages {
         // SDL supported language codes
         // http://kb.sdl.com/kb/?ArticleId=2993&source=Article&c=12&cid=23#tab:homeTab:crumb:7:artId:4878
 
-        $file = INIT::$UTILS_ROOT . '/Langs/supported_langs.json';
+        $file = AppConfig::$UTILS_ROOT . '/Langs/supported_langs.json';
         if ( !file_exists( $file ) ) {
             Log::doJsonLog( "no language defs found in $file" );
             exit;

@@ -1,6 +1,6 @@
 <?php
 
-namespace DataAccess;
+namespace Model\DataAccess;
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com

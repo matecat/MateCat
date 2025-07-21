@@ -7,34 +7,33 @@
  *
  */
 
-namespace Users\Authentication;
+namespace Model\Users\Authentication;
 
-use API\Commons\Exceptions\ValidationError;
-use Exception;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use ReflectionException;
+use Utils\Tools\Utils;
 
 class ChangePasswordModel {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
     private $user;
 
-    public function __construct( Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
         $this->user = $user;
     }
 
     /**
      * @param $old_password
      * @param $new_password
-     * @param $new_password_confirmation
      *
      * @throws ValidationError
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public function changePassword( $old_password, $new_password, $new_password_confirmation ) {
+    public function changePassword( $old_password, $new_password ) {
 
         if ( !Utils::verifyPass( $old_password, $this->user->salt, $this->user->pass ) ) {
             throw new ValidationError( "Invalid password" );
@@ -43,8 +42,6 @@ class ChangePasswordModel {
         if ( $old_password === $new_password ) {
             throw new ValidationError( "New password cannot be the same as your old password" );
         }
-
-        UserPasswordValidator::validatePassword( $new_password, $new_password_confirmation );
 
         $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt );
 
@@ -58,9 +55,9 @@ class ChangePasswordModel {
             $fieldsToUpdate[ 'fields' ][]   = 'email_confirmed_at';
         }
 
-        Users_UserDao::updateStruct( $this->user, $fieldsToUpdate );
-        ( new Users_UserDao )->destroyCacheByEmail( $this->user->email );
-        ( new Users_UserDao )->destroyCacheByUid( $this->user->uid );
+        UserDao::updateStruct( $this->user, $fieldsToUpdate );
+        ( new UserDao )->destroyCacheByEmail( $this->user->email );
+        ( new UserDao )->destroyCacheByUid( $this->user->uid );
 
     }
 

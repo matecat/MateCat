@@ -1,5 +1,6 @@
 <?php
 
+use Model\ProjectManager\ProjectOptionsSanitizer;
 use TestHelpers\AbstractTest;
 
 

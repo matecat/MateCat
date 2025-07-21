@@ -1,23 +1,23 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use Files\FilesPartsDao;
-use Jobs_JobDao;
-use Jobs_JobStruct;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Model\Files\FilesPartsDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
 use ReflectionException;
 
 class FilesController extends AbstractStatefulKleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
-    protected Jobs_JobStruct $chunk;
+    protected JobStruct $chunk;
 
-    public function setChunk( Jobs_JobStruct $chunk ) {
+    public function setChunk( JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -74,7 +74,7 @@ class FilesController extends AbstractStatefulKleinController {
      * @throws ReflectionException
      */
     private function getFirstAndLastSegmentFromFileId( $fileId ) {
-        $fileInfo = Jobs_JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
+        $fileInfo = JobDao::getFirstSegmentOfFilesInJob( $this->chunk, 60 * 5 );
 
         if ( empty( $fileInfo ) ) {
             $this->response->status()->setCode( 404 );

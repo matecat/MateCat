@@ -7,7 +7,7 @@
  *
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 
 use Predis\Client;

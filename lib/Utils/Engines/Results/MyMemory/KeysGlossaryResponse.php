@@ -1,6 +1,11 @@
 <?php
 
-class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_AbstractResponse {
+namespace Utils\Engines\Results\MyMemory;
+
+use Exception;
+use Utils\Engines\Results\TMSAbstractResponse;
+
+class KeysGlossaryResponse extends TMSAbstractResponse {
 
     public $entries = [];
 
@@ -10,7 +15,7 @@ class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_Abst
             throw new Exception( "Invalid Response", -1 );
         }
 
-        $this->entries = isset( $response[ 'entries' ] ) ? $response[ 'entries' ] : [];
+        $this->entries = $response[ 'entries' ] ?? [];
     }
 
     /**
@@ -21,7 +26,7 @@ class Engines_Results_MyMemory_KeysGlossaryResponse extends Engines_Results_Abst
             return false;
         }
 
-        foreach ( $this->entries as $key => $value ) {
+        foreach ( $this->entries as $value ) {
             if ( $value === true ) {
                 return true;
             }

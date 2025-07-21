@@ -1,14 +1,18 @@
 <?php
 
-use ConnectedServices\OauthTokenEncryption;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
+namespace Model\Users;
+
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
-use Teams\MembershipDao;
-use Teams\TeamDao;
-use Teams\TeamStruct;
-use Users\MetadataDao;
-use Users\MetadataStruct;
+use Exception;
+use Model\ConnectedServices\Oauth\OauthTokenEncryption;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Teams\MembershipDao;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use ReflectionException;
+use stdClass;
+use Utils\Tools\Utils;
 
 /**
  * Created by PhpStorm.
@@ -16,7 +20,7 @@ use Users\MetadataStruct;
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+class UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public ?int    $uid                           = null;
     public ?string $email                         = null;
@@ -57,8 +61,8 @@ class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
         $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
     }
 
-    public static function getStruct(): Users_UserStruct {
-        return new Users_UserStruct();
+    public static function getStruct(): UserStruct {
+        return new UserStruct();
     }
 
     public function everSignedIn(): bool {
@@ -168,6 +172,7 @@ class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return null|string
      * @throws EnvironmentIsBrokenException
+     * @throws Exception
      */
     public function getDecryptedOauthAccessToken(): ?string {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
@@ -194,6 +199,5 @@ class Users_UserStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
         return $decoded;
     }
-
 
 }

@@ -1,17 +1,17 @@
 <?php
 
-namespace Features\ReviewExtended\Email;
+namespace Plugins\Features\ReviewExtended\Email;
 
-use Email\AbstractEmail;
 use Exception;
-use INIT;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Utils\Email\AbstractEmail;
+use Utils\Registry\AppConfig;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     private $chunk;
 
@@ -21,17 +21,17 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     private $chunkReview;
 
     /**
-     * @var string
+     * @var string|null
      */
-    protected $title = 'Alert from batch review processor';
+    protected ?string $title = 'Alert from batch review processor';
 
     /**
      * BatchEventCreatorAlertEmail constructor.
      *
-     * @param Jobs_JobStruct    $chunk
+     * @param JobStruct         $chunk
      * @param ChunkReviewStruct $chunkReview
      */
-    public function __construct( Jobs_JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
+    public function __construct( JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
         $this->chunk       = $chunk;
         $this->chunkReview = $chunkReview;
         $this->_setlayout( 'empty_skeleton.html' );
@@ -53,7 +53,7 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
      * @throws Exception
      */
     public function send() {
-        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( AppConfig::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( !empty( $mailConf[ 'email_list' ] ) ) {
             foreach ( $mailConf[ 'email_list' ] as $email => $uName ) {

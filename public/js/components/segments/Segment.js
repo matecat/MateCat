@@ -701,7 +701,7 @@ class Segment extends React.Component {
     let segment_classes = this.checkSegmentClasses()
 
     let split_group = this.props.segment.split_group || []
-    let autoPropagable = this.props.segment.repetitions_in_chunk !== '1'
+    let autoPropagable = this.props.segment.repetitions_in_chunk !== 1
     let originalId = this.props.segment.original_sid
 
     let translationIssues = this.getTranslationIssues()

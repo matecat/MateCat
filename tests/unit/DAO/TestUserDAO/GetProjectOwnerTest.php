@@ -1,11 +1,17 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Users_UserDao::getProjectOwner
+ * @covers UserDao::getProjectOwner
  * User: dinies
  * Date: 27/05/16
  * Time: 18.21
@@ -16,12 +22,12 @@ class GetProjectOwnerTest extends AbstractTest {
      */
     protected $flusher;
     /**
-     * @var Jobs_JobDao
+     * @var JobDao
      */
     protected $job_Dao;
 
     /**
-     * @var Users_UserDao
+     * @var UserDao
      */
     protected $user_Dao;
     protected $user_struct_param;
@@ -37,25 +43,25 @@ class GetProjectOwnerTest extends AbstractTest {
     protected $id_job;
     protected $email_owner;
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     protected $job_struct;
 
 
     public function setUp(): void {
         parent::setUp();
-        $this->database_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        $this->user_Dao          = new Users_UserDao( $this->database_instance );
+        $this->database_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
+        $this->user_Dao          = new UserDao( $this->database_instance );
 
         /**
          * user insertion
          */
         $this->email_owner     = "bar@foo.net";
-        $this->sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . $this->email_owner . "', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $this->sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . $this->email_owner . "', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         $this->database_instance->getConnection()->query( $this->sql_insert_user );
         $this->uid_user = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
-        $this->sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_user . "';";
+        $this->sql_delete_user = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='" . $this->uid_user . "';";
 
 
         /**
@@ -63,7 +69,7 @@ class GetProjectOwnerTest extends AbstractTest {
          */
 
 
-        $this->job_struct = new Jobs_JobStruct(
+        $this->job_struct = new JobStruct(
                 [
                         'id'                                  => null, //SET NULL FOR AUTOINCREMENT
                         'password'                            => "7barandfoo71",
@@ -112,7 +118,7 @@ class GetProjectOwnerTest extends AbstractTest {
         );
 
 
-        $this->job_Dao = new Jobs_JobDao( $this->database_instance );
+        $this->job_Dao = new JobDao( $this->database_instance );
         $this->job_Dao->createFromStruct( $this->job_struct );
         $this->id_job = $this->getTheLastInsertIdByQuery( $this->database_instance );
 
@@ -125,15 +131,15 @@ class GetProjectOwnerTest extends AbstractTest {
     public function tearDown(): void {
         $this->database_instance->getConnection()->query( $this->sql_delete_job );
         $this->database_instance->getConnection()->query( $this->sql_delete_user );
-        $this->flusher = new Predis\Client( INIT::$REDIS_SERVERS );
+        $this->flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
         $this->flusher->flushdb();
         parent::tearDown();
     }
 
     public function test_getProjectOwner() {
-        /** @var Users_UserStruct $user */
+        /** @var UserStruct $user */
         $user = $this->user_Dao->getProjectOwner( $this->id_job );
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );
         $this->assertEquals( $this->email_owner, $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );
@@ -147,9 +153,9 @@ class GetProjectOwnerTest extends AbstractTest {
     public function test_getProjectOwner_mocked() {
 
         /**
-         * @var Users_UserDao
+         * @var UserDao
          */
-        $mock_user_Dao = $this->getMockBuilder( Users_UserDao::class )
+        $mock_user_Dao = $this->getMockBuilder( UserDao::class )
                 ->setConstructorArgs( [ $this->database_instance ] )
                 ->setMethods( [ '_buildResult', '_fetch_array' ] )
                 ->getMock();
@@ -160,10 +166,10 @@ class GetProjectOwnerTest extends AbstractTest {
 //        $mock_user_Dao->expects( $this->exactly( 1 ) )
 //                ->method( '_buildResult' );
 
-        /** @var Users_UserStruct $user */
+        /** @var UserStruct $user */
         $user = $mock_user_Dao->getProjectOwner( $this->id_job );
 
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( $this->uid_user, $user->uid );
         $this->assertEquals( $this->email_owner, $user->email );
         $this->assertMatchesRegularExpression( '/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date );

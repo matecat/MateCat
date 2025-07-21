@@ -1,10 +1,15 @@
 <?php
 
+
+use Model\DataAccess\Database;
+use Model\Users\UserDao;
+use Utils\Registry\AppConfig;
+
 $root = realpath(dirname(__FILE__) . '/../../../');
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 $db->debug = false;
 $db->connect();
 
@@ -24,7 +29,7 @@ if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
 if (!array_key_exists('email', $options))     usage() ;
 
-$dao = new Users_UserDao( Database::obtain() ) ;
+$dao = new UserDao( Database::obtain() ) ;
 $user = $dao->getByEmail( $options['email'] ) ;
 
 
@@ -37,7 +42,7 @@ if ( $user->oauth_access_token ) {
     var_dump ( $user->getDecodedOauthAccessToken() ) ;
 }
 
-$cs = new \ConnectedServices\ConnectedServiceDao() ;
+$cs = new \Model\ConnectedServices\ConnectedServiceDao() ;
 $services = $cs->findServicesByUser($user);
 
 foreach ( $services as $service ) {

@@ -1,6 +1,8 @@
 <?php
 
 
+use migrations\AbstractMatecatMigration;
+
 class RemoveWorkspaces extends AbstractMatecatMigration
 {
 

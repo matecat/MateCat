@@ -1,5 +1,5 @@
 <?php
-namespace Langs;
+namespace Utils\Langs;
 
 use Exception;
 

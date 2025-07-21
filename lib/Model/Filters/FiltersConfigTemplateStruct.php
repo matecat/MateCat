@@ -1,19 +1,19 @@
 <?php
 
-namespace Filters;
+namespace Model\Filters;
 
-use DataAccess\AbstractDaoSilentStruct;
-use Date\DateTimeUtil;
 use DomainException;
 use Exception;
-use Filters\DTO\Dita;
-use Filters\DTO\Json;
-use Filters\DTO\MSExcel;
-use Filters\DTO\MSPowerpoint;
-use Filters\DTO\MSWord;
-use Filters\DTO\Xml;
-use Filters\DTO\Yaml;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\Filters\DTO\Dita;
+use Model\Filters\DTO\Json;
+use Model\Filters\DTO\MSExcel;
+use Model\Filters\DTO\MSPowerpoint;
+use Model\Filters\DTO\MSWord;
+use Model\Filters\DTO\Xml;
+use Model\Filters\DTO\Yaml;
+use Utils\Date\DateTimeUtil;
 
 class FiltersConfigTemplateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 

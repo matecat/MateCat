@@ -1,6 +1,6 @@
 <?php
 
-namespace Engines\DeepL;
+namespace Utils\Engines\DeepL;
 
 class DeepLApiException extends \Exception {
 }

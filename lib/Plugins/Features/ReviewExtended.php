@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Features;
+namespace Plugins\Features;
 
 class ReviewExtended extends AbstractRevisionFeature {
     const FEATURE_CODE = 'review_extended';

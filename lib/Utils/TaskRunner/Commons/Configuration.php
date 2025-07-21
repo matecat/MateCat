@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 use Exception;
 
@@ -22,7 +22,8 @@ class Configuration {
     private array    $__raw;
 
     /**
-     * @param string $rawConfig
+     * @param string      $rawConfig
+     * @param string|null $contextIndex
      *
      * @throws Exception
      */

@@ -6,16 +6,16 @@
  * Time: 18:09
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use ApiKeys_ApiKeyDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
-use Traits\RateLimiterTrait;
-use Utils;
+use Model\ApiKeys\ApiKeyDao;
+use Utils\Tools\Utils;
 
 class KeyCheckController extends KleinController {
 
@@ -84,19 +84,11 @@ class KeyCheckController extends KleinController {
 
         if ( $user_api_key && $user_api_secret ) {
 
-            $api_record = ApiKeys_ApiKeyDao::findByKey( $user_api_key );
+            $api_record = ApiKeyDao::findByKey( $user_api_key );
 
             if ( $api_record && $api_record->validSecret( $user_api_secret ) ) {
 
-                /*
-                    //for now the response is really simple, if more info are needed use the DAO
-                    $dao = new Users_UserDao();
-                    $dao->setCacheTTL( 3600 );
-                    $user = $dao->getByUid( $api_record->uid ) ;
-                    $userJson = [ 'user' => User::renderItem( $user ) ]:
-                */
-
-                $userJson = [ 'user' => [ 'uid' => (int)$api_record->uid ] ];
+                $userJson = [ 'user' => [ 'uid' => $api_record->uid ] ];
                 $this->response->json( $userJson );
 
                 return;

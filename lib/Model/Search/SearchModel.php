@@ -7,32 +7,34 @@
  *
  */
 
-namespace Search;
+namespace Model\Search;
 
-use Database;
 use Exception;
-use Log;
 use Matecat\Finder\WholeTextFinder;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
+use stdClass;
+use Utils\Logger\Log;
 
 class SearchModel {
 
     /**
      * @var SearchQueryParamsStruct
      */
-    protected $queryParams;
+    protected SearchQueryParamsStruct $queryParams;
 
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
-    protected $db;
+    protected IDatabase $db;
 
     /**
      * @var MateCatFilter
      */
-    private $filters;
+    private MateCatFilter $filters;
 
     /**
      * SearchModel constructor.
@@ -76,6 +78,9 @@ class SearchModel {
             case 'status_only':
                 $results = $this->_getQuery( $this->_loadSearchStatusOnlyQuery() );
                 break;
+            default:
+                $results = [];
+                break;
         }
 
         $vector = [
@@ -88,7 +93,7 @@ class SearchModel {
             $searchTerm = ( false === empty( $this->queryParams->source ) ) ? $this->queryParams->source : $this->queryParams->target;
 
             foreach ( $results as $occurrence ) {
-                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm, $occurrence[ 'original_map' ] );
+                $matches      = $this->find( $occurrence[ 'text' ], $searchTerm );
                 $matchesCount = count( $matches );
 
                 if ( $this->hasMatches( $matches ) ) {
@@ -146,7 +151,7 @@ class SearchModel {
      *
      * @return bool
      */
-    private function hasMatches( array $matches ) {
+    private function hasMatches( array $matches ): bool {
 
         return count( $matches ) > 0 and $matches[ 0 ][ 0 ] !== '';
     }
@@ -154,16 +159,13 @@ class SearchModel {
     /**
      * @param string $haystack
      * @param string $needle
-     * @param null   $originalMap
      *
      * @return array
      * @throws Exception
      */
-    private function find( $haystack, $needle, $originalMap = null ) {
+    private function find( string $haystack, string $needle ): array {
 
         $this->filters->fromLayer0ToLayer2( $haystack );
-
-//        $haystack = StringTransformer::transform($haystack, $originalMap);
 
         return WholeTextFinder::find(
                 $haystack,
@@ -181,7 +183,7 @@ class SearchModel {
      * @return array
      * @throws Exception
      */
-    protected function _getQuery( $sql ) {
+    protected function _getQuery( $sql ): array {
 
         try {
             $stmt = $this->db->getConnection()->prepare( $sql );
@@ -193,27 +195,6 @@ class SearchModel {
         }
 
         return $results;
-    }
-
-    /**
-     * @param $sql
-     * @param $data
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    protected function _insertQuery( $sql, $data ) {
-
-        try {
-            $stmt = $this->db->getConnection()->prepare( $sql );
-            $stmt->execute( $data );
-        } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
-            throw new Exception( $e->getMessage(), $e->getCode() * -1, $e );
-        }
-
-        return $stmt->rowCount();
-
     }
 
     /**
@@ -233,7 +214,7 @@ class SearchModel {
             $this->queryParams->where_status = "AND st.status = '{$this->queryParams->status}'";
         }
 
-        $this->queryParams->matchCase = new \stdClass();
+        $this->queryParams->matchCase = new stdClass();
         if ( $this->queryParams->isMatchCaseRequested ) {
             $this->queryParams->matchCase->SQL_REGEXP_CASE = "BINARY";
             $this->queryParams->matchCase->SQL_LENGHT_CASE = "";
@@ -244,7 +225,7 @@ class SearchModel {
             $this->queryParams->matchCase->REGEXP_MODIFIER = 'iu';
         }
 
-        $this->queryParams->exactMatch = new \stdClass();
+        $this->queryParams->exactMatch = new stdClass();
         if ( $this->queryParams->isExactMatchRequested ) {
             $this->queryParams->exactMatch->Space_Left  = "[[:space:]]{0,}";
             $this->queryParams->exactMatch->Space_Right = "([[:space:]]|$)";
@@ -274,7 +255,7 @@ class SearchModel {
         $this->_loadParams();
         $password_where = ( $inCurrentChunkOnly ) ? ' AND st.id_segment between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
-        $query = "
+        return "
         SELECT  st.id_segment as id, st.translation as text, od.map as original_map
 			FROM segment_translations st
 			INNER JOIN jobs j ON j.id = st.id_job
@@ -284,8 +265,6 @@ class SearchModel {
 			AND st.status != 'NEW'
 			{$this->queryParams->where_status}
 			GROUP BY st.id_segment";
-
-        return $query;
 
     }
 
@@ -299,7 +278,7 @@ class SearchModel {
         $this->_loadParams();
         $password_where = ( $inCurrentChunkOnly ) ? ' AND s.id between j.job_first_segment and j.job_last_segment AND j.password = "' . $this->queryParams->password . '"' : '';
 
-        $query = "
+        return "
         SELECT s.id, s.segment as text, od.map as original_map
 			FROM segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -312,69 +291,19 @@ class SearchModel {
 			{$this->queryParams->where_status}
 			GROUP BY s.id";
 
-        return $query;
-
     }
 
-    protected function _loadSearchStatusOnlyQuery() {
+    protected function _loadSearchStatusOnlyQuery(): string {
 
         $this->_loadParams();
 
-        $query = "
+        return "
         SELECT st.id_segment as id
 			FROM segment_translations as st
 			WHERE st.id_job = {$this->queryParams->job}
 		    {$this->queryParams->where_status}
 		";
 
-        return $query;
-
-    }
-
-    public function _loadReplaceAllQuery() {
-
-        $this->_loadParams();
-
-        $sql = "
-        SELECT st.id_segment, st.id_job, st.translation, st.status
-            FROM segment_translations st
-            JOIN jobs ON st.id_job = jobs.id AND password = '{$this->queryParams->password}' AND jobs.id = {$this->queryParams->job}
-            JOIN segments as s ON st.id_segment = s.id 
-            WHERE id_job = {$this->queryParams->job}
-            AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-            AND st.status != 'NEW'
-            AND translation 
-            	REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedTrg}{$this->queryParams->exactMatch->Space_Right}'
-            {$this->queryParams->where_status}
-        ";
-
-        if ( !empty( $this->queryParams->regexpEscapedSrc ) ) {
-            $sql .= " AND s.segment REGEXP {$this->queryParams->matchCase->SQL_REGEXP_CASE} 
-		          '{$this->queryParams->exactMatch->Space_Left}{$this->queryParams->regexpEscapedSrc}{$this->queryParams->exactMatch->Space_Right}' ";
-        }
-
-        return $sql;
-    }
-
-    /**
-     * @return string
-     */
-    private function getSpacerForSearchQueries() {
-        if ( $this->isExactMatchEnabled() ) {
-            return ' ';
-        }
-
-        return '';
-    }
-
-    /**
-     * @return bool
-     */
-    private function isExactMatchEnabled() {
-        $exactMatch = $this->queryParams->exactMatch;
-
-        return ( $exactMatch->Space_Left !== '' and $exactMatch->Space_Right !== '' );
     }
 
 }

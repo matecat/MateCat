@@ -7,25 +7,25 @@
  *
  */
 
-namespace WordCount;
+namespace Model\WordCount;
 
 
-use DataAccess\AbstractDao;
-use Database;
-use Log;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use PDO;
 use PDOException;
+use Utils\Logger\Log;
 
 class WordCounterDao extends AbstractDao {
 
     /**
      * Update the word count for the job
      *
-     * We perform an update in join with jobs table
+     * We perform an update in join with the `jobs` table
      * because we want to update the word count only for the current chunk
      *
      * Update the status of segment_translation is needed to avoid duplicated calls
-     * ( The second call fails for status condition )
+     * (The second call fails for status condition)
      *
      * @param WordCountStruct $wStruct
      *
@@ -124,14 +124,13 @@ class WordCounterDao extends AbstractDao {
      * Leave untouched for getSegmentsController, split job recalculation
      * because of file level granularity in payable words
      *
-     * @param      $id_job
-     * @param null $id_file
-     * @param null $jPassword
+     * @param int         $id_job
+     * @param int|null    $id_file
+     * @param string|null $jPassword
      *
      * @return array
-     *
      */
-    public function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
+    public function getStatsForJob( int $id_job, ?int $id_file = null, ?string $jPassword = null ): array {
 
         /*
          * -- TOTAL field is not used, but we keep here to easy check the values and for documentation

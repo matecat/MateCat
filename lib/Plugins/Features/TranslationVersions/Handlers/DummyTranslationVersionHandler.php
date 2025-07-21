@@ -7,11 +7,11 @@
  *
  */
 
-namespace Features\TranslationVersions\Handlers;
+namespace Plugins\Features\TranslationVersions\Handlers;
 
 
-use Features\TranslationVersions\VersionHandlerInterface;
-use Translations_SegmentTranslationStruct;
+use Model\Translations\SegmentTranslationStruct;
+use Plugins\Features\TranslationVersions\VersionHandlerInterface;
 
 class DummyTranslationVersionHandler implements VersionHandlerInterface {
 
@@ -21,19 +21,19 @@ class DummyTranslationVersionHandler implements VersionHandlerInterface {
      *
      * Never set a new Version
      *
-     * @param Translations_SegmentTranslationStruct $new_translation
-     * @param Translations_SegmentTranslationStruct $old_translation
+     * @param SegmentTranslationStruct $new_translation
+     * @param SegmentTranslationStruct $old_translation
      *
      * @return bool
      */
-    public function saveVersionAndIncrement( Translations_SegmentTranslationStruct $new_translation, Translations_SegmentTranslationStruct $old_translation ): bool {
+    public function saveVersionAndIncrement( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation ): bool {
         return false;
     }
 
     public function storeTranslationEvent( $params ) {
     }
 
-    public function propagateTranslation( Translations_SegmentTranslationStruct $translationStruct ): array {
+    public function propagateTranslation( SegmentTranslationStruct $translationStruct ): array {
         return [];
     }
 

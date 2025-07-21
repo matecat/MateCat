@@ -2,6 +2,8 @@
 
 use Klein\Klein;
 use PHPUnit\Framework\MockObject\MockObject;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\ActiveMQ\WorkerClient;
 
 function sig_handler( $signo ) {
 

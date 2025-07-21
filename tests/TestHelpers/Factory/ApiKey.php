@@ -1,5 +1,9 @@
 <?php
 
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+
 class Factory_ApiKey extends Factory_Base {
 
     private static $unique_key = 0;
@@ -14,8 +18,8 @@ class Factory_ApiKey extends Factory_Base {
                 'enabled'    => true
         ], $values );
 
-        $dao    = new ApiKeys_ApiKeyDao( Database::obtain() );
-        $struct = new ApiKeys_ApiKeyStruct( $values );
+        $dao    = new ApiKeyDao( Database::obtain() );
+        $struct = new ApiKeyStruct( $values );
 
         return $dao->create( $struct );
 

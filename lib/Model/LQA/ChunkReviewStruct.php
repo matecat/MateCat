@@ -1,12 +1,12 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use Chunks_ChunkDao;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
-use Jobs_JobStruct;
-use Utils;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
@@ -35,25 +35,14 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getChunk(): Jobs_JobStruct {
+    public function getChunk(): JobStruct {
         $review = clone $this;
 
         return $this->cachable( __FUNCTION__, $review, function ( $review ) {
-            return Chunks_ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
+            return ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
         } );
-    }
-
-    /**
-     * @return int
-     */
-    public function getReviewedPercentage() {
-        $count = $this->getChunk()->totalWordsCount();
-
-        return round( ( $this->reviewed_words_count /
-                ( empty( $count ) ? 1 : $count ) *
-                100 ), 2 );
     }
 
     public function getUndoData() {

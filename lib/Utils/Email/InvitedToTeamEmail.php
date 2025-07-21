@@ -6,21 +6,22 @@
  * Time: 17:46
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Exception;
-use Routes;
-use Teams\TeamStruct;
+use Model\Teams\TeamStruct;
+use Model\Users\UserStruct;
+use Utils\Url\CanonicalRoutes;
 
 class InvitedToTeamEmail extends AbstractEmail {
 
-    protected $title;
-    protected $user;
-    protected $invited_email;
-    protected $team;
+    protected ?string    $title;
+    protected UserStruct $user;
+    protected string     $invited_email;
+    protected TeamStruct $team;
 
-    public function __construct( \Users_UserStruct $user, $invited_email, TeamStruct $team ) {
+    public function __construct( UserStruct $user, string $invited_email, TeamStruct $team ) {
         $this->user          = $user;
         $this->invited_email = $invited_email;
         $this->team          = $team;
@@ -38,7 +39,7 @@ class InvitedToTeamEmail extends AbstractEmail {
                 'sender'     => $this->user->toArray(),
                 'email'      => $this->invited_email,
                 'team'       => $this->team->toArray(),
-                'signup_url' => Routes::inviteToTeamConfirm( [
+                'signup_url' => CanonicalRoutes::inviteToTeamConfirm( [
                         'invited_by_uid' => $this->user->uid,
                         'email'          => $this->invited_email,
                         'team_id'        => $this->team->id
@@ -46,6 +47,9 @@ class InvitedToTeamEmail extends AbstractEmail {
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
         $recipient = [ $this->invited_email ];
 

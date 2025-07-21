@@ -1,18 +1,18 @@
 <?php
 
-namespace Xliff;
+namespace Model\Xliff;
 
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
 use DateTime;
 use Exception;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\Projects\ProjectTemplateDao;
 use PDO;
-use Projects\ProjectTemplateDao;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class XliffConfigTemplateDao extends AbstractDao {
 
@@ -93,6 +93,7 @@ class XliffConfigTemplateDao extends AbstractDao {
      *
      * @return array
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
 
@@ -111,7 +112,6 @@ class XliffConfigTemplateDao extends AbstractDao {
         $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models = [];
-//        $models[] = self::getDefaultTemplate( $uid );
 
         foreach ( $result[ 'items' ] as $item ) {
             $models[] = self::hydrateTemplateStruct( $item->getArrayCopy() );
@@ -134,7 +134,7 @@ class XliffConfigTemplateDao extends AbstractDao {
      */
     public static function getById( $id, int $ttl = 60 ): ?XliffConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id' => $id,
         ] );
 
@@ -155,7 +155,7 @@ class XliffConfigTemplateDao extends AbstractDao {
      */
     public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?XliffConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
         ] );
@@ -176,7 +176,7 @@ class XliffConfigTemplateDao extends AbstractDao {
      */
     public static function getByUid( int $uid, int $ttl = 60 ): array {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'uid' => $uid,
         ] );
 
@@ -268,6 +268,7 @@ class XliffConfigTemplateDao extends AbstractDao {
      * @param array $data
      *
      * @return XliffConfigTemplateStruct|null
+     * @throws Exception
      */
     private static function hydrateTemplateStruct( array $data ): ?XliffConfigTemplateStruct {
         if (

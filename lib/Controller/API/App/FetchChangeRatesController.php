@@ -1,10 +1,10 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use currency_translatedChangeRatesFetcher;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Utils\Currency\TranslatedChangeRatesFetcher;
 
 class FetchChangeRatesController extends KleinController {
 
@@ -14,7 +14,7 @@ class FetchChangeRatesController extends KleinController {
 
     public function fetch(): void {
 
-        $changeRatesFetcher = new currency_translatedChangeRatesFetcher();
+        $changeRatesFetcher = new TranslatedChangeRatesFetcher();
         $changeRatesFetcher->fetchChangeRates();
 
         $this->response->json( [

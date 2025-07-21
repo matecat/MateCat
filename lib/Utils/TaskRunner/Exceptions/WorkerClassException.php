@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Exceptions;
+namespace Utils\TaskRunner\Exceptions;
 
 /**
  * Class WorkerClassException

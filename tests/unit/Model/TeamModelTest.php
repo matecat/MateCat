@@ -1,7 +1,9 @@
 <?php
 
-use Teams\TeamStruct;
+use Model\Teams\TeamModel;
+use Model\Teams\TeamStruct;
 use TestHelpers\AbstractTest;
+use Utils\Constants\Teams;
 
 /**
  * Created by PhpStorm.
@@ -23,7 +25,7 @@ class TeamModelTest extends AbstractTest {
         $newOrg = new TeamStruct( [
                 'name'       => 'test team',
                 'created_by' => $user->uid,
-                'type'       => Constants_Teams::GENERAL
+                'type'       => Teams::GENERAL
         ] );
 
         $teamModel = new TeamModel( $newOrg );
