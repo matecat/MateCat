@@ -10,6 +10,7 @@ use API\V2\Json\QALocalWarning;
 use DataAccess\AbstractDaoObjectStruct;
 use DataAccess\IDaoStruct;
 use LQA\QA;
+use Matecat\SubFiltering\MateCatFilter;
 
 
 class QualityReport_QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDaoStruct {
@@ -169,11 +170,16 @@ class QualityReport_QualityReportSegmentStruct extends AbstractDaoObjectStruct i
 
     public function getLocalWarning( FeatureSet $featureSet, Jobs_JobStruct $chunk ) {
 
-        $QA = new QA( $this->segment, $this->translation );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [] );
+        $src_content = $Filter->fromLayer0ToLayer2( $this->segment );
+        $trg_content = $Filter->fromLayer0ToLayer2( $this->translation );
+
+        $QA = new QA( $src_content, $trg_content );
+        $QA->setFeatureSet( $featureSet );
+        $QA->setChunk( $chunk );
+        $QA->setIdSegment( $this->sid );
         $QA->setSourceSegLang( $chunk->source );
         $QA->setTargetSegLang( $chunk->target );
-        $QA->setChunk( $chunk );
-        $QA->setFeatureSet( $featureSet );
         $QA->performConsistencyCheck();
 
         $local_warning = new QALocalWarning( $QA, $this->sid );
