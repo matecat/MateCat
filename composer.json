@@ -9,7 +9,7 @@
         "google/apiclient": "^2",
         "klein/klein": "^2.1",
         "stomp-php/stomp-php": "^5.0",
-        "predis/predis": "^v2.0",
+        "predis/predis": "^v3.0.0",
         "matecat/simple-s3": "^1.5",
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^2.2",
