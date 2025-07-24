@@ -612,9 +612,6 @@ const NewProject = () => {
     if (!isUserLogged) return
 
     retrieveSupportedLanguages()
-
-    // UI.addEvents()
-
     const hideAllErrors = () => {
       setErrors()
       setWarnings()

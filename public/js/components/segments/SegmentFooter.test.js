@@ -297,9 +297,6 @@ afterAll(() => {
   window.HTMLElement.prototype.scrollTo = superScrollToElementFunction
 })
 
-require('../../ui.core')
-UI.start = () => {}
-
 const props = {
   segment: JSON.parse(
     '{"original_sid":"608","lxqDecodedTranslation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2] ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","id_file":"6","notes":null,"readonly":"false","original_translation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2]##$_A0$##ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","contributions":{"matches":[{"target_note":"","memory_key":"","prop":[],"last_updated_by":"MT!","match":"MT","ICE":false,"reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","subject":false,"created_by":"MT","usage_count":1,"create_date":"2022-01-19 16:43:07","target":"it-IT","translation":" La loro musica è stata variamente descritta come &lt;g id=\\"8\\"&gt;hard rock&lt;/g&gt;, &lt;g id=\\"9\\"&gt;rock blues&lt;/g&gt;, e &lt;g id=\\"10\\"&gt;metallo pesante&lt;/g&gt;,&lt;g id=\\"11\\"&gt;[2]&lt;/g&gt;##$_A0$##ma la band stessa lo chiama semplicemente &quot;&lt;g id=\\"12\\"&gt;rock and roll&lt;/g&gt;&quot;.&lt;g id=\\"13\\"&gt;[3]&lt;/g&gt;","segment":"##$_A0$##Their music has been variously described as##$_A0$##&lt;g id=\\"8\\"&gt;hard rock&lt;/g&gt;,##$_A0$##&lt;g id=\\"9\\"&gt;blues rock&lt;/g&gt;, and##$_A0$##&lt;g id=\\"10\\"&gt;heavy metal&lt;/g&gt;,&lt;g id=\\"11\\"&gt;[2]&lt;/g&gt;##$_A0$##but the band themselves call it simply \\"&lt;g id=\\"12\\"&gt;rock and roll&lt;/g&gt;\\".&lt;g id=\\"13\\"&gt;[3]&lt;/g&gt;","source_note":"","tm_properties":null,"raw_translation":" La loro musica è stata variamente descritta come <g id=\\"8\\">hard rock</g>, <g id=\\"9\\">rock blues</g>, e <g id=\\"10\\">metallo pesante</g>,<g id=\\"11\\">[2]</g> ma la band stessa lo chiama semplicemente &quot;<g id=\\"12\\">rock and roll</g>&quot;.<g id=\\"13\\">[3]</g>","source":"en-US","id":0,"last_update_date":"2022-01-19","raw_segment":" Their music has been variously described as <g id=\\"8\\">hard rock</g>, <g id=\\"9\\">blues rock</g>, and <g id=\\"10\\">heavy metal</g>,<g id=\\"11\\">[2]</g> but the band themselves call it simply \\"<g id=\\"12\\">rock and roll</g>\\".<g id=\\"13\\">[3]</g>","quality":70}]},"unlocked":false,"propagable":false,"openIssues":false,"context_groups":null,"jid":"6","currentInSearch":false,"edit_area_locked":false,"filename":"ACDC.docx","tagMismatch":{},"opened":true,"modified":false,"parsed_time_to_edit":["00","00","00",96],"originalDecodedTranslation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2]°ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","tagged":false,"lxqDecodedSource":" Their music has been variously described as hard rock, blues rock, and heavy metal,[2] but the band themselves call it simply \\"rock and roll\\".[3]","revision_number":null,"target_chunk_lengths":{"len":[0],"statuses":["DRAFT"]},"cl_contributions":{"matches":[],"errors":[]},"inSearch":false,"sid":"608","searchParams":{},"occurrencesInSearch":null,"metadata":[],"repetitions_in_chunk":"1","version_number":"1","openSplit":false,"translation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2]##$_A0$##ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","decodedSource":"°Their music has been variously described as°hard rock,°blues rock, and°heavy metal,[2]°but the band themselves call it simply \\"rock and roll\\".[3]","status":"DRAFT","targetTagMap":[{"offset":94,"length":9,"type":"nbsp","mutability":"IMMUTABLE","data":{"id":"","name":"nbsp","encodedText":"##$_A0$##","decodedText":"°","openTagId":null,"closeTagId":null,"openTagKey":null,"closeTagKey":null,"placeholder":"°","originalOffset":-1}}],"segment":"##$_A0$##Their music has been variously described as##$_A0$##&lt;g id=\\"8\\"&gt;hard rock&lt;/g&gt;,##$_A0$##&lt;g id=\\"9\\"&gt;blues rock&lt;/g&gt;, and##$_A0$##&lt;g id=\\"10\\"&gt;heavy metal&lt;/g&gt;,&lt;g id=\\"11\\"&gt;[2]&lt;/g&gt;##$_A0$##but the band themselves call it simply \\"&lt;g id=\\"12\\"&gt;rock and roll&lt;/g&gt;\\".&lt;g id=\\"13\\"&gt;[3]&lt;/g&gt;","missingTagsInTarget":[],"updatedSource":"##$_A0$##Their music has been variously described as##$_A0$##hard rock,##$_A0$##blues rock, and##$_A0$##heavy metal,[2]##$_A0$##but the band themselves call it simply \\"rock and roll\\".[3]","warnings":{},"source_chunk_lengths":[],"splitted":false,"lexiqa":{"target":{"urls":[],"mspolicheck":[],"numbers":[],"spaces":[],"specialchardetect":[],"punctuation":[],"spelling":[{"insource":false,"msg":"and","start":143,"errorid":"matecat-6-2b14d6279fd8_608_143_146_d1g_t","color":"#563d7c","length":3,"module":"d1g","suggestions":["ad","rand","band"],"ignored":false,"end":146,"category":"spelling"}],"blacklist":[],"glossary":[]}},"segment_hash":"f4d5a08434b1909daa43b85eb9574701","data_ref_map":null,"decodedTranslation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2]°ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","selected":false,"versions":[{"diff":null,"created_at":"2022-01-13 10:57:29","propagated_from":0,"id_segment":608,"version_number":1,"translation":" La loro musica è stata variamente descritta come hard rock, rock blues, e metallo pesante,[2]##$_A0$##ma la band stessa lo chiama semplicemente \\"rock and roll\\".[3]","id_job":6,"issues":[],"id":0},{"diff":null,"created_at":"2022-01-13 09:57:29","propagated_from":0,"id_segment":608,"version_number":0,"translation":"La loro musica è stata variamente descritta come&lt;g id=\\"8\\"&gt; hard rock&lt;/g&gt; ,&lt;g id=\\"9\\"&gt; rock blues&lt;/g&gt; , e&lt;g id=\\"10\\"&gt; metallo pesante&lt;/g&gt; ,&lt;g id=\\"11\\"&gt; [2]&lt;/g&gt; ma la band stessa lo chiama semplicemente &quot;&lt;g id=\\"12\\"&gt; rock and roll&lt;/g&gt; &quot;.&lt;g id=\\"13\\"&gt; [3]&lt;/g&gt;","id_job":6,"issues":[],"id":11}],"time_to_edit":"96","warning":"0","sourceTagMap":[],"glossary":[],"openComments":false,"ice_locked":"0","autopropagated_from":"0"}',
@@ -346,7 +343,7 @@ beforeEach(() => {
 })
 
 test('Rendering elements', () => {
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />
@@ -362,7 +359,7 @@ test('Rendering elements', () => {
 
 test('Add tab', () => {
   const multiMatchLangs = {primary: 'it-IT'}
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
@@ -377,7 +374,7 @@ test('Add tab', () => {
 
 test('Remove tab', () => {
   const multiMatchLangs = undefined
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment, multiMatchLangs}}>
       <SegmentFooter />
@@ -391,7 +388,7 @@ test('Remove tab', () => {
 })
 
 xtest('Translation Matches count result', () => {
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   config.id_client = 'xxx'
   render(
     <SegmentContext.Provider
@@ -409,7 +406,7 @@ xtest('Translation Matches count result', () => {
 })
 
 xtest('Translation conflicts (alternatives)', () => {
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   const modifiedProps = {
     ...props,
     segment: {
@@ -433,7 +430,7 @@ xtest('Translation conflicts (alternatives)', () => {
 })
 
 xtest('Click tab', async () => {
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />
@@ -447,7 +444,7 @@ xtest('Click tab', async () => {
 })
 
 xtest('Move to next tab with keyboard shortcut', async () => {
-  UI.registerFooterTabs()
+  globalFunctions.registerFooterTabs()
   render(
     <SegmentContext.Provider value={{segment: props.segment}}>
       <SegmentFooter />
