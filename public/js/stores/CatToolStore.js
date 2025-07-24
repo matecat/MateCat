@@ -5,13 +5,13 @@ import {filter} from 'lodash'
 import AppDispatcher from './AppDispatcher'
 import CatToolConstants from '../constants/CatToolConstants'
 import ModalsConstants from '../constants/ModalsConstants'
-import CatToolActions from '../actions/CatToolActions'
 
 EventEmitter.prototype.setMaxListeners(0)
 
 let CatToolStore = assign({}, EventEmitter.prototype, {
   files: null,
   qr: null,
+  firstLoad: true,
   languages: [],
   searchResults: {
     searchResults: [], // Array
@@ -27,6 +27,9 @@ let CatToolStore = assign({}, EventEmitter.prototype, {
   jobMetadata: undefined,
   _projectProgress: undefined,
   _currentProjectTemplate: undefined,
+  getFirstLoad: function () {
+    return this.firstLoad
+  },
   storeFilesInfo: function (files) {
     this.files = files
   },
@@ -135,6 +138,9 @@ AppDispatcher.register(function (action) {
   switch (action.actionType) {
     case CatToolConstants.SHOW_CONTAINER:
       CatToolStore.emitChange(CatToolConstants.SHOW_CONTAINER, action.container)
+      break
+    case CatToolConstants.SET_FIRST_LOAD:
+      CatToolStore.firstLoad = action.value
       break
     case CatToolConstants.CLOSE_SUBHEADER:
       CatToolStore.emitChange(CatToolConstants.CLOSE_SUBHEADER)

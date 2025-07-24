@@ -187,7 +187,7 @@ const Speech2Text = {
     Speech2Text.isToKeepRecognizing = false
   },
   showMatches: function () {
-    SegmentActions.activateTab(UI.getSegmentId(UI.currentSegment, 'matches'))
+    SegmentActions.activateTab(SegmentStore.getCurrentSegmentId(), 'matches')
   },
   animateSpeechActive: function () {
     Speech2Text.microphone.removeClass('micSpeechReceiving')

@@ -1,8 +1,11 @@
-import CommonUtils from './commonUtils'
 import SegmentStore from '../stores/SegmentStore'
 import DraftMatecatUtils from '../components/segments/utils/DraftMatecatUtils'
-import {SEGMENTS_STATUS} from '../constants/Constants'
+import {
+  SEGMENTS_STATUS,
+  splittedTranslationPlaceholder,
+} from '../constants/Constants'
 import UserStore from '../stores/UserStore'
+import SegmentActions from '../actions/SegmentActions'
 
 const SegmentUtils = {
   /**
@@ -187,10 +190,10 @@ const SegmentUtils = {
   },
   createSetTranslationRequest: (segment, status, propagate = false) => {
     let {translation, segment: segmentSource, original_sid: sid} = segment
-    const contextBefore = UI.getContextBefore(sid)
-    const idBefore = UI.getIdBefore(sid)
-    const contextAfter = UI.getContextAfter(sid)
-    const idAfter = UI.getIdAfter(sid)
+    const contextBefore = globalFunctions.getContextBefore(sid)
+    const idBefore = globalFunctions.getIdBefore(sid)
+    const contextAfter = globalFunctions.getContextAfter(sid)
+    const idAfter = globalFunctions.getIdAfter(sid)
     if (segment.splitted) {
       translation = SegmentUtils.collectSplittedTranslations(sid)
       segmentSource = SegmentUtils.collectSplittedTranslations(sid, '.source')
@@ -202,7 +205,7 @@ const SegmentUtils = {
       status: status ? status : segment.status,
       translation: translation,
       segment: segmentSource,
-      time_to_edit: UI.editTime ? UI.editTime : new Date() - UI.editStart,
+      time_to_edit: new Date() - SegmentStore.getStartEditTime(),
       chosen_suggestion_index: !config.isReview
         ? segment.choosenSuggestionIndex
         : undefined,
@@ -240,7 +243,7 @@ const SegmentUtils = {
       totalTranslation +=
         selector === '.source' ? segment.segment : segment.translation
       if (index < segments.length - 1)
-        totalTranslation += UI.splittedTranslationPlaceholder
+        totalTranslation += splittedTranslationPlaceholder
     })
     return totalTranslation
   },
