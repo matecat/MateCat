@@ -5,6 +5,7 @@ import {SegmentContext} from './SegmentContext'
 import SegmentFooter from './SegmentFooter'
 import {http, HttpResponse} from 'msw'
 import {mswServer} from '../../../mocks/mswServer'
+import globalFunctions from '../../globalFunctions'
 window.React = React
 
 window.config = {
