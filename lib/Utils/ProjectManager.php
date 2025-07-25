@@ -1076,7 +1076,7 @@ class ProjectManager {
         }
 
         $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
-        $fileName = CatUtils::encodeFileName($file_info['filename']) . "." . $file_info['extension'];
+        $fileName = $fs::createFileName($file_info['filename'], $file_info['extension']);
 
         /** @var $fs S3FilesStorage */
         $client              = $fs::getStaticS3Client();
