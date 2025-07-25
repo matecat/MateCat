@@ -5,7 +5,6 @@ import {
   splittedTranslationPlaceholder,
 } from '../constants/Constants'
 import UserStore from '../stores/UserStore'
-import SegmentActions from '../actions/SegmentActions'
 
 const SegmentUtils = {
   /**
