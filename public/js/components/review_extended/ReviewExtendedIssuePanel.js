@@ -11,6 +11,7 @@ import {
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
 import SegmentUtils from '../../utils/segmentUtils'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
@@ -105,7 +106,7 @@ class ReviewExtendedIssuePanel extends React.Component {
 
   handleFail(response) {
     if (response.errors && response.errors[0].code === -2000) {
-      UI.processErrors(response.errors, 'createIssue')
+      CatToolActions.processErrors(response.errors, 'createIssue')
     } else {
       CommonUtils.genericErrorAlertMessage()
     }

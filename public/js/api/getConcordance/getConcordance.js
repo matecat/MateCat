@@ -24,7 +24,7 @@ export const getConcordance = async (
   const dataParams = {
     is_concordance: 1,
     from_target: type,
-    id_segment: UI.currentSegmentId,
+    id_segment: SegmentStore.getCurrentSegmentId(),
     text: query,
     id_job: idJob,
     num_results: NUM_CONCORDANCE_RESULTS,
