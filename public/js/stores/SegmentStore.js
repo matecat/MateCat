@@ -44,6 +44,7 @@ import {
   JOB_WORD_CONT_TYPE,
   REVISE_STEP_NUMBER,
   SEGMENTS_STATUS,
+  splittedTranslationPlaceholder,
 } from '../constants/Constants'
 
 EventEmitter.prototype.setMaxListeners(0)
@@ -105,6 +106,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
   isSearchingGlossaryInTarget: false,
   helpAiAssistantWords: undefined,
   _aiSuggestions: [],
+  currentSegmentId: undefined,
+  editStart: undefined,
   /**
    * Update all
    */
@@ -132,7 +135,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     let newSegments = []
     $.each(segments, (i, segment) => {
       let splittedSourceAr = segment.segment.split(
-        UI.splittedTranslationPlaceholder,
+        splittedTranslationPlaceholder,
       )
       let inSearch = false
       let currentInSearch = false
@@ -152,7 +155,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
 
         $.each(splittedSourceAr, (i) => {
           let translation = segment.translation.split(
-            UI.splittedTranslationPlaceholder,
+            splittedTranslationPlaceholder,
           )[i]
           let status = segment.target_chunk_lengths.statuses[i]
           let segData = {
@@ -1158,7 +1161,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments?.first()?.get('sid')
   },
   getCurrentSegment: function () {
-    let current = null,
+    let current = SegmentStore.getSegmentById(SegmentStore.currentSegmentId),
       tmpCurrent = null
     tmpCurrent = this._segments.find((segment) => {
       return segment.get('opened') === true
@@ -1267,6 +1270,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       segmentCharacters,
     )
   },
+  getStartEditTime: function () {
+    return SegmentStore.editStart
+  },
 })
 
 // Register callback to handle all updates
@@ -1305,6 +1311,11 @@ AppDispatcher.register(function (action) {
       )
       // SegmentStore.emitChange(SegmentConstants.SCROLL_TO_SEGMENT, action.sid);
       break
+    case SegmentConstants.SET_CURRENT_SEGMENT_ID: {
+      SegmentStore.editStart = new Date()
+      SegmentStore.currentSegmentId = action.sid
+      break
+    }
     case SegmentConstants.SELECT_SEGMENT: {
       let idToScroll
       if (action.direction === 'next') {

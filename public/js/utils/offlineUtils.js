@@ -1,7 +1,8 @@
-import $ from 'jquery'
 import SegmentActions from '../actions/SegmentActions'
 import {checkConnectionPing} from '../api/checkConnectionPing'
 import CatToolActions from '../actions/CatToolActions'
+import SegmentStore from '../stores/SegmentStore'
+import {execSetTranslationTail} from '../setTranslationUtil'
 
 const OfflineUtils = {
   offline: false,
@@ -29,7 +30,6 @@ const OfflineUtils = {
         })
         .catch(() => {
           this.offline = true
-          UI.body.attr('data-offline-mode', 'light-off')
           this.checkingConnection = setInterval(() => {
             this.checkConnection()
           }, 5000)
@@ -40,7 +40,7 @@ const OfflineUtils = {
   endOfflineMode: function () {
     if (this.offline) {
       this.offline = false
-      var notification = {
+      const notification = {
         uid: 'offline-back',
         title: 'Connection is back',
         text: 'We are saving translated segments in the database.',
@@ -58,7 +58,6 @@ const OfflineUtils = {
       clearInterval(this.checkingConnection)
       this.currentConnectionCountdown = null
       this.checkingConnection = false
-      UI.body.removeAttr('data-offline-mode')
     }
   },
   failedConnection: function () {
@@ -68,16 +67,15 @@ const OfflineUtils = {
     checkConnectionPing()
       .then(() => {
         this.endOfflineMode()
-        UI.executingSetTranslation = []
-        UI.execSetTranslationTail()
+        execSetTranslationTail()
         //reset counter
         this.offlineCacheRemaining = this.offlineCacheSize
       })
       .catch(() => {
         /**
          * do Nothing there are already a thread running
-         * @see UI.startOfflineMode
-         * @see UI.endOfflineMode
+         * @see OfflineUtils.startOfflineMode
+         * @see OfflineUtils.endOfflineMode
          */
       })
   },
@@ -108,7 +106,7 @@ const OfflineUtils = {
   },
 
   changeStatusOffline: function (sid) {
-    if ($('#segment-' + sid + ' .editarea').text() != '') {
+    if (SegmentStore.getSegmentById(sid)) {
       SegmentActions.removeClassToSegment(sid, 'status-draft')
       SegmentActions.removeClassToSegment(sid, 'status-approved')
       SegmentActions.removeClassToSegment(sid, 'status-new')

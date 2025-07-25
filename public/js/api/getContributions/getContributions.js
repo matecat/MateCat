@@ -25,10 +25,10 @@ export const getContributions = async ({
   contextListBefore,
   contextListAfter,
 }) => {
-  const contextBefore = UI.getContextBefore(idSegment)
-  const idBefore = UI.getIdBefore(idSegment)
-  const contextAfter = UI.getContextAfter(idSegment)
-  const idAfter = UI.getIdAfter(idSegment)
+  const contextBefore = globalFunctions.getContextBefore(idSegment)
+  const idBefore = globalFunctions.getIdBefore(idSegment)
+  const contextAfter = globalFunctions.getContextAfter(idSegment)
+  const idAfter = globalFunctions.getIdAfter(idSegment)
 
   const obj = {
     password: password,

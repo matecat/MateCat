@@ -11,6 +11,7 @@ import SegmentStore from '../../../stores/SegmentStore'
 import {getContributions} from '../../../api/getContributions'
 import {deleteContribution} from '../../../api/deleteContribution'
 import {SEGMENTS_STATUS} from '../../../constants/Constants'
+import CatToolActions from '../../../actions/CatToolActions'
 
 let TranslationMatches = {
   copySuggestionInEditarea: function (segment, index, translation) {
@@ -28,7 +29,7 @@ let TranslationMatches = {
         percentageClass,
         matchToUse.created_by,
       )
-      UI.registerQACheck()
+      SegmentActions.startSegmentQACheck()
       CommonUtils.dispatchCustomEvent('contribution:copied', {
         translation: translation,
         segment: segment,
@@ -203,7 +204,7 @@ let TranslationMatches = {
       contextListBefore,
       contextListAfter,
     }).catch((errors) => {
-      UI.processErrors(errors, 'getContribution')
+      CatToolActions.processErrors(errors, 'getContribution')
       TranslationMatches.renderContributionErrors(errors, id_segment_original)
     })
   },

@@ -46,6 +46,7 @@ import {
   charsSizeCounter,
 } from '../utils/charsSizeCounterUtil'
 import {CatToolInterface} from './CatToolInterface'
+import CommentsActions from '../actions/CommentsActions'
 
 const urlParams = new URLSearchParams(window.location.search)
 const initialStateIsOpenSettings = Boolean(urlParams.get('openTab'))
@@ -74,7 +75,7 @@ function CatTool() {
 
   const [jobMetadata, setJobMetadata] = useState()
 
-  const startSegmentIdRef = useRef(UI.startSegmentId)
+  const startSegmentIdRef = useRef()
   const callbackAfterSegmentsResponseRef = useRef()
 
   const {isLoading: isLoadingSegments, result: segmentsResult} =
@@ -153,10 +154,33 @@ function CatTool() {
     }
   }
 
+  const checkQueryParams = () => {
+    const action = CommonUtils.getParameterByName('action')
+    let interval
+    if (action) {
+      switch (action) {
+        case 'openComments':
+          interval = setTimeout(function () {
+            CommentsActions.openCommentsMenu()
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+        case 'warnings':
+          interval = setTimeout(function () {
+            CatToolActions.toggleQaIssues()
+            clearInterval(interval)
+          }, 500)
+          CommonUtils.removeParam('action')
+          break
+      }
+    }
+  }
+
   // actions listener
   useEffect(() => {
     // CatTool onRender action
     getTmKeys()
+    checkQueryParams()
     const onRenderHandler = (options) => {
       const {
         actionType, // eslint-disable-line
@@ -274,6 +298,7 @@ function CatTool() {
 
   // on mount dispatch some actions
   useEffect(() => {
+    CommonUtils.setBrowserHistoryBehavior()
     getSupportedLanguages()
       .then((data) => {
         ApplicationStore.setLanguages(data)
@@ -284,7 +309,6 @@ function CatTool() {
       )
     CatToolActions.onRender()
     $('html').trigger('start')
-    UI.splittedTranslationPlaceholder = '##$_SPLIT$##'
   }, [])
 
   // handle getSegments result
@@ -295,7 +319,7 @@ function CatTool() {
     if (errors) {
       const {type, ...errors} = segmentsResult // eslint-disable-line
       if (errors.length)
-        UI.processErrors(
+        CatToolActions.processErrors(
           errors,
           where === 'center' ? 'getSegments' : 'getMoreSegments',
         )
@@ -333,7 +357,9 @@ function CatTool() {
       if (haveDataFilesEntries) {
         if (options?.openCurrentSegmentAfter && !segmentId)
           SegmentActions.openSegment(
-            UI.firstLoad ? UI.currentSegmentId : startSegmentIdRef?.current,
+            CatToolStore.getFirstLoad()
+              ? SegmentStore.getCurrentSegmentId()
+              : startSegmentIdRef?.current,
           )
       }
       CatToolActions.updateFooterStatistics()
@@ -366,14 +392,13 @@ function CatTool() {
     callbackAfterSegmentsResponseRef.current()
   }, [segmentsResult])
 
-  // call UI.init execute after first segments request
   useEffect(() => {
     if (!wasInitSegments) return
-    UI.init()
+    CatToolActions.setFirstLoad(false)
     setTimeout(function () {
-      UI.checkWarnings(true)
+      CatToolActions.checkWarnings(true)
     }, 1000)
-    UI.registerFooterTabs()
+    globalFunctions.registerFooterTabs()
   }, [wasInitSegments])
 
   // user metadata options initialization
@@ -480,7 +505,7 @@ function CatTool() {
               <div className="article-segments-container">
                 <SegmentsContainer
                   isReview={config.isReview}
-                  startSegmentId={UI.startSegmentId?.toString()}
+                  startSegmentId={startSegmentIdRef.current}
                   firstJobSegment={config.first_job_segment}
                   languages={supportedLanguages}
                 />
@@ -549,7 +574,6 @@ function CatTool() {
 
 export default CatTool
 
-UI.start()
 mountPage({
   Component: CatTool,
   rootElement: document.getElementsByClassName('page-content')[0],

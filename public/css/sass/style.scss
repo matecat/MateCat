@@ -1861,28 +1861,6 @@ section.status-rejected .status {
   margin-top: 1px;
 }
 
-body[data-offline-mode='light-off'] section.setTranslationPending .status,
-section.setTranslationError .status {
-  background-image: url(/public/img/offline-bg.png) !important;
-  background-color: #0798bc !important;
-  background-repeat: no-repeat !important;
-  background-position: center center;
-  background-size: 20px 40px;
-}
-
-body[data-offline-mode='light-off'] .editor.setTranslationPending .status,
-.editor.setTranslationError .status {
-  background-size: 20px 50px;
-}
-
-body[data-offline-mode='light-off'] .msg span,
-.lightoff .msg span {
-  vertical-align: middle;
-  margin-top: -3px;
-  font-size: 18px;
-  display: inline-block;
-}
-
 section.editor.status-rejected .status {
   background-color: colors.$rebuttedRed !important;
 }

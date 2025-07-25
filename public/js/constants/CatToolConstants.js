@@ -24,6 +24,7 @@ const CatToolConstants = keyMirror({
   OPEN_SETTINGS_PANEL: null,
   GET_JOB_METADATA: null,
   SEGMENT_FILTER_ERROR: null,
+  SET_FIRST_LOAD: null,
 })
 
 export default CatToolConstants

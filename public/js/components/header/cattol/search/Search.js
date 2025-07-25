@@ -17,8 +17,12 @@ import AlertModal from '../../../modals/AlertModal'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {tagSignatures} from '../../../segments/utils/DraftMatecatUtils/tagModel'
 import CommonUtils from '../../../../utils/commonUtils'
-import {REVISE_STEP_NUMBER} from '../../../../constants/Constants'
+import {
+  REVISE_STEP_NUMBER,
+  SEGMENTS_STATUS,
+} from '../../../../constants/Constants'
 import {Select} from '../../../common/Select'
+import {segmentTranslation} from '../../../../setTranslationUtil'
 
 class Search extends React.Component {
   constructor(props) {
@@ -185,14 +189,16 @@ class Search extends React.Component {
   }
 
   handleCancelClick() {
-    UI.body.removeClass('searchActive')
+    SearchUtils.searchOpen = false
     this.handleClearClick()
-    if (SegmentStore.getSegmentByIdToJS(UI.currentSegmentId)) {
-      setTimeout(() => SegmentActions.scrollToSegment(UI.currentSegmentId))
+    if (SegmentStore.getSegmentByIdToJS(SegmentStore.getCurrentSegmentId())) {
+      setTimeout(() =>
+        SegmentActions.scrollToSegment(SegmentStore.getCurrentSegmentId()),
+      )
     } else {
       CatToolActions.onRender({
         firstLoad: false,
-        segmentToOpen: UI.currentSegmentId,
+        segmentToOpen: SegmentStore.getCurrentSegmentId(),
       })
     }
 
@@ -300,11 +306,7 @@ class Search extends React.Component {
       )
       if (segment) {
         this.updateAfterReplace(segment.original_sid)
-        // let next = this.state.occurrencesList[this.state.featuredSearchResult];
-        UI.setTranslation({
-          id_segment: segment.original_sid,
-          status: segment.status,
-        })
+        segmentTranslation(segment, segment.status, () => {}, false)
       }
     })
   }

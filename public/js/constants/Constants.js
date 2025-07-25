@@ -68,3 +68,5 @@ export const ANALYSIS_WORKFLOW_TYPES = {
   STANDARD: 'standard',
   MTQE: 'mtqe',
 }
+
+export const splittedTranslationPlaceholder = '##$_SPLIT$##'
