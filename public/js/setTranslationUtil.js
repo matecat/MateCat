@@ -30,6 +30,15 @@ export const segmentTranslation = (
       autoPropagate,
       callback,
     })
+    // Remove the modified class only if the segment is not in draft or new status
+    if (
+      [
+        SEGMENTS_STATUS.DRAFT.toUpperCase(),
+        SEGMENTS_STATUS.NEW.toUpperCase(),
+      ].indexOf(status.toUpperCase()) === -1
+    ) {
+      SegmentActions.modifiedTranslation(segment.sid, false)
+    }
   }
 
   if (
