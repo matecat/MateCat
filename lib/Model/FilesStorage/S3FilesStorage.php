@@ -780,14 +780,13 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return string
      */
     public static function createFileName( string $filename, string $extension ): string {
-        $baseName = $filename . "." . $extension;
 
         // encode filename only if is too long
-        if ( strlen( urlencode( $baseName ) ) > 221 ) {
-            return CatUtils::encodeFileName( $baseName );
+        if ( strlen( urlencode( $filename ) ) > 221 ) {
+            return CatUtils::encodeFileName( $filename ) . "." . $extension;
         }
 
-        return $baseName;
+        return $filename . "." . $extension;
     }
 
     /**
