@@ -72,7 +72,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
         if ( CatUtils::isRevisionFromIdJobAndPassword( $idJob, $password ) ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $this->getUser()->email == $chunk->status_owner ) {
+        } elseif ( $this->getUser()->email == $chunk->owner ) {
             $userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
@@ -112,6 +112,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
             if ( !empty( $filter ) ) {
                 $sortedKeys[] = array_values( $filter )[ 0 ];
             }
+
+            // owner a true solo se sono l'owner del job
+
         }
 
         return $sortedKeys;
