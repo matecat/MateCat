@@ -2,30 +2,39 @@ export const changeGDriveSourceLang = async ({
   sourceLang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
+  filters_extraction_parameters_template,
 }) => {
   let params = {
     source: sourceLang,
     segmentation_rule: segmentation_rule,
     filters_extraction_parameters_template_id:
       filters_extraction_parameters_template_id,
+    filters_extraction_parameters_template,
   }
+
+  const formData = new FormData()
+
+  Object.keys(params).forEach((key) => {
+    if (params[key] !== undefined) formData.append(key, params[key])
+  })
+
   let url = `/gdrive/change`
 
   const res = await fetch(url, {
     credentials: 'include',
     method: 'POST',
-    body: JSON.stringify(params),
+    body: formData,
   })
 
   if (!res.ok) {
     return Promise.reject(res)
   }
 
-  /*  const {errors, ...restData} = await res.json()
+  const {errors, ...restData} = await res.json()
 
   if (errors) {
     return Promise.reject(errors)
-  }*/
+  }
 
-  return Promise.resolve()
+  return restData
 }
