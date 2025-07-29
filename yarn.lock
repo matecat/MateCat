@@ -4262,9 +4262,9 @@ foreground-child@^3.3.1:
     signal-exit "^4.0.1"
 
 form-data@^4.0.0:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.3.tgz#608b1b3f3e28be0fccf5901fc85fb3641e5cf0ae"
-  integrity sha512-qsITQPfmvMOSAdeyZ+12I1c+CKSstAFAwu+97zrnWAbIr5u8wfsExUzCesVLC8NgHuRUqNN4Zy6UPWUTRGslcA==
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
+  integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
   dependencies:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
@@ -6415,9 +6415,9 @@ postcss@^8.4.33:
     source-map-js "^1.2.1"
 
 posthog-js@^1.57.2:
-  version "1.257.0"
-  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.257.0.tgz#7adfffa024756b910ee87a978e0fc6c12a9fa730"
-  integrity sha512-Ujg9RGtWVCu+4tmlRpALSy2ZOZI6JtieSYXIDDdgMWm167KYKvTtbMPHdoBaPWcNu0Km+1hAIBnQFygyn30KhA==
+  version "1.258.2"
+  resolved "https://registry.yarnpkg.com/posthog-js/-/posthog-js-1.258.2.tgz#84b034ae1d8a52b3197275645343ffbdc302729d"
+  integrity sha512-XBSeiN4HjiYsy3tW5zss8WOJF2JXTQXAYw2wZ+zjqQuzzi7kkLEXjIgsVrBnt5Opwhqn0krZVsb0ZBw34dIiyQ==
   dependencies:
     core-js "^3.38.1"
     fflate "^0.4.8"
@@ -6425,9 +6425,9 @@ posthog-js@^1.57.2:
     web-vitals "^4.2.4"
 
 preact@^10.19.3:
-  version "10.26.9"
-  resolved "https://registry.yarnpkg.com/preact/-/preact-10.26.9.tgz#b3898d1b65140640799062ad73b89846c293b6a7"
-  integrity sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA==
+  version "10.27.0"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.27.0.tgz#7e614fb651cc1f49275bfb7682e811d759a5364f"
+  integrity sha512-/DTYoB6mwwgPytiqQTh/7SFRL98ZdiD8Sk8zIUVOxtwq4oWcwrcd1uno9fE/zZmUaUrFNYzbH14CPebOz9tZQw==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
