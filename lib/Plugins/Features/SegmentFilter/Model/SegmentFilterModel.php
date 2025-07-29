@@ -8,27 +8,27 @@
 
 namespace Features\SegmentFilter\Model;
 
+use DataAccess\ShapelessConcreteStruct;
 use Exception;
 use Jobs_JobStruct;
-use Translations_SegmentTranslationStruct;
 
 class SegmentFilterModel {
 
     /**
      * @var Jobs_JobStruct
      */
-    private $chunk;
+    private Jobs_JobStruct $chunk;
 
     /**
      * @var FilterDefinition
      */
-    private $filter;
+    private FilterDefinition $filter;
 
     /**
      * SegmentFilterModel constructor.
      *
-     * @param Jobs_JobStruct $chunk
-     * @param FilterDefinition    $filter
+     * @param Jobs_JobStruct   $chunk
+     * @param FilterDefinition $filter
      *
      * @throws Exception
      */
@@ -38,10 +38,10 @@ class SegmentFilterModel {
     }
 
     /**
-     * @return null|Translations_SegmentTranslationStruct[]
+     * @return ShapelessConcreteStruct[]
      * @throws Exception
      */
-    public function getSegmentList() {
+    public function getSegmentList(): array {
 
         if ( $this->filter->isSampled() ) {
             $result = SegmentFilterDao::findSegmentIdsForSample( $this->chunk, $this->filter );

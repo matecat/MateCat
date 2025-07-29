@@ -31,6 +31,7 @@ use Matecat\XliffParser\XliffParser;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
 use Model\Analysis\AnalysisDao;
 use PayableRates\CustomPayableRateDao;
+use PayableRates\CustomPayableRateStruct;
 use ProjectManager\ProjectManagerModel;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -42,6 +43,7 @@ use Translators\TranslatorsModel;
 use WordCount\CounterModel;
 use Xliff\DTO\XliffRulesModel;
 use Xliff\XliffConfigTemplateStruct;
+use Conversion\ZipArchiveHandler;
 
 class ProjectManager {
 
@@ -197,12 +199,8 @@ class ProjectManager {
                             'mmt_glossaries'                          => null,
                             'deepl_formality'                         => null,
                             'deepl_id_glossary'                       => null,
-                            'dictation'                               => null,
-                            'show_whitespace'                         => null,
-                            'character_counter'                       => null,
                             'character_counter_mode'                  => null,
                             'character_counter_count_tags'            => null,
-                            'ai_assistant'                            => null,
                             'filters_extraction_parameters'           => new RecursiveArrayObject(),
                             'xliff_parameters'                        => new RecursiveArrayObject(),
                             'tm_prioritization'                       => null,
@@ -397,26 +395,6 @@ class ProjectManager {
         // "From API" flag
         if ( isset( $this->projectStructure[ 'from_api' ] ) and $this->projectStructure[ 'from_api' ] ) {
             $options[ 'from_api' ] = 1;
-        }
-
-        // dictation (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'dictation' ] ) and $this->projectStructure[ 'dictation' ] !== null ) {
-            $options[ 'dictation' ] = $this->projectStructure[ 'dictation' ] == true ? 1 : 0;
-        }
-
-        // show_whitespace (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'show_whitespace' ] ) and $this->projectStructure[ 'show_whitespace' ] !== null ) {
-            $options[ 'show_whitespace' ] = $this->projectStructure[ 'show_whitespace' ] == true ? 1 : 0;
-        }
-
-        // character_counter (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'character_counter' ] ) and $this->projectStructure[ 'character_counter' ] !== null ) {
-            $options[ 'character_counter' ] = $this->projectStructure[ 'character_counter' ] == true ? 1 : 0;
-        }
-
-        // ai_assistant (LEGACY CODE TO BE REMOVED)
-        if ( isset( $this->projectStructure[ 'ai_assistant' ] ) and $this->projectStructure[ 'ai_assistant' ] !== null ) {
-            $options[ 'ai_assistant' ] = $this->projectStructure[ 'ai_assistant' ] == true ? 1 : 0;
         }
 
         // xliff_parameters
@@ -927,7 +905,7 @@ class ProjectManager {
             if ( $e->getCode() == -1 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
                         "code"    => -1,
-                        "message" => "No text to translate in the file {$e->getMessage()}."
+                        "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
                 if ( INIT::$FILE_STORAGE_METHOD != 's3' ) {
                     $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
@@ -1331,6 +1309,14 @@ class ProjectManager {
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
                 $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
+            } elseif ( isset( $projectStructure[ 'payable_rate_model' ] ) and !empty( $projectStructure[ 'payable_rate_model' ] ) ) {
+
+                // get payable rates
+                $payableRatesTemplate = new CustomPayableRateStruct();
+                $payableRatesTemplate->hydrateFromJSON( json_encode($projectStructure[ 'payable_rate_model' ]) );
+                $payableRates         = $payableRatesTemplate->getPayableRates( $projectStructure[ 'source_language' ], $target );
+                $payableRates         = json_encode( $payableRates );
+
             } elseif ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) ) {
                 // get payable rates
                 $payableRatesTemplate = CustomPayableRateDao::getById( $projectStructure[ 'payable_rate_model_id' ] );

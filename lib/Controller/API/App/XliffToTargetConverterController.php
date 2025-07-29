@@ -10,8 +10,8 @@
 namespace API\App;
 
 use AbstractControllers\KleinController;
-use Filters;
-use MimeTypes\MimeTypes;
+use Conversion\Filters;
+use Conversion\MimeTypes\MimeTypes;
 
 set_time_limit( 180 );
 
