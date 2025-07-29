@@ -4565,16 +4565,16 @@
         },
         {
             "name": "translated/lara-sdk",
-            "version": "1.0.2",
+            "version": "1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/translated/lara-php.git",
-                "reference": "8fc077542ba1f7ffdf967a9949f43e6a1c6be310"
+                "reference": "93b995e8bcd8244935716ba12d4549864575a5e7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/translated/lara-php/zipball/8fc077542ba1f7ffdf967a9949f43e6a1c6be310",
-                "reference": "8fc077542ba1f7ffdf967a9949f43e6a1c6be310",
+                "url": "https://api.github.com/repos/translated/lara-php/zipball/93b995e8bcd8244935716ba12d4549864575a5e7",
+                "reference": "93b995e8bcd8244935716ba12d4549864575a5e7",
                 "shasum": ""
             },
             "require": {
@@ -4595,17 +4595,16 @@
             "authors": [
                 {
                     "name": "Translated",
-                    "email": "info@translated.com",
-                    "homepage": "https://translated.com/"
+                    "email": "support@laratranslate.com"
                 }
             ],
             "description": "Official Lara SDK for PHP",
-            "homepage": "https://github.com/translated/lara-php",
+            "homepage": "https://laratranslate.com/",
             "support": {
                 "issues": "https://github.com/translated/lara-php/issues",
-                "source": "https://github.com/translated/lara-php/tree/v1.0.2"
+                "source": "https://github.com/translated/lara-php/tree/v1.2.3"
             },
-            "time": "2025-01-10T10:15:24+00:00"
+            "time": "2025-07-16T08:44:40+00:00"
         }
     ],
     "packages-dev": [
