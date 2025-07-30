@@ -35,21 +35,10 @@
 <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
   document.getElementById('reactivate-job').addEventListener('click', function(e) {
     e.preventDefault();
-
-    const params = new URLSearchParams({
-      action: "changeJobsStatus",
-      new_status: "active",
-      res: "job",
-      id: config.job_id,
-      password: config.password
-    });
-
-    fetch('/', {
+    const url = '/api/v3/jobs/' + config.job_id + '/' + config.password+'/active'
+    fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
+      credentials: 'include',
     })
         .then(response => response.json())
         .then(data => {
