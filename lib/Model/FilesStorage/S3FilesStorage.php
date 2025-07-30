@@ -164,7 +164,13 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // encode the file name (fix name too longs)
         $file_info       = AbstractFilesStorage::pathinfo_fix( $fileName );
-        $encodedFileName = self::createFileName( $file_info[ 'filename' ], $file_info[ 'extension' ] );
+
+        if(!empty($file_info[ 'filename' ]) and !empty($file_info[ 'extension' ])){
+            $encodedFileName = self::createFileName( $prefix . '/work/' , $file_info );
+        } else {
+            $encodedFileName = $file_info[ 'basename' ];
+        }
+
         $xliffPath       = str_replace( $fileName, $encodedFileName, $xliffPath );
         $fileName        = $encodedFileName;
 
@@ -185,13 +191,13 @@ class S3FilesStorage extends AbstractFilesStorage {
 
             // encode the file name (fix name too longs)
             $file_info        = AbstractFilesStorage::pathinfo_fix( $fileName );
-            $fileName         = self::createFileName( $file_info[ 'filename' ], $file_info[ 'extension' ] );
+            $fileName         = self::createFileName( $prefix . '/work/' , $file_info );
             $xliffDestination = str_replace( $file_info[ 'filename' ] . "." . $file_info[ 'extension' ], $fileName, $xliffDestination );
 
             $this->s3Client->uploadItem( [
-                    'bucket' => static::$FILES_STORAGE_BUCKET,
-                    'key'    => $xliffDestination,
-                    'source' => $xliffPath
+                'bucket' => static::$FILES_STORAGE_BUCKET,
+                'key'    => $xliffDestination,
+                'source' => $xliffPath
             ] );
 
             Log::doJsonLog( 'Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
@@ -255,7 +261,7 @@ class S3FilesStorage extends AbstractFilesStorage {
 
         // encode filename
         $file_info = AbstractFilesStorage::pathinfo_fix( $file_name );
-        $file_name = self::createFileName( $file_info[ 'filename' ], $file_info[ 'extension' ] );
+        $file_name = self::createFileName( $prefix . '/orig/', $file_info );
 
         $origDestination = $prefix . DIRECTORY_SEPARATOR . 'orig' . DIRECTORY_SEPARATOR . $file_name;
 
@@ -501,7 +507,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 $subPathName = $prefix . DIRECTORY_SEPARATOR . $subPathName;
 
                 $file_info          = AbstractFilesStorage::pathinfo_fix( $subPathName );
-                $encodedSubPathName = self::createFileName( $file_info[ 'filename' ], $file_info[ 'extension' ] );
+                $encodedSubPathName = self::createFileName( $prefix."/", $file_info );
                 $encodedSubPathName = $prefix . DIRECTORY_SEPARATOR . $encodedSubPathName;
 
                 // upload file
@@ -774,19 +780,27 @@ class S3FilesStorage extends AbstractFilesStorage {
     }
 
     /**
-     * @param string $filename
-     * @param string $extension
+     * @param string $prefix
+     * @param array  $file_info
      *
      * @return string
      */
-    public static function createFileName( string $filename, string $extension ): string {
+    public static function createFileName( string $prefix, array $file_info ): string {
 
-        // encode filename only if is too long
-        if ( strlen( urlencode( $filename ) ) > 221 ) {
-            return CatUtils::encodeFileName( $filename ) . "." . $extension;
+        if(!empty($file_info[ 'filename' ]) and !empty($file_info[ 'extension' ])){
+
+            // check if prefixed filename if is too long
+            $filename = $file_info[ 'filename' ];
+            $extension = $file_info[ 'extension' ];
+
+            if ( strlen( urlencode( $prefix.$filename ) ) > 221 ) {
+                return CatUtils::encodeFileName( $filename ) . "." . $extension;
+            }
+
+            return $filename . "." . $extension;
         }
 
-        return $filename . "." . $extension;
+        return $file_info[ 'basename' ];
     }
 
     /**
