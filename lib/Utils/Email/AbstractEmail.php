@@ -8,7 +8,6 @@
 
 namespace Email;
 
-use AMQHandler;
 use Exception;
 use INIT;
 use Log;
@@ -24,7 +23,7 @@ abstract class AbstractEmail {
     /**
      * @return array
      */
-    abstract protected function _getTemplateVariables();
+    abstract protected function _getTemplateVariables(): array;
 
 
     /**
@@ -37,7 +36,7 @@ abstract class AbstractEmail {
     }
 
     protected function _setLayoutByPath( $path ) {
-        $this->_layout_path = $path ;
+        $this->_layout_path = $path;
     }
 
     protected function _setTemplate( $template ) {
@@ -65,28 +64,41 @@ abstract class AbstractEmail {
         Log::doJsonLog( 'Message has been sent' );
     }
 
-    protected function _buildMessageContent() {
+    /**
+     * @return string
+     */
+    protected function _buildMessageContent(): string {
         ob_start();
-        extract( $this->_getTemplateVariables(), EXTR_OVERWRITE );
+        extract( $this->_getTemplateVariables() );
         include( $this->_template_path );
 
         return ob_get_clean();
     }
 
-    protected function _buildHTMLMessage( $messageContent = null ) {
+    /**
+     * @param $messageContent
+     *
+     * @return string
+     */
+    protected function _buildHTMLMessage( $messageContent = null ): string {
         ob_start();
-        extract( $this->_getLayoutVariables( $messageContent ), EXTR_OVERWRITE );
+        extract( $this->_getLayoutVariables( $messageContent ) );
         include( $this->_layout_path );
 
         return ob_get_clean();
     }
 
-    protected function _getLayoutVariables( $messageBody = null ) {
+    /**
+     * @param $messageBody
+     *
+     * @return array
+     */
+    protected function _getLayoutVariables( $messageBody = null ): array {
 
         if ( isset( $this->title ) ) {
             $title = $this->title;
         } else {
-            $title = 'MateCat';
+            $title = 'Matecat';
         }
 
         return [
@@ -97,7 +109,10 @@ abstract class AbstractEmail {
         ];
     }
 
-    protected function _getDefaultMailConf() {
+    /**
+     * @return array
+     */
+    protected function _getDefaultMailConf(): array {
 
         $mailConf = [];
 
@@ -114,6 +129,9 @@ abstract class AbstractEmail {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function sendTo( $address, $name ) {
         $recipient = [ $address, $name ];
 
@@ -123,7 +141,10 @@ abstract class AbstractEmail {
         );
     }
 
-    protected function doSend( $address, $subject, $htmlBody, $altBody ) {
+    /**
+     * @throws Exception
+     */
+    protected function doSend( $address, $subject, $htmlBody, $altBody ): bool {
         $mailConf = $this->_getDefaultMailConf();
 
         $mailConf[ 'address' ] = $address;
@@ -143,7 +164,7 @@ abstract class AbstractEmail {
      * @return string
      * @internal param $title
      */
-    protected function _buildTxtMessage( $messageBody ) {
+    protected function _buildTxtMessage( $messageBody ): string {
         $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "", $messageBody );
         $messageBody = preg_replace( "#<[/]*strong[^>]*>#i", "", $messageBody );
         $messageBody = preg_replace( "#<[/]*(ol|ul|li)[^>]*>#i", "\t", $messageBody );

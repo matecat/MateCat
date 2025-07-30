@@ -3,30 +3,36 @@
 namespace API\V2;
 
 
-use API\V2\Validators\ChunkPasswordValidator;
-use Chunks_ChunkStruct;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
+use Exception;
+use Jobs_JobStruct;
+use Projects\ChunkOptionsModel;
 
 class ChunkOptionsController extends BaseChunkController {
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( Jobs_JobStruct $chunk ): ChunkOptionsController {
         $this->chunk = $chunk;
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function update() {
 
         $this->return404IfTheJobWasDeleted();
 
-        $chunk_options_model = new \ChunkOptionsModel( $this->chunk ) ;
-        
+        $chunk_options_model = new ChunkOptionsModel( $this->chunk ) ;
+
         $chunk_options_model->setOptions( $this->filteredParams() ) ;
-        $chunk_options_model->save(); 
-        
+        $chunk_options_model->save();
+
         $this->response->json( array( 'options' => $chunk_options_model->toArray() ) ) ;
     }
 
@@ -37,6 +43,7 @@ class ChunkOptionsController extends BaseChunkController {
             $Controller->setChunk( $Validator->getChunk() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     protected function filteredParams() {
@@ -47,9 +54,8 @@ class ChunkOptionsController extends BaseChunkController {
         );
 
         $args = array_intersect_key( $args, $this->request->params() );
-        $filtered = filter_var_array( $this->request->params(), $args);
 
-        return $filtered;
-        
+        return filter_var_array( $this->request->params(), $args);
+
     }
 }

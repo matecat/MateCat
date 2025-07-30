@@ -8,20 +8,23 @@
 
 namespace Features\ReviewExtended;
 
+use Exception;
 use Exceptions\ValidationError;
-use Features\SecondPassReview\Model\ChunkReviewModel;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Features\TranslationVersions\Model\TranslationVersionDao;
 use Features\TranslationVersions\Model\TranslationVersionStruct;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use LQA\EntryDao;
 use LQA\EntryStruct;
-use ReflectionException;
+use Projects_ProjectStruct;
 use Utils;
 
 class TranslationIssueModel {
 
     /**
-     * @var \Projects_ProjectStruct
+     * @var Projects_ProjectStruct
      */
     protected $project;
 
@@ -33,12 +36,12 @@ class TranslationIssueModel {
     protected $issue;
 
     /**
-     * @var \LQA\ChunkReviewStruct
+     * @var ChunkReviewStruct
      */
     protected $chunk_review;
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -73,7 +76,7 @@ class TranslationIssueModel {
      *
      * @return EntryStruct
      * @throws ValidationError
-     * @throws ReflectionException
+     * @throws Exception
      */
     public function save() {
         $this->setDefaultIssueValues();
@@ -132,17 +135,29 @@ class TranslationIssueModel {
     }
 
     /**
-     * Deletes the entry and subtracts penalty points.
-     * Penalty points are not subtracted if deletion is coming from a review and the issue is rebutted, because in that
-     * case we could end up with negative sum of penalty points
-     *
-     * @throws \Exception
+     * @throws Exception
      */
     public function delete() {
         EntryDao::deleteEntry( $this->issue );
 
-        $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $this->subtractPenaltyPoints( $chunk_review_model );
+        //
+        // ---------------------------------------------------
+        // Note 2020-06-24
+        // ---------------------------------------------------
+        //
+        // $this->chunkReview may not refer to the chunk review associated to issue source page
+        //
+        $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
+        $final_revision = ( new TranslationEventDao() )->getFinalRevisionForSegmentAndSourcePage(
+                $chunkReview->id_job,
+                $this->issue->id_segment,
+                $this->issue->source_page
+        );
+
+        if ( $final_revision ) {
+            $chunk_review_model = new ChunkReviewModel( $chunkReview );
+            $this->subtractPenaltyPoints( $chunk_review_model );
+        }
     }
 
     /**
@@ -151,7 +166,7 @@ class TranslationIssueModel {
      *
      * @param ChunkReviewModel $chunk_review_model
      *
-     * @throws \Exception
+     * @throws Exception
      */
     protected function subtractPenaltyPoints( ChunkReviewModel $chunk_review_model ) {
         if ( ( $chunk_review_model->getPenaltyPoints() - $this->issue->penalty_points ) >= 0 ) {

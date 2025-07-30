@@ -9,16 +9,16 @@
 
 namespace Segments;
 
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDao;
+use \DataAccess\IDaoStruct;
 use Projects_ProjectStruct;
 
-class ContextGroupDao extends DataAccess_AbstractDao {
+class ContextGroupDao extends AbstractDao {
 
     const TABLE       = 'context_groups';
     const STRUCT_TYPE = "ContextStruct";
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id', 'id_project' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id', 'id_project' ];
 
     protected static $query_get_all_by_project   = "SELECT * FROM context_groups WHERE id_project = :id_project";
     protected static $query_get_all_by_file_id   = "SELECT * FROM context_groups WHERE id_file = :id_file";
@@ -28,10 +28,10 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     /**
      * @param Projects_ProjectStruct $project
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return IDaoStruct[]
      */
     public function getAllByProject( Projects_ProjectStruct $project ) {
-        $stmt = $this->_getStatementForCache( self::$query_get_all_by_project );
+        $stmt = $this->_getStatementForQuery( self::$query_get_all_by_project );
 
         return $this->_fetchObject( $stmt,
                 $project,
@@ -42,7 +42,7 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     }
 
     public function getBySegmentID( $sid ) {
-        $stmt = $this->_getStatementForCache( self::$query_get_by_segment_id );
+        $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_id );
 
         return $this->_fetchObject( $stmt,
                 new ContextStruct(),
@@ -53,7 +53,7 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     }
 
     public function getByFileID( $fid ) {
-        $stmt = $this->_getStatementForCache( self::$query_get_all_by_file_id );
+        $stmt = $this->_getStatementForQuery( self::$query_get_all_by_file_id );
 
         return $this->_fetchObject( $stmt,
                 new ContextStruct(),
@@ -64,7 +64,7 @@ class ContextGroupDao extends DataAccess_AbstractDao {
     }
 
     public function getBySIDRange( $start, $stop ) {
-        $stmt = $this->_getStatementForCache( self::$query_get_by_segment_range );
+        $stmt = $this->_getStatementForQuery( self::$query_get_by_segment_range );
         /** @var ContextStruct[] $resSet */
         $resSet      = $this->_fetchObject( $stmt,
                 new ContextStruct(),

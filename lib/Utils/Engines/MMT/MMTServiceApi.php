@@ -16,19 +16,18 @@ class MMTServiceApi {
 
     const DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
-    private $baseUrl;
-    private $license;
-    private $client = 0;
-    private $pluginVersion;
-    private $platform;
-    private $platformVersion;
+    private string  $baseUrl;
+    private ?string $license         = null;
+    private int     $client          = 0;
+    private ?string $platform        = null;
+    private ?string $platformVersion = null;
 
     /**
      * @param string|null $baseUrl
      *
      * @return MMTServiceApi
      */
-    public static function newInstance( $baseUrl = null ) {
+    public static function newInstance( ?string $baseUrl = null ): MMTServiceApi {
         $baseUrl = $baseUrl == null ? self::DEFAULT_BASE_URL : rtrim( $baseUrl, "/" );
 
         return new static( $baseUrl );
@@ -39,21 +38,19 @@ class MMTServiceApi {
      *
      * @param string $baseUrl
      */
-    private function __construct( $baseUrl ) {
+    private function __construct( string $baseUrl ) {
         $this->baseUrl = $baseUrl;
     }
 
     /**
-     * @param string $pluginVersion   the plugin version (i.e. "2.4")
      * @param string $platform        the platform name (i.e. "Matecat")
      * @param string $platformVersion the platform version (i.e. "1.10.7")
      *
      * @return MMTServiceApi
      */
-    public function setIdentity( $pluginVersion = null, $platform = null, $platformVersion = null ) {
-        $this->pluginVersion   = $pluginVersion;
-        $this->platform        = $platform;
-        $this->platformVersion = $platformVersion;
+    public function setIdentity( string $platform, string $platformVersion ): MMTServiceApi {
+        $this->platform        = $platform; // 'Matecat'
+        $this->platformVersion = $platformVersion; //Ex: 2.22.24
 
         return $this;
     }
@@ -63,7 +60,7 @@ class MMTServiceApi {
      *
      * @return MMTServiceApi
      */
-    public function setLicense( $license ) {
+    public function setLicense( string $license ): MMTServiceApi {
         $this->license = $license;
 
         return $this;
@@ -74,7 +71,7 @@ class MMTServiceApi {
      *
      * @return MMTServiceApi
      */
-    public function setClient( $client ) {
+    public function setClient( int $client ): MMTServiceApi {
         $this->client = $client;
 
         return $this;
@@ -114,6 +111,29 @@ class MMTServiceApi {
         return $this->send( 'GET', "$this->baseUrl/users/me" );
     }
 
+    /**
+     * Get the Quality Estimation of a translation
+     *
+     * @param string $source
+     * @param string $target
+     * @param string $sentence
+     * @param string $translation
+     * @param string $mt_qe_engine_id
+     *
+     * @return mixed
+     * @throws MMTServiceApiException
+     */
+    public function qualityEstimation( string $source, string $target, string $sentence, string $translation, string $mt_qe_engine_id ) {
+        return $this->send( 'GET', "$this->baseUrl/translate/qe", [
+                "source"          => $source,
+                "target"          => $target,
+                "sentence"        => $sentence,
+                "translation"     => $translation,
+                'purfect_version' => $mt_qe_engine_id
+        ] );
+    }
+
+
     /* Memory ------------------------------------------------------------------------------------------------------- */
 
     /**
@@ -137,12 +157,12 @@ class MMTServiceApi {
     /**
      * @param             $name
      * @param string|null $description
-     * @param null        $externalId
+     * @param string|null $externalId
      *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function createMemory( $name, $description = null, $externalId = null ) {
+    public function createMemory( $name, ?string $description = null, ?string $externalId = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories", [
                 'name' => $name, 'description' => $description, 'external_id' => $externalId
         ] );
@@ -151,42 +171,42 @@ class MMTServiceApi {
     /**
      * @param $id
      *
-     * @return mixed
+     * @return array
      * @throws MMTServiceApiException
      */
-    public function deleteMemory( $id ) {
+    public function deleteMemory( $id ): ?array {
         return $this->send( 'DELETE', "$this->baseUrl/memories/$id" );
     }
 
     /**
      * @param $id
      * @param $data
+     *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function importGlossary($id, $data)
-    {
+    public function importGlossary( $id, $data ) {
         return $this->send( 'POST', "$this->baseUrl/memories/$id/glossary", $data, true );
     }
 
     /**
      * @param $id
      * @param $data
+     *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function updateGlossary($id, $data)
-    {
+    public function updateGlossary( $id, $data ) {
         return $this->send( 'PUT', "$this->baseUrl/memories/$id/glossary", $data );
     }
 
     /**
      * @param $uuid
+     *
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function importJobStatus($uuid)
-    {
+    public function importJobStatus( $uuid ) {
         return $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid" );
     }
 
@@ -208,19 +228,20 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function updateMemory( $id, $name, $description = null ) {
+    public function updateMemory( $id, $name, ?string $description = null ) {
         return $this->send( 'PUT', "$this->baseUrl/memories/$id", [
                 'name' => $name, 'description' => $description
         ] );
     }
 
     /**
-     * @param $externalIds
+     * @param array $externalIds
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function connectMemories( $externalIds ) {
+    public function connectMemories( array $externalIds ) {
         return $this->send( 'POST', "$this->baseUrl/memories/connect", [
                 'external_ids' => implode( ',', $externalIds )
         ] );
@@ -234,6 +255,7 @@ class MMTServiceApi {
      * @param $translation
      *
      * @param $session
+     *
      * @return mixed
      * @throws MMTServiceApiException
      */
@@ -241,30 +263,30 @@ class MMTServiceApi {
 
         if ( is_array( $id ) ) {
             return $this->send( 'POST', "$this->baseUrl/memories/content", [
-                'memories' => empty( $id ) ? null : implode( ',', $id ),
-                'source'   => $source,
-                'target' => $target,
-                'sentence' => $sentence,
-                'translation' => $translation,
-                'session' => $session,
+                    'memories'    => empty( $id ) ? null : implode( ',', $id ),
+                    'source'      => $source,
+                    'target'      => $target,
+                    'sentence'    => $sentence,
+                    'translation' => $translation,
+                    'session'     => $session,
             ] );
         }
 
         return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
-            'source' => $source,
-            'target' => $target,
-            'sentence' => $sentence,
-            'translation' => $translation,
-            'session' => $session,
+                'source'      => $source,
+                'target'      => $target,
+                'sentence'    => $sentence,
+                'translation' => $translation,
+                'session'     => $session,
         ] );
     }
 
     /**
      * @param $uuid
+     *
      * @throws MMTServiceApiException
      */
-    public function jobStatus($uuid)
-    {
+    public function jobStatus( $uuid ) {
         $this->send( 'GET', "$this->baseUrl/import-jobs/$uuid/content", [] );
     }
 
@@ -276,6 +298,7 @@ class MMTServiceApi {
      * @param $sentence
      * @param $translation
      * @param $session
+     *
      * @throws MMTServiceApiException
      */
     public function updateMemoryContent( $tuid, $memory_keys, $source, $target, $sentence, $translation, $session ) {
@@ -286,7 +309,7 @@ class MMTServiceApi {
                     'target'      => $target,
                     'sentence'    => $sentence,
                     'translation' => $translation,
-                    'session' => $session
+                    'session'     => $session
             ] );
         }
     }
@@ -299,7 +322,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function importIntoMemoryContent( $id, $tmx, $compression = null ) {
+    public function importIntoMemoryContent( $id, $tmx, ?string $compression = null ) {
         return $this->send( 'POST', "$this->baseUrl/memories/$id/content", [
                 'tmx' => $this->_setCulFileUpload( $tmx ), 'compression' => $compression
         ], true );
@@ -345,7 +368,7 @@ class MMTServiceApi {
      * @return mixed
      * @throws MMTServiceApiException
      */
-    public function getContextVectorFromFile( $source, $targets, $file, $compression = null, $hints = null, $limit = null ) {
+    public function getContextVectorFromFile( $source, $targets, $file, ?string $compression = null, ?array $hints = null, ?int $limit = null ) {
         return $this->send( 'GET', "$this->baseUrl/context-vector", [
                 'source'      => $source, 'targets' => implode( ',', $targets ), 'content' => $this->_setCulFileUpload( $file ),
                 'compression' => $compression, 'hints' => ( $hints ? implode( ',', $hints ) : null ), 'limit' => $limit
@@ -353,43 +376,70 @@ class MMTServiceApi {
     }
 
     /**
-     * @param $source
-     * @param $target
-     * @param $text
-     * @param null $contextVector
-     * @param null $hints
-     * @param null $projectId
-     * @param null $timeout
-     * @param null $priority
-     * @param null $session
-     * @param null $glossaries
-     * @param null $ignoreGlossaryCase
-     * @return mixed
+     * @param             $source
+     * @param             $target
+     * @param             $text
+     * @param null        $contextVector
+     * @param null        $hints
+     * @param null        $projectId
+     * @param null        $timeout
+     * @param null        $priority
+     * @param null        $session
+     * @param null        $glossaries
+     * @param null        $ignoreGlossaryCase
+     * @param null        $include_score
+     * @param string|null $mt_qe_engine_id
+     *
+     * @return mixed|void
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    public function translate( $source, $target, $text, $contextVector = null, $hints = null, $projectId = null, $timeout = null, $priority = null, $session = null, $glossaries = null, $ignoreGlossaryCase = null ) {
+    public function translate(
+            $source,
+            $target,
+            $text,
+            $contextVector = null,
+            $hints = null,
+            $projectId = null,
+            $timeout = null,
+            $priority = null,
+            $session = null,
+            $glossaries = null,
+            $ignoreGlossaryCase = null,
+            $include_score = null,
+            string $mt_qe_engine_id = '2'
+    ) {
+
+        if ( empty( $text ) ) {
+            return;
+        }
 
         $params = [
-            'source'  => $source,
-            'target' => $target,
-            'q' => $text,
-            'context_vector' => $contextVector,
-            'hints'   => ( $hints ? implode( ',', $hints ) : null ),
-            'project_id' => $projectId,
-            'timeout' => ( $timeout ? ( $timeout * 1000 ) : null ),
-            'priority' => ( $priority ?: 'normal' ),
+                'source'         => $source,
+                'target'         => $target,
+                'q'              => $text,
+                'context_vector' => $contextVector,
+                'hints'          => ( $hints ? implode( ',', $hints ) : null ),
+                'project_id'     => (string)$projectId,
+                'timeout'        => ( $timeout ? ( $timeout * 1000 ) : null ),
+                'priority'       => ( $priority ?: 'normal' ),
         ];
 
-        if($session){
-            $params['session'] = $session;
+        if ( $session ) {
+            $params[ 'session' ] = $session;
         }
 
-        if($glossaries){
-            $params['glossaries'] = $glossaries;
+        if ( $glossaries ) {
+            $params[ 'glossaries' ] = $glossaries;
         }
 
-        if($ignoreGlossaryCase){
-            $params['ignore_glossary_case'] = ($ignoreGlossaryCase  == 1) ? 'true' : 'false';
+        if ( $ignoreGlossaryCase ) {
+            $params[ 'ignore_glossary_case' ] = ( $ignoreGlossaryCase == 1 ) ? 'true' : 'false';
+        }
+
+        if ( $include_score ) {
+            $params[ 'include_score' ]     = true;
+            $params[ 'purfect_engine_id' ] = $mt_qe_engine_id;
         }
 
         return $this->send( 'GET', "$this->baseUrl/translate", $params, false, $timeout );
@@ -411,16 +461,17 @@ class MMTServiceApi {
     }
 
     /**
-     * @param string $method
-     * @param string $url
-     * @param array  $params
-     * @param bool   $multipart
-     * @param int    $timeout
+     * @param string     $method
+     * @param string     $url
+     * @param array|null $params
+     * @param bool       $multipart
+     * @param int|null   $timeout
      *
      * @return mixed
      * @throws MMTServiceApiException
+     * @throws MMTServiceApiRequestException
      */
-    protected function send( $method, $url, $params = null, $multipart = false, $timeout = null ) {
+    protected function send( string $method, string $url, ?array $params = null, ?bool $multipart = false, ?int $timeout = null ) {
         if ( $params ) {
             $params = array_filter( $params, function ( $value ) {
                 return $value !== null;
@@ -438,8 +489,8 @@ class MMTServiceApi {
         } else {
             $headers[] = 'Content-Type: application/json';
             if ( $params ) {
-                $params = json_encode( $params );
-                $headers[] = strlen( $params ) ;
+                $params    = json_encode( $params );
+                $headers[] = strlen( $params );
             }
         }
 
@@ -448,9 +499,6 @@ class MMTServiceApi {
         }
         if ( $this->client > 0 ) {
             $headers[] = "MMT-ApiClient: $this->client";
-        }
-        if ( $this->pluginVersion ) {
-            $headers[] = "MMT-PluginVersion: $this->pluginVersion";
         }
         if ( $this->platform ) {
             $headers[] = "MMT-Platform: $this->platform";
@@ -468,17 +516,6 @@ class MMTServiceApi {
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         ];
-
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            /**
-             * Added in PHP 5.5.0 with FALSE as the default value.
-             * PHP 5.6.0 changes the default value to TRUE.
-             * For php >= 5.5.0 we use \CURLFile , so we can force and set safe upload to true
-             *
-             * @see MMTServiceApi::_setCulFileUpload()
-             */
-            $options[ CURLOPT_SAFE_UPLOAD ] = true;
-        }
 
         if ( count( $headers ) > 0 ) {
             $options[ CURLOPT_HTTPHEADER ] = $headers;
@@ -528,7 +565,7 @@ class MMTServiceApi {
      * @return mixed|null
      * @throws MMTServiceApiException
      */
-    private function parse( $body ) {
+    private function parse( string $body ): ?array {
         $json = json_decode( $body, true );
 
         if ( json_last_error() != JSON_ERROR_NONE ) {
@@ -540,7 +577,7 @@ class MMTServiceApi {
             throw MMTServiceApiException::fromJSONResponse( $json );
         }
 
-        return isset( $json[ 'data' ] ) ? $json[ 'data' ] : null;
+        return $json[ 'data' ] ?? null;
     }
 
 }

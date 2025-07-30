@@ -2,8 +2,8 @@
 
 namespace API\V2\Json;
 
-use Chunks_ChunkStruct;
 use FeatureSet;
+use Jobs_JobStruct;
 use LQA\EntryStruct;
 use Matecat\SubFiltering\MateCatFilter;
 
@@ -14,21 +14,21 @@ class SegmentVersion {
     private $with_issues;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
     /**
      * SegmentVersion constructor.
      *
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      * @param                    $data
      * @param bool               $with_issues
      * @param FeatureSet|null    $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( Chunks_ChunkStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
+    public function __construct( Jobs_JobStruct $chunk, $data, $with_issues = false, FeatureSet $featureSet = null ) {
         $this->data        = $data;
         $this->with_issues = $with_issues;
         $this->chunk       = $chunk;
@@ -146,7 +146,7 @@ class SegmentVersion {
     public function renderItem( $version ) {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \FeatureSet();
-        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
+        $Filter     = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [] );
 
         return [
                 'id'              => (int)$version->id,

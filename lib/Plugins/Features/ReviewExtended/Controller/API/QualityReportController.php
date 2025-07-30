@@ -8,14 +8,17 @@
 
 namespace Features\ReviewExtended\Controller\API;
 
+use API\Commons\Validators\ChunkPasswordValidator;
 use API\V2\BaseChunkController;
-use API\V2\Validators\ChunkPasswordValidator;
-use Chunks_ChunkStruct;
+use Exception;
 use Features\ReviewExtended\Model\QualityReportModel;
 use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationVersions\Model\TranslationEventDao;
+use Features\TranslationEvents\Model\TranslationEventDao;
 use Files\FilesInfoUtility;
 use INIT;
+use Jobs_JobStruct;
+use Model\Analysis\Constants\MatchConstantsFactory;
+use Projects_MetadataDao;
 use Projects_ProjectStruct;
 use QualityReport\QualityReportSegmentModel;
 
@@ -30,7 +33,7 @@ class QualityReportController extends BaseChunkController {
     protected $project;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return $this
      */
@@ -59,6 +62,13 @@ class QualityReportController extends BaseChunkController {
     }
 
     /**
+     * @throws Exception
+     */
+    public function segments_for_ui() {
+        $this->segments( true );
+    }
+
+    /**
      * @param bool $isForUI
      *
      * @throws \Exception
@@ -66,6 +76,9 @@ class QualityReportController extends BaseChunkController {
     protected function renderSegments( $isForUI = false ) {
 
         $this->project = $this->chunk->getProject();
+
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         $ref_segment = (int)$this->request->param( 'ref_segment' );
         $where       = $this->request->param( 'where' );
@@ -101,9 +114,11 @@ class QualityReportController extends BaseChunkController {
             $filesInfoUtility = new FilesInfoUtility( $this->chunk );
             $filesInfo        = $filesInfoUtility->getInfo( false );
 
-            $segments = $this->_formatSegments( $segments, $ttlArray, $filesInfo );
+            $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+            $segments               = $this->_formatSegments( $segments, $ttlArray, $filesInfo, $mt_qe_workflow_enabled );
 
             $this->response->json( [
+                    'workflow_type' => $matchConstantsClass::getWorkflowType(),
                     'segments'      => $segments,
                     'first_segment' => (int)$filesInfo[ 'first_segment' ],
                     'last_segment'  => (int)$filesInfo[ 'last_segment' ],
@@ -168,8 +183,10 @@ class QualityReportController extends BaseChunkController {
      *
      * @return array
      */
-    private function _formatSegments( $segments, array $ttlArray, array $filesInfo ) {
+    private function _formatSegments( $segments, array $ttlArray, array $filesInfo, bool $mt_qe_workflow_enabled = false ) {
         $outputArray = [];
+
+        $matchConstants = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         foreach ( $segments as $index => $segment ) {
 
@@ -184,7 +201,7 @@ class QualityReportController extends BaseChunkController {
             $seg[ 'last_revisions' ]             = $segment->last_revisions;
             $seg[ 'last_translation' ]           = $segment->last_translation;
             $seg[ 'locked' ]                     = $segment->locked;
-            $seg[ 'match_type' ]                 = $segment->match_type;
+            $seg[ 'match_type' ]                 = $matchConstants::toExternalMatchTypeName( $segment->match_type );
             $seg[ 'parsed_time_to_edit' ]        = $segment->parsed_time_to_edit;
             $seg[ 'pee' ]                        = $segment->pee;
             $seg[ 'pee_translation_revise' ]     = $segment->pee_translation_revise;

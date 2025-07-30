@@ -1,0 +1,105 @@
+@use '../../commons/colors';
+
+.dropdownmenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: var(--radix-dropdown-menu-content-available-height);
+  overflow-y: auto;
+  background-color: colors.$white;
+  color: colors.$grey6;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+  animation: 0.3s cubic-bezier(0.77, 0, 0.175, 1) forwards dropdownmenu-fadeIn;
+  z-index: 7;
+  &.subDropdown {
+    background-color: colors.$white;
+  }
+  .dropdownMenuArrow {
+    fill: colors.$white
+  }
+}
+
+.dropdownmenu-separator {
+  margin: 2px 0;
+  height: 1px;
+  background-color: colors.$grey8;
+}
+
+.dropdownmenu-item {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  border: none;
+  border-radius: 2px;
+  width: 100%;
+  padding: 8px;
+  white-space: nowrap;
+  color: colors.$grey6;
+  cursor: pointer;
+  outline: none;
+
+  &.selectable {
+    position: relative;
+    padding-right: 40px;
+  }
+  &.critical:not([data-disabled]) {
+    color: colors.$redDefault;
+
+    &:hover {
+      background-color: rgba(colors.$redDefaultHover, 0.24);
+      color: colors.$redDefault;
+    }
+  }
+  &:not([data-disabled]):hover,
+  &[data-highlighted]:not([data-disabled]),
+  &:not([data-disabled]).selected,
+  &[data-state='checked']:not([data-disabled]) {
+    background-color: colors.$grey5 !important;
+    color: colors.$darkBlue !important;
+  }
+  &[data-disabled],
+  &[data-disabled]:hover {
+    color: colors.$grey7;
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  &.subTrigger {
+    &:not([data-disabled]):hover,
+    &[data-highlighted]:not([data-disabled]),
+    &[data-state='open'] {
+      background-color: rgba(colors.$grey7, 0.06);
+      color: black;
+    }
+  }
+}
+
+.dropdownmenu-subIcon {
+  display: flex;
+  margin-left: auto;
+
+  svg {
+    margin-left: 16px;
+    transform: rotate(-90deg);
+  }
+}
+
+.dropdownmenu-indicator {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: 8px;
+}
+
+@keyframes dropdownmenu-fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

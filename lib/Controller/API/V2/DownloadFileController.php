@@ -4,11 +4,14 @@ namespace API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
 use CatUtils;
 use ConnectedServices\ConnectedServiceDao;
-use ConnectedServices\GDrive;
 use ConnectedServices\GDriveTokenVerifyModel;
+use ConnectedServices\Google\GDrive\RemoteFileService;
+use ConnectedServices\Google\GoogleProvider;
+use Conversion\Filters;
+use Conversion\ZipArchiveHandler;
 use DownloadOmegaTDecorator;
 use Exception;
 use Exceptions\NotFoundException;
@@ -18,11 +21,10 @@ use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
 use FilesStorage\FsFilesStorage;
 use FilesStorage\S3FilesStorage;
-use Filters;
 use Google_Service_Drive_DriveFile;
 use INIT;
 use Jobs_JobDao;
-use Langs_Languages;
+use Langs\Languages;
 use Log;
 use LQA\ChunkReviewDao;
 use Matecat\XliffParser\Exception\NotSupportedVersionException;
@@ -38,20 +40,19 @@ use RemoteFiles_RemoteFileDao;
 use Segments_SegmentDao;
 use Utils;
 use XliffReplacer\XliffReplacerCallback;
-use ZipArchiveExtended;
 use ZipContentObject;
 
 set_time_limit( 180 );
 
 class DownloadFileController extends AbstractDownloadController {
 
-    protected $download_type;
-    protected $job;
-    protected $forceXliff;
+    protected                 $download_type;
+    protected \Jobs_JobStruct $job;
+    protected                 $forceXliff;
     protected $downloadToken;
 
     /**
-     * @var GDrive\RemoteFileService
+     * @var RemoteFileService
      */
     protected $remoteFileService;
 
@@ -291,7 +292,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                     if ( $fileType[ 'proprietary_short_name' ] === 'matecat_converter' ) {
                         // Set the XLIFF extension to .xlf
-                        // Internally, MateCat continues using .sdlxliff as default
+                        // Internally, Matecat continues using .sdlxliff as default
                         // extension for the XLIFF behind the projects.
                         // Changing this behavior requires a huge refactoring that
                         // it's scheduled for future versions.
@@ -369,7 +370,7 @@ class DownloadFileController extends AbstractDownloadController {
                  */
                 $output_content[ $fileID ][ 'document_content' ] = $this->featureSet->filter( 'overrideConversionResult',
                         $output_content[ $fileID ][ 'document_content' ],
-                        Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
+                        Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] )
                 );
 
                 //in case of .strings, they are required to be in UTF-16
@@ -395,7 +396,7 @@ class DownloadFileController extends AbstractDownloadController {
         }
 
         foreach ( $output_content as $idFile => $fileInformation ) {
-            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $fileInformation[ 'output_filename' ] );
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo( $fileInformation[ 'output_filename' ] );
             if ( is_array( $zipPathInfo ) ) {
                 $output_content[ $idFile ][ 'zipfilename' ]     = $zipPathInfo[ 'zipfilename' ];
                 $output_content[ $idFile ][ 'zipinternalPath' ] = $zipPathInfo[ 'dirname' ];
@@ -405,12 +406,9 @@ class DownloadFileController extends AbstractDownloadController {
 
         if ( $this->download_type == 'omegat' ) {
 
-            $this->sessionStart();
-            $this->setUserCredentials();
             $OtDownloadDecorator = new DownloadOmegaTDecorator( $this );
             $output_content      = array_merge( $output_content, $OtDownloadDecorator->decorate() );
             $OtDownloadDecorator->createOmegaTZip( $output_content );
-            $this->disableSessions();
 
         } else {
             try {
@@ -518,11 +516,6 @@ class DownloadFileController extends AbstractDownloadController {
             $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
         }
 
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;
         $activity->id_project = $this->job[ 'id_project' ];
@@ -559,7 +552,7 @@ class DownloadFileController extends AbstractDownloadController {
         if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
 
             $is_utf8 = false;
-            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+            [ $original_charset, $documentContent ] = CatUtils::convertEncoding( 'UTF-8', $documentContent );
 
         }
 
@@ -594,7 +587,7 @@ class DownloadFileController extends AbstractDownloadController {
         }
 
         if ( !$is_utf8 ) {
-            list( , $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+            [ , $documentContent ] = CatUtils::convertEncoding( $original_charset, $documentContent );
         }
 
         return $documentContent;
@@ -702,8 +695,10 @@ class DownloadFileController extends AbstractDownloadController {
         $verifier  = new GDriveTokenVerifyModel( $connectedService );
         $raw_token = $connectedService->getDecryptedOauthAccessToken();
 
-        if ( $verifier->validOrRefreshed() ) {
-            $this->remoteFileService = new GDrive\RemoteFileService( $raw_token );
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+
+        if ( $verifier->validOrRefreshed( $client ) ) {
+            $this->remoteFileService = new RemoteFileService( $raw_token, $client );
         } else {
             // TODO: check how this exception is handled
             throw new Exception( 'Unable to refresh token for service' );
@@ -755,7 +750,7 @@ class DownloadFileController extends AbstractDownloadController {
      *
      * @throws Exception
      */
-    private function updateRemoteFiles( $output_content ) {
+    private function updateRemoteFiles( array $output_content ) {
         foreach ( $output_content as $id_file => $output_file ) {
             $remoteFile                           = RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file->getContent() );
@@ -874,7 +869,7 @@ class DownloadFileController extends AbstractDownloadController {
             copy( $zipFile, $tmpFName );
         }
 
-        $zip = new ZipArchiveExtended();
+        $zip = new ZipArchiveHandler();
         if ( $zip->open( $tmpFName ) ) {
 
             $zip->createTree();
@@ -884,7 +879,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                 $realZipFilePath    = str_replace(
                         [
-                                ZipArchiveExtended::INTERNAL_SEPARATOR,
+                                ZipArchiveHandler::INTERNAL_SEPARATOR,
                                 AbstractFilesStorage::pathinfo_fix( $tmpFName, PATHINFO_BASENAME )
                         ],
                         [ DIRECTORY_SEPARATOR, "" ],

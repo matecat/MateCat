@@ -2,15 +2,15 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use API\V2\Json\TranslationIssueComment;
-use API\V2\Validators\ChunkPasswordValidator;
 use Database;
 use Exceptions\ValidationError;
 use Features\ReviewExtended\ReviewUtils;
 use Features\ReviewExtended\TranslationIssueModel;
-use Features\SecondPassReview;
 use LQA\EntryCommentDao;
 use LQA\EntryDao as EntryDao;
 use LQA\EntryStruct;
@@ -24,7 +24,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     protected $revisionFactory;
 
     /**
-     * @var Validators\SegmentTranslationIssueValidator
+     * @var \API\Commons\Validators\SegmentTranslationIssueValidator
      */
     private $validator;
     private $issue;
@@ -66,8 +66,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
         Database::obtain()->begin();
 
-        // TODO refactory validation systems and check if is needed to initialize  EntryStruct twice, here and in \Features\ReviewExtended\TranslationIssueModel line 84
-
         $struct = new EntryStruct( $data );
 
         $model = $this->_getSegmentTranslationIssueModel(
@@ -96,7 +94,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $postParams = $this->request->paramsPost();
 
         if ( $postParams[ 'rebutted_at' ] == null ) {
-            $entryDao = new EntryDao( Database::obtain()->getConnection() );
+            $entryDao = new EntryDao( Database::obtain() );
             $issue    = $entryDao->updateRebutted(
                     $this->validator->issue->id, false
             );
@@ -175,7 +173,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @param $password
      * @param $issue
      *
-     * @return TranslationIssueModel|SecondPassReview\TranslationIssueModel
+     * @return TranslationIssueModel
      */
     protected function _getSegmentTranslationIssueModel( $id_job, $password, $issue ) {
         return $this->revisionFactory->getTranslationIssueModel( $id_job, $password, $issue );
@@ -187,10 +185,11 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         $jobValidator->onSuccess( function () use ( $jobValidator ) {
             $this->revisionFactory = RevisionFactory::initFromProject( $jobValidator->getChunk()->getProject() );
             //enable dynamic loading ( Factory ) by callback hook on revision features
-            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this->request )->setChunkReview( $jobValidator->getChunkReview() );
+            $this->validator = $this->revisionFactory->getTranslationIssuesValidator( $this )->setChunkReview( $jobValidator->getChunkReview() );
             $this->validator->validate();
         } );
         $this->appendValidator( $jobValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 
@@ -206,7 +205,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
      * @return EntryStruct
      */
     private function updateIssueWithRebutted() {
-        $entryDao = new EntryDao( Database::obtain()->getConnection() );
+        $entryDao = new EntryDao( Database::obtain() );
 
         return $entryDao->updateRebutted(
                 $this->validator->issue->id, true

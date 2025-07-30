@@ -1,0 +1,143 @@
+@use '../commons/colors';
+
+.user-project-dropdown-container {
+  position: relative;
+
+  .dropdown {
+    position: absolute;
+    visibility: hidden;
+    z-index: 1;
+    background-color: white;
+    margin-top: 5px;
+    padding: 5px;
+    min-width: 250px;
+    right: 0;
+    max-height: 450px;
+    overflow: auto;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+    box-shadow: 0px 2px 3px 0px rgba(34, 36, 38, 0.15);
+
+    &.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+
+      > li {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        padding: 10px;
+
+        &:hover {
+          background-color: colors.$grey9;
+        }
+
+        &.active {
+          background-color: colors.$darkBlueHover;
+          color: colors.$white;
+        }
+      }
+    }
+  }
+
+  .trigger-button {
+    position: relative;
+    padding: 10px 10px 10px 1px !important;
+    transition: padding 0.2s ease-out;
+
+    &.not-assignee {
+      box-shadow: unset !important;
+      background-color: transparent !important;
+      border: 1px solid colors.$grey7;
+
+      &:hover {
+        border-color: colors.$translatedBlue;
+        color: colors.$translatedBlue !important;
+      }
+
+      > span {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 10px;
+      }
+    }
+
+    &:disabled {
+      box-shadow: unset !important;
+      border: 1px solid colors.$grey8;
+      //color: $grey6 !important;
+    }
+
+    &:hover:not(:disabled):not(.not-assignee) {
+      padding-right: 32px !important;
+
+      .button-remove-assignee {
+        visibility: visible;
+      }
+    }
+  }
+
+  .add-new-member {
+    border-bottom: 1px solid colors.$grey8;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    color: colors.$translatedBlue;
+    font-weight: bold;
+    justify-content: space-between;
+
+    > svg {
+      border: 1px solid colors.$translatedBlue;
+      border-radius: 50%;
+    }
+  }
+
+  .search-by-name {
+    padding: 0 10px !important;
+
+    &:hover {
+      background-color: unset !important;
+    }
+
+    .input-component {
+      width: 100%;
+
+      input {
+        border: unset;
+        box-shadow: none;
+      }
+    }
+  }
+
+  .no-results {
+    text-align: center;
+    color: #9e9e9e;
+  }
+
+  .button-remove-assignee {
+    visibility: hidden;
+    position: absolute;
+    right: 3px;
+    display: flex;
+    width: 24px;
+    height: 24px;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(colors.$grey7, 0.5);
+    border-radius: 50%;
+    color: colors.$white;
+
+    &:hover {
+      background-color: rgba(colors.$grey7, 0.7);
+    }
+  }
+}

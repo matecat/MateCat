@@ -6,6 +6,7 @@ use Engines_Intento as Intento;
 use Exceptions\AuthorizationError;
 use Exceptions\NotFoundException;
 use LQA\ChunkReviewStruct;
+use Teams\MembershipStruct;
 use WordCount\WordCountStruct;
 
 /**
@@ -38,19 +39,19 @@ class catController extends viewController {
 
     private $qa_overall = '';
 
-    public $target_code;
-    public $source_code;
-    private $revision ;
+    public  $target_code;
+    public  $source_code;
+    private $revision;
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
-    private $chunk ;
+    private $chunk;
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ?Projects_ProjectStruct
      */
-    public $project ;
+    public $project;
 
     private $translation_engines;
 
@@ -59,7 +60,7 @@ class catController extends viewController {
     /**
      * @var WordCountStruct
      */
-    private $wStruct ;
+    private $wStruct;
 
     protected $templateName = "index.html";
 
@@ -67,18 +68,18 @@ class catController extends viewController {
         $this->start_time = microtime( 1 ) * 1000;
 
         parent::__construct();
-
+        $this->checkLoginRequiredAndRedirect();
         parent::makeTemplate( $this->templateName );
 
-        $filterArgs = array(
-                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password' => array(
+        $filterArgs = [
+                'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'revision' => array( 'filter' => FILTER_VALIDATE_INT ),
-        );
+                ],
+                'revision' => [ 'filter' => FILTER_VALIDATE_INT ],
+        ];
 
-        $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
+        $getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid               = $getInput->jid;
         $this->received_password = $getInput->password;
@@ -93,7 +94,7 @@ class catController extends viewController {
          */
         ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
 
-        $this->featureSet->loadForProject( $this->project ) ;
+        $this->featureSet->loadForProject( $this->project );
     }
 
     /**
@@ -101,35 +102,40 @@ class catController extends viewController {
      * @throws \Exception
      */
     public function doAction() {
-        $this->featureSet->run('beginDoAction', $this);
+
+        $this->featureSet->run( 'beginDoAction', $this );
 
         try {
             $this->findJobByIdPasswordAndSourcePage();
-        } catch( NotFoundException $e ){
+        } catch ( NotFoundException $e ) {
             $this->job_not_found = true;
+
             return;
         }
 
         //retrieve job owner. It will be useful also if the job is archived or cancelled
         $this->job_owner = ( $this->chunk->owner != "" ) ? $this->chunk->owner : INIT::$MAILER_RETURN_PATH;
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_CANCELLED ) {
+        if ( $this->chunk->isCanceled() ) {
             $this->job_cancelled = true;
+
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_ARCHIVED ) {
+        if ( $this->chunk->isArchived() ) {
             $this->job_archived = true;
+
             return;
         }
 
-        if ( $this->chunk->status_owner == Constants_JobStatus::STATUS_DELETED ) {
+        if ( $this->chunk->isDeleted() ) {
             $this->job_not_found = true;
+
             return;
         }
 
-        $this->pid = $this->project->id;
-        $this->cid = $this->project->id_customer;
+        $this->pid         = $this->project->id;
+        $this->cid         = $this->project->id_customer;
         $this->source_code = $this->chunk->source;
         $this->target_code = $this->chunk->target;
         $this->create_date = $this->chunk->create_date;
@@ -137,8 +143,7 @@ class catController extends viewController {
 
         $this->wStruct = CatUtils::getWStructFromJobArray( $this->chunk, $this->project );
 
-        // YYY [Remove] backward compatibility for current projects
-        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct, true, $this->project->getWordCountType() );
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
@@ -153,38 +158,39 @@ class catController extends viewController {
         //this gets all engines of the user
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
-            $engineQuery->type   = 'MT';
+            $engineQuery->type   = Constants_Engines::MT;
             $engineQuery->uid    = $this->user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
-            $mt_engines = array();
+            $mt_engines = [];
         }
 
         // this gets MyMemory
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->type   = 'TM';
+        $engineQuery->type   = Constants_Engines::TM;
         $engineQuery->active = 1;
         $tms_engine          = $engine->setCacheTTL( 3600 * 24 * 30 )->read( $engineQuery );
 
         //this gets MT engine active for the job
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->id     = $this->chunk->id_mt_engine ;
+        $engineQuery->id     = $this->chunk->id_mt_engine;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
         $active_mt_engine_array = [];
-        if(!empty($active_mt_engine)){
+        if ( !empty( $active_mt_engine ) ) {
+            $engine_type            = explode( "\\", $active_mt_engine[ 0 ]->class_load );
             $active_mt_engine_array = [
-                "id" => $active_mt_engine[0]->id,
-                "name" => $active_mt_engine[0]->name,
-                "type" => $active_mt_engine[0]->type,
-                "description" => $active_mt_engine[0]->description,
-                'engine_type' => ($active_mt_engine[0]->class_load === 'MyMemory' ? 'MMTLite' : $active_mt_engine[0]->class_load),
+                    "id"          => $active_mt_engine[ 0 ]->id,
+                    "name"        => $active_mt_engine[ 0 ]->name,
+                    "type"        => $active_mt_engine[ 0 ]->type,
+                    "description" => $active_mt_engine[ 0 ]->description,
+                    'engine_type' => ( $active_mt_engine[ 0 ]->class_load === 'MyMemory' ? 'MMTLite' : array_pop( $engine_type ) ),
             ];
         }
 
-        $this->template->active_engine = Utils::escapeJsonEncode($active_mt_engine_array);
+        $this->template->active_engine = $active_mt_engine_array;
 
         /*
          * array_unique cast EnginesModel_EngineStruct to string
@@ -193,7 +199,7 @@ class catController extends viewController {
          *
          */
         $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
-        $this->translation_engines = $this->removeMMTFromEngines($this->translation_engines);
+        $this->translation_engines = $this->removeMMTFromEngines( $this->translation_engines );
 
         $this->_saveActivity();
 
@@ -217,7 +223,7 @@ class catController extends viewController {
     private function findJobByIdPasswordAndSourcePage() {
         if ( self::isRevision() ) {
             /** @var ChunkReviewStruct $chunkReviewStruct */
-            $chunkReviewStruct = $this->featureSet->filter(
+            $chunkReviewStruct     = $this->featureSet->filter(
                     'filter_review_password_to_job_password',
                     new ChunkReviewStruct( [
                             'password'        => $this->received_password,
@@ -226,21 +232,21 @@ class catController extends viewController {
                     ] ),
                     Utils::getSourcePage()
             );
-            $this->chunk = $chunkReviewStruct->getChunk();
-            $this->password = $chunkReviewStruct->password;
+            $this->chunk           = $chunkReviewStruct->getChunk();
+            $this->password        = $chunkReviewStruct->password;
             $this->review_password = $chunkReviewStruct->review_password;
         } else {
-            $this->password = $this->received_password;
+            $this->password        = $this->received_password;
             $this->review_password = $this->password;
-            $this->chunk = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+            $this->chunk           = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         }
 
         $this->currentPassword = $this->review_password;
     }
 
-    protected function _saveActivity(){
+    protected function _saveActivity() {
 
-        if( $this->isRevision() ){
+        if ( $this->isRevision() ) {
             $action = ActivityLogStruct::ACCESS_REVISE_PAGE;
         } else {
             $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
@@ -261,90 +267,94 @@ class catController extends viewController {
      * @return mixed|void
      * @throws NotFoundException
      * @throws AuthorizationError
+     * @throws Exception
      */
     public function setTemplateVars() {
 
-        if ( $this->job_not_found ) {
-            parent::makeTemplate( 'job_not_found.html' );
-            $this->template->support_mail = INIT::$SUPPORT_MAIL;
-            throw new NotFoundException( "Job Not Found." );
-        }
+        $ownerMail    = INIT::$SUPPORT_MAIL;
+        $jobOwnerIsMe = false;
 
-        if( $this->job_cancelled ) parent::makeTemplate( 'job_cancelled.html' );
-        if( $this->job_archived ) parent::makeTemplate( 'job_archived.html' );
-
-        $this->template->jid = $this->jid;
-        $this->template->currentPassword = $this->currentPassword;
-
-        $this->template->id_team = null;
-
-        if( $this->job_cancelled || $this->job_archived ) {
-
-            $this->template->pid                 = null;
-            $this->template->source_code         = null;
-            $this->template->target_code         = null;
-
-            $this->template->jobOwnerIsMe        = false;
-            $this->template->support_mail        = INIT::$SUPPORT_MAIL;
-            $this->template->owner_email         = INIT::$SUPPORT_MAIL;
-
-            if($this->user){
-                $this->template->owner = $this->user->getEmail();
-            }
+        if ( $this->job_cancelled || $this->job_archived ) {
 
             $team = $this->project->getTeam();
 
-            if( !empty( $team ) ){
+            if ( !empty( $team ) ) {
 
                 $teamModel = new TeamModel( $team );
                 $teamModel->updateMembersProjectsCount();
                 $membersIdList = [];
-                $ownerMail = null;
-                if( $team->type == Constants_Teams::PERSONAL ){
-                    $ownerMail = $team->getMembers()[0]->getUser()->getEmail();
+                if ( $team->type == Constants_Teams::PERSONAL ) {
+                    $ownerMail = $team->getMembers()[ 0 ]->getUser()->getEmail();
                 } else {
                     $assignee = ( new Users_UserDao() )->setCacheTTL( 60 * 60 * 24 )->getByUid( $this->project->id_assignee );
-                    if ($assignee) {
+
+                    if ( $assignee ) {
                         $ownerMail = $assignee->getEmail();
                     } else {
                         $ownerMail = INIT::$SUPPORT_MAIL;
                     }
-                    $membersIdList = array_map( function( $memberStruct ){
+
+                    $membersIdList = array_map( function ( $memberStruct ) {
                         /**
-                         * @var $memberStruct \Teams\MembershipStruct
+                         * @var $memberStruct MembershipStruct
                          */
                         return $memberStruct->uid;
                     }, $team->getMembers() );
 
                 }
-                $this->template->owner_email = $ownerMail;
 
-                if( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ){
-                    $this->template->jobOwnerIsMe        = true;
-                } else {
-                    $this->template->jobOwnerIsMe        = false;
+                if ( $this->user->email == $ownerMail || in_array( $this->user->uid, $membersIdList ) ) {
+                    $jobOwnerIsMe = true;
                 }
 
             }
 
-            $this->template->job_not_found       = $this->job_not_found;
-            $this->template->job_archived        = ( $this->job_archived ) ? 1 : '';
-            $this->template->job_cancelled       = $this->job_cancelled;
-            $this->template->logged_user         = ( $this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
-            $this->template->extended_user       = ( $this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-            $this->template->password            = $this->password;
-
-            return;
-
-
-        } else {
-            $this->template->pid                 = $this->pid;
-            $this->template->source_code         = $this->source_code;
-            $this->template->target_code         = $this->target_code;
         }
+
+        if ( $this->job_not_found ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_not_found.html', [ "support_mail" => INIT::$SUPPORT_MAIL ], 404 );
+            $controllerInstance->render();
+        }
+
+        if ( $this->job_cancelled ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_cancelled.html', [
+                    "support_mail" => INIT::$SUPPORT_MAIL,
+                    "owner_email"  => $ownerMail
+            ] );
+            $controllerInstance->render();
+        }
+
+        if ( $this->job_archived ) {
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'job_archived.html', [
+                    "support_mail" => INIT::$SUPPORT_MAIL,
+                    "owner_email"  => $ownerMail,
+                    'jid'          => $this->jid,
+                    'password'     => $this->password,
+                    'jobOwnerIsMe' => $jobOwnerIsMe
+            ] );
+            $controllerInstance->render();
+        }
+
+        $this->template->jid             = $this->jid;
+        $this->template->currentPassword = $this->currentPassword;
+
+        $this->template->id_team = null;
+
+        $this->template->pid         = $this->pid;
+        $this->template->source_code = $this->source_code;
+        $this->template->target_code = $this->target_code;
 
         if ( !empty( $this->project->id_team ) ) {
             $this->template->id_team = $this->project->id_team;
+
+            if ( !isset( $team ) ) {
+                $team = $this->project->getTeam();
+            }
+
+            $this->template->team_name = $team->name;
         }
 
         $this->template->owner_email        = $this->job_owner;
@@ -358,30 +368,29 @@ class catController extends viewController {
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->project->name;
 
-        $this->template->mt_engines = $this->translation_engines;
+        $this->template->mt_engines                            = $this->translation_engines;
         $this->template->translation_engines_intento_providers = Intento::getProviderList();
-        $this->template->translation_engines_intento_prov_json = Utils::escapeJsonEncode(Intento::getProviderList());
 
         $this->template->not_empty_default_tm_key = !empty( INIT::$DEFAULT_TM_KEY );
 
-        $this->template->word_count_type = $this->project->getWordCountType();
-        $this->job_stats[ 'analysis_complete' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->template->word_count_type        = $this->project->getWordCountType();
+        $this->job_stats[ 'analysis_complete' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
-        $this->template->stat_quality          = $this->qa_data;
+        $this->template->stat_quality = $this->qa_data;
 
         $this->template->overall_quality_class = strtolower( $this->getQaOverall() );
 
-        $end_time                    = microtime( true ) * 1000;
-        $load_time                   = $end_time - $this->start_time;
-        $this->template->load_time   = $load_time;
+        $end_time                  = microtime( true ) * 1000;
+        $load_time                 = $end_time - $this->start_time;
+        $this->template->load_time = $load_time;
 
-        $this->template->first_job_segment   = $this->chunk->job_first_segment;
-        $this->template->tms_enabled = var_export( (bool) $this->chunk->id_tms , true );
-        $this->template->mt_enabled  = var_export( (bool) $this->chunk->id_mt_engine , true );
+        $this->template->first_job_segment = $this->chunk->job_first_segment;
+        $this->template->tms_enabled       = var_export( (bool)$this->chunk->id_tms, true );
+        $this->template->mt_enabled        = var_export( (bool)$this->chunk->id_mt_engine, true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
 
-        if ( array_key_exists( explode( '-', $this->target_code )[0] , CatUtils::$cjk ) ) {
+        if ( array_key_exists( explode( '-', $this->target_code )[ 0 ], CatUtils::$cjk ) ) {
             $this->template->segmentQACheckInterval = 3000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         } else {
             $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
@@ -391,10 +400,8 @@ class catController extends viewController {
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
 
-        $this->template->tagLockCustomizable  = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
-        $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
-        $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
-        $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
+        $this->template->tagLockCustomizable = ( INIT::$UNLOCKABLE_TAGS == true ) ? true : false;
+        $this->template->copySourceInterval  = INIT::$COPY_SOURCE_INTERVAL;
 
         /*
          * Line Feed PlaceHolding System
@@ -424,17 +431,17 @@ class catController extends viewController {
 
         if ( INIT::$COMMENTS_ENABLED ) {
             $this->template->comments_enabled = true;
-            $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
+            $this->template->socket_base_url  = INIT::$SOCKET_BASE_URL;
         }
 
-        $this->template->isGDriveProject = $this->isCurrentProjectGDrive();
-
-        $projectMetaDataDao = new Projects_MetadataDao();
-        $projectMetaData = $projectMetaDataDao->get($this->project->id, Projects_MetadataDao::FEATURES_KEY);
-        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
+        $projectMetaDataDao              = new Projects_MetadataDao();
+        $projectMetaData                 = $projectMetaDataDao->get( $this->project->id, Projects_MetadataDao::FEATURES_KEY );
+        $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
         //Maybe some plugin want to disable the Split from the config
         $this->template->splitSegmentEnabled = 'true';
+
+        $this->intOauthClients();
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
@@ -447,35 +454,35 @@ class catController extends viewController {
     }
 
     public function getJobStats() {
-        return $this->job_stats ;
+        return $this->job_stats;
     }
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk() {
-        return $this->chunk ;
+        return $this->chunk;
     }
 
     /**
      * @return string
      */
     public function getReviewPassword() {
-        return $this->review_password ;
+        return $this->review_password;
     }
 
     /**
      * @return string
      */
-    public function getPassword(){
-        return ($this->chunk !== null) ? $this->chunk->password : $this->password;
+    public function getPassword() {
+        return ( $this->chunk !== null ) ? $this->chunk->password : $this->password;
     }
 
     /**
      * @return bool
      */
-    public function isJobSplitted(){
-        return ($this->chunk !== null) ? $this->chunk->isSplitted() : false;
+    public function isJobSplitted() {
+        return ( $this->chunk !== null ) ? $this->chunk->isSplitted() : false;
     }
 
     /**
@@ -487,7 +494,7 @@ class catController extends viewController {
     public function getRevisionNumber() {
         return catController::isRevision() ? (
         $this->revision == null ? 1 : $this->revision
-        ) : null ;
+        ) : null;
     }
 
     public function getQaOverall() {
@@ -496,7 +503,7 @@ class catController extends viewController {
     }
 
     public function isCurrentProjectGDrive() {
-        return \Projects_ProjectDao::isGDriveProject($this->chunk->id_project);
+        return Projects_ProjectDao::isGDriveProject( $this->chunk->id_project );
     }
 
 }

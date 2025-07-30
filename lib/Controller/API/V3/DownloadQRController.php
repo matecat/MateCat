@@ -3,7 +3,9 @@
 namespace API\V3;
 
 use API\V2\BaseChunkController;
+use Exception;
 use QualityReport\QualityReportSegmentModel;
+use ZipArchive;
 
 
 class DownloadQRController extends BaseChunkController {
@@ -31,7 +33,7 @@ class DownloadQRController extends BaseChunkController {
     /**
      * @var array
      */
-    private $allowedFormats = ['csv', 'json'];
+    private $allowedFormats = ['csv', 'json', 'xml'];
 
     /**
      * Download QR to a file
@@ -64,9 +66,9 @@ class DownloadQRController extends BaseChunkController {
             $prefix = "QR_".$this->idJob. "_". $this->password. "_";
             $filePath = tempnam("/tmp", $prefix);
 
-            $files = $this->composeFilesContentArray($chunk);
-            $this->composeZipFile($filePath, $files);
-            $this->downloadFile('application/zip', $prefix.date('YmdHis').'.zip', $filePath);
+            $fileContent = $this->composeFileContent($chunk);
+            file_put_contents($filePath, $fileContent);
+            $this->downloadFile($this->fileMimeType(), $prefix.date('YmdHis').'.'.$this->format, $filePath);
 
         } catch ( \Exceptions\NotFoundException $e ) {
             $this->response->status()->setCode( 404 );
@@ -90,12 +92,31 @@ class DownloadQRController extends BaseChunkController {
     }
 
     /**
-     * @param \Chunks_ChunkStruct $chunk
-     *
-     * @return array
+     * @return string
+     */
+    private function fileMimeType()
+    {
+        if($this->format === 'json'){
+            return 'application/json';
+        }
+
+        if($this->format === 'csv'){
+            return 'text/csv';
+        }
+
+        if($this->format === 'xml'){
+            return 'text/xml';
+        }
+
+        return 'application/octet-stream';
+    }
+
+    /**
+     * @param \Jobs_JobStruct $chunk
+     * @return bool|false|string
      * @throws \Exception
      */
-    private function composeFilesContentArray( \Chunks_ChunkStruct $chunk) {
+    private function composeFileContent(\Jobs_JobStruct $chunk) {
 
         $data = [];
 
@@ -131,11 +152,15 @@ class DownloadQRController extends BaseChunkController {
             $uniqueFile = $this->createCSVFile($data, $categoryIssues);
         }
 
-        if(!isset($uniqueFile)){
-            throw new \Exception('Merging files for download failed.');
+        if($this->format === 'xml'){
+            $uniqueFile = $this->createXMLFile($data, $categoryIssues);
         }
 
-        return [$uniqueFile];
+        if(!isset($uniqueFile)){
+            throw new Exception('Merging files for download failed.');
+        }
+
+        return $uniqueFile;
     }
 
     /**
@@ -180,6 +205,7 @@ class DownloadQRController extends BaseChunkController {
         foreach ($segments as $segment){
 
             $issues   = [];
+            $comments = [];
 
             foreach ($segment->issues as $issue){
 
@@ -190,6 +216,10 @@ class DownloadQRController extends BaseChunkController {
                 }
 
                 $issues[$label] = $issues[$label] + 1;
+
+                foreach ($issue->comments as $comment){
+                    $comments[$label][] = $comment;
+                }
             }
 
             $data[] = [
@@ -224,6 +254,7 @@ class DownloadQRController extends BaseChunkController {
                 $segment->source_page,
                 $segment->is_pre_translated,
                 $issues,
+                $comments,
             ];
         }
 
@@ -236,7 +267,7 @@ class DownloadQRController extends BaseChunkController {
      *
      * @return bool|false|string
      */
-    private function createCSVFile(array $data, array $categoryIssues){
+    private function createCSVFile(array $data, array $categoryIssues = []){
 
         $headings = [
             "sid",
@@ -271,20 +302,36 @@ class DownloadQRController extends BaseChunkController {
             "is_pre_translated",
         ];
 
-        $headings = array_merge($headings, $categoryIssues);
+        foreach ($categoryIssues as $categoryIssue){
+            $headings[] = $categoryIssue;
+            $headings[] = "comments";
+        }
 
         $csvData = [];
         $csvData[] = $headings;
 
         foreach ($data as $datum){
 
+            // comments
+            $comments = $datum[31];
+
             // issues
             $issues = $datum[30];
             unset($datum[30]);
+            unset($datum[31]);
 
             foreach ($categoryIssues as $categoryIssue){
                 $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $issueComments = [];
+
+                if(isset($comments[$categoryIssue])){
+                    foreach ($comments[$categoryIssue] as $issueComment){
+                        $issueComments[] = $issueComment['comment'];
+                    }
+                }
+
                 $datum[] = $count;
+                $datum[] = implode("|||", $issueComments);
             }
 
             $csvData[] = array_values($datum);
@@ -306,17 +353,15 @@ class DownloadQRController extends BaseChunkController {
         return $fileContent;
     }
 
-    /**
-     * @param array $data
-     * @param array $categoryIssues
-     *
-     * @return false|string
-     */
-    private function createJsonFile(array $data, array $categoryIssues){
+    private function createXMLFile(array $data, array $categoryIssues = []){
 
-        $jsonData = [];
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<segments>';
 
         foreach ($data as $datum){
+
+            // comments
+            $comments = $datum[31];
 
             // issues
             $issues = $datum[30];
@@ -325,7 +370,114 @@ class DownloadQRController extends BaseChunkController {
 
             foreach ($categoryIssues as $categoryIssue){
                 $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
-                $issueValues[$categoryIssue] = $count;
+                $issueValues[$categoryIssue] = [
+                    'count' => $count,
+                    'comments' => (isset($comments[$categoryIssue])) ? $comments[$categoryIssue] : [],
+                ];
+            }
+
+            $xml .= '<segment>';
+            $xml .= '<sid>'.$datum[0].'</sid>';
+            $xml .= '<target>'.$datum[1].'</target>';
+            $xml .= '<segment>'.$datum[2].'</segment>';
+            $xml .= '<raw_word_count>'.$datum[3].'</raw_word_count>';
+            $xml .= '<translation>'.$datum[4].'</translation>';
+            $xml .= '<version>'.$datum[5].'</version>';
+            $xml .= '<ice_locked>'.$datum[6].'</ice_locked>';
+            $xml .= '<status>'.$datum[7].'</status>';
+            $xml .= '<time_to_edit>'.$datum[8].'</time_to_edit>';
+            $xml .= '<filename>'.$datum[9].'</filename>';
+            $xml .= '<id_file>'.$datum[10].'</id_file>';
+            $xml .= '<warning>'.$datum[11].'</warning>';
+            $xml .= '<suggestion_match>'.$datum[12].'</suggestion_match>';
+            $xml .= '<suggestion_source>'.$datum[13].'</suggestion_source>';
+            $xml .= '<suggestion>'.$datum[14].'</suggestion>';
+            $xml .= '<edit_distance>'.$datum[15].'</edit_distance>';
+            $xml .= '<locked>'.$datum[16].'</locked>';
+            $xml .= '<match_type>'.$datum[17].'</match_type>';
+            $xml .= '<pee>'.$datum[18].'</pee>';
+            $xml .= '<ice_modified>'.$datum[19].'</ice_modified>';
+            $xml .= '<secs_per_word>'.$datum[20].'</secs_per_word>';
+            $xml .= '<parsed_time_to_edit>'.$datum[21].'</parsed_time_to_edit>';
+            $xml .= '<last_translation>'.$datum[22].'</last_translation>';
+            $xml .= '<revision>'.$datum[23].'</revision>';
+            $xml .= '<second_pass_revision>'.$datum[24].'</second_pass_revision>';
+            $xml .= '<pee_translation_revise>'.$datum[25].'</pee_translation_revise>';
+            $xml .= '<pee_translation_suggestion>'.$datum[26].'</pee_translation_suggestion>';
+            $xml .= '<version_number>'.$datum[27].'</version_number>';
+            $xml .= '<source_page>'.$datum[28].'</source_page>';
+            $xml .= '<is_pre_translated>'.$datum[29].'</is_pre_translated>';
+
+            //$issueValues
+            $xml .= '<issues>';
+
+            foreach ($issueValues as $label => $issueValue){
+
+                $count = $issueValue['count'];
+                $comments = $issueValue['comments'];
+
+                $xml .= '<issue>';
+                $xml .= '<label>'.$label.'</label>';
+                $xml .= '<count>'.$count.'</count>';
+                $xml .= '<comments>';
+
+                if(!empty($comments)){
+                    foreach ($comments as $comment){
+                        $xml .= '<comment>';
+                        $xml .= '<id>'.$comment['id'].'</id>';
+                        $xml .= '<uid>'.$comment['uid'].'</uid>';
+                        $xml .= '<id_qa_entry>'.$comment['id_qa_entry'].'</id_qa_entry>';
+                        $xml .= '<create_date>'.$comment['create_date'].'</create_date>';
+                        $xml .= '<comment>'.$comment['comment'].'</comment>';
+                        $xml .= '<source_page>'.$comment['source_page'].'</source_page>';
+                        $xml .= '</comment>';
+                    }
+                }
+
+                $xml .= '</comments>';
+                $xml .= '</issue>';
+            }
+
+            $xml .= '</issues>';
+            $xml .= '</segment>';
+        }
+
+        $xml .= '</segments>';
+
+        $dom = new \DOMDocument;
+        $dom->preserveWhiteSpace = false;
+        $dom->loadXML($xml, LIBXML_NOENT);
+        $dom->formatOutput = true;
+
+        return $dom->saveXML();
+    }
+
+    /**
+     * @param array $data
+     * @param array $categoryIssues
+     *
+     * @return false|string
+     */
+    private function createJsonFile(array $data, array $categoryIssues = []){
+
+        $jsonData = [];
+
+        foreach ($data as $datum){
+
+            // comments
+            $comments = $datum[31];
+
+            // issues
+            $issues = $datum[30];
+            unset($datum[30]);
+            $issueValues = [];
+
+            foreach ($categoryIssues as $categoryIssue){
+                $count = (isset($issues[$categoryIssue])) ? $issues[$categoryIssue] : 0;
+                $issueValues[$categoryIssue] = [
+                    'count' => $count,
+                    'comments' => (isset($comments[$categoryIssue])) ? $comments[$categoryIssue] : [],
+                ];
             }
 
             $jsonData[] = [
@@ -371,9 +523,9 @@ class DownloadQRController extends BaseChunkController {
      * @param array  $files
      */
     private function composeZipFile($filename, array $files) {
-        $zip = new \ZipArchive;
+        $zip = new ZipArchive;
 
-        if ($zip->open($filename, \ZipArchive::CREATE)) {
+        if ($zip->open($filename, ZipArchive::CREATE)) {
             foreach ($files as $index => $fileContent){
                 $zip->addFromString( "qr_file__".($index+1)."." . $this->format, $fileContent);
             }

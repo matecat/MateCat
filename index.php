@@ -13,5 +13,6 @@ try {
 } catch ( ControllerReturnException $e ) {
     // Do nothing. This mimics the behaviour of return -1 in various controllers,
     // for refactoring purpose.
+    usleep(1);
 }
 $controller->finalize ();

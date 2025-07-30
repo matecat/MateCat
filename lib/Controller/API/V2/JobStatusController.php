@@ -8,8 +8,8 @@
 
 namespace API\V2;
 
-use AMQHandler;
-use API\V2\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use Constants_TranslationStatus;
 use Exception;
 use Features\ReviewExtended\ReviewUtils;
@@ -27,6 +27,7 @@ class JobStatusController extends BaseChunkController {
         } );
 
         $this->appendValidator( $chunkValidator );
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
@@ -57,7 +58,7 @@ class JobStatusController extends BaseChunkController {
         if ( in_array( $status, [
                 Constants_TranslationStatus::STATUS_TRANSLATED, Constants_TranslationStatus::STATUS_APPROVED, Constants_TranslationStatus::STATUS_APPROVED2
         ] ) ) {
-            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangebleStatus(
+            $unchangeable_segments = Translations_SegmentTranslationDao::getUnchangeableStatus(
                     $this->chunk, $segments_id, $status, $source_page
             );
             $segments_id          = array_diff( $segments_id, $unchangeable_segments );
@@ -71,7 +72,7 @@ class JobStatusController extends BaseChunkController {
                                     'client_id'          => $this->request->client_id,
                                     'chunk'              => $this->chunk,
                                     'destination_status' => $status,
-                                    'id_user'            => ( $this->userIsLogged() ? $this->getUser()->uid : null ),
+                                    'id_user'            => ( $this->isLoggedIn() ? $this->getUser()->uid : null ),
                                     'is_review'          => ( $status == Constants_TranslationStatus::STATUS_APPROVED ),
                                     'revision_number'    => $this->request->revision_number
                             ], [ 'persistent' => true ]

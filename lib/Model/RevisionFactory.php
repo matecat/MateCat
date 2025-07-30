@@ -1,15 +1,19 @@
 <?php
 
-use API\V2\Validators\SegmentTranslationIssueValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Validators\SegmentTranslationIssueValidator;
+use Exceptions\NotFoundException;
+use Exceptions\ValidationError;
 use Features\AbstractRevisionFeature;
 use Features\BaseFeature;
 use Features\ReviewExtended;
-use Features\ReviewExtended\ISegmentTranslationModel;
-use Features\SecondPassReview\Model\ChunkReviewModel;
-use Features\SecondPassReview\TranslationIssueModel;
-use Features\TranslationVersions\Model\TranslationEvent;
+use Features\ReviewExtended\ReviewedWordCountModel;
+use Features\TranslationEvents\Model\TranslationEvent;
 use Klein\Request;
 use LQA\ChunkReviewStruct;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 use WordCount\CounterModel;
 
 /**
@@ -49,13 +53,9 @@ class RevisionFactory {
     /**
      * @param ChunkReviewStruct $chunkReviewStruct
      *
-     * @return ReviewExtended\IChunkReviewModel|ChunkReviewModel
+     * @return ReviewExtended\IChunkReviewModel
      */
     public function getChunkReviewModel( ChunkReviewStruct $chunkReviewStruct ) {
-        if ( $this->_isSecondPass() ) {
-            return new ChunkReviewModel( $chunkReviewStruct );
-        }
-
         return $this->revision->getChunkReviewModel( $chunkReviewStruct );
     }
 
@@ -63,22 +63,26 @@ class RevisionFactory {
      * @param TranslationEvent    $translationEvent
      * @param ChunkReviewStruct[] $chunkReviews
      *
-     * @return ISegmentTranslationModel
+     * @return ReviewedWordCountModel
      */
-    public function getSegmentTranslationModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
-        return $this->revision->getSegmentTranslationModel( $translationEvent, $jobWordCounter, $chunkReviews );
+    public function getReviewedWordCountModel( TranslationEvent $translationEvent, array $chunkReviews, CounterModel $jobWordCounter ) {
+        return $this->revision->getReviewedWordCountModel( $translationEvent, $jobWordCounter, $chunkReviews );
     }
 
     /**
      * This method use a filter because of external plugins
      *
-     * @param Request $request
+     * @param KleinController $controller
      *
-     * @return SegmentTranslationIssueValidator|\Features\ReviewImproved\Controller\API\V2\Validators\SegmentTranslationIssueValidator
-     * @throws Exception
+     * @return SegmentTranslationIssueValidator
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    public function getTranslationIssuesValidator( Request $request ) {
-        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $request ) );
+    public function getTranslationIssuesValidator( KleinController $controller ) {
+        return $this->_featureSet->filter( 'loadSegmentTranslationIssueValidator', new SegmentTranslationIssueValidator( $controller ) );
     }
 
     /**
@@ -97,14 +101,10 @@ class RevisionFactory {
      * @param $password
      * @param $issue
      *
-     * @return ReviewExtended\TranslationIssueModel|Features\SecondPassReview\TranslationIssueModel
+     * @return ReviewExtended\TranslationIssueModel
      */
     public function getTranslationIssueModel( $id_job, $password, $issue ) {
-        if ( $this->_isSecondPass() ) {
-            return new TranslationIssueModel( $id_job, $password, $issue );
-        } else {
-            return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
-        }
+        return $this->revision->getTranslationIssueModel( $id_job, $password, $issue );
     }
 
     /**

@@ -10,55 +10,53 @@
 namespace API\App\Json\Analysis;
 
 use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
 
 class AnalysisFile implements MatchContainerInterface, JsonSerializable {
 
     /**
      * @var int
      */
-    protected $id = null;
-    /**
-     * @var int
-     */
-    protected $file_part_id;
+    protected int $id;
     /**
      * @var string
      */
-    protected $name = "";
+    protected string $name = "";
 
     /**
      * @var AnalysisMatch[]
      */
-    protected $matches = [];
+    protected array $matches = [];
     /**
      * @var string
      */
-    protected $original_name;
+    protected string $original_name;
     /**
      * @var string|null
      */
-    protected $id_file_part;
+    protected ?string $id_file_part;
 
     /**
      * @var int
      */
-    protected $total_raw = 0;
+    protected int $total_raw = 0;
     /**
-     * @var int
+     * @var float
      */
-    protected $total_equivalent = 0;
+    protected float $total_equivalent = 0;
 
-    public function __construct( $id, $id_file_part, $name, $original_name ) {
+    public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass ) {
         $this->id            = (int)$id;
         $this->id_file_part  = $id_file_part;
         $this->name          = $name;
         $this->original_name = $original_name;
-        foreach ( MatchConstants::$forValue as $matchType ) {
-            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
+        foreach ( $matchConstantsClass::forValue() as $matchType ) {
+            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType, $matchConstantsClass );
         }
+
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'               => $this->id,
                 'id_file_part'     => $this->id_file_part,
@@ -73,39 +71,41 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
     /**
      * @return int
      */
-    public function getId() {
+    public function getId(): int {
         return $this->id;
     }
 
     /**
+     * @param string $matchName
+     *
      * @return AnalysisMatch
      */
-    public function getMatch( $matchName ) {
+    public function getMatch( string $matchName ): AnalysisMatch {
         return $this->matches[ $matchName ];
     }
 
     /**
      * @return string
      */
-    public function getName() {
+    public function getName(): string {
         return $this->name;
     }
 
     /**
-     * @param $raw
+     * @param int $raw
      *
      * @return void
      */
-    public function incrementRaw( $raw ) {
-        $this->total_raw += (int)$raw;
+    public function incrementRaw( int $raw ) {
+        $this->total_raw += $raw;
     }
 
     /**
-     * @param $equivalent
+     * @param float $equivalent
      *
      * @return void
      */
-    public function incrementEquivalent( $equivalent ) {
+    public function incrementEquivalent( float $equivalent ) {
         $this->total_equivalent += $equivalent;
     }
 

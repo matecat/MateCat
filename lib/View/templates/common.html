@@ -1,0 +1,55 @@
+<div metal:define-macro="footer_includes">
+    <script tal:attributes="nonce x_nonce_unique_id" type="text/javascript">
+        /*<![CDATA[*/
+        if ( typeof config == 'undefined' ) {
+            config = {} ;
+        }
+        config.userMail  = '${userMail}';
+        config.userFullName = "${extended_user}";
+        config.userShortName = "${logged_user}";
+        config.isLoggedIn = ${isLoggedIn|string:false};
+        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
+        config.googleAuthURL = ${structure php:json_encode(googleAuthURL)} ;
+        config.googleDriveEnabled = ${googleDriveEnabled};
+        config.build_number = '${build_number}';
+        /*]]>*/
+
+    <tal:block tal:condition="php: !empty(githubAuthUrl)">
+        /*<![CDATA[*/
+            config.githubAuthUrl = ${structure php:json_encode(githubAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+    <tal:block tal:condition="php: !empty(linkedInAuthUrl)">
+        /*<![CDATA[*/
+            config.linkedInAuthUrl = ${structure php:json_encode(linkedInAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+    <tal:block tal:condition="php: !empty(microsoftAuthUrl)">
+        /*<![CDATA[*/
+            config.microsoftAuthUrl = ${structure php:json_encode(microsoftAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+    <tal:block tal:condition="php: !empty(facebookAuthUrl)">
+        /*<![CDATA[*/
+            config.facebookAuthUrl = ${structure php:json_encode(facebookAuthUrl)} ;
+        /*]]>*/
+    </tal:block>
+    <tal:block tal:repeat="config_data config_js">
+        /*<![CDATA[*/
+        config.pluggable = ${structure php: json_encode( config_data )} ;
+        /*]]>*/
+    </tal:block>
+    <tal:block tal:condition="php: !empty(flashMessages)">
+        /*<![CDATA[*/
+        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        /*]]>*/
+    </tal:block>
+    </script>
+    <tal:block  tal:repeat="js_source footer_js">
+        <script tal:attributes="src js_source; nonce x_nonce_unique_id"></script>
+    </tal:block>
+    <tal:block  tal:repeat="css_url css_resources">
+        <link rel="stylesheet" tal:attributes="href css_url; nonce x_nonce_unique_id"/>
+    </tal:block>
+    <div id="modal" style="z-index: 999999999"></div>
+</div>

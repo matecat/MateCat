@@ -2,10 +2,10 @@
 
 namespace Revise;
 
-use DataAccess_AbstractDaoObjectStruct;
-use DataAccess_IDaoStruct;
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 
-class FeedbackStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct{
+class FeedbackStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     /**
      * @var int

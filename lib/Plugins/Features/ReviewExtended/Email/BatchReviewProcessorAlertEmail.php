@@ -3,12 +3,15 @@
 namespace Features\ReviewExtended\Email;
 
 use Email\AbstractEmail;
+use Exception;
+use INIT;
+use Jobs_JobStruct;
 use LQA\ChunkReviewStruct;
 
 class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
     /**
-     * @var \Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     private $chunk;
 
@@ -25,10 +28,10 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     /**
      * BatchEventCreatorAlertEmail constructor.
      *
-     * @param \Chunks_ChunkStruct $chunk
-     * @param ChunkReviewStruct   $chunkReview
+     * @param Jobs_JobStruct    $chunk
+     * @param ChunkReviewStruct $chunkReview
      */
-    public function __construct( \Chunks_ChunkStruct $chunk, ChunkReviewStruct $chunkReview ) {
+    public function __construct( Jobs_JobStruct $chunk, ChunkReviewStruct $chunkReview ) {
         $this->chunk       = $chunk;
         $this->chunkReview = $chunkReview;
         $this->_setlayout( 'empty_skeleton.html' );
@@ -38,7 +41,7 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
     /**
      * @return array
      */
-    protected function _getTemplateVariables() {
+    protected function _getTemplateVariables(): array {
         return [
                 'chunkId'       => $this->chunk->id,
                 'chunkReviewId' => $this->chunkReview->id,
@@ -47,9 +50,10 @@ class BatchReviewProcessorAlertEmail extends AbstractEmail {
 
     /**
      * @return void
+     * @throws Exception
      */
     public function send() {
-        $mailConf = @parse_ini_file( \INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
+        $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( !empty( $mailConf[ 'email_list' ] ) ) {
             foreach ( $mailConf[ 'email_list' ] as $email => $uName ) {

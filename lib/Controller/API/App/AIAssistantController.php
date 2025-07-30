@@ -2,9 +2,10 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
+use AbstractControllers\KleinController;
 use AsyncTasks\Workers\AIAssistantWorker;
-use Utils;
+use INIT;
+use Langs\Languages;
 
 class AIAssistantController extends KleinController {
 
@@ -12,7 +13,7 @@ class AIAssistantController extends KleinController {
 
     public function index()
     {
-        if(empty(\INIT::$OPENAI_API_KEY)){
+        if(empty(INIT::$OPENAI_API_KEY)){
             $this->response->code(500);
             $this->response->json([
                 'error' => 'OpenAI API key is not set'
@@ -31,7 +32,7 @@ class AIAssistantController extends KleinController {
             die();
         }
 
-        $languages = \Langs_Languages::getInstance();
+        $languages = Languages::getInstance();
         $localizedLanguage = $languages->getLocalizedLanguage($json['target']);
 
         if(empty($localizedLanguage)){

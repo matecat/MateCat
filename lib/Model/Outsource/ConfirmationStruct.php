@@ -10,13 +10,13 @@
 namespace Outsource;
 
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-abstract class ConfirmationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+abstract class ConfirmationStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
-    const VENDOR_NAME = null;
-    const VENDOR_ID = null;
+    const VENDOR_NAME       = null;
+    const VENDOR_ID         = null;
     const REVIEW_ORDER_LINK = null;
 
     public $id;
@@ -26,7 +26,7 @@ abstract class ConfirmationStruct extends DataAccess_AbstractDaoSilentStruct imp
     public $id_vendor   = self::VENDOR_ID;
     public $create_date;
     public $delivery_date;
-    public $currency = 'EUR';
+    public $currency    = 'EUR';
     public $price;
     public $quote_pid;
 

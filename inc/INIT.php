@@ -48,8 +48,7 @@ class INIT {
     public static $QUEUE_CREDENTIALS;
     public static $USE_COMPILED_ASSETS     = false;
     public static $ENABLE_MULTI_DOMAIN_API = false;
-    public static $BLACKLIST_FILE_SIZE_MAX = 2097152;
-    public static $XSRF_TOKEN = 'xsrf-token';
+    public static $XSRF_TOKEN              = 'xsrf-token';
 
     /**
      * Use or not the js tracking codes macro import ( Ex: google analytics code injection )
@@ -60,10 +59,9 @@ class INIT {
      */
     public static $TRACKING_CODES_VIEW_PATH = "";
 
-    public static $QUEUE_NAME                   = "matecat_analysis_queue";
-    public static $COMMENTS_ENABLED             = true;
-    public static $SSE_NOTIFICATIONS_QUEUE_NAME = "/topic/matecat_sse_notifications";
-    public static $SSE_BASE_URL;
+    public static        $COMMENTS_ENABLED                = true;
+    public static string $SOCKET_NOTIFICATIONS_QUEUE_NAME = "/queue/matecat_socket_notifications";
+    public static string $SOCKET_BASE_URL = '';
 
     public static $SMTP_HOST;
     public static $SMTP_PORT;
@@ -71,7 +69,7 @@ class INIT {
     public static $SMTP_HOSTNAME;
 
     public static $MAILER_FROM        = 'cattool@matecat.com';
-    public static $MAILER_FROM_NAME   = 'MateCat';
+    public static $MAILER_FROM_NAME   = 'Matecat';
     public static $MAILER_RETURN_PATH = 'no-reply@matecat.com';
 
     public static $LOG_REPOSITORY;
@@ -80,7 +78,6 @@ class INIT {
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
-    public static $BLACKLIST_REPOSITORY;
     public static $ANALYSIS_FILES_REPOSITORY;
     public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
@@ -92,10 +89,6 @@ class INIT {
     public static $UTILS_ROOT;
     public static $DEFAULT_NUM_RESULTS_FROM_TM;
     public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
-    public static $TIME_TO_EDIT_ENABLED;
-    public static $DEFAULT_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES;
-    public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
     public static $AUTHSECRET;
     public static $AUTHSECRET_PATH;
     public static $REFERENCE_REPOSITORY;
@@ -106,14 +99,16 @@ class INIT {
     public static $WARNING_POLLING_INTERVAL     = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL    = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME               = 'matecat_login_v5';
+    public static $AUTHCOOKIENAME               = 'matecat_login_v6';
     public static $SUPPORT_MAIL                 = 'the owner of this MateCat instance.';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS      = 3000;
-    public static $AUTHCOOKIEDURATION           = 5184000;            // 86400 * 60;         // seconds
-    public static $MAX_UPLOAD_FILE_SIZE         = 62914560;         // 60 * 1024 * 1024;  // bytes
+    public static $AUTHCOOKIEDURATION           = 86400 * 7;        // 24 hours
+    public static $MAX_UPLOAD_FILE_SIZE         = 62914560;     // 60 * 1024 * 1024;  // bytes
     public static $MAX_UPLOAD_TMX_FILE_SIZE     = 314572800;    // 300 * 1024 * 1024; // bytes
     public static $MAX_NUM_FILES                = 100;
     public static $MAX_SOURCE_WORDS             = 250000;
+
+    public static $MMT_DEFAULT_LICENSE;
 
     /**
      * OPENAI configuration
@@ -122,20 +117,6 @@ class INIT {
     public static $OPEN_AI_MODEL;
     public static $OPEN_AI_TIMEOUT;
     public static $OPEN_AI_MAX_TOKENS;
-    public static $OPEN_AI_MAX_REQUEST_TOKENS;
-
-    /**
-     * DQF configuration
-     *
-     */
-    public static $DQF_BASE_URL;
-    public static $DQF_ID_PREFIX = '';
-    public static $DQF_API_KEY;
-    public static $DQF_ENCRYPTION_KEY;
-    public static $DQF_ENCRYPTION_IV;
-
-    public static $DQF_GENERIC_USERNAME;
-    public static $DQF_GENERIC_PASSWORD;
 
     /**
      * We proose that lxq_server is in a configuration file
@@ -176,7 +157,6 @@ class INIT {
      * @var int Interval in seconds
      */
     public static $COPY_SOURCE_INTERVAL = 300;
-    public static $MAX_NUM_SEGMENTS     = 500;
 
     /**
      * Default Matecat user agent string
@@ -206,7 +186,6 @@ class INIT {
     /**
      * The MateCat Version
      */
-    //TODO: Rename variable to MATECAT_VERSION
     public static $BUILD_NUMBER;
 
     /**
@@ -227,14 +206,12 @@ class INIT {
      */
     public static $DEFAULT_TM_KEY = '';
 
+    /**
+     * @var string The default MMT license is applied when Lara falls back for unsupported languages and the user does not add their personal MMT license.
+     */
+    public static $DEFAULT_MMT_KEY = '';
 
-    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ]; 
-
-    // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
-    // This occurs especially in mobile environment. As an example, when you try to open a link from within
-    // the GMail app, it redirect to an internal browser that does not declare a valid user agent
-    // In this case we will show a notice on the top of the page instead of deny the access
-    public static $UNTESTED_BROWSERS = [ 'mozillageneric' ];
+    public static $ENABLED_BROWSERS = [ 'applewebkit', 'chrome', 'safari', 'edge', 'firefox' ];
 
     /**
      * If you don't have a client id and client secret, please visit
@@ -271,15 +248,46 @@ class INIT {
      * Done!
      */
     public static $OAUTH_CONFIG;
-    public static $OAUTH_CLIENT_ID;
-    public static $OAUTH_CLIENT_SECRET;
-    public static $OAUTH_CLIENT_APP_NAME;
-    public static $OAUTH_REDIRECT_URL;
-    public static $OAUTH_SCOPES;
-    public static $OAUTH_BROWSER_API_KEY;
 
-    public static $ENABLE_OMEGAT_DOWNLOAD = false;
-    public static $UNLOCKABLE_TAGS        = false;
+    /**
+     * Google credentials
+     */
+    public static $GOOGLE_OAUTH_CLIENT_ID;
+    public static $GOOGLE_OAUTH_CLIENT_SECRET;
+    public static $GOOGLE_OAUTH_CLIENT_APP_NAME;
+    public static $GOOGLE_OAUTH_REDIRECT_URL;
+    public static $GOOGLE_OAUTH_SCOPES;
+    public static $GOOGLE_OAUTH_BROWSER_API_KEY;
+
+    /**
+     * Github credentials
+     */
+    public static $GITHUB_OAUTH_CLIENT_ID;
+    public static $GITHUB_OAUTH_CLIENT_SECRET;
+    public static $GITHUB_OAUTH_REDIRECT_URL;
+
+    /**
+     * Linkedin credentials
+     */
+    public static $LINKEDIN_OAUTH_CLIENT_ID;
+    public static $LINKEDIN_OAUTH_CLIENT_SECRET;
+    public static $LINKEDIN_OAUTH_REDIRECT_URL;
+
+    /**
+     * Microsoft credentials
+     */
+    public static $MICROSOFT_OAUTH_CLIENT_ID;
+    public static $MICROSOFT_OAUTH_CLIENT_SECRET;
+    public static $MICROSOFT_OAUTH_REDIRECT_URL;
+
+    /**
+     * Facebook credentials
+     */
+    public static $FACEBOOK_OAUTH_CLIENT_ID;
+    public static $FACEBOOK_OAUTH_CLIENT_SECRET;
+    public static $FACEBOOK_OAUTH_REDIRECT_URL;
+
+    public static $UNLOCKABLE_TAGS = false;
 
     public static $SKIP_SQL_CACHE = false;
 
@@ -304,25 +312,35 @@ class INIT {
 
     public function __construct() {
 
-        self::$OAUTH_CLIENT_ID       = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
-        self::$OAUTH_CLIENT_SECRET   = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
-        self::$OAUTH_CLIENT_APP_NAME = @INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
-        self::$OAUTH_BROWSER_API_KEY = @INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
+        self::$GITHUB_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GITHUB_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GITHUB_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GITHUB_OAUTH_CONFIG' ][ 'GITHUB_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
+        self::$LINKEDIN_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_ID' ] ?? null;
+        self::$LINKEDIN_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$LINKEDIN_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'LINKEDIN_OAUTH_CONFIG' ][ 'LINKEDIN_OAUTH_REDIRECT_URL' ] ?? null;
 
-        self::$OAUTH_SCOPES = [
-                'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile',
-                'profile'
-        ];
+        self::$MICROSOFT_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_ID' ] ?? null;
+        self::$MICROSOFT_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$MICROSOFT_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'MICROSOFT_OAUTH_CONFIG' ][ 'MICROSOFT_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$FACEBOOK_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_ID' ] ?? null;
+        self::$FACEBOOK_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$FACEBOOK_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'FACEBOOK_OAUTH_CONFIG' ][ 'FACEBOOK_OAUTH_REDIRECT_URL' ] ?? null;
+
+        self::$GOOGLE_OAUTH_CLIENT_ID     = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_ID' ] ?? null;
+        self::$GOOGLE_OAUTH_CLIENT_SECRET = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_SECRET' ] ?? null;
+        self::$GOOGLE_OAUTH_REDIRECT_URL  = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_REDIRECT_URL' ] ?? null;
+
+        # Drive
+        self::$GOOGLE_OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_CLIENT_APP_NAME' ] ?? null;
+        self::$GOOGLE_OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'GOOGLE_OAUTH_CONFIG' ][ 'GOOGLE_OAUTH_BROWSER_API_KEY' ] ?? null;
 
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
+
     }
 
-    public static $SPELL_CHECK_TRANSPORT_TYPE = 'shell';
-    public static $SPELL_CHECK_ENABLED        = false;
-    public static $SUPPORTED_FILE_TYPES       = [
+    public static $SUPPORTED_FILE_TYPES = [
             'Office'              => [
                     'pages'   => [ '', '', 'extdoc' ],
                     'doc'     => [ '', '', 'extdoc' ],
@@ -363,18 +381,18 @@ class INIT {
                     'zip'     => [ '', '', 'extzip' ],
             ],
             'Web'                 => [
-                    'htm'   => [ '', '', 'exthtm' ],
-                    'html'  => [ '', '', 'exthtm' ],
-                    'xhtml' => [ '', '', 'exthtm' ],
-                    'xml'   => [ '', '', 'extxml' ],
-                    'dtd'   => [ '', '', 'extxml' ],
+                    'htm'    => [ '', '', 'exthtm' ],
+                    'html'   => [ '', '', 'exthtm' ],
+                    'xhtml'  => [ '', '', 'exthtm' ],
+                    'xml'    => [ '', '', 'extxml' ],
+                    'dtd'    => [ '', '', 'extxml' ],
 //                    'php'   => array( '', '', 'extxml' ),
-                    'json'  => [ '', '', 'extxml' ],
-                    'jsont' => [ '', '', 'extxml' ],
+                    'json'   => [ '', '', 'extxml' ],
+                    'jsont'  => [ '', '', 'extxml' ],
                     'jsont2' => [ '', '', 'extxml' ],
-                    'yaml'  => [ '', '', 'extxml' ],
-                    'yml'   => [ '', '', 'extxml' ],
-                    'md'    => [ '', '', 'extxml' ],
+                    'yaml'   => [ '', '', 'extxml' ],
+                    'yml'    => [ '', '', 'extxml' ],
+                    'md'     => [ '', '', 'extxml' ],
             ],
             'Scanned Files'       => [
                     'pdf'  => [ '', '', 'extpdf' ],
@@ -394,11 +412,12 @@ class INIT {
                     'xlf'      => [ 'default', '', 'extxlf' ],
             ],
             "Desktop Publishing"  => [
-                    'mif'  => [ '', '', 'extmif' ],
-                    'idml' => [ '', '', 'extidd' ],
-                    'icml' => [ '', '', 'exticml' ],
-                    'xml'  => [ '', '', 'extxml' ],
-                    'dita' => [ '', '', 'extdit' ]
+                    'mif'     => [ '', '', 'extmif' ],
+                    'idml'    => [ '', '', 'extidd' ],
+                    'icml'    => [ '', '', 'exticml' ],
+                    'xml'     => [ '', '', 'extxml' ],
+                    'dita'    => [ '', '', 'extdit' ],
+                    'ditamap' => [ '', '', 'extdit' ]
             ],
             "Localization"        => [
                     'properties'  => [ '', '', 'extpro' ],
@@ -407,6 +426,7 @@ class INIT {
                     'sxml'        => [ '', '', 'extxml' ],
                     'txml'        => [ '', '', 'extxml' ],
                     'dita'        => [ '', '', 'extdit' ],
+                    'ditamap'     => [ '', '', 'extdit' ],
                     'Android xml' => [ '', '', 'extxml' ],
                     'strings'     => [ '', '', 'extstr' ],
                     'sbv'         => [ '', '', 'extsbv' ],
@@ -415,7 +435,7 @@ class INIT {
                     'wix'         => [ '', '', 'extwix' ],
                     'po'          => [ '', '', 'extpo' ],
                     'g'           => [ '', '', 'extg' ],
-                    'QT linguist ts'          => [ '', '', 'exts' ],
+                    'ts'          => [ '', '', 'exts' ],
             ]
     ];
 
@@ -427,8 +447,6 @@ class INIT {
             'indd' => [ '', "Try converting to INX" ]
     ];
 
-    public static $DEPRECATE_LEGACY_XLIFFS = true;
-
     /*
      * The maximum filename length accepted.
      * Usually OSes accept names of 255 characters at most.
@@ -437,7 +455,7 @@ class INIT {
      */
     public static $MAX_FILENAME_LENGTH = 210;
 
-    public static $AUTOLOAD_PLUGINS = [];
+    public static $AUTOLOAD_PLUGINS = [ "second_pass_review" ];
 
     /**
      * Definitions for the asynchronous task runner

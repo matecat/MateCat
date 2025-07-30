@@ -2,10 +2,26 @@
 
 namespace QAModelTemplate;
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
+use DataAccess\ShapelessConcreteStruct;
+use Database;
+use Date\DateTimeUtil;
+use DateTime;
+use Exception;
+use INIT;
+use Pagination\Pager;
+use Pagination\PaginationParameters;
+use PDO;
+use Projects\ProjectTemplateDao;
+use ReflectionException;
+use Swaggest\JsonSchema\InvalidValue;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
-class QAModelTemplateDao extends DataAccess_AbstractDao
-{
+class QAModelTemplateDao extends AbstractDao {
+
+    const query_paginated   = "SELECT id FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid LIMIT %u OFFSET %u ";
+    const paginated_map_key = __CLASS__ . "::getAllPaginated";
 
     /**
      * validate a json against schema and then
@@ -14,39 +30,37 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param      $json
      * @param null $uid
      *
-     * @return int
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @return QAModelTemplateStruct
+     * @throws InvalidValue
+     * @throws Exception
      */
-    public static function createFromJSON($json, $uid = null)
-    {
-        self::validateJSON($json);
+    public static function createFromJSON( $json, $uid = null ): QAModelTemplateStruct {
 
         $QAModelTemplateStruct = new QAModelTemplateStruct();
-        $QAModelTemplateStruct->hydrateFromJSON($json);
+        $QAModelTemplateStruct->hydrateFromJSON( $json );
 
-        if($uid){
+        if ( $uid ) {
             $QAModelTemplateStruct->uid = $uid;
         }
 
-        return self::save($QAModelTemplateStruct);
+        return self::save( $QAModelTemplateStruct );
     }
 
     /**
      * @param $json
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     *
+     * @throws InvalidValue
+     * @throws Exception
      */
-    private static function validateJSON($json)
-    {
-        $validatorObject = new \Validator\JSONValidatorObject();
+    private static function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
         $validatorObject->json = $json;
-        $jsonSchema = file_get_contents( __DIR__ . '/../../../inc/validation/schema/qa_model.json' );
-        $validator = new \Validator\JSONValidator($jsonSchema);
-        $validator->validate($validatorObject);
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $validator             = new JSONValidator( $jsonSchema );
+        $validator->validate( $validatorObject );
 
-        if(!$validator->isValid()){
-            throw $validator->getErrors()[0]->error;
+        if ( !$validator->isValid() ) {
+            throw $validator->getExceptions()[ 0 ]->error;
         }
     }
 
@@ -54,208 +68,286 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param QAModelTemplateStruct $QAModelTemplateStruct
      * @param                       $json
      *
-     * @return mixed
-     * @throws \Swaggest\JsonSchema\InvalidValue
-     * @throws \Exception
+     * @return QAModelTemplateStruct
+     * @throws InvalidValue
+     * @throws Exception
      */
-    public static function editFromJSON(QAModelTemplateStruct $QAModelTemplateStruct, $json)
-    {
-        self::validateJSON($json);
-        $QAModelTemplateStruct->hydrateFromJSON($json);
+    public static function editFromJSON( QAModelTemplateStruct $QAModelTemplateStruct, $json ): QAModelTemplateStruct {
 
-        return self::update($QAModelTemplateStruct);
+        $QAModelTemplateStruct->hydrateFromJSON( $json );
+
+        return self::update( $QAModelTemplateStruct );
     }
 
     /**
-     * @param $id
+     * @param int $id
+     * @param int $uid
      *
-     * @throws \Exception
+     * @return int
+     * @throws ReflectionException
      */
-    public static function remove($id)
-    {
-        $conn = \Database::obtain()->getConnection();
+    public static function remove( int $id, int $uid ): int {
 
+        $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare( "DELETE FROM qa_model_templates WHERE id = :id " );
-            $stmt->execute([
-                'id' => $id
-            ]);
+            $stmt = $conn->prepare( "UPDATE qa_model_templates SET deleted_at = :now WHERE id = :id AND `deleted_at` IS NULL;" );
+            $stmt->execute( [
+                    'id'  => $id,
+                    'now' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
+            ] );
+
+            $deleted = $stmt->rowCount();
+
+            if ( !$deleted ) {
+                return 0;
+            }
 
             $stmt = $conn->prepare( "SELECT * FROM qa_model_template_passfails WHERE id_template=:id_template " );
-            $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
-            $stmt->execute([
+            $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
+            $stmt->execute( [
                     'id_template' => $id
-            ]);
+            ] );
 
             $QAModelTemplatePassfailStruct = $stmt->fetch();
 
             $stmt = $conn->prepare( "DELETE FROM qa_model_template_passfail_options WHERE id_passfail=:id_passfail " );
-            $stmt->execute([
+            $stmt->execute( [
                     'id_passfail' => $QAModelTemplatePassfailStruct->id
-            ]);
+            ] );
 
             $stmt = $conn->prepare( "DELETE FROM qa_model_template_passfails WHERE id_template=:id_template " );
-            $stmt->execute([
-                'id_template' => $id
-            ]);
+            $stmt->execute( [
+                    'id_template' => $id
+            ] );
 
             $stmt = $conn->prepare( "SELECT * FROM qa_model_template_categories WHERE id_template=:id_template " );
-            $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplateCategoryStruct::class );
-            $stmt->execute([
+            $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateCategoryStruct::class );
+            $stmt->execute( [
                     'id_template' => $id
-            ]);
+            ] );
 
             $QAModelTemplateCategoryStructs = $stmt->fetchAll();
 
-            foreach ($QAModelTemplateCategoryStructs as $QAModelTemplateCategoryStruct) {
+            foreach ( $QAModelTemplateCategoryStructs as $QAModelTemplateCategoryStruct ) {
                 $stmt = $conn->prepare( "DELETE FROM qa_model_template_severities WHERE id_category=:id_category " );
-                $stmt->execute([
+                $stmt->execute( [
                         'id_category' => $QAModelTemplateCategoryStruct->id
-                ]);
+                ] );
             }
 
             $stmt = $conn->prepare( "DELETE FROM qa_model_template_categories WHERE id_template=:id_template " );
-            $stmt->execute([
+            $stmt->execute( [
                     'id_template' => $id
-            ]);
+            ] );
+
+            ProjectTemplateDao::removeSubTemplateByIdAndUser( $id, $uid, 'qa_model_template_id' );
 
             $conn->commit();
-        } catch (\Exception $exception){
+
+            return $deleted;
+
+        } catch ( Exception $exception ) {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $uid );
         }
+    }
+
+    /**
+     * @param $uid
+     *
+     * @return array
+     * @throws Exception
+     */
+    public static function getDefaultTemplate( $uid ): array {
+        $defaultTemplate      = file_get_contents( INIT::$ROOT . '/inc/qa_model.json' );
+        $defaultTemplateModel = json_decode( $defaultTemplate, true );
+
+        $categories      = [];
+        $idSeverityIndex = 0;
+
+        foreach ( $defaultTemplateModel[ 'model' ][ 'categories' ] as $cindex => $category ) {
+
+            $severities = [];
+            unset( $category[ 'dqf_id' ] );
+            $category[ 'id' ]   = ( $cindex + 1 );
+            $category[ 'sort' ] = ( $cindex + 1 );
+
+            foreach ( $defaultTemplateModel[ 'model' ][ 'severities' ] as $sindex => $severity ) {
+
+                $idSeverityIndex++;
+
+                unset( $severity[ 'dqf_id' ] );
+                $severity[ 'id' ]          = $idSeverityIndex;
+                $severity[ 'id_category' ] = ( $cindex + 1 );
+                $severity[ 'code' ]        = strtoupper( substr( $severity[ 'label' ], 0, 3 ) );
+                $severity[ 'penalty' ]     = floatval( $severity[ 'penalty' ] );
+                $severity[ 'sort' ]        = ( $sindex + 1 );
+                $severities[]              = $severity;
+            }
+
+            $category[ 'severities' ] = $severities;
+
+            $categories[] = $category;
+        }
+
+        $passFail         = $defaultTemplateModel[ 'model' ][ 'passfail' ];
+        $passFail[ 'id' ] = 0;
+
+        $passFail[ 'thresholds' ] = [
+                [
+                        "id"          => 0,
+                        "id_passfail" => 0,
+                        "label"       => "R1",
+                        "value"       => (int)$passFail[ 'options' ][ 'limit' ][ 0 ],
+                ],
+                [
+                        "id"          => 0,
+                        "id_passfail" => 0,
+                        "label"       => "R2",
+                        "value"       => (int)$passFail[ 'options' ][ 'limit' ][ 1 ],
+                ]
+        ];
+
+        unset( $passFail[ 'options' ] );
+
+        $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
+
+        return [
+                'id'         => 0,
+                'uid'        => (int)$uid,
+                'label'      => 'Matecat original settings',
+                'version'    => 1,
+                'categories' => $categories,
+                'passfail'   => $passFail,
+                'createdAt'  => DateTimeUtil::formatIsoDate( $now ),
+                'modifiedAt' => DateTimeUtil::formatIsoDate( $now ),
+                'deletedAt'  => null,
+        ];
+
     }
 
     /**
      * @param int $uid
      * @param int $current
      * @param int $pagination
+     * @param int $ttl
      *
      * @return array
+     * @throws ReflectionException
      */
-    public static function getAllPaginated($uid, $current = 1, $pagination = 20)
-    {
-        $conn = \Database::obtain()->getConnection();
+    public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
 
-        $stmt = $conn->prepare( "SELECT count(id) as count FROM qa_model_templates WHERE uid = :uid");
-        $stmt->execute([
-            'uid' => $uid
-        ]);
+        $conn = Database::obtain()->getConnection();
 
-        $count = $stmt->fetch(\PDO::FETCH_ASSOC);
-        $pages = ceil($count['count'] / $pagination);
-        $prev = ($current !== 1) ? "/api/v3/qa_model_template?page=".($current-1) : null;
-        $next = ($current < $pages) ? "/api/v3/qa_model_template?page=".($current+1) : null;
-        $offset = ($current - 1) * $pagination;
+        $pager  = new Pager( $conn );
+        $totals = $pager->count(
+                "SELECT count(id) FROM qa_model_templates WHERE deleted_at IS NULL AND uid = :uid",
+                [ 'uid' => $uid ]
+        );
+
+        $paginationParameters = new PaginationParameters( self::query_paginated, [ 'uid' => $uid ], ShapelessConcreteStruct::class, $baseRoute, $current, $pagination );
+        $paginationParameters->setCache( self::paginated_map_key . ":" . $uid, $ttl );
+
+        $result = $pager->getPagination( $totals, $paginationParameters );
 
         $models = [];
-
-        $stmt = $conn->prepare( "SELECT id FROM qa_model_templates WHERE uid = :uid LIMIT $pagination OFFSET $offset ");
-        $stmt->execute([
-            'uid' => $uid
-        ]);
-
-        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $model){
-            $models[] = self::get([
-                'id' => $model['id'],
-                'uid' => $uid
-            ]);
+        foreach ( $result[ 'items' ] as $model ) {
+            $models[] = self::get( [
+                    'id'  => $model[ 'id' ],
+                    'uid' => $uid
+            ] );
         }
 
-        return [
-            'current_page' => $current,
-            'per_page' => $pagination,
-            'last_page' => $pages,
-            'prev' => $prev,
-            'next' => $next,
-            'items' => $models,
-        ];
+        $result[ 'items' ] = $models;
+
+        return $result;
     }
 
     /**
-     * @param $uid
-     *
-     * @return QAModelTemplateStruct
+     * @throws Exception
      */
-    public static function getByUser($uid)
-    {
-        return self::get([
-            'uid' => $uid
-        ]);
+    public static function getQaModelTemplateByIdAndUid( PDO $conn, array $meta = [] ) {
+
+        $query  = "SELECT * FROM qa_model_templates WHERE deleted_at IS NULL ";
+        $params = [];
+
+        if ( empty( $meta[ 'id' ] ) || empty( $meta[ 'uid' ] ) ) {
+            throw new Exception( "id and uid parameters must be provided." );
+        }
+
+        $query          .= " AND id=:id ";
+        $params[ 'id' ] = $meta[ 'id' ];
+
+        $query           .= " AND uid=:uid ";
+        $params[ 'uid' ] = $meta[ 'uid' ];
+
+        $stmt = $conn->prepare( $query );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateStruct::class );
+        $stmt->execute( $params );
+
+        return $stmt->fetch();
+
     }
 
     /**
      * @param array $meta
      *
      * @return QAModelTemplateStruct
+     * @throws Exception
      */
-    public static function get(array $meta = [])
-    {
-        $conn = \Database::obtain()->getConnection();
-        $query = "SELECT * FROM qa_model_templates WHERE 1=1 ";
-        $params = [];
+    public static function get( array $meta = [] ): ?QAModelTemplateStruct {
 
-        if(isset($meta['id']) and '' !== $meta['id'] ){
-            $query .= " AND id=:id ";
-            $params['id'] = $meta['id'];
-        }
+        $conn = Database::obtain()->getConnection();
 
-        if(isset($meta['uid']) and '' !== $meta['uid'] ){
-            $query .= " AND uid=:uid ";
-            $params['uid'] = $meta['uid'];
-        }
+        $QAModelTemplateStruct = self::getQaModelTemplateByIdAndUid( $conn, $meta );
 
-        $stmt = $conn->prepare( $query );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplateStruct::class );
-        $stmt->execute($params);
-
-        $QAModelTemplateStruct = $stmt->fetch();
-
-        if(!$QAModelTemplateStruct){
+        if ( !$QAModelTemplateStruct ) {
             return null;
         }
 
         // qa_model_template_passfails
         $stmt = $conn->prepare( "SELECT * FROM qa_model_template_passfails WHERE id_template=:id_template " );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
-        $stmt->execute([
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplatePassfailStruct::class );
+        $stmt->execute( [
                 'id_template' => $QAModelTemplateStruct->id
-        ]);
+        ] );
 
         $QAModelTemplatePassfailStruct = $stmt->fetch();
 
         $stmt = $conn->prepare( "SELECT * FROM qa_model_template_passfail_options WHERE id_passfail=:id_passfail " );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplatePassfailThresholdStruct::class );
-        $stmt->execute([
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplatePassfailThresholdStruct::class );
+        $stmt->execute( [
                 'id_passfail' => $QAModelTemplatePassfailStruct->id
-        ]);
+        ] );
 
         $QAModelTemplatePassfailStruct->thresholds = $stmt->fetchAll();
 
         // qa_model_template_categories
-        $stmt = $conn->prepare( "SELECT * FROM qa_model_template_categories WHERE id_template=:id_template " );
-        $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplateCategoryStruct::class );
-        $stmt->execute([
-            'id_template' => $QAModelTemplateStruct->id
-        ]);
+        $stmt = $conn->prepare( "SELECT * FROM qa_model_template_categories WHERE id_template=:id_template ORDER BY sort ASC" );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateCategoryStruct::class );
+        $stmt->execute( [
+                'id_template' => $QAModelTemplateStruct->id
+        ] );
 
         $QAModelTemplateCategoryStructs = $stmt->fetchAll();
 
-        foreach ($QAModelTemplateCategoryStructs as $QAModelTemplateCategoryStruct){
-            $stmt = $conn->prepare( "SELECT * FROM qa_model_template_severities WHERE id_category=:id_category " );
-            $stmt->setFetchMode( \PDO::FETCH_CLASS, QAModelTemplateSeverityStruct::class );
-            $stmt->execute([
-                'id_category' => $QAModelTemplateCategoryStruct->id
-            ]);
+        foreach ( $QAModelTemplateCategoryStructs as $QAModelTemplateCategoryStruct ) {
+            $stmt = $conn->prepare( "SELECT * FROM qa_model_template_severities WHERE id_category=:id_category ORDER BY sort ASC " );
+            $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateSeverityStruct::class );
+            $stmt->execute( [
+                    'id_category' => $QAModelTemplateCategoryStruct->id
+            ] );
 
             $QAModelTemplateCategoryStruct->severities = $stmt->fetchAll();
         }
 
         $QAModelTemplateStruct->categories = $QAModelTemplateCategoryStructs;
-        $QAModelTemplateStruct->passfail = $QAModelTemplatePassfailStruct;
+        $QAModelTemplateStruct->passfail   = $QAModelTemplatePassfailStruct;
 
         return $QAModelTemplateStruct;
     }
@@ -263,78 +355,87 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
     /**
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
-     * @return string
-     * @throws \Exception
+     * @return QAModelTemplateStruct
+     * @throws Exception
      */
-    public static function save(QAModelTemplateStruct $modelTemplateStruct)
-    {
-        $conn = \Database::obtain()->getConnection();
+    public static function save( QAModelTemplateStruct $modelTemplateStruct ): QAModelTemplateStruct {
+        $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
         try {
             $stmt = $conn->prepare( "INSERT INTO qa_model_templates (uid, version, label) VALUES (:uid, :version, :label) " );
-            $stmt->execute([
+            $stmt->execute( [
                     'version' => $modelTemplateStruct->version,
-                    'label' => $modelTemplateStruct->label,
-                    'uid' => $modelTemplateStruct->uid,
-            ]);
+                    'label'   => $modelTemplateStruct->label,
+                    'uid'     => $modelTemplateStruct->uid,
+            ] );
 
             $QAModelTemplateId = $conn->lastInsertId();
 
             $modelTemplateStruct->passfail->id_template = $QAModelTemplateId;
-            $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfails ( id_template, passfail_type) VALUES ( :id_template, :passfail_type) " );
-            $stmt->execute([
+            $stmt                                       = $conn->prepare( "INSERT INTO qa_model_template_passfails ( id_template, passfail_type) VALUES ( :id_template, :passfail_type) " );
+            $stmt->execute( [
                     'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
-                    'id_template' => $modelTemplateStruct->passfail->id_template
-            ]);
+                    'id_template'   => $modelTemplateStruct->passfail->id_template
+            ] );
 
-            $QAModelTemplatePassfailId = $conn->lastInsertId();
+            $QAModelTemplatePassfailId         = $conn->lastInsertId();
+            $modelTemplateStruct->passfail->id = $QAModelTemplatePassfailId;
 
-            foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct){
+            foreach ( $modelTemplateStruct->passfail->thresholds as $thresholdStruct ) {
                 $thresholdStruct->id_passfail = $QAModelTemplatePassfailId;
-                $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfail_options (id_passfail, passfail_label, passfail_value) VALUES (:id_passfail, :passfail_label, :passfail_value) " );
-                $stmt->execute([
-                    'id_passfail' => $thresholdStruct->id_passfail,
-                    'passfail_label' => $thresholdStruct->passfail_label,
-                    'passfail_value' => $thresholdStruct->passfail_value
-                ]);
+                $stmt                         = $conn->prepare( "INSERT INTO qa_model_template_passfail_options (id_passfail, passfail_label, passfail_value) VALUES (:id_passfail, :passfail_label, :passfail_value) " );
+                $stmt->execute( [
+                        'id_passfail'    => $thresholdStruct->id_passfail,
+                        'passfail_label' => $thresholdStruct->passfail_label,
+                        'passfail_value' => $thresholdStruct->passfail_value
+                ] );
+
+                $thresholdStruct->id = $conn->lastInsertId();
             }
 
-            foreach ($modelTemplateStruct->categories as $categoryStruct){
+            foreach ( $modelTemplateStruct->categories as $csort => $categoryStruct ) {
                 $categoryStruct->id_template = $QAModelTemplateId;
-                $stmt = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, sort) 
+                $stmt                        = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template, id_parent, category_label, code, sort) 
                     VALUES (:id_template, :id_parent, :category_label, :code, :sort) " );
-                $stmt->execute([
-                    'id_template' => $categoryStruct->id_template,
-                    'id_parent' => ($categoryStruct->id_parent) ? $categoryStruct->id_parent : null,
-                    'category_label' => $categoryStruct->category_label,
-                    'code' => $categoryStruct->code,
-                    'sort' => ($categoryStruct->sort) ? $categoryStruct->sort : null,
-                ]);
+                $stmt->execute( [
+                        'id_template'    => $categoryStruct->id_template,
+                        'id_parent'      => ( $categoryStruct->id_parent ) ? $categoryStruct->id_parent : null,
+                        'category_label' => $categoryStruct->category_label,
+                        'code'           => $categoryStruct->code,
+                        'sort'           => (int)( $categoryStruct->sort ) ? $categoryStruct->sort : (int)( $csort + 1 ),
+                ] );
 
                 $QAModelTemplateCategoryId = $conn->lastInsertId();
+                $categoryStruct->id        = $QAModelTemplateCategoryId;
 
-                foreach ($categoryStruct->severities as $severityStruct){
+                foreach ( $categoryStruct->severities as $ssort => $severityStruct ) {
                     $severityStruct->id_category = $QAModelTemplateCategoryId;
-                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category, severity_label, severity_code, penalty, sort) 
+                    $stmt                        = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category, severity_label, severity_code, penalty, sort) 
                     VALUES (:id_category, :severity_label, :severity_code, :penalty, :sort) " );
-                    $stmt->execute([
-                            'id_category' => $severityStruct->id_category,
+                    $stmt->execute( [
+                            'id_category'    => $severityStruct->id_category,
                             'severity_label' => $severityStruct->severity_label,
-                            'penalty' => $severityStruct->penalty,
-                            'severity_code' => $severityStruct->severity_code,
-                            'sort' => ($severityStruct->sort) ? $severityStruct->sort : null,
-                    ]);
+                            'penalty'        => $severityStruct->penalty,
+                            'severity_code'  => $severityStruct->severity_code,
+                            'sort'           => (int)( $severityStruct->sort ) ? $severityStruct->sort : (int)( $ssort + 1 ),
+                    ] );
+
+                    $severityStruct->id = $conn->lastInsertId();
                 }
             }
 
             $conn->commit();
 
-            return $QAModelTemplateId;
-        } catch (\Exception $exception){
+            $modelTemplateStruct->id = $QAModelTemplateId;
+
+            return $modelTemplateStruct;
+        } catch ( Exception $exception ) {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $modelTemplateStruct->uid );
         }
     }
 
@@ -342,84 +443,105 @@ class QAModelTemplateDao extends DataAccess_AbstractDao
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function update(QAModelTemplateStruct $modelTemplateStruct)
-    {
-        $conn = \Database::obtain()->getConnection();
+    public static function update( QAModelTemplateStruct $modelTemplateStruct ) {
+        $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
         try {
-            $stmt = $conn->prepare( "UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label WHERE id=:id" );
-            $stmt->execute([
-                'version' => $modelTemplateStruct->version,
-                'label' => $modelTemplateStruct->label,
-                'uid' => $modelTemplateStruct->uid,
-                'id' => $modelTemplateStruct->id,
-            ]);
+            $stmt = $conn->prepare( "UPDATE qa_model_templates SET uid=:uid, version=:version, label=:label, modified_at=:modified_at WHERE id=:id" );
+            $stmt->execute( [
+                    'version'     => $modelTemplateStruct->version,
+                    'label'       => $modelTemplateStruct->label,
+                    'uid'         => $modelTemplateStruct->uid,
+                    'id'          => $modelTemplateStruct->id,
+                    'modified_at' => ( new DateTime() )->format( 'Y-m-d H:i:s' )
+            ] );
 
             // UPSERT
             $stmt = $conn->prepare( "DELETE from qa_model_template_passfails WHERE id_template=:id_template " );
-            $stmt->execute([
-                'id_template' => $modelTemplateStruct->id,
-            ]);
+            $stmt->execute( [
+                    'id_template' => $modelTemplateStruct->id,
+            ] );
 
             $stmt = $conn->prepare( "DELETE from qa_model_template_categories WHERE id_template=:id_template " );
-            $stmt->execute([
-                'id_template' => $modelTemplateStruct->id,
-            ]);
+            $stmt->execute( [
+                    'id_template' => $modelTemplateStruct->id,
+            ] );
 
             $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfails (id_template, passfail_type) VALUES (:id_template,:passfail_type )" );
-            $stmt->execute([
-                'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
-                'id_template' => $modelTemplateStruct->id,
-            ]);
+            $stmt->execute( [
+                    'passfail_type' => $modelTemplateStruct->passfail->passfail_type,
+                    'id_template'   => $modelTemplateStruct->id,
+            ] );
 
-            $idPassfail = $conn->lastInsertId();
+            $idPassfail                        = $conn->lastInsertId();
+            $modelTemplateStruct->passfail->id = $idPassfail;
 
-            foreach ($modelTemplateStruct->passfail->thresholds as $thresholdStruct){
+            foreach ( $modelTemplateStruct->passfail->thresholds as $thresholdStruct ) {
                 $stmt = $conn->prepare( "INSERT INTO qa_model_template_passfail_options (id_passfail,passfail_label,passfail_value) 
                     VALUES (:id_passfail,:passfail_label,:passfail_value) " );
-                $stmt->execute([
-                    'id_passfail' => $idPassfail,
-                    'passfail_label' => $thresholdStruct->passfail_label,
-                    'passfail_value' => $thresholdStruct->passfail_value,
-                ]);
+                $stmt->execute( [
+                        'id_passfail'    => $idPassfail,
+                        'passfail_label' => $thresholdStruct->passfail_label,
+                        'passfail_value' => $thresholdStruct->passfail_value,
+                ] );
+
+                $thresholdStruct->id          = $conn->lastInsertId();
+                $thresholdStruct->id_passfail = $idPassfail;
             }
 
-            foreach ($modelTemplateStruct->categories as $categoryStruct){
+            foreach ( $modelTemplateStruct->categories as $csort => $categoryStruct ) {
                 $stmt = $conn->prepare( "INSERT INTO qa_model_template_categories (id_template,id_parent,category_label, code, sort) 
                     VALUES (:id_template,:id_parent,:category_label,:code,:sort) " );
-                $stmt->execute([
-                        'id_template' => $categoryStruct->id_template,
-                        'id_parent' => ($categoryStruct->id_parent) ? $categoryStruct->id_parent : null,
+                $stmt->execute( [
+                        'id_template'    => $categoryStruct->id_template,
+                        'id_parent'      => ( $categoryStruct->id_parent ) ? $categoryStruct->id_parent : null,
                         'category_label' => $categoryStruct->category_label,
-                        'code' => $categoryStruct->code,
-                        'sort' => ($categoryStruct->sort) ? $categoryStruct->sort : null,
-                ]);
+                        'code'           => $categoryStruct->code,
+                        'sort'           => ( $categoryStruct->sort ) ? (int)$categoryStruct->sort : (int)( $csort + 1 ),
+                ] );
 
-                $idCategory = $conn->lastInsertId();
+                $idCategory         = $conn->lastInsertId();
+                $categoryStruct->id = $idCategory;
 
-                foreach ($categoryStruct->severities as $severityStruct){
-                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category,severity_label,severity_code,penalty, sort)
+                foreach ( $categoryStruct->severities as $ssort => $severityStruct ) {
+                    $stmt = $conn->prepare( "INSERT INTO qa_model_template_severities (id_category,severity_label,severity_code, penalty, sort)
                         VALUES (:id_category, :severity_label, :severity_code, :penalty, :sort) " );
-                    $stmt->execute([
-                        'id_category' => $idCategory,
-                        'severity_label' => $severityStruct->severity_label,
-                        'severity_code' => $severityStruct->severity_code,
-                        'penalty' => $severityStruct->penalty,
-                        'sort' => ($severityStruct->sort) ? $severityStruct->sort : null,
-                    ]);
+                    $stmt->execute( [
+                            'id_category'    => $idCategory,
+                            'severity_label' => $severityStruct->severity_label,
+                            'severity_code'  => $severityStruct->severity_code,
+                            'penalty'        => $severityStruct->penalty,
+                            'sort'           => ( $severityStruct->sort ) ? (int)$severityStruct->sort : (int)( $ssort + 1 ),
+                    ] );
+
+                    $severityStruct->id          = $conn->lastInsertId();
+                    $severityStruct->id_category = $idCategory;
                 }
             }
 
             $conn->commit();
 
-            return $modelTemplateStruct->id;
-        } catch (\Exception $exception){
+            return $modelTemplateStruct;
+        } catch ( Exception $exception ) {
             $conn->rollBack();
 
             throw $exception;
+        } finally {
+            static::destroyQueryPaginated( $modelTemplateStruct->uid );
         }
     }
+
+    /**
+     * @param int $uid
+     *
+     * @throws ReflectionException
+     */
+    private
+    static function destroyQueryPaginated( int $uid ) {
+        ( new static() )->_deleteCacheByKey( self::paginated_map_key . ":" . $uid, false );
+    }
+
 }

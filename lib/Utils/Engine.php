@@ -15,7 +15,7 @@ class Engine {
      * @return Engines_AbstractEngine
      * @throws Exception
      */
-    public static function getInstance( $id ) {
+    public static function getInstance( $id ): Engines_AbstractEngine {
 
         if ( !is_numeric( $id ) ) {
             throw new Exception( "Missing id engineRecord", -1 );
@@ -30,15 +30,18 @@ class Engine {
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $engineRecord = isset( $eng[ 0 ] ) ? $eng[ 0 ] : null;
+        $engineRecord = $eng[ 0 ] ?? null;
 
         if ( empty( $engineRecord ) ) {
             throw new Exception( "Engine $id not found", -2 );
         }
 
         $className = 'Engines_' . $engineRecord->class_load;
-        if ( !class_exists( $className, true ) ) {
-            throw new Exception( "Engine Class $className not Found" );
+        if ( !class_exists( $className ) ) {
+            $className = $engineRecord->class_load;
+            if ( !class_exists( $className ) ) {
+                throw new Exception( "Engine Class $className not Found" );
+            }
         }
 
         return new $className( $engineRecord );
@@ -48,10 +51,23 @@ class Engine {
     /**
      * @param EnginesModel_EngineStruct $engineRecord
      *
-     * @return mixed
+     * @return Engines_EngineInterface
+     * @throws Exception
      */
-    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ) {
+    public static function createTempInstance( EnginesModel_EngineStruct $engineRecord ): Engines_EngineInterface {
+
         $className = 'Engines_' . $engineRecord->class_load;
+        if ( !class_exists( $className ) ) {
+            $className = $engineRecord->class_load; // fully qualified class name
+            if ( !class_exists( $className ) ) {
+                $className = 'Utils\Engines\\' . $engineRecord->class_load; // guess
+                if ( !class_exists( $className ) ) {
+                    throw new Exception( "Engine Class $engineRecord->class_load not Found" );
+                }
+                // we found the right class name, overwrite the fake record
+                $engineRecord->class_load = $className;
+            }
+        }
 
         return new $className( $engineRecord );
     }

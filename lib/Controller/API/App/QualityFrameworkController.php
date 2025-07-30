@@ -2,9 +2,11 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Exceptions\NotFoundException;
+use LQA\ModelDao;
+use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use QAModelTemplate\QAModelTemplateDao;
 
@@ -20,12 +22,12 @@ class QualityFrameworkController extends KleinController {
      */
     public function project() {
 
-        $idProject = $this->request->param('id_project');
-        $password = $this->request->param('password');
+        $idProject = $this->request->param( 'id_project' );
+        $password  = $this->request->param( 'password' );
 
         try {
-            $project = (new \Projects_ProjectDao())->findByIdAndPassword($idProject, $password);
-        } catch (NotFoundException $exception) {
+            $project = ( new Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
+        } catch ( NotFoundException $exception ) {
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => [
@@ -35,7 +37,7 @@ class QualityFrameworkController extends KleinController {
             exit();
         }
 
-        $this->response->json($this->renderQualityFramework($project));
+        $this->response->json( $this->renderQualityFramework( $project ) );
         exit();
     }
 
@@ -44,22 +46,22 @@ class QualityFrameworkController extends KleinController {
      */
     public function job() {
 
-        $idJob = $this->request->param('id_job');
-        $password = $this->request->param('password');
+        $idJob    = $this->request->param( 'id_job' );
+        $password = $this->request->param( 'password' );
 
-        $job = \CatUtils::getJobFromIdAndAnyPassword($idJob, $password);
+        $job = \CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 
-        if($job === null){
+        if ( $job === null ) {
             $this->response->code( 500 );
             $this->response->json( [
-                'error' => [
-                    'message' => 'Job not found'
-                ]
+                    'error' => [
+                            'message' => 'Job not found'
+                    ]
             ] );
             exit();
         }
 
-        $this->response->json($this->renderQualityFramework($job->getProject()));
+        $this->response->json( $this->renderQualityFramework( $job->getProject() ) );
         exit();
     }
 
@@ -68,12 +70,11 @@ class QualityFrameworkController extends KleinController {
      *
      * @return array
      */
-    private function renderQualityFramework(Projects_ProjectStruct $projectStruct)
-    {
+    private function renderQualityFramework( Projects_ProjectStruct $projectStruct ) {
         $idQaModel = $projectStruct->id_qa_model;
-        $qaModel = \LQA\ModelDao::findById($idQaModel);
+        $qaModel   = ModelDao::findById( $idQaModel );
 
-        if($qaModel === null){
+        if ( $qaModel === null ) {
             $this->response->code( 500 );
             $this->response->json( [
                     'error' => [
@@ -83,13 +84,19 @@ class QualityFrameworkController extends KleinController {
             exit();
         }
 
-        $json = $qaModel->getDecodedModel();
-        $json['template_model'] = null;
+        $json                     = $qaModel->getDecodedModel();
+        $json[ 'template_model' ] = null;
 
-        if($qaModel->qa_model_template_id){
-            $parentTemplate = QAModelTemplateDao::get(['id' => $qaModel->qa_model_template_id ]);
+        if ( $qaModel->qa_model_template_id ) {
 
-            $json['template_model'] = $parentTemplate->getDecodedModel()['model'];
+            $parentTemplate = QAModelTemplateDao::get( [ 'id' => $qaModel->qa_model_template_id, 'uid' => $this->getUser()->uid ] );
+
+            if ( $parentTemplate === null ) {
+                return $json;
+            }
+
+            $json[ 'template_model' ] = $parentTemplate->getDecodedModel()[ 'model' ];
+
         }
 
         return $json;

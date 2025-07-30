@@ -10,9 +10,8 @@
 namespace DataAccess;
 
 use ArrayAccess;
-use DataAccess_AbstractDaoObjectStruct;
 
-class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct implements ArrayAccess {
+class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -29,10 +28,11 @@ class ShapelessConcreteStruct extends DataAccess_AbstractDaoObjectStruct impleme
         if ( !property_exists( $this, $name ) ) {
             return null;
         }
+
         return $this->$name;
     }
 
-    public function getArrayCopy() {
+    public function getArrayCopy(): array {
         return (array)$this;
     }
 

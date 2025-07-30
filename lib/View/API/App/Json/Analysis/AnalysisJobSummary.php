@@ -10,17 +10,18 @@
 namespace API\App\Json\Analysis;
 
 use JsonSerializable;
+use Model\Analysis\Constants\ConstantsInterface;
 
 class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
 
     /**
      * @var AnalysisMatch[]
      */
-    protected $matches = [];
+    protected array $matches = [];
 
-    public function __construct() {
-        foreach ( MatchConstants::$forValue as $matchType ) {
-            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType );
+    public function __construct( ConstantsInterface $matchConstantsClass ) {
+        foreach ( $matchConstantsClass::forValue() as $matchType ) {
+            $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType, $matchConstantsClass );
         }
     }
 
@@ -29,9 +30,11 @@ class AnalysisJobSummary implements MatchContainerInterface, JsonSerializable {
     }
 
     /**
+     * @param string $matchName
+     *
      * @return AnalysisMatch
      */
-    public function getMatch( $matchName ) {
+    public function getMatch( string $matchName ): AnalysisMatch {
         return $this->matches[ $matchName ];
     }
 

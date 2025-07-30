@@ -4,8 +4,7 @@ namespace Validator;
 
 use Exception;
 use Files\CSV;
-use INIT;
-use Langs_Languages;
+use Langs\Languages;
 use Utils;
 use Validator\Contracts\AbstractValidator;
 use Validator\Contracts\ValidatorObject;
@@ -22,15 +21,14 @@ class GlossaryCSVValidator extends AbstractValidator {
         }
 
         $headers          = $this->getHeaders( $object->csv );
-        $languages        = Langs_Languages::getInstance();
-        $allowedLanguages = $languages->allowedLanguages();
+        $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
-        if ( $this->validateLanguages( $headers, $allowedLanguages ) === false ) {
+        if ( !$this->validateLanguages( $headers, $languagesHandler ) ) {
             return false;
         }
 
-        $allowedLanguagesRegex = implode( "|", $allowedLanguages );
+        $allowedLanguagesRegex = strtolower( implode( "|", array_keys( $languagesHandler->getEnabledLanguages() ) ) );
 
         // 2. Validate structure
         preg_match_all( '/^(forbidden)?(domain)?(subdomain)?(definition)?(((' . $allowedLanguagesRegex . ')((notes)?(example of use)?){2,})+$)/', implode( "", $headers ), $headerMatches );
@@ -47,47 +45,49 @@ class GlossaryCSVValidator extends AbstractValidator {
 
     /**
      * @param $filePath
+     *
      * @return array
      */
-    private function getHeaders( $filePath ) {
+    private function getHeaders( $filePath ): array {
         $headers = CSV::headers( $filePath );
         $headers = array_map( 'Utils::trimAndLowerCase', $headers );
 
-        return Utils::popArray($headers);
+        return Utils::removeEmptyStringFromTail( $headers );
     }
 
     /**
      * @param $filePath
+     *
      * @return int
      */
-    public function getNumberOfLanguage( $filePath ){
+    public function getNumberOfLanguage( $filePath ) {
 
-        $headers = $this->getHeaders($filePath);
+        $headers  = $this->getHeaders( $filePath );
         $skipKeys = [
-            "forbidden",
-            "domain",
-            "subdomain",
-            "definition",
-            "notes",
-            "example of use"
+                "forbidden",
+                "domain",
+                "subdomain",
+                "definition",
+                "notes",
+                "example of use"
         ];
 
         $languages = array_diff( $headers, $skipKeys );
 
-        if(empty($languages)){
+        if ( empty( $languages ) ) {
             return 0;
         }
 
-        return count($languages);
+        return count( $languages );
     }
 
     /**
-     * @param $headers
-     * @param $allowedLanguages
+     * @param array     $headers
+     * @param Languages $languagesHandler
      *
      * @return bool
      */
-    private function validateLanguages( $headers, $allowedLanguages ) {
+    private function validateLanguages( array $headers, Languages $languagesHandler ): bool {
 
         $skipKeys = [
                 "forbidden",
@@ -108,14 +108,14 @@ class GlossaryCSVValidator extends AbstractValidator {
 
         foreach ( $languages as $language ) {
 
-            if( empty($language) ){
+            if ( empty( $language ) ) {
                 $error          = 'The file contains and empty column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
 
                 return false;
             }
 
-            if ( !in_array( $language, $allowedLanguages ) ) {
+            if ( !$languagesHandler->isValidLanguage( $language ) ) {
 
                 $error          = ( strpos( $language, '_' ) !== false ) ? 'The column header <b>' . $language . '</b> contains an underscore, please replace it with a dash for the file to be valid for import. Ex: it_IT -> it-iT' : '<b>' . $language . '</b> is not a valid column header, you can find the correct column headers <a href="https://guides.matecat.com/glossary-file-format" target="_blank">here</a>.';
                 $this->errors[] = $error;
@@ -123,5 +123,8 @@ class GlossaryCSVValidator extends AbstractValidator {
                 return false;
             }
         }
+
+        return true;
+
     }
 }

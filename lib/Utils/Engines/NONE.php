@@ -8,24 +8,25 @@
  */
 
 
-class Engines_NONE  extends Engines_AbstractEngine {
+class Engines_NONE extends Engines_AbstractEngine {
 
     public function get( $_config ) {
-        return [];
+        return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
     public function set( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
+        return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
     public function update( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
+        return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
     public function delete( $_config ) {
-        return [ 'responseStatus' => 200, 'responseData' => [] ];
+        return new Engines_Results_MyMemory_TMS( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {}
+    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    }
 
 }

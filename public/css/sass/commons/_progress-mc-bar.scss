@@ -1,3 +1,4 @@
+@use "../commons/colors";
 #manage-container .progress-bar {
   height: 20px;
   top: 15px;
@@ -5,7 +6,7 @@
   min-width: 115px;
   border-radius: 10px;
   /* margin-bottom: 10px; */
-  padding-top: 7px;
+  padding-top: 10px;
 }
 
 .analyze .progress-bar {
@@ -22,16 +23,16 @@
     //min-width: 120px;
     position: relative;
     .meter {
-      > div {
-        display: contents;
-      }
-      height: 18px;
+      height: 12px;
       width: 100%;
       float: left;
       margin: 0px 15px 0px 0 !important;
       background-color: #d0d1d1;
       overflow: hidden;
       border-radius: 10px;
+      > div {
+        display: contents;
+      }
       a {
         display: block;
         height: 100%;
@@ -40,49 +41,30 @@
         overflow: hidden;
         -webkit-transition: all 200ms ease-in;
         transition: all 200ms ease-in;
-      }
-      a:after {
-        content: '';
-        position: absolute;
-        top: 0px;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        background-image: -webkit-linear-gradient(
-          -45deg,
-          rgba(255, 255, 255, 0.2) 25%,
-          transparent 25%,
-          transparent 50%,
-          rgba(255, 255, 255, 0.2) 50%,
-          rgba(255, 255, 255, 0.2) 75%,
-          transparent 75%,
-          transparent
-        );
-        z-index: 0;
-        -webkit-background-size: 50px 50px;
-        -moz-background-size: 50px 50px;
-        background-size: 50px 50px;
-        -webkit-animation: move 2s linear infinite;
-        overflow: hidden;
-        height: 18px;
-        opacity: 0.3;
-        pointer-events: none;
+        cursor: default !important;
       }
     }
+
+    .percent {
+      position: absolute;
+      right: 0;
+      top: -20px;
+    }
+
     .translated-bar {
-      background-color: $translatedBlue;
+      background-color: colors.$translatedBlue;
     }
     .approved-bar {
-      background-color: $approvedGreen;
+      background-color: colors.$approvedGreen;
     }
     .approved-bar-2nd-pass {
-      background-color: $approved2Green;
+      background-color: colors.$approved2Green;
     }
     .warning-bar {
-      background-color: $rebuttedRed;
+      background-color: colors.$rebuttedRed;
     }
     .draft-bar {
-      background-color: $grey4;
+      background-color: colors.$grey4;
     }
   }
 }

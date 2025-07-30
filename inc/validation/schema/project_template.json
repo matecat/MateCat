@@ -1,0 +1,138 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "is_default": {
+      "type": "boolean"
+    },
+    "id_team": {
+      "type": ["integer", "string"]
+    },
+    "tm_prioritization": {
+      "type": "boolean"
+    },
+    "pretranslate_100": {
+      "type": "boolean"
+    },
+    "pretranslate_101": {
+      "type": "boolean"
+    },
+    "get_public_matches": {
+      "type": "boolean"
+    },
+    "team_id": {
+      "type":  ["null", "integer", "string"]
+    },
+    "subject": {
+      "type":  ["null", "string"]
+    },
+    "source_language": {
+      "type":  ["null", "string"]
+    },
+    "target_language": {
+      "type":  ["null", "array"]
+    },
+    "mt_quality_value_in_editor": {
+      "type": "number",
+      "minimum": 76,
+      "maximum": 102
+    },
+    "segmentation_rule": {
+      "type": ["null", "object"]
+    },
+    "tm": {
+      "type": ["null", "array"],
+      "items": {
+        "type": "object",
+        "$ref": "#/definitions/tm"
+      }
+    },
+    "mt": {
+      "type": ["null", "object"],
+      "$ref": "#/definitions/mt"
+    },
+    "payable_rate_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "qa_model_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "xliff_config_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "filters_template_id": {
+      "type": ["null", "integer", "string"]
+    },
+    "character_counter_count_tags": {
+      "type": "boolean"
+    },
+    "character_counter_mode": {
+      "type": "string",
+      "enum": [
+        "google_ads",
+        "exclude_cjk",
+        "all_one"
+      ]
+    },
+    "dialect_strict": {
+      "type":  ["null", "boolean"]
+    }
+  },
+  "required": [
+    "name",
+    "id_team",
+    "pretranslate_100",
+    "get_public_matches"
+  ],
+  "definitions": {
+    "tm": {
+      "type": "object",
+      "properties": {
+        "glos": {
+          "type": "boolean"
+        },
+        "is_shared": {
+          "type": "boolean"
+        },
+        "key": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "boolean"
+        },
+        "tm": {
+          "type": "boolean"
+        },
+        "r": {
+          "type": "boolean"
+        },
+        "w": {
+          "type": "boolean"
+        },
+        "penalty": {
+          "type": "integer",
+          "nullable": true,
+          "maximum": 100,
+          "minimum": 0
+        }
+      }
+    },
+    "mt": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": ["integer", "string"]
+        },
+        "extra": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

@@ -1,13 +1,17 @@
+@use "../commons/colors";
 // rewrite semantic CSS
-
+html, body {
+  height: 100%;
+}
 body.analyze {
   min-width: 1024px;
   font-family: Calibri, Arial, Helvetica, sans-serif;
-  background-color: $grey5;
+  background-color: colors.$grey5;
   overflow-x: auto;
   overflow-y: hidden;
-  header {
-    z-index: 1001 !important;
+  font-size: 14px;
+  h1 {
+    font-size: 28px;
   }
 }
 .analyze-page {
@@ -24,7 +28,7 @@ body.analyze {
 
   .project {
     .scroll {
-      background-color: $grey2;
+      background-color: colors.$grey2;
       width: 40px;
       height: 40px;
       position: fixed;
@@ -46,7 +50,7 @@ body.analyze {
     }
 
     .project-header {
-      background: $grey4;
+      background: colors.$grey4;
       padding-bottom: 10px;
       margin-bottom: 0;
       .left-analysis {
@@ -69,12 +73,12 @@ body.analyze {
           left: -45px;
           max-width: 100%;
           min-width: 0;
-          background-color: $grey2;
+          background-color: colors.$grey2;
           color: #000000;
           border-radius: 0 2px 2px 0;
           padding-right: 15px;
           &:after {
-            border-right-color: $grey1 !important;
+            border-right-color: colors.$grey1 !important;
           }
           .project-id,
           .project-name {
@@ -117,13 +121,13 @@ body.analyze {
               display: inline-block;
               margin-bottom: 0;
               span {
-                color: $greenDefault;
+                color: colors.$greenDefault;
                 padding: 5px 2px 5px 0;
                 margin-left: 4px;
                 border-radius: 15px;
               }
               i {
-                color: $greenDefault;
+                color: colors.$greenDefault;
                 position: relative;
                 top: 2px;
               }
@@ -168,7 +172,7 @@ body.analyze {
         .word-percent {
           position: relative;
           padding: 15px 15px 10px 20px;
-          border: 1px solid $greenDefault;
+          border: 1px solid colors.$greenDefault;
           top: 27px;
           font-size: 16px;
           margin-bottom: 25px;
@@ -197,11 +201,6 @@ body.analyze {
             }
             &:focus {
               text-decoration: none;
-            }
-          }
-          .custom {
-            &.popup {
-              min-width: 90%;
             }
           }
         }
@@ -259,10 +258,15 @@ body.analyze {
 
     .project-top {
       padding: 45px 15px 15px;
-      background-color: $grey5;
+      background-color: colors.$grey5;
       margin: 0 -1rem 0;
+      &.type-mtqe {
+        .title-total-words, .title-matecat-words {
+          width: 50% !important;
+        }
+      }
       .compare-table {
-        background-color: $grey3;
+        background-color: colors.$grey3;
         margin-bottom: 1px;
         .updated-count {
           background-color: #f9ffb5;
@@ -412,7 +416,7 @@ body.analyze {
           }
         }
         &.jobs {
-          background-color: $grey5;
+          background-color: colors.$grey5;
           z-index: 0;
           position: relative;
           .job {
@@ -524,7 +528,7 @@ body.analyze {
             &.outsource-translation-disabled {
               span,
               a {
-                color: $grey;
+                color: colors.$grey;
               }
             }
             a {
@@ -629,17 +633,18 @@ body.analyze {
       .analyze-report {
         text-align: center;
         width: 100%;
-        background-color: $grey3;
+        background-color: colors.$grey3;
         margin: 0 auto;
         position: relative;
         top: 30px;
         cursor: pointer;
         z-index: 1;
         > div {
-          width: 140px;
+          width: 160px;
           margin: 0 auto;
           position: relative;
           height: 48px;
+          display: flex;
         }
         h3 {
           margin-bottom: 10px;
@@ -662,7 +667,7 @@ body.analyze {
             top: 3px;
             position: relative;
             transition: 0.3s ease;
-            color: $black;
+            color: colors.$black;
             &.open {
               -webkit-transform: rotate(180deg);
               -moz-transform: rotate(180deg);
@@ -677,7 +682,7 @@ body.analyze {
     }
     .job-id {
       display: inline-block;
-      color: $grey1;
+      color: colors.$grey1;
       font-size: 12px;
       position: relative;
       line-height: 35px;
@@ -760,7 +765,7 @@ body.analyze {
 
     .project-body {
       margin-top: 0;
-      background-color: $grey3;
+      background-color: colors.$grey3;
       margin: 0 -1rem 0;
       margin-left: 1px;
       margin-right: 1px;
@@ -769,57 +774,29 @@ body.analyze {
         margin-top: 35px;
         margin-bottom: 20px;
         .job-header {
-          background-color: #ffffff !important;
+          background-color: colors.$white !important;
           padding: 0 0 !important;
         }
         .job-body {
-          background-color: $grey5;
+          background-color: colors.$grey5;
           .chunks {
+            overflow-x: auto;
             .chunk-container {
               padding-top: 0;
+              overflow-x: auto;
+              min-width: 1200px;
               .analysis {
                 //padding-top: 60px;
                 margin-top: 0;
                 &.show-details {
-                  .head-chunk,
-                  .job-table-header > div,
+                  .chunks-analyze,
                   .chunk-analyze-container > div {
-                    background-color: #eaebef !important;
+                    background-color: colors.$grey4 !important;
                   }
                 }
                 &.outsource-open {
                   margin-left: -35px;
                   margin-right: -35px;
-                }
-
-                .head-chunk {
-                  transition: 0.3s ease;
-                  background-color: $grey5;
-                  padding: 8px 15px;
-                  position: relative;
-                  z-index: 4;
-                  text-align: left;
-                  .job-not-payable {
-                    display: inline-block;
-                    padding: 0 0 0 10px !important;
-                    line-height: 30px;
-                    position: relative;
-                    top: 1px;
-                    display: inline-block;
-                    color: $grey1;
-                    #raw-words {
-                      text-decoration: line-through;
-                    }
-                  }
-                  .job-payable {
-                    padding: 0 10px !important;
-                    min-width: 105px;
-                    line-height: 30px;
-                    font-weight: 700;
-                    position: relative;
-                    top: 1px;
-                    display: inline-block;
-                  }
                 }
               }
             }
@@ -830,23 +807,7 @@ body.analyze {
   }
 }
 
-.analysis {
-  .job-table-header {
-    margin-top: 0 !important;
-    margin-bottom: 0;
-  }
-  .chunk-analyze-container {
-    margin-top: 0 !important;
-    margin-bottom: 0;
-    width: 103%;
-    .ui.grid {
-      margin-top: 0;
-      width: 103%;
-    }
-  }
-  .chunks-title-table,
-  .chunks-pay-table,
-  .chunk,
+/*.analysis {
   .chunk-detail {
     .left-box {
       height: 1%;
@@ -854,62 +815,6 @@ body.analyze {
       float: left;
       text-align: left;
       width: 15%;
-    }
-    .single-analysis {
-      display: inline-block;
-      margin: 0 auto;
-      width: 85%;
-      position: relative;
-      float: left;
-      text-align: right;
-      font-size: 15px;
-      line-height: 30px;
-      .single {
-        display: inline-block;
-        width: 8.5%;
-        margin-left: 0;
-        margin-right: -1px;
-        padding: 4px 6px 0 2px;
-        span {
-          font-size: 13px;
-          vertical-align: top;
-        }
-        &.total {
-          width: 8.5%;
-        }
-        &.payable-words {
-        }
-        &.new {
-          width: 5.5%;
-        }
-        &.repetition {
-          width: 9%;
-        }
-        &.internal-matches {
-        }
-        &.p-50-74 {
-        }
-        &.p-75-84 {
-        }
-        &.p-85-94 {
-        }
-        &.p-95-99 {
-        }
-        &.tm-100 {
-          width: 5%;
-        }
-        &.tm-public {
-          width: 6%;
-        }
-        &.tm-context {
-          width: 7%;
-        }
-        &.machine-translation {
-          position: relative;
-          width: 9%;
-          border-right: none;
-        }
-      }
     }
     .right-box {
       width: 10%;
@@ -942,21 +847,6 @@ body.analyze {
           display: inline-block;
         }
       }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-        position: relative;
-        float: left;
-        text-align: right;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
-          }
-        }
-      }
     }
 
     @media only screen and (max-width: 991px) and (min-width: 768px) {
@@ -977,21 +867,6 @@ body.analyze {
           }
           &:hover {
             text-decoration: none;
-          }
-        }
-      }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-        position: relative;
-        float: left;
-        text-align: center;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
           }
         }
       }
@@ -1018,129 +893,15 @@ body.analyze {
           }
         }
       }
-      .single-analysis {
-        display: inline-block;
-        margin: 0 auto;
-
-        position: relative;
-        float: left;
-        text-align: center;
-        font-size: 14px;
-        line-height: 30px;
-        .single {
-          span {
-            font-size: 12px;
-            font-weight: 700;
-          }
-        }
-      }
     }
   }
 
-  .chunks-title-table {
-    box-shadow: none !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom: 1px solid $grey2;
-    .single-analysis {
-      line-height: 25px;
-      .single {
-        line-height: 18px;
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-        padding-bottom: 3px;
-        height: 60px;
-        vertical-align: text-top;
-        border: 1px solid $grey1;
-        border-bottom: none;
-        border-top: none;
-        text-align: center;
-        padding-right: 6px;
-      }
-    }
-  }
-
-  .chunks-pay-table {
-    box-shadow: none !important;
-    padding-top: 0 !important;
-    padding-bottom: 3px !important;
-    top: -1px;
-    .single-analysis {
-      .single {
-        border: 1px solid $grey1;
-        border-bottom: none;
-        text-align: right;
-        padding-right: 6px;
-        &.total {
-          width: 16.9%;
-          text-decoration: none;
-          border-left: 1px solid $grey1;
-        }
-      }
-    }
-  }
-
-  .chunk,
   .chunk-detail {
     transition: 0.3s ease;
     background-color: #ffffff;
     padding-top: 4px !important;
     padding-bottom: 4px !important;
     text-align: center;
-  }
-
-  .chunk {
-    z-index: 2;
-    transition: 0.3s ease;
-    &:hover {
-      background-color: #f0f1f6;
-      .payable-words {
-        background: #e8fbcc !important;
-      }
-    }
-    .file-details {
-      display: inline-block;
-      text-decoration: underline;
-      min-width: 62px;
-      line-height: 35px;
-      position: relative;
-      top: 1px;
-      cursor: pointer;
-      color: $grey1;
-      &:hover {
-        text-decoration: none;
-      }
-    }
-    .f-details-number {
-      display: inline-block;
-      position: relative;
-      top: 1px;
-      color: $grey1;
-    }
-    .single-analysis {
-      .single {
-        border-right: 1px solid #e4e6e8;
-        border-left: 1px solid #e4e6e8;
-        text-align: right;
-        padding-right: 6px;
-      }
-      .payable-words {
-        font-weight: 700;
-        transition: 0.3s ease;
-        color: #000000;
-        font-size: 18px;
-      }
-      .payable-words.updated-count {
-        background-color: $approvedGreen;
-        transition: 0.3s ease;
-      }
-
-      .updated-count {
-        background-color: #f9ffb5;
-        transition: 0.4s ease;
-      }
-    }
   }
 
   .chunk-detail {
@@ -1187,11 +948,11 @@ body.analyze {
     background-color: #f9ffb5;
     transition: 0.4s ease;
   }
-}
+}*/
 
 @media only screen and (min-width: 1200px) {
-  .ui.container {
-    width: 1140px;
+  .ui.container:not(.fluid) {
+    width: 1140px !important;;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1199,8 +960,8 @@ body.analyze {
 }
 
 @media only screen and (min-width: 1380px) {
-  .ui.container {
-    width: 1280px;
+  .ui.container:not(.fluid) {
+    width: 1280px !important;;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1208,8 +969,8 @@ body.analyze {
 }
 
 @media only screen and (max-width: 1199px) and (min-width: 992px) {
-  .ui.container {
-    width: 991px;
+  .ui.container:not(.fluid) {
+    width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1217,8 +978,8 @@ body.analyze {
 }
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
-  .ui.container {
-    min-width: 991px;
+  .ui.container:not(.fluid) {
+    min-width: 991px !important;
     margin-left: auto !important;
     margin-right: auto !important;
     transition: 0.3s ease;
@@ -1229,7 +990,7 @@ body.analyze {
 }
 
 @media only screen and (max-width: 767px) {
-  .ui.container {
+  .ui.container:not(.fluid) {
     margin-left: 1em !important;
     margin-right: 1em !important;
     min-width: 991px;
@@ -1241,7 +1002,7 @@ body.analyze {
 }
 
 // Transitions
-.chunk-detail {
+/*.chunk-detail {
   width: 100%;
   height: 35px;
   position: relative;
@@ -1263,7 +1024,7 @@ body.analyze {
     padding-bottom: 0 !important;
     -webkit-transition: height 0.3s ease;
   }
-}
+}*/
 .progress-bar {
   height: 20px;
   position: relative;
@@ -1314,116 +1075,5 @@ body.analyze {
       max-height 0.5s ease,
       padding 1s ease,
       opacity 1s ease;
-  }
-}
-
-.ui.popup {
-  z-index: 999;
-}
-
-/*.analyze footer {
-    background: #6d6e71;
-    height: 27px;
-    text-align: right;
-    border-top: 1px solid #333;
-    color: #fff;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1001;
-}
-
-.analyze footer .wrapper {
-    margin: 0 auto 0 auto;
-    padding: 3px 0 0 0;
-    width: 92%;
-    font-size: 14px;
-    position: relative;
-    text-align: right;
-}*/
-
-/* Header */
-
-#action-manage {
-  opacity: 0.8;
-  &:hover {
-    opacity: 1;
-  }
-}
-
-/* Footer */
-.normal-foo {
-  background-color: $grey4;
-  min-width: 992px;
-
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  z-index: 2;
-  .footer-body {
-    display: grid;
-    position: relative;
-    grid-column-gap: 24px;
-    grid-template-columns: 0.6fr 0.6fr 1fr;
-    align-items: center;
-    padding: 16px 64px;
-    height: 77px;
-    .info {
-      display: grid;
-      align-items: center;
-      grid-template-columns: 40px auto;
-      grid-column-gap: 8px;
-      .logo {
-        background-position: center;
-        background-size: cover;
-      }
-      .description {
-        color: $grey1;
-        font-weight: 100;
-        font-size: 12px;
-        text-align: left;
-        line-height: 14px;
-        .link {
-          color: #00aee4;
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-  .side-info {
-    padding: 0 16px;
-    position: absolute;
-    display: grid;
-    align-items: center;
-    bottom: 0;
-    right: 0;
-    width: 419px;
-    height: 35px;
-    box-shadow: -2px -2px 12px 0 rgba(198, 198, 198, 0.5);
-    background-color: #ffffff;
-    .side-info-body {
-      display: grid;
-      grid-template-columns: 80px 80px 80px;
-      align-items: center;
-      .item {
-        a {
-          margin: 0;
-          padding: 0;
-          color: $grey1;
-          display: block;
-          text-decoration: underline;
-          text-align: left;
-        }
-      }
-    }
-  }
-}
-
-#action-manage {
-  opacity: 0.8;
-  &:hover {
-    opacity: 1;
   }
 }

@@ -1,6 +1,14 @@
 <?php
+
+use Langs\LanguageDomains;
+use Langs\Languages;
+
 require_once '../../inc/Bootstrap.php';
-Bootstrap::start();
+try {
+    Bootstrap::start();
+    Bootstrap::sessionStart();
+} catch ( Exception $e ) {
+}
 
 $count = 0;
 foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
@@ -10,40 +18,50 @@ foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
 $nr_supoported_files = $count;
 
 $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
+
+$csp_nonce = Utils::uuid4();
+$csp       = file_get_contents( INIT::$ROOT . "/" . INIT::$TRACKING_CODES_VIEW_PATH . "/CSP-HeaderMeta.html" );
+$csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
+
 ?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>API - Matecat</title>
+    <?= $csp ?>
     <link rel="stylesheet" type="text/css" href="/public/api/dist/lib/swagger-ui.css">
     <link rel="icon" type="image/png" sizes="32x32" href="/public/img/meta/favicon-32x32.svg"/>
     <link rel="icon" type="image/png" sizes="16x16" href="/public/img/meta/favicon-16x16.svg"/>
 
-    <script>
+    <script nonce="<?= $csp_nonce ?>">
         /*<![CDATA[*/
         config = {};
         config.swagger_host = '<?php echo $_SERVER[ 'HTTP_HOST' ] ?>';
         /*]]>*/
     </script>
 
-    <script src='/public/api/dist/lib/jquery-3.3.1.min.js' type='text/javascript'></script>
+    <script src='/public/api/dist/lib/jquery-3.7.1.min.js' type='text/javascript'></script>
     <script src="/public/api/dist/lib/swagger-ui-bundle.js"></script>
     <script src="/public/api/dist/lib/swagger-ui-standalone-preset.js"></script>
 
     <script src='/public/api/swagger-source.js' type='text/javascript'></script>
     <?php
 
-    $reflect  = new ReflectionClass( 'CustomPage' );
+    $reflect  = new ReflectionClass( 'CustomPageView' );
     $instance = $reflect->newInstanceArgs( [] );
 
     $featureSet = new FeatureSet();
-    $featureSet->loadFromUserEmail( $instance->getUser()->email );
+
+    if($instance->getUser()->email !== null){
+        $featureSet->loadFromUserEmail( $instance->getUser()->email );
+    }
+
     $appendJS = $featureSet->filter( 'overloadAPIDocs', [] );
     echo implode( "\n", $appendJS );
 
     ?>
-    <script type="application/javascript">
+    <script nonce="<?= $csp_nonce ?>" type="application/javascript">
         /*<![CDATA[*/
 
         // add active class to menu
@@ -85,10 +103,12 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 url: spec,
                 spec: spec,
                 dom_id: '#swagger-ui-container',
-                supportedSubmitMethods: ['get',
+                supportedSubmitMethods: [
+                    'get',
                     'post',
                     'put',
-                    'delete'],
+                    'delete'
+                ],
                 docExpansion: 'none',
                 deepLinking: true,
                 presets: [
@@ -135,7 +155,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 return false;
 
             } );
-            $( '#menuElements li a[href="'+ hash.replace('/', '') +'"]' ).trigger('click');
+            $( '#menuElements li a[href="' + hash.replace( '/', '' ) + '"]' ).trigger( 'click' );
         } );
 
         /*]]>*/
@@ -315,7 +335,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 <tr>
                     <td>
                         <ul class="lang-list">
-                            <?php foreach ( Langs_Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
+                            <?php foreach ( Languages::getInstance()->getEnabledLanguages() as $lang ): ?>
                                 <li><?= $lang[ 'name' ] . " (" . $lang[ 'code' ] . ")" ?></li>
                             <?php endforeach; ?>
                         </ul>
@@ -336,7 +356,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / ( 1024 * 1024 );
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach ( Langs_LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
+                <?php foreach ( LanguageDomains::getInstance()->getEnabledDomains() as $domains ): ?>
                     <tr>
                         <td><?= $domains[ 'display' ] ?></td>
                         <td><?= $domains[ 'key' ] ?></td>

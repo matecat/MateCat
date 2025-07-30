@@ -1,19 +1,22 @@
 <?php
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
  * Date: 23/02/15
  * Time: 14.55
  */
-class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
+class EnginesModel_EngineDAO extends AbstractDao {
 
     const TABLE = "engines";
 
     const STRUCT_TYPE = "EnginesModel_EngineStruct";
 
-    protected static $auto_increment_field = [ 'id' ];
-    protected static $primary_keys         = [ 'id' ];
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     /**
      * Build the query,
@@ -114,6 +117,10 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         //return the inserted object on success
         $obj->id = $this->database->last_insert();
 
+        // revert internal JSON fields to arrays
+        $obj->others           = json_decode( $obj->others, true );
+        $obj->extra_parameters = json_decode( $obj->extra_parameters, true );
+
         return $obj;
 
     }
@@ -137,7 +144,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             return []; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
-        list( $query, $bind_values ) = $query_and_bindValues;
+        [ $query, $bind_values ] = $query_and_bindValues;
 
 
         $stmt      = $this->database->getConnection()->prepare( $query );
@@ -168,14 +175,17 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
             return true; //anonymous use request, he can not have any associated engine, do not perform queries
         }
 
-        list( $query, $bind_values ) = $query_and_bindValues;
+        [ $query, $bind_values ] = $query_and_bindValues;
         $stmt = $this->database->getConnection()->prepare( $query );
 
-        return $this->_destroyObjectCache( $stmt, $bind_values );
+        return $this->_destroyObjectCache( $stmt, EnginesModel_EngineStruct::class, $bind_values );
 
     }
 
-    public function atomicUpdate( EnginesModel_EngineStruct $obj ) {
+    /**
+     * @throws Exception
+     */
+    public function updateByStruct( EnginesModel_EngineStruct $obj ) {
         $obj = $this->sanitize( clone $obj );
 
         $this->_validatePrimaryKey( $obj );
@@ -283,7 +293,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      *
      * @return array|EnginesModel_EngineStruct|EnginesModel_EngineStruct[]
      */
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
         $result = [];
 
         foreach ( $array_result as $item ) {
@@ -330,19 +340,19 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
      * @return EnginesModel_EngineStruct
      * @throws Exception
      */
-    public function sanitize( DataAccess_IDaoStruct $input ) {
+    public function sanitize( IDaoStruct $input ) {
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->name                    = ( $input->name !== null ) ?  $input->name  : null;
-        $input->description             = ( $input->description !== null ) ?  $input->description  : null;
-        $input->base_url                = ( $input->base_url !== null ) ?  $input->base_url  : null;
-        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ?  $input->translate_relative_url  : null;
-        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ?  $input->contribute_relative_url  : null;
-        $input->update_relative_url     = ( $input->update_relative_url !== null ) ?  $input->update_relative_url  : null;
-        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ?  $input->delete_relative_url  : null;
-        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ?  json_encode( $input->others )  : '{}';
-        $input->class_load              = ( $input->class_load !== null ) ?  $input->class_load  : null;
-        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ?  json_encode( $input->extra_parameters ) : '{}';
+        $input->name                    = ( $input->name !== null ) ? $input->name : null;
+        $input->description             = ( $input->description !== null ) ? $input->description : null;
+        $input->base_url                = ( $input->base_url !== null ) ? $input->base_url : null;
+        $input->translate_relative_url  = ( $input->translate_relative_url !== null ) ? $input->translate_relative_url : null;
+        $input->contribute_relative_url = ( $input->contribute_relative_url !== null ) ? $input->contribute_relative_url : null;
+        $input->update_relative_url     = ( $input->update_relative_url !== null ) ? $input->update_relative_url : null;
+        $input->delete_relative_url     = ( $input->delete_relative_url !== null ) ? $input->delete_relative_url : null;
+        $input->others                  = ( $input->others !== null and $input->others !== '{}' ) ? json_encode( $input->others ) : '{}';
+        $input->class_load              = ( $input->class_load !== null ) ? $input->class_load : null;
+        $input->extra_parameters        = ( $input->extra_parameters !== null and $input->extra_parameters !== '{}' ) ? json_encode( $input->extra_parameters ) : '{}';
         $input->penalty                 = ( $input->penalty !== null ) ? $input->penalty : null;
         $input->active                  = ( $input->active !== null ) ? $input->active : null;
         $input->uid                     = ( $input->uid !== null ) ? $input->uid : null;
@@ -351,12 +361,12 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param DataAccess_IDaoStruct $obj
+     * @param IDaoStruct $obj
      *
-     * @return bool|void
+     * @return void
      * @throws Exception
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+    protected function _validateNotNullFields( IDaoStruct $obj ): void {
         /**
          * @var $obj EnginesModel_EngineStruct
          */
@@ -371,12 +381,12 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param EnginesModel_EngineStruct|DataAccess_IDaoStruct $obj
+     * @param EnginesModel_EngineStruct|IDaoStruct $obj
      *
      * @return void
      * @throws Exception
      */
-    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( IDaoStruct $obj ): void {
         if ( $obj->id === null ) {
             throw new Exception( "Engine ID required" );
         }
@@ -386,19 +396,18 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
         }
     }
 
-    public function validateForUser( EnginesModel_EngineStruct $obj )
-    {
+    public function validateForUser( EnginesModel_EngineStruct $obj ) {
         $query = "SELECT * FROM " . self::TABLE . " WHERE `name` = :engine_name and uid = :uid and active = :active";
 
         $stmt = $this->database->getConnection()->prepare( $query );
         $stmt->execute( [
-            'engine_name'  => $obj->name,
-            'uid' => $obj->uid,
-            'active' => 1
+                'engine_name' => $obj->name,
+                'uid'         => $obj->uid,
+                'active'      => 1
         ] );
 
         if ( $stmt->rowCount() > 0 ) {
-            throw new Exception("A user can have only one $obj->name engine");
+            throw new Exception( "A user can have only one $obj->name engine" );
         }
     }
 }

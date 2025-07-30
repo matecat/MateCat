@@ -3,20 +3,24 @@
 namespace Date;
 
 use DateTime;
+use DateTimeInterface;
+use Exception;
 
 class DateTimeUtil {
 
     /**
      * @param null $date
-     * @return string
-     * @throws \Exception
+     *
+     * @return ?string
+     * @throws Exception
      */
-    public static function formatIsoDate($date = null)
-    {
-        if($date !== null){
-            $date = new DateTime($date);
+    public static function formatIsoDate( $date = null ): ?string {
+        if ( $date !== null ) {
+            $date = new DateTime( $date );
 
-            return $date->format(DateTime::ATOM);
+            return $date->format( DateTimeInterface::ATOM );
         }
+
+        return null;
     }
 }

@@ -2,9 +2,10 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
 use Engine;
+use Exception;
 use InvalidArgumentException;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
@@ -91,7 +92,7 @@ class MyMemoryController extends KleinController
         $keyExists = $tmxHandler->checkCorrectKey( $key );
 
         if($keyExists === false){
-            throw new \Exception($key . " is not a valid key");
+            throw new Exception($key . " is not a valid key");
         }
 
         $this->saveMemoryKey($key, $name);

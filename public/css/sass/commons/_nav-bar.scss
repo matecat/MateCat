@@ -1,8 +1,9 @@
+@use "../commons/colors";
 header {
   font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
   position: relative;
   width: 100%;
-  z-index: 12;
+  z-index: 6;
   margin: 0;
   background: #002b5c;
   height: 60px;
@@ -10,9 +11,11 @@ header {
     min-width: 992px;
     position: relative;
   }
-  .nav-mc-bar {
+
+  .nav-bar {
     margin: 0px !important;
     height: 100%;
+
     .navigation {
       padding: 10px !important;
       /*padding: 5px 15px 5px 0px !important;
@@ -22,16 +25,20 @@ header {
         margin-right: 0;
       }
     }
+
     .ui.selection.dropdown,
     .ui.select-org.dropdown {
       font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
       font-weight: 600;
+
       &.org {
         float: right;
       }
+
       i {
         float: right;
       }
+
       .menu {
         .header {
           font-size: 14px;
@@ -42,18 +49,21 @@ header {
           margin: 0;
           padding: 8px 16px;
           cursor: pointer;
-          color: $translatedBlue;
+          color: colors.$translatedBlue;
+
           &:hover {
             background-color: #f3f3f3;
           }
+
           i {
             float: right;
             font-size: 24px;
             margin-top: -3px;
             margin-right: -3px;
-            color: $translatedBlue;
+            color: colors.$translatedBlue;
           }
         }
+
         .item > a > i {
           position: absolute;
           width: 24px;
@@ -64,23 +74,27 @@ header {
           right: 10px;
           bottom: 20%;
           background-color: transparent;
-          color: $translatedBlue;
+          color: colors.$translatedBlue;
           font-size: 18px;
           padding-left: 1px;
+
           &:hover {
             background-color: #dededc;
             transition: 0.3s ease;
           }
         }
+
         .item:first-child {
           a > i {
             display: none;
           }
         }
+
         .divider {
           margin: 0;
         }
       }
+
       .scrolling {
         .item.item.item {
           padding: 8px !important;
@@ -96,16 +110,19 @@ header {
                         border-radius: 50px;
                     }*/
         }
+
         .team-filter {
           visibility: visible;
         }
       }
     }
+
     .ui.selection.visible.dropdown > .text:not(.default),
     .ui.select-org.visible.dropdown > .text:not(.default) {
       /*font-weight: 600;*/
       //color: white;
     }
+
     div.ui-user-top-image {
       -webkit-box-align: center;
       -webkit-align-items: center;
@@ -116,7 +133,7 @@ header {
       box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
       -moz-box-sizing: border-box;
       box-sizing: border-box;
-      color: $translatedBlue;
+      color: colors.$translatedBlue;
       display: -webkit-inline-box;
       display: -webkit-inline-flex;
       display: -ms-inline-flexbox;
@@ -131,18 +148,20 @@ header {
       font-size: 14px;
       height: 36px;
       width: 36px;
+      min-width: 35px;
       margin-left: 10px;
       margin-right: 10px;
       text-decoration: none;
       transition: 0.3s ease;
       cursor: pointer;
       background-color: transparent;
-      border: 2px solid $translatedBlue;
+      border: 2px solid colors.$translatedBlue;
       /*opacity: 0.8;
             &:hover {
                 opacity: 1;
             }*/
     }
+
     .ui.user-nolog.label {
       -webkit-box-align: center;
       -webkit-align-items: center;
@@ -215,9 +234,11 @@ header {
           align-items: center;
           grid-template-rows: 32px;
           padding: 0 0 0 8px;
+
           .icon {
             margin: 0 !important;
             padding: 0px 8px;
+
             a {
               display: grid;
               padding: 0 4px;
@@ -225,10 +246,12 @@ header {
               justify-content: center;
               align-items: center;
               visibility: hidden;
+
               &:hover {
                 background: rgba(0, 0, 0, 0.03);
                 border-radius: 50px;
               }
+
               svg {
                 path {
                   fill: #0099cc;
@@ -237,6 +260,7 @@ header {
             }
           }
         }
+
         &:hover .icon a {
           visibility: visible;
         }
@@ -246,16 +270,18 @@ header {
             color: #fff;
             border-radius: 2px;
             background: #002b5c;
+
             a {
               svg {
                 path {
                   fill: #fff;
                 }
               }
+
               &:hover {
                 svg {
                   path {
-                    fill: $translatedBlue;
+                    fill: colors.$translatedBlue;
                   }
                 }
               }
@@ -289,12 +315,15 @@ header {
         text-decoration: none;
         transition: 0.3s ease;
       }
+
       &.only-one-team .scrolling.menu {
         display: none;
       }
+
       &.disable-dropdown-team {
         pointer-events: none;
         cursor: default;
+
         .text {
           text-decoration: none;
         }
@@ -303,33 +332,6 @@ header {
   }
 }
 
-.user-menu-tooltip {
-  right: 30px !important;
-
-  h4.header {
-    box-shadow: none !important;
-    background: transparent;
-    text-decoration: none;
-    border-bottom: none;
-    color: black;
-    margin-bottom: 10px !important;
-  }
-
-  .content p {
-    font-size: 15px;
-    text-align: left;
-    min-width: 180px;
-  }
-
-  a.close-popup-teams {
-    float: right;
-    cursor: pointer;
-    text-decoration: underline;
-    &:hover {
-      text-decoration: none;
-    }
-  }
-}
 #profile-menu {
   .menu {
     width: 200px;
@@ -373,7 +375,7 @@ header {
   }
   .ui-user-top-image {
     float: right;
-    margin: 0 10px;
+    margin: 0;
     cursor: pointer;
     min-width: 35px;
     @media only screen and (max-width: 1040px) {
@@ -413,6 +415,10 @@ header {
     margin-right: 14px;
     margin-left: 14px;
   }
+
+  .popover-component-container {
+    margin-left: 15px;
+  }
 }
 
 .logo {
@@ -420,7 +426,7 @@ header {
   float: left;
   border: 0;
   //margin-top: 5px;
-  background: url(../../img/logo_matecat_big_white.svg) 0px 0px no-repeat;
+  background: url(/public/img/logo_matecat_big_white.svg) 0px 0px no-repeat;
   width: 190px;
   height: 40px;
   left: 20px;
@@ -428,14 +434,10 @@ header {
 }
 
 #menu-site {
-  /*margin-top: 8px !important;*/
-  /*float: right !important;*/
-  margin-right: 6px;
+  height: 40px;
+  display: flex;
+  align-items: center;
   text-align: right;
-  /*
-    border-right: 1px solid #8a8a8a;
-    */
-  /*height: 22px;*/
   .btn {
     background: #fff;
     color: #002b5c;
@@ -487,3 +489,5 @@ header {
 .ui.dropdown > .left.menu .menu {
   margin: 0 !important;
 }
+
+

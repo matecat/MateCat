@@ -9,12 +9,12 @@
 
 namespace Translators;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 use Users_UserDao;
 use Users_UserStruct;
 
-class JobsTranslatorsStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class JobsTranslatorsStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     public $id_job;
     public $job_password;
@@ -30,11 +30,13 @@ class JobsTranslatorsStruct extends DataAccess_AbstractDaoSilentStruct implement
      * @return Users_UserStruct
      *
      */
-    public function getUser(){
-        if( !empty( $this->id_translator_profile ) ){
+    public function getUser() {
+        if ( !empty( $this->id_translator_profile ) ) {
             $existentUser = ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+
             return $existentUser;
         }
+
         return new Users_UserStruct();
     }
 

@@ -2,16 +2,12 @@
 
 namespace API\V3;
 
+use AbstractControllers\KleinController;
 use API\App\Json\Analysis\AnalysisProject;
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectPasswordValidator;
-use Constants_JobStatus;
-use Exceptions\ValidationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use Model\Analysis\Status;
-use Projects_MetadataDao;
 use Projects_ProjectDao;
 
 class StatusController extends KleinController {
@@ -26,9 +22,7 @@ class StatusController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws AuthenticationError
      * @throws \Exceptions\NotFoundException
-     * @throws ValidationError
      */
     public function index() {
 
@@ -37,7 +31,7 @@ class StatusController extends KleinController {
         /**
          * @var AnalysisProject $result
          */
-        $result = $analysisStatus->fetchData( Projects_MetadataDao::WORD_COUNT_RAW )->getResult();
+        $result = $analysisStatus->fetchData()->getResult();
 
         // return 404 if there are no chunks
         // (or they were deleted)
@@ -45,7 +39,7 @@ class StatusController extends KleinController {
         if ( !empty( $result->getJobs() ) ) {
             foreach ( $result->getJobs() as $j ) {
                 foreach ( $j->getChunks() as $chunk ) {
-                    if ( $chunk->getChunkStruct()->status_owner !== Constants_JobStatus::STATUS_DELETED ) {
+                    if ( !$chunk->getChunkStruct()->isDeleted() ) {
                         $chunksCount++;
                     }
                 }

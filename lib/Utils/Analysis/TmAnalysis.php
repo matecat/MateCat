@@ -5,4 +5,4 @@ Bootstrap::start();
 
 use TaskRunner\TaskManager;
 
-TaskManager::getInstance( @$argv[1], @$argv[2] )->main();
+TaskManager::getInstance( @$argv[ 1 ], @$argv[ 2 ] )->main();

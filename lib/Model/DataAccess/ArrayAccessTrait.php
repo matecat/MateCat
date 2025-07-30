@@ -18,7 +18,7 @@ trait ArrayAccessTrait {
      *
      * @return bool
      */
-    public function offsetExists( $offset ) {
+    public function offsetExists( $offset ): bool {
         return property_exists( $this, $offset );
     }
 
@@ -26,7 +26,6 @@ trait ArrayAccessTrait {
      * @param mixed $offset
      *
      * @returns mixed
-     * @return
      */
     public function offsetGet( $offset ) {
         return $this->__get( $offset );

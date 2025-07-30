@@ -32,10 +32,10 @@ class ErrMailWorker extends AbstractWorker {
 
     /**
      * Override to set another logger on the same queue
-     * 
+     *
      * @return string
      */
-    public function getLoggerName(){
+    public function getLoggerName(): string {
         return "err_mail.log";
     }
 
@@ -69,9 +69,9 @@ class ErrMailWorker extends AbstractWorker {
      * @throws ReQueueException
      * @throws Exception
      */
-    protected function _sendErrMailReport( Params $mailConf ){
+    protected function _sendErrMailReport( Params $mailConf ): bool {
 
-        if( empty( $mailConf->server_configuration ) ){
+        if ( empty( $mailConf->server_configuration ) ) {
 
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Wrong configuration data found. Ensure that 'TaskRunner\\Commons\\Params->server_configuration' exists and contains valid data." );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message not sent." );
@@ -82,27 +82,27 @@ class ErrMailWorker extends AbstractWorker {
             $mail = new PHPMailer();
 
             $mail->isSMTP();
-            $mail->Host       = $mailConf->server_configuration['Host'];
-            $mail->Port       = $mailConf->server_configuration['Port'];
-            $mail->Sender     = $mailConf->server_configuration['Sender'];
-            $mail->Hostname   = $mailConf->server_configuration['Hostname'];
-            $mail->From       = $mailConf->server_configuration['From'];
-            $mail->FromName   = $mailConf->server_configuration['FromName'];
+            $mail->Host     = $mailConf->server_configuration[ 'Host' ];
+            $mail->Port     = $mailConf->server_configuration[ 'Port' ];
+            $mail->Sender   = $mailConf->server_configuration[ 'Sender' ];
+            $mail->Hostname = $mailConf->server_configuration[ 'Hostname' ];
+            $mail->From     = $mailConf->server_configuration[ 'From' ];
+            $mail->FromName = $mailConf->server_configuration[ 'FromName' ];
 
-            $mail->addReplyTo( $mailConf->server_configuration['ReturnPath'], $mail->FromName );
+            $mail->addReplyTo( $mailConf->server_configuration[ 'ReturnPath' ], $mail->FromName );
 
-            if( !empty( $mailConf->email_list ) ){
-                foreach( $mailConf->email_list as $email => $uName ){
+            if ( !empty( $mailConf->email_list ) ) {
+                foreach ( $mailConf->email_list as $email => $uName ) {
                     $mail->addAddress( $email, $uName );
                 }
-            } else{
+            } else {
                 $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row." );
                 throw new EmptyElementException( "No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row." );
             }
 
         }
 
-        $mail->XMailer  = 'MateCat Mailer';
+        $mail->XMailer = 'Matecat Mailer';
         $mail->CharSet = 'UTF-8';
         $mail->isHTML();
 
@@ -124,26 +124,27 @@ class ErrMailWorker extends AbstractWorker {
          */
         $mail->Priority = 1;
 
-        if( empty( $mailConf->subject ) ){
-            $mail->Subject = 'Alert from Matecat: ' . php_uname('n');
+        if ( empty( $mailConf->subject ) ) {
+            $mail->Subject = 'Alert from Matecat: ' . php_uname( 'n' );
         } else {
             $mail->Subject = $mailConf->subject;
         }
 
-        $mail->Body    = '<pre>' . $mailConf->body . '</pre>';
+        $mail->Body = '<pre>' . $mailConf->body . '</pre>';
 
-        $txtContent = preg_replace(  '|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body );
+        $txtContent    = preg_replace( '|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body );
         $mail->AltBody = strip_tags( $txtContent );
 
-        $mail->msgHTML($mail->Body);
+        $mail->msgHTML( $mail->Body );
 
-        if(!$mail->send()) {
+        if ( !$mail->send() ) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody );
             throw new ReQueueException( 'Mailer Error: ' . $mail->ErrorInfo );
         }
 
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message has been sent." );
+
         return true;
 
     }

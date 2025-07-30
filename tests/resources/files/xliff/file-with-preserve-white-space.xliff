@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:its="http://www.w3.org/2005/11/its" its:version="2.0" version="1.2">
+    <file datatype="x-dita" filter="com.matecat.filters.basefilters.DefaultFilter" original="test-normalize-spaces.dita" source-language="ru" target-language="en" tool-id="matecat-converter 1.2.2">
+        <header>
+            <reference></reference>
+        </header>
+        <body/>
+    </file>
+    <file datatype="x-rkm" filter="com.matecat.filters.basefilters.DefaultFilter" original="manifest.rkm" source-language="ru" target-language="en" tool-id="matecat-converter 1.2.2">
+        <body/>
+    </file>
+    <file datatype="xml" original="test-normalize-spaces.dita" source-language="ru" target-language="en">
+        <body>
+            <trans-unit id="tu1">
+                <source xml:lang="ru">rec</source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">rec</mrk>
+                </seg-source>
+                <target xml:lang="en">
+                    <mrk mid="0" mtype="seg">rec</mrk>
+                </target>
+            </trans-unit>
+            <trans-unit id="tu2" xml:space="preserve">
+<source xml:lang="ru">&lt;model id="12341" categoryId="10"&gt;
+  &lt;name&gt;EOS 60D Body&lt;/name&gt;
+
+     ...
+
+  &lt;rec type="component" isSupplement="true" innerId="167" marketId="7888908"&gt;Объектив Canon EF 50 mm f/1.8 STM&lt;/rec&gt;
+  &lt;rec type="accessory" isSupplement="true" marketId="14210745"&gt;Сумка для фотокамеры Gadget Bag&lt;/rec&gt;
+  &lt;rec type="consumable" isSupplement="true"&gt;Аккумулятор для Canon AcmePower AP-LP-E6&lt;/rec&gt;
+
+     ...
+
+&lt;/model&gt;</source>
+                <seg-source><mrk mid="0" mtype="seg">&lt;model id="12341" categoryId="10"&gt;
+  &lt;name&gt;EOS 60D Body&lt;/name&gt;
+
+     ...
+
+  &lt;rec type="component" isSupplement="true" innerId="167" marketId="7888908"&gt;Объектив Canon EF 50 mm f/1.8 STM&lt;/rec&gt;
+  &lt;rec type="accessory" isSupplement="true" marketId="14210745"&gt;Сумка для фотокамеры Gadget Bag&lt;/rec&gt;
+  &lt;rec type="consumable" isSupplement="true"&gt;Аккумулятор для Canon AcmePower AP-LP-E6&lt;/rec&gt;
+
+     ...
+
+&lt;/model&gt;</mrk></seg-source>
+                <target xml:lang="en"><mrk mid="0" mtype="seg">&lt;model id="12341" categoryId="10"&gt;
+  &lt;name&gt;EOS 60D Body&lt;/name&gt;
+
+     ...
+
+  &lt;rec type="component" isSupplement="true" innerId="167" marketId="7888908"&gt;Объектив Canon EF 50 mm f/1.8 STM&lt;/rec&gt;
+  &lt;rec type="accessory" isSupplement="true" marketId="14210745"&gt;Сумка для фотокамеры Gadget Bag&lt;/rec&gt;
+  &lt;rec type="consumable" isSupplement="true"&gt;Аккумулятор для Canon AcmePower AP-LP-E6&lt;/rec&gt;
+
+     ...
+
+&lt;/model&gt;</mrk></target>
+</trans-unit>
+        </body>
+    </file>
+</xliff>

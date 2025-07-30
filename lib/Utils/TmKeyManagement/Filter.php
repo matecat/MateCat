@@ -234,7 +234,7 @@ class TmKeyManagement_Filter {
              * this means what if we want to select the keys that are readable AND writable,
              * then we must apply two filters in sequence: one with R flag, the other with the W flag.
              **/
-            $has_required_grants = $has_required_grants || $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
+            $has_required_grants = $has_required_grants && $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
         } else {
             $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ $this->_required_grant ] ] == true;
         }

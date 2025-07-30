@@ -10,8 +10,9 @@
 namespace API\V2;
 
 
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\MemoryKeys;
-use API\V2\Validators\LoginValidator;
 use TmKeyManagement_MemoryKeyDao;
 use TmKeyManagement_MemoryKeyStruct;
 

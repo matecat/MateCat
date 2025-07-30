@@ -18,12 +18,12 @@ use RedisHandler;
 /**
  * Class Analysis_Manager
  *
- * Should be the final class when daemons will refactored
+ * Should be the final class when daemons will be refactored
  *
  */
 class Health {
 
-    public static function fastAnalysisIsRunning( $redisHandler ) {
+    public static function fastAnalysisIsRunning( $redisHandler ): bool {
 
         /**
          * @var $redisHandler Client
@@ -35,7 +35,7 @@ class Health {
 
     }
 
-    public static function tmAnalysisIsRunning( $redisHandler ) {
+    public static function tmAnalysisIsRunning( $redisHandler ): bool {
 
         /**
          * @var $redisHandler Client
@@ -49,11 +49,12 @@ class Health {
      *
      * @return bool
      */
-    public static function thereIsAMisconfiguration() {
+    public static function thereIsAMisconfiguration(): bool {
 
         try {
             $redisHandler = new RedisHandler();
             $redisHandler = $redisHandler->getConnection();
+
             return ( INIT::$VOLUME_ANALYSIS_ENABLED && !self::fastAnalysisIsRunning( $redisHandler ) && !self::tmAnalysisIsRunning( $redisHandler ) );
         } catch ( \Exception $ex ) {
             $msg = "****** No REDIS instances found. ******";

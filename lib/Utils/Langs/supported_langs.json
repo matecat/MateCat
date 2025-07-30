@@ -9,7 +9,11 @@
             "isocode": "ace",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ace-ID"
+            "rfc3066code": "ace-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -20,7 +24,11 @@
             "isocode": "af",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "af-ZA"
+            "rfc3066code": "af-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -31,7 +39,11 @@
             "isocode": "ak",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ak-GH"
+            "rfc3066code": "ak-GH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -42,7 +54,11 @@
             "isocode": "sq",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sq-AL"
+            "rfc3066code": "sq-AL",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -53,7 +69,11 @@
             "isocode": "am",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "am-ET"
+            "rfc3066code": "am-ET",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -64,7 +84,11 @@
             "isocode": "aig",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "aig-AG"
+            "rfc3066code": "aig-AG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -75,7 +99,26 @@
             "isocode": "ar",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ar-SA"
+            "rfc3066code": "ar-SA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Arabic (United Arab Emirates)"
+                }
+            ],
+            "isocode": "ar",
+            "enabled": true,
+            "rtl": true,
+            "rfc3066code": "ar-AE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -86,7 +129,11 @@
             "isocode": "ar",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ar-EG"
+            "rfc3066code": "ar-EG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -97,7 +144,11 @@
             "isocode": "ar",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ar-JO"
+            "rfc3066code": "ar-JO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -108,7 +159,11 @@
             "isocode": "an",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "an-ES"
+            "rfc3066code": "an-ES",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -119,7 +174,11 @@
             "isocode": "hy",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hy-AM"
+            "rfc3066code": "hy-AM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -130,7 +189,11 @@
             "isocode": "asm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "as-IN"
+            "rfc3066code": "as-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -141,7 +204,11 @@
             "isocode": "ast",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ast-ES"
+            "rfc3066code": "ast-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -152,7 +219,11 @@
             "isocode": "de",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "de-AT"
+            "rfc3066code": "de-AT",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -163,7 +234,11 @@
             "isocode": "awa",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "awa-IN"
+            "rfc3066code": "awa-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -174,7 +249,11 @@
             "isocode": "quy",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "quy-PE"
+            "rfc3066code": "quy-PE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -186,6 +265,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "az-AZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "az-Latn-AZ"
         },
         {
@@ -197,7 +280,11 @@
             "isocode": "bah",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bah-BS"
+            "rfc3066code": "bah-BS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -208,7 +295,11 @@
             "isocode": "bjs",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bjs-BB"
+            "rfc3066code": "bjs-BB",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -219,7 +310,11 @@
             "isocode": "ban",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ban-ID"
+            "rfc3066code": "ban-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -230,7 +325,26 @@
             "isocode": "rmn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rmn-BG"
+            "rfc3066code": "rmn-BG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Baluchi (Pakistan)"
+                }
+            ],
+            "isocode": "bal",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "bal-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -241,7 +355,11 @@
             "isocode": "bm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bm-ML"
+            "rfc3066code": "bm-ML",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -252,7 +370,11 @@
             "isocode": "bjn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bjn-ID"
+            "rfc3066code": "bjn-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -263,7 +385,11 @@
             "isocode": "ba",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ba-RU"
+            "rfc3066code": "ba-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -274,7 +400,11 @@
             "isocode": "eu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "eu-ES"
+            "rfc3066code": "eu-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -285,7 +415,11 @@
             "isocode": "be",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "be-BY"
+            "rfc3066code": "be-BY",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -296,7 +430,11 @@
             "isocode": "fr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fr-BE"
+            "rfc3066code": "fr-BE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -307,7 +445,11 @@
             "isocode": "bem",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bem-ZM"
+            "rfc3066code": "bem-ZM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -318,7 +460,11 @@
             "isocode": "bn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bn-BD"
+            "rfc3066code": "bn-BD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -329,7 +475,11 @@
             "isocode": "bn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bn-IN"
+            "rfc3066code": "bn-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -340,7 +490,11 @@
             "isocode": "bho",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bho-IN"
+            "rfc3066code": "bho-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -351,7 +505,11 @@
             "isocode": "bh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bh-IN"
+            "rfc3066code": "bh-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -362,7 +520,11 @@
             "isocode": "bi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bi-VU"
+            "rfc3066code": "bi-VU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -373,7 +535,11 @@
             "isocode": "gax",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gax-KE"
+            "rfc3066code": "gax-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -385,6 +551,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "bs-BA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "bs-Latn-BA"
         },
         {
@@ -397,6 +567,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "bs-Cyrl-BA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "bs-Cyrl-BA"
         },
         {
@@ -408,7 +582,11 @@
             "isocode": "br",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "br-FR"
+            "rfc3066code": "br-FR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -419,7 +597,11 @@
             "isocode": "bug",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bug-ID"
+            "rfc3066code": "bug-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -430,7 +612,11 @@
             "isocode": "bg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bg-BG"
+            "rfc3066code": "bg-BG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -441,18 +627,26 @@
             "isocode": "my",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "my-MM"
+            "rfc3066code": "my-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
                 {
-                    "en": "Catalan (Catalunya)"
+                    "en": "Catalan (Catalonia)"
                 }
             ],
             "isocode": "ca",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ca-ES"
+            "rfc3066code": "ca-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -463,7 +657,11 @@
             "isocode": "cav",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cav-ES"
+            "rfc3066code": "cav-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -474,7 +672,11 @@
             "isocode": "cb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ceb-PH"
+            "rfc3066code": "ceb-PH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -485,7 +687,11 @@
             "isocode": "tzm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tzm-MA"
+            "rfc3066code": "tzm-MA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -496,7 +702,11 @@
             "isocode": "ayr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ayr-BO"
+            "rfc3066code": "ayr-BO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -507,7 +717,11 @@
             "isocode": "knc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "knc-NG"
+            "rfc3066code": "knc-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -518,7 +732,11 @@
             "isocode": "shu",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "shu-TD"
+            "rfc3066code": "shu-TD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -529,7 +747,11 @@
             "isocode": "ch",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ch-GU"
+            "rfc3066code": "ch-GU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -540,7 +762,11 @@
             "isocode": "chr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "chr-US"
+            "rfc3066code": "chr-US",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -551,18 +777,26 @@
             "isocode": "hne",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hne-IN"
+            "rfc3066code": "hne-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
                 {
-                    "en": "Chinese (Simplified)"
+                    "en": "Chinese (Simplified, mainland China)"
                 }
             ],
             "isocode": "zh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zh-CN"
+            "rfc3066code": "zh-CN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -573,7 +807,26 @@
             "isocode": "zh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zh-HK"
+            "rfc3066code": "zh-HK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chinese (Simplified, Singapore)"
+                }
+            ],
+            "isocode": "zh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "zh-SG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -584,18 +837,26 @@
             "isocode": "zh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zh-TW"
+            "rfc3066code": "zh-TW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
                 {
-                    "en": "Chinese (Traditional, Macau)"
+                    "en": "Chinese (Traditional, Macao)"
                 }
             ],
             "isocode": "zh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zh-MO"
+            "rfc3066code": "zh-MO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -606,7 +867,11 @@
             "isocode": "ctg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ctg-BD"
+            "rfc3066code": "ctg-BD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -617,7 +882,11 @@
             "isocode": "cjk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cjk-AO"
+            "rfc3066code": "cjk-AO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -628,7 +897,11 @@
             "isocode": "cac",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cac-GT"
+            "rfc3066code": "cac-GT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -639,7 +912,11 @@
             "isocode": "grc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "grc-GR"
+            "rfc3066code": "grc-GR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -650,7 +927,11 @@
             "isocode": "zdj",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zdj-KM"
+            "rfc3066code": "zdj-KM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -661,7 +942,11 @@
             "isocode": "cop",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cop-EG"
+            "rfc3066code": "cop-EG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -672,7 +957,11 @@
             "isocode": "crh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "crh-RU"
+            "rfc3066code": "crh-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -683,7 +972,11 @@
             "isocode": "pov",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pov-GW"
+            "rfc3066code": "pov-GW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -694,7 +987,11 @@
             "isocode": "hr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hr-HR"
+            "rfc3066code": "hr-HR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -705,7 +1002,11 @@
             "isocode": "cs",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cs-CZ"
+            "rfc3066code": "cs-CZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -716,7 +1017,11 @@
             "isocode": "da",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "da-DK"
+            "rfc3066code": "da-DK",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -727,7 +1032,11 @@
             "isocode": "prs",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "prs-AF"
+            "rfc3066code": "prs-AF",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -738,7 +1047,11 @@
             "isocode": "diq",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "diq-TR"
+            "rfc3066code": "diq-TR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -749,7 +1062,11 @@
             "isocode": "nl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nl-NL"
+            "rfc3066code": "nl-NL",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -760,7 +1077,11 @@
             "isocode": "dyu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "dyu-CI"
+            "rfc3066code": "dyu-CI",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -771,7 +1092,11 @@
             "isocode": "dz",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "dz-BT"
+            "rfc3066code": "dz-BT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -782,7 +1107,11 @@
             "isocode": "ydd",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ydd-US"
+            "rfc3066code": "ydd-US",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -793,7 +1122,11 @@
             "isocode": "vmw",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "vmw-MZ"
+            "rfc3066code": "vmw-MZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -804,7 +1137,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-GB"
+            "rfc3066code": "en-GB",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -815,7 +1152,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-AU"
+            "rfc3066code": "en-AU",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -826,7 +1167,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-CA"
+            "rfc3066code": "en-CA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -837,7 +1182,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-IN"
+            "rfc3066code": "en-IN",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -848,7 +1197,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-IE"
+            "rfc3066code": "en-IE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -859,7 +1212,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-NZ"
+            "rfc3066code": "en-NZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -870,7 +1227,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-SG"
+            "rfc3066code": "en-SG",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -881,7 +1242,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-ZA"
+            "rfc3066code": "en-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -892,7 +1257,11 @@
             "isocode": "en",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "en-US"
+            "rfc3066code": "en-US",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -903,7 +1272,11 @@
             "isocode": "eo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "eo-EU"
+            "rfc3066code": "eo-EU",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -914,7 +1287,11 @@
             "isocode": "et",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "et-EE"
+            "rfc3066code": "et-EE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -925,7 +1302,11 @@
             "isocode": "ee",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ee-GH"
+            "rfc3066code": "ee-GH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -936,7 +1317,11 @@
             "isocode": "fn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fn-FNG"
+            "rfc3066code": "fn-FNG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -947,7 +1332,11 @@
             "isocode": "fo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fo-FO"
+            "rfc3066code": "fo-FO",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -958,7 +1347,11 @@
             "isocode": "fj",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fj-FJ"
+            "rfc3066code": "fj-FJ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -969,7 +1362,11 @@
             "isocode": "fil",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fil-PH"
+            "rfc3066code": "fil-PH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -980,7 +1377,11 @@
             "isocode": "fi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fi-FI"
+            "rfc3066code": "fi-FI",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -991,7 +1392,11 @@
             "isocode": "nl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nl-BE"
+            "rfc3066code": "nl-BE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1002,7 +1407,11 @@
             "isocode": "fon",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fon-BJ"
+            "rfc3066code": "fon-BJ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1013,7 +1422,11 @@
             "isocode": "fr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fr-FR"
+            "rfc3066code": "fr-FR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1024,7 +1437,11 @@
             "isocode": "fr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fr-CA"
+            "rfc3066code": "fr-CA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1035,7 +1452,11 @@
             "isocode": "fr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fr-CH"
+            "rfc3066code": "fr-CH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1046,7 +1467,11 @@
             "isocode": "fur",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fur-IT"
+            "rfc3066code": "fur-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1057,7 +1482,11 @@
             "isocode": "ff",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ff-FUL"
+            "rfc3066code": "ff-FUL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1068,7 +1497,11 @@
             "isocode": "gl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gl-ES"
+            "rfc3066code": "gl-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1079,7 +1512,11 @@
             "isocode": "mfi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mfi-NG"
+            "rfc3066code": "mfi-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1090,7 +1527,11 @@
             "isocode": "grt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "grt-IN"
+            "rfc3066code": "grt-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1101,7 +1542,11 @@
             "isocode": "ka",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ka-GE"
+            "rfc3066code": "ka-GE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1112,7 +1557,11 @@
             "isocode": "de",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "de-DE"
+            "rfc3066code": "de-DE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1123,7 +1572,11 @@
             "isocode": "gil",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gil-KI"
+            "rfc3066code": "gil-KI",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1134,7 +1587,11 @@
             "isocode": "glw",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "glw-NG"
+            "rfc3066code": "glw-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1145,7 +1602,11 @@
             "isocode": "el",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "el-GR"
+            "rfc3066code": "el-GR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1156,7 +1617,11 @@
             "isocode": "gcl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gcl-GD"
+            "rfc3066code": "gcl-GD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1167,7 +1632,11 @@
             "isocode": "gn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gn-PY"
+            "rfc3066code": "gn-PY",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1178,7 +1647,11 @@
             "isocode": "gu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gu-IN"
+            "rfc3066code": "gu-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1189,7 +1662,11 @@
             "isocode": "gyn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gyn-GY"
+            "rfc3066code": "gyn-GY",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1200,7 +1677,11 @@
             "isocode": "ht",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ht-HT"
+            "rfc3066code": "ht-HT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1211,7 +1692,11 @@
             "isocode": "khk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "khk-MN"
+            "rfc3066code": "khk-MN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1222,7 +1707,11 @@
             "isocode": "ha",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ha-NE"
+            "rfc3066code": "ha-NE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -1233,7 +1722,11 @@
             "isocode": "HAW",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "haw-US"
+            "rfc3066code": "haw-US",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1244,7 +1737,11 @@
             "isocode": "he",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "he-IL"
+            "rfc3066code": "he-IL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -1255,7 +1752,11 @@
             "isocode": "hig",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hig-NG"
+            "rfc3066code": "hig-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1266,7 +1767,11 @@
             "isocode": "hil",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hil-PH"
+            "rfc3066code": "hil-PH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1277,7 +1782,11 @@
             "isocode": "mrj",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mrj-RU"
+            "rfc3066code": "mrj-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1288,7 +1797,26 @@
             "isocode": "hi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hi-IN"
+            "rfc3066code": "hi-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Hindi (Fiji)"
+                }
+            ],
+            "isocode": "hi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "hi-FJ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1299,7 +1827,11 @@
             "isocode": "hmn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hmn-CN"
+            "rfc3066code": "hmn-CN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1310,7 +1842,11 @@
             "isocode": "hoc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hoc-IN"
+            "rfc3066code": "hoc-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1321,7 +1857,11 @@
             "isocode": "hu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "hu-HU"
+            "rfc3066code": "hu-HU",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1332,7 +1872,11 @@
             "isocode": "is",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "is-IS"
+            "rfc3066code": "is-IS",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1343,7 +1887,11 @@
             "isocode": "ig",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ig-NG"
+            "rfc3066code": "ig-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1354,7 +1902,11 @@
             "isocode": "ilo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ilo-PH"
+            "rfc3066code": "ilo-PH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1365,7 +1917,11 @@
             "isocode": "id",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "id-ID"
+            "rfc3066code": "id-ID",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1376,7 +1932,11 @@
             "isocode": "kal",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kl-GL"
+            "rfc3066code": "kl-GL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1387,7 +1947,11 @@
             "isocode": "ga",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ga-IE"
+            "rfc3066code": "ga-IE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1398,7 +1962,11 @@
             "isocode": "it",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "it-IT"
+            "rfc3066code": "it-IT",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1409,7 +1977,11 @@
             "isocode": "it",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "it-CH"
+            "rfc3066code": "it-CH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1420,7 +1992,11 @@
             "isocode": "jam",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "jam-JM"
+            "rfc3066code": "jam-JM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1431,7 +2007,11 @@
             "isocode": "ja",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ja-JP"
+            "rfc3066code": "ja-JP",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1442,7 +2022,11 @@
             "isocode": "jv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "jv-ID"
+            "rfc3066code": "jv-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -1453,7 +2037,11 @@
             "isocode": "kac",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kac-MM"
+            "rfc3066code": "kac-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1464,7 +2052,11 @@
             "isocode": "quc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "quc-GT"
+            "rfc3066code": "quc-GT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1475,7 +2067,11 @@
             "isocode": "kbp",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kbp-TG"
+            "rfc3066code": "kbp-TG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1486,7 +2082,11 @@
             "isocode": "kea",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kea-CV"
+            "rfc3066code": "kea-CV",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1497,7 +2097,11 @@
             "isocode": "kab",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kab-DZ"
+            "rfc3066code": "kab-DZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1508,7 +2112,11 @@
             "isocode": "kln",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kln-KE"
+            "rfc3066code": "kln-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1519,7 +2127,11 @@
             "isocode": "kam",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kam-KE"
+            "rfc3066code": "kam-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1530,7 +2142,11 @@
             "isocode": "kjb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kjb-GT"
+            "rfc3066code": "kjb-GT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1541,7 +2157,11 @@
             "isocode": "kn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kn-IN"
+            "rfc3066code": "kn-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1552,7 +2172,11 @@
             "isocode": "kn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kr-KAU"
+            "rfc3066code": "kr-KAU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -1563,7 +2187,11 @@
             "isocode": "kar",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kar-MM"
+            "rfc3066code": "kar-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1574,7 +2202,11 @@
             "isocode": "ks",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ks-IN"
+            "rfc3066code": "ks-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1585,7 +2217,11 @@
             "isocode": "kas",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "kas-IN"
+            "rfc3066code": "kas-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1596,7 +2232,11 @@
             "isocode": "ks",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ks-IN"
+            "rfc3066code": "ks-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1607,7 +2247,11 @@
             "isocode": "kk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kk-KZ"
+            "rfc3066code": "kk-KZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1618,7 +2262,11 @@
             "isocode": "kha",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kha-IN"
+            "rfc3066code": "kha-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1629,7 +2277,11 @@
             "isocode": "km",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "km-KH"
+            "rfc3066code": "km-KH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1640,7 +2292,11 @@
             "isocode": "ki",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ki-KE"
+            "rfc3066code": "ki-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1651,7 +2307,11 @@
             "isocode": "kmb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kmb-AO"
+            "rfc3066code": "kmb-AO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1662,7 +2322,11 @@
             "isocode": "rw",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rw-RW"
+            "rfc3066code": "rw-RW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1673,7 +2337,11 @@
             "isocode": "run",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rn-BI"
+            "rfc3066code": "rn-BI",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1684,7 +2352,11 @@
             "isocode": "guz",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "guz-KE"
+            "rfc3066code": "guz-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1695,7 +2367,11 @@
             "isocode": "kg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kg-CG"
+            "rfc3066code": "kg-CG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1706,7 +2382,11 @@
             "isocode": "kok",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kok-IN"
+            "rfc3066code": "kok-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1717,7 +2397,11 @@
             "isocode": "ko",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ko-KR"
+            "rfc3066code": "ko-KR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1728,7 +2412,11 @@
             "isocode": "ku",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kmr-TR"
+            "rfc3066code": "kmr-TR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1739,7 +2427,11 @@
             "isocode": "ku",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ckb-IQ"
+            "rfc3066code": "ckb-IQ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -1750,7 +2442,11 @@
             "isocode": "ky",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ky-KG"
+            "rfc3066code": "ky-KG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1761,7 +2457,11 @@
             "isocode": "lo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lo-LA"
+            "rfc3066code": "lo-LA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1772,7 +2472,11 @@
             "isocode": "ltg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ltg-LV"
+            "rfc3066code": "ltg-LV",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1783,7 +2487,11 @@
             "isocode": "la",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "la-XN"
+            "rfc3066code": "la-XN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1794,7 +2502,11 @@
             "isocode": "lv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lv-LV"
+            "rfc3066code": "lv-LV",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1805,7 +2517,11 @@
             "isocode": "lij",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lij-IT"
+            "rfc3066code": "lij-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1816,7 +2532,11 @@
             "isocode": "li",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "li-NL"
+            "rfc3066code": "li-NL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1827,7 +2547,11 @@
             "isocode": "ln",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ln-LIN"
+            "rfc3066code": "ln-LIN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1838,7 +2562,11 @@
             "isocode": "lt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lt-LT"
+            "rfc3066code": "lt-LT",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1849,7 +2577,11 @@
             "isocode": "lmo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lmo-IT"
+            "rfc3066code": "lmo-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1860,7 +2592,11 @@
             "isocode": "lua",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lua-CD"
+            "rfc3066code": "lua-CD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1871,7 +2607,11 @@
             "isocode": "lug",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lg-UG"
+            "rfc3066code": "lg-UG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1882,7 +2622,11 @@
             "isocode": "luy",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "luy-KE"
+            "rfc3066code": "luy-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1893,7 +2637,11 @@
             "isocode": "luo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "luo-KE"
+            "rfc3066code": "luo-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1904,7 +2652,11 @@
             "isocode": "lb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lb-LU"
+            "rfc3066code": "lb-LU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1915,7 +2667,11 @@
             "isocode": "mas",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mas-KE"
+            "rfc3066code": "mas-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1926,7 +2682,11 @@
             "isocode": "mk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mk-MK"
+            "rfc3066code": "mk-MK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1937,7 +2697,11 @@
             "isocode": "mag",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mag-IN"
+            "rfc3066code": "mag-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1948,7 +2712,11 @@
             "isocode": "mai",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mai-IN"
+            "rfc3066code": "mai-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1959,7 +2727,11 @@
             "isocode": "mg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mg-MG"
+            "rfc3066code": "mg-MG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1970,7 +2742,11 @@
             "isocode": "ms",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ms-MY"
+            "rfc3066code": "ms-MY",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1981,7 +2757,11 @@
             "isocode": "ml",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ml-IN"
+            "rfc3066code": "ml-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -1992,7 +2772,11 @@
             "isocode": "div",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "dv-MV"
+            "rfc3066code": "dv-MV",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -2003,7 +2787,11 @@
             "isocode": "mt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mt-MT"
+            "rfc3066code": "mt-MT",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2014,7 +2802,11 @@
             "isocode": "mam",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mam-GT"
+            "rfc3066code": "mam-GT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2025,7 +2817,11 @@
             "isocode": "mfi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mfi-CM"
+            "rfc3066code": "mfi-CM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2036,7 +2832,11 @@
             "isocode": "mni",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mni-IN"
+            "rfc3066code": "mni-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2047,7 +2847,11 @@
             "isocode": "gv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gv-IM"
+            "rfc3066code": "gv-IM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2058,7 +2862,11 @@
             "isocode": "mi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mi-NZ"
+            "rfc3066code": "mi-NZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2069,7 +2877,11 @@
             "isocode": "mr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mr-IN"
+            "rfc3066code": "mr-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2080,7 +2892,11 @@
             "isocode": "mrt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mrt-NG"
+            "rfc3066code": "mrt-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2091,7 +2907,11 @@
             "isocode": "mhr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mhr-RU"
+            "rfc3066code": "mhr-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2102,7 +2922,11 @@
             "isocode": "mh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mh-MH"
+            "rfc3066code": "mh-MH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2113,7 +2937,11 @@
             "isocode": "men",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "men-SL"
+            "rfc3066code": "men-SL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2124,7 +2952,11 @@
             "isocode": "mer",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mer-KE"
+            "rfc3066code": "mer-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2135,7 +2967,11 @@
             "isocode": "nyf",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nyf-KE"
+            "rfc3066code": "nyf-KE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2146,7 +2982,11 @@
             "isocode": "min",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "min-ID"
+            "rfc3066code": "min-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2157,7 +2997,11 @@
             "isocode": "lus",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lus-IN"
+            "rfc3066code": "lus-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2168,7 +3012,11 @@
             "isocode": "mn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mn-MN"
+            "rfc3066code": "mn-MN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2180,6 +3028,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "sr-ME",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "sr-Latn-RS"
         },
         {
@@ -2191,7 +3043,11 @@
             "isocode": "mfe",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mfe-MU"
+            "rfc3066code": "mfe-MU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2202,7 +3058,11 @@
             "isocode": "ar",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ar-MA"
+            "rfc3066code": "ar-MA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2213,7 +3073,11 @@
             "isocode": "mos",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "mos-BF"
+            "rfc3066code": "mos-BF",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2224,7 +3088,11 @@
             "isocode": "ndc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ndc-MZ"
+            "rfc3066code": "ndc-MZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2235,7 +3103,11 @@
             "isocode": "ne",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ne-NP"
+            "rfc3066code": "ne-NP",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2246,7 +3118,11 @@
             "isocode": "fuv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "fuv-NG"
+            "rfc3066code": "fuv-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2257,7 +3133,11 @@
             "isocode": "niu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "niu-NU"
+            "rfc3066code": "niu-NU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2268,7 +3148,11 @@
             "isocode": "azj",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "azj-AZ"
+            "rfc3066code": "azj-AZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2279,7 +3163,11 @@
             "isocode": "kmr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "kmr-TR"
+            "rfc3066code": "kmr-TR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2291,6 +3179,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "nd-ZW",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "nde-ZW"
         },
         {
@@ -2302,7 +3194,11 @@
             "isocode": "nso",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nso-ZA"
+            "rfc3066code": "nso-ZA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2313,7 +3209,11 @@
             "isocode": "uzn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "uzn-UZ"
+            "rfc3066code": "uzn-UZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2324,7 +3224,11 @@
             "isocode": "nb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nb-NO"
+            "rfc3066code": "nb-NO",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2335,7 +3239,11 @@
             "isocode": "nn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nn-NO"
+            "rfc3066code": "nn-NO",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2346,7 +3254,26 @@
             "isocode": "nus",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nus-SS"
+            "rfc3066code": "nus-SS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Nupe"
+                }
+            ],
+            "isocode": "nup",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "nup-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2357,7 +3284,11 @@
             "isocode": "ny",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ny-MW"
+            "rfc3066code": "ny-MW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2368,7 +3299,11 @@
             "isocode": "oc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "oc-FR"
+            "rfc3066code": "oc-FR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2379,7 +3314,11 @@
             "isocode": "oc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "oc-ES"
+            "rfc3066code": "oc-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2390,7 +3329,11 @@
             "isocode": "or",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "or-IN"
+            "rfc3066code": "or-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2401,7 +3344,11 @@
             "isocode": "ory",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ory-IN"
+            "rfc3066code": "ory-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2412,7 +3359,11 @@
             "isocode": "ur",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ur-PK"
+            "rfc3066code": "ur-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2423,7 +3374,11 @@
             "isocode": "pau",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pau-PW"
+            "rfc3066code": "pau-PW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2434,7 +3389,11 @@
             "isocode": "pi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pi-IN"
+            "rfc3066code": "pi-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2445,7 +3404,11 @@
             "isocode": "pag",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pag-PH"
+            "rfc3066code": "pag-PH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2456,7 +3419,11 @@
             "isocode": "pap",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pap-CW"
+            "rfc3066code": "pap-CW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2468,7 +3435,11 @@
             "enabled": true,
             "rtl": true,
             "languageRegionCode": "ps-AF",
-            "rfc3066code": "ps-PK"
+            "rfc3066code": "ps-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -2479,7 +3450,11 @@
             "isocode": "fa",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "fa-IR"
+            "rfc3066code": "fa-IR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -2490,7 +3465,11 @@
             "isocode": "pis",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pis-SB"
+            "rfc3066code": "pis-SB",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2501,7 +3480,11 @@
             "isocode": "plt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "plt-MG"
+            "rfc3066code": "plt-MG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2512,7 +3495,11 @@
             "isocode": "pl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pl-PL"
+            "rfc3066code": "pl-PL",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2523,7 +3510,11 @@
             "isocode": "pt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pt-PT"
+            "rfc3066code": "pt-PT",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2534,7 +3525,11 @@
             "isocode": "pt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pt-BR"
+            "rfc3066code": "pt-BR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2545,7 +3540,11 @@
             "isocode": "pot",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pot-US"
+            "rfc3066code": "pot-US",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2556,7 +3555,11 @@
             "isocode": "pa",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "pa-IN"
+            "rfc3066code": "pa-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2567,7 +3570,11 @@
             "isocode": "pa",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "pa-PK"
+            "rfc3066code": "pa-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2578,7 +3585,11 @@
             "isocode": "qu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "qu-PE"
+            "rfc3066code": "qu-PE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2589,7 +3600,11 @@
             "isocode": "rhg",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "rhg-MM"
+            "rfc3066code": "rhg-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2600,7 +3615,11 @@
             "isocode": "rhl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "rhl-MM"
+            "rfc3066code": "rhl-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2611,7 +3630,11 @@
             "isocode": "ro",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ro-RO"
+            "rfc3066code": "ro-RO",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2622,7 +3645,11 @@
             "isocode": "rm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "roh-CH"
+            "rfc3066code": "roh-CH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2633,7 +3660,11 @@
             "isocode": "run",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "run-BI"
+            "rfc3066code": "run-BI",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2644,7 +3675,11 @@
             "isocode": "ru",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ru-RU"
+            "rfc3066code": "ru-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2655,7 +3690,11 @@
             "isocode": "acf",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "acf-LC"
+            "rfc3066code": "acf-LC",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2666,7 +3705,11 @@
             "isocode": "smo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sm-WS"
+            "rfc3066code": "sm-WS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2677,7 +3720,11 @@
             "isocode": "sg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sg-CF"
+            "rfc3066code": "sg-CF",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2688,7 +3735,11 @@
             "isocode": "sa",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sa-IN"
+            "rfc3066code": "sa-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2699,7 +3750,11 @@
             "isocode": "sat",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sat-IN"
+            "rfc3066code": "sat-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2710,7 +3765,11 @@
             "isocode": "sc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sc-IT"
+            "rfc3066code": "sc-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2721,7 +3780,11 @@
             "isocode": "gd",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gd-GB"
+            "rfc3066code": "gd-GB",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2732,7 +3795,11 @@
             "isocode": "seh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "seh-ZW"
+            "rfc3066code": "seh-ZW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2744,6 +3811,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "sr-Cyrl-RS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "sr-Cyrl-RS"
         },
         {
@@ -2756,6 +3827,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "sr-Latn-RS",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "sr-Latn-RS"
         },
         {
@@ -2767,7 +3842,11 @@
             "isocode": "crs",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "crs-SC"
+            "rfc3066code": "crs-SC",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2778,7 +3857,11 @@
             "isocode": "ns",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "nso-ZA"
+            "rfc3066code": "nso-ZA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2789,7 +3872,11 @@
             "isocode": "tn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tn-ZA"
+            "rfc3066code": "tn-ZA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2800,7 +3887,11 @@
             "isocode": "shn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "shn-MM"
+            "rfc3066code": "shn-MM",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2811,7 +3902,11 @@
             "isocode": "sna",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sn-ZW"
+            "rfc3066code": "sn-ZW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2822,7 +3917,11 @@
             "isocode": "scn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "scn-IT"
+            "rfc3066code": "scn-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2833,7 +3932,11 @@
             "isocode": "szl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "szl-PL"
+            "rfc3066code": "szl-PL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2844,7 +3947,11 @@
             "isocode": "sd",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "sd-PK"
+            "rfc3066code": "sd-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2855,7 +3962,11 @@
             "isocode": "si",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "si-LK"
+            "rfc3066code": "si-LK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2866,7 +3977,11 @@
             "isocode": "sk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sk-SK"
+            "rfc3066code": "sk-SK",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2877,7 +3992,11 @@
             "isocode": "sl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sl-SI"
+            "rfc3066code": "sl-SI",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2888,7 +4007,11 @@
             "isocode": "so",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "so-SO"
+            "rfc3066code": "so-SO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -2899,7 +4022,11 @@
             "isocode": "st",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "st-LS"
+            "rfc3066code": "st-LS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2910,7 +4037,11 @@
             "isocode": "azb",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "azb-AZ"
+            "rfc3066code": "azb-AZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2921,7 +4052,11 @@
             "isocode": "pbt",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "pbt-PK"
+            "rfc3066code": "pbt-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2933,6 +4068,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "nr-ZA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "nso-ZA"
         },
         {
@@ -2944,7 +4083,11 @@
             "isocode": "dik",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "dik-SS"
+            "rfc3066code": "dik-SS",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2955,7 +4098,11 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-ES"
+            "rfc3066code": "es-ES",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2966,7 +4113,11 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-AR"
+            "rfc3066code": "es-AR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2977,7 +4128,11 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-CO"
+            "rfc3066code": "es-CO",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2988,7 +4143,11 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-419"
+            "rfc3066code": "es-419",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -2999,7 +4158,11 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-MX"
+            "rfc3066code": "es-MX",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3010,7 +4173,56 @@
             "isocode": "es",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "es-US"
+            "rfc3066code": "es-US",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Venezuela)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-VE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Perù)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-PE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Spanish (Puerto Rico)"
+                }
+            ],
+            "isocode": "es",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "es-PR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3021,7 +4233,11 @@
             "isocode": "srn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "srn-SR"
+            "rfc3066code": "srn-SR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3032,7 +4248,11 @@
             "isocode": "lvs",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "lvs-LV"
+            "rfc3066code": "lvs-LV",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3043,7 +4263,11 @@
             "isocode": "zsm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zsm-MY"
+            "rfc3066code": "zsm-MY",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3054,7 +4278,11 @@
             "isocode": "su",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "su-ID"
+            "rfc3066code": "su-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3066,6 +4294,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "sw-KE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "sw-KE"
         },
         {
@@ -3077,7 +4309,11 @@
             "isocode": "ss",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ss-SZ"
+            "rfc3066code": "ss-SZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3088,7 +4324,11 @@
             "isocode": "sv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "sv-SE"
+            "rfc3066code": "sv-SE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3099,7 +4339,11 @@
             "isocode": "de",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "de-CH"
+            "rfc3066code": "de-CH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3110,7 +4354,11 @@
             "isocode": "syc",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "syc-TR"
+            "rfc3066code": "syc-TR",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -3121,7 +4369,11 @@
             "isocode": "tl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tl-PH"
+            "rfc3066code": "tl-PH",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3132,7 +4384,11 @@
             "isocode": "ty",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ty-PF"
+            "rfc3066code": "ty-PF",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3143,7 +4399,11 @@
             "isocode": "tg",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tg-TJ"
+            "rfc3066code": "tg-TJ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3154,7 +4414,11 @@
             "isocode": "tmh",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "tmh-DZ"
+            "rfc3066code": "tmh-DZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -3165,7 +4429,11 @@
             "isocode": "taq",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "taq-ML"
+            "rfc3066code": "taq-ML",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3177,7 +4445,11 @@
             "enabled": true,
             "rtl": false,
             "languageRegionCode": "ta-IN",
-            "rfc3066code": "ta-IN"
+            "rfc3066code": "ta-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3189,7 +4461,11 @@
             "enabled": true,
             "rtl": false,
             "languageRegionCode": "ta-LK",
-            "rfc3066code": "ta-LK"
+            "rfc3066code": "ta-LK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3200,7 +4476,11 @@
             "isocode": "trv",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "trv-TW"
+            "rfc3066code": "trv-TW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3211,7 +4491,11 @@
             "isocode": "tt",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tt-RU"
+            "rfc3066code": "tt-RU",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3222,7 +4506,11 @@
             "isocode": "te",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "te-IN"
+            "rfc3066code": "te-IN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3233,7 +4521,11 @@
             "isocode": "tet",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tet-TL"
+            "rfc3066code": "tet-TL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3244,7 +4536,11 @@
             "isocode": "th",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "th-TH"
+            "rfc3066code": "th-TH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3255,7 +4551,11 @@
             "isocode": "bod",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "bo-CN"
+            "rfc3066code": "bo-CN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3266,7 +4566,26 @@
             "isocode": "ti",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ti-ET"
+            "rfc3066code": "ti-ET",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Tiv"
+                }
+            ],
+            "isocode": "tiv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "tiv-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3277,7 +4596,11 @@
             "isocode": "tpi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tpi-PG"
+            "rfc3066code": "tpi-PG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3288,7 +4611,11 @@
             "isocode": "tkl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tkl-TK"
+            "rfc3066code": "tkl-TK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3299,7 +4626,11 @@
             "isocode": "ton",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "to-TO"
+            "rfc3066code": "to-TO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3310,7 +4641,11 @@
             "isocode": "als",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "als-AL"
+            "rfc3066code": "als-AL",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3321,7 +4656,11 @@
             "isocode": "ts",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ts-ZA"
+            "rfc3066code": "ts-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3332,7 +4671,11 @@
             "isocode": "tsc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tsc-MZ"
+            "rfc3066code": "tsc-MZ",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3343,7 +4686,11 @@
             "isocode": "tn",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tn-BW"
+            "rfc3066code": "tn-BW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3354,7 +4701,11 @@
             "isocode": "tum",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tum-MW"
+            "rfc3066code": "tum-MW",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3365,7 +4716,11 @@
             "isocode": "tr",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tr-TR"
+            "rfc3066code": "tr-TR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3376,7 +4731,11 @@
             "isocode": "tk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tk-TM"
+            "rfc3066code": "tk-TM",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3387,7 +4746,11 @@
             "isocode": "tvl",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tvl-TV"
+            "rfc3066code": "tvl-TV",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3398,7 +4761,11 @@
             "isocode": "tw",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "tw-GH"
+            "rfc3066code": "tw-GH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3409,7 +4776,11 @@
             "isocode": "udm",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "udm-RU"
+            "rfc3066code": "udm-RU",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3420,7 +4791,11 @@
             "isocode": "uk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "uk-UA"
+            "rfc3066code": "uk-UA",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3431,7 +4806,11 @@
             "isocode": "ppk",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "ppk-ID"
+            "rfc3066code": "ppk-ID",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3442,7 +4821,11 @@
             "isocode": "umb",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "umb-AO"
+            "rfc3066code": "umb-AO",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3453,7 +4836,11 @@
             "isocode": "ur",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ur-PK"
+            "rfc3066code": "ur-PK",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3464,7 +4851,11 @@
             "isocode": "ug",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "ug-CN"
+            "rfc3066code": "ug-CN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3476,6 +4867,10 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "uz-UZ",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            },
             "languageRegionCode": "uz-Latn-UZ"
         },
         {
@@ -3487,7 +4882,11 @@
             "isocode": "vec",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "vec-IT"
+            "rfc3066code": "vec-IT",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3498,7 +4897,11 @@
             "isocode": "vi",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "vi-VN"
+            "rfc3066code": "vi-VN",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3509,7 +4912,11 @@
             "isocode": "svc",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "svc-VC"
+            "rfc3066code": "svc-VC",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3520,7 +4927,11 @@
             "isocode": "vic",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "vic-US"
+            "rfc3066code": "vic-US",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3531,7 +4942,11 @@
             "isocode": "wls",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "wls-WF"
+            "rfc3066code": "wls-WF",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3542,7 +4957,11 @@
             "isocode": "war",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "war-PH"
+            "rfc3066code": "war-PH",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3553,7 +4972,11 @@
             "isocode": "cy",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "cy-GB"
+            "rfc3066code": "cy-GB",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3564,7 +4987,26 @@
             "isocode": "gaz",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "gaz-ET"
+            "rfc3066code": "gaz-ET",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "West Flemish"
+                }
+            ],
+            "isocode": "vls",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "vls-BE",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3575,7 +5017,11 @@
             "isocode": "wo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "wo-SN"
+            "rfc3066code": "wo-SN",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3586,7 +5032,11 @@
             "isocode": "xh",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "xh-ZA"
+            "rfc3066code": "xh-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3597,7 +5047,11 @@
             "isocode": "yi",
             "enabled": true,
             "rtl": true,
-            "rfc3066code": "yi-YD"
+            "rfc3066code": "yi-YD",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": true
+            }
         },
         {
             "localized": [
@@ -3608,7 +5062,11 @@
             "isocode": "yo",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "yo-NG"
+            "rfc3066code": "yo-NG",
+            "ocr": {
+                "supported": false,
+                "not_supported_or_rtl": false
+            }
         },
         {
             "localized": [
@@ -3619,7 +5077,11 @@
             "isocode": "zu",
             "enabled": true,
             "rtl": false,
-            "rfc3066code": "zu-ZA"
+            "rfc3066code": "zu-ZA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
         }
     ]
 }

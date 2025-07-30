@@ -39,7 +39,7 @@ abstract class OutsourceTo_AbstractProvider {
     protected $_outsource_login_url_ko = "";
 
     /**
-     * These are the url that the vendor system must call in order to confirm the outsource to MateCat
+     * These are the url that the vendor system must call in order to confirm the outsource to Matecat
      *
      * Set them appropriately in the constructor.
      *
@@ -58,7 +58,8 @@ abstract class OutsourceTo_AbstractProvider {
      * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ko
      *
      */
-    public function __construct(){}
+    public function __construct() {
+    }
 
     /**
      * Object containing the quote result
@@ -87,6 +88,10 @@ abstract class OutsourceTo_AbstractProvider {
      */
     protected $timezone = "0";
 
+    protected ?FeatureSet $features = null;
+
+    protected ?Users_UserStruct $user = null;
+
     /**
      * List of job Ids and relative passwords that will be sent to the provider for quoting
      *
@@ -102,7 +107,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @var array List of job ids and relative passwords
      */
-    protected $jobList = array();
+    protected $jobList = [];
 
     /**
      * Perform Quotes to the selected Provider
@@ -118,7 +123,7 @@ abstract class OutsourceTo_AbstractProvider {
      *
      * @return Shop_AbstractItem[]
      */
-    public function getQuotesResult(){
+    public function getQuotesResult() {
         return $this->_quote_result;
     }
 
@@ -172,6 +177,32 @@ abstract class OutsourceTo_AbstractProvider {
     }
 
     /**
+     * @param FeatureSet|null $features
+     * @return $this
+     */
+    public function setFeatures(?FeatureSet $features)
+    {
+        if ( !empty( $features ) ) {
+            $this->features = $features;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Users_UserStruct|null $user
+     * @return $this
+     */
+    public function setUser(?Users_UserStruct $user)
+    {
+        if ( !empty( $user ) ) {
+            $this->user = $user;
+        }
+
+        return $this;
+    }
+
+    /**
      * Set the currency for the project
      *
      * @param string $currency
@@ -219,7 +250,7 @@ abstract class OutsourceTo_AbstractProvider {
         return $this->_outsource_login_url_ok;
     }
 
-    public function getOutsourceConfirm(){
+    public function getOutsourceConfirm() {
         return $this->_outsource_url_confirm;
     }
 

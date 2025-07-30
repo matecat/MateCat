@@ -1,12 +1,12 @@
-@import '../../commons/colors';
+@use '../../commons/colors';
 
 
 .icuItem {
   display: inline-block;
   position: relative;
-  color: $linkBlue;
+  color: colors.$linkBlue;
   &.icuItem-error {
-    color: $redDefault;
+    color: colors.$redDefault;
     cursor: pointer;
   }
 }

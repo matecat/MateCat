@@ -15,178 +15,115 @@ loggerName = 'TaskManager.log'             ;Master Logger for the Task Manager
 ;;######    Key Name P1    #####
 ;;##############################
 P1[queue_name]    = "analysis_queue_P1"         ;AMQ queue name
-P1[pid_set_name]  = "ch_pid_set_p1"             ;Redis set list for the processes id
-P1[max_executors] = 10                          ;Number of executors
-P1[redis_key]     = "p1_list"                   ;Redis list of MateCat projects to be analyzed
-P1[loggerName]    = "tm_analysis_P1.log"        ;Logger name
+P1[max_executors] = 10                         ;Number of executors
 ;;##############################
 ;;######    Key Name P2    #####
 ;;##############################
 P2[queue_name]    = "analysis_queue_P2"
-P2[pid_set_name]  = "ch_pid_set_p2"
 P2[max_executors] = 5
-P2[redis_key]     = "p2_list"
-P2[loggerName]    = "tm_analysis_P2.log"
 ;;##############################
 ;;######    Key Name P3    #####
 ;;##############################
 P3[queue_name]    = "analysis_queue_P3"
-P3[pid_set_name]  = "ch_pid_set_p3"
-P3[max_executors] = 1
-P3[redis_key]     = "p3_list"
-P3[loggerName]    = "tm_analysis_P3.log"
-
-;;##################################
-;;##### Key Name project_queue #####
-;;##################################
-PROJECT_QUEUE[queue_name]    = "project_queue"
-PROJECT_QUEUE[pid_set_name]  = "ch_pid_project_queue"
-PROJECT_QUEUE[max_executors] = 1
-PROJECT_QUEUE[redis_key]     = "project_queue_list"
-PROJECT_QUEUE[loggerName]    = "project_queue.log"
+P3[max_executors] = 5
+;;##############################
+;;######    Key Name P4    #####
+;;##############################
+P4[queue_name]    = "analysis_queue_P4"
+P4[max_executors] = 5
 
 ;;##############################
 ;;##### Key Name MailQueue #####
 ;;##############################
 MAIL[queue_name]    = "mail_queue"
-MAIL[pid_set_name]  = "ch_pid_set_mail"
-MAIL[max_executors] = 1
-MAIL[redis_key]     = "mail_list"
-MAIL[loggerName]    = "mail_queue.log"
+MAIL[max_executors] = 0
+
+;;###################################
+;;##### Propagation             #####
+;;###################################
+PROPAGATION[queue_name] = "propagation"
+PROPAGATION[max_executors] = 1
 
 ;;##############################
 ;;##### Key Name setContribution #####
 ;;##############################
 CONTRIBUTION[queue_name]    = "set_contribution"
-CONTRIBUTION[pid_set_name]  = "ch_pid_set_contribution"
-CONTRIBUTION[max_executors] = 1
-CONTRIBUTION[redis_key]     = "set_contribution_list"
-CONTRIBUTION[loggerName]    = "set_contribution.log"
-
-;;##############################
-;;##### Key Name QAChecks  #####
-;;##############################
-QA_CHECKS[queue_name] = "qa_checks"
-QA_CHECKS[pid_set_name] = "qa_checks_set"
-QA_CHECKS[max_executors] = 1
-QA_CHECKS[redis_key] = "qa_checks_key"
-QA_CHECKS[loggerName] = "qa_checks.log"
-
-;;#################################
-;;##### Key Name activity_log #####
-;;#################################
-ACTIVITYLOG[queue_name]    = "activity_log"
-ACTIVITYLOG[pid_set_name]  = "ch_pid_activity_log"
-ACTIVITYLOG[max_executors] = 1
-ACTIVITYLOG[redis_key]     = "activity_log_list"
-ACTIVITYLOG[loggerName]    = "activity_log.log"
-
-;;##############################
-;;##### Key Name DQF       #####
-;;##############################
-DQF[queue_name]    = "dqf"
-DQF[pid_set_name]  = "ch_pid_dqf"
-DQF[max_executors] = 1
-DQF[redis_key]     = "dqf_list"
-DQF[loggerName]    = "dqf.log"
-
-
-;;######################################
-;;##### Key Name setContributionMT #####
-;;######################################
-CONTRIBUTION_MT[queue_name]    = "set_contribution_mt"
-CONTRIBUTION_MT[pid_set_name]  = "ch_pid_set_contribution_mt"
-CONTRIBUTION_MT[max_executors] = 1
-CONTRIBUTION_MT[redis_key]     = "set_contribution_mt_list"
-CONTRIBUTION_MT[loggerName]    = "set_contribution_mt.log"
-
-;;##############################
-;;##### Key Name jobs      #####
-;;##############################
-JOBS[queue_name]    = "jobs"
-JOBS[pid_set_name]  = "ch_pid_jobs"
-JOBS[max_executors] = 1
-JOBS[redis_key]     = "jobs_list"
-JOBS[loggerName]    = "jobs.log"
-
-
-;;###############################
-;;##### Key Name tmx import #####
-;;###############################
-;ALIGNER_TMX_IMPORT[queue_name]   = "aligner_tmx_import"
-;ALIGNER_TMX_IMPORT[pid_set_name]  = "ch_pid_tmx_import"
-;ALIGNER_TMX_IMPORT[max_executors] = 1
-;ALIGNER_TMX_IMPORT[redis_key]     = "tmx_import_list"
-;ALIGNER_TMX_IMPORT[loggerName]    = "tmx_import.log"
+CONTRIBUTION[max_executors] = 5
 
 ;;##############################
 ;;##### Key Name setContribution #####
 ;;##############################
 CONTRIBUTION_GET[queue_name]    = "get_contribution"
-CONTRIBUTION_GET[pid_set_name]  = "ch_pid_get_contribution"
-CONTRIBUTION_GET[max_executors] = 50
-CONTRIBUTION_GET[redis_key]     = "get_contribution_list"
-CONTRIBUTION_GET[loggerName]    = "get_contribution.log"
+CONTRIBUTION_GET[max_executors] = 5
 
-;;###############################
-;;#####   Align Job Small   #####
-;;###############################
-ALIGNER_ALIGN_JOB_SMALL[queue_name]    = "aligner_align_job_small"
-ALIGNER_ALIGN_JOB_SMALL[pid_set_name]  = "ch_pid_align_job_small"
-ALIGNER_ALIGN_JOB_SMALL[max_executors] = 1
-ALIGNER_ALIGN_JOB_SMALL[redis_key]     = "align_job_small_list"
-ALIGNER_ALIGN_JOB_SMALL[loggerName]    = "align_job_small.log"
+;;##############################
+;;##### Key Name activity_log #####
+;;##############################
+ACTIVITYLOG[queue_name]    = "activity_log"
+ACTIVITYLOG[max_executors] = 1
 
-;;###############################
-;;#####   Align Job Medium  #####
-;;###############################
-ALIGNER_ALIGN_JOB_MEDIUM[queue_name]    = "aligner_align_job_medium"
-ALIGNER_ALIGN_JOB_MEDIUM[pid_set_name]  = "ch_pid_align_job_medium"
-ALIGNER_ALIGN_JOB_MEDIUM[max_executors] = 1
-ALIGNER_ALIGN_JOB_MEDIUM[redis_key]     = "align_job_medium_list"
-ALIGNER_ALIGN_JOB_MEDIUM[loggerName]    = "align_job_medium.log"
+;;##################################
+;;##### Key Name project_queue #####
+;;##################################
+PROJECT_QUEUE[queue_name]    = "project_queue"
+PROJECT_QUEUE[max_executors] = 1
 
-;;###############################
-;;#####    Align Job Big    #####
-;;###############################
-ALIGNER_ALIGN_JOB_BIG[queue_name]    = "aligner_align_job_big"
-ALIGNER_ALIGN_JOB_BIG[pid_set_name]  = "ch_pid_align_job_big"
-ALIGNER_ALIGN_JOB_BIG[max_executors] = 1
-ALIGNER_ALIGN_JOB_BIG[redis_key]     = "align_job_big_list"
-ALIGNER_ALIGN_JOB_BIG[loggerName]    = "align_job_big.log"
+;;##############################
+;;##### Key Name setContributionMT #####
+;;##############################
+CONTRIBUTION_MT[queue_name]    = "set_contribution_mt"
+CONTRIBUTION_MT[max_executors] = 5
 
-;;###############################
-;;#####   Segment Create    #####
-;;###############################
-ALIGNER_SEGMENT_CREATE[queue_name]    = "aligner_segment_create"
-ALIGNER_SEGMENT_CREATE[pid_set_name]  = "ch_pid_aligner_segment_create"
-ALIGNER_SEGMENT_CREATE[max_executors] = 5
-ALIGNER_SEGMENT_CREATE[redis_key]     = "aligner_segment_create_list"
-ALIGNER_SEGMENT_CREATE[loggerName]    = "aligner_segment_create.log"
+;;##############################
+;;##### Key Name jobs      #####
+;;##############################
+JOBS[queue_name]    = "jobs"
+JOBS[max_executors] = 1
 
 ;;##################################
 ;;##### Key Name GlossaryRead  #####
 ;;##################################
 GLOSSARY_READ[queue_name]    = "glossary_read"
-GLOSSARY_READ[pid_set_name]  = "ch_pid_glossary_read"
-GLOSSARY_READ[max_executors] = 1
-GLOSSARY_READ[redis_key]     = "glossary_read"
-GLOSSARY_READ[loggerName]    = "glossary_read.log"
+GLOSSARY_READ[max_executors] = 5
 
 ;;###################################
 ;;##### Key Name GlossaryWrite  #####
 ;;###################################
 GLOSSARY_WRITE[queue_name]    = "glossary_write"
-GLOSSARY_WRITE[pid_set_name]  = "ch_pid_glossary_write"
 GLOSSARY_WRITE[max_executors] = 1
-GLOSSARY_WRITE[redis_key]     = "glossary_write"
-GLOSSARY_WRITE[loggerName]    = "glossary_write.log"
+
+;;###############################
+;;#####   Align Job Small   #####
+;;###############################
+ALIGNER_ALIGN_JOB_SMALL[queue_name]    = "aligner_align_job_small"
+ALIGNER_ALIGN_JOB_SMALL[max_executors] = 1
+
+;;###############################
+;;#####   Align Job Medium  #####
+;;###############################
+ALIGNER_ALIGN_JOB_MEDIUM[queue_name]    = "aligner_align_job_medium"
+ALIGNER_ALIGN_JOB_MEDIUM[max_executors] = 1
+
+;;###############################
+;;#####    Align Job Big    #####
+;;###############################
+ALIGNER_ALIGN_JOB_BIG[queue_name]    = "aligner_align_job_big"
+ALIGNER_ALIGN_JOB_BIG[max_executors] = 1
+
+;;###############################
+;;#####   Segment Create    #####
+;;###############################
+ALIGNER_SEGMENT_CREATE[queue_name]    = "aligner_segment_create"
+ALIGNER_SEGMENT_CREATE[max_executors] = 5
+
+;;###############################
+;;##### Key Name tmx import #####
+;;###############################
+ALIGNER_TMX_IMPORT[queue_name]   = "aligner_tmx_import"
+ALIGNER_TMX_IMPORT[max_executors] = 1
 
 ;;###################################
 ;;##### AI Assistant            #####
 ;;###################################
 AI_ASSISTANT_EXPLAIN_MEANING[queue_name]    = "ai_assistant_explain_meaning"
-AI_ASSISTANT_EXPLAIN_MEANING[pid_set_name]  = "ch_pid_ai_assistant_explain_meaning"
 AI_ASSISTANT_EXPLAIN_MEANING[max_executors] = 1
-AI_ASSISTANT_EXPLAIN_MEANING[redis_key]     = "ai_assistant_explain_meaning"
-AI_ASSISTANT_EXPLAIN_MEANING[loggerName]    = "ai_assistant_explain_meaning.log"

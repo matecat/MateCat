@@ -11,10 +11,10 @@ namespace Segments;
 
 
 use DataAccess\ArrayAccessTrait;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
+class SegmentUIStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, \ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -42,5 +42,6 @@ class SegmentUIStruct extends DataAccess_AbstractDaoSilentStruct implements Data
     public $data_ref_map;
     public $context_groups;
     public $metadata;
+    public $internal_id;
 
 }

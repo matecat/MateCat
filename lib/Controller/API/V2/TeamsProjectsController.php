@@ -9,13 +9,14 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\Exceptions\NotFoundException;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectExistsInTeamValidator;
+use API\Commons\Validators\TeamAccessValidator;
+use API\Commons\Validators\TeamProjectValidator;
 use API\V2\Json\Project;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectExistsInTeamValidator;
-use API\V2\Validators\TeamAccessValidator;
-use API\V2\Validators\TeamProjectValidator;
 use Exception;
 use Exceptions\ValidationError;
 use ManageUtils;
@@ -36,6 +37,7 @@ class TeamsProjectsController extends KleinController {
      * @throws AuthorizationError
      * @throws ReflectionException
      * @throws ValidationError
+     * @throws Exception
      */
     public function update() {
 
@@ -54,6 +56,10 @@ class TeamsProjectsController extends KleinController {
 
         $updatedStruct = $projectModel->update();
         $formatted     = new Project();
+        $formatted->setUser( $this->user );
+
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [ 'project' => $formatted->renderItem( $updatedStruct ) ] );
 
     }

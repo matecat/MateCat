@@ -1,21 +1,22 @@
 <?php
 
-class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class ApiKeys_ApiKeyDao extends AbstractDao {
 
     /**
      * @param       $key
-     * @param array $options
      *
-     * @return ApiKeys_ApiKeyStruct
+     * @return ApiKeys_ApiKeyStruct|null
      */
-    static function findByKey( $key, $options = [] ) {
+    static function findByKey( $key ): ?ApiKeys_ApiKeyStruct {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM api_keys WHERE enabled AND api_key = :key " );
         $stmt->execute( [ 'key' => $key ] );
 
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct' );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?? null;
     }
 
     public function create( $obj ) {
@@ -69,9 +70,9 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public function deleteByUid($uid) {
+    public function deleteByUid( $uid ) {
 
-        $apiKey = $this->getByUid($uid);
+        $apiKey = $this->getByUid( $uid );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "DELETE FROM api_keys WHERE id = :id " );

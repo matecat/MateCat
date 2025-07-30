@@ -1,21 +1,20 @@
 <?php
 
 use Behat\Transliterator\Transliterator;
-use CommandLineTasks\Constants\GlobalMessage;
 use Features\ReviewExtended\ReviewUtils as ReviewUtils;
 
 class Utils {
 
-    public static function getSourcePageFromReferer() {
-        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'HTTP_REFERER' ] ) );
+    public static function getSourcePageFromReferer(): int {
+        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'HTTP_REFERER' ] ?? null ) );
     }
 
 
     /**
      * @return int
      */
-    public static function getSourcePage() {
-        return self::returnSourcePageAsInt( parse_url( @$_SERVER[ 'REQUEST_URI' ] ) );
+    public static function getSourcePage(): int {
+        return self::returnSourcePageAsInt( parse_url( $_SERVER[ 'REQUEST_URI' ] ?? null ) );
     }
 
     /**
@@ -23,7 +22,7 @@ class Utils {
      *
      * @return int
      */
-    private static function returnSourcePageAsInt( $url ) {
+    private static function returnSourcePageAsInt( array $url ): int {
         $sourcePage = Constants::SOURCE_PAGE_TRANSLATE;
 
         if ( !isset( $url[ 'path' ] ) ) {
@@ -45,81 +44,100 @@ class Utils {
     }
 
     /**
+     * @param string|null $agent
+     *
      * @return array
      */
-    static public function getBrowser() {
+    static public function getBrowser( ?string $agent = null ): array {
 
         // handle Undefined index: HTTP_USER_AGENT
-        if(!isset($_SERVER[ 'HTTP_USER_AGENT' ])){
+        if ( !isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) && empty( $agent ) ) {
             return [
-                'userAgent' => null,
-                'name'      => null,
-                'version'   => null,
-                'platform'  => null
+                    'userAgent' => null,
+                    'name'      => null,
+                    'version'   => null,
+                    'platform'  => null
             ];
         }
 
-        $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
+        $u_agent = $agent;
+        if ( empty( $u_agent ) ) {
+            $u_agent = $_SERVER[ 'HTTP_USER_AGENT' ];
+        }
 
         //First get the platform?
         if ( preg_match( '/linux/i', $u_agent ) ) {
-            $platform = 'linux';
+            $platform = 'Linux';
+            if ( preg_match( '/android/i', $u_agent ) ) {
+                $platform = 'Android';
+            }
         } elseif ( preg_match( '/macintosh|mac os x/i', $u_agent ) ) {
-            $platform = 'mac';
+            $platform = 'MacOSX';
+            if ( preg_match( '/iphone/i', $u_agent ) ) {
+                $platform = 'iOS';
+            } elseif ( preg_match( '/ipad/i', $u_agent ) ) {
+                $platform = 'ipadOS';
+            }
         } elseif ( preg_match( '/windows|win32/i', $u_agent ) ) {
-            $platform = 'windows';
+            $platform = 'Windows';
+            if ( preg_match( '/phone/i', $u_agent ) ) {
+                $platform = 'Windows Phone';
+            }
         } else {
             $platform = 'Unknown';
         }
 
         // Next get the name of the useragent, yes separately and for good reason
-        if ( preg_match( '/MSIE|Trident|Edge/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Internet Explorer';
-            $ub    = "MSIE";
+        if ( preg_match( '/MSIE/i', $u_agent ) && !preg_match( '/Opera|OPR/i', $u_agent ) ) {
+            $browserName = 'Internet Explorer';
+            $ub          = "MSIE";
+        } elseif ( preg_match( '|Edg.*?/|i', $u_agent ) && $platform != 'ipadOS' ) {
+            $browserName = 'Microsoft Edge';
+            $ub          = "Edg.*?";
+        } elseif ( preg_match( '/Trident/i', $u_agent ) || preg_match( '/IEMobile/i', $u_agent ) ) {
+            $browserName = 'Internet Explorer Mobile';
+            $ub          = "IEMobile";
         } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
-            $bname = 'Mozilla Firefox';
-            $ub    = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
-            $bname = 'Google Chrome';
-            $ub    = "Chrome";
+            $browserName = 'Mozilla Firefox';
+            $ub          = "Firefox";
+        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/Opera|OPR/i', $u_agent ) ) {
+            $browserName = 'Google Chrome';
+            $ub          = "Chrome";
         } elseif ( preg_match( '/Opera|OPR/i', $u_agent ) ) {
-            $bname = 'Opera';
-            $ub    = "Opera";
-        } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
-            $bname = 'Apple Safari';
-            $ub    = "Safari";
-        } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
-            $bname = 'Netscape';
-            $ub    = "Netscape";
-        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
-            $bname = 'Mozilla Generic';
-            $ub    = "Mozillageneric";
+            $browserName = 'Opera';
+            $ub          = "Opera";
+        } elseif ( preg_match( '/Safari/i', $u_agent ) || preg_match( '/applewebkit.*\(.*khtml.*like.*gecko.*\).*mobile.*$/i', $u_agent ) ) {
+            $browserName = 'Apple Safari';
+            $ub          = "Safari|Version";
+            if ( $platform == 'iOS' || preg_match( '/Mobile/i', $u_agent ) ) {
+                $browserName = 'Mobile Safari';
+            }
         } else {
-            $bname = 'Unknown';
-            $ub    = "Unknown";
+            $browserName = 'Unknown';
+            $ub          = "Unknown";
         }
-        // finally get the correct version number
+        // finally, get the correct version number
         $known   = [ 'Version', $ub, 'other' ];
-        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+        $pattern = '#(?<browser>' . join( '|', $known ) . ')[/ ]+(?<version>[0-9.|a-zA-Z._]*)#i';
         if ( !preg_match_all( $pattern, $u_agent, $matches ) ) {
-            // we have no matching number just continue
+            // we have no matching number, continue
         }
 
         // see how many we have
         $i = count( $matches[ 'browser' ] );
-        if ( $i != 1 ) {
+        if ( $i > 1 ) {
+
             //we will have two since we are not using 'other' argument yet
-            //see if version is before or after the name
-            if ( strripos( $u_agent, "Version" ) < strripos( $u_agent, $ub ) ) {
-                $version = $matches[ 'version' ][ 0 ];
+            //see if the version is before or after the name
+            //if it is before then use the name's version
+            if ( strtolower( $matches[ 'browser' ][ 0 ] ) == 'version' && strtolower( $matches[ 'browser' ][ 1 ] ) != 'safari' ) {
+                $version = $matches[ 'version' ][ 1 ] ?? null;
             } else {
-                $version = @$matches[ 'version' ][ 1 ];
+                $version = $matches[ 'version' ][ 0 ] ?? null;
             }
+
         } else {
-            $version = $matches[ 'version' ][ 0 ];
+            $version = $matches[ 'version' ][ 0 ] ?? null;
         }
 
         // check if we have a number
@@ -128,14 +146,19 @@ class Utils {
         }
 
         return [
-            'userAgent' => $u_agent,
-            'name'      => $bname,
-            'version'   => $version,
-            'platform'  => $platform
+                'userAgent' => $u_agent,
+                'name'      => $browserName,
+                'version'   => $version,
+                'platform'  => $platform
         ];
     }
 
-    public static function friendly_slug( $string ) {
+    /**
+     * @param $string
+     *
+     * @return string
+     */
+    public static function friendly_slug( $string ): string {
         // everything to lower and no spaces begin or end
         $string = strtolower( trim( $string ) );
 
@@ -147,93 +170,68 @@ class Utils {
         $string = str_replace( $find, '-', $string );
 
         // transliterate string
-        $string = Transliterator::transliterate($string);
+        $string = Transliterator::transliterate( $string );
+
+        // avoid empty strings
+        if(empty($string)){
+            $string = "-";
+        }
 
         //delete and replace rest of special chars
-        $find   = [ '/[^a-z0-9\-<>]/', '/[\-]+/', '/<[^>]*>/' ];
-        $repl   = [ '', '-', '' ];
+        $find = [ '/[^a-z0-9\-<>]/', '/-+/', '/<[^>]*>/' ];
+        $repl = [ '', '-', '' ];
 
         //return the friendly url
         return preg_replace( $find, $repl, $string );
     }
 
-    public static function replace_accents( $var ) { //replace for accents catalan spanish and more
-        $a   = [
-            'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ',
-            'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď',
-            'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ',
-            'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś',
-            'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ',
-            'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ'
+    public static function replace_accents( $var ): string { //replace it for accents catalan spanish and more
+        $a = [
+                'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï', 'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ',
+                'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'ÿ', 'Ā', 'ā', 'Ă', 'ă', 'Ą', 'ą', 'Ć', 'ć', 'Ĉ', 'ĉ', 'Ċ', 'ċ', 'Č', 'č', 'Ď',
+                'ď', 'Đ', 'đ', 'Ē', 'ē', 'Ĕ', 'ĕ', 'Ė', 'ė', 'Ę', 'ę', 'Ě', 'ě', 'Ĝ', 'ĝ', 'Ğ', 'ğ', 'Ġ', 'ġ', 'Ģ', 'ģ', 'Ĥ', 'ĥ', 'Ħ', 'ħ', 'Ĩ', 'ĩ', 'Ī', 'ī', 'Ĭ', 'ĭ', 'Į', 'į', 'İ', 'ı', 'Ĳ', 'ĳ',
+                'Ĵ', 'ĵ', 'Ķ', 'ķ', 'Ĺ', 'ĺ', 'Ļ', 'ļ', 'Ľ', 'ľ', 'Ŀ', 'ŀ', 'Ł', 'ł', 'Ń', 'ń', 'Ņ', 'ņ', 'Ň', 'ň', 'ŉ', 'Ō', 'ō', 'Ŏ', 'ŏ', 'Ő', 'ő', 'Œ', 'œ', 'Ŕ', 'ŕ', 'Ŗ', 'ŗ', 'Ř', 'ř', 'Ś', 'ś',
+                'Ŝ', 'ŝ', 'Ş', 'ş', 'Š', 'š', 'Ţ', 'ţ', 'Ť', 'ť', 'Ŧ', 'ŧ', 'Ũ', 'ũ', 'Ū', 'ū', 'Ŭ', 'ŭ', 'Ů', 'ů', 'Ű', 'ű', 'Ų', 'ų', 'Ŵ', 'ŵ', 'Ŷ', 'ŷ', 'Ÿ', 'Ź', 'ź', 'Ż', 'ż', 'Ž', 'ž', 'ſ', 'ƒ',
+                'Ơ', 'ơ', 'Ư', 'ư', 'Ǎ', 'ǎ', 'Ǐ', 'ǐ', 'Ǒ', 'ǒ', 'Ǔ', 'ǔ', 'Ǖ', 'ǖ', 'Ǘ', 'ǘ', 'Ǚ', 'ǚ', 'Ǜ', 'ǜ', 'Ǻ', 'ǻ', 'Ǽ', 'ǽ', 'Ǿ', 'ǿ'
         ];
-        $b   = [
-            'A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a',
-            'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C',
-            'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i',
-            'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R',
-            'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z',
-            'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o'
+        $b = [
+                'A', 'A', 'A', 'A', 'A', 'A', 'AE', 'C', 'E', 'E', 'E', 'E', 'I', 'I', 'I', 'I', 'D', 'N', 'O', 'O', 'O', 'O', 'O', 'O', 'U', 'U', 'U', 'U', 'Y', 's', 'a', 'a', 'a', 'a', 'a', 'a',
+                'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i', 'n', 'o', 'o', 'o', 'o', 'o', 'o', 'u', 'u', 'u', 'u', 'y', 'y', 'A', 'a', 'A', 'a', 'A', 'a', 'C', 'c', 'C', 'c', 'C', 'c', 'C',
+                'c', 'D', 'd', 'D', 'd', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'E', 'e', 'G', 'g', 'G', 'g', 'G', 'g', 'G', 'g', 'H', 'h', 'H', 'h', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i', 'I', 'i',
+                'IJ', 'ij', 'J', 'j', 'K', 'k', 'L', 'l', 'L', 'l', 'L', 'l', 'L', 'l', 'l', 'l', 'N', 'n', 'N', 'n', 'N', 'n', 'n', 'O', 'o', 'O', 'o', 'O', 'o', 'OE', 'oe', 'R', 'r', 'R', 'r', 'R',
+                'r', 'S', 's', 'S', 's', 'S', 's', 'S', 's', 'T', 't', 'T', 't', 'T', 't', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'W', 'w', 'Y', 'y', 'Y', 'Z', 'z', 'Z', 'z', 'Z',
+                'z', 's', 'f', 'O', 'o', 'U', 'u', 'A', 'a', 'I', 'i', 'O', 'o', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'U', 'u', 'A', 'a', 'AE', 'ae', 'O', 'o'
         ];
 
         return str_replace( $a, $b, $var );
     }
 
-    /**
-     * @throws Exception
-     */
-    public static function getGlobalMessage() {
-
-        // pull messages from redis
-        $redis = (new RedisHandler() )->getConnection();
-        $ids = $redis->smembers('global_message_list_ids');
-        $retStrings = [];
-
-        foreach ($ids as $id){
-            $element = $redis->get('global_message_list_element_'.$id);
-
-            if($element !== null){
-                $element = unserialize($element);
-
-                $resObject = [
-                    'msg'    => $element['message'],
-                    'level'  => $element['level'],
-                    'token'  => md5( $element['message'] ),
-                    'expire' => ( new DateTime( $element['expire'] ) )->format( DateTime::W3C )
-                ];
-
-                $retStrings[] = $resObject;
-            } else {
-                $redis->srem('global_message_list_ids', $id);
-            }
-        }
-
-        return [ 'messages' => json_encode($retStrings) ];
-    }
-
-    public static function encryptPass( $clear_pass, $salt ) {
+    public static function encryptPass( $clear_pass, $salt ): string {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+
         return password_hash( $pepperedPass, PASSWORD_DEFAULT );
     }
 
-    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ) {
+    public static function verifyPass( $clear_pass, $salt, $db_hashed_pass ): bool {
         $pepperedPass = hash_hmac( "sha256", $clear_pass . $salt, INIT::$AUTHSECRET );
+
         return password_verify( $pepperedPass, $db_hashed_pass );
     }
 
     /**
      * Generate 128bit password with real uniqueness over single process instance
-     *   N.B. Concurrent requests can collide ( Ex: fork )
+     *   N.B. Concurrent requests can collide (Ex: fork)
      *
-     * Minimum Password Length 12 Characters
+     * Minimum Password Length of 12 Characters
      *
-     * WARNING: the obtained random string MUST NOT be used for security purposes
+     * WARNING: the obtained random string MUST NOT be used for security, @use self::uuid4 instead.
      *
      * @param int  $maxlength
      * @param bool $more_entropy
      *
      * @return bool|string
      */
-    public static function randomString( $maxlength = 12, $more_entropy = false ) {
+    public static function randomString( int $maxlength = 12, bool $more_entropy = false ): string {
 
         $_pwd = md5( uniqid( '', true ) );
 
@@ -256,21 +254,28 @@ class Utils {
 
     /**
      * @param $string
+     *
      * @return bool
      */
-    public static function isJson( $string ) {
-        json_decode($string);
+    public static function isJson( $string ): bool {
+        json_decode( $string );
+
         return json_last_error() === JSON_ERROR_NONE;
     }
 
-    public static function mysqlTimestamp( $time ) {
-        return date( 'Y-m-d H:i:s', $time );
+    public static function mysqlTimestamp( $time ): string {
+        $date = date( 'Y-m-d H:i:s', $time );
+        if ( !$date ) {
+            $date = date( 'Y-m-d H:i:s', time() );
+        }
+
+        return $date;
     }
 
     /**
      * @throws Exception
      */
-    public static function api_timestamp( $date_string ) {
+    public static function api_timestamp( $date_string ): ?string {
         if ( $date_string == null ) {
             return null;
         } else {
@@ -280,7 +285,7 @@ class Utils {
         }
     }
 
-    public static function underscoreToCamelCase( $string ) {
+    public static function underscoreToCamelCase( $string ): string {
         return str_replace( ' ', '', ucwords( str_replace( '_', ' ', $string ) ) );
     }
 
@@ -289,9 +294,8 @@ class Utils {
      *
      * @return string
      */
-    public static function trimAndLowerCase($string)
-    {
-        return trim(strtolower($string));
+    public static function trimAndLowerCase( $string ): string {
+        return trim( strtolower( $string ) );
     }
 
     /**
@@ -301,25 +305,26 @@ class Utils {
      *
      * @return array
      */
-    public static function popArray(array $array)
-    {
-        if(end($array) === ''){
-            array_pop($array);
+    public static function removeEmptyStringFromTail( array $array ): array {
 
-            return self::popArray($array);
+        if ( end( $array ) === '' ) {
+            array_pop( $array );
+
+            return self::removeEmptyStringFromTail( $array );
         }
 
         return $array;
+
     }
 
     /**
-     * @param $params
-     * @param $required_keys
+     * @param array $params
+     * @param array $required_keys
      *
-     * @return mixed
+     * @return array
      * @throws Exception
      */
-    public static function ensure_keys( $params, $required_keys ) {
+    public static function ensure_keys( array $params, array $required_keys ): array {
         $missing = [];
 
         foreach ( $required_keys as $key ) {
@@ -335,33 +340,19 @@ class Utils {
         return $params;
     }
 
-    public static function is_assoc( $array ) {
-        return is_array( $array ) and count( array_filter( array_keys( $array ), 'is_string' ) );
-    }
-
-    public static function curlFile( $filePath ) {
-        $curlFile = "@$filePath";
-        // CURLfile is available with PHP 5.5 and higher versions
-        if ( version_compare( PHP_VERSION, '5.5.0' ) >= 0 ) {
-            $curlFile = new CURLFile( $filePath );
-        }
-
-        return $curlFile;
-    }
-
     /**
-     * @return string|void
+     * @return string|null
      */
-    public static function getRealIpAddr() {
+    public static function getRealIpAddr(): ?string {
 
         foreach ( [
-                      'HTTP_CLIENT_IP',
-                      'HTTP_X_FORWARDED_FOR',
-                      'HTTP_X_FORWARDED',
-                      'HTTP_X_CLUSTER_CLIENT_IP',
-                      'HTTP_FORWARDED_FOR',
-                      'HTTP_FORWARDED',
-                      'REMOTE_ADDR'
+                          'HTTP_CLIENT_IP',
+                          'HTTP_X_FORWARDED_FOR',
+                          'HTTP_X_FORWARDED',
+                          'HTTP_X_CLUSTER_CLIENT_IP',
+                          'HTTP_FORWARDED_FOR',
+                          'HTTP_FORWARDED',
+                          'REMOTE_ADDR'
                   ] as $key ) {
             if ( isset( $_SERVER[ $key ] ) ) {
                 foreach ( explode( ',', $_SERVER[ $key ] ) as $ip ) {
@@ -372,21 +363,23 @@ class Utils {
             }
         }
 
+        return null;
+
     }
 
     /**
      * @throws Exception
      */
-    public static function sendErrMailReport( $htmlContent, $subject = null ) {
+    public static function sendErrMailReport( string $htmlContent, string $subject = null ): void {
 
         if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
-            return true;
+            return;
         }
 
         $mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 
         if ( empty( $subject ) ) {
-            $subject = 'Alert from MateCat: ' . php_uname( 'n' );
+            $subject = 'Alert from Matecat: ' . php_uname( 'n' );
         } else {
             $subject .= ' ' . php_uname( 'n' );
         }
@@ -399,11 +392,9 @@ class Utils {
 
         Log::doJsonLog( 'Message has been sent' );
 
-        return true;
-
     }
 
-    protected static function _getBackTrace() {
+    protected static function _getBackTrace(): string {
 
         $trace = debug_backtrace();
         $now   = date( 'Y-m-d H:i:s' );
@@ -422,17 +413,6 @@ class Utils {
 
         return $stringDataInfo;
 
-    }
-
-    /**
-     * Alias of uuid4
-     * @see Utils::uuid4()
-     *
-     * @return string|null
-     * @throws Exception
-     */
-    public static function createToken() {
-        return self::uuid4();
     }
 
     /**
@@ -460,16 +440,17 @@ class Utils {
         // Set bits 6-7 to 10
         $data[ 8 ] = chr( ord( $data[ 8 ] ) & 0x3f | 0x80 );
 
-        // Output the 36 character UUID.
+        // Output the 36-character UUID.
         return vsprintf( '%s%s-%s-%s-%s-%s%s%s', str_split( bin2hex( $data ), 4 ) );
+
     }
 
     /**
-     * @param $token
+     * @param string|null $token
      *
      * @return bool
      */
-    public static function isTokenValid( $token = null ) {
+    public static function isTokenValid( ?string $token = null ): bool {
         if ( empty( $token ) || !preg_match( '|^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$|', $token ) ) {
             return false;
         }
@@ -487,11 +468,12 @@ class Utils {
      *
      * @return string The fixed file name.
      */
-    public static function fixFileName( $stringName, $directory = null, $upCount = true ) {
+    public static function fixFileName( string $stringName, string $directory = null, bool $upCount = true ): string {
         $string = filter_var( $stringName, FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
         while ( is_file( $directory . DIRECTORY_SEPARATOR . $string ) && $upCount ) {
             $string = static::upCountName( $string );
         }
+
         return $string;
     }
 
@@ -503,9 +485,10 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected function upCountNameCallback( $matches ) {
+    protected function upCountNameCallback( array $matches ): string {
         $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
-        $ext   = isset( $matches[ 2 ] ) ? $matches[ 2 ] : '';
+        $ext   = $matches[ 2 ] ?? '';
+
         return '_(' . $index . ')' . $ext;
     }
 
@@ -516,9 +499,9 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected static function upCountName( $name ) {
+    protected static function upCountName( string $name ): string {
         return preg_replace_callback(
-            '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
+                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils', 'upCountNameCallback' ], $name, 1
         );
     }
 
@@ -530,17 +513,17 @@ class Utils {
      *
      * @return bool Returns true if the file name is valid, false otherwise.
      */
-    public static function isValidFileName( $fileUpName ) {
+    public static function isValidFileName( string $fileUpName ): bool {
 
         if (
-            stripos( $fileUpName, '../' ) !== false ||
-            stripos( $fileUpName, '/../' ) !== false ||
-            stripos( $fileUpName, '/..' ) !== false ||
-            stripos( $fileUpName, '%2E%2E%2F' ) !== false ||
-            stripos( $fileUpName, '%2F%2E%2E%2F' ) !== false ||
-            stripos( $fileUpName, '%2F%2E%2E' ) !== false ||
-            stripos( $fileUpName, '.' ) === 0 ||
-            stripos( $fileUpName, '%2E' ) === 0
+                stripos( $fileUpName, '../' ) !== false ||
+                stripos( $fileUpName, '/../' ) !== false ||
+                stripos( $fileUpName, '/..' ) !== false ||
+                stripos( $fileUpName, '%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E%2F' ) !== false ||
+                stripos( $fileUpName, '%2F%2E%2E' ) !== false ||
+                stripos( $fileUpName, '.' ) === 0 ||
+                stripos( $fileUpName, '%2E' ) === 0
         ) {
             //Directory Traversal!
             return false;
@@ -555,7 +538,7 @@ class Utils {
      */
     public static function deleteDir( $dirPath ) {
 
-        if(is_dir($dirPath)){
+        if ( is_dir( $dirPath ) ) {
             $iterator = new DirectoryIterator( $dirPath );
 
             foreach ( $iterator as $fileInfo ) {
@@ -566,7 +549,7 @@ class Utils {
                     self::deleteDir( $fileInfo->getPathname() );
                 } else {
                     $fileName = $fileInfo->getFilename();
-                    if ( $fileName[0] == '.' ) {
+                    if ( $fileName[ 0 ] == '.' ) {
                         continue;
                     }
                     $outcome = unlink( $fileInfo->getPathname() );
@@ -587,7 +570,7 @@ class Utils {
      * @return void|string
      * @throws Exception
      */
-    public static function raiseJsonExceptionError( $raise = true ) {
+    public static function raiseJsonExceptionError( bool $raise = true ) {
 
         if ( function_exists( "json_last_error" ) ) {
 
@@ -627,24 +610,9 @@ class Utils {
 
     }
 
-    //Array_column() is not supported on PHP 5.4, so I'll rewrite it
-    public static function array_column( array $input, $column_key, $index_key = null ) {
-
-        if ( function_exists( 'array_column' ) ) {
-            return array_column( $input, $column_key, $index_key );
-        }
-
-        $result = [];
-        foreach ( $input as $k => $v ) {
-            $result[ $index_key ? $v[ $index_key ] : $k ] = $v[ $column_key ];
-        }
-
-        return $result;
-    }
-
     // Previously in FileFormatConverter
     //remove UTF-8 BOM
-    public static function stripFileBOM( $string, $utf = 8 ) {
+    public static function stripFileBOM( $string, $utf = 8 ): string {
         //depending on encoding, different slices are to be cut
         switch ( $utf ) {
             case 16:
@@ -671,26 +639,26 @@ class Utils {
      * uploadDirFromSessionCookie
      *
      * @oaram $guid string
-     * @param $file_name string optional file name to append to the upload path
+     * @param $guid
+     * @param $file_name string|null optional file name to append to the upload path
      *
      * @return string
      */
-    public static function uploadDirFromSessionCookie( $guid, $file_name = null ) {
+    public static function uploadDirFromSessionCookie( $guid, string $file_name = null ): string {
         return INIT::$UPLOAD_REPOSITORY . "/" .
-            $guid . '/' .
-            $file_name;
+                $guid . '/' .
+                $file_name;
     }
 
     /**
-     * @param       $match
-     * @param       $job_tm_keys
-     * @param       $job_owner
-     * @param       $uid
+     * @param array    $match
+     * @param string   $job_tm_keys
+     * @param int|null $uid
      *
      * @return null|string
      * @throws Exception
      */
-    public static function changeMemorySuggestionSource( $match, $job_tm_keys, $job_owner, $uid ) {
+    public static function changeMemorySuggestionSource( array $match, string $job_tm_keys, ?int $uid = null ): string {
         $sug_source = $match[ 'created_by' ];
         $key        = $match[ 'memory_key' ];
 
@@ -722,7 +690,7 @@ class Utils {
     /**
      * @throws Exception
      */
-    public static function keyNameFromUserKeyring( $uid, $key ) {
+    public static function keyNameFromUserKeyring( $uid, $key ): ?string {
         if ( $uid === null ) {
             return null;
         }
@@ -752,18 +720,17 @@ class Utils {
     /**
      * Returns description for a key. If not found then default to "Private TM".
      *
-     * @param $key
-     * @param $job_tm_keys
+     * @param string $key
+     * @param string $job_tm_keys
      *
      * @return null|string
      * @throws Exception
      */
-    public static function getDefaultKeyDescription( $key, $job_tm_keys ) {
+    public static function getDefaultKeyDescription( string $key, string $job_tm_keys ): string {
         $ownerKeys   = TmKeyManagement_TmKeyManagement::getOwnerKeys( [ $job_tm_keys ] );
         $description = Constants::NO_DESCRIPTION_TM;
 
         //search the current key
-        $currentKey = null;
         for ( $i = 0; $i < count( $ownerKeys ); $i++ ) {
             $name = trim( $ownerKeys[ $i ]->name );
 
@@ -783,21 +750,13 @@ class Utils {
     /**
      * stringsAreEqual
      *
-     * This function needs to handle a special case. When old translation has been saved from a pre-translated XLIFF,
-     * encoding is different from the one received from the UI. Quotes are different for instance.
-     *
-     * So we compare the decoded version of the two strings. Should always work.
-     *
-     * @param $stringA
-     * @param $stringB
+     * @param string $stringA
+     * @param string $stringB
      *
      * @return bool
      */
-    public static function stringsAreEqual( $stringA, $stringB ) {
-        $old = html_entity_decode( $stringA, ENT_XML1 | ENT_QUOTES );
-        $new = html_entity_decode( $stringB, ENT_XML1 | ENT_QUOTES );
-
-        return $new == $old;
+    public static function stringsAreEqual( string $stringA, string $stringB ): bool {
+        return $stringA == $stringB;
     }
 
     /**
@@ -808,35 +767,24 @@ class Utils {
      *
      * @return string
      */
-    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ) {
+    public static function htmlentitiesToUft8WithoutDoubleEncoding( $string ): string {
         return htmlentities( $string, ENT_QUOTES, 'UTF-8', false );
     }
 
     /**
      * @param string $phrase
-     * @param int $max_words
+     * @param int    $max_words
      *
      * @return string
      */
-    public static function truncatePhrase($phrase, $max_words){
+    public static function truncatePhrase( string $phrase, int $max_words ): string {
 
-        $phrase_array = explode(' ',$phrase);
-        if(count($phrase_array) > $max_words && $max_words > 0){
-            $phrase = implode(' ',array_slice($phrase_array, 0, $max_words));
+        $phrase_array = explode( ' ', $phrase );
+        if ( count( $phrase_array ) > $max_words && $max_words > 0 ) {
+            $phrase = implode( ' ', array_slice( $phrase_array, 0, $max_words ) );
         }
 
         return $phrase;
-    }
-
-    /**
-     * This escape is need by
-     * javascript JSON.parse() function
-     *
-     * @param array $data
-     * @return string
-     */
-    public static function escapeJsonEncode($data){
-        return str_replace("\\\"","\\\\\\\"", json_encode($data));
     }
 
     /**
@@ -847,68 +795,127 @@ class Utils {
      * This is the link: <a href="https://matecat.com">click here</a> -----> This is the link: click here(https://matecat.com)
      *
      * @param string $html
+     *
      * @return string
      */
-    public static function stripTagsPreservingHrefs($html)
-    {
-        $htmlDom = new DOMDocument('1.0', 'UTF-8');
+    public static function stripTagsPreservingHrefs( string $html ): string {
+        $htmlDom               = new DOMDocument( '1.0', 'UTF-8' );
         $htmlDom->formatOutput = false;
 
-        @$htmlDom->loadHTML($html);
+        @$htmlDom->loadHTML( $html );
 
-        $links = $htmlDom->getElementsByTagName('a');
+        $links = $htmlDom->getElementsByTagName( 'a' );
+        $images = $htmlDom->getElementsByTagName( 'img' );
 
+        // replace <a> with a label(href)
         /** @var DOMElement $link */
-        foreach($links as $link){
-            $linkLabel = $link->nodeValue;
-            $linkHref = $link->getAttribute('href');
-            $link->nodeValue = $linkLabel . "(".str_replace("\\\"","", $linkHref).")";
+        foreach ( $links as $link ) {
+            $linkLabel       = $link->nodeValue;
+            $linkHref        = $link->getAttribute( 'href' );
+            $link->nodeValue = "[".$linkLabel."]" . "(" . str_replace( "\\\"", "", $linkHref ) . ")";
         }
 
-        $html = $htmlDom->saveHtml($htmlDom->documentElement);
-        $html = utf8_decode($html);
-
-        $strippedHtml = strip_tags($html);
-        $strippedHtml = ltrim($strippedHtml);
-        $strippedHtml = rtrim($strippedHtml);
-
-        return $strippedHtml;
-    }
-
-    /**
-     * @param $email
-     *
-     * @throws Exception
-     */
-    public static function validateEmailAddress($email)
-    {
-        $clean_email = filter_var($email,FILTER_SANITIZE_EMAIL);
-
-        if( $email !== $clean_email or !filter_var($email,FILTER_VALIDATE_EMAIL) ){
-            throw new Exception($email . " is not a valid email address");
+        // replace <img> with src
+        $i = $images->length - 1;
+        while ($i > -1) {
+            $image = $images->item($i);
+            $src = $image->getAttribute( 'src' );
+            $newElement = $htmlDom->createTextNode($src);
+            $image->parentNode->replaceChild($newElement, $image);
+            $i--;
         }
+
+        $html = $htmlDom->saveHtml( $htmlDom->documentElement );
+        $html = utf8_decode( $html );
+
+        $strippedHtml = strip_tags( $html );
+        $strippedHtml = ltrim( $strippedHtml );
+
+        return rtrim( $strippedHtml );
     }
 
     /**
      * @param $list
+     *
      * @return array
      */
-    public static function validateEmailList($list){
+    public static function validateEmailList( $list ): array {
 
         $aValid = [];
-        foreach ( explode( ',', $list ) AS $sEmailAddress ) {
+        foreach ( explode( ',', $list ) as $sEmailAddress ) {
             $sEmailAddress = trim( $sEmailAddress );
-            if( empty( $sEmailAddress ) ) continue;
+            if ( empty( $sEmailAddress ) ) {
+                continue;
+            }
             $aValid[ $sEmailAddress ] = filter_var( $sEmailAddress, FILTER_VALIDATE_EMAIL );
         }
 
         $invalidEmails = array_keys( $aValid, false );
 
-        if( !empty( $invalidEmails ) ){
+        if ( !empty( $invalidEmails ) ) {
             throw new InvalidArgumentException( "Not valid e-mail provided: " . implode( ", ", $invalidEmails ), -6 );
         }
 
         return array_keys( $aValid );
+    }
+
+    /**
+     * @param array $arr
+     * @return bool
+     */
+    public static function arrayIsList(array $arr)
+    {
+        if ($arr === []) {
+            return true;
+        }
+
+        return array_keys($arr) === range(0, count($arr) - 1);
+    }
+
+    /**
+     * @param string $haystack
+     * @param string $needle
+     *
+     * @return bool
+     */
+    public static function stringEndsWith( string $haystack, string $needle ): bool {
+        $length = strlen( $needle );
+        if ( $length == 0 ) {
+            return true;
+        }
+
+        return ( substr( $haystack, -$length ) === $needle );
+    }
+
+    /**
+     * @param string    $haystack
+     * @param string    $needle
+     * @param bool|null $caseSensitive
+     *
+     * @return bool
+     */
+    public static function stringStartsWith( string $haystack, string $needle, ?bool $caseSensitive = true ): bool {
+        return ( $caseSensitive ) ? strpos( $haystack, $needle ) === 0 : stripos( $haystack, $needle ) === 0;
+    }
+
+    /**
+     * @param $nameString
+     * @return bool|string
+     */
+    public static function sanitizeName( $nameString ) {
+
+        $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_.\-]/u', "_", $nameString );
+        $nameString = preg_replace( '/_{2,}/', "_", $nameString );
+        $nameString = str_replace( '_.', ".", $nameString );
+
+        // project name validation
+        $pattern = '/^[\p{L}\s0-9a-zA-Z_.\-]+$/u';
+
+        if ( !preg_match( $pattern, $nameString ) ) {
+            return false;
+        }
+
+        return $nameString;
 
     }
 }

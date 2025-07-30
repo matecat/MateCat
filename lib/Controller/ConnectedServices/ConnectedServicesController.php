@@ -9,80 +9,95 @@
 namespace ConnectedServices;
 
 
-use API\App\AbstractStatefulKleinController;
+use AbstractControllers\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
+use API\Commons\Validators\LoginValidator;
+use ConnectedServices\Google\GoogleProvider;
+use Exception;
 use Exceptions\NotFoundException;
+use INIT;
+use Utils;
 
-class ConnectedServicesController extends AbstractStatefulKleinController  {
-
-    /**
-     * @var \Users_UserStruct
-     */
-    protected $user ;
+class ConnectedServicesController extends AbstractStatefulKleinController {
 
     /**
-     * @var ConnectedServiceStruct
+     * @var ?ConnectedServiceStruct
      */
-    protected $service ;
+    protected ?ConnectedServiceStruct $connectedServiceStruct = null;
 
+    /**
+     * @return void
+     */
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
+
+
+    /**
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function verify() {
         $this->__validateOwnership();
 
-        if ( $this->service->service == ConnectedServiceDao::GDRIVE_SERVICE ) {
+        if ( $this->connectedServiceStruct->service == ConnectedServiceDao::GDRIVE_SERVICE ) {
             $this->__handleGDrive();
         }
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function update() {
-        $this->__validateOwnership() ;
+        $this->__validateOwnership();
 
-        $params = filter_var_array( $this->request->params(), array(
-            'disabled' => FILTER_VALIDATE_BOOLEAN
-        ));
+        $params = filter_var_array( $this->request->params(), [
+                'disabled' => FILTER_VALIDATE_BOOLEAN
+        ] );
 
-        if ( $params['disabled'] ) {
-            $this->service->disabled_at = \Utils::mysqlTimestamp( time() ) ;
+        if ( $params[ 'disabled' ] ) {
+            $this->connectedServiceStruct->disabled_at = Utils::mysqlTimestamp( time() );
+        } else {
+            $this->connectedServiceStruct->disabled_at = null;
         }
-        else {
-           $this->service->disabled_at = null ;
-        }
 
-        ConnectedServiceDao::updateStruct($this->service, array('disabled_at') ) ;
+        ConnectedServiceDao::updateStruct( $this->connectedServiceStruct, [ 'fields' => [ 'disabled_at' ] ] );
 
-        $formatter = new ConnectedService( array() );
-        $this->response->json( array( 'connected_service' => $formatter->renderItem( $this->service ) ) ) ;
+        $this->refreshClientSessionIfNotApi();
+
+        $formatter = new ConnectedService( [] );
+        $this->response->json( [ 'connected_service' => $formatter->renderItem( $this->connectedServiceStruct ) ] );
     }
 
-    protected function afterConstruct() {
-        \Bootstrap::sessionClose();
-    }
-
+    /**
+     * @throws Exception
+     */
     private function __handleGDrive() {
-        $verifier = new GDriveTokenVerifyModel( $this->service ) ;
+        $verifier = new GDriveTokenVerifyModel( $this->connectedServiceStruct );
 
-        if ( $verifier->validOrRefreshed() ) {
-            $this->response->code( 200 ) ;
-        }
-        else {
-            $this->response->code( 403 ) ;
+        $client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+
+        if ( $verifier->validOrRefreshed( $client ) ) {
+            $this->response->code( 200 );
+        } else {
+            $this->response->code( 403 );
         }
 
-        $formatter = new ConnectedService( array() );
-        $this->response->json( array( 'connected_service' => $formatter->renderItem( $verifier->getService() ) ) ) ;
+        $formatter = new ConnectedService( [] );
+        $this->response->json( [ 'connected_service' => $formatter->renderItem( $verifier->getService() ) ] );
     }
 
+    /**
+     * @throws NotFoundException
+     */
     private function __validateOwnership() {
 
-        // check for the user to be logged
-        if ( !$this->user ) {
-            throw new NotFoundException('user not found') ;
-        }
+        $serviceDao                   = new ConnectedServiceDao();
+        $this->connectedServiceStruct = $serviceDao->findServiceByUserAndId( $this->user, $this->request->param( 'id_service' ) );
 
-        $serviceDao = new ConnectedServiceDao();
-        $this->service = $serviceDao->findServiceByUserAndId( $this->user, $this->request->param('id_service') );
-
-        if ( !$this->service ) {
-            throw new NotFoundException( 'service not found' ) ;
+        if ( !$this->connectedServiceStruct ) {
+            throw new NotFoundException( 'connectedServiceStruct not found' );
         }
     }
 }

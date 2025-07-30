@@ -11,6 +11,7 @@ namespace TaskRunner\Commons;
 
 /**
  * Class Context
+ *
  * Context definition for the Executors
  *
  * @package TaskRunner\Commons
@@ -21,42 +22,36 @@ class Context {
      * The name for the queue on AMQ
      * @var string
      */
-    public $queue_name;
+    public string $queue_name;
 
     /**
      * Name of the set of processes in which every pid will be put by TaskManager
      * @var string
      */
-    public $pid_set_name;
-
-    /**
-     * List of numerical process IDs in my list
-     * @var array
-     */
-    public $pid_list = [];
+    public string $pid_set_name;
 
     /**
      * Number of the processes actually tied to that queue
      * @var int
      */
-    public $pid_list_len = 0;
+    public int $pid_list_len = 0;
 
     /**
-     * Max processes that must to be tied the queue
+     * Max processes that must be tied the queue
      * @var int
      */
-    public $max_executors = 0;
+    public int $max_executors = 0;
 
     /**
      * Default Logger name
      * @var string
      */
-    public $loggerName = 'Executor.log';
+    public string $loggerName = 'Executor.log';
 
     /**
-     * @var $redis_key
+     * @var string $redis_key
      */
-    public $redis_key;
+    public string $redis_key;
 
     /**
      * AbstractContext constructor.
@@ -65,9 +60,11 @@ class Context {
      */
     protected function __construct( array $queueElement ) {
 
-        foreach ( $queueElement as $key => $values ) {
-            $this->$key = $values;
-        }
+        $this->queue_name    = $queueElement[ 'queue_name' ];
+        $this->pid_set_name  = $queueElement[ 'queue_name' ] . '_pid_set';
+        $this->max_executors = $queueElement[ 'max_executors' ];
+        $this->redis_key     = $queueElement[ 'queue_name' ] . '_redis_key';
+        $this->loggerName    = $queueElement[ 'queue_name' ] . '.log';
 
     }
 
@@ -78,7 +75,7 @@ class Context {
      *
      * @return static
      */
-    public static function buildFromArray( array $context ) {
+    public static function buildFromArray( array $context ): Context {
         return new static( $context );
     }
 

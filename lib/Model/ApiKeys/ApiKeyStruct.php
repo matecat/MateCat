@@ -1,23 +1,29 @@
 <?php
 
-class ApiKeys_ApiKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
 
-    public $id;
-    public $uid;
-    public $api_key;
-    public $api_secret;
-    public $create_date;
-    public $last_update;
-    public $enabled;
+class ApiKeys_ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
-    public function validSecret( $secret ) {
+    public ?int    $id = null;
+    public int    $uid;
+    public string $api_key;
+    public string $api_secret;
+    public string $create_date;
+    public string $last_update;
+    public bool   $enabled;
+
+    public function validSecret( $secret ): bool {
         return $this->api_secret == $secret;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getUser() {
         $dao = new Users_UserDao( Database::obtain() );
         $dao->setCacheTTL( 3600 );
-        $user = $dao->getByUid( $this->uid );
-        return $user;
+
+        return $dao->getByUid( $this->uid );
     }
 }

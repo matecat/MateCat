@@ -2,15 +2,18 @@
 
 namespace API\V2;
 
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Project;
-use API\V2\Json\ProjectAnonymous;
-use API\V2\Validators\ProjectAccessValidator;
-use API\V2\Validators\ProjectPasswordValidator;
 use Constants_JobStatus;
 use Exception;
+use Exceptions\NotFoundException;
 use Jobs_JobDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
+use ReflectionException;
 use Translations_SegmentTranslationDao;
 use Utils;
 
@@ -25,23 +28,20 @@ class ProjectsController extends KleinController {
     /**
      * @var Projects_ProjectStruct
      */
-    private $project;
+    private Projects_ProjectStruct $project;
 
     /**
-     * @var ProjectPasswordValidator
+     * @return void
+     * @throws NotFoundException
+     * @throws ReflectionException
+     * @throws Exception
      */
-    private $projectValidator;
-
     public function get() {
 
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-            $formatted->setUser( $this->user );
-            if ( !empty( $this->api_key ) ) {
-                $formatted->setCalledFromApi( true );
-            }
+        $formatted = new Project();
+        $formatted->setUser( $this->user );
+        if ( !empty( $this->api_key ) ) {
+            $formatted->setCalledFromApi( true );
         }
 
         $this->featureSet->loadForProject( $this->project );
@@ -50,10 +50,18 @@ class ProjectsController extends KleinController {
 
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function setDueDate() {
         $this->updateDueDate();
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function updateDueDate() {
         if (
                 array_key_exists( "due_date", $this->params )
@@ -67,25 +75,22 @@ class ProjectsController extends KleinController {
             $project_dao = new Projects_ProjectDao;
             $project_dao->updateField( $this->project, "due_date", $due_date );
         }
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
+
+        $formatted = new Project();
 
         //$this->response->json( $this->project->toArray() );
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
     public function deleteDueDate() {
         $project_dao = new Projects_ProjectDao;
         $project_dao->updateField( $this->project, "due_date", null );
 
-        if ( empty( $this->user ) ) {
-            $formatted = new ProjectAnonymous();
-        } else {
-            $formatted = new Project();
-        }
+        $formatted = new Project();
         $this->response->json( [ 'project' => $formatted->renderItem( $this->project ) ] );
     }
 
@@ -122,7 +127,7 @@ class ProjectsController extends KleinController {
         foreach ( $chunks as $chunk ) {
 
             // update a job only if it is NOT deleted
-            if ( !$chunk->wasDeleted() ) {
+            if ( !$chunk->isDeleted() ) {
                 Jobs_JobDao::updateJobStatus( $chunk, $status );
 
                 $lastSegmentsList = Translations_SegmentTranslationDao::getMaxSegmentIdsFromJob( $chunk );
@@ -143,7 +148,7 @@ class ProjectsController extends KleinController {
         } );
 
         $this->appendValidator( $projectValidator );
-
+        $this->appendValidator( new LoginValidator( $this ) );
     }
 
 }

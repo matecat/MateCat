@@ -9,44 +9,66 @@
 
 namespace API\V2;
 
+use AbstractControllers\KleinController;
 use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
 use API\V2\Json\Activity;
+use Exception;
+use ReflectionException;
 
 class ActivityLogController extends KleinController {
 
-
-    protected $rawLogContent;
-    protected $project_data;
-
-    public function lastOnProject(){
-
-        $validator = new Validators\ProjectPasswordValidator( $this );
+    /**
+     * @throws Exception
+     */
+    public function allOnProject() {
+        $validator = new ProjectPasswordValidator( $this );
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $rawContent = $activityLogDao->getLastActionInProject( $validator->getIdProject() ) ;
+        $rawContent     = $activityLogDao->getAllForProject( $validator->getIdProject() );
 
-        $formatted = new Activity( $rawContent ) ;
-        $this->response->json( array( 'activity' => $formatted->render() ) );
+        $formatted = new Activity( $rawContent );
+        $this->response->json( $formatted->render() );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function lastOnProject() {
+
+        $validator = new ProjectPasswordValidator( $this );
+        $validator->validate();
+
+        $activityLogDao = new ActivityLogDao();
+        $rawContent     = $activityLogDao->getLastActionInProject( $validator->getIdProject() );
+
+        $formatted = new Activity( $rawContent );
+        $this->response->json( [ 'activity' => $formatted->render() ] );
 
     }
 
-    public function lastOnJob(){
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function lastOnJob() {
 
-        $validator = new Validators\ChunkPasswordValidator( $this );
+        $validator = new ChunkPasswordValidator( $this );
         $validator->validate();
 
-        $activityLogDao = new ActivityLogDao();
+        $activityLogDao                  = new ActivityLogDao();
         $activityLogDao->whereConditions = ' id_job = :id_job ';
-        $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
-        $this->rawLogContent  = $activityLogDao->read(
+        $activityLogDao->epilogueString  = " ORDER BY ID DESC LIMIT 1";
+        $rawLogContent                   = $activityLogDao->read(
                 new ActivityLogStruct(),
-                [ 'id_job' =>  $validator->getJobId() ]
+                [ 'id_job' => $validator->getJobId() ]
         );
 
-        $formatted = new Activity( $this->rawLogContent ) ;
-        $this->response->json( array( 'activity' => $formatted->render() ) );
+        $formatted = new Activity( $rawLogContent );
+        $this->response->json( [ 'activity' => $formatted->render() ] );
 
     }
 

@@ -1,7 +1,8 @@
 <?php
 
-use API\App\Json\CompatibilityProject;
+use API\V2\Json\Project;
 use Exceptions\NotFoundException;
+use Teams\TeamStruct;
 
 class ManageUtils {
 
@@ -17,7 +18,7 @@ class ManageUtils {
      * @param                       $search_only_completed
      * @param                       $project_id           int
      *
-     * @param \Teams\TeamStruct     $team
+     * @param TeamStruct     $team
      *
      * @param Users_UserStruct|null $assignee
      * @param                       $no_assignee
@@ -25,21 +26,21 @@ class ManageUtils {
      * @return array
      */
     protected static function _getProjects(
-            Users_UserStruct  $user,
-                              $start,
-                              $step,
-                              $search_in_pname,
-                              $search_source,
-                              $search_target,
-                              $search_status,
-                              $search_only_completed,
-                              $project_id,
-            \Teams\TeamStruct $team = null,
-            Users_UserStruct  $assignee = null,
-                              $no_assignee
+            Users_UserStruct $user,
+                             $start,
+                             $step,
+                             $search_in_pname,
+                             $search_source,
+                             $search_target,
+                             $search_status,
+                             $search_only_completed,
+                             $project_id,
+            TeamStruct       $team = null,
+            Users_UserStruct $assignee = null,
+                             $no_assignee = false
     ) {
 
-        list( $conditions, $data ) = static::conditionsForProjectsQuery(
+        [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname,
                 $search_source,
                 $search_target,
@@ -98,13 +99,12 @@ class ManageUtils {
      * @param                        $search_status
      * @param                        $search_only_completed
      * @param                        $project_id
-     * @param \Teams\TeamStruct|null $team
+     * @param TeamStruct|null        $team
      * @param Users_UserStruct|null  $assignee
      * @param bool                   $no_assignee
      *
      * @return array
-     * @throws NotFoundException
-     * @throws Exception
+     * @throws ReflectionException
      */
     public static function getProjects(
             Users_UserStruct  $user,
@@ -116,10 +116,10 @@ class ManageUtils {
                               $search_status,
                               $search_only_completed,
                               $project_id,
-            \Teams\TeamStruct $team = null,
+            TeamStruct $team = null,
             Users_UserStruct  $assignee = null,
                               $no_assignee = false
-    ) {
+    ): array {
         $id_list = static::_getProjects(
                 $user,
                 $start,
@@ -138,7 +138,7 @@ class ManageUtils {
         $_projects = new Projects_ProjectDao();
         $projects  = $_projects->getByIdList( $id_list );
 
-        $projectRenderer = new CompatibilityProject( $projects, $search_status );
+        $projectRenderer = new Project( $projects, $search_status );
         $projectRenderer->setUser( $user );
 
         return $projectRenderer->render();
@@ -200,7 +200,7 @@ class ManageUtils {
      * @param                        $search_target
      * @param                        $search_status
      * @param                        $search_only_completed
-     * @param \Teams\TeamStruct|null $team
+     * @param TeamStruct|null $team
      * @param Users_UserStruct|null  $assignee
      * @param bool                   $no_assignee
      *
@@ -208,12 +208,12 @@ class ManageUtils {
      */
     public static function getProjectsNumber( Users_UserStruct  $user, $search_in_pname, $search_source, $search_target, $search_status,
                                                                 $search_only_completed,
-                                              \Teams\TeamStruct $team = null,
+                                              TeamStruct $team = null,
                                               Users_UserStruct  $assignee = null,
                                                                 $no_assignee = false
     ) {
 
-        list( $conditions, $data ) = static::conditionsForProjectsQuery(
+        [ $conditions, $data ] = static::conditionsForProjectsQuery(
                 $search_in_pname, $search_source, $search_target,
                 $search_status, $search_only_completed
         );

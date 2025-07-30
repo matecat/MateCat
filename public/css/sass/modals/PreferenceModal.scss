@@ -1,3 +1,5 @@
+@use "../commons/colors";
+
 .preferences-modal .user-info-form {
   font-size: 18px;
   line-height: 30px;
@@ -20,7 +22,7 @@
 
   > label {
     font-size: 15px;
-    color: $grey1;
+    color: colors.$grey1;
   }
 }
 
@@ -53,7 +55,7 @@
       font-size: 15px;
       text-align: left;
       word-wrap: break-word;
-      color: $grey1;
+      color: colors.$grey1;
       white-space: nowrap;
       width: 100%;
       border: none;
@@ -66,7 +68,7 @@
 
   .user-api-text-confirm-delete {
     label {
-      color: $black;
+      color: colors.$black;
     }
   }
 
@@ -81,7 +83,7 @@
     flex: 1 100%;
     line-height: 40px;
     margin-top: 13px;
-    border: 1px solid $greenDefault;
+    border: 1px solid colors.$greenDefault;
     background-color: #f7fdf7;
     border-radius: 4px;
     display: flex;
@@ -90,7 +92,7 @@
     padding: 10px;
 
     i {
-      color: $greenDefault;
+      color: colors.$greenDefault;
       margin-top: 8px;
       margin-left: 20px;
     }
@@ -121,7 +123,7 @@
 
   &.user-api-created textarea,
   &.user-api-created label {
-    color: $black;
+    color: colors.$black;
   }
 }
 
@@ -130,9 +132,9 @@
   line-height: 25px;
   .user-info-icon-update {
     cursor: pointer;
-    color: $grey;
+    color: colors.$grey;
     &:hover {
-      color: $black;
+      color: colors.$black;
     }
   }
 }
@@ -140,6 +142,9 @@
 .user-info-details {
   height: 35px;
   align-items: center;
+  display: flex;
+  align-content: center;
+  gap: 10px;
   &.user-info-modify {
     height: 35px;
     input,
@@ -147,9 +152,7 @@
       height: 35px !important;
     }
   }
-  display: flex;
-  align-content: center;
-  gap: 10px;
+
   input {
     margin-top: 0 !important;
     width: 150px !important;
@@ -208,7 +211,7 @@
     font-size: 16px;
     margin-bottom: 15px;
     margin-left: 80%;
-    background-color: $translatedBlue;
+    background-color: colors.$translatedBlue;
     transition: 0.3s ease;
     color: #ffffff;
     text-shadow: none;
@@ -235,8 +238,6 @@
 }
 
 .user-info-form .grey-txt {
-  color: $grey1;
+  color: colors.$grey1;
 }
-.reset-password.btn-confirm-medium {
-  float: left;
-}
+

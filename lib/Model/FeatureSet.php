@@ -1,10 +1,13 @@
 <?php
 
 use AbstractControllers\IController;
-use API\V2\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\AuthenticationError;
+use Exceptions\NotFoundException;
 use Exceptions\ValidationError;
 use Features\BaseFeature;
 use Matecat\SubFiltering\Contracts\FeatureSetInterface;
+use TaskRunner\Exceptions\EndQueueException;
+use TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -12,19 +15,18 @@ use Matecat\SubFiltering\Contracts\FeatureSetInterface;
  * Date: 3/11/16
  * Time: 11:00 AM
  */
-class FeatureSet implements FeatureSetInterface
-{
+class FeatureSet implements FeatureSetInterface {
     /**
      * @var BasicFeatureStruct[]
      */
-    private $features = [];
+    private array $features = [];
 
-    protected $_ignoreDependencies = false;
+    protected bool $_ignoreDependencies = false;
 
     /**
      * @return BasicFeatureStruct[]
      */
-    public function getFeaturesStructs(){
+    public function getFeaturesStructs(): array {
         return $this->features;
     }
 
@@ -56,48 +58,10 @@ class FeatureSet implements FeatureSetInterface
     /**
      * @return array
      */
-    public function getCodes() {
+    public function getCodes(): array {
         return array_values( array_map( function ( $feature ) {
             return $feature->feature_code;
         }, $this->features ) );
-    }
-
-    /**
-     * Finds if any of the features loaded are extending AbstractRevisionFeature.
-     *
-     * @deprecated This method was introduced for refactoring purpose and should not be used
-     *             for new implementations.
-     */
-    public function hasRevisionFeature() {
-        return $this->detectInstanceOf( 'Features\AbstractRevisionFeature' );
-    }
-
-    /**
-     * This function scans all features' class hierarchy tree and returns the first
-     * feature that matches the given input name.
-     *
-     * This method is useful to find if the featurese has any special base or abstract
-     * feature which may require special conditionals.
-     *
-     * @param $class_name
-     *
-     * @deprecated This method was introduced for to facilitate refactoring and should not be
-     *             used for new implementations.
-     *
-     * @return bool
-     */
-    public function detectInstanceOf( $class_name ) {
-        foreach ( $this->features as $feature ) {
-            $name = Features::getPluginClass( $feature->feature_code );
-            if ( $name ) {
-                $obj = new $name( $feature );
-                if ( in_array( $class_name, class_parents( $obj ) ) ) {
-                    return $obj;
-                }
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -110,11 +74,11 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * @param $feature_codes
+     * @param array|null $feature_codes
      *
      * @throws Exception
      */
-    private function loadFromCodes( $feature_codes ) {
+    private function loadFromCodes( ?array $feature_codes = [] ) {
         $features = [];
 
         if ( !empty( $feature_codes ) ) {
@@ -161,7 +125,7 @@ class FeatureSet implements FeatureSetInterface
      * @param $metadata
      *
      * @throws Exception
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws ValidationError
      */
     public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
@@ -203,20 +167,6 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * When some HTML page need to load static
-     * resources for customization from mandatory plugins
-     * even when a plugin is not auto activable for the projects
-     * ( Ex: analyze page )
-     *
-     * @see FeatureSet::loadForProject()
-     *
-     * @throws Exception
-     */
-    public function forceAutoLoadFeatures() {
-        $this->__loadFromMandatory();
-    }
-
-    /**
      * Loads features that can be activated automatically on proejct, i.e. those that
      * don't require a parameter to be passed from the UI.
      *
@@ -242,8 +192,10 @@ class FeatureSet implements FeatureSetInterface
             return $feature->toNewObject();
         }, $features );
 
-        $returnable = array_filter( $objs, function ( BaseFeature $obj ) {
-            return $obj->isAutoActivableOnProject();
+        $returnable = array_filter( $objs, function ( ?BaseFeature $obj ) {
+            if($obj !== null){
+                return $obj->isAutoActivableOnProject();
+            }
         } );
 
         $this->merge( array_map( function ( BaseFeature $feature ) {
@@ -259,19 +211,18 @@ class FeatureSet implements FeatureSetInterface
      *
      * @return mixed
      *
-     * FIXME: this is not a real filter since the input params are not passed
      * modified in cascade to the next function in the queue.
-     * @throws \Exceptions\NotFoundException
+     * @throws NotFoundException
      * @throws ValidationError
      * @throws AuthenticationError
-     * @throws \TaskRunner\Exceptions\ReQueueException
-     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws ReQueueException
+     * @throws EndQueueException
      */
     public function filter( $method, $filterable ) {
         $args = array_slice( func_get_args(), 1 );
 
         foreach ( $this->features as $feature ) {
-            /* @var $feature BasicFeatureStruct */
+
             $obj = $feature->toNewObject();
 
             if ( !is_null( $obj ) ) {
@@ -292,15 +243,7 @@ class FeatureSet implements FeatureSetInterface
                          *
                          */
                         $filterable = call_user_func_array( [ $obj, $method ], $args );
-                    } catch ( ValidationError $e ) {
-                        throw $e;
-                    } catch ( \Exceptions\NotFoundException $e ) {
-                        throw $e;
-                    } catch ( AuthenticationError $e ) {
-                        throw $e;
-                    } catch ( \TaskRunner\Exceptions\ReQueueException $e ) {
-                        throw $e;
-                    } catch ( \TaskRunner\Exceptions\EndQueueException $e ) {
+                    } catch ( ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e ) {
                         throw $e;
                     } catch ( Exception $e ) {
                         Log::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
@@ -316,14 +259,11 @@ class FeatureSet implements FeatureSetInterface
     /**
      * @param $method
      *
-     * @throws Exception
      */
     public function run( $method ) {
-        $args       = array_slice( func_get_args(), 1 );
-        $returnable = [];
-
+        $args = array_slice( func_get_args(), 1 );
         foreach ( $this->features as $feature ) {
-            $returnable[ $feature->feature_code ] = $this->runOnFeature( $method, $feature, $args );
+            $this->runOnFeature( $method, $feature, $args );
         }
     }
 
@@ -341,9 +281,8 @@ class FeatureSet implements FeatureSetInterface
      *
      * @throws Exception
      */
-    public function appendDecorators( $name, IController $controller, PHPTAL $template ) {
+    public function appendDecorators( string $name, IController $controller, PHPTAL $template ) {
 
-        /** @var BasicFeatureStruct $feature */
         foreach ( $this->features as $feature ) {
 
             $cls = Features::getFeatureClassDecorator( $feature, $name );
@@ -358,14 +297,14 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * This function ensures that whenever a plugin load is requested
-     * it's own dependencies are also loaded
+     * This function ensures that whenever a plugin load is requested,
+     * its own dependencies are also loaded
      *
      * These dependencies are ordered so the plugin is every time at the last position
      *
      * @throws Exception
      */
-    public function sortFeatures() {
+    public function sortFeatures(): FeatureSet {
 
 
         $toBeSorted     = array_values( $this->features );
@@ -383,20 +322,17 @@ class FeatureSet implements FeatureSetInterface
     /**
      * Warning Recursion, memory overflow if there are a lot of features ( but this is impossible )
      *
-     * @param BasicFeatureStruct[]
+     * @param BasicFeatureStruct[] $featureStructsList
      *
      * @return BasicFeatureStruct[]
      */
-    private function _quickSort( $featureStructsList ) {
+    private function _quickSort( array $featureStructsList ): array {
 
         $length = count( $featureStructsList );
         if ( $length < 2 ) {
             return $featureStructsList;
         }
 
-        /**
-         * @var $firstInList BasicFeatureStruct
-         */
         $firstInList        = $featureStructsList[ 0 ];
         $ObjectFeatureFirst = $firstInList->toNewObject();
 
@@ -424,9 +360,7 @@ class FeatureSet implements FeatureSetInterface
 
         $codes = $this->getCodes();
         foreach ( $this->features as $feature ) {
-            /**
-             * @var $feature BasicFeatureStruct
-             */
+
             $baseFeature          = $feature->toNewObject();
             $missing_dependencies = array_diff( $baseFeature::getDependencies(), $codes );
 
@@ -441,14 +375,14 @@ class FeatureSet implements FeatureSetInterface
     }
 
     /**
-     * Updates the features array with new features. Ensures no duplicates are created.
+     * Updates the Features array with new features. Ensures no duplicates are created.
      * Loads dependencies as needed.
      *
      * @param $new_features BasicFeatureStruct[]
      *
      * @throws Exception
      */
-    private function merge( $new_features ) {
+    private function merge( array $new_features ) {
 
         if ( !$this->_ignoreDependencies ) {
             $this->_loadFeatureDependencies();
@@ -458,31 +392,33 @@ class FeatureSet implements FeatureSetInterface
         $conflictingDeps = [];
 
         foreach ( $new_features as $feature ) {
-            // flat dependency management
 
+            // flat dependency management
             $baseFeature = $feature->toNewObject();
 
-            $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
+            if($baseFeature !== null){
+                $conflictingDeps[ $feature->feature_code ] = $baseFeature::getConflictingDependencies();
 
-            $deps = [];
+                $deps = [];
 
-            if ( !$this->_ignoreDependencies ) {
-                $deps = array_map( function ( $code ) {
-                    return new BasicFeatureStruct( [ 'feature_code' => $code ] );
-                }, $baseFeature->getDependencies() );
+                if ( !$this->_ignoreDependencies ) {
+                    $deps = array_map( function ( $code ) {
+                        return new BasicFeatureStruct( [ 'feature_code' => $code ] );
+                    }, $baseFeature->getDependencies() );
+                }
+
+                $all_features = array_merge( $all_features, $deps, [ $feature ] );
             }
-
-            $all_features = array_merge( $all_features, $deps, [ $feature ] );
         }
 
         /** @var BasicFeatureStruct $feature */
         foreach ( $all_features as $feature ) {
             foreach ( $conflictingDeps as $key => $value ) {
-                if ( empty( $conflictingDeps[ $key ] ) ) {
+                if ( empty( $value ) ) {
                     continue;
                 }
                 if ( in_array( $feature->feature_code, $value ) ) {
-                    throw new Exception( "{$feature->feature_code} is conflicting with $key." );
+                    throw new Exception( "$feature->feature_code is conflicting with $key." );
                 }
             }
             if ( !isset( $this->features[ $feature->feature_code ] ) ) {
@@ -514,7 +450,7 @@ class FeatureSet implements FeatureSetInterface
     /**
      * @return array
      */
-    private function __getAutoloadPlugins() {
+    private function __getAutoloadPlugins(): array {
         $features = [];
 
         if ( !empty( INIT::$AUTOLOAD_PLUGINS ) ) {
@@ -529,19 +465,19 @@ class FeatureSet implements FeatureSetInterface
     /**
      * Runs a command on a single feautre
      *
-     * @param $method
-     * @param $feature
-     * @param $args
+     * @param string             $method
+     * @param BasicFeatureStruct $feature
+     * @param array              $args
      *
-     * @return mixed
+     * @return void
      */
-    private function runOnFeature( $method, BasicFeatureStruct $feature, $args ) {
+    private function runOnFeature( string $method, BasicFeatureStruct $feature, array $args ): void {
         $name = Features::getPluginClass( $feature->feature_code );
         if ( $name ) {
             $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
-                return call_user_func_array( [ $obj, $method ], $args );
+                call_user_func_array( [ $obj, $method ], $args );
             }
         }
     }

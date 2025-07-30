@@ -4,14 +4,24 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 06/10/14
  * Time: 15.49
- * 
+ *
  */
 
-abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements DataAccess_IDaoStruct, Countable {
+namespace DataAccess;
 
-    protected $cached_results = array();
+use stdClass;
+use Countable;
+use DomainException;
+use ReflectionObject;
+use ReflectionProperty;
 
-    public function __construct( Array $array_params = array() ) {
+abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
+
+    use RecursiveArrayCopy;
+
+    protected array $cached_results = [];
+
+    public function __construct( array $array_params = [] ) {
         if ( $array_params != null ) {
             foreach ( $array_params as $property => $value ) {
                 $this->$property = $value;
@@ -19,6 +29,13 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
         }
     }
 
+    /**
+     * @param $name
+     * @param $value
+     *
+     * @return void
+     * @throws DomainException
+     */
     public function __set( $name, $value ) {
         if ( !property_exists( $this, $name ) ) {
             throw new DomainException( 'Unknown property ' . $name );
@@ -30,17 +47,18 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * and be sure to clear the cache when calling cachable
      * methods.
      *
+     * @return $this
      * @example assuming the model has a cachable
-     * method called foo();
+     *          method called foo();
      *
      * $model->foo(); // makes computation the first time and caches
      * $model->foo(); // returns the cached result
      * $model->clear()->foo(); // clears the cache and returns fresh data
      *
-     * @return $this
      */
-    public function clear() {
-        $this->cached_results = array();
+    public function clear(): AbstractDaoObjectStruct {
+        $this->cached_results = [];
+
         return $this;
     }
 
@@ -53,13 +71,14 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * @param $function
      *
      * @return mixed
-     * 
+     *
      */
-    protected function cachable($method_name, $params, $function) {
-        $resultset = isset( $this->cached_results[ $method_name ] ) ? $this->cached_results[ $method_name ] : null;
-        if( $resultset == null ){
-            $resultset = $this->cached_results[ $method_name ] = call_user_func($function, $params);
+    protected function cachable( string $method_name, $params, callable $function ) {
+        $resultset = $this->cached_results[ $method_name ] ?? null;
+        if ( $resultset == null ) {
+            $resultset = $this->cached_results[ $method_name ] = call_user_func( $function, $params );
         }
+
         return $resultset;
     }
 
@@ -67,6 +86,7 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
      * @param $name
      *
      * @return mixed
+     * @throws DomainException
      */
     public function __get( $name ) {
         if ( !property_exists( $this, $name ) ) {
@@ -76,60 +96,22 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass implements Da
         return $this->$name;
     }
 
-    public function setTimestamp($attribute, $timestamp) {
-        $this->$attribute = date('c', $timestamp);
-    }
-
-    /**
-     * Checks if any error is present and if so throws an exception
-     * with imploded error messages.
-     *
-     * @throws \Exceptions\ValidationError
-     */
-
-    /**
-     * Returns an array of the public attributes of the struct.
-     * If $mask is provided, the resulting array will include
-     * only the specified keys.
-     *
-     * This method is useful in conjunction with PDO execute, where only
-     * a subset of the attributes may be required to be bound to the query.
-     *
-     * @param $mask array|null a mask for the keys to return
-     *
-     * @return array
-     *
-     * @throws ReflectionException
-     */
-    public function toArray( $mask = null ){
-
-        $attributes = array();
-        $reflectionClass = new ReflectionObject( $this );
-        $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
-        foreach( $publicProperties as $property ) {
-            if ( !empty($mask) ) {
-                if ( !in_array( $property->getName(), $mask ) ) {
-                    continue;
-                }
-            }
-            $attributes[ $property->getName() ] = $property->getValue( $this );
-        }
-        return $attributes;
-
+    public function setTimestamp( $attribute, $timestamp ) {
+        $this->$attribute = date( 'c', $timestamp );
     }
 
     /**
      * Compatibility with ArrayObject
      *
      * @return array
-     * @throws ReflectionException
      */
-    public function getArrayCopy(){
+    public function getArrayCopy() {
         return $this->toArray();
     }
 
-    public function count() {
+    public function count(): int {
         $reflectionClass = new ReflectionObject( $this );
+
         return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
     }
 

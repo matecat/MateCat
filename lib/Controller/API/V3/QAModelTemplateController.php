@@ -2,10 +2,17 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
+use Exception;
+use INIT;
+use Klein\Response;
 use QAModelTemplate\QAModelTemplateDao;
-use Validator\Errors\JSONValidatorError;
+use Swaggest\JsonSchema\InvalidValue;
+use Validator\Errors\JSONValidatorException;
+use Validator\Errors\JsonValidatorGenericException;
+use Validator\JSONValidator;
+use Validator\JSONValidatorObject;
 
 
 class QAModelTemplateController extends KleinController {
@@ -16,205 +23,259 @@ class QAModelTemplateController extends KleinController {
     }
 
     /**
+     * @param $json
+     *
+     * @throws InvalidValue
+     * @throws JSONValidatorException
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws JsonValidatorGenericException
+     */
+    private function validateJSON( $json ) {
+        $validatorObject       = new JSONValidatorObject();
+        $validatorObject->json = $json;
+        $jsonSchema            = file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+        $validator             = new JSONValidator( $jsonSchema, true );
+        $validator->validate( $validatorObject );
+    }
+
+    /**
      * fetch all
      *
-     * @return \Klein\Response
+     * @return Response
+     * @throws Exception
      */
-    public function index()
-    {
-        $currentPage = (isset($_GET['page'])) ? $_GET['page'] : 1;
-        $pagination = 20;
-        $uid = $this->getUser()->uid;
+    public function index(): Response {
 
-        return $this->response->json(QAModelTemplateDao::getAllPaginated($uid, $currentPage, $pagination));
+        try {
+
+            $currentPage = $this->request->param( 'page' ) ?? 1;
+            $pagination  = $this->request->param( 'perPage' ) ?? 20;
+
+            if ( $pagination > 200 ) {
+                $pagination = 200;
+            }
+
+            $uid = $this->getUser()->uid;
+
+            return $this->response->json( QAModelTemplateDao::getAllPaginated( $uid, "/api/v3/qa_model_template?page=", (int)$currentPage, (int)$pagination ) );
+
+        } catch ( Exception $exception ) {
+            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
+            $this->response->status()->setCode( $code );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
+        }
     }
 
     /**
      * create new template
      *
-     * @return \Klein\Response
+     * @return Response
      */
-    public function create() {
-
-        // accept only JSON
-        if($this->request->headers()->get('Content-Type') !== 'application/json'){
-            $this->response->json([
-                'message' => 'Method not allowed'
-            ]);
-            $this->response->code(405);
-            exit();
-        }
+    public function create(): Response {
 
         // try to create the template
         try {
+
+            // accept only JSON
+            if ( !$this->isJsonRequest() ) {
+                throw new Exception( 'Method not allowed', 405 );
+            }
+
             $json = $this->request->body();
-            $id = QAModelTemplateDao::createFromJSON($json, $this->getUser()->uid);
 
-            $this->response->code(201);
-            return $this->response->json([
-                'id' => $id
-            ]);
-        } catch (JSONValidatorError $exception){
-            $this->response->code(500);
+            $this->validateJSON( $json );
 
-            return $this->response->json($exception);
-        } catch (\Exception $exception){
-            $this->response->code(500);
+            $model = QAModelTemplateDao::createFromJSON( $json, $this->getUser()->uid );
 
-            return $this->response->json([
-                'error' => $exception->getMessage()
-            ]);
+            $this->response->code( 201 );
+
+            return $this->response->json( $model );
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue $exception ) {
+            $this->response->code( 400 );
+
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
+        } catch ( Exception $exception ) {
+
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
     }
 
     /**
-     * @param $id
-     *
-     * @return \Klein\Response
+     * @return Response
      */
-    public function delete()
-    {
-        $id = $this->request->param( 'id' );
-        $model = QAModelTemplateDao::get([
-            'id' => $id,
-            'uid' => $this->getUser()->uid
-        ]);
-
-        if(empty($model)){
-            $this->response->code(404);
-
-            return $this->response->json([
-                'error' => 'Model not found'
-            ]);
-        }
+    public function delete(): Response {
 
         try {
-            QAModelTemplateDao::remove($id);
 
-            return $this->response->json([
-                'id' => $id
-            ]);
-        } catch (\Exception $exception){
-            $this->response->code(500);
+            $id = (int)$this->request->param( 'id' );
 
-            return $this->response->json([
-                'error' => $exception->getMessage()
-            ]);
+            $deleted = QAModelTemplateDao::remove( $id, $this->getUser()->uid );
+
+            if ( empty( $deleted ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
+            return $this->response->json( [
+                    'id' => $id
+            ] );
+
+        } catch ( Exception $exception ) {
+
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
     }
 
     /**
      * edit model
      *
-     * @return \Klein\Response
+     * @return Response
      */
-    public function edit()
-    {
-        $id = $this->request->param( 'id' );
-        $model = QAModelTemplateDao::get([
-            'id' => $id,
-            'uid' => $this->getUser()->uid
-        ]);
-
-        if(empty($model)){
-            $this->response->code(404);
-
-            return $this->response->json([
-                'error' => 'Model not found'
-            ]);
-        }
+    public function edit(): Response {
 
         try {
+
+            $id = (int)$this->request->param( 'id' );
+
+            $model = QAModelTemplateDao::get( [
+                    'id'  => $id,
+                    'uid' => $this->getUser()->uid
+            ] );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
             $json = $this->request->body();
-            $id = QAModelTemplateDao::editFromJSON($model, $json);
 
-            $this->response->code(200);
-            return $this->response->json([
-                'id' => $id
-            ]);
-        } catch (JSONValidatorError $exception){
-            $this->response->code(500);
+            $this->validateJSON( $json );
 
-            return $this->response->json($exception);
-        } catch (\Exception $exception){
-            $this->response->code(500);
+            $model = QAModelTemplateDao::editFromJSON( $model, $json );
 
-            return $this->response->json([
-                'error' => $exception->getMessage()
-            ]);
+            $this->response->code( 200 );
+
+            return $this->response->json( $model );
+
+        } catch ( JSONValidatorException|JsonValidatorGenericException|InvalidValue  $exception ) {
+            $errorCode = max( $exception->getCode(), 400 );
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [ 'error' => $exception->getMessage() ] );
+        } catch ( Exception $exception ) {
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
     }
 
     /**
      * fetch single
      *
-     * @return \Klein\Response
+     * @return Response
+     * @throws Exception
      */
-    public function view()
-    {
-        $id = $this->request->param( 'id' );
-        $model = QAModelTemplateDao::get([
-            'id' => $id,
-            'uid' => $this->getUser()->uid
-        ]);
+    public function view(): Response {
 
-        if(!empty($model)){
-            return $this->response->json($model);
+        try {
+
+            (int)$id = $this->request->param( 'id' );
+
+            $model = QAModelTemplateDao::get( [
+                    'id'  => $id,
+                    'uid' => $this->getUser()->uid
+            ] );
+
+            if ( empty( $model ) ) {
+                throw new Exception( 'Model not found', 404 );
+            }
+
+            $this->response->code( 200 );
+
+            return $this->response->json( $model );
+
+        } catch ( Exception $exception ) {
+            $errorCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
+            $this->response->code( $errorCode );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
 
-        $this->response->code(404);
-
-        return $this->response->json([
-            'error' => 'Model not found'
-        ]);
     }
 
     /**
      * This is the QA Model JSON schema
      *
-     * @return \Klein\Response
+     * @return Response
      */
-    public function schema()
-    {
-        return $this->response->json(json_decode($this->getQaModelSchema()));
+    public function schema(): Response {
+        return $this->response->json( json_decode( $this->getQaModelSchema() ) );
     }
 
     /**
      * Validate a QA Model template
      *
-     * @return \Klein\Response
+     * @return Response
      */
-    public function validate()
-    {
+    public function validate(): Response {
         try {
             $json = $this->request->body();
 
-            $validatorObject = new \Validator\JSONValidatorObject();
+            $validatorObject       = new JSONValidatorObject();
             $validatorObject->json = $json;
-            $validator = new \Validator\JSONValidator($this->getQaModelSchema());
-            $validator->validate($validatorObject);
+            $validator             = new JSONValidator( $this->getQaModelSchema() );
+            $validator->validate( $validatorObject );
 
-            $errors = $validator->getErrors();
-            $code = ($validator->isValid()) ? 200 : 500;
+            $errors = $validator->getExceptions();
+            $code   = ( $validator->isValid() ) ? 200 : 500;
 
-            $this->response->code($code);
-            return $this->response->json([
-                'errors' => $errors
-            ]);
-        } catch (\Exception $exception){
-            $this->response->code(500);
+            $this->response->code( $code );
 
-            return $this->response->json([
-                'error' => $exception->getMessage()
-            ]);
+            return $this->response->json( [
+                    'errors' => $errors
+            ] );
+        } catch ( Exception $exception ) {
+            $this->response->code( 500 );
+
+            return $this->response->json( [
+                    'error' => $exception->getMessage()
+            ] );
         }
     }
 
     /**
-     * @return false|string
+     * @return string
      */
-    private function getQaModelSchema()
-    {
-        return file_get_contents( \INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
+    private function getQaModelSchema(): string {
+        return file_get_contents( INIT::$ROOT . '/inc/validation/schema/qa_model.json' );
     }
+
+    /**
+     * @throws Exception
+     */
+    public function default(): Response {
+
+        $this->response->status()->setCode( 200 );
+        return $this->response->json(
+                QAModelTemplateDao::getDefaultTemplate( $this->getUser()->uid )
+        );
+
+    }
+
 }

@@ -9,29 +9,30 @@
 namespace Teams;
 
 use Constants_Teams;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id ;
+    public $id;
     public $name;
     public $created_by;
-    public $created_at ;
+    public $created_at;
     public $type = Constants_Teams::PERSONAL;
 
     /**
      * @var MembershipStruct[]
      */
-    protected $members ;
+    protected $members;
 
     /**
      * @param MembershipStruct[] $list
      *
      * @return $this
      */
-    public function setMembers($list) {
-        $this->members = $list ;
+    public function setMembers( $list ): TeamStruct {
+        $this->members = $list;
+
         return $this;
     }
 
@@ -39,7 +40,22 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
      * @return null|MembershipStruct[]
      */
     public function getMembers() {
-        return $this->members ;
+        return $this->members;
+    }
+
+    /**
+     * @param $uid
+     *
+     * @return bool
+     */
+    public function hasUser( $uid ) {
+        foreach ( $this->getMembers() as $member ) {
+            if ( $member->uid === $uid ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

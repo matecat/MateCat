@@ -10,9 +10,9 @@
  */
 class Engines_SmartMATE extends Engines_AbstractEngine {
 
-    use \Engines\Traits\Oauth, \Engines\Traits\FormatResponse;
+    use \Engines\Traits\Oauth;
 
-    protected $_auth_parameters = array(
+    protected $_auth_parameters = [
             'client_id'     => null,
             'client_secret' => null,
 
@@ -22,19 +22,19 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
          */
             'grant_type'    => "client_credentials",
             'scope'         => "translate"
-    );
+    ];
 
-    protected $_config = array(
+    protected array $_config = [
             'segment'     => null,
             'translation' => null,
             'source'      => null,
             'target'      => null,
-    );
+    ];
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -51,19 +51,22 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
         $all_args = func_get_args();
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
-            $decoded = array(
-                    'data' => array(
-                            "translations" => array(
-                                    array( 'translatedText' => $this->_resetSpecialStrings( $decoded[ "translation" ] ) )
-                            )
-                    )
-            );
+            $decoded = [
+                    'data' => [
+                            "translations" => [
+                                    [ 'translatedText' => $decoded[ "translation" ] ]
+                            ]
+                    ]
+            ];
         } else {
 
             if ( $rawValue[ 'error' ][ 'code' ] == 0 && $rawValue[ 'responseStatus' ] >= 400 ) {
@@ -73,7 +76,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeResponseAsMatch( $all_args, $decoded );
+        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
@@ -124,22 +127,22 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
     }
 
     protected function _formatRecursionError() {
-        return $this->_composeResponseAsMatch(
-                [],
-                array(
-                        'error' => array(
+        return $this->_composeMTResponseAsMatch(
+                '',
+                [
+                        'error'          => [
                                 'code'     => -499,
                                 'message'  => "Client Closed Request",
                                 'response' => 'Maximum recursion limit reached'
                             // Some useful info might still be contained in the response body
-                        ),
+                        ],
                         'responseStatus' => 499
-                ) //return negative number
+                ] //return negative number
         );
     }
 
     protected function _fillCallParameters( $_config ) {
-        $parameters           = array();
+        $parameters           = [];
         $parameters[ 'text' ] = $_config[ 'segment' ];
         $parameters[ 'from' ] = $_config[ 'source' ];
         $parameters[ 'to' ]   = $_config[ 'target' ];

@@ -10,13 +10,15 @@
 namespace Translators;
 
 
-class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+
+class TranslatorsProfilesDao extends AbstractDao {
 
     const TABLE       = "translator_profiles";
     const STRUCT_TYPE = "TranslatorProfilesStruct";
 
-    protected static $auto_increment_field = array( 'id' );
-    protected static $primary_keys         = array( 'id' );
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_query_by_uid_src_trg_rev = "
         SELECT * FROM translator_profiles 
@@ -36,7 +38,7 @@ class TranslatorsProfilesDao extends \DataAccess_AbstractDao {
      */
     public function getByProfile( TranslatorProfilesStruct $profile ) {
 
-        $stmt = $this->_getStatementForCache( self::$_query_by_uid_src_trg_rev );
+        $stmt = $this->_getStatementForQuery( self::$_query_by_uid_src_trg_rev );
 
         return @$this->_fetchObject( $stmt,
                 $profile,

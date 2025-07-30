@@ -10,13 +10,13 @@
 namespace WordCount;
 
 
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
 use Log;
 use PDO;
 use PDOException;
 
-class WordCounterDao extends DataAccess_AbstractDao {
+class WordCounterDao extends AbstractDao {
 
     /**
      * Update the word count for the job
@@ -82,7 +82,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
 
     }
 
-    public static function initializeWordCount( WordCountStruct $wStruct ) {
+    public function initializeWordCount( WordCountStruct $wStruct ) {
 
         $db = Database::obtain();
 
@@ -131,7 +131,7 @@ class WordCounterDao extends DataAccess_AbstractDao {
      * @return array
      *
      */
-    public static function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
+    public function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
         /*
          * -- TOTAL field is not used, but we keep here to easy check the values and for documentation
@@ -152,32 +152,23 @@ class WordCounterDao extends DataAccess_AbstractDao {
                 SELECT
                     j.id,
                     SUM(
-                            IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count )
+                            COALESCE( st.eq_word_count, 0 )
                         ) AS TOTAL,
                     SUM(
                             IF(
                                         st.status IS NULL OR
                                         st.status = 'NEW',
-                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                                        st.eq_word_count , 0 )
                         ) AS NEW,
                     SUM(
                             IF(
                                         st.status IS NULL OR st.status = 'DRAFT',
-                                        IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
+                                        st.eq_word_count , 0 )
                         ) AS DRAFT,
-                    SUM(
-                            IF( st.status='TRANSLATED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                        ) AS TRANSLATED,
-                
-                    SUM(
-                            IF(st.status='APPROVED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                        ) AS APPROVED,
-                    SUM(
-                            IF(st.status='APPROVED2', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                        ) AS APPROVED2,
-                    SUM(
-                            IF(st.status='REJECTED', IF( st.match_type = 'ICE' AND st.eq_word_count = 0 AND s.raw_word_count != 0, s.raw_word_count, st.eq_word_count ),0 )
-                        ) AS REJECTED,
+                    SUM( IF( st.status='TRANSLATED', st.eq_word_count, 0 ) ) AS TRANSLATED,
+                    SUM( IF( st.status='APPROVED', st.eq_word_count, 0 ) ) AS APPROVED,
+                    SUM( IF( st.status='APPROVED2', st.eq_word_count, 0 ) ) AS APPROVED2,
+                    SUM( IF( st.status='REJECTED', st.eq_word_count, 0 ) ) AS REJECTED,
                     
                     SUM( s.raw_word_count ) AS TOTAL_RAW,
                     SUM( IF( st.status IS NULL OR st.status = 'NEW', s.raw_word_count, 0 ) ) AS NEW_RAW,

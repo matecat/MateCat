@@ -8,13 +8,14 @@
 
 namespace Features\ReviewExtended;
 
-use Chunks_ChunkStruct;
+use Jobs_JobStruct;
 use LQA\ModelStruct;
+use Projects_ProjectStruct;
 
 interface IChunkReviewModel {
 
     /**
-     * @return Chunks_ChunkStruct
+     * @return Jobs_JobStruct
      */
     public function getChunk();
 
@@ -50,18 +51,11 @@ interface IChunkReviewModel {
     public function getQALimit( ModelStruct $lqa_model );
 
     /**
-     *
-     * @param \Projects_ProjectStruct $project
-     *
-     */
-    public function _updatePassFailResult( \Projects_ProjectStruct $project );
-
-    /**
      * This method invokes the recount of reviewed_words_count and
      * penalty_points for the chunk and updates the passfail result.
      *
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
      */
-    public function recountAndUpdatePassFailResult( \Projects_ProjectStruct $project );
+    public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project );
 }

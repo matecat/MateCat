@@ -9,7 +9,8 @@
 
 namespace API\App\Json;
 
-use API\V2\KleinController;
+use AbstractControllers\KleinController;
+use Utils;
 
 class Ping {
 
@@ -28,16 +29,16 @@ class Ping {
         }
 
         return [
-                'status'  => 'OK',
-                'message' => 'Pong...',
-                "client_ip"   => \Utils::getRealIpAddr(),
-                "user"        => ( $this->controller->userIsLogged() ? [
+                'status'      => 'OK',
+                'message'     => 'Pong...',
+                "client_ip"   => Utils::getRealIpAddr(),
+                "user"        => ( $this->controller->isLoggedIn() ? [
                         "uid"        => $this->controller->getUser()->getUid(),
                         "email"      => $this->controller->getUser()->getEmail(),
                         "first_name" => $this->controller->getUser()->getFirstName(),
                         "lat_name"   => $this->controller->getUser()->getLastName()
                 ] : [ "uid" => 0 ] ),
-                "browser"     => \Utils::getBrowser(),
+                "browser"     => Utils::getBrowser(),
                 "request_uri" => $_request_uri,
                 "took"        => $this->controller->getTimer()
         ];

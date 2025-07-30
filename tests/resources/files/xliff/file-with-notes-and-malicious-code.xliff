@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:its="http://www.w3.org/2005/11/its" its:version="2.0" version="1.2">
+    <file datatype="x-xlf" original="Ebay-like-small-file-edited.xlf" source-language="hy-am" target-language="fr-fr" tool-id="matecat-converter">
+        <header>
+            <reference>
+                <internal-file form="base64">
+                    PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHhsaWZmIHhtbG5zPSJ1cm46b2FzaXM6bmFtZXM6dGM6eGxpZmY6ZG9jdW1lbnQ6MS4yIiB2ZXJzaW9uPSIxLjIiPgo8ZmlsZSBvcmlnaW5hbD0iIiBzb3VyY2UtbGFuZ3VhZ2U9ImVuLVVTIiB0YXJnZXQtbGFuZ3VhZ2U9InB0LUJSIiBkYXRhdHlwZT0icGxhaW50ZXh0IiBtdD0iZU1UIj4KPGhlYWRlcj48L2hlYWRlcj4KPGJvZHk+Cgk8dHJhbnMtdW5pdCBjYXQxPSJBbnRpcXVlcyIgY2F0Mj0iQW50aXF1aXRpZXMiIGlkPSIyNTE5NzE1NTEwNjUiPgoJCTxzb3VyY2UgeG1sOmxhbmc9ImVuLVVTIj5BbiBFbmdsaXNoIHN0cmluZzwvc291cmNlPgoJCTx0YXJnZXQgeG1sOmxhbmc9InB0LUJSIj5UaGlzIGlzIEJyYXppbGlhbiB0ZXh0IDE8L3RhcmdldD4KCQk8bm90ZT5UaGlzIGlzIGEgY29tbWVudDwvbm90ZT4KCQk8bm90ZT5UaGlzIGlzIGEgY29tbWVudCBudW1iZXIgdHdvPC9ub3RlPgoJCTxub3RlPlRoaXMgaXMgYSBjb21tZW50IG51bWJlciB0aHJlZTwvbm90ZT4KCTwvdHJhbnMtdW5pdD4KICA8dHJhbnMtdW5pdCBjYXQxPSJBbnRpcXVlcyIgY2F0Mj0iQW50aXF1aXRpZXMiIGlkPSIyNTE5NzE1NTEwNjYiPgoJCTxzb3VyY2UgeG1sOmxhbmc9ImVuLVVTIj5UaGlzIHVuaXQgaGFzIGEgY29tbWVudCB0b288L3NvdXJjZT4KCQk8dGFyZ2V0IHhtbDpsYW5nPSJwdC1CUiI+QW5vdGhlciB0cmFuc2xhdGVkIHRleHQ8L3RhcmdldD4KCTwvdHJhbnMtdW5pdD4KICA8dHJhbnMtdW5pdCBjYXQxPSJBbnRpcXVlcyIgY2F0Mj0iQW50aXF1aXRpZXMiIGlkPSIyNTE5NzE1NTEwNjciPgoJCTxzb3VyY2UgeG1sOmxhbmc9ImVuLVVTIj5BbiBFbmdsaXNoIHN0cmluZzwvc291cmNlPgoJCTx0YXJnZXQgeG1sOmxhbmc9InB0LUJSIj5UaGlzIGlzIEJyYXppbGlhbiB0ZXh0IDE8L3RhcmdldD4KCQk8bm90ZT5UaGlzIGlzIGFub3RoZXIgY29tbWVudDwvbm90ZT4KCTwvdHJhbnMtdW5pdD4KPC9ib2R5Pgo8L2ZpbGU+CjwveGxpZmY+Cg==
+                </internal-file>
+            </reference>
+        </header>
+        <body/>
+    </file>
+    <file datatype="x-rkm" original="manifest.rkm" source-language="hy-am" target-language="fr-fr" tool-id="matecat-converter">
+        <header>
+            <reference>
+                <internal-file form="base64">
+                    PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjwhLS09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PS0tPg0KPCEtLVBMRUFTRSwgRE8gTk9UIFJFTkFNRSwgTU9WRSwgTU9ESUZZIE9SIEFMVEVSIElOIEFOWSBXQVkgVEhJUyBGSUxFLS0+DQo8IS0tPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0tLT4NCjxtYW5pZmVzdCB2ZXJzaW9uPSIyIiBsaWJWZXJzaW9uPSIiIHByb2plY3RJZD0iTkM1QzkzQURFIiBwYWNrYWdlSWQ9IjY4ODc2NjIyLTQzZWItNDdiYy1hY2VmLWFmNjNlNWQwOTE5OSIgc291cmNlPSJoeS1hbSIgdGFyZ2V0PSJmci1mciIgb3JpZ2luYWxTdWJEaXI9Im9yaWdpbmFsIiBza2VsZXRvblN1YkRpcj0ic2tlbGV0b24iIHNvdXJjZVN1YkRpcj0id29yayIgdGFyZ2V0U3ViRGlyPSJ3b3JrIiBtZXJnZVN1YkRpcj0iZG9uZSIgdG1TdWJEaXI9IiIgZGF0ZT0iMjAxNS0xMC0wNiAxNjo1ODowMCswMDAwIiB1c2VBcHByb3ZlZE9ubHk9IjAiIHVwZGF0ZUFwcHJvdmVkRmxhZz0iMCI+DQo8Y3JlYXRvclBhcmFtZXRlcnM+PC9jcmVhdG9yUGFyYW1ldGVycz4NCjxkb2MgeG1sOnNwYWNlPSJwcmVzZXJ2ZSIgZG9jSWQ9IjEiIGV4dHJhY3Rpb25UeXBlPSJ4bGlmZiIgcmVsYXRpdmVJbnB1dFBhdGg9IkViYXktbGlrZS1zbWFsbC1maWxlLWVkaXRlZC54bGYiIGZpbHRlcklkPSJva2ZfeGxpZmYiIGlucHV0RW5jb2Rpbmc9InV0Zi04IiByZWxhdGl2ZVRhcmdldFBhdGg9IkViYXktbGlrZS1zbWFsbC1maWxlLWVkaXRlZC5vdXQueGxmIiB0YXJnZXRFbmNvZGluZz0iVVRGLTgiIHNlbGVjdGVkPSIxIj5JM1l4Q25WelpVTjFjM1J2YlZCaGNuTmxjaTVpUFhSeWRXVUtabUZqZEc5eWVVTnNZWE56UFdOdmJTNWpkR011ZDNOMGVDNXpkR0Y0TGxkemRIaEpibkIxZEVaaFkzUnZjbmtLWm1Gc2JHSmhZMnRVYjBsRUxtSTlabUZzYzJVS1pYTmpZWEJsUjFRdVlqMW1ZV3h6WlFwaFpHUlVZWEpuWlhSTVlXNW5kV0ZuWlM1aVBYUnlkV1VLYjNabGNuSnBaR1ZVWVhKblpYUk1ZVzVuZFdGblpTNWlQV1poYkhObENtOTFkSEIxZEZObFoyMWxiblJoZEdsdmJsUjVjR1V1YVQwekNtbG5ibTl5WlVsdWNIVjBVMlZuYldWdWRHRjBhVzl1TG1JOVptRnNjMlVLWVdSa1FXeDBWSEpoYm5NdVlqMW1ZV3h6WlFwaFpHUkJiSFJVY21GdWMwZE5iMlJsTG1JOWRISjFaUXBsWkdsMFFXeDBWSEpoYm5NdVlqMW1ZV3h6WlFwcGJtTnNkV1JsUlhoMFpXNXphVzl1Y3k1aVBYUnlkV1VLYVc1amJIVmtaVWwwY3k1aVBYUnlkV1VLWW1Gc1lXNWpaVU52WkdWekxtSTlkSEoxWlFwaGJHeHZkMFZ0Y0hSNVZHRnlaMlYwY3k1aVBXWmhiSE5sQ25SaGNtZGxkRk4wWVhSbFRXOWtaUzVwUFRBS2RHRnlaMlYwVTNSaGRHVldZV3gxWlQxdVpXVmtjeTEwY21GdWMyeGhkR2x2YmdwaGJIZGhlWE5WYzJWVFpXZFRiM1Z5WTJVdVlqMW1ZV3h6WlFweGRXOTBaVTF2WkdWRVpXWnBibVZrTG1JOWRISjFaUXB4ZFc5MFpVMXZaR1V1YVQwd0NuVnpaVk5rYkZoc2FXWm1WM0pwZEdWeUxtSTlabUZzYzJVPTwvZG9jPg0KPC9tYW5pZmVzdD4=
+                </internal-file>
+            </reference>
+        </header>
+        <body/>
+    </file>
+    <file datatype="x-plaintext" original="" source-language="hy-am" target-language="fr-fr">
+        <body>
+            <trans-unit id="251971551065">
+                <source xml:lang="hy-am">An English string</source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">An English string</mrk>
+                </seg-source>
+                <target xml:lang="fr-fr">
+                    <mrk mid="0" mtype="seg">An English string</mrk>
+                </target>
+                <note>
+                    <script>alert('This is malicious code');</script>
+                </note>
+            </trans-unit>
+            <trans-unit id="251971551066">
+                <source xml:lang="hy-am">This unit has a comment too</source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">This unit has a comment too</mrk>
+                </seg-source>
+                <target xml:lang="fr-fr">
+                    <mrk mid="0" mtype="seg">This unit has a comment too</mrk>
+                </target>
+            </trans-unit>
+            <trans-unit id="251971551067">
+                <source xml:lang="hy-am">An English string</source>
+                <seg-source>
+                    <mrk mid="0" mtype="seg">An English string</mrk>
+                </seg-source>
+                <target xml:lang="fr-fr">
+                    <mrk mid="0" mtype="seg">An English string</mrk>
+                </target>
+                <note>This is another comment</note>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

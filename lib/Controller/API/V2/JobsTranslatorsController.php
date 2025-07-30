@@ -10,10 +10,11 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\NotFoundException;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Validators\JobPasswordValidator;
+use API\Commons\Validators\LoginValidator;
 use API\V2\Json\JobTranslator;
-use API\V2\Validators\JobPasswordValidator;
-use API\V2\Validators\LoginValidator;
 use InvalidArgumentException;
 use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
@@ -49,7 +50,7 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "Wrong parameter :email ", 400 );
         }
 
-        if($this->jStruct->wasDeleted()){
+        if($this->jStruct->isDeleted()){
             throw new NotFoundException('No job found.');
         }
 
@@ -90,7 +91,7 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
-        if($this->jStruct->wasDeleted()){
+        if($this->jStruct->isDeleted()){
             throw new NotFoundException('No job found.');
         }
 

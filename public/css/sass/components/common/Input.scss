@@ -1,0 +1,126 @@
+@use '../../commons/colors';
+
+.input-component {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    cursor: pointer;
+  }
+
+  &.isCompressed {
+    gap: 8px;
+
+    label {
+      font-size: 14px;
+    }
+  }
+}
+
+.input-component-wrapper {
+  position: relative;
+
+  input {
+    width: 100%;
+    height: 40px;
+    color: colors.$grey6;
+    border: 1px solid colors.$grey4;
+    padding: 12px;
+    box-shadow: 2px 2px 4px 0px rgba(0, 0, 0, 0.0784313725) inset;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &:autofill,
+    &:-webkit-autofill {
+      border: none !important;
+    }
+    &::placeholder {
+      color: colors.$grey7;
+      opacity: 1;
+    }
+    &:hover {
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.0784313725) inset;
+    }
+    &:focus,
+    &:active {
+      outline: none;
+      box-shadow: inset 0 0 0 2px colors.$black;
+    }
+    &.isCompressed {
+      padding: 10px;
+      font-size: 14px;
+    }
+    &.isPassword {
+      padding-right: 46px;
+
+      &.isCompressed {
+        padding-right: 40px;
+      }
+    }
+    &.hasError,
+    &.hasError:hover,
+    &.hasError:focus {
+      box-shadow: inset 0 0 0 2px colors.$redDefault !important;
+    }
+    &:disabled {
+      background-color: colors.$grey9;
+      box-shadow: none;
+      color: colors.$grey8;
+      cursor: not-allowed;
+
+      &::placeholder {
+        color: colors.$grey8;
+      }
+    }
+  }
+  &.withIcon input {
+    padding-left: 46px;
+  }
+  &.withIcon input.isCompressed {
+    padding-left: 40px;
+  }
+
+  input + svg {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: colors.$grey8;
+    cursor: pointer;
+    pointer-events: none;
+  }
+  input.isCompressed + svg {
+    top: 10px;
+    left: 10px;
+  }
+  input:disabled + svg {
+    color: colors.$grey8 !important;
+  }
+}
+
+.input-component-togglePwdButton {
+  position: absolute !important;
+  top: 10px;
+  right: 10px;
+
+  .isCompressed + & {
+    top: 8px;
+    right: 8px;
+  }
+
+  :autofill + &,
+  :-webkit-autofill + & {
+    color: fieldtext !important;
+  }
+}
+
+.input-component-errorMessage {
+  font-size: 12px;
+  color: colors.$redDefault;
+  text-align: left;
+  padding-left: 2px;
+}

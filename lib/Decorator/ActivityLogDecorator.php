@@ -2,6 +2,9 @@
 
 use ActivityLog\ActivityLogStruct;
 
+/**
+ * @deprecated
+ */
 class ActivityLogDecorator {
 
     protected $controller;
@@ -97,7 +100,7 @@ class ActivityLogDecorator {
         foreach( $rawContent as $k => $value ){
 
             // This filter allows our support team at matecat.com to have their email addresses
-            // replaced by a "MateCat Support Team" tag.
+            // replaced by a "Matecat Support Team" tag.
             $value = $this->featureSet->filter('filterActivityLogEntry', $value);
 
             if( empty( $value->email ) ) {
@@ -120,8 +123,6 @@ class ActivityLogDecorator {
         }
 
         $this->template->isLoggedIn    = $this->controller->isLoggedIn();
-        $this->template->logged_user   = ( $this->controller->getUser() !== false ) ? $this->controller->getUser()->shortName() : "";
-        $this->template->extended_user = ( $this->controller->getUser() !== false ) ? trim( $this->controller->getUser()->fullName() ) : "";
         $this->template->outputContent = $outputContent;
         $this->template->projectID     = $this->controller->project_data[ 0 ][ 'pid' ];
         $this->template->projectName   = $this->controller->project_data[ 0 ][ 'pname' ];

@@ -4,6 +4,7 @@ namespace API\V2;
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Conversion\ZipArchiveHandler;
 use Exception;
 use FilesStorage\AbstractFilesStorage;
 use FilesStorage\FilesStorageFactory;
@@ -12,7 +13,6 @@ use Log;
 use LQA\ChunkReviewDao;
 use Projects_ProjectDao;
 use Utils;
-use ZipArchiveExtended;
 use ZipContentObject;
 
 set_time_limit( 180 );
@@ -81,7 +81,7 @@ class DownloadOriginalController extends AbstractDownloadController {
 
             $id_file = $file[ 'id_file' ];
 
-            $zipPathInfo = ZipArchiveExtended::zipPathInfo( $file[ 'filename' ] );
+            $zipPathInfo = ZipArchiveHandler::zipPathInfo( $file[ 'filename' ] );
 
             if ( is_array( $zipPathInfo ) ) {
                 $output_content[ $id_file ][ 'output_filename' ] = $zipPathInfo[ 'zipfilename' ];
@@ -124,11 +124,6 @@ class DownloadOriginalController extends AbstractDownloadController {
             $this->setOutputContent( $oContent );
             $this->setMimeType();
         }
-
-        /**
-         * Retrieve user information
-         */
-        $this->readLoginInfo();
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->id_job;

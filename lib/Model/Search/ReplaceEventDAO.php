@@ -1,8 +1,9 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Search\ReplaceEventStruct;
 
-class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
+class Search_ReplaceEventDAO extends AbstractDao {
 
     const STRUCT_TYPE = ReplaceEventStruct::class;
     const TABLE       = 'replace_events';
@@ -202,14 +203,14 @@ class Search_ReplaceEventDAO extends DataAccess_AbstractDao {
         $actual = Search_ReplaceEventCurrentVersionDAO::getByIdJob( $id_job );
 
         if ( $type === 'undo' ) {
-            $versionToMove =  $actual - 1;
+            $versionToMove = $actual - 1;
 
             if ( $versionToMove === 0 ) {
                 return 0;
             }
 
         } elseif ( $type === 'redo' ) {
-            $versionToMove =  $actual + 1;
+            $versionToMove = $actual + 1;
 
             if ( $versionToMove > self::getCurrentBulkVersion( $id_job ) ) {
                 return 0;

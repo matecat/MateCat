@@ -8,13 +8,15 @@
 
 namespace API\V3;
 
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\NotFoundException;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\ProjectAccessValidator;
 use API\V2\BaseChunkController;
-use API\V2\Exceptions\AuthenticationError;
-use API\V2\Exceptions\NotFoundException;
-use API\V2\Validators\ChunkPasswordValidator;
-use Chunks_ChunkStruct;
 use Exceptions\ValidationError;
 use Files\FilesInfoUtility;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
@@ -32,13 +34,16 @@ class FileInfoController extends BaseChunkController {
         $Validator->onSuccess( function () use ( $Validator ) {
             $this->setChunk( $Validator->getChunk() );
             $this->setProject( $Validator->getChunk()->getProject() );
+            $this->appendValidator( new ProjectAccessValidator( $this,  $Validator->getChunk()->getProject() ) );
             //those are not needed at moment, so avoid unnecessary queries
 //            $this->setFeatureSet( $this->project->getFeaturesSet() );
         } );
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
+
     }
 
-    private function setChunk( Chunks_ChunkStruct $chunk ) {
+    private function setChunk( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -122,3 +127,6 @@ class FileInfoController extends BaseChunkController {
         }
     }
 }
+
+// GET https://dev.matecat.com/api/v3/jobs/32/f7ac6b279743/file/35/instructions
+// POST https://dev.matecat.com/api/v3/jobs/32/f7ac6b279743/file/35/instructions

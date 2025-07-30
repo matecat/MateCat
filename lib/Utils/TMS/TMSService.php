@@ -2,26 +2,30 @@
 
 namespace TMS;
 
-use API\V2\Exceptions\UnprocessableException;
+use API\Commons\Exceptions\UnprocessableException;
 use Chunks_ChunkDao;
-use Chunks_ChunkStruct;
+use Constants_Engines;
 use Constants_TranslationStatus;
+use Conversion\Upload;
 use DateTime;
 use DateTimeZone;
 use Engine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_ExportResponse;
 use Engines_Results_MyMemory_TmxResponse;
+use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use INIT;
 use InvalidArgumentException;
+use Jobs_JobStruct;
 use Log;
 use Matecat\SubFiltering\MateCatFilter;
 use SplTempFileObject;
 use stdClass;
 use TMSService\TMSServiceDao;
-use Upload;
+use Users\MetadataDao;
+use Users_UserStruct;
 use Utils;
 
 class TMSService {
@@ -143,35 +147,84 @@ class TMSService {
      * Import TMX file in MyMemory
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file ) {
+    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
 
-        $this->checkCorrectKey( $file->getTmKey() );
+        try {
 
-        Log::doJsonLog( $this->file );
+            $this->checkCorrectKey( $file->getTmKey() );
 
-        $importStatus = $this->mymemory_engine->import(
-                $file->getFilePath(),
-                $file->getTmKey(),
-                $file->getName()
-        );
+            Log::doJsonLog( $this->file );
 
-        //check for errors during the import
-        switch ( $importStatus->responseStatus ) {
-            case "503" :
-            case "400" :
-                throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
-            case "403" :
-                throw new Exception( "Error: ". $this->formatErrorMessage($importStatus->responseDetails), -15 );
-            default:
+            $importStatus = $this->mymemory_engine->importMemory(
+                    $file->getFilePath(),
+                    $file->getTmKey(),
+                    $user
+            );
+
+            //check for errors during the import
+            switch ( $importStatus->responseStatus ) {
+                case "503" :
+                case "400" :
+                    throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
+                case "403" :
+                    throw new Exception( "Error: " . $this->formatErrorMessage( $importStatus->responseDetails ), -15 );
+                default:
+            }
+
+            $file->setUuid( $importStatus->id );
+
+            // load tmx in engines with adaptivity
+            $engineList = Constants_Engines::getAvailableEnginesList();
+
+            $warnings = [];
+
+            foreach ( $engineList as $engineName ) {
+
+                try {
+
+                    $struct             = EnginesModel_EngineStruct::getStruct();
+                    $struct->class_load = $engineName;
+                    $struct->type       = Constants_Engines::MT;
+                    $engine             = Engine::createTempInstance( $struct );
+
+                    if ( $engine->isAdaptiveMT() ) {
+                        //retrieve OWNER Engine License
+                        $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRecord()->class_load ); // engine_id
+                        if ( !empty( $ownerMmtEngineMetaData ) ) {
+                            $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+
+                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
+
+                        }
+                    }
+
+                } catch ( Exception $e ) {
+                    if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                        //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
+                        Log::doJsonLog( $e->getMessage() );
+                        $engineName = explode( "\\", $engineName );
+                        $engineName = end( $engineName );
+                        $warnings[] = [ 'engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName() ];
+                    }
+                }
+
+            }
+
+        } finally {
+            @unlink( $file->getFilePath() );
+            @unlink( $file->getFilePath() . ".gz" );
         }
 
-        $file->setUuid( $importStatus->id );
+        return $warnings;
 
     }
 
     /**
      * Import TMX file in MyMemory
+     *
      * @param TMSFile $file
+     *
      * @throws Exception
      */
     public function addGlossaryInMyMemory( TMSFile $file ) {
@@ -216,6 +269,7 @@ class TMSService {
 
     /**
      * @param $uuid
+     *
      * @return mixed
      * @throws Exception
      */
@@ -275,7 +329,7 @@ class TMSService {
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( 'Error: '. $this->formatErrorMessage($allMemories->responseData[ 'log' ]), -15 );
+            throw new Exception( 'Error: ' . $this->formatErrorMessage( $allMemories->responseData[ 'log' ] ), -15 );
         }
 
         switch ( $allMemories->responseData[ 'status' ] ) {
@@ -303,11 +357,11 @@ class TMSService {
 
     /**
      * @param $message
+     *
      * @return mixed
      */
-    private function formatErrorMessage($message)
-    {
-        if($message === "THE CHARACTER SET PROVIDED IS INVALID."){
+    private function formatErrorMessage( $message ) {
+        if ( $message === "THE CHARACTER SET PROVIDED IS INVALID." ) {
             return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
         }
 
@@ -344,10 +398,10 @@ class TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
-     * @param $userMail
-     * @param $userName
-     * @param $userSurname
-     * @param $tm_key
+     * @param      $userMail
+     * @param      $userName
+     * @param      $userSurname
+     * @param      $tm_key
      * @param bool $strip_tags
      *
      * @return Engines_Results_MyMemory_ExportResponse
@@ -421,7 +475,7 @@ class TMSService {
         }
 
         /**
-         * @var $chunks Chunks_ChunkStruct[]
+         * @var $chunks Jobs_JobStruct[]
          */
         $chunks = Chunks_ChunkDao::getByJobID( $jid );
 
@@ -449,12 +503,15 @@ class TMSService {
             $tmOrigin = "";
             if ( strpos( $this->output_type, 'tm' ) !== false ) {
                 $suggestionsArray = json_decode( $row[ 'suggestions_array' ], true );
-                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $row[ 'id_customer' ], $uid );
+                $suggestionOrigin = Utils::changeMemorySuggestionSource( $suggestionsArray[ 0 ], $row[ 'tm_keys' ], $uid );
                 $tmOrigin         = '<prop type="x-MateCAT-suggestion-origin">' . $suggestionOrigin . "</prop>";
                 if ( preg_match( "/[a-f0-9]{8,}/", $suggestionsArray[ 0 ][ 'memory_key' ] ) ) {
                     $tmOrigin .= "\n        <prop type=\"x-MateCAT-suggestion-private-key\">" . $suggestionsArray[ 0 ][ 'memory_key' ] . "</prop>";
                 }
             }
+
+            $contextPre  = ( isset( $result[ ( $k - 1 ) ] ) ) ? $result[ ( $k - 1 ) ][ 'segment' ] : '';
+            $contextPost = ( isset( $result[ ( $k + 1 ) ] ) ) ? $result[ ( $k + 1 ) ][ 'segment' ] : '';
 
             $tmx = '
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
@@ -462,6 +519,8 @@ class TMSService {
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
         <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ], ENT_DISALLOWED, "UTF-8" ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
+        <prop type="x-context-pre">' . $contextPre . '</prop>
+        <prop type="x-context-post">' . $contextPost . '</prop>
         ' . $chunkPropString . '
         ' . $tmOrigin . '
         <tuv xml:lang="' . $sourceLang . '">

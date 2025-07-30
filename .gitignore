@@ -6,16 +6,20 @@
 nbproject/
 webgrind/
 _dic_cache
+.phpunit.result.cache
 
 # Configuration files
 .num_processes
 inc/*.dat
 inc/oauth_config.ini
+/inc/oauth_config.*.ini
+
 inc/Error_Mail_List.ini
 inc/config.ini
 inc/config.ini*
 inc/config.test.ini
 inc/config.development.ini
+
 inc/.globalmessage.ini
 inc/oauth-token-key.txt
 .passwd.ini
@@ -45,7 +49,7 @@ unitTest/xhGui/
 unitTest/coverage/*
 local_storage
 test_storage
-lib/Utils/fileupload/thumbnails/*
+lib/View/fileupload/thumbnails/*
 tmp/
 
 task_manager_config.ini
@@ -64,13 +68,13 @@ phinx.yml
 .lastjobprocessed_jpeer
 .maxJobToProcess_jpeer
 
-inc/dqf/dqf_test_secret.ini
-
 mmt_fallback_key.ini
 
 inc/google_translate/mmt_fallback_credentials.json
 .DS_Store
 certs
 /public/build/
+/public/buildResources/
 /lib/View/*.html
 /lib/View/APIDoc.php
+/.phpunit.result.cache

@@ -1,0 +1,293 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "uid": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "nullable": true
+    },
+    "name": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true
+    },
+    "modified_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true
+    },
+    "isSelected": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true
+    },
+    "isTemporary": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "nullable": true
+    },
+    "json": {
+      "type": "object",
+      "properties": {
+        "extract_arrays": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "escape_forward_slashes": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "translate_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "do_not_translate_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "context_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "character_limit": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "dependencies": {
+        "translate_keys": {
+          "not": {
+            "required": [
+              "do_not_translate_keys"
+            ]
+          }
+        },
+        "do_not_translate_keys": {
+          "not": {
+            "required": [
+              "translate_keys"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "xml": {
+      "type": "object",
+      "properties": {
+        "preserve_whitespace": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "translate_attributes": {
+          "type": "array",
+          "nullable": true
+        },
+        "translate_elements": {
+          "type": "array",
+          "nullable": true
+        },
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "dependencies": {
+        "translate_elements": {
+          "not": {
+            "required": [
+              "do_not_translate_elements"
+            ]
+          }
+        },
+        "do_not_translate_elements": {
+          "not": {
+            "required": [
+              "translate_elements"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "yaml": {
+      "type": "object",
+      "properties": {
+        "translate_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "do_not_translate_keys": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "dependencies": {
+        "translate_keys": {
+          "not": {
+            "required": [
+              "do_not_translate_keys"
+            ]
+          }
+        },
+        "do_not_translate_keys": {
+          "not": {
+            "required": [
+              "translate_keys"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_word": {
+      "type": "object",
+      "properties": {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_comments": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_headers_footers": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_hidden_text": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "accept_revisions": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "exclude_styles": {
+          "type": "array",
+          "nullable": true
+        },
+        "exclude_highlight_colors": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_excel": {
+      "type": "object",
+      "properties": {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_hidden_cells": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_diagrams": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_drawings": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_sheet_names": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "exclude_columns": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "ms_powerpoint": {
+      "type": "object",
+      "properties": {
+        "extract_doc_properties": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
+        },
+        "extract_hidden_slides": {
+          "type": "boolean",
+          "nullable": true
+        },
+        "extract_notes": {
+          "type": "boolean",
+          "nullable": true,
+          "default": true
+        },
+        "translate_slides": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "dependencies": {
+        "extract_hidden_slides": {
+          "not": {
+            "required": [
+              "translate_slides"
+            ]
+          }
+        },
+        "translate_slides": {
+          "not": {
+            "required": [
+              "extract_hidden_slides"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "dita": {
+      "type": "object",
+      "properties": {
+        "do_not_translate_elements": {
+          "type": "array",
+          "nullable": true
+        }
+      },
+      "required": ["do_not_translate_elements"],
+      "additionalProperties": false
+    }
+  }
+}

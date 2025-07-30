@@ -9,6 +9,8 @@
 
 namespace TaskRunner\Commons;
 
+use AMQHandler;
+use Exception;
 use INIT;
 use Log;
 
@@ -23,41 +25,61 @@ use Log;
  */
 abstract class AbstractDaemon {
 
+    use SignalHandlerTrait;
+
+    /**
+     * @var AMQHandler|null
+     */
+    protected ?AMQHandler $queueHandler;
+
     /**
      * Flag for control the instance running status. Setting to false cause the daemon to stop.
      *
      * @var bool
      */
-    public $RUNNING = true;
+    public bool $RUNNING = true;
 
     /**
      * The process id of the daemon
      *
      * @var int
      */
-    public static $tHandlerPID;
-
-    /**
-     * Static reference for the singleton
-     *
-     * @var static
-     */
-    protected static $__INSTANCE = null;
+    public int $myProcessPid;
 
     /**
      * Sleep time in seconds. To be used as a parameter of sleep()
      * @var int
      */
-    protected static $sleepTime = 2;
+    protected static int $sleepTime = 2;
+
+    /**
+     * @var string
+     */
+    protected string $_configFile;
+
+    /**
+     * Optional context index on which the task runner works
+     *
+     * @var string|null
+     */
+    protected ?string $_contextIndex;
+
+    /**
+     * Context list definitions
+     *
+     * @var ContextList
+     */
+    protected $_queueContextList = [];
 
     /**
      * AbstractDaemon constructor.
      *
-     * @param null $configFile
-     * @param null $contextIndex
+     * @param ?string $configFile
+     * @param ?string $contextIndex
      */
-    protected function __construct( $configFile = null, $contextIndex = null ) {
-        static::$tHandlerPID = posix_getpid();
+    protected function __construct( string $configFile = null, string $contextIndex = null ) {
+        INIT::$PRINT_ERRORS = true;
+        $this->myProcessPid = posix_getpid();
     }
 
     /**
@@ -68,56 +90,12 @@ abstract class AbstractDaemon {
      *
      * @return static
      */
-    public static function getInstance( $config_file = null, $queueIndex = null ) {
+    public static function getInstance( $config_file = null, $queueIndex = null ): AbstractDaemon {
 
-        if ( PHP_SAPI != 'cli' || isset ( $_SERVER [ 'HTTP_HOST' ] ) ) {
-            die ( "This script can be run only in CLI Mode.\n\n" );
-        }
+        $__INSTANCE = new static( $config_file, $queueIndex );
+        $__INSTANCE->installHandler();
 
-        declare( ticks = 10 );
-        set_time_limit( 0 );
-
-        if ( static::$__INSTANCE === null ) {
-            if ( !extension_loaded( "pcntl" ) && (bool)ini_get( "enable_dl" ) ) {
-                dl( "pcntl.so" );
-            }
-            if ( !function_exists( 'pcntl_signal' ) ) {
-                $msg = "****** PCNTL EXTENSION NOT LOADED. KILLING THIS PROCESS COULD CAUSE UNPREDICTABLE ERRORS ******";
-                //static::_TimeStampMsg( $msg );
-            } else {
-                //static::_TimeStampMsg( str_pad( " Registering signal handlers ", 60, "*", STR_PAD_BOTH ) );
-
-                pcntl_signal( SIGTERM, array( get_called_class(), 'sigSwitch' ) );
-                pcntl_signal( SIGINT, array( get_called_class(), 'sigSwitch' ) );
-                pcntl_signal( SIGHUP, array( get_called_class(), 'sigSwitch' ) );
-                $msg = str_pad( " Signal Handler Installed ", 60, "-", STR_PAD_BOTH );
-
-                //static::_TimeStampMsg( "$msg" );
-            }
-            static::$__INSTANCE = new static(  $config_file, $queueIndex );
-        }
-
-        return static::$__INSTANCE;
-    }
-
-    /**
-     * Posix Signal handling method
-     *
-     * @param $sig_no
-     */
-    public static function sigSwitch( $sig_no ) {
-
-        static::_TimeStampMsg( "Signo : $sig_no" );
-
-        switch ( $sig_no ) {
-            case SIGTERM :
-            case SIGINT :
-            case SIGHUP :
-                static::$__INSTANCE->RUNNING = false;
-                break;
-            default :
-                break;
-        }
+        return $__INSTANCE;
     }
 
     /**
@@ -125,8 +103,10 @@ abstract class AbstractDaemon {
      *
      * @param $msg
      */
-    protected static function _TimeStampMsg( $msg ) {
-        if ( INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+    protected function _logTimeStampedMsg( $msg ) {
+        if ( INIT::$DEBUG ) {
+            echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
+        }
         Log::doJsonLog( $msg );
     }
 
@@ -137,18 +117,26 @@ abstract class AbstractDaemon {
      *
      * @return mixed
      */
-    abstract public function main( $args = null );
+    abstract public function main( array $args = null );
 
     /**
      * Needed to be abstract and static despite the strict standards because it will be called from signal handler
      * @return mixed
      */
-    abstract public static function cleanShutDown();
+    abstract public function cleanShutDown();
 
     /**
      * Every cycle reload and update Daemon configuration.
      * @return void
+     * @throws Exception
      */
-    abstract protected function _updateConfiguration();
+    abstract protected function _updateConfiguration(): void;
+
+    /**
+     * @throws Exception
+     */
+    public function getConfiguration(): Configuration {
+        return new Configuration( $this->_configFile, $this->_contextIndex );
+    }
 
 }

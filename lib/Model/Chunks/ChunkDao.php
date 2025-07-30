@@ -1,86 +1,74 @@
 <?php
 
-class Chunks_ChunkDao extends DataAccess_AbstractDao {
+use DataAccess\AbstractDao;
+use Exceptions\NotFoundException;
+
+class Chunks_ChunkDao extends AbstractDao {
 
     /**
-     * @param     $id_job
-     * @param     $password
-     * @param int $ttl
+     * @param int    $id_job
+     * @param string $password
+     * @param int    $ttl
      *
-     * @return Chunks_ChunkStruct|DataAccess_IDaoStruct
-     * @throws \Exceptions\NotFoundException
+     * @return Jobs_JobStruct
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
-    public static function getByIdAndPassword( $id_job, $password, $ttl = 0 ) {
-        $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl, new Chunks_ChunkStruct );
+    public static function getByIdAndPassword( int $id_job, string $password, int $ttl = 0 ): Jobs_JobStruct {
+
+        $fetched = Jobs_JobDao::getByIdAndPassword( $id_job, $password, $ttl );
+
         if ( empty( $fetched ) ) {
-            throw new Exceptions\NotFoundException( 'Record not found' );
+            throw new NotFoundException( 'Job not found' );
         } else {
             return $fetched;
         }
-    }
 
-    /**
-     * @param     $id_job
-     * @param     $password
-     * @param int $ttl
-     *
-     * @return int
-     */
-    public static function getSegmentsCount($id_job, $password, $ttl = 0)
-    {
-        return Jobs_JobDao::getSegmentsCount( $id_job, $password, $ttl );
     }
 
     /**
      * @param Translations_SegmentTranslationStruct $translation
      * @param int                                   $ttl
      *
-     * @return Chunks_ChunkStruct|DataAccess_IDaoStruct
+     * @return Jobs_JobStruct
+     * @throws ReflectionException
      */
-    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, $ttl = 0 ) {
-        return Jobs_JobDao::getBySegmentTranslation( $translation, $ttl, new Chunks_ChunkStruct() );
+    public static function getBySegmentTranslation( Translations_SegmentTranslationStruct $translation, int $ttl = 0 ): Jobs_JobStruct {
+        return Jobs_JobDao::getBySegmentTranslation( $translation, $ttl );
     }
 
     /**
-     * @param     $id_job
+     * @param int $id_job
      *
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
+     * @return Jobs_JobStruct[]
+     * @throws ReflectionException
      */
-    public static function getByJobID( $id_job, $ttl = 0 ) {
-        return Jobs_JobDao::getById( $id_job, $ttl, new Chunks_ChunkStruct() );
+    public static function getByJobID( int $id_job, int $ttl = 0 ): array {
+        return Jobs_JobDao::getById( $id_job, $ttl );
     }
 
     /**
-     * @param     $id_project
+     * @param int $id_project
      * @param int $ttl
      *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
+     * @return Jobs_JobStruct[]
+     * @throws ReflectionException
      */
-    public function getByProjectID( $id_project, $ttl = 0 ) {
-        return Jobs_JobDao::getByProjectId( $id_project, $ttl, new Chunks_ChunkStruct() );
+    public function getByProjectID( int $id_project, int $ttl = 0 ): array {
+        return Jobs_JobDao::getByProjectId( $id_project, $ttl );
     }
 
     /**
-     * @param $id_project
-     * @param $id_job
-     * @param $ttl
-     *
-     * @return Chunks_ChunkStruct[]|DataAccess_IDaoStruct[]
-     */
-    public static function getByIdProjectAndIdJob( $id_project, $id_job, $ttl = 0 ) {
-        return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl, new Chunks_ChunkStruct() );
-    }
-
-    /**
-     * @param $id_job
-     * @param $password
+     * @param int $id_project
+     * @param int $id_job
      * @param int $ttl
-     * @return float|null
+     *
+     * @return Jobs_JobStruct[]
      */
-    public static function getStandardWordCount($id_job, $password, $ttl = 86400)
-    {
-        return Jobs_JobDao::getStandardWordCount($id_job, $password, $ttl);
+    public static function getByIdProjectAndIdJob( int $id_project, int $id_job, int $ttl = 0 ): array {
+        return Jobs_JobDao::getByIdProjectAndIdJob( $id_project, $id_job, $ttl );
     }
+
 }

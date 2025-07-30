@@ -10,159 +10,195 @@
 namespace Contribution;
 
 
-use Chunks_ChunkStruct;
+use DataAccess\IDaoStruct;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_IDaoStruct;
+use Engine;
+use Engines_AbstractEngine;
+use Exception;
+use FeatureSet;
+use Jobs_JobStruct;
 use Projects_ProjectStruct;
+use Users_UserStruct;
 
-class ContributionRequestStruct extends ShapelessConcreteStruct implements DataAccess_IDaoStruct {
+class ContributionRequestStruct extends ShapelessConcreteStruct implements IDaoStruct {
 
     // Needed by getSessionId()
-    public $id_file;
-    public $id_job;
-    public $password;
+    public ?int    $id_file  = null;
+    public ?int    $id_job   = null;
+    public ?string $password = null;
 
-    public $jobStruct;
+    public ?array $jobStruct = [];
 
-    public $dataRefMap;
+    public array $dataRefMap = [];
 
-    public $projectStruct;
+    /**
+     * @var ?array
+     */
+    public ?array $projectStruct = [];
 
-    public $contexts = [
+    public array $contexts = [
             'context_before' => null,
             'segment'        => null,
             'context_after'  => null
     ];
 
-    /**
-     * @var string
-     */
-    public $id_client;
-
-    /**
-     * @var \Users_UserStruct
-     */
-    public $user;
+    public ?array $context_list_before = null;
+    public ?array $context_list_after  = null;
 
     /**
      * @var string
      */
-    public $userRole;
+    public string $id_client;
+
+    /**
+     * @var ?array
+     */
+    public ?array $user = [];
+
+    /**
+     * @var string
+     */
+    public string $userRole;
+
+    /**
+     * @var int|null
+     */
+    public ?int $segmentId = null;
 
     /**
      * @var int
      */
-    public $segmentId = null;
-
-    /**
-     * @var int
-     */
-    public $resultNum = 3;
+    public int $resultNum = 3;
 
     /**
      * @var bool
      */
-    public $concordanceSearch = false;
+    public bool $concordanceSearch = false;
 
     /**
      * @var bool
      */
-    public $fromTarget = false;
+    public bool $fromTarget = false;
+
+    public array $crossLangTargets = [];
+
+    public bool $dialect_strict = false;
+
+    public bool $tm_prioritization = false;
+
+    public bool    $mt_evaluation              = false;
+    public int     $mt_quality_value_in_editor = 86;
+    public bool    $mt_qe_workflow_enabled     = false;
+    public ?string $mt_qe_workflow_parameters  = null;
+
+    public array $penalty_key = [];
 
 
-    public $crossLangTargets = [] ;
-
-
-    # Private members
-    /**
-     * @var \Jobs_JobStruct|\Chunks_ChunkStruct
-     */
-    private $__jobStruct = null;
-
-    /**
-     * @var \Projects_ProjectStruct
-     */
-    private $__projectStruct = null;
-
-    /**
-     * @var \Users_UserStruct
-     */
-    private $__user = null;
+    ### NOT SERIALIZABLE Private members ###
 
     /**
-     * @var \Engines_AbstractEngine
+     * @var ?Engines_AbstractEngine
      */
-    private $__tms = null;
+    private ?Engines_AbstractEngine $tmEngine = null;
 
     /**
-     * @var \Engines_AbstractEngine
+     * @var ?Engines_AbstractEngine
      */
-    private $__mt_engine = null;
+    private ?Engines_AbstractEngine $mt_engine = null;
 
     /**
-     * @return Chunks_ChunkStruct|\Jobs_JobStruct
+     * @param Jobs_JobStruct $jobStruct
+     *
+     * @return $this
      */
-    public function getJobStruct(){
-        if( $this->__jobStruct == null ){
-            $this->__jobStruct = new Chunks_ChunkStruct( (array)$this->jobStruct );
-        }
-        return $this->__jobStruct;
+    public function setJobStruct( Jobs_JobStruct $jobStruct ): ContributionRequestStruct {
+        $this->jobStruct = $jobStruct->toArray();
+
+        return $this;
+    }
+
+    /**
+     * @param Projects_ProjectStruct $projectStruct
+     *
+     * @return $this
+     */
+    public function setProjectStruct( Projects_ProjectStruct $projectStruct ): ContributionRequestStruct {
+        $this->projectStruct = $projectStruct->toArray();
+
+        return $this;
+    }
+
+    /**
+     * @param Users_UserStruct|null $user
+     *
+     * @return $this
+     */
+    public function setUser( Users_UserStruct $user ): ContributionRequestStruct {
+        $this->user = $user->toArray();
+
+        return $this;
+    }
+
+
+    /**
+     * @return ?Jobs_JobStruct
+     */
+    public function getJobStruct(): ?Jobs_JobStruct {
+        return new Jobs_JobStruct( $this->jobStruct );
     }
 
     /**
      * @return Projects_ProjectStruct
      */
-    public function getProjectStruct(){
-        if( $this->__projectStruct == null ){
-            $this->__projectStruct = new Projects_ProjectStruct( (array)$this->projectStruct );
-        }
-        return $this->__projectStruct;
+    public function getProjectStruct(): ?Projects_ProjectStruct {
+        return new Projects_ProjectStruct( $this->projectStruct );
     }
 
     /**
-     * @param \FeatureSet $featureSet
+     * @param FeatureSet $featureSet
      *
-     * @return \Engines_AbstractEngine
-     * @throws \Exception
+     * @return Engines_AbstractEngine
+     * @throws Exception
      */
-    public function getTMEngine( \FeatureSet $featureSet ){
-        if( $this->__tms == null ){
-            $this->__tms = \Engine::getInstance( $this->getJobStruct()->id_tms );
-            $this->__tms->setFeatureSet( $featureSet );
+    public function getTMEngine( FeatureSet $featureSet ): Engines_AbstractEngine {
+        if ( $this->tmEngine == null ) {
+            $this->tmEngine = Engine::getInstance( $this->getJobStruct()->id_tms );
+            $this->tmEngine->setFeatureSet( $featureSet );
         }
-        return $this->__tms;
+
+        return $this->tmEngine;
     }
 
     /**
-     * @param \FeatureSet $featureSet
+     * @param FeatureSet $featureSet
      *
-     * @return \Engines_AbstractEngine
-     * @throws \Exception
+     * @return Engines_AbstractEngine
+     * @throws Exception
      */
-    public function getMTEngine( \FeatureSet $featureSet ){
-        if( $this->__mt_engine == null ){
-            $this->__mt_engine = \Engine::getInstance( $this->getJobStruct()->id_mt_engine );
-            $this->__mt_engine->setFeatureSet( $featureSet );
+    public function getMTEngine( FeatureSet $featureSet ): Engines_AbstractEngine {
+        if ( $this->mt_engine == null ) {
+            $this->mt_engine = Engine::getInstance( $this->getJobStruct()->id_mt_engine );
+            $this->mt_engine->setFeatureSet( $featureSet );
         }
-        return $this->__mt_engine;
+
+        return $this->mt_engine;
     }
 
-    public function getContexts(){
+    public function getContexts(): object {
         return (object)$this->contexts;
     }
 
-    public function getUser(){
-        if( $this->__user == null ){
-            $this->__user = new \Users_UserStruct( (array)$this->user );
-        }
-        return $this->__user;
+    /**
+     * @return ?Users_UserStruct
+     */
+    public function getUser(): ?Users_UserStruct {
+        return new Users_UserStruct( $this->user );
     }
 
     /**
      * @return string
      */
-    public function getSessionId()
-    {
-        return md5($this->id_file. '-' . $this->id_job . '-' . $this->password);
+    public function getSessionId(): string {
+        return md5( $this->id_file . '-' . $this->id_job . '-' . $this->password );
     }
 }

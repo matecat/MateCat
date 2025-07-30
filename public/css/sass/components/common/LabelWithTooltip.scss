@@ -1,0 +1,46 @@
+@use '../../commons/colors';
+
+.label-with-tooltip {
+  position: absolute;
+  z-index: 14;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+
+  &:after {
+    position: absolute;
+    left: 50%;
+    margin-left: -4px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid white;
+    content: '';
+  }
+}
+
+.label-with-tooltip-bottom {
+  &:before {
+    position: absolute;
+    left: 50%;
+    top: -6px;
+    margin-left: -4px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid white;
+    content: '';
+  }
+
+  &::after {
+    display: none;
+  }
+}
+
+.label-with-tooltip-content {
+  border-radius: 4px;
+  padding: 4px 8px;
+  background-color: colors.$white;
+  box-shadow: 0 0 16px rgba(colors.$black, 0.25);
+  color: colors.$grey6;
+  white-space: normal;
+  font-size: 14px;
+  font-weight: normal;
+}

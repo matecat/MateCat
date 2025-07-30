@@ -4,15 +4,6 @@
 [submodule "plugins/aligner"]
 	path = plugins/aligner
 	url = git@github.com:matecat/aligner_plugin.git
-[submodule "plugins/kudo"]
-	path = plugins/kudo
-	url = git@github.com:matecat/kudo_plugin.git
-[submodule "plugins/patreon"]
-	path = plugins/patreon
-	url = git@github.com:matecat/patreon_plugin.git
-[submodule "plugins/skyscanner"]
-	path = plugins/skyscanner
-	url = git@github.com:matecat/skyscanner_plugin.git
 [submodule "plugins/translated"]
 	path = plugins/translated
 	url = git@github.com:matecat/translated_plugin.git
@@ -26,3 +17,10 @@
 	path = internal_scripts
 	url = git@github.com:matecat/internal_scripts.git
 	ignore = untracked
+[submodule "plugins/familysearch"]
+	path = plugins/familysearch
+	url = git@github.com:matecat/familysearch_plugin.git
+[submodule "plugins/roblox"]
+        path = plugins/roblox
+        url = git@github.com:matecat/roblox_plugin.git
+

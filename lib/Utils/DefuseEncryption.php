@@ -1,6 +1,8 @@
 <?php
 
 use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Exception\BadFormatException;
+use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 
@@ -11,13 +13,16 @@ use Defuse\Crypto\Key;
  */
 class DefuseEncryption {
 
-    private $key;
-    private $keyFilePath;
+    private ?Key   $key = null;
+    private string $keyFilePath;
 
-    public function __construct( $keyFilePath ) {
+    /**
+     * @throws Exception
+     */
+    public function __construct( string $keyFilePath ) {
         $this->keyFilePath = $keyFilePath;
 
-        if( $this->loadEncryptionKey() === false ) {
+        if ( $this->loadEncryptionKey() === false ) {
             $this->createEncryptionKey();
         }
     }
@@ -25,17 +30,20 @@ class DefuseEncryption {
     /**
      * Loads the encryption key from the file.
      * @return bool True if successfully load
+     * @throws EnvironmentIsBrokenException
+     * @throws BadFormatException
      */
-    public function loadEncryptionKey() {
-        if( file_exists( $this->keyFilePath ) ) {
+    public function loadEncryptionKey(): bool {
+        if ( file_exists( $this->keyFilePath ) ) {
             $keyFile = fopen( $this->keyFilePath, 'r' );
 
-            if( $keyFile ) {
+            if ( $keyFile ) {
                 $keyFileContents = fread( $keyFile, filesize( $this->keyFilePath ) );
                 fclose( $keyFile );
 
-                if( $keyFileContents ) {
+                if ( $keyFileContents ) {
                     $this->key = Key::loadFromAsciiSafeString( $keyFileContents );
+
                     return true;
                 }
             }
@@ -51,50 +59,61 @@ class DefuseEncryption {
      * @throws Exception
      */
     public function createEncryptionKey() {
-        $this->generateKey();
-        $keyFile = fopen( $this->keyFilePath, 'w' );
 
-        if( $keyFile === false ) {
-            throw new Exception( 'Failed to open the file.' );
+        try {
+
+            $keyFile = fopen( $this->keyFilePath, 'w' );
+
+            if ( $keyFile === false ) {
+                throw new Exception( 'Failed to open the file.' );
+            }
+
+            if ( fwrite( $keyFile, $this->generateKey() ) === false ) {
+                throw new Exception( 'Failed to write in the file.' );
+            }
+
+        } finally {
+            if ( $keyFile ) {
+                fclose( $keyFile );
+                $this->loadEncryptionKey();
+            }
         }
 
-        if( fwrite( $keyFile, $this->key ) === FALSE ) {
-            throw new Exception( 'Failed to write in the file.' );
-        }
-
-        fclose( $keyFile );
-
-        $this->loadEncryptionKey();
     }
 
     /**
      * Generates a new key.
+     * @throws EnvironmentIsBrokenException
      */
-    public function generateKey() {
-        $this->key = Key::createNewRandomKey()->saveToAsciiSafeString();
+    public function generateKey(): string {
+        return Key::createNewRandomKey()->saveToAsciiSafeString();
     }
 
     /**
      * Encrypts a text and returns the encrypted text
+     *
      * @param $text
+     *
      * @return string   Encrypted text
+     * @throws EnvironmentIsBrokenException
      */
-    public function encrypt( $text ) {
-        $cipherText = Crypto::encrypt( $text, $this->key );
-
-        return $cipherText;
+    public function encrypt( $text ): string {
+        return Crypto::encrypt( $text, $this->key );
     }
 
     /**
      * Decrypts an encrypted text
+     *
      * @param $cipherText
-     * @return bool|string  Decrypted text or FALSE when found an error in decryption
+     *
+     * @return null|string  Decrypted text or FALSE when found an error in decryption
+     * @throws EnvironmentIsBrokenException
      */
-    public function decrypt( $cipherText ) {
+    public function decrypt( $cipherText ): ?string {
         try {
             return Crypto::decrypt( $cipherText, $this->key );
         } catch ( WrongKeyOrModifiedCiphertextException $ex ) {
-            return false;
+            return null;
         }
     }
 

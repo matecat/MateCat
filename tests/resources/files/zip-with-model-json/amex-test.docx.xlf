@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:its="http://www.w3.org/2005/11/its" its:version="2.0">
+    <file original="word/styles.xml" source-language="fr-fr" target-language="fr-fr" datatype="x-undefined">
+        <body>
+        </body>
+    </file>
+    <file original="word/document.xml" source-language="fr-fr" target-language="fr-fr" datatype="x-undefined">
+        <body>
+            <trans-unit id="tu1" xml:space="preserve">
+<source xml:lang="fr-fr">American Express : pour des raisons indépendantes de notre volonté, nous ne pourrons effectuer le débit qu’en Euros. Merci de votre compréhension<x id="1"/></source>
+                <seg-source><mrk mid="0" mtype="seg">American Express :</mrk>
+                    <mrk mid="1" mtype="seg">pour des raisons indépendantes de notre volonté, nous ne pourrons effectuer le débit qu’en Euros.</mrk>
+                    <mrk mid="2" mtype="seg">Merci de votre compréhension<x id="1"/></mrk></seg-source>
+                <target xml:lang="fr-fr"><mrk mid="0" mtype="seg">American Express :</mrk>
+                    <mrk mid="1" mtype="seg">pour des raisons indépendantes de notre volonté, nous ne pourrons effectuer le débit qu’en Euros.</mrk>
+                    <mrk mid="2" mtype="seg">Merci de votre compréhension<x id="1"/></mrk></target>
+</trans-unit>
+        </body>
+    </file>
+    <file original="word/settings.xml" source-language="fr-fr" target-language="fr-fr" datatype="x-undefined">
+        <body>
+        </body>
+    </file>
+    <file original="docProps/core.xml" source-language="fr-fr" target-language="fr-fr" datatype="x-undefined">
+        <body>
+        </body>
+    </file>
+</xliff>

@@ -1,5 +1,8 @@
 <?php
 
+use DataAccess\AbstractDaoObjectStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -7,8 +10,8 @@
  * Time: 14.54
  */
 class EnginesModel_EngineStruct
-        extends DataAccess_AbstractDaoObjectStruct
-        implements DataAccess_IDaoStruct, ArrayAccess {
+        extends AbstractDaoObjectStruct
+        implements IDaoStruct, ArrayAccess {
 
     /**
      * @var int
@@ -69,7 +72,7 @@ class EnginesModel_EngineStruct
 
 
     /**
-     * @var array
+     * @var array|string
      */
     public $extra_parameters;
 
@@ -170,7 +173,7 @@ class EnginesModel_EngineStruct
     /**
      * Cast an Engine to String. Useful for engine comparison inside a list ( catController )
      */
-    public function __toString(){
+    public function __toString() {
         return $this->id . $this->name . $this->description;
     }
 
@@ -181,17 +184,16 @@ class EnginesModel_EngineStruct
      *
      * @return array|mixed
      */
-    public function getExtraParamsAsArray()
-    {
-        if(is_array($this->extra_parameters)){
+    public function getExtraParamsAsArray() {
+        if ( is_array( $this->extra_parameters ) ) {
             return $this->extra_parameters;
         }
 
-        if(empty($this->extra_parameters) or $this->extra_parameters === null){
+        if ( empty( $this->extra_parameters ) ) {
             return [];
         }
 
-        return json_decode($this->extra_parameters, true);
+        return json_decode( $this->extra_parameters, true );
     }
 
 }

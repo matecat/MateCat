@@ -2,10 +2,11 @@
 
 namespace API\V2;
 
-use API\V2\Exceptions\ValidationError;
-use API\V2\Validators\ProjectAccessValidator;
-use API\V2\Validators\ProjectPasswordValidator;
-use API\V2\Validators\TeamProjectValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\ProjectAccessValidator;
+use API\Commons\Validators\ProjectPasswordValidator;
+use API\Commons\Validators\TeamProjectValidator;
 use Chunks_ChunkDao;
 use Exception;
 use LQA\ChunkReviewDao;
@@ -52,7 +53,7 @@ class ReviewsController extends KleinController
 
         // destroy the 5 minutes chunk review cache
         $chunk = ( new Chunks_ChunkDao() )->getByIdAndPassword( $records[ 0 ]->id_job, $records[ 0 ]->password );
-        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk, 60 * 5 );
+        ( new ChunkReviewDao() )->destroyCacheForFindChunkReviews( $chunk );
 
         $this->response->json( [
                 'chunk_review' => [

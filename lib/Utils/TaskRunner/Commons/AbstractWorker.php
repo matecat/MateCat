@@ -11,11 +11,11 @@ namespace TaskRunner\Commons;
 
 use AMQHandler;
 use Database;
+use Exception;
 use INIT;
 use PDOException;
 use SplObserver;
 use SplSubject;
-use Stomp\Exception\StompException;
 use Stomp\Transport\Message;
 use TaskRunner\Exceptions\EndQueueException;
 
@@ -34,12 +34,12 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @var SplObserver[]
      */
-    protected $_observer;
+    protected array $_observer;
 
     /**
      * The last log message
      *
-     * @var string
+     * @var string|array
      */
     protected $_logMsg;
 
@@ -48,7 +48,7 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @var string
      */
-    protected $_workerPid = '0';
+    protected string $_workerPid = '0';
 
     /**
      * The context object.
@@ -56,19 +56,19 @@ abstract class AbstractWorker implements SplSubject {
      *
      * @var Context
      */
-    protected $_myContext;
+    protected Context $_myContext;
 
     /**
      * @var AMQHandler
      */
-    protected $_queueHandler;
+    protected AMQHandler $_queueHandler;
 
     /**
      * Number of times the worker must be retried in case of error
      *
      * @var int
      */
-    protected $maxRequeueNum = 100;
+    protected int $maxRequeueNum = 100;
 
     /**
      * TMAnalysisWorker constructor.
@@ -98,17 +98,17 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * @return Context
      */
-    public function getContext() {
+    public function getContext(): Context {
         return $this->_myContext;
     }
 
     /**
      * Override this method in the concrete worker if you need the worker to log in a file
-     * different than the one in context object
+     * different from the one in context object
      *
      * @return string
      */
-    public function getLoggerName() {
+    public function getLoggerName(): string {
         return $this->_myContext->loggerName;
     }
 
@@ -165,7 +165,7 @@ abstract class AbstractWorker implements SplSubject {
 
     /**
      * Method used by the Observer to get the logging message
-     * @return string
+     * @return string|array
      */
     public function getLogMsg() {
         return $this->_logMsg;
@@ -174,7 +174,7 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * Method to be called when a concrete worker must log
      *
-     * @param $msg string
+     * @param $msg array|string
      */
     protected function _doLog( $msg ) {
         $this->_logMsg = $msg;
@@ -235,13 +235,14 @@ abstract class AbstractWorker implements SplSubject {
 
     /**
      * @param $_object
-     *
+     * @throws Exception
      */
-    protected function publishToSseTopic( $_object ) {
+    protected function publishToNodeJsClients( $_object ) {
 
         $message = json_encode( $_object );
-        AMQHandler::getNewInstanceForDaemons()->publishToTopic( INIT::$SSE_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
+        AMQHandler::getNewInstanceForDaemons()->publishToNodeJsClients( INIT::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message, [ 'persistent' => 'false' ] ) );
         $this->_doLog( $message );
 
     }
+
 }

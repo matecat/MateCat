@@ -9,36 +9,36 @@
 
 class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
-    use \Engines\Traits\FormatResponse;
+    protected array $_config = [
+            'q'      => null,
+            'source' => null,
+            'target' => null,
+    ];
 
-    protected $_config = array(
-            'q'           => null,
-            'source'      => null,
-            'target'      => null,
-    );
-
-    public function __construct($engineRecord) {
-        parent::__construct($engineRecord);
-        if ( $this->engineRecord->type != "MT" ) {
-            throw new Exception( "Engine {$this->engineRecord->id} is not a MT engine, found {$this->engineRecord->type} -> {$this->engineRecord->class_load}" );
+    public function __construct( $engineRecord ) {
+        parent::__construct( $engineRecord );
+        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
     /**
-     * @param $rawValue
+     * @param       $rawValue
      * @param array $parameters
-     * @param null $function
+     * @param null  $function
+     *
      * @return array|Engines_Results_MT|mixed
+     * @throws Exception
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
 
-        $all_args =  func_get_args();
+        $all_args                = func_get_args();
         $all_args[ 1 ][ 'text' ] = $all_args[ 1 ][ 'q' ];
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
             if ( isset( $decoded[ "data" ] ) ) {
-                return $this->_composeResponseAsMatch( $all_args, $decoded );
+                return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
             } else {
                 $decoded = [
                         'error' => [
@@ -62,19 +62,25 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     public function get( $_config ) {
 
-        $parameters = array();
+        $parameters = [];
+
         if ( $this->client_secret != '' && $this->client_secret != null ) {
             $parameters[ 'key' ] = $this->client_secret;
         }
-        $parameters['target'] = $this->_fixLangCode( $_config['target'] );
-        $parameters['source'] = $this->_fixLangCode( $_config['source'] );
-        $parameters['q'] = $this->_preserveSpecialStrings($_config['segment']);
+
+        if ( isset( $_config[ 'key' ] ) and !empty( $_config[ 'key' ] ) ) {
+            $parameters[ 'key' ] = $_config[ 'key' ];
+        }
+
+        $parameters[ 'target' ]     = $this->_fixLangCode( $_config[ 'target' ] );
+        $parameters[ 'source' ]     = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'q' ]          = $_config[ 'segment' ];
 
         $this->_setAdditionalCurlParams(
-                array(
+                [
                         CURLOPT_POST       => true,
                         CURLOPT_POSTFIELDS => http_build_query( $parameters )
-                )
+                ]
         );
 
         $this->call( "translate_relative_url", $parameters, true );

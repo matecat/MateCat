@@ -2,6 +2,5 @@
 
 namespace Engines\DeepL;
 
-class DeepLApiException extends \Exception
-{
+class DeepLApiException extends \Exception {
 }

@@ -11,10 +11,10 @@ namespace Segments;
 
 use ArrayAccess;
 use DataAccess\ArrayAccessTrait;
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
-class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, ArrayAccess {
+class ContextStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -26,7 +26,7 @@ class ContextStruct extends DataAccess_AbstractDaoSilentStruct implements DataAc
 
     public function __construct( array $array_params = [], $decode = true ) {
         parent::__construct( $array_params );
-        if( $decode ){
+        if ( $decode ) {
             $this->context_json = json_decode( $this->context_json );
         }
     }

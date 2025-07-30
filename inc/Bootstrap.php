@@ -1,5 +1,8 @@
 <?php
 
+use API\Commons\Exceptions\AuthenticationError;
+use API\Commons\Exceptions\ValidationError;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -16,16 +19,22 @@ class Bootstrap {
     /**
      * @var FeatureSet
      */
-    private $autoLoadedFeatureSet;
+    private FeatureSet $autoLoadedFeatureSet;
 
-    public static function start() {
-        new self();
+    public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
+        new self( $config_file, $task_runner_config_file );
     }
 
-    private function __construct() {
+    private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
-        self::$_ROOT  = realpath( dirname( __FILE__ ) . '/../' );
-        self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
+
+        if ( $config_file != null ) {
+            self::$CONFIG = parse_ini_file( $config_file->getRealPath(), true );
+        } else {
+            self::$CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/config.ini', true );
+        }
+
         $OAUTH_CONFIG = @parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/oauth_config.ini', true );
 
         register_shutdown_function( [ 'Bootstrap', 'shutdownFunctionHandler' ] );
@@ -38,27 +47,33 @@ class Bootstrap {
         spl_autoload_register( [ 'Bootstrap', 'loadClass' ] );
         @include_once 'vendor/autoload.php';
 
-        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
+        INIT::$OAUTH_CONFIG = $OAUTH_CONFIG;
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser
-        INIT::$TIME_TO_EDIT_ENABLED           = false;
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
-        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
-
+        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View/templates";
 
         //get the environment configuration
         self::initConfig();
 
-        ini_set( 'display_errors', false );
-        if ( INIT::$PRINT_ERRORS ) {
-            ini_set( 'display_errors', true );
+        if ( $task_runner_config_file != null ) {
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( $task_runner_config_file->getRealPath(), true );
+        } else {
+            INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
         }
+
+        ini_set( 'display_errors', false );
 
         if ( empty( INIT::$STORAGE_DIR ) ) {
             INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage";
+        }
+
+        if ( INIT::$PRINT_ERRORS || stripos( INIT::$ENV, 'develop' ) !== false ) {
+            ini_set( 'error_log', INIT::$STORAGE_DIR . "/log_archive/php_errors.txt" );
+            ini_set( 'error_reporting', E_ALL );
         }
 
         date_default_timezone_set( INIT::$TIME_ZONE );
@@ -68,7 +83,6 @@ class Bootstrap {
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
         INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
-        INIT::$BLACKLIST_REPOSITORY            = INIT::$STORAGE_DIR . "/files_storage/blacklist";
         INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
         INIT::$QUEUE_PROJECT_REPOSITORY        = INIT::$STORAGE_DIR . "/files_storage/queueProjects";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
@@ -80,65 +94,51 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
-        INIT::$TASK_RUNNER_CONFIG = parse_ini_file( self::$_ROOT . DIRECTORY_SEPARATOR . 'inc/task_manager_config.ini', true );
-
         try {
             Log::$uniqID = ( isset( $_COOKIE[ INIT::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ INIT::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
             WorkerClient::init();
             Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
             Log::doJsonLog( $e->getMessage() );
         }
 
-        if ( !is_dir( INIT::$STORAGE_DIR ) ) {
-            mkdir( INIT::$STORAGE_DIR, 0755, true );
-        }
-        if ( !is_dir( INIT::$LOG_REPOSITORY ) ) {
-            mkdir( INIT::$LOG_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$UPLOAD_REPOSITORY ) ) {
-            mkdir( INIT::$UPLOAD_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$FILES_REPOSITORY ) ) {
-            mkdir( INIT::$FILES_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
-            mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$ANALYSIS_FILES_REPOSITORY ) ) {
-            mkdir( INIT::$ANALYSIS_FILES_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
-            mkdir( INIT::$ZIP_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$CONVERSIONERRORS_REPOSITORY ) ) {
-            mkdir( INIT::$CONVERSIONERRORS_REPOSITORY, 0755, true );
-        }
-        if ( !is_dir( INIT::$TMP_DOWNLOAD ) ) {
-            mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
-        }
-        if ( !is_dir( INIT::$QUEUE_PROJECT_REPOSITORY ) ) {
-            mkdir( INIT::$QUEUE_PROJECT_REPOSITORY, 0755, true );
+        $directories = [
+                INIT::$STORAGE_DIR,
+                INIT::$LOG_REPOSITORY,
+                INIT::$UPLOAD_REPOSITORY,
+                INIT::$FILES_REPOSITORY,
+                INIT::$CACHE_REPOSITORY,
+                INIT::$ANALYSIS_FILES_REPOSITORY,
+                INIT::$ZIP_REPOSITORY,
+                INIT::$CONVERSIONERRORS_REPOSITORY,
+                INIT::$TMP_DOWNLOAD,
+                INIT::$QUEUE_PROJECT_REPOSITORY,
+        ];
+
+        foreach ( $directories as $directory ) {
+            if ( !is_dir( $directory ) ) {
+                mkdir( $directory, 0755, true );
+            }
         }
 
         //auth sections
         INIT::$AUTHSECRET_PATH = INIT::$ROOT . '/inc/login_secret.dat';
-        //if secret is set in file
+        //if a secret is set in file
         if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
             //fetch it
             INIT::$AUTHSECRET = file_get_contents( INIT::$AUTHSECRET_PATH );
         } else {
             //try creating the file and the fetch it
-            //generate pass
+            //generates pass
             $secret = Utils::randomString( 512, true );
-            //put file
+            //put the file
             file_put_contents( INIT::$AUTHSECRET_PATH, $secret );
-            //if put succeed
+            //if put succeeds
             if ( file_exists( INIT::$AUTHSECRET_PATH ) ) {
                 //restrict permissions
                 chmod( INIT::$AUTHSECRET_PATH, 0400 );
             } else {
-                //if couldn't create due to permissions, use default secret
+                //if we couldn't create due to permissions, use default secret
                 INIT::$AUTHSECRET = 'ScavengerOfHumanSorrow';
             }
         }
@@ -156,76 +156,69 @@ class Bootstrap {
         $this->autoLoadedFeatureSet->run( 'bootstrapCompleted' );
     }
 
-    public static function exceptionHandler( $exception ) {
+    public static function exceptionHandler( Throwable $exception ) {
 
         Log::$fileName = 'fatal_errors.txt';
 
-        $response_message = "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>";
-
-        try {
-            /**
-             * @var $exception Exception
-             */
-            throw $exception;
-        } catch ( InvalidArgumentException $e ) {
-            $code    = 400;
-            $message = "Bad Request";
-        } catch ( Exceptions\NotFoundException $e ) {
-            $code    = 404;
-            $message = "Not Found";
-            \Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\AuthorizationError $e ) {
-            $code    = 403;
-            $message = "Forbidden";
-            \Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( Exceptions\ValidationError $e ) {
-            $code             = 409;
-            $message          = "Conflict";
-            $response_message = $exception->getMessage();
-            \Log::doJsonLog( [ "error" => 'The request could not be completed due to a conflict with the current state of the resource. - ' . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
-        } catch ( \PDOException $e ) {
-            $code    = 503;
-            $message = "Service Unavailable";
-            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
-        } catch ( Exception $e ) {
-            $code    = 500;
-            $message = "Internal Server Error";
-            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
-            \Log::doJsonLog( [ "error" => $exception->getMessage(), "trace" => $exception->getTrace() ] );
+        switch ( get_class( $exception ) ) {
+            case AuthenticationError::class: // authentication requested
+                $code = 401;
+                Log::doJsonLog( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case InvalidArgumentException::class:
+            case ValidationError:: class:
+            case Exceptions\ValidationError::class:
+                $code = 400;
+                Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case Exceptions\NotFoundException:: class:
+            case API\Commons\Exceptions\NotFoundException::class:
+                $code = 404;
+                Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case Exceptions\AuthorizationError::class:
+            case API\Commons\Exceptions\AuthorizationError::class:
+                $code = 403;
+                Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                break;
+            case PDOException::class:
+                $code = 503;
+                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                break;
+            default:
+                $code = 500;
+                Log::doJsonLog( json_encode( ( new API\Commons\Error( $exception ) )->render( true ) ) );
+                break;
         }
+
+        self::formatOutputExceptions( $code, $exception );
+        die(); // do not complete the response and set the header
+
+    }
+
+    private static function formatOutputExceptions( int $httpStatusCode, Throwable $exception ) {
 
         if ( stripos( PHP_SAPI, 'cli' ) === false ) {
-            header( "HTTP/1.1 " . $code . " " . $message );
-        }
 
-        if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || @$_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
-
-            //json_rersponse
             if ( INIT::$PRINT_ERRORS ) {
-                echo json_encode( [
-                        "errors" => [ [ "code" => -1000, "message" => $exception->getMessage() ] ], "data" => []
-                ] );
-            } else {
-                echo json_encode( [
-                        "errors"  => [
-                                [
-                                        "code"    => -1000,
-                                        "message" => $response_message
-                                ]
-                        ], "data" => []
-                ] );
+                $report = [
+                        'message' => $exception->getMessage(),
+                        'trace'   => $exception->getTraceAsString(),
+                ];
             }
 
-        } elseif ( INIT::$PRINT_ERRORS ) {
+            $controllerInstance = new CustomPageView();
+            try {
+                $controllerInstance->setView( $httpStatusCode . '.html', $report ?? [], $httpStatusCode );
+            } catch ( Exception $ignore ) {
+
+            }
+
+            $controllerInstance->render();
+
+        } else {
             echo $exception->getMessage() . "\n";
             echo $exception->getTraceAsString() . "\n";
-        } else {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( "$code.html" );
-            $controllerInstance->setCode( $code );
-            $controllerInstance->doAction();
-            die(); // do not complete the response and set the header
         }
 
     }
@@ -241,10 +234,10 @@ class Bootstrap {
                 E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         ];
 
-        # Getting last error
+        # Getting the last error
         $error = error_get_last();
 
-        # Checking if last error is a fatal error
+        # Checking if the last error is a fatal error
         if ( isset( $error[ 'type' ] ) )
             switch ( $error[ 'type' ] ) {
                 case E_CORE_ERROR:
@@ -253,62 +246,22 @@ class Bootstrap {
                 case E_USER_ERROR:
                 case E_RECOVERABLE_ERROR:
 
-                    if ( !ob_get_level() ) {
-                        ob_start();
-                    } else {
-                        ob_end_clean();
-                        ob_start();
-                    }
-
-                    debug_print_backtrace();
-                    $output = ob_get_contents();
-                    ob_end_clean();
-
-                    # Here we handle the error, displaying HTML, logging, ...
-                    $output .= "<pre>\n";
-                    $output .= "[ {$errorType[$error['type']]} ]\n\t";
-                    $output .= "{$error['message']}\n\t";
-                    $output .= "Not Recoverable Error on line {$error['line']} in file " . $error[ 'file' ];
-                    $output .= " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                    $output .= " - REQUEST URI: " . var_export( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
-                    $output .= " - REQUEST Message: " . var_export( $_REQUEST, true ) . "\n";
-                    $output .= "\n\t";
-                    $output .= "Aborting...\n";
-                    $output .= "</pre>";
-
-                    $isAPI = preg_match( '#/api/*#', @$_SERVER[ 'REQUEST_URI' ] );
-
                     Log::$fileName = 'fatal_errors.txt';
-                    Log::doJsonLog( $output );
-                    Utils::sendErrMailReport( $output );
+                    $exception     = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
-                    if ( stripos( PHP_SAPI, 'cli' ) === false ) {
-                        header( "HTTP/1.1 500 Internal Server Error" );
+                    try {
+                        $reflector = new ReflectionProperty( $exception, 'trace' );
+                        $reflector->setAccessible( true );
+                        $error[ 'type' ] = $errorType[ $error[ 'type' ] ];
+                        $reflector->setValue( $exception, [ $error ] );
+                    } catch ( ReflectionException $e ) {
+
                     }
 
-                    if ( ( isset( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) && strtolower( $_SERVER[ 'HTTP_X_REQUESTED_WITH' ] ) == 'xmlhttprequest' ) || $isAPI ) {
+                    Log::doJsonLog( $exception->getTrace() );
+                    self::formatOutputExceptions( 500, $exception );
+                    die();
 
-                        //json_response
-                        if ( INIT::$PRINT_ERRORS ) {
-                            echo json_encode( [
-                                    "errors" => [ [ "code" => -1000, "message" => $output ] ], "data" => []
-                            ] );
-                        } else {
-                            echo json_encode( [
-                                    "errors"  => [
-                                            [
-                                                    "code"    => -1000,
-                                                    "message" => "Oops we got an Error. Contact <a href='mailto:" . INIT::$SUPPORT_MAIL . "'>" . INIT::$SUPPORT_MAIL . "</a>"
-                                            ]
-                                    ], "data" => []
-                            ] );
-                        }
-
-                    } elseif ( INIT::$PRINT_ERRORS ) {
-                        echo $output;
-                    }
-
-                    break;
             }
 
     }
@@ -317,12 +270,15 @@ class Bootstrap {
         @session_write_close();
     }
 
+    /**
+     * @throws Exception
+     */
     public static function sessionStart() {
         $session_status = session_status();
         if ( $session_status == PHP_SESSION_NONE ) {
             session_start();
         } elseif ( $session_status == PHP_SESSION_DISABLED ) {
-            throw new \Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+            throw new Exception( "MateCat needs to have sessions. Sessions must be enabled." );
         }
     }
 
@@ -369,8 +325,8 @@ class Bootstrap {
     }
 
     /**
-     * Returns an array of configuration params as parsed from config.ini file.
-     * The returned array only return entries that match the current environment.
+     * Returns an array of configuration params as parsed from the config.ini file.
+     * The returned array only returns entries that match the current environment.
      *
      */
     public static function getEnvConfig() {
@@ -381,7 +337,7 @@ class Bootstrap {
 
         $env = self::$CONFIG[ self::$CONFIG[ 'ENV' ] ];
 
-        // check if outsource is disabled by environment
+        // check if outsource is disabled by the environment
         $enable_outsource = getenv( 'ENABLE_OUTSOURCE' );
 
         if ( $enable_outsource == "false" ) {
@@ -393,23 +349,24 @@ class Bootstrap {
     }
 
     /**
-     * Returns a specific key from parsed coniguration file
+     * Returns a specific key from a parsed configuration file
      *
      * @param $key
      *
      * @return mixed
+     * @noinspection PhpUnused
      */
     public static function getEnvConfigKey( $key ) {
         $config = self::getEnvConfig();
 
-        return @$config[ $key ];
+        return $config[ $key ] ?? null;
     }
 
     /**
      * TODO: move this to a private instance method on a singleton of this class.
      *
-     * This function initializes the configuration peforming all required checks to be sure
-     * that configuraiton is safe.
+     * This function initializes the configuration performing all required checks to be sure
+     * that configuration is safe.
      *
      * If any sanity check is to be done, this is the right place to do it.
      */
@@ -431,7 +388,7 @@ class Bootstrap {
             register_shutdown_function( 'Bootstrap::sessionClose' );
 
             // Get HTTPS server status
-            // Override if header is set from load balancer
+            // Override if the header is set from load balancer
             $localProto = 'http';
             foreach ( [ 'HTTPS', 'HTTP_X_FORWARDED_PROTO' ] as $_key ) {
                 if ( isset( $_SERVER[ $_key ] ) ) {
@@ -444,24 +401,13 @@ class Bootstrap {
             ini_set( 'session.name', INIT::$PHP_SESSION_NAME );
             ini_set( 'session.cookie_domain', '.' . INIT::$COOKIE_DOMAIN );
             ini_set( 'session.cookie_secure', true );
+            ini_set( 'session.cookie_httponly', true );
 
         }
 
         INIT::$HTTPHOST = INIT::$CLI_HTTP_HOST;
 
         INIT::obtain(); //load configurations
-
-//        $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
-//
-//        if ( self::$CONFIG['ENV'] == 'production' ) {
-//            if( stripos( $fileSystem, 'nfs' ) === false && self::$CONFIG['CHECK_FS'] ){
-//                die( 'Wrong Configuration! You must mount your remote filesystem to the production or change the storage directory.' );
-//            }
-//        } else {
-//            if( stripos( $fileSystem, 'nfs' ) !== false && self::$CONFIG['CHECK_FS'] ){
-//                die( 'Wrong Configuration! You must un-mount your remote filesystem or change the local directory.' );
-//            }
-//        }
 
         Features::setIncludePath();
 
@@ -472,7 +418,7 @@ class Bootstrap {
      *
      * @return bool true if all mandatory keys are present, false otherwise
      */
-    public static function areMandatoryKeysPresent() {
+    public static function areMandatoryKeysPresent(): bool {
         $merged_config = array_merge( self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
 
         foreach ( INIT::$MANDATORY_KEYS as $key ) {
@@ -484,29 +430,8 @@ class Bootstrap {
         return true;
     }
 
-    /**
-     * Check if the main OAuth keys are present
-     *
-     * @return bool true if the main OAuth keys are present, false otherwise
-     */
-    public static function areOauthKeysPresent() {
-        if ( empty( INIT::$OAUTH_CLIENT_ID ) ) {
-            return false;
-        }
-
-        if ( empty( INIT::$OAUTH_CLIENT_SECRET ) ) {
-            return false;
-        }
-
-        if ( empty( INIT::$OAUTH_CLIENT_APP_NAME ) ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public static function isGDriveConfigured() {
-        if ( empty( INIT::$OAUTH_BROWSER_API_KEY ) ) {
+    public static function isGDriveConfigured(): bool {
+        if ( empty( INIT::$GOOGLE_OAUTH_CLIENT_ID ) || empty( INIT::$GOOGLE_OAUTH_BROWSER_API_KEY ) ) {
             return false;
         }
 

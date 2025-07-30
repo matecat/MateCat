@@ -10,12 +10,15 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\AuthorizationError;
-use API\V2\Json\Error;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\AuthorizationError;
+use API\Commons\Validators\LoginValidator;
+use API\Commons\Validators\TeamAccessValidator;
 use API\V2\Json\Team;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\TeamAccessValidator;
+use Exception;
 use InvalidArgumentException;
+use ReflectionException;
+use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamDao;
 use Teams\TeamStruct;
@@ -30,7 +33,11 @@ class TeamsController extends KleinController {
         $this->appendValidator( new TeamAccessValidator( $this ) );
     }
 
-    public function create() {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function create(): void {
 
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
@@ -46,15 +53,15 @@ class TeamsController extends KleinController {
                         'filter' => FILTER_SANITIZE_EMAIL,
                         'flags'  => FILTER_REQUIRE_ARRAY
                 ]
-        ], true );
+        ] );
 
-        $teamStruct = new TeamStruct( array(
+        $teamStruct = new TeamStruct( [
                 'created_by' => $this->user->uid,
                 'name'       => $params[ 'name' ],
                 'type'       => $params[ 'type' ]
-        ) );
+        ] );
 
-        $model = new \TeamModel( $teamStruct );
+        $model = new TeamModel( $teamStruct );
         foreach ( $params[ 'members' ] as $email ) {
             $model->addMemberEmail( $email );
         }
@@ -63,61 +70,71 @@ class TeamsController extends KleinController {
         $team      = $model->create();
         $formatted = new Team();
 
+        $this->refreshClientSessionIfNotApi();
+
         $this->response->json( [ 'team' => $formatted->renderItem( $team ) ] );
     }
 
-    public function update() {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function update(): void {
 
         $this->addValidatorAccess();
         $this->validateRequest();
 
-        try {
+        // sanitize params
+        $params = filter_var_array( $this->params, [
+                'name'    => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_BACKTICK
+                ],
+                'id_team' => [
+                        'filter' => FILTER_VALIDATE_INT
+                ],
+        ] );
 
-            $org     = new TeamStruct();
-            $org->id = $this->request->id_team;
+        $org       = new TeamStruct();
+        $org->id   = $params[ 'id_team' ];
+        $org->name = $params[ 'name' ];
 
-            $org->name = $this->params[ 'name' ];
-            if ( empty( $org->name ) ) {
-                throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
-            }
-
-            $membershipDao = new MembershipDao();
-            $org           = $membershipDao->findTeamByIdAndUser( $org->id, $this->user );
-
-            if ( empty( $org ) ) {
-                throw new AuthorizationError( "Not Authorized", 401 );
-            }
-
-            $org->name = $this->params[ 'name' ];
-
-            $teamDao = new TeamDao();
-
-            $teamDao->updateTeamName( $org );
-            $memberList = ( new MembershipDao() )->getMemberListByTeamId( $org->id );
-
-            foreach ( $memberList as $user ) {
-                ( new MembershipDao() )->destroyCacheUserTeams( $user->getUser() ); // clean the cache for all team users to see the changes
-            }
-
-            $formatted = new Team( [ $org ] );
-            $this->response->json( [ 'team' => $formatted->render() ] );
-        } catch ( \PDOException $e ) {
-            $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch ( AuthorizationError $e ) {
-            $this->response->code( 401 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch ( InvalidArgumentException $e ) {
-            $this->response->code( 400 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
+        if ( empty( $org->name ) ) {
+            throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
         }
 
+        $membershipDao = new MembershipDao();
+        $org           = $membershipDao->findTeamByIdAndUser( $org->id, $this->user );
+
+        if ( empty( $org ) ) {
+            throw new AuthorizationError( "Not Authorized", 401 );
+        }
+
+        $org->name = $params[ 'name' ];
+
+        $teamDao = new TeamDao();
+
+        $teamDao->updateTeamName( $org );
+        $memberList = ( new MembershipDao() )->getMemberListByTeamId( $org->id );
+
+        foreach ( $memberList as $user ) {
+            ( new MembershipDao() )->destroyCacheUserTeams( $user->getUser() ); // clean the cache for all team users to see the changes
+        }
+
+        $formatted = new Team( [ $org ] );
+
+        $this->refreshClientSessionIfNotApi();
+
+        $this->response->json( [ 'team' => $formatted->render() ] );
 
     }
 
-    public function getTeamList(){
+    /**
+     * @throws ReflectionException
+     */
+    public function getTeamList(): void {
 
-        $teamList = ( new MembershipDao() )->findUserTeams( $this->user );
+        $teamList  = ( new MembershipDao() )->findUserTeams( $this->user );
         $formatted = new Team( $teamList );
         $this->response->json( [ 'teams' => $formatted->render() ] );
 

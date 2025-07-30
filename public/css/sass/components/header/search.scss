@@ -1,3 +1,4 @@
+@use "../../commons/colors";
 .searchbox {
   position: relative;
   float: left;
@@ -51,14 +52,12 @@
     -moz-transition: all 100ms ease-in;
   }
 
-  .search-input:hover,
-  .search-editarea:hover {
+  .search-input:hover {
     -moz-box-shadow: inset 0 1px 1px #e6e7e8;
     -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
   }
 
-  .search-input:focus,
-  .search-editarea:focus {
+  .search-input:focus {
     -moz-box-shadow: inset 0 1px 2px #ccc;
     -webkit-box-shadow: inset 0 1px 2px #ccc;
     color: #000;
@@ -135,27 +134,32 @@ button#exec-replace {
 /////////// New Find
 .ui.form {
   box-sizing: border-box;
-  //TODO: Transform in SCSS Component for all INPUT TYPES
-  input {
-    border-radius: 2px !important;
-    border: 1px solid rgba(34, 36, 38, 0.15) !important;
-    box-shadow: inset 0 1px 3px #ddd !important;
-    font-size: 1.2em !important;
-    padding: 8px 16px 7px !important;
-    &::-webkit-input-placeholder {
-      color: #929292;
-    }
-    &:hover {
-      border-color: rgba(34, 36, 38, 0.35) !important;
-    }
-    &:focus {
-      border-color: #85b7d9 !important;
-      background: #ffffff !important;
-      color: rgba(0, 0, 0, 0.8) !important;
-      /*outline: none;*/
-    }
-  }
   .find-wrapper {
+    //TODO: Transform in SCSS Component for all INPUT TYPES
+    .find-element {
+      input:not(.input--invisible), {
+        border-radius: 2px !important;
+        border: 1px solid rgba(34, 36, 38, 0.15) !important;
+        box-shadow: inset 0 1px 3px #ddd !important;
+        font-size: 1.2em !important;
+        padding: 8px 16px 7px !important;
+
+        &::-webkit-input-placeholder {
+          color: #929292;
+        }
+
+        &:hover {
+          border-color: rgba(34, 36, 38, 0.35) !important;
+        }
+
+        &:focus {
+          border-color: #85b7d9 !important;
+          background: #ffffff !important;
+          color: rgba(0, 0, 0, 0.8) !important;
+          /*outline: none;*/
+        }
+      }
+    }
     .find-container {
       background-color: #fff;
       padding: 10px 0 0;
@@ -185,65 +189,34 @@ button#exec-replace {
             .find-dropdown {
               display: flex;
               align-items: center;
-              .ui.basic.button {
-                font-family: 'calibri', Arial, Helvetica, sans-serif;
-                font-size: 16px !important;
-                padding: 11px 20px;
-                border-radius: 2px;
-                /*transition: 0.3s ease;*/
-                box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset;
-
-                &:hover,
-                &.active {
-                  box-shadow: 0 0 0 1px #0055b8 inset;
-                  color: #0055b8 !important;
-                  background: #fff !important;
-                }
-
-                .text {
-                  /*transition: 0.3s ease;*/
-                  display: flex;
-                }
-                .ui.cancel.label {
-                  position: absolute;
-                  padding: 4px;
-                  background-color: #d6d6d6;
-                  border-radius: 15px;
-                  top: 8px;
-                  line-height: 0px;
-                  right: 0px;
-                  visibility: hidden;
-                  &:hover {
-                    background-color: #cccccc !important;
-                  }
+              font-weight: normal;
+              height: 37px;
+              .select {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 5px;
+                padding: 9px 46px 9px 12px;
+              }
+              .ui.cancel.label {
+                padding: 4px;
+                background-color: #d6d6d6;
+                border-radius: 15px;
+                top: 8px;
+                line-height: 0px;
+                right: 0px;
+                &:hover {
+                  background-color: #cccccc !important;
                 }
               }
               .ui.input input {
                 box-shadow: inset 0 1px 3px #ddd;
               }
+
               &.not-filtered {
                 .ui.basic.button {
                   &.disabled {
                     box-shadow: 0 0 0 1px rgba(34, 36, 38, 0.25) inset !important;
-                  }
-                }
-              }
-              &.filtered {
-                .ui.basic.button {
-                  background-color: #ffffff !important;
-                  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12),
-                    0 2px 4px rgba(0, 0, 0, 0.24) !important;
-                  color: #000000 !important;
-                  padding: 9px 20px;
-                  &:hover {
-                    width: fit-content;
-                    .text {
-                      margin-right: 15px;
-                    }
-                    .ui.cancel.label {
-                      visibility: unset;
-                      right: 5px;
-                    }
                   }
                 }
               }
@@ -269,13 +242,13 @@ button#exec-replace {
                   background: #e8e8e8;
                 }
                 &.translated-color {
-                  background: $translatedBlue;
+                  background: colors.$translatedBlue;
                 }
                 &.approved-color {
-                  background: $approvedGreen;
+                  background: colors.$approvedGreen;
                 }
                 &.approved-2ndpass-color {
-                  background: $approved2Green;
+                  background: colors.$approved2Green;
                 }
                 &.rejected-color {
                   background: #dc2e34;
@@ -441,5 +414,33 @@ button#exec-replace {
         }
       }
     }
+  }
+  .select-with-icon__wrapper {
+    height: 37px;
+  }
+  .select__dropdown-wrapper {
+    min-width: 180px;
+    margin-top: 1px;
+    box-shadow: 0 2px 3px 0 rgba(34, 36, 38, 0.15);
+    border: 1px solid rgba(34, 36, 38, 0.15);
+  }
+
+  .custom-dropdown.select__dropdown {
+    background-color: #fff;
+  }
+
+  ul.dropdown__list {
+    min-height: 165px;
+  }
+
+  li.dropdown__option {
+    padding: 8px;
+  }
+
+  .dropdown__option span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
   }
 }

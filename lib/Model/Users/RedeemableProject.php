@@ -8,55 +8,57 @@
 
 namespace Users;
 
+use Exception;
 use Jobs_JobDao;
 use Projects_ProjectDao;
 use Routes;
+use Users_UserStruct;
 
-class RedeemableProject
-{
+class RedeemableProject {
     /**
-     * @var \Users_UserStruct
+     * @var Users_UserStruct
      */
-    protected $user ;
-    protected $session ;
+    protected Users_UserStruct $user;
+    protected array            $session;
 
     /**
      * @var \Projects_ProjectStruct
      */
-    protected $project ;
+    protected $project;
 
-    public function __construct( $user, $session ) {
-        $this->user = $user ;
-        $this->session = $session ;
+    public function __construct( Users_UserStruct $user, array &$session ) {
+        $this->user    = $user;
+        $this->session =& $session;
     }
 
     public function isPresent() {
-        return $this->__getProject() != NULL ;
+        return $this->__getProject() != null;
     }
 
     public function __getProject() {
         if ( !isset( $this->project ) ) {
-            if ( isset( $this->session['last_created_pid'] ) ) {
-                $this->project = Projects_ProjectDao::findById( $this->session['last_created_pid'] ) ;
+            if ( isset( $this->session[ 'last_created_pid' ] ) ) {
+                $this->project = Projects_ProjectDao::findById( $this->session[ 'last_created_pid' ] );
             }
         }
-        return $this->project ;
+
+        return $this->project;
     }
 
     public function isRedeemable() {
-        return isset( $this->session['redeem_project']) && $this->session['redeem_project'] === TRUE ;
+        return isset( $this->session[ 'redeem_project' ] ) && $this->session[ 'redeem_project' ] === true;
     }
 
     public function redeem() {
         if ( $this->isPresent() && $this->isRedeemable() ) {
 
-            $this->project->id_customer = $this->user->getEmail() ;
-            $this->project->id_team = $this->user->getPersonalTeam()->id ;
+            $this->project->id_customer = $this->user->getEmail();
+            $this->project->id_team     = $this->user->getPersonalTeam()->id;
             $this->project->id_assignee = $this->user->getUid();
 
-            Projects_ProjectDao::updateStruct( $this->project, array(
-                'fields' => array( 'id_team', 'id_customer', 'id_assignee' )
-            ) ) ;
+            Projects_ProjectDao::updateStruct( $this->project, [
+                    'fields' => [ 'id_team', 'id_customer', 'id_assignee' ]
+            ] );
 
             ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );
         }
@@ -65,32 +67,34 @@ class RedeemableProject
     }
 
     public function clear() {
-        unset( $this->session['redeem_project'] );
-        unset( $this->session['last_created_pid'] );
-        unset( $_SESSION['redeem_project'] );
-        unset( $_SESSION['last_created_pid'] );
+        unset( $this->session[ 'redeem_project' ] );
+        unset( $this->session[ 'last_created_pid' ] );
+        unset( $_SESSION[ 'redeem_project' ] );
+        unset( $_SESSION[ 'last_created_pid' ] );
     }
 
     public function getProject() {
-        return $this->project ;
+        return $this->project;
     }
 
     public function tryToRedeem() {
         if ( $this->isPresent() && $this->isRedeemable() ) {
-            $this->redeem() ;
+            $this->redeem();
         }
     }
 
-    public function getDestinationURL() {
+    /**
+     * @throws Exception
+     */
+    public function getDestinationURL(): ?string {
         if ( $this->isPresent() ) {
-            return Routes::analyze( array(
-                'project_name'  => $this->project->name,
-                'id_project'    => $this->project->id,
-                'password'      => $this->project->password
-            )) ;
-        }
-        else {
-            return NULL ;
+            return Routes::analyze( [
+                    'project_name' => $this->project->name,
+                    'id_project'   => $this->project->id,
+                    'password'     => $this->project->password
+            ] );
+        } else {
+            return null;
         }
     }
 

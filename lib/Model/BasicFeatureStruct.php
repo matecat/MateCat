@@ -1,5 +1,8 @@
 <?php
 
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+
 /**
  * Class BasicFeatureStruct
  *
@@ -10,21 +13,25 @@
  *
  *
  */
-class BasicFeatureStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class BasicFeatureStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $feature_code ;
-    public $options ;
+    public $feature_code;
+    public $options;
 
     public function getFullyQualifiedClassName() {
         return Features::getPluginClass( $this->feature_code );
     }
 
     /**
-     * @return \Features\IBaseFeature
+     * @return \Features\IBaseFeature | null
      */
     public function toNewObject() {
         $name = Features::getPluginClass( $this->feature_code );
-        return new $name($this);
-    }
 
+        if ( class_exists( $name ) ) {
+            return new $name( $this );
+        }
+
+        return null;
+    }
 }

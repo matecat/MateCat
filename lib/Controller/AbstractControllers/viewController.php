@@ -1,86 +1,77 @@
 <?php
 
+use ConnectedServices\Facebook\FacebookProvider;
+use ConnectedServices\Github\GithubProvider;
+use ConnectedServices\Google\GoogleProvider;
+use ConnectedServices\LinkedIn\LinkedInProvider;
+use ConnectedServices\Microsoft\MicrosoftProvider;
+use ConnectedServices\OauthClient;
+use ConnectedServices\ProviderInterface;
+
 abstract class viewController extends controller {
 
     /**
      * Template Engine Instance
      *
-     * @var PHPTALWithAppend
+     * @var PHPTAL|null
      */
-    protected $template = null;
+    protected ?PHPTAL $template = null;
 
     /**
-     * @var Google_Client
+     * @var ProviderInterface
      */
-    protected $client;
+    protected ProviderInterface $client;
 
-    /**
-     * @var string
-     */
-    protected $authURL;
-
-    protected $login_required = false;
-
+    protected $project = null;
 
     /**
      * Class constructor
      *
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function __construct() {
 
         $this->startTimer();
 
         if ( !Bootstrap::areMandatoryKeysPresent() ) {
-            $controllerInstance = new CustomPage();
-            $controllerInstance->setTemplate( "badConfiguration.html" );
-            $controllerInstance->setCode( 503 );
-            $controllerInstance->doAction();
-            die(); // do not complete klein response, set 404 header in render404 instead of 200
+            $controllerInstance = new CustomPageView();
+            $controllerInstance->setView( 'badConfiguration.html', [], 503 );
+            $controllerInstance->render();
         }
 
-        //SESSION ENABLED
-        $this->readLoginInfo( false );
-
+        // SESSION ENABLED
+        $this->identifyUser();
         $this->featureSet = new FeatureSet();
-
     }
 
     /**
      * Perform Authentication Requests and set incoming url
      */
-    public function checkLoginRequiredAndRedirect() {
-        if ( !$this->login_required ) {
-            return true;
-        }
-
-        //prepare redirect flag
-        $mustRedirectToLogin = false;
+    protected function checkLoginRequiredAndRedirect() {
 
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
-            $mustRedirectToLogin      = true;
-        }
-
-        if ( $mustRedirectToLogin ) {
-            FlashMessage::set( 'popup', 'login', FlashMessage::SERVICE );
-
-            header( 'Location: ' . Routes::appRoot() );
+            $_SESSION[ 'wanted_url' ] = ltrim( $_SERVER[ 'REQUEST_URI' ], '/' );
+            header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "signin", false );
             exit;
+        } elseif ( isset( $_SESSION[ 'wanted_url' ] ) ) {
+            // handle redirect after login
+            $this->redirectToWantedUrl();
         }
 
-        return true;
     }
 
-    public function setLoginRequired( $value ) {
-        $this->login_required = $value;
+    protected function redirectToWantedUrl() {
+        header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . $_SESSION[ 'wanted_url' ], false );
+        unset( $_SESSION[ 'wanted_url' ] );
+        exit;
     }
 
     /**
-     * Return the content in the right format, it tell to the child class to execute template vars inflating
+     * Return the content in the right format, it tells the child class to execute template vars inflating
      *
-     * @return mixed|void
+     * @return void
      * @throws Exception
      * @see controller::finalize
      *
@@ -94,7 +85,6 @@ abstract class viewController extends controller {
 
         ob_get_contents();
         ob_get_clean();
-        ob_start( "ob_gzhandler" ); // compress page before sending
         $this->nocache();
 
         header( 'Content-Type: text/html; charset=utf-8' );
@@ -106,71 +96,56 @@ abstract class viewController extends controller {
 
         $this->logPageCall();
 
-        if ( isset( $ignore ) ) {
-            throw $ignore;
-        }
-
-    }
-
-    /**
-     * @return string
-     * @deprecated use getAuthUrl instead.
-     */
-    public function generateAuthURL() {
-        return $this->getAuthUrl();
     }
 
     /**
      * setInitialTemplateVars
      *
-     * Initialize template variables that must be initialized to avoid templte errors.
+     * Initialize template variables that must be initialized to avoid template errors.
      * These variables are expected to be overridden.
      * @throws Exception
      */
     private function setInitialTemplateVars() {
 
         if ( is_null( $this->template ) ) {
-            throw new Exception( 'Tamplate is not defined' );
+            throw new Exception( 'Template is not defined' );
         }
 
         if ( $this->userIsLogged ) {
             $this->featureSet->loadFromUserEmail( $this->user->email );
         }
 
-        $this->template->user_plugins =  $this->featureSet->filter('appendInitialTemplateVars', $this->featureSet->getCodes());
+        $this->template->{'user_plugins'} = $this->featureSet->filter( 'appendInitialTemplateVars', $this->featureSet->getCodes() );
 
-        $this->template->footer_js            = [];
-        $this->template->config_js            = [];
-        $this->template->css_resources        = [];
-        $this->template->authURL              = $this->getAuthUrl();
-        $this->template->gdriveAuthURL        = \ConnectedServices\GDrive::generateGDriveAuthUrl();
-        $this->template->enableMultiDomainApi = INIT::$ENABLE_MULTI_DOMAIN_API;
-        $this->template->ajaxDomainsNumber    = INIT::$AJAX_DOMAINS;
+        $this->template->{'footer_js'}     = [];
+        $this->template->{'config_js'}     = [];
+        $this->template->{'css_resources'} = [];
 
+        $this->template->{'enableMultiDomainApi'} = INIT::$ENABLE_MULTI_DOMAIN_API;
+        $this->template->{'ajaxDomainsNumber'}    = INIT::$AJAX_DOMAINS;
 
     }
 
     /**
      * setTemplateFinalVars
      *
-     * Here you have the possiblity to set additional template variables that you always want available in the
-     * template. This is the pleace where to set variables like user_id, email address and so on.
+     * Here you have the possibility to set additional template variables that you always want available in the
+     * template.
+     * This is the place where to set variables like user_id, email address and so on.
      */
     private function setTemplateFinalVars() {
 
-        $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
-        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+        $MMTLicense       = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user ) : [];
+        $isAnInternalUser = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email ) : false;
 
-        $this->template->logged_user      = $this->user->shortName();
-        $this->template->extended_user    = $this->user->fullName();
-        $this->template->isAnInternalUser = $isAnInternalUser;
-        $this->template->isMMTEnabled     = (isset($MMTLicense['enabled']) and $isAnInternalUser) ? $MMTLicense['enabled'] : false;
-        $this->template->MMTId            = (isset($MMTLicense['id']) and $isAnInternalUser) ? $MMTLicense['id'] : null;
-        $this->template->isLoggedIn       = $this->userIsLogged;
-        $this->template->userMail         = $this->user->email;
+        $this->template->{'logged_user'}      = $this->user->shortName();
+        $this->template->{'extended_user'}    = $this->user->fullName();
+        $this->template->{'isAnInternalUser'} = $isAnInternalUser;
+        $this->template->{'isMMTEnabled'}     = ( isset( $MMTLicense[ 'enabled' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'enabled' ] : false;
+        $this->template->{'MMTId'}            = ( isset( $MMTLicense[ 'id' ] ) and $isAnInternalUser ) ? $MMTLicense[ 'id' ] : null;
+        $this->template->{'isLoggedIn'}       = $this->userIsLogged;
+        $this->template->{'userMail'}         = $this->user->email;
         $this->collectFlashMessages();
-
-        $this->template->googleDriveEnabled = Bootstrap::areOauthKeysPresent() && Bootstrap::isGDriveConfigured();
     }
 
     /**
@@ -181,30 +156,18 @@ abstract class viewController extends controller {
     abstract function setTemplateVars();
 
     /**
-     * @return string
-     */
-    public function getAuthUrl() {
-        if ( is_null( $this->authURL ) ) {
-            $this->client  = OauthClient::getInstance()->getClient();
-            $this->authURL = $this->client->createAuthUrl();
-        }
-
-        return $this->authURL;
-    }
-
-    /**
      * @return bool
      */
-    public static function isRevision() {
+    public static function isRevision(): bool {
 
         $controller = static::getInstance();
 
         if ( isset( $controller->id_job ) and isset( $controller->received_password ) ) {
             $jid        = $controller->jid;
             $password   = $controller->received_password;
-            $isRevision = CatUtils::getIsRevisionFromIdJobAndPassword( $jid, $password );
+            $isRevision = CatUtils::isRevisionFromIdJobAndPassword( $jid, $password );
 
-            if ( null === $isRevision ) {
+            if ( !$isRevision ) {
                 $isRevision = CatUtils::getIsRevisionFromRequestUri();
             }
 
@@ -214,42 +177,39 @@ abstract class viewController extends controller {
         return CatUtils::getIsRevisionFromRequestUri();
     }
 
-    protected function render404( $customTemplate = '404.html' ) {
-        $this->renderCustomHTTP( $customTemplate, 404 );
-    }
-
-    protected function renderCustomHTTP( $customTemplate, $httpCode ) {
-        $status = new \Klein\HttpStatus( $httpCode );
-        header( "HTTP/1.0 " . $status->getFormattedString() );
-        $this->makeTemplate( $customTemplate );
-        $this->finalize();
-        die();
+    protected function render404() {
+        $controllerInstance = new CustomPageView();
+        $controllerInstance->setView( '404.html', [], 404 );
+        $controllerInstance->render();
     }
 
     /**
-     * Create an instance of skeleton PHPTAL template
+     * Create an instance of a skeleton PHPTAL template
      *
-     * @param PHPTAL|string $skeleton_file
+     * @param string $skeleton_file
      */
-    protected function makeTemplate( $skeleton_file ) {
+    protected function makeTemplate( string $skeleton_file ) {
         try {
 
-            $this->template = $skeleton_file;
-            if ( !$this->template instanceof PHPTAL ) {
-                $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            }
+            $this->template = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
 
-            $this->template->basepath            = INIT::$BASEURL;
-            $this->template->hostpath            = INIT::$HTTPHOST;
-            $this->template->build_number        = INIT::$BUILD_NUMBER;
-            $this->template->use_compiled_assets = INIT::$USE_COMPILED_ASSETS;
-            $this->template->enabledBrowsers     = INIT::$ENABLED_BROWSERS;
-            $this->template->maxFileSize         = INIT::$MAX_UPLOAD_FILE_SIZE;
-            $this->template->maxTMXFileSize      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-            $this->template->dqf_enabled         = false;
-            $this->template->isOpenAiEnabled     = !empty(INIT::$OPENAI_API_KEY);
+            $this->template->{'basepath'}            = INIT::$BASEURL;
+            $this->template->{'hostpath'}            = INIT::$HTTPHOST;
+            $this->template->{'build_number'}        = INIT::$BUILD_NUMBER;
+            $this->template->{'use_compiled_assets'} = INIT::$USE_COMPILED_ASSETS;
+            $this->template->{'enabledBrowsers'}     = INIT::$ENABLED_BROWSERS;
+            $this->template->{'maxFileSize'}         = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->{'maxTMXFileSize'}      = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+            $this->template->{'isOpenAiEnabled'}     = !empty( INIT::$OPENAI_API_KEY );
 
-            ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
+            /**
+             * This is a unique ID generated at runtime.
+             * It is injected into the nonce attribute of `< script >` tags to allow browsers to safely execute the contained CSS and JavaScript.
+             */
+            $this->template->{'x_nonce_unique_id'}          = Utils::uuid4();
+            $this->template->{'x_self_ajax_location_hosts'} = INIT::$ENABLE_MULTI_DOMAIN_API ? " *.ajax." . parse_url( INIT::$HTTPHOST )[ 'host' ] : null;
+
+            ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->{'analysis_enabled'} = true : null );
             $this->template->setOutputMode( PHPTAL::HTML5 );
         } catch ( Exception $e ) {
             echo "<pre>";
@@ -261,25 +221,40 @@ abstract class viewController extends controller {
         }
     }
 
+    protected function intOauthClients() {
+        try {
+            $this->template->{'googleAuthURL'}    = ( INIT::$GOOGLE_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+            $this->template->{'githubAuthUrl'}    = ( INIT::$GITHUB_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( GithubProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+            $this->template->{'linkedInAuthUrl'}  = ( INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( LinkedInProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+            $this->template->{'microsoftAuthUrl'} = ( INIT::$LINKEDIN_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( MicrosoftProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+            $this->template->{'facebookAuthUrl'}  = ( INIT::$FACEBOOK_OAUTH_CLIENT_ID ) ? OauthClient::getInstance( FacebookProvider::PROVIDER_NAME )->getAuthorizationUrl( $_SESSION ) : "";
+
+            $this->template->{'googleDriveEnabled'} = Bootstrap::isGDriveConfigured();
+            $this->template->{'gdriveAuthURL'}      = ( $this->isLoggedIn() && Bootstrap::isGDriveConfigured() ) ? OauthClient::getInstance( GoogleProvider::PROVIDER_NAME, INIT::$HTTPHOST . "/gdrive/oauth/response" )->getAuthorizationUrl( $_SESSION, 'drive' ) : "";
+
+        } catch ( Exception $e ) {
+        }
+    }
+
     protected function collectFlashMessages() {
-        $messages                      = FlashMessage::flush();
-        $this->template->flashMessages = $messages;
+        $messages                          = FlashMessage::flush();
+        $this->template->{'flashMessages'} = $messages;
     }
 
     /**
      * @return Projects_ProjectStruct
      */
-    public function getProject() {
+    public function getProject(): ?Projects_ProjectStruct {
         return $this->project;
     }
 
 
     /**
-     * @param \Projects_ProjectStruct $project
+     * @param Projects_ProjectStruct $project
      *
      * @return $this
      */
-    public function setProject( $project ) {
+    public function setProject( Projects_ProjectStruct $project ): viewController {
         $this->project = $project;
 
         return $this;
@@ -289,24 +264,21 @@ abstract class viewController extends controller {
      * Remove MMT from mt_engines if is an internal user
      *
      * @param array $engines
+     *
      * @return array
-     * @throws \API\V2\Exceptions\AuthenticationError
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exceptions\ValidationError
-     * @throws \TaskRunner\Exceptions\EndQueueException
-     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws Exception
      */
-    protected function removeMMTFromEngines(array $engines = []) {
+    protected function removeMMTFromEngines( array $engines = [] ): array {
 
-        $isAnInternalUser  = $this->userIsLogged ? $this->featureSet->filter( "isAnInternalUser", $this->user->email) : false;
+        $isAnInternalUser = $this->userIsLogged && $this->featureSet->filter( "isAnInternalUser", $this->user->email );
 
-        if($isAnInternalUser){
-            $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user) : [];
+        if ( $isAnInternalUser ) {
+            $MMTLicense = $this->userIsLogged ? $this->featureSet->filter( "MMTLicense", $this->user ) : [];
 
-            if(!empty($MMTLicense) and isset($MMTLicense['id'])){
-                foreach ($engines as $index => $engine){
-                    if($engine->id === $MMTLicense['id']){
-                        unset($engines[$index]);
+            if ( !empty( $MMTLicense ) and isset( $MMTLicense[ 'id' ] ) ) {
+                foreach ( $engines as $index => $engine ) {
+                    if ( $engine->id === $MMTLicense[ 'id' ] ) {
+                        unset( $engines[ $index ] );
                     }
                 }
             }

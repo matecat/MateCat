@@ -10,7 +10,7 @@
 namespace Translators;
 
 
-use API\V2\KleinController;
+use AbstractControllers\KleinController;
 use Email\SendToTranslatorForDeliveryChangeEmail;
 use Email\SendToTranslatorForJobSplitEmail;
 use Email\SendToTranslatorForNewJobEmail;
@@ -22,14 +22,14 @@ use Jobs_JobStruct;
 use Outsource\ConfirmationDao;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
-use TransactionableTrait;
+use TransactionalTrait;
 use Users_UserDao;
 use Users_UserStruct;
 use Utils;
 
 class TranslatorsModel {
 
-    use TransactionableTrait;
+    use TransactionalTrait;
 
     /**
      * @var Users_UserStruct
@@ -108,6 +108,7 @@ class TranslatorsModel {
      */
     public function setJobOwnerTimezone( $job_owner_timezone ) {
         $this->job_owner_timezone = $job_owner_timezone;
+
         return $this;
     }
 
@@ -142,16 +143,16 @@ class TranslatorsModel {
         $this->id_job       = $jStruct->id;
         $this->job_password = $jStruct->password;
 
-        $this->project = $this->jStruct->getProject( $project_cache_TTL );
+        $this->project    = $this->jStruct->getProject( $project_cache_TTL );
         $this->featureSet = $this->project->getFeaturesSet();
 
     }
 
     public function getTranslator( $cache = 86400 ) {
 
-        $jTranslatorsDao    = new JobsTranslatorsDao();
+        $jTranslatorsDao = new JobsTranslatorsDao();
 
-        return $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
+        return $this->jobTranslator = $jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ] ?? null;
 
     }
 

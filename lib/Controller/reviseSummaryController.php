@@ -2,19 +2,20 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Langs\Languages;
 use WordCount\WordCountStruct;
 
 /**
- * Description of catController
  *
- * @Deprecated
+ * @see https://dev.matecat.com/revise-summary/9763519-772d1081eef6
  *
- * @author antonio
+ * Quality Report Controller
+ * @deprecated and no more used
  */
 class reviseSummaryController extends viewController {
 
-	private $jid;
-	private $project_status = "";
+    private $jid;
+    private $project_status = "";
 
     private $data;
     private $job_stats;
@@ -23,13 +24,14 @@ class reviseSummaryController extends viewController {
     private $password;
 
     public function __construct() {
-		parent::__construct();
-		parent::makeTemplate("revise_summary.html");
+        parent::__construct();
+        $this->checkLoginRequiredAndRedirect();
+        parent::makeTemplate( "revise_summary.html" );
 
-        $filterArgs = array(
-                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'password' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-        );
+        $filterArgs = [
+                'jid'      => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ],
+        ];
 
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
@@ -39,29 +41,26 @@ class reviseSummaryController extends viewController {
 
     }
 
-	public function doAction() {
+    public function doAction() {
 
         //pay a little query to avoid to fetch 5000 rows
-        $this->data = $jobStruct = Jobs_JobDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->data = $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
 
         $wStruct = WordCountStruct::loadFromJob( $jobStruct );
 
-        if( $jobStruct['status'] == Constants_JobStatus::STATUS_ARCHIVED || $jobStruct['status'] == Constants_JobStatus::STATUS_CANCELLED ){
+        if ( $jobStruct->isArchived() || $jobStruct->isCanceled() ) {
             //this job has been archived
-            $this->job_archived = true;
-            $this->job_owner_email = $jobStruct['job_owner'];
+            $this->job_archived    = true;
+            $this->job_owner_email = $jobStruct[ 'job_owner' ];
         }
 
-        $projectStruct = $this->data->getProject();
-        // YYY [Remove] backward compatibility for current projects
-        $this->job_stats = CatUtils::getFastStatsForJob( $wStruct, false, $jobStruct->getProject(60 * 60 )->getWordCountType() );
-
-        $this->project_status = $projectStruct;
+        $this->job_stats      = CatUtils::getFastStatsForJob( $wStruct, false );
+        $this->project_status = $this->data->getProject();
 
         $this->_saveActivity();
-	}
+    }
 
-    protected function _saveActivity(){
+    protected function _saveActivity() {
 
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
@@ -73,39 +72,44 @@ class reviseSummaryController extends viewController {
         Activity::save( $activity );
 
     }
-    
-	public function setTemplateVars() {
+
+    /**
+     * @throws \Exceptions\NotFoundException
+     * @throws \TaskRunner\Exceptions\EndQueueException
+     * @throws \API\Commons\Exceptions\AuthenticationError
+     * @throws \TaskRunner\Exceptions\ReQueueException
+     * @throws \Exceptions\ValidationError
+     * @throws Exception
+     */
+    public function setTemplateVars() {
 
         $this->template->job_archived = ( $this->job_archived ) ? 1 : '';
         $this->template->owner_email  = $this->job_owner_email;
 
-        $this->template->jid          = $this->jid;
-        $this->template->password     = $this->password;
-        $this->template->pid          = $this->data['id_project'];
+        $this->template->jid      = $this->jid;
+        $this->template->password = $this->password;
+        $this->template->pid      = $this->data[ 'id_project' ];
 
-        $this->template->pname        = $this->project_status[ 'name' ];
-        $this->template->source_code  = $this->data[ 'source' ];
-        $this->template->target_code  = $this->data[ 'target' ];
+        $this->template->pname       = $this->project_status[ 'name' ];
+        $this->template->source_code = $this->data[ 'source' ];
+        $this->template->target_code = $this->data[ 'target' ];
 
-        $this->template->creation_date = $this->data['create_date'];
+        $this->template->creation_date = $this->data[ 'create_date' ];
 
         $this->template->word_count_type        = $this->data->getProject()->getWordCountType();
         $this->job_stats[ 'analysis_complete' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats              = $this->job_stats;
 
-
-        $this->template->build_number  = INIT::$BUILD_NUMBER;
-        $this->template->extended_user = ($this->isLoggedIn() !== false ) ? trim( $this->user->fullName() ) : "";
-        $this->template->logged_user   = ($this->isLoggedIn() !== false ) ? $this->user->shortName() : "";
+        $this->template->build_number = INIT::$BUILD_NUMBER;
 
         $projectMetaDataDao = new Projects_MetadataDao();
-        $projectMetaData = null;
+        $projectMetaData    = null;
 
-        if($this->getProject() !== null){
-            $projectMetaData = $projectMetaDataDao->get($this->getProject()->id, Projects_MetadataDao::FEATURES_KEY);
+        if ( $this->getProject() !== null ) {
+            $projectMetaData = $projectMetaDataDao->get( $this->getProject()->id, Projects_MetadataDao::FEATURES_KEY );
         }
 
-        $this->template->project_plugins = (!empty($projectMetaData)) ?  $this->featureSet->filter('appendInitialTemplateVars', explode(",", $projectMetaData->value)) : [];
+        $this->template->project_plugins = ( !empty( $projectMetaData ) ) ? $this->featureSet->filter( 'appendInitialTemplateVars', explode( ",", $projectMetaData->value ) ) : [];
 
         /*
          * Line Feed PlaceHolding System
@@ -133,12 +137,14 @@ class reviseSummaryController extends viewController {
             $this->template->nbspPlaceholderRegex = CatUtils::nbspPlaceholderRegex;
         }
 
-        $lang_handler = Langs_Languages::getInstance();
-        $this->template->source_rtl = ( $lang_handler->isRTL( $this->data[ 'source' ] ) ) ? true : false ;
-        $this->template->target_rtl = ( $lang_handler->isRTL( $this->data[ 'target' ] ) ) ? true : false ;
+        $lang_handler               = Languages::getInstance();
+        $this->template->source_rtl = (bool)$lang_handler->isRTL( $this->data[ 'source' ] );
+        $this->template->target_rtl = (bool)$lang_handler->isRTL( $this->data[ 'target' ] );
 
         $this->template->searchable_statuses = $this->searchableStatuses();
-        $this->template->first_job_segment   = $this->data->job_first_segment ;
+        $this->template->first_job_segment   = $this->data->job_first_segment;
+
+        $this->intOauthClients();
 
     }
 
@@ -153,7 +159,7 @@ class reviseSummaryController extends viewController {
         );
 
         return array_map( function ( $item ) {
-            return (object)array( 'value' => $item, 'label' => $item );
+            return (object)[ 'value' => $item, 'label' => $item ];
         }, $statuses );
     }
 }

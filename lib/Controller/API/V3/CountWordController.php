@@ -8,11 +8,12 @@
 
 namespace API\V3;
 
-use API\V2\Exceptions\ValidationError;
-use API\V2\KleinController;
+use AbstractControllers\KleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\LoginValidator;
 use CatUtils;
-use Langs_Languages;
-use LQA\SizeRestriction;
+use Langs\Languages;
+use LQA\SizeRestriction\SizeRestriction;
 use Matecat\SubFiltering\MateCatFilter;
 
 
@@ -28,13 +29,15 @@ class CountWordController extends KleinController {
             throw new ValidationError( "Invalid text field", 400 );
         }
 
-        $langs = Langs_Languages::getInstance();
+        $langs = Languages::getInstance();
 
         try {
             $langs->validateLanguage( $this->language );
         } catch ( \Exception $e ) {
             throw new ValidationError( $e->getMessage(), 400 );
         }
+
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 

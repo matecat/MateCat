@@ -11,6 +11,6 @@ namespace LQA;
 
 class EntryWithCategoryStruct extends EntryStruct {
 
-    public $category ;
+    public $category;
 
 }

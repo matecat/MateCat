@@ -401,6 +401,9 @@ class WordCountStruct implements JsonSerializable {
         return $this->total;
     }
 
+    /**
+     * @return array|mixed
+     */
     public function jsonSerialize() {
 
         return [
@@ -421,8 +424,30 @@ class WordCountStruct implements JsonSerializable {
                         'total'      => $this->getRawTotal()
                 ]
         ];
-
     }
 
+    /**
+     * @return array
+     */
+    public function toArray() {
+        return [
+                Projects_MetadataDao::WORD_COUNT_EQUIVALENT => [
+                        'new'        => $this->new_words,
+                        'draft'      => $this->draft_words,
+                        'translated' => $this->translated_words,
+                        'approved'   => $this->approved_words,
+                        'approved2'  => $this->approved2_words,
+                        'total'      => $this->getTotal()
+                ],
+                Projects_MetadataDao::WORD_COUNT_RAW        => [
+                        'new'        => $this->new_raw_words,
+                        'draft'      => $this->draft_raw_words,
+                        'translated' => $this->translated_raw_words,
+                        'approved'   => $this->approved_raw_words,
+                        'approved2'  => $this->approved2_raw_words,
+                        'total'      => $this->getRawTotal()
+                ]
+        ];
+    }
 
 } 

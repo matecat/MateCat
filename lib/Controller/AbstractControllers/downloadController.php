@@ -1,5 +1,6 @@
 <?php
 
+use Files\FileDao;
 use FilesStorage\AbstractFilesStorage;
 
 /**
@@ -8,6 +9,7 @@ use FilesStorage\AbstractFilesStorage;
  * Date: 27/01/14
  * Time: 18.57
  *
+ * @deprecated
  */
 abstract class downloadController extends controller {
 
@@ -132,14 +134,14 @@ abstract class downloadController extends controller {
             $this->unlockToken();
 
             if ( empty( $this->project ) ) {
-                $this->project = \Projects_ProjectDao::findByJobId( $this->id_job );
+                $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             }
 
             if ( empty( $this->_filename ) ) {
                 $this->_filename = $this->getDefaultFileName( $this->project );
             }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject( $this->project->id );
+            $isGDriveProject = Projects_ProjectDao::isGDriveProject( $this->project->id );
 
             $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
 
@@ -174,7 +176,7 @@ abstract class downloadController extends controller {
      * @return string
      */
     public function getDefaultFileName( Projects_ProjectStruct $project ) {
-        $files = Files_FileDao::getByProjectId( $project->id );
+        $files = FileDao::getByProjectId( $project->id );
 
         if ( count( $files ) > 1 ) {
             return $this->project->name . ".zip";

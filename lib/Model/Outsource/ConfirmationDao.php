@@ -9,21 +9,25 @@
 
 namespace Outsource;
 
+use DataAccess\AbstractDao;
+use DataAccess\IDaoStruct;
 use Database;
+use Jobs_JobStruct;
 use PDO;
+use ReflectionException;
 
-class ConfirmationDao extends \DataAccess_AbstractDao {
+class ConfirmationDao extends AbstractDao {
 
     const TABLE       = "outsource_confirmation";
     const STRUCT_TYPE = "ConfirmationStruct";
 
-    protected static $auto_increment_field = array( 'id' );
-    protected static $primary_keys         = array( 'id' );
+    protected static array $auto_increment_field = [ 'id' ];
+    protected static array $primary_keys         = [ 'id' ];
 
     protected static $_query_update_job_password    = "UPDATE outsource_confirmation SET password = :new_password WHERE id_job = :id_job AND password = :old_password LIMIT 1";
     protected static $_query_get_by_job_id_password = "SELECT * FROM outsource_confirmation WHERE id_job = :id_job AND password = :password LIMIT 1";
 
-    public function updatePassword( $jid, $old_password, $new_password ){
+    public function updatePassword( $jid, $old_password, $new_password ) {
 
         $conn = Database::obtain()->getConnection();
 
@@ -38,33 +42,36 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param \Jobs_JobStruct $jobStruct
+     * @param Jobs_JobStruct $jobStruct
      *
-     * @return \DataAccess_IDaoStruct|TranslatedConfirmationStruct
+     * @return IDaoStruct|TranslatedConfirmationStruct
+     * @throws ReflectionException
      */
-    public function getConfirmation( \Jobs_JobStruct $jobStruct ){
+    public function getConfirmation( Jobs_JobStruct $jobStruct ) {
 
         $query = self::$_query_get_by_job_id_password;
-        $data = [ 'id_job' => $jobStruct->id, 'password' => $jobStruct->password ];
+        $data  = [ 'id_job' => $jobStruct->id, 'password' => $jobStruct->password ];
 
-        $stmt                     = $this->_getStatementForCache( $query );
-        $confirmationStruct     = new TranslatedConfirmationStruct();
+        $stmt               = $this->_getStatementForQuery( $query );
+        $confirmationStruct = new TranslatedConfirmationStruct();
 
-        return @$this->_fetchObject( $stmt,
+        return $this->_fetchObject( $stmt,
                 $confirmationStruct,
                 $data
-        )[0];
+        )[ 0 ] ?? null;
 
     }
 
-    public function destroyConfirmationCache( \Jobs_JobStruct $jobStruct ) {
+    public function destroyConfirmationCache( Jobs_JobStruct $jobStruct ) {
         $query = self::$_query_get_by_job_id_password;
-        $stmt  = $this->_getStatementForCache( $query );
+        $stmt  = $this->_getStatementForQuery( $query );
+
         return $this->_destroyObjectCache( $stmt,
-                array(
+                TranslatedConfirmationStruct::class,
+                [
                         'id_job'   => $jobStruct->id,
                         'password' => $jobStruct->password
-                )
+                ]
         );
     }
 

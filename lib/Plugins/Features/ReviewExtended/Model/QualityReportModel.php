@@ -10,21 +10,22 @@ namespace Features\ReviewExtended\Model;
 
 use ArrayObject;
 use Chunks_ChunkCompletionEventDao;
-use Chunks_ChunkStruct;
 use Database;
 use Exception;
 use Features\ReviewExtended\IChunkReviewModel;
 use Features\ReviewExtended\ReviewUtils;
+use Jobs_JobStruct;
 use LQA\ChunkReviewDao;
 use Revise\FeedbackDAO;
 use RevisionFactory;
 use Users_UserDao;
+use Utils;
 
 
 class QualityReportModel {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk;
 
@@ -53,9 +54,9 @@ class QualityReportModel {
     private $version;
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      */
-    public function __construct( Chunks_ChunkStruct $chunk ) {
+    public function __construct( Jobs_JobStruct $chunk ) {
         $this->chunk = $chunk;
     }
 
@@ -97,6 +98,9 @@ class QualityReportModel {
         return $this->chunk_review_model;
     }
 
+    /**
+     * @throws Exception
+     */
     public function resetScore( $event_id ) {
         $chunkReview            = $this->getChunkReview();
         $chunkReview->undo_data = json_encode( [
@@ -110,7 +114,14 @@ class QualityReportModel {
         $chunkReview->reviewed_words_count = 0;
         $chunkReview->is_pass              = 1;
 
-        ChunkReviewDao::updateStruct( $chunkReview );
+        ChunkReviewDao::updateStruct( $chunkReview, [
+                'fields' => [
+                        'undo_data',
+                        'penalty_points',
+                        'reviewed_words_count',
+                        'is_pass'
+                ]
+        ] );
     }
 
     /**
@@ -142,11 +153,11 @@ class QualityReportModel {
                         'avg_edit_distance' => $this->avg_edit_distance
                 ],
                 'job'     => [
-                        'source' => $this->chunk->getJob()->source,
-                        'target' => $this->chunk->getJob()->target,
+                        'source' => $this->chunk->source,
+                        'target' => $this->chunk->target,
                 ],
                 'project' => [
-                        'metadata'   => $this->getProject()->getMetadataAsKeyValue(),
+                        'metadata'   => $this->getAndDecodePossiblyProjectMetadataJson(),
                         'id'         => $this->getProject()->id,
                         'created_at' => $this->filterDate(
                                 $this->getProject()->create_date
@@ -160,12 +171,22 @@ class QualityReportModel {
         return $this->quality_report_structure;
     }
 
+    protected function getAndDecodePossiblyProjectMetadataJson(): array {
+        $metadata = $this->getProject()->getMetadataAsKeyValue();
+        foreach ( $metadata as $key => $value ) {
+            if ( Utils::isJson( $value ) ) {
+                $metadata[ $key ] = json_decode( $value, true );
+            }
+        }
+        return $metadata;
+    }
+
     /**
      * @return void
      * @throws Exception
      */
     protected function _attachReviewsData() {
-        $chunk_reviews = ( new \Features\ReviewExtended\Model\ChunkReviewDao() )->findChunkReviews( $this->chunk );
+        $chunk_reviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
 
         $this->quality_report_structure[ 'chunk' ][ 'reviews' ] = [];
         foreach ( $chunk_reviews as $chunk_review ) {
@@ -179,7 +200,7 @@ class QualityReportModel {
             $this->quality_report_structure[ 'chunk' ][ 'reviews' ][] = [
                     'revision_number' => $revisionNumber,
                     'feedback'        => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                    'is_pass'         => !!$chunk_review->is_pass,
+                    'is_pass'         => ( $chunk_review->is_pass !== null ? !!$chunk_review->is_pass : null ),
                     'score'           => $chunkReviewModel->getScore(),
                     'reviewer_name'   => $this->getReviewerName()
             ];
@@ -229,10 +250,6 @@ class QualityReportModel {
 
             if ( $record[ 'comment_id' ] != null ) {
                 $this->structureNestComment( $record );
-            }
-
-            if ( isset( $record[ 'warning_scope' ] ) && $record[ 'warning_scope' ] != null ) {
-                $this->structureNestQaChecks( $record ); // ache serve sto coso?
             }
 
             $current_file_id    = $record[ 'file_id' ];
@@ -292,19 +309,6 @@ class QualityReportModel {
                 $this->current_issue
         );
 
-    }
-
-    private function structureNestQaChecks( $record ) {
-        $qa_check = new ArrayObject( [
-                'severity' => $record[ 'warning_severity' ],
-                'scope'    => $record[ 'warning_scope' ],
-                'data'     => $record[ 'warning_data' ]
-        ] );
-
-        array_push(
-                $this->current_segment[ 'qa_checks' ],
-                $qa_check
-        );
     }
 
     private function structureNestComment( $record ) {

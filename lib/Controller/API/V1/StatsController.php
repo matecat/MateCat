@@ -3,19 +3,21 @@
 namespace API\V1;
 
 
-use API\V2\KleinController;
-use API\V2\Validators\ChunkPasswordValidator;
-use Chunks_ChunkStruct;
+use AbstractControllers\KleinController;
+use API\Commons\Validators\ChunkPasswordValidator;
+use API\V2\Validators\LoginValidator;
+use CatUtils;
+use Jobs_JobStruct;
 use WordCount\WordCountStruct;
 
 class StatsController extends KleinController {
 
     /**
-     * @var Chunks_ChunkStruct
+     * @var Jobs_JobStruct
      */
     protected $chunk ;
 
-    public function setChunk( Chunks_ChunkStruct $chunk ){
+    public function setChunk( Jobs_JobStruct $chunk ){
         $this->chunk = $chunk;
     }
 
@@ -24,8 +26,10 @@ class StatsController extends KleinController {
      */
     public function stats() {
         $wStruct = WordCountStruct::loadFromJob( $this->chunk );
-        $wStruct['analysis_complete'] = $this->chunk->getProject()->analysisComplete() ;
-        $this->response->json( $wStruct ) ;
+        $job_stats   = CatUtils::getFastStatsForJob( $wStruct );
+        $job_stats[ 'analysis_complete' ] = $this->chunk->getProject()->analysisComplete();
+
+        $this->response->json( $job_stats );
     }
 
     protected function afterConstruct() {
@@ -37,6 +41,7 @@ class StatsController extends KleinController {
         } );
 
         $this->appendValidator( $Validator );
+        $this->appendValidator( new LoginValidator( $this ) );
 
     }
 

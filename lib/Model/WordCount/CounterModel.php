@@ -83,12 +83,12 @@ class CounterModel {
 
     public function setNewStatus( $new_status ) {
         $this->_verifyStatus( $new_status );
-        $this->newStatus     = $new_status;
+        $this->newStatus = $new_status;
     }
 
     public function setOldStatus( $old_status ) {
         $this->_verifyStatus( $old_status );
-        $this->oldStatus     = $old_status;
+        $this->oldStatus = $old_status;
     }
 
     public function setUpdatedValues( $weighted_words_amount, $raw_words_amount ) {
@@ -213,12 +213,16 @@ class CounterModel {
 
     }
 
-    public function initializeJobWordCount( $id_job, $jPassword ) {
+    public function initializeJobWordCount( $id_job, $jPassword, WordCounterDao $wordCounterDao = null ) {
 
-        $_details = WordCounterDao::getStatsForJob( $id_job, null, $jPassword );
-        //Log::doJsonLog( "--- trying to Initialize/reset job total word count." );
+        if ( !$wordCounterDao ) {
+            $wordCounterDao = new WordCounterDao();
+        }
+
+        $_details = $wordCounterDao->getStatsForJob( $id_job, null, $jPassword );
 
         $_job_details = array_pop( $_details ); //get the row
+        $job_details  = [];
 
         foreach ( $_job_details as $key => $value ) {
             $k = explode( "_", $key ); // EX: split TOTAL_RAW
@@ -248,9 +252,7 @@ class CounterModel {
         $wStruct->setApproved2RawWords( $job_details[ Constants_TranslationStatus::STATUS_APPROVED2 ][ 'raw' ] );
         $wStruct->setRejectedRawWords( $job_details[ Constants_TranslationStatus::STATUS_REJECTED ][ 'raw' ] );
 
-        WordCounterDao::initializeWordCount( $wStruct );
-
-        //Log::doJsonLog( $wStruct );
+        $wordCounterDao->initializeWordCount( $wStruct );
 
         return $wStruct;
 

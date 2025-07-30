@@ -26,9 +26,9 @@ class EnginesModel_YandexTranslateStruct extends EnginesModel_EngineStruct {
     /**
      * @var array
      */
-    public $extra_parameters = array(
-        'client_secret' => ""
-    );
+    public $extra_parameters = [
+            'client_secret' => ""
+    ];
 
     /**
      * @var string

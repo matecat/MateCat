@@ -2,9 +2,7 @@
 
 namespace AsyncTasks\Workers;
 
-use Database;
 use Engine;
-use Engines_AbstractEngine;
 use Engines_MyMemory;
 use Engines_Results_MyMemory_CheckGlossaryResponse;
 use Engines_Results_MyMemory_DomainsResponse;
@@ -13,8 +11,6 @@ use Engines_Results_MyMemory_KeysGlossaryResponse;
 use Engines_Results_MyMemory_SearchGlossaryResponse;
 use Engines_Results_MyMemory_SetGlossaryResponse;
 use Engines_Results_MyMemory_UpdateGlossaryResponse;
-use EnginesModel_EngineDAO;
-use EnginesModel_EngineStruct;
 use Exception;
 use FeatureSet;
 use Stomp\Exception\StompException;
@@ -88,7 +84,7 @@ class GlossaryWorker extends AbstractWorker {
             $matches[ 'id_segment' ] = $id_segment;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_check',
                         $payload[ 'id_client' ],
@@ -140,7 +136,7 @@ class GlossaryWorker extends AbstractWorker {
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_delete',
                         $payload[ 'id_client' ],
@@ -170,7 +166,7 @@ class GlossaryWorker extends AbstractWorker {
         $message[ 'entries' ]    = ( !empty( $domains->entries ) ) ? $domains->entries : [];
         $message[ 'id_segment' ] = $id_segment;
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_domains',
                         $payload[ 'id_client' ],
@@ -190,11 +186,11 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload ) {
 
         if (
-            empty( $payload[ 'source' ] ) ||
-            empty( $payload[ 'id_segment' ] ) ||
-            empty( $payload[ 'source' ] ) ||
-            empty ( $payload[ 'source_language' ] ) ||
-            empty ( $payload[ 'target_language' ] )
+                empty( $payload[ 'source' ] ) ||
+                empty( $payload[ 'id_segment' ] ) ||
+                empty( $payload[ 'source' ] ) ||
+                empty ( $payload[ 'source_language' ] ) ||
+                empty ( $payload[ 'target_language' ] )
         ) {
             throw new EndQueueException( "Invalid Payload" );
         }
@@ -208,17 +204,17 @@ class GlossaryWorker extends AbstractWorker {
 
         /** @var Engines_Results_MyMemory_GetGlossaryResponse $response */
         $response = $client->glossaryGet(
-            $payload[ 'id_job' ],
-            $payload[ 'id_segment' ],
-            $payload[ 'source' ],
-            $payload[ 'source_language' ],
-            $payload[ 'target_language' ],
-            $keys
+                $payload[ 'id_job' ],
+                $payload[ 'id_segment' ],
+                $payload[ 'source' ],
+                $payload[ 'source_language' ],
+                $payload[ 'target_language' ],
+                $keys
         );
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_get',
                         $payload[ 'id_client' ],
@@ -242,7 +238,7 @@ class GlossaryWorker extends AbstractWorker {
         /** @var Engines_Results_MyMemory_KeysGlossaryResponse $response */
         $response = $client->glossaryKeys( $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_keys',
                         $payload[ 'id_client' ],
@@ -275,7 +271,7 @@ class GlossaryWorker extends AbstractWorker {
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_search',
                         $payload[ 'id_client' ],
@@ -292,34 +288,14 @@ class GlossaryWorker extends AbstractWorker {
      * @return array
      * @throws EndQueueException
      */
-    private function formatGetGlossaryMatches( $matches, $payload ) {
-        $tmKeys = $payload[ 'tmKeys' ];
-
-        if ( !is_array( $matches ) ) {
-            $this->_doLog( "Invalid response received from Glossary (not an array). This is the payload that was sent: " . json_encode( $payload ) . ". Got back from MM: " . $matches );
-            throw new EndQueueException( "Invalid response received from Glossary (not an array)" );
-        }
+    private function formatGetGlossaryMatches( array $matches, array $payload ): array {
 
         if ( empty( $matches ) ) {
             throw new EndQueueException( "Empty response received from Glossary" );
         }
 
         if ( $matches[ 'id_segment' ] === null or $matches[ 'id_segment' ] === "" ) {
-            $matches[ 'id_segment' ] = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
-        }
-
-        // could not have metadata, suppress warning
-        $key = @$matches[ 'terms' ][ 'metadata' ][ 'key' ];
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( $tmKey[ 'key' ] === $key and $tmKey[ 'is_shared' ] === false ) {
-
-                $keyLength   = strlen( $key );
-                $last_digits = substr( $key, -8 );
-                $key         = str_repeat( "*", $keyLength - 8 ) . $last_digits;
-
-                $matches[ 'terms' ][ 'metadata' ][ 'key' ] = $key;
-            }
+            $matches[ 'id_segment' ] = $payload[ 'id_segment' ] ?? null;
         }
 
         return $matches;
@@ -385,15 +361,12 @@ class GlossaryWorker extends AbstractWorker {
 
             $payload[ 'term' ][ 'metadata' ][ 'keys' ] = $keysAsArray;
 
-            // return term_id
-            if ( isset( $response->responseData[ 'id_glossary_term' ] ) and null !== $response->responseData[ 'id_glossary_term' ] ) {
-                $payload[ 'term' ][ 'term_id' ] = $response->responseData[ 'id_glossary_term' ];
-            }
+            $payload[ 'request_id' ] = $response->responseDetails;
 
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_set',
                         $payload[ 'id_client' ],
@@ -452,11 +425,11 @@ class GlossaryWorker extends AbstractWorker {
             }
 
             $payload[ 'term' ][ 'matching_words' ] = $matchingWordsAsArray;
-
+            $payload[ 'request_id' ] = $response->responseData['uuid'];
             $message[ 'payload' ] = $payload;
         }
 
-        $this->publishToSseTopic(
+        $this->publishToNodeJsClients(
                 $this->setResponsePayload(
                         'glossary_update',
                         $payload[ 'id_client' ],
@@ -503,13 +476,14 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return Engines_AbstractEngine
+     * @return Engines_MyMemory
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
         $_TMS = Engine::getInstance( 1 );
         $_TMS->setFeatureSet( $featureSet );
 
+        /** @var Engines_MyMemory $_TMS */
         return $_TMS;
     }
 
@@ -532,17 +506,6 @@ class GlossaryWorker extends AbstractWorker {
      * @throws Exception
      */
     private function getMyMemoryClient() {
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
-        $engineStruct     = EnginesModel_EngineStruct::getStruct();
-        $engineStruct->id = 1;
-
-        $eng = $engineDAO->setCacheTTL( 60 * 5 )->read( $engineStruct );
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engineRecord = @$eng[ 0 ];
-
-        return new Engines_MyMemory( $engineRecord );
+       return $this->getEngine( new FeatureSet() );
     }
 }

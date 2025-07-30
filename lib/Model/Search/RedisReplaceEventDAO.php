@@ -1,9 +1,10 @@
 <?php
 
+use DataAccess\AbstractDao;
 use Predis\Client;
 use Search\ReplaceEventStruct;
 
-class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Search_ReplaceEventDAOInterface {
+class Search_RedisReplaceEventDAO extends AbstractDao implements Search_ReplaceEventDAOInterface {
 
     const TABLE = 'replace_events';
 
@@ -78,7 +79,7 @@ class Search_RedisReplaceEventDAO extends DataAccess_AbstractDao implements Sear
      * @return string
      */
     private function getRedisKey( $idJob, $version ) {
-        return md5( self::TABLE. '::' . $idJob . '::' . $version );
+        return md5( self::TABLE . '::' . $idJob . '::' . $version );
     }
 
     /**

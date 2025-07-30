@@ -2,8 +2,8 @@
 
 namespace ActivityLog;
 
-use DataAccess_AbstractDaoSilentStruct;
-use DataAccess_IDaoStruct;
+use \DataAccess\AbstractDaoSilentStruct;
+use \DataAccess\IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -11,7 +11,7 @@ use DataAccess_IDaoStruct;
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class ActivityLogStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
 
     /**
      * MAP to convert the values to the right string definition
@@ -79,7 +79,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
 
     const TRANSLATION_DELIVERED = 101;
 
-    protected $cached_results = [];
+    protected array $cached_results = [];
 
     /**
      * @var int

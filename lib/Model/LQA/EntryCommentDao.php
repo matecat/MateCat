@@ -2,10 +2,11 @@
 
 namespace LQA;
 
+use DataAccess\AbstractDao;
 use Database;
 use PDO;
 
-class EntryCommentDao extends \DataAccess_AbstractDao {
+class EntryCommentDao extends AbstractDao {
 
     public function findByIssueId( $id_issue ) {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
@@ -76,7 +77,7 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll( PDO::FETCH_GROUP | PDO::FETCH_ASSOC );
     }
 
-    protected function _buildResult( $array_result ) {
+    protected function _buildResult( array $array_result ) {
     }
 
 }

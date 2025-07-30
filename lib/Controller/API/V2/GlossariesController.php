@@ -8,12 +8,13 @@
 
 namespace API\V2;
 
-use API\App\AbstractStatefulKleinController;
-use API\V2\Exceptions\ValidationError;
-use API\V2\Validators\LoginValidator;
+use AbstractControllers\AbstractStatefulKleinController;
+use API\Commons\Exceptions\ValidationError;
+use API\Commons\Validators\LoginValidator;
 use Bootstrap;
 use Exception;
 use InvalidArgumentException;
+use Klein\Request;
 use Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
@@ -25,9 +26,9 @@ use Validator\GlossaryCSVValidatorObject;
 class GlossariesController extends AbstractStatefulKleinController {
 
     /**
-     * @var \Klein\Request
+     * @var Request
      */
-    protected $request;
+    protected Request $request;
 
     protected $name;
     protected $tm_key;
@@ -182,8 +183,8 @@ class GlossariesController extends AbstractStatefulKleinController {
         $validator            = new GlossaryCSVValidator();
         $validator->validate( $validatorObject );
 
-        if ( count( $validator->getErrors() ) > 0 ) {
-            throw new ValidationError( $validator->getErrors()[ 0 ] );
+        if ( count( $validator->getExceptions() ) > 0 ) {
+            throw new ValidationError( $validator->getExceptions()[ 0 ] );
         }
 
         return $validator;

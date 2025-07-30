@@ -1,22 +1,35 @@
 <?php
 
-/*
-   this class manages supported languages in the CAT tool
- */
+namespace Langs;
 
+use INIT;
+use Log;
 
-class Lang_InvalidLanguageException extends Exception {} ;
+class Languages {
 
-class Langs_Languages {
+    private static ?Languages $instance       = null; //singleton instance
+    private static array      $map_string2rfc = []; //associative map on language names -> codes
+    private static array      $map_rfc2obj    = []; //internal support map rfc -> language data
 
-    private static $instance; //singleton instance
-    private static $map_string2rfc; //associative map on language names -> codes
-    private static $map_rfc2obj; //internal support map rfc -> language data
-    private static $map_iso2rfc; //associative map iso -> rfc codes
-    private static $languages_definition; // the complete json struct
+    /*
+     * Associative map iso → rfc codes.
+     *
+     * IMPORTANT:
+     *
+     * This map is an approximation and should not be used to resolve specific language variants.
+     * For example, the english has more than 6 variants (ex: en -> en-??)
+     *
+     * This map should be used only to allow internal code to work even for general language codes.
+     *
+     */
+    private static array $map_iso2rfc           = [];
+    private static array $languages_definition  = []; // the complete json struct
+    private static array $ocr_supported         = [];
+    private static array $ocr_notSupported      = [];
+    private static array $enabled_language_list = [];
 
     /**
-     * Langs_Languages constructor.
+     * Languages constructor.
      */
     private function __construct() {
         //get languages file
@@ -48,11 +61,22 @@ class Langs_Languages {
 
                     //add associative reference
                     self::$languages_definition[ $k1 ][ 'localized' ][ $isocode ] = $localizedTag;
+
+                    // ocr support
+                    if ( $lang[ 'ocr' ][ 'supported' ] === true ) {
+                        self::$ocr_supported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    }
+
+                    if ( $lang[ 'ocr' ][ 'not_supported_or_rtl' ] === true ) {
+                        self::$ocr_notSupported[ $localizedTag ] = $lang[ 'rfc3066code' ];
+                    }
                 }
 
                 //remove positional reference
                 unset( self::$languages_definition[ $k1 ][ 'localized' ][ $k2 ] );
             }
+
+
         }
 
         //create internal support objects representation
@@ -72,19 +96,40 @@ class Langs_Languages {
             //set support for ISO by indirect reference through RFC pointers
             self::$map_iso2rfc[ $lang[ 'isocode' ] ] = $lang[ 'rfc3066code' ];
 
-            //manage ambiguities
+            //manage ambiguities (approximation)
             self::$map_iso2rfc[ 'en' ] = 'en-US';
-            self::$map_iso2rfc[ 'pt' ] = 'pt-BR';
+            self::$map_iso2rfc[ 'sp' ] = 'sp-SP';
+            self::$map_iso2rfc[ 'pt' ] = 'pt-PT';
+            self::$map_iso2rfc[ 'fr' ] = 'fr-FR';
+            self::$map_iso2rfc[ 'ar' ] = 'ar-SA';
+            self::$map_iso2rfc[ 'zh' ] = 'zh-CN';
+            self::$map_iso2rfc[ 'it' ] = 'it-IT';
+
         }
+
+        foreach ( self::$map_rfc2obj as $rfc => $lang ) {
+            //if marked as enabled, add to result
+            if ( $lang[ 'enabled' ] ) {
+                self::$enabled_language_list[ $rfc ] = [
+                        'code'      => $rfc,
+                        'name'      => $lang[ 'localized' ][ 'en' ],
+                        'direction' => ( $lang[ 'rtl' ] ) ? 'rtl' : 'ltr'
+                ];
+            }
+        }
+
+        uasort( self::$enabled_language_list, function ( $a, $b ) {
+            return strcmp( $a[ 'name' ], $b[ 'name' ] );
+        } );
 
     }
 
     /**
-     * @return Langs_Languages
+     * @return Languages
      */
-    public static function getInstance() {
+    public static function getInstance(): Languages {
         if ( !self::$instance ) {
-            self::$instance = new Langs_Languages();
+            self::$instance = new Languages();
         }
 
         return self::$instance;
@@ -93,41 +138,38 @@ class Langs_Languages {
     /**
      * Check if a language is RTL
      *
-     * @param $code
+     * @param string $code
      *
-     * @return mixed
+     * @return bool
      */
-    public static function isRTL( $code ) {
+    public static function isRTL( string $code ): bool {
         //convert ISO code in RFC
-        if ( strlen( $code ) < 5 ) {
-            $code = self::$map_iso2rfc[ $code ];
-        }
+        $code = self::getInstance()->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'rtl' ];
     }
 
     /**
      * Check if the language is enabled
-     * @param $code
+     *
+     * @param string $code
      *
      * @return mixed
      */
-    public function isEnabled( $code ) {
+    public function isEnabled( string $code ) {
         //convert ISO code in RFC
-        if ( strlen( $code ) < 5 ) {
-            $code = self::$map_iso2rfc[ $code ];
-        }
+        $code = $this->normalizeLanguageCode( $code );
 
         return self::$map_rfc2obj[ $code ][ 'enabled' ];
     }
 
     /**
-     * get corresponding Language-Region code given a localized name
+     * get the corresponding Language-Region code given the localized name
      * http://www.rfc-editor.org/rfc/rfc5646.txt
      * http://www.w3.org/International/articles/language-tags/
      */
     public function getLangRegionCode( $localizedName ) {
-        @$value = self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'languageRegionCode' ];
+        $value = self::$map_rfc2obj[ self::$map_string2rfc[ $localizedName ] ][ 'languageRegionCode' ] ?? null;
         if ( empty( $value ) ) {
             $value = $this->get3066Code( $localizedName );
         }
@@ -148,6 +190,7 @@ class Langs_Languages {
 
     /**
      * get list of languages, as ISO Code
+     *
      * @param $localizedName
      *
      * @return mixed
@@ -157,66 +200,44 @@ class Langs_Languages {
     }
 
     /**
-     * get list of enabled languages
-     *
-     * @param string $localizationLang
+     * get a list of enabled languages ordered by name alphabetically, the keys are the language rfc3066code codes
      *
      * @return array
      */
-    public function getEnabledLanguages( $localizationLang = 'en' ) {
-
-        $list = [];
-
-        foreach ( self::$map_rfc2obj as $rfc => $lang ) {
-            //if marked as enabled, add to result
-            if ( $lang[ 'enabled' ] ) {
-                $code   = $rfc;
-                $list[] = array(
-                        'code'      => $code,
-                        'name'      => $lang[ 'localized' ][ $localizationLang ],
-                        'direction' => ( $lang[ 'rtl' ] ) ? 'rtl' : 'ltr'
-                );
-            }
-        }
-
-        usort($list, function($a, $b) {return strcmp($a['name'], $b['name']);});
-
-        return $list;
-
+    public function getEnabledLanguages(): array {
+        return self::$enabled_language_list;
     }
 
     /**
-     * 
-     * Get corresponding ISO 639-1 code given a localized name
      *
-     * @param        $code
-     * @param string $lang
+     * Get the corresponding ISO 639-1 code given a localized name
      *
-     * @throws Exception
+     * @param             $code
+     * @param string|null $lang
      *
      * @return mixed
      */
-    public function getLocalizedName( $code, $lang = 'en' ) {
-        if ( strlen( $code ) < 5 ) {
-            $code = self::$map_iso2rfc[ $code ];
-        }
+    public function getLocalizedName( $code, ?string $lang = 'en' ) {
+        $code = $this->normalizeLanguageCode( $code );
+
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
     }
 
     /**
      *
      * Be strict when and only find localized name with an RFC expected input
-     * 
-     * @param        $code
-     * @param string $lang
+     *
+     * @param             $code
+     * @param string|null $lang
      *
      * @return mixed
-     * @throws Exception
+     * @throws InvalidLanguageException
      */
-    public function getLocalizedNameRFC( $code, $lang = 'en') {
+    public function getLocalizedNameRFC( $code, ?string $lang = 'en' ) {
         if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
-            throw new Lang_InvalidLanguageException('Invalid language code: ' . $code ) ;
+            throw new InvalidLanguageException( 'Invalid language code: ' . $code );
         }
+
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
     }
 
@@ -226,7 +247,7 @@ class Langs_Languages {
      * @return array
      */
     public function getRTLLangs() {
-        $acc = array();
+        $acc = [];
         foreach ( self::$map_rfc2obj as $code => $value ) {
             if ( $value[ 'rtl' ] && $value[ 'enabled' ] ) {
                 $acc[] = $code;
@@ -236,55 +257,105 @@ class Langs_Languages {
         return $acc;
     }
 
-    public function validateLanguage( $code = null ){
+    /**
+     * @throws InvalidLanguageException
+     */
+    public function validateLanguage( ?string $code = null ): string {
+
         if ( empty( $code ) ) {
-            throw new Lang_InvalidLanguageException( "Missing language.", -3 );
+            throw new InvalidLanguageException( "Missing language.", -3 );
         }
-        $this->getLocalizedNameRFC( $code ) ;
-        if( !$this->isEnabled( $code ) ) throw new Lang_InvalidLanguageException( 'Language not enabled: ' . $code );
+
+        $code = $this->normalizeLanguageCode( $code );
+
+        $this->getLocalizedNameRFC( $code );
+        if ( !$this->isEnabled( $code ) ) {
+            throw new InvalidLanguageException( 'Language not enabled: ' . $code );
+        }
+
+        return $code;
+
     }
 
     /**
-     * A indexed array of allowed languages
-     *
-     * @param string $format
-     * @return array
+     * @throws InvalidLanguageException
      */
-    public static function allowedLanguages($format = 'rfc3066code')
-    {
-        $allowedLanguages = [];
+    public function validateLanguageList( array $languageList ): array {
 
-        foreach ( self::$languages_definition as $lang ) {
-            if(isset($lang[ $format ])){
-                $allowedLanguages[] = Utils::trimAndLowerCase($lang[ $format ]);
-            }
+        if ( empty( $languageList ) ) {
+            throw new InvalidLanguageException( "Empty language list.", -3 );
         }
 
-        return $allowedLanguages;
+        $langList = [];
+        foreach ( $languageList as $language ) {
+            $langList[] = $this->validateLanguage( $language );
+        }
+
+        return $langList;
+
+    }
+
+    /**
+     * @throws InvalidLanguageException
+     */
+    public function validateLanguageListAsString( string $languageList, ?string $separator = ',' ): string {
+
+        $targets = explode( $separator, $languageList );
+        $targets = array_map( 'trim', $targets );
+        $targets = array_unique( $targets );
+
+        return implode( ',', $this->validateLanguageList( $targets ) );
+    }
+
+    /**
+     * @param string $languageCode
+     *
+     * @return string|null
+     */
+    protected function normalizeLanguageCode( string $languageCode ): ?string {
+
+        $langParts = explode( '-', $languageCode );
+
+        $langParts[ 0 ] = trim( strtolower( $langParts[ 0 ] ) );
+
+        if ( sizeof( $langParts ) == 1 ) {
+            /*
+             *  IMPORTANT: Pick the first language region. This is an approximation. Use this only to normalize the language code.
+             */
+            return self::$map_iso2rfc[ $langParts[ 0 ] ] ?? null;
+        } elseif ( sizeof( $langParts ) == 2 ) {
+            $langParts[ 1 ] = trim( strtoupper( $langParts[ 1 ] ) );
+        } elseif ( sizeof( $langParts ) == 3 ) {
+            $langParts[ 1 ] = ucfirst( trim( strtolower( $langParts[ 1 ] ) ) );
+            $langParts[ 2 ] = trim( strtoupper( $langParts[ 2 ] ) );
+        } else {
+            return null;
+        }
+
+        return implode( "-", $langParts );
+
     }
 
     /**
      * @param string $language
-     * @param string $format
+     *
      * @return bool
      */
-    public static function isValidLanguage($language, $format = 'rfc3066code')
-    {
-        $language = Utils::trimAndLowerCase($language);
-        $allowedLanguages = self::allowedLanguages($format);
+    public static function isValidLanguage( string $language ): bool {
+        $language = self::getInstance()->normalizeLanguageCode( $language );
 
-        return in_array($language, $allowedLanguages);
+        return array_key_exists( $language, self::$map_rfc2obj );
     }
 
     /**
-     * @param $rfc3066code
+     * @param string $rfc3066code
+     *
      * @return string|null
      */
-    public static function getLocalizedLanguage($rfc3066code)
-    {
+    public static function getLocalizedLanguage( string $rfc3066code ): ?string {
         foreach ( self::$languages_definition as $lang ) {
-            if($lang['rfc3066code'] === $rfc3066code){
-                return @$lang['localized']['en'];
+            if ( $lang[ 'rfc3066code' ] === $rfc3066code ) {
+                return $lang[ 'localized' ][ 'en' ] ?? null;
             }
         }
 
@@ -298,18 +369,28 @@ class Langs_Languages {
      * es-419 ---> es
      * to-TO ----> ton
      *
-     * @param $rfc3066code
+     * @param string $code
+     *
      * @return string|null
      */
-    public static function convertLanguageToIsoCode($rfc3066code)
-    {
-        foreach ( self::$languages_definition as $lang ) {
-            if($rfc3066code === $lang['rfc3066code']){
-                return $lang['isocode'];
-            }
-        }
+    public static function convertLanguageToIsoCode( string $code ): ?string {
+        $code = self::getInstance()->normalizeLanguageCode( $code );
 
-        return null;
+        return self::$map_rfc2obj[ $code ][ 'isocode' ] ?? null;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getLanguagesWithOcrSupported(): array {
+        return self::$ocr_supported;
+    }
+
+    /**
+     * @return array
+     */
+    public static function getLanguagesWithOcrNotSupported(): array {
+        return self::$ocr_notSupported;
     }
 }
 

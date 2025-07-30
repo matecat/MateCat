@@ -2,6 +2,8 @@
 
 namespace Validator\Contracts;
 
+use Validator\Errors\JsonValidatorExceptionInterface;
+
 abstract class AbstractValidator {
 
     /**
@@ -12,32 +14,31 @@ abstract class AbstractValidator {
     /**
      * @param ValidatorObject $object
      *
-     * @throws \Exception
      * @return bool
+     * @throws \Exception
      */
-    abstract public function validate(ValidatorObject $object);
+    abstract public function validate( ValidatorObject $object );
 
     /**
      * @return ValidatorErrorObject[]
      */
-    public function getErrors(){
+    public function getExceptions() {
         return $this->errors;
     }
 
     /**
      * @param $error
      */
-    public function addError($error)
-    {
-        $errorObject = new ValidatorErrorObject();
+    public function addException( JsonValidatorExceptionInterface $error ) {
+        $errorObject        = new ValidatorErrorObject();
         $errorObject->error = $error;
-        $this->errors[] = $errorObject;
+        $this->errors[]     = $errorObject;
     }
 
     /**
      * @return bool
      */
     public function isValid() {
-        return empty($this->errors);
+        return empty( $this->errors );
     }
 }

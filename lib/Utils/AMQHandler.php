@@ -19,7 +19,7 @@ use TaskRunner\Commons\Context;
 class AMQHandler {
 
     /**
-     * @var Predis\Client
+     * @var RedisHandler
      */
     protected $redisHandler;
 
@@ -76,6 +76,8 @@ class AMQHandler {
 
         }
 
+        $connection->setReadTimeout( 2, 500000 );
+
         $this->statefulStomp = new StatefulStomp( new Client( $connection ) );
 
     }
@@ -114,12 +116,19 @@ class AMQHandler {
      * @return Predis\Client
      * @throws ReflectionException
      */
-    public function getRedisClient() {
+    public function getRedisClient(): Predis\Client {
         if ( empty( $this->redisHandler ) ) {
             $this->redisHandler = new RedisHandler();
         }
 
         return $this->redisHandler->getConnection();
+    }
+
+    /**
+     * @return RedisHandler
+     */
+    public function getRedisHandler(): RedisHandler {
+        return $this->redisHandler;
     }
 
     /**
@@ -146,7 +155,7 @@ class AMQHandler {
      *
      * @return bool
      */
-    public function publishToQueues( $destination, Message $message ) {
+    public function publishToQueues( string $destination, Message $message ): bool {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
@@ -168,7 +177,7 @@ class AMQHandler {
      *
      * @return bool
      */
-    public function publishToTopic( $destination, Message $message ) {
+    public function publishToNodeJsClients( string $destination, Message $message ): bool {
 
         $this->clientType = self::CLIENT_TYPE_PUBLISHER;
 
@@ -179,12 +188,12 @@ class AMQHandler {
     /**
      * Get the queue Length
      *
-     * @param $queueName
+     * @param string|null $queueName
      *
      * @return mixed
      * @throws Exception
      */
-    public function getQueueLength( $queueName = null ) {
+    public function getQueueLength( ?string $queueName = null ) {
 
         if ( !empty( $queueName ) ) {
             $queue = $queueName;
@@ -203,12 +212,12 @@ class AMQHandler {
     /**
      * Get the number of consumers for this queue
      *
-     * @param null $queueName
+     * @param string|null $queueName
      *
      * @return mixed
      * @throws Exception
      */
-    public function getConsumerCount( $queueName = null ) {
+    public function getConsumerCount( ?string $queueName = null ) {
 
         if ( !empty( $queueName ) ) {
             $queue = $queueName;

@@ -1,23 +1,22 @@
 <?php
 
-namespace Files ;
+namespace Files;
 
-use Chunks_ChunkStruct;
-use DataAccess_AbstractDao;
+use DataAccess\AbstractDao;
 use Database;
-use Files_FileStruct;
+use Jobs_JobStruct;
 use PDO;
 
-class FilesJobDao extends  DataAccess_AbstractDao {
+class FilesJobDao extends AbstractDao {
     const TABLE = 'files_job';
 
     /**
-     * @param Files_FileStruct   $file
-     * @param Chunks_ChunkStruct $chunk
+     * @param FileStruct   $file
+     * @param Jobs_JobStruct $chunk
      *
      * @return array
      */
-    public function getSegmentBoundariesForChunk( Files_FileStruct $file, Chunks_ChunkStruct $chunk ) {
+    public function getSegmentBoundariesForChunk( FileStruct $file, Jobs_JobStruct $chunk ) {
         $sql = "SELECT MIN(st.id_segment) AS MIN, MAX(st.id_segment) as MAX
           FROM files_job
             JOIN jobs
@@ -31,21 +30,21 @@ class FilesJobDao extends  DataAccess_AbstractDao {
                 AND jobs.id  = :id_job
           ";
 
-        $conn = Database::obtain()->getConnection() ;
+        $conn = Database::obtain()->getConnection();
 
-        $stmt = $conn->prepare( $sql ) ;
+        $stmt = $conn->prepare( $sql );
 
-        $stmt->setFetchMode( PDO::FETCH_ASSOC ) ;
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
-        $stmt->execute([
-            'id_job'   => $chunk->id,
-            'password' => $chunk->password,
-            'id_file'  => $file->id
-        ]) ;
+        $stmt->execute( [
+                'id_job'   => $chunk->id,
+                'password' => $chunk->password,
+                'id_file'  => $file->id
+        ] );
 
-        $record = $stmt->fetch() ;
+        $record = $stmt->fetch();
 
-        return [ $record['MIN'], $record['MAX'] ] ;
+        return [ $record[ 'MIN' ], $record[ 'MAX' ] ];
     }
 
 }

@@ -1,0 +1,67 @@
+
+@use '../../commons/colors';
+@use 'SigninPage';
+@use 'Login';
+@use 'Register';
+@use 'ForgotPassword';
+@use 'PasswordReset';
+
+.onboarding-controls {
+  position: absolute;
+  width: 100%;
+
+  .container-buttons {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    .forgotpassword-component {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 480px;
+      padding: 48px 64px 48px 64px;
+
+      h2,
+      p {
+        text-align: left;
+      }
+
+      p {
+        color: colors.$grey7;
+      }
+
+
+      .forgotpassword-form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 24px;
+      }
+    }
+
+    .button-back {
+      width: 35px;
+      height: 35px;
+      line-height: 35px;
+
+      > svg {
+        transform: rotate(90deg);
+      }
+    }
+
+    .button-close {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      border-radius: 50%;
+      background-color: colors.$grey7;
+      color: colors.$white;
+    }
+  }
+}
+.form-errorMessage {
+  font-size: 14px;
+  color: colors.$redDefault;
+  text-align: center;
+  padding-left: 2px;
+}

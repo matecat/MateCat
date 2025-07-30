@@ -1,16 +1,19 @@
 <?php
 
-namespace LQA ;
+namespace LQA;
 
-class CategoryStruct extends \DataAccess_AbstractDaoSilentStruct implements \DataAccess_IDaoStruct {
+use DataAccess\AbstractDaoSilentStruct;
+use DataAccess\IDaoStruct;
+
+class CategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     public $id;
-    public $severities ;
+    public $severities;
 
-    public $id_model ;
-    public $id_parent ;
-    public $label ;
-    public $options ;
+    public $id_model;
+    public $id_parent;
+    public $label;
+    public $options;
 
     /**
      * @return mixed
@@ -20,18 +23,18 @@ class CategoryStruct extends \DataAccess_AbstractDaoSilentStruct implements \Dat
     }
 
     public function toArrayWithJsonDecoded() {
-        $result = $this->toArray() ;
+        $result = $this->toArray();
 
-        $severities = json_decode( $this->severities, true );
+        $severities      = json_decode( $this->severities, true );
         $severitiesArray = [];
 
-        foreach ($severities as $index =>$severity){
-            $severitiesArray[$index] = array_merge(['id' => null], $severities[$index]);
+        foreach ( $severities as $index => $severity ) {
+            $severitiesArray[ $index ] = array_merge( [ 'id' => null ], $severities[ $index ] );
         }
 
-        $result['severities'] = $severitiesArray;
-        $result['options'] = json_decode( $this->options, true );
+        $result[ 'severities' ] = $severitiesArray;
+        $result[ 'options' ]    = json_decode( $this->options, true );
 
-        return $result ;
+        return $result;
     }
 }

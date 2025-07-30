@@ -1,0 +1,34 @@
+
+<html lang="en">
+	<head>
+		<title>Redirecting to your order</title>
+		<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/CSP-HeaderMeta.html/CSP_NONCE"/>
+		<script tal:attributes="nonce x_nonce_unique_id">
+			var config = {
+				data: ${structure php: data},
+                tokenAuth: '${structure php: tokenAuth}',
+                data_key: '${structure php: data_key}',
+				confirm_tokens: '${structure php: confirm_tokens}'
+			};
+            document.addEventListener('DOMContentLoaded', function() {
+              var data = JSON.stringify(config.data);
+
+              document.getElementById('sessionData').value = data;
+              document.getElementById('tokenAuth').value = config.tokenAuth;
+              document.getElementById('data_key').value = config.data_key;
+              document.getElementById('confirm_tokens').value = config.confirm_tokens;
+
+              document.getElementById('redirectForm').submit();
+            });
+	
+		</script>
+	</head>
+	<body>
+		 <form style="visibility: hidden" id="redirectForm" action="${redirect_url}" method="POST">
+             <input type="hidden" id="tokenAuth" name="tokenAuth" value="" />
+             <input type="hidden" id="sessionData" name="data" value="" />
+             <input type="hidden" id="data_key" name="data_key" value="" />
+             <input type="hidden" id="confirm_tokens" name="confirm_tokens" value="" />
+		</form>
+	</body>
+</html>

@@ -2,14 +2,14 @@
 
 namespace API\V3;
 
-use API\V2\KleinController;
-use API\V2\Validators\LoginValidator;
+use AbstractControllers\KleinController;
+use API\Commons\Validators\LoginValidator;
+use Conversion\Upload;
 use Engines_DeepL;
 use Exception;
 use Files\CSV as CSVParser;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
-use Upload;
 use Validator\EngineValidator;
 
 class DeepLGlossaryController extends KleinController

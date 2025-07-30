@@ -2,17 +2,19 @@
 
 namespace Validator\Contracts;
 
+use ArrayAccess;
 use DataAccess\ArrayAccessTrait;
+use stdClass;
 
-abstract class ValidatorObject implements \ArrayAccess {
+abstract class ValidatorObject implements ArrayAccess {
 
     use ArrayAccessTrait;
 
     /**
-     * @param \stdClass $object
+     * @param stdClass $object
      */
-    public function hydrateFromObject(\stdClass $object){
-        foreach (get_object_vars($object) as $key => $value){
+    public function hydrateFromObject( stdClass $object ) {
+        foreach ( get_object_vars( $object ) as $key => $value ) {
             $this->$key = $value;
         }
     }

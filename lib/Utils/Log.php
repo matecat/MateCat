@@ -62,13 +62,13 @@ class Log {
         $fileHandler   = new StreamHandler( self::getFileNamePath() );
         $fileFormatter = new LineFormatter( "%message%\n", "", true, true );
         $fileHandler->setFormatter( $fileFormatter );
-        self::$logger = new Logger( 'MateCat', [ $fileHandler ] );
+        self::$logger = new Logger( 'Matecat', [ $fileHandler ] );
     }
 
     protected static function getFileNamePath() {
         if ( !empty( self::$fileName ) ) {
-            if(is_array(self::$fileName)){
-                self::$fileName = implode(self::$fileName);
+            if ( is_array( self::$fileName ) ) {
+                self::$fileName = implode( self::$fileName );
             }
 
             $name = LOG_REPOSITORY . "/" . self::$fileName;
@@ -109,39 +109,24 @@ class Log {
         $_ip   = Utils::getRealIpAddr();
 
         $context         = [];
-        $context[ 'ip' ] = !empty( $_ip ) ? $_ip : gethostbyname( gethostname() );
+        $context[ 'ip' ] = $_ip ?? gethostbyname( gethostname() );
 
-        if ( isset( $trace[ 3 ][ 'class' ] ) ) {
-            $context[ 'class' ] = $trace[ 3 ][ 'class' ];
-        }
-
-        if ( isset( $trace[ 3 ][ 'function' ] ) ) {
-            $context[ 'function' ] = $trace[ 3 ][ 'function' ];
-        }
-
-        $context[ 'line' ] = isset( $trace[ 2 ][ 'line' ] ) ? $trace[ 2 ][ 'line' ] : null;
+        $context[ 'class' ]    = $trace[ 2 ][ 'class' ] ?? null;
+        $context[ 'function' ] = $trace[ 2 ][ 'function' ] ?? null;
+        $context[ 'line' ]     = $trace[ 1 ][ 'line' ] ?? null;
+        $context[ 'file' ]     = $trace[ 1 ][ 'file' ] ?? null;
 
         return $context;
 
     }
 
+    /**
+     * @return void
+     * @deprecated
+     * @see        Log::doJsonLog()
+     */
     public static function doLog() {
-
-        $head = self::_getHeader();
-
-        $string = "";
-        $ct     = func_num_args(); // number of argument passed
-        for ( $i = 0; $i < $ct; $i++ ) {
-            $curr_arg = func_get_arg( $i ); // get each argument passed
-
-            $tmp = explode( "\n", print_r( $curr_arg, true ) );
-            foreach ( $tmp as $row ) {
-                $string .= $head . $row . "\n";
-            }
-
-        }
-
-        self::_writeTo( rtrim( $string ) );
+        Log::doJsonLog( func_get_arg( 0 ) );
     }
 
     public static function doJsonLog( $content, $filename = null ) {

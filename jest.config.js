@@ -12,4 +12,8 @@ module.exports = {
     '!<rootDir>/public/**/*.min.js',
   ],
   transformIgnorePatterns: ['node_modules/(?!@bundled-es-modules)/'],
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+    '.+\\.(css|styl|less|sass|scss)$': 'jest-transform-css',
+  },
 }

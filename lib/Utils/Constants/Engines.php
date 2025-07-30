@@ -1,5 +1,7 @@
 <?php
 
+use Utils\Engines\Lara;
+
 /**
  * Created by PhpStorm.
  * User: roberto
@@ -15,10 +17,11 @@ class Constants_Engines {
     const MY_MEMORY        = 'MyMemory';
     const MICROSOFT_HUB    = 'MicrosoftHub';
     const APERTIUM         = 'Apertium';
-    const ALTLANG	       = 'Altlang';
+    const ALTLANG          = 'Altlang';
     const SMART_MATE       = 'SmartMATE';
     const YANDEX_TRANSLATE = 'YandexTranslate';
     const MMT              = 'MMT';
+    const LARA             = 'Lara';
     const DEEPL            = 'DeepL';
     const GOOGLE_TRANSLATE = 'GoogleTranslate';
     const INTENTO          = 'Intento';
@@ -34,17 +37,18 @@ class Constants_Engines {
             self::INTENTO          => self::INTENTO,
             self::MMT              => self::MMT,
             self::DEEPL            => self::DEEPL,
+            Lara::class            => Lara::class, // new namespaced engine classes must be loaded by fully qualified class name
     ];
 
     /**
      * @return array
      */
-    public static function getAvailableEnginesList(){
+    public static function getAvailableEnginesList() {
         return self::$ENGINES_LIST;
     }
 
-    public static function setInEnginesList( $engine ){
-        if( defined( 'self::' . $engine ) ){
+    public static function setInEnginesList( $engine ) {
+        if ( defined( 'self::' . $engine ) ) {
             self::$ENGINES_LIST[ $engine ] = $engine;
         }
     }

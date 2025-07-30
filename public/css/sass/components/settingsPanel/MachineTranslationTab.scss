@@ -1,3 +1,4 @@
+@use '../../commons/colors';
 .machine-translation-tab {
   .add-mt-button,
   .add-mt-container {
@@ -10,9 +11,6 @@
 
   li.dropdown__option {
     height: 36px;
-  }
-  .not-logged-user {
-    padding: 100px;
   }
 
   .confirm-button {
@@ -45,6 +43,7 @@
     justify-content: center;
     align-items: center;
     z-index: 2;
+    margin-bottom: 10px;
   }
   .add-provider-container {
     display: flex;
@@ -55,6 +54,11 @@
       text-align: left;
       padding: 15px 15px 0 0;
       .provider-data {
+        //&.provider-data-lara {
+        //  .provider-field:last-child {
+        //    margin-top: -12px
+        //  }
+        //}
         display: flex;
         flex-direction: column;
         .button {
@@ -100,11 +104,11 @@
           }
         }
         .field-error {
-          color: $redDefault;
+          color: colors.$redDefault;
           font-size: 12px;
         }
         .mt-error {
-          color: $redDefault;
+          color: colors.$redDefault;
         }
       }
     }
@@ -112,7 +116,7 @@
       width: 50%;
       text-align: left;
       padding: 15px;
-      background: $grey5;
+      background: colors.$grey5;
       display: flex;
       flex-direction: column;
       .button {
@@ -127,6 +131,50 @@
         line-height: 26px;
       }
     }
+  }
+
+  .provider-field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+.machine-translation-tab-table-title {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  > span:first-of-type {
+    flex-grow: 1;
+    text-align: left;
+  }
+}
+.machine-translation-tab {
+  .settings-panel-table-rowHeading,
+  .settings-panel-row-content {
+    min-height: 40px;
+    grid-template-columns: 15% minmax(0, 1fr) 15% 15%;
+  }
+  .settings-panel-row {
+    border-top: unset;
+  }
+  .settings-panel-row-extra-content {
+    border: none;
+  }
+
+  .settings-panel-row-content {
+    background-color: colors.$white;
+  }
+
+  .settings-panel-row-active {
+    background-color: colors.$transparentBlue;
+  }
+  .settings-panel-table-rowHeading-column:nth-child(3),
+  .settings-panel-table-rowHeading-column:nth-child(4) {
+    text-align: center;
   }
 
   .select-with-label__wrapper {
@@ -145,14 +193,12 @@
 
     .select__dropdown-wrapper {
       min-width: 280px;
-      border: solid 1px #96c8da;
-      border-top: unset;
       z-index: 1;
       margin-top: 1px;
     }
   }
 
-  //Dropdown ovwerrides
+  //Dropdown overrides
   .add-mt-provider .select-with-icon__wrapper {
     height: 40px;
   }
@@ -160,8 +206,23 @@
     height: 37px;
   }
 
-  .select-with-label__wrapper {
+  .add-mt-provider .select-with-label__wrapper {
     margin-right: 30px;
+  }
+
+  .provider-license-label-with-icon {
+    display: flex;
+    gap: 5px;
+  }
+
+  .provider-data-lara {
+    .button {
+      margin-top: 62px !important;
+    }
+
+    .provider-field {
+      gap: 15px !important;
+    }
   }
 }
 .machine-translation-tab {
@@ -175,15 +236,19 @@
   }
 
   .settings-panel-table {
+    .select {
+      padding: 2px 8px;
+      height: 24px;
+    }
+  }
+
+  .active-table-ModernMT,
+  .active-table-DeepL,
+  .active-table-Lara {
     .settings-panel-row-extra-content {
       transition: none;
       min-height: unset;
       max-height: none;
-    }
-
-    .select {
-      padding: 2px 8px;
-      height: 24px;
     }
   }
 
@@ -211,7 +276,7 @@
 .mt-glossary {
   display: flex;
   flex-direction: column;
-  background-color: #f3f3f3;
+  background-color: colors.$white;
 
   .expand-button {
     height: 32px;
@@ -302,7 +367,7 @@
   width: 100%;
   padding: 4px;
   background-color: unset;
-  border: 1px solid $grey8;
+  border: 1px solid colors.$grey8;
   border-radius: 3px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -315,7 +380,7 @@
   }
 
   &.error {
-    border: solid 1px $redDefault;
+    border: solid 1px colors.$redDefault;
   }
 }
 
@@ -341,7 +406,7 @@
 
   .grey-button {
     &.error {
-      border: solid 1px $redDefault;
+      border: solid 1px colors.$redDefault;
     }
   }
 
@@ -387,7 +452,7 @@
   cursor: pointer;
 
   &:hover {
-    background-color: $grey5;
+    background-color: colors.$grey5;
   }
 
   &:disabled {
@@ -403,7 +468,7 @@
 
 .spinner {
   position: absolute;
-  background: url(../../img/loading.gif) 48% top no-repeat !important;
+  background: url(/public/img/loading.gif) 48% top no-repeat !important;
   background-size: 26px 26px !important;
   width: 26px;
   height: 26px;
@@ -411,7 +476,7 @@
 }
 
 .mt-glossary-table {
-  margin-top: 15px;
+  padding-top: 15px;
 
   .settings-panel-table-rows-container {
     max-height: 400px;
@@ -438,4 +503,38 @@
 .create-glossary-button {
   gap: unset;
   padding: 2px 8px 2px 4px;
+}
+
+.create-glossary-button-disabled {
+  visibility: hidden;
+}
+
+.machine-translation-tab-title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .mt-quality-value {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background-color: colors.$grey4;
+    padding: 5px;
+    border-radius: 4px;
+    border: solid 1px colors.$grey2;
+
+    h4 {
+      margin: 0;
+    }
+  }
+
+  .mt-quality-value-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+}
+
+.manage-lara-glossary-button {
+  margin-left: auto;
 }

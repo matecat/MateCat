@@ -2,27 +2,26 @@
 
 namespace LQA;
 
-use Chunks_ChunkStruct;
+use DataAccess\AbstractDao;
 use DataAccess\ShapelessConcreteStruct;
-use DataAccess_AbstractDao;
-use DataAccess_IDaoStruct;
 use Database;
 use Exceptions\ValidationError;
+use Jobs_JobStruct;
 use Log;
 use PDO;
 use Utils;
 
-class EntryDao extends DataAccess_AbstractDao {
-    protected function _buildResult( $array_result ) {
+class EntryDao extends AbstractDao {
+    protected function _buildResult( array $array_result ) {
     }
 
     /**
      * @param array $ids
+     *
      * @return array
      */
-    public static function getBySegmentIds(array $ids = [])
-    {
-        $sql = "SELECT 
+    public static function getBySegmentIds( array $ids = [] ) {
+        $sql  = "SELECT 
             q.id_job,
             q.id_segment,
             q.source_page,
@@ -38,7 +37,7 @@ class EntryDao extends DataAccess_AbstractDao {
             qa_categories cat ON q.id_category = cat.id
         WHERE
             q.deleted_at IS NULL
-                AND q.id_segment IN ( " . implode(', ' , $ids ) . " ) ";
+                AND q.id_segment IN ( " . implode( ', ', $ids ) . " ) ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute();
@@ -102,11 +101,11 @@ class EntryDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Chunks_ChunkStruct $chunk
+     * @param Jobs_JobStruct $chunk
      *
      * @return EntryStruct[]
      */
-    public static function findAllByChunk( Chunks_ChunkStruct $chunk ) {
+    public static function findAllByChunk( Jobs_JobStruct $chunk ) {
         $sql = "SELECT qa_entries.*, qa_categories.label as category_label FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
@@ -204,7 +203,7 @@ class EntryDao extends DataAccess_AbstractDao {
                 " FROM qa_entries " .
                 " WHERE id_job = :id_job " .
                 " AND qa_entries.deleted_at IS NULL " .
-                " AND source_page = :source_page " ;
+                " AND source_page = :source_page ";
 
         $opts = [
                 'id_job'      => $id_job,
@@ -362,9 +361,9 @@ class EntryDao extends DataAccess_AbstractDao {
      * @param null $idFilePart
      * @param int  $ttl
      *
-     * @return DataAccess_IDaoStruct[]
+     * @return \DataAccess\IDaoStruct[]
      */
-    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0) {
+    public function getIssuesGroupedByIdFilePart( $id_job, $password, $revisionNumber, $idFilePart = null, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
@@ -392,14 +391,14 @@ class EntryDao extends DataAccess_AbstractDao {
                     AND e.deleted_at IS NULL";
 
         $params = [
-            'id_job'   => $id_job,
-            'password' => $password,
-            'revisionNumber' => $revisionNumber
+                'id_job'         => $id_job,
+                'password'       => $password,
+                'revisionNumber' => $revisionNumber
         ];
 
-        if($idFilePart){
-            $sql .= " AND id_file_part = :id_file_part";
-            $params['id_file_part'] = $idFilePart;
+        if ( $idFilePart ) {
+            $sql                      .= " AND id_file_part = :id_file_part";
+            $params[ 'id_file_part' ] = $idFilePart;
         }
 
         $stmt = $conn->prepare( $sql );

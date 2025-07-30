@@ -23,14 +23,14 @@ class ContextList {
      *
      * @var Context[]
      */
-    public $list = array();
+    public array $list = [];
 
     /**
      * QueuesList constructor.
      *
      * @param array $queue_info
      */
-    protected function __construct( Array $queue_info ) {
+    protected function __construct( array $queue_info ) {
 
         foreach ( $queue_info as $level => $values ) {
             $this->list[ $level ] = Context::buildFromArray( $values );
@@ -45,7 +45,7 @@ class ContextList {
      *
      * @return static
      */
-    public static function get( Array $queue_info = array() ) {
+    public static function get( array $queue_info = [] ): ContextList {
         return new static( $queue_info );
     }
 
