@@ -20,6 +20,7 @@ import IconClose from '../../../icons/IconClose'
 import Checkmark from '../../../../../img/icons/Checkmark'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {cloneDeep, isEqual} from 'lodash'
+import {v4 as uuidV4} from 'uuid'
 
 export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
   const {analysisTemplates} = useContext(SettingsPanelContext)
@@ -29,7 +30,7 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
 
   const [exceptions, setExceptions] = useState([])
 
-  const [addExceptionCounter, setAddExceptionCounter] = useState(0)
+  const [pendingExceptionsId, setPendingExceptionsId] = useState([])
 
   const languages = useMemo(
     () =>
@@ -85,14 +86,13 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       }
     }
     setExceptions(exceptions)
-    setAddExceptionCounter(exceptions.length ? 0 : 1)
   }, [breakdowns])
 
   useEffect(() => {
     evaluateExceptions()
   }, [evaluateExceptions, breakdowns])
 
-  const addException = ({source, target, value}) => {
+  const addException = ({source, target, value, id}) => {
     const newException = {
       [source.code]: {
         ...breakdowns[source.code],
@@ -106,6 +106,10 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
       ...breakdowns,
       ...newException,
     })
+
+    setPendingExceptionsId((prevState) =>
+      prevState.filter((exceptionId) => exceptionId !== id),
+    )
   }
   const removeException = (exception) => {
     let newObject = cloneDeep(breakdowns)
@@ -154,13 +158,17 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
           />
         )
       })}
-      {[...Array(addExceptionCounter)].map((e, i) => (
+      {pendingExceptionsId.map((exceptionId) => (
         <LanguageException
           languages={languages}
-          addException={addException}
-          key={'newExc' + i}
+          addException={(props) => addException({...props, id: exceptionId})}
+          key={'newExc' + exceptionId}
           removeException={() => {
-            setAddExceptionCounter((prevState) => prevState - 1)
+            setPendingExceptionsId((prevState) =>
+              prevState.filter(
+                (prevExceptionId) => prevExceptionId !== exceptionId,
+              ),
+            )
           }}
           isExceptionSaved={isExceptionSaved}
         />
@@ -169,7 +177,9 @@ export const LanguagesExceptions = ({breakdowns, updateExceptions}) => {
         className="add-button"
         type={BUTTON_TYPE.PRIMARY}
         size={BUTTON_SIZE.MEDIUM}
-        onClick={() => setAddExceptionCounter((prevState) => prevState + 1)}
+        onClick={() =>
+          setPendingExceptionsId((prevState) => [...prevState, uuidV4()])
+        }
       >
         <AddWide size={12} />
         Add exception
