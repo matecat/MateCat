@@ -131,6 +131,7 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
+
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
@@ -1060,6 +1061,9 @@ class ProjectManager {
         if ( false === is_dir( $this->uploadDir ) ) {
             mkdir( $this->uploadDir, 0755 );
         }
+
+        $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
+        $fileName = $fs::createFileName($file_info['filename'], $file_info['extension']);
 
         /** @var $fs S3FilesStorage */
         $client              = $fs::getStaticS3Client();
