@@ -1,5 +1,6 @@
 @use 'commons/mixins';
 @use 'commons/_colors';
+@use 'components/segment/IcuHighlight';
 body.cattool {
   //display: flex;
   height: 100vh;
