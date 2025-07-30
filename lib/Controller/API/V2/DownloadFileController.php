@@ -222,7 +222,7 @@ class DownloadFileController extends AbstractDownloadController {
                 //make dir if it doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
                     Log::doJsonLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) );
-                    $a = mkdir( dirname( $outputPath ), 0775, true );
+                    mkdir( dirname( $outputPath ), 0775, true );
                 }
 
                 $data = $sDao->getSegmentsDownload( $this->job, $fileID );
