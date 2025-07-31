@@ -17,6 +17,7 @@ const DownloadFileUtils = {
           type: 'error',
         }
         CatToolActions.addNotification(notification)
+        callback()
       })
   },
 

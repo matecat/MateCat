@@ -68,6 +68,8 @@ class DownloadFileController extends AbstractDownloadController {
 
     const FILES_CHUNK_SIZE = 3;
 
+    protected $encoding;
+
     /**
      * @throws ReflectionException
      * @throws AuthenticationError
@@ -116,6 +118,9 @@ class DownloadFileController extends AbstractDownloadController {
                 'download_type' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
+                'encoding' => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
                 'password'      => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
@@ -131,6 +136,7 @@ class DownloadFileController extends AbstractDownloadController {
         $this->id_file       = $__postInput[ 'id_file' ];
         $this->id_job        = $__postInput[ 'id_job' ];
         $this->download_type = $__postInput[ 'download_type' ];
+        $this->encoding      = $__postInput[ 'encoding' ];
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
