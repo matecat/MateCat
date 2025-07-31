@@ -142,6 +142,34 @@ class TranslationEventDao extends AbstractDao {
     }
 
     /**
+     * @param $id_job
+     *
+     * @return TranslationEventStruct|null
+     */
+    public function getLatestEventForAJob( $id_job ): ?TranslationEventStruct {
+
+        $sql = "SELECT * FROM segment_translation_events
+                WHERE id_job = :id_job
+                    AND status != :draft
+                    ORDER BY id DESC
+                    LIMIT 1
+                ";
+
+        $conn = $this->getDatabaseHandler()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
+        $stmt->execute( [
+            'id_job'     => $id_job,
+            'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+        ] );
+
+        $res = $stmt->fetchAll();
+
+        return $res[ 0 ] ?? null;
+
+    }
+
+    /**
      * @param array $id_segment_list
      * @param int   $id_job
      *
