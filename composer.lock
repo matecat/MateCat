@@ -1509,16 +1509,16 @@
         },
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.9",
+            "version": "v1.0.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "8a80e58f78c1e209eb3c25142f794ad1d8ab600a"
+                "reference": "48197303e888ca82813cc2afb2556ad075c46e40"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/8a80e58f78c1e209eb3c25142f794ad1d8ab600a",
-                "reference": "8a80e58f78c1e209eb3c25142f794ad1d8ab600a",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/48197303e888ca82813cc2afb2556ad075c46e40",
+                "reference": "48197303e888ca82813cc2afb2556ad075c46e40",
                 "shasum": ""
             },
             "require": {
@@ -1560,9 +1560,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.9"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.10"
             },
-            "time": "2025-07-16T14:55:20+00:00"
+            "time": "2025-07-31T13:21:10+00:00"
         },
         {
             "name": "matecat/simple-s3",
