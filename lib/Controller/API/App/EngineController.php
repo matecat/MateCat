@@ -182,6 +182,7 @@ class EngineController extends KleinController {
                 $newEngineStruct->uid                                    = $this->user->uid;
                 $newEngineStruct->type                                   = Constants_Engines::MT;
                 $newEngineStruct->extra_parameters[ 'apikey' ]           = $engineData[ 'secret' ];
+                $newEngineStruct->extra_parameters[ 'service' ]          = $engineData[ 'service' ];
                 $newEngineStruct->extra_parameters[ 'provider' ]         = $engineData[ 'provider' ];
                 $newEngineStruct->extra_parameters[ 'providerkey' ]      = $engineData[ 'providerkey' ];
                 $newEngineStruct->extra_parameters[ 'providercategory' ] = $engineData[ 'providercategory' ];
