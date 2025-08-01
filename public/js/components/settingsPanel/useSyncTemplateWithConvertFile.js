@@ -19,8 +19,6 @@ function useSyncTemplateWithConvertFile({
     if (!isCattool) {
       retrieveOnce.current(() =>
         getTemplates().then((templates) => {
-          // sort by name
-          templates.items.sort((a, b) => (a.name > b.name ? 1 : -1))
           const items = [defaultTemplate, ...templates.items]
           const selectedTemplateId =
             items.find(({id}) => id === idTemplate)?.id ?? 0
