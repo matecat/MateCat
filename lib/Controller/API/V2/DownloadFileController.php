@@ -49,7 +49,7 @@ class DownloadFileController extends AbstractDownloadController {
     protected                 $download_type;
     protected \Jobs_JobStruct $job;
     protected                 $forceXliff;
-    protected $downloadToken;
+    protected                 $downloadToken;
 
     /**
      * @var RemoteFileService
@@ -252,7 +252,7 @@ class DownloadFileController extends AbstractDownloadController {
 
                 // if FileStorage is on S3, download the file on a temp dir
                 if ( AbstractFilesStorage::isOnS3() ) {
-                    $s3Client = S3FilesStorage::getStaticS3Client();
+                    $s3Client            = S3FilesStorage::getStaticS3Client();
                     $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
                     $params[ 'key' ]     = $xliffFilePath;
                     $params[ 'save_as' ] = "/tmp/" . AbstractFilesStorage::pathinfo_fix( $xliffFilePath, PATHINFO_BASENAME );
@@ -311,8 +311,8 @@ class DownloadFileController extends AbstractDownloadController {
 
                 //if it is a not converted file ( sdlxliff ) we have originalFile equals to xliffFile (it has just been copied)
                 if ( AbstractFilesStorage::isOnS3() ) {
-                    $originalFilePath = $file[ 'originalFilePath' ];
-                    $s3Client = S3FilesStorage::getStaticS3Client();
+                    $originalFilePath        = $file[ 'originalFilePath' ];
+                    $s3Client                = S3FilesStorage::getStaticS3Client();
                     $file[ 'original_file' ] = $s3Client->openItem( [
                             'bucket' => S3FilesStorage::getFilesStorageBucket(),
                             'key'    => $originalFilePath
@@ -454,8 +454,8 @@ class DownloadFileController extends AbstractDownloadController {
                         // always an array with 1 element, pop it, Ex: array( array() )
                         $oContent = array_pop( $output_content );
 
-                        $filename = $this->generateFilename($oContent->output_filename);
-                        $pathinfo = pathinfo($filename);
+                        $filename = $this->generateFilename( $oContent->output_filename );
+                        $pathinfo = pathinfo( $filename );
 
                         if ( $pathinfo[ 'extension' ] == 'zip' ) {
                             $this->setFilename( $filename );
@@ -921,8 +921,9 @@ class DownloadFileController extends AbstractDownloadController {
                         //
                         // Much better using AbstractFilesStorage::pathinfo_fix function to get the real filename (with no xlf extension)
                         //
-                        $declaredOutputFileName = AbstractFilesStorage::pathinfo_fix( $newInternalZipFile->output_filename, PATHINFO_FILENAME );
-                        $isTheSameFile          = ( $declaredOutputFileName == $newRealZipFilePath );
+                        $declaredOutputFileName     = AbstractFilesStorage::pathinfo_fix( $newInternalZipFile->output_filename, PATHINFO_FILENAME );
+                        $newRealZipFilePathBaseName = AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_BASENAME );
+                        $isTheSameFile              = ( $declaredOutputFileName == $newRealZipFilePathBaseName );
                     } else {
                         $isTheSameFile = ( $newInternalZipFile->output_filename == $newRealZipFilePath );
                     }
@@ -935,7 +936,7 @@ class DownloadFileController extends AbstractDownloadController {
                         if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
                             $newRealZipFilePath .= '.docx';
                         } elseif ( $this->forceXliff ) {
-                            $newRealZipFilePath = $newInternalZipFile->output_filename;
+                            $newRealZipFilePath = $newInternalZipFile->output_filename; //xlf
                         }
 
                         $zip->addFromString( $newRealZipFilePath, $newInternalZipFile->getContent() );
