@@ -1,14 +1,23 @@
 import React, {useContext, useEffect, useRef, useState} from 'react'
-import Switch from '../../../../common/Switch'
 import {SegmentedControl} from '../../../../common/SegmentedControl'
 import {WordsBadge} from '../../../../common/WordsBadge/WordsBadge'
 import {FiltersParamsContext} from './FiltersParams'
 import {Controller, useForm} from 'react-hook-form'
 import {isEqual} from 'lodash'
+import {Select} from '../../../../common/Select'
+import Switch from '../../../../common/Switch'
 
 const SEGMENTED_CONTROL_OPTIONS = [
   {id: 'translate_keys', name: 'Translatable'},
   {id: 'do_not_translate_keys', name: 'Non-translatable'},
+]
+
+const INNER_CONTENT_TYPE_OPTIONS = [
+  {id: 'text/html', name: 'HTML'},
+  {id: 'text/xml', name: 'XML'},
+  {id: 'text/csv', name: 'CSV'},
+  {id: 'application/json', name: 'JSON'},
+  {id: 'text/markdown', name: 'Markdown'},
 ]
 
 export const Yaml = () => {
@@ -141,6 +150,104 @@ export const Yaml = () => {
           />
           {renderActiveSegmentedController}
         </div>
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Context keys</h3>
+          <p>
+            Choose which keys should be extracted as context for translatable
+            keys.
+            <br />
+            Key names are case sensitive.
+            <br />
+            The extracted notes will be applied to translatable keys in the same
+            object scope.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="context_keys"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Character limit keys</h3>
+          <p>
+            Choose which keys should be extracted as the character limit for
+            translatable keys.
+            <br />
+            Key names are case sensitive.
+            <br />
+            Character limits will be applied to translatable keys in the same
+            object.
+            <br />
+            Keys with a character limit won't be segmented.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="character_limit"
+          render={({field: {onChange, value, name}}) => (
+            <WordsBadge
+              name={name}
+              value={value}
+              onChange={onChange}
+              placeholder={''}
+            />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Char limit segmentation</h3>
+          <p></p>
+        </div>
+        <Controller
+          control={control}
+          name="char_limit_segmentation"
+          render={({field: {onChange, value, name}}) => (
+            <Switch name={name} active={value} onChange={onChange} />
+          )}
+        />
+      </div>
+
+      <div className="filters-params-option">
+        <div>
+          <h3>Translatable text content type</h3>
+          <p>
+            Select the content type of the translatable text to optimize
+            segmentation and tags.
+          </p>
+        </div>
+        <Controller
+          control={control}
+          name="inner_content_type"
+          render={({field: {onChange, value, name}}) => (
+            <Select
+              name={name}
+              placeholder="Select inner content type"
+              options={INNER_CONTENT_TYPE_OPTIONS}
+              activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
+                ({id}) => id === value?.[0],
+              )}
+              onSelect={(option) =>
+                onChange(typeof option?.id === 'string' ? [option.id] : [])
+              }
+              maxHeightDroplist={260}
+            />
+          )}
+        />
       </div>
     </div>
   )

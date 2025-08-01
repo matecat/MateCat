@@ -2,12 +2,17 @@
 
 namespace Filters\DTO;
 
+use DomainException;
 use JsonSerializable;
 
 class Yaml implements IDto, JsonSerializable {
 
-    private array $translate_keys        = [];
-    private array $do_not_translate_keys = [];
+    private array $translate_keys          = [];
+    private array $do_not_translate_keys   = [];
+    private array $inner_content_type      = [];
+    private array $context_keys            = [];
+    private array $character_limit         = [];
+    private bool  $char_limit_segmentation = false;
 
     /**
      * @param array $translate_keys
@@ -24,6 +29,51 @@ class Yaml implements IDto, JsonSerializable {
     }
 
     /**
+     * @param array $inner_content_type
+     */
+    public function setInnerContentType( array $inner_content_type ): void {
+
+        $mimeTypes = [
+            'text/html',
+            'text/xml',
+            'application/xml',
+            'text/csv',
+            'application/json',
+            'text/markdown',
+            'text/x-markdown',
+        ];
+
+        $inner_content_type = array_unique($inner_content_type);
+
+        if(!empty(array_diff($inner_content_type, $mimeTypes))){
+            throw new DomainException("YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']");
+        }
+
+        $this->inner_content_type = $inner_content_type;
+    }
+
+    /**
+     * @param array $context_keys
+     */
+    public function setContextKeys( array $context_keys ): void {
+        $this->context_keys = $context_keys;
+    }
+
+    /**
+     * @param array $character_limit
+     */
+    public function setCharacterLimit( array $character_limit ): void {
+        $this->character_limit = $character_limit;
+    }
+
+    /**
+     * @param bool $char_limit_segmentation
+     */
+    public function setCharLimitSegmentation( bool $char_limit_segmentation ): void {
+        $this->char_limit_segmentation = $char_limit_segmentation;
+    }
+
+    /**
      * @param $data
      */
     public function fromArray( $data ) {
@@ -33,6 +83,22 @@ class Yaml implements IDto, JsonSerializable {
 
         if ( isset( $data[ 'do_not_translate_keys' ] ) ) {
             $this->setDoNotTranslateKeys( $data[ 'do_not_translate_keys' ] );
+        }
+
+        if ( isset( $data[ 'inner_content_type' ] ) ) {
+            $this->setInnerContentType( $data[ 'inner_content_type' ] );
+        }
+
+        if ( isset( $data[ 'context_keys' ] ) ) {
+            $this->setContextKeys( $data[ 'context_keys' ] );
+        }
+
+        if ( isset( $data[ 'character_limit' ] ) ) {
+            $this->setCharacterLimit( $data[ 'character_limit' ] );
+        }
+
+        if ( isset( $data[ 'char_limit_segmentation' ] ) ) {
+            $this->setCharLimitSegmentation( $data[ 'char_limit_segmentation' ] );
         }
     }
 
@@ -49,6 +115,11 @@ class Yaml implements IDto, JsonSerializable {
             $format[ 'do_not_translate_keys' ] = $this->do_not_translate_keys;
             unset( $format[ 'translate_keys' ] );
         }
+
+        $format['inner_content_type'] = $this->inner_content_type;
+        $format['context_keys'] = $this->context_keys;
+        $format['character_limit'] = $this->character_limit;
+        $format['char_limit_segmentation'] = $this->char_limit_segmentation;
 
         return $format;
 
