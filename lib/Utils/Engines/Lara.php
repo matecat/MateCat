@@ -3,7 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
-use Google\Service\Translate\Glossary;
+use Lara\Glossary;
 use Lara\LaraApiException;
 use Lara\LaraCredentials;
 use Lara\LaraException;
