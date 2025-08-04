@@ -46,12 +46,19 @@ import {
 import {getTagProjection} from '../api/getTagProjection'
 import {setCurrentSegment} from '../api/setCurrentSegment'
 import CommonUtils from '../utils/commonUtils'
+import {getTranslationMismatches as getTranslationMismatchesApi} from '../api/getTranslationMismatches'
+import TextUtils from '../utils/textUtils'
+import {
+  segmentTranslation,
+  translationIsToSaveBeforeClose,
+} from '../setTranslationUtil'
 
 const SegmentActions = {
   localStorageCommentsClosed:
     'commentsPanelClosed-' + config.id_job + config.password,
   localStorageReviewPanelClosed:
     'issuePanelClosed-' + config.id_job + config.password,
+  pendingQACheck: undefined,
   /********* SEGMENTS *********/
   renderSegments: function (segments, idToOpen) {
     AppDispatcher.dispatch({
@@ -146,14 +153,6 @@ const SegmentActions = {
   openSegment: function (sid, wasOriginatedFromBrowserHistory = false) {
     const segment = SegmentStore.getSegmentByIdToJS(sid)
     if (segment) {
-      //Check first if the segment is in the view
-      if (
-        SegmentUtils.isReadonlySegment(segment) &&
-        !SearchUtils.searchEnabled
-      ) {
-        UI.readonlyClickDisplay()
-        return
-      }
       if (segment.splitted && sid.toString().indexOf('-') === -1) {
         this.scrollToSegment(sid + '-1', this.openSegment)
         return
@@ -182,12 +181,8 @@ const SegmentActions = {
     this.closeIssuesPanel()
   },
   saveSegmentBeforeClose: function (segment) {
-    if (UI.translationIsToSaveBeforeClose(segment)) {
-      return UI.setTranslation({
-        id_segment: segment.sid,
-        status:
-          segment.status.toLowerCase() === 'new' ? 'draft' : segment.status,
-      })
+    if (translationIsToSaveBeforeClose(segment)) {
+      return segmentTranslation(segment, SEGMENTS_STATUS.DRAFT, () => {}, false)
     } else {
       return Promise.resolve()
     }
@@ -302,20 +297,18 @@ const SegmentActions = {
       }
     }
 
-    UI.setTimeToEdit(sid)
     const status =
       config.revisionNumber === REVISE_STEP_NUMBER.REVISE1
         ? SEGMENTS_STATUS.APPROVED
         : SEGMENTS_STATUS.APPROVED2
-    UI.changeStatus(segment, status, afterApproveFn) // this does < setTranslation
-
+    segmentTranslation(segment, status, afterApproveFn)
     // Lock the segment if it's approved in a second pass but was previously approved in first revision
     if (config.revisionNumber > 1) {
       SegmentUtils.removeUnlockedSegment(sid)
     }
   },
   openNextApproved: function (sid) {
-    sid = sid || UI.currentSegmentId
+    sid = sid || SegmentStore.getCurrentSegmentId()
     const nextApprovedSegment = SegmentStore.getNextSegment({
       current_sid: sid,
       status: SEGMENTS_STATUS.APPROVED,
@@ -352,9 +345,6 @@ const SegmentActions = {
    */
   clickOnTranslatedButton: function (segment, goToNextUntranslated) {
     SegmentActions.removeClassToSegment(segment.sid, 'modified')
-
-    UI.setTimeToEdit(segment.sid)
-
     const afterTranslateFn = () => {
       if (!goToNextUntranslated) {
         SegmentActions.gotoNextSegment() //Others functionality override this function
@@ -363,7 +353,7 @@ const SegmentActions = {
       }
     }
 
-    UI.changeStatus(segment, 'translated', afterTranslateFn)
+    segmentTranslation(segment, SEGMENTS_STATUS.TRANSLATED, afterTranslateFn)
   },
 
   setHeaderPercentage: function (sid, fid, match, className, createdBy) {
@@ -442,7 +432,7 @@ const SegmentActions = {
       })
       .catch((errors) => {
         if (errors && (errors.length > 0 || !isUndefined(errors.code))) {
-          UI.processErrors(errors, 'getTagProjection')
+          CatToolActions.processErrors(errors, 'getTagProjection')
           SegmentActions.disableTPOnSegment()
           // Set as Tagged and restore source with taggedText
           SegmentActions.setSegmentAsTagged(sid)
@@ -454,8 +444,14 @@ const SegmentActions = {
         }
       })
       .finally(function () {
-        UI.registerQACheck()
+        SegmentActions.startSegmentQACheck()
       })
+  },
+  startSegmentQACheck: function () {
+    clearTimeout(SegmentActions.pendingQACheck)
+    SegmentActions.pendingQACheck = setTimeout(function () {
+      SegmentActions.getSegmentsQa(SegmentStore.getCurrentSegment())
+    }, config.segmentQACheckInterval)
   },
   /**
    * Tag Projection: get the tag projection for the current segment
@@ -651,7 +647,7 @@ const SegmentActions = {
     copyAllSourceToTarget()
       .then(() => {
         CatToolActions.onRender({
-          segmentToOpen: UI.currentSegmentId,
+          segmentToOpen: SegmentStore.getCurrentSegmentId(),
         })
       })
       .catch((errors) => {
@@ -672,6 +668,62 @@ const SegmentActions = {
   },
   abortCopyAllSources: function () {
     SegmentStore.consecutiveCopySourceNum = []
+  },
+  handleClickOnReadOnly: function (segment) {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      let message =
+        'All segments are in <b>read-only mode</b> because this job is under review.'
+
+      if (config.chunk_completion_undoable && config.last_completion_event_id) {
+        message =
+          message +
+          '<p class=\'warning-call-to\'><a href="javascript:void(0);" id="showTranslateWarningMessageUndoLink" >Re-Open Job</a></p>'
+      }
+
+      CatToolActions.addNotification({
+        uid: 'translate-warning',
+        autoDismiss: false,
+        dismissable: true,
+        position: 'tc',
+        text: message,
+        title: 'Warning',
+        type: 'warning',
+        allowHtml: true,
+      })
+    }
+    if (TextUtils.justSelecting('readonly')) return
+    let locked = !segment.unlocked && SegmentUtils.isIceSegment(segment)
+    if (locked) {
+      ModalsActions.showModalComponent(
+        AlertModal,
+        {
+          text:
+            'Segment is locked (in-context exact match) and shouldn’t be edited. ' +
+            'If you must edit it, click on the padlock icon to the left of the segment. ' +
+            'The owner of the project will be notified of any edits.',
+        },
+        'Ice Match',
+      )
+      return
+    }
+    ModalsActions.showModalComponent(AlertModal, {
+      text: SegmentActions.messageForClickOnReadonly(),
+    })
+  },
+
+  messageForClickOnReadonly: function () {
+    const projectCompletionCheck =
+      config.project_completion_feature_enabled &&
+      !config.isReview &&
+      config.job_completion_current_phase == 'revise'
+    if (projectCompletionCheck) {
+      return 'This job is currently under review. Segments are in read-only mode.'
+    }
+    return 'This part has not been assigned to you.'
   },
   /******************* EditArea ************/
   modifiedTranslation: function (sid, status) {
@@ -892,16 +944,20 @@ const SegmentActions = {
   },
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
     if (!CatToolStore.haveKeysGlossary) return
+
     // refresh segment glossary already included
     if (shouldRefresh) {
-      getGlossaryForSegment({
-        idSegment: sid,
-        source: DraftMatecatUtils.removePlaceholdersForGlossary(
-          DraftMatecatUtils.removeTagsFromText(text),
-        ),
-      }).catch(() => {
-        OfflineUtils.failedConnection()
-      })
+      const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+        DraftMatecatUtils.removeTagsFromText(text),
+      )
+      if (source && source !== ' ') {
+        getGlossaryForSegment({
+          idSegment: sid,
+          source,
+        }).catch(() => {
+          OfflineUtils.failedConnection()
+        })
+      }
       return
     }
 
@@ -942,15 +998,19 @@ const SegmentActions = {
         segment &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
-        //Response inside SSE Channel
-        getGlossaryForSegment({
-          idSegment: request.sid,
-          source: DraftMatecatUtils.removePlaceholdersForGlossary(
-            DraftMatecatUtils.removeTagsFromText(request.text),
-          ),
-        }).catch(() => {
-          OfflineUtils.failedConnection()
-        })
+        const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+          DraftMatecatUtils.removeTagsFromText(request.text),
+        )
+
+        if (source && source !== ' ') {
+          //Response inside SSE Channel
+          getGlossaryForSegment({
+            idSegment: request.sid,
+            source,
+          }).catch(() => {
+            OfflineUtils.failedConnection()
+          })
+        }
       }
     }
   },
@@ -1612,7 +1672,7 @@ const SegmentActions = {
     })
   },
   removeAllSegments: () => {
-    UI.removeCacheObjects()
+    SegmentActions.setCurrentSegmentId()
     AppDispatcher.dispatch({
       actionType: SegmentConstants.REMOVE_ALL_SEGMENTS,
     })
@@ -1771,12 +1831,57 @@ const SegmentActions = {
         const segment = SegmentStore.getSegmentByIdToJS(id_segment)
         if (!segment) return
         if (config.alternativesEnabled && !segment.alternatives) {
-          UI.getTranslationMismatches(id_segment)
+          SegmentActions.getTranslationMismatches(id_segment)
         }
       })
       .catch(() => {
         OfflineUtils.failedConnection()
       })
+  },
+  getTranslationMismatches: function (id_segment) {
+    getTranslationMismatchesApi({
+      password: config.password,
+      id_segment: id_segment.toString(),
+      id_job: config.id_job,
+    })
+      .then((data) => {
+        SegmentActions.detectTranslationAlternatives(data, id_segment)
+      })
+      .catch((errors) => {
+        if (errors.length) {
+          CatToolActions.processErrors(errors, 'setTranslation')
+        } else {
+          OfflineUtils.failedConnection()
+        }
+      })
+  },
+  detectTranslationAlternatives: function (d, id_segment) {
+    let sameContentIndex = -1
+    const segmentObj = SegmentStore.getSegmentByIdToJS(id_segment)
+    d.data.editable.forEach((item, ind) => {
+      if (item.translation === segmentObj.translation) {
+        sameContentIndex = ind
+      }
+    })
+    if (sameContentIndex !== -1) d.data.editable.splice(sameContentIndex, 1)
+
+    let sameContentIndex1 = -1
+    d.data.not_editable.forEach((item, ind) => {
+      //Remove trailing spaces for string comparison
+      if (item.translation === segmentObj.translation) {
+        sameContentIndex1 = ind
+      }
+    })
+    if (sameContentIndex1 !== -1)
+      d.data.not_editable.splice(sameContentIndex1, 1)
+
+    const numAlt = d.data.editable.length + d.data.not_editable.length
+
+    if (numAlt) {
+      SegmentActions.setAlternatives(id_segment, d.data)
+      SegmentActions.activateTab(id_segment, 'alternatives')
+      SegmentActions.setTabIndex(id_segment, 'alternatives', numAlt)
+    }
   },
   refreshTagMap: function () {
     SegmentActions.renderSegments(
@@ -1790,6 +1895,12 @@ const SegmentActions = {
   changeCharactersCounterRules: function () {
     AppDispatcher.dispatch({
       actionType: SegmentConstants.CHANGE_CHARACTERS_COUNTER_RULES,
+    })
+  },
+  setCurrentSegmentId: function (sid) {
+    AppDispatcher.dispatch({
+      actionType: SegmentConstants.SET_CURRENT_SEGMENT_ID,
+      sid,
     })
   },
 }

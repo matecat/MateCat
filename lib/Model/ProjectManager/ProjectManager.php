@@ -172,6 +172,7 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
+
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
@@ -1921,6 +1922,12 @@ class ProjectManager {
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
+
+            // save external-file attribute
+            if ( isset( $xliff_file[ 'attr' ][ 'external-file' ] ) ) {
+                $externalFile = $xliff_file[ 'attr' ][ 'external-file' ];
+                $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
+            }
 
             // save x-jsont* datatype
             if ( isset( $xliff_file[ 'attr' ][ 'data-type' ] ) ) {

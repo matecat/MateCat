@@ -101,6 +101,13 @@
     }
   }
 
+  .unsaved {
+    color: colors.$translatedBlue;
+  }
+}
+
+.xliff-settings-container,
+.filters-params-option {
   .select__dropdown-wrapper {
     z-index: 5;
   }
@@ -116,10 +123,6 @@
 
   .select--is-disabled {
     background-color: colors.$grey9;
-  }
-
-  .unsaved {
-    color: colors.$translatedBlue;
   }
 }
 

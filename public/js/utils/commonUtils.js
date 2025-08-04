@@ -5,6 +5,7 @@ import SegmentActions from '../actions/SegmentActions'
 import SegmentStore from '../stores/SegmentStore'
 import AlertModal from '../components/modals/AlertModal'
 import ModalsActions from '../actions/ModalsActions'
+import {isTranslationTailEmpty} from '../setTranslationUtil'
 
 const CommonUtils = {
   millisecondsToTime(milli) {
@@ -168,7 +169,7 @@ const CommonUtils = {
     }
 
     if (OfflineUtils.offline) {
-      if (UI.setTranslationTail && UI.setTranslationTail.length) {
+      if (!isTranslationTailEmpty()) {
         return say_goodbye(
           'You are working in offline mode. If you proceed to refresh you will lose all the pending translations. ' +
             'Do you want to proceed with the refresh ?',

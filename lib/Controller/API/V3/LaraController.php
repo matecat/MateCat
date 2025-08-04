@@ -1,13 +1,13 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 use API\Commons\Validators\LoginValidator;
 use API\V2\BaseChunkController;
+use Engines_AbstractEngine;
 use Exception;
 use Utils\Engines\Lara;
 use Validator\EngineValidator;
-
 
 class LaraController extends BaseChunkController {
     protected function afterConstruct() {
@@ -26,11 +26,11 @@ class LaraController extends BaseChunkController {
         }
 
         try {
-            $engineId  = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
 
             /** @var Lara $LaraClient */
             $LaraClient = $this->getLaraClient( $engineId );
-            $glossaries  = $LaraClient->getGlossaries();
+            $glossaries = $LaraClient->getGlossaries();
 
             $this->response->status()->setCode( 200 );
             $this->response->json( $glossaries );
@@ -47,12 +47,12 @@ class LaraController extends BaseChunkController {
     }
 
     /**
-     * @param $engineId
+     * @param int $engineId
      *
-     * @return \Engines_AbstractEngine
+     * @return Engines_AbstractEngine
      * @throws Exception
      */
-    private function getLaraClient( $engineId ) {
+    private function getLaraClient( int $engineId ): Engines_AbstractEngine {
         return EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Lara::class );
     }
 }

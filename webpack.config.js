@@ -232,7 +232,6 @@ const matecatConfig = async ({env}, {mode}) => {
       ],
       ...entryPoints,
       cattool: [
-        path.resolve(__dirname, 'public/js/ui.core.js'),
         path.resolve(__dirname, 'public/js/pages/CatTool.js'),
         path.resolve(
           __dirname,

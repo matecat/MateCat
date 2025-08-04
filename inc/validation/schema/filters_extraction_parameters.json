@@ -109,6 +109,23 @@
         "do_not_translate_keys": {
           "type": "array",
           "nullable": true
+        },
+        "inner_content_type": {
+          "type": "array",
+          "nullable": true
+        },
+        "context_keys": {
+          "type": "array",
+          "nullable": true
+        },
+        "character_limit": {
+          "type": "array",
+          "nullable": true
+        },
+        "char_limit_segmentation": {
+          "type": "boolean",
+          "nullable": true,
+          "default": false
         }
       },
       "dependencies": {

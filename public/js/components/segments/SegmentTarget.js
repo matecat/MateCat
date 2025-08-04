@@ -43,12 +43,6 @@ class SegmentTarget extends React.Component {
     this.autoFillTagsInTarget = this.autoFillTagsInTarget.bind(this)
   }
 
-  onClickEvent(event) {
-    if (this.context.readonly) {
-      UI.handleClickOnReadOnly($(event.currentTarget).closest('section'))
-    }
-  }
-
   selectIssueText(event) {
     var selection = document.getSelection()
     var container = $(this.issuesHighlightArea).find('.errorTaggingArea')
@@ -134,7 +128,6 @@ class SegmentTarget extends React.Component {
         >
           <div
             className="textarea-container"
-            onClick={this.onClickEvent.bind(this)}
             onMouseUp={this.selectIssueText.bind(this)}
             ref={(div) => (this.issuesHighlightArea = div)}
           >

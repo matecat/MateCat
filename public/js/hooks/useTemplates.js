@@ -74,6 +74,7 @@ const orderTemplates = (templates) => {
         ? 1
         : -1,
     )
+    .sort((a, b) => (a.id === b.id && !a.isTemporary ? -1 : 0))
     .reduce((acc, cur) => (cur.id === 0 ? [cur, ...acc] : [...acc, cur]), [])
 }
 
@@ -89,8 +90,9 @@ function useTemplates(schema) {
     (value) => {
       setTemplatesState((prevState) => {
         const result = typeof value === 'function' ? value(prevState) : value
-        return orderTemplates(
-          result.map((template) => createTemplateProxy({template, schema})),
+        const orderedResult = orderTemplates(result)
+        return orderedResult.map((template) =>
+          createTemplateProxy({template, schema}),
         )
       })
     },

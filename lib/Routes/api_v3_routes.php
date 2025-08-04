@@ -75,7 +75,7 @@ route( '/api/v3/create-key',  'POST', [ 'Controller\API\V3\MyMemoryController', 
 
 // LARA
 $klein->with( '/api/v3/lara/[i:engineId]', function () {
-    route( '/glossaries', 'GET', [ '\API\V3\LaraController', 'glossaries' ] );
+    route( '/glossaries', 'GET', [ 'Controller\API\V3\LaraController', 'glossaries' ] );
 } );
 
 // MMT
@@ -151,7 +151,6 @@ $klein->with( '/api/v3/projects/[:id_project]/[:password]', function () {
     route( '/archive', 'POST', [ 'Controller\API\V2\ProjectsController', 'archive' ] );
     route( '/active', 'POST', [ 'Controller\API\V2\ProjectsController', 'active' ] );
     route( '/r2', 'POST', [ 'Controller\API\V2\ReviewsController', 'createReview' ] );
-    route( '/analysis/status', 'GET', [ '\Controller\API\V3\StatusController', 'index' ] );
     route( '/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
 } );
 
