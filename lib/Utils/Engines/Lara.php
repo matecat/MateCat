@@ -193,7 +193,7 @@ class Lara extends AbstractEngine {
                 if ( $metadata !== null ) {
                     $metadata            = html_entity_decode( $metadata->value );
                     $laraGlossariesArray = json_decode( $metadata, true );
-                    $translateOptions->setGlossaries( $laraGlossariesArray );
+                    $translateOptions->setGlossaries($laraGlossariesArray);
                 }
             }
 

@@ -1583,16 +1583,16 @@
         },
         {
             "name": "matecat/emoji-to-entity-converter",
-            "version": "v1.0.10",
+            "version": "v1.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/emoji-to-entity-converter.git",
-                "reference": "48197303e888ca82813cc2afb2556ad075c46e40"
+                "reference": "7d728f8fcae0fbb2aac28ead40a9ac0a2e183f08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/48197303e888ca82813cc2afb2556ad075c46e40",
-                "reference": "48197303e888ca82813cc2afb2556ad075c46e40",
+                "url": "https://api.github.com/repos/matecat/emoji-to-entity-converter/zipball/7d728f8fcae0fbb2aac28ead40a9ac0a2e183f08",
+                "reference": "7d728f8fcae0fbb2aac28ead40a9ac0a2e183f08",
                 "shasum": ""
             },
             "require": {
@@ -1634,9 +1634,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/emoji-to-entity-converter/issues",
-                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.10"
+                "source": "https://github.com/matecat/emoji-to-entity-converter/tree/v1.0.8"
             },
-            "time": "2025-07-31T13:21:10+00:00"
+            "time": "2024-06-25T14:06:16+00:00"
         },
         {
             "name": "matecat/simple-s3",
@@ -1701,16 +1701,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.2.9",
+            "version": "v2.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "59b3945370c5ced5ca500ee0b9a49115b32b53c6"
+                "reference": "f7d6154b33915119e5d46bdc72ef4bc4cc970973"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/59b3945370c5ced5ca500ee0b9a49115b32b53c6",
-                "reference": "59b3945370c5ced5ca500ee0b9a49115b32b53c6",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/f7d6154b33915119e5d46bdc72ef4bc4cc970973",
+                "reference": "f7d6154b33915119e5d46bdc72ef4bc4cc970973",
                 "shasum": ""
             },
             "require": {
@@ -1755,9 +1755,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.2.9"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.2.8"
             },
-            "time": "2025-07-29T15:40:49+00:00"
+            "time": "2025-05-15T10:05:27+00:00"
         },
         {
             "name": "matecat/whole-text-finder",
@@ -1814,16 +1814,16 @@
         },
         {
             "name": "matecat/xliff-parser",
-            "version": "v2.2.11",
+            "version": "v2.2.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/xliff-parser.git",
-                "reference": "71c71cb1c6742d9848fb3cd26061b9fccc54612c"
+                "reference": "e5c479fc2abc45a7fcd598ec54cb191bd21b33c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/71c71cb1c6742d9848fb3cd26061b9fccc54612c",
-                "reference": "71c71cb1c6742d9848fb3cd26061b9fccc54612c",
+                "url": "https://api.github.com/repos/matecat/xliff-parser/zipball/e5c479fc2abc45a7fcd598ec54cb191bd21b33c5",
+                "reference": "e5c479fc2abc45a7fcd598ec54cb191bd21b33c5",
                 "shasum": ""
             },
             "require": {
@@ -1875,9 +1875,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/xliff-parser/issues",
-                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.11"
+                "source": "https://github.com/matecat/xliff-parser/tree/v2.2.10"
             },
-            "time": "2025-07-22T09:01:43+00:00"
+            "time": "2025-07-08T08:28:39+00:00"
         },
         {
             "name": "matecat/xml-dom-parser",
@@ -4713,16 +4713,16 @@
         },
         {
             "name": "translated/lara-sdk",
-            "version": "1.2.3",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/translated/lara-php.git",
-                "reference": "93b995e8bcd8244935716ba12d4549864575a5e7"
+                "reference": "586f09863e8fae861c74964fad932d3598e7338a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/translated/lara-php/zipball/93b995e8bcd8244935716ba12d4549864575a5e7",
-                "reference": "93b995e8bcd8244935716ba12d4549864575a5e7",
+                "url": "https://api.github.com/repos/translated/lara-php/zipball/586f09863e8fae861c74964fad932d3598e7338a",
+                "reference": "586f09863e8fae861c74964fad932d3598e7338a",
                 "shasum": ""
             },
             "require": {
@@ -4750,9 +4750,9 @@
             "homepage": "https://laratranslate.com/",
             "support": {
                 "issues": "https://github.com/translated/lara-php/issues",
-                "source": "https://github.com/translated/lara-php/tree/v1.2.3"
+                "source": "https://github.com/translated/lara-php/tree/v1.2.2"
             },
-            "time": "2025-07-16T08:44:40+00:00"
+            "time": "2025-07-07T15:37:05+00:00"
         }
     ],
     "packages-dev": [
