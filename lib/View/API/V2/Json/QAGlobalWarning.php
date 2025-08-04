@@ -10,24 +10,25 @@
 namespace View\API\V2\Json;
 
 
+use ArrayObject;
 use Utils\LQA\QA;
 
 class QAGlobalWarning extends QAWarning {
 
-    protected $tagIssues;
-    protected $translationMismatches;
+    protected array $tagIssues;
+    protected array $translationMismatches;
 
     protected $structure;
 
     /**
      * QAGlobalWarning constructor.
      *
-     * from query: getWarning( id_job, password )
+     * from query: getWarning(id_job, password)
      *
      * @param array $tagIssues             [ [ total_sources, translations_available, first_of_my_job ] ]
      * @param array $translationMismatches [ [ total_sources, translations_available, first_of_my_job ] ]
      */
-    public function __construct( $tagIssues, $translationMismatches ) {
+    public function __construct( array $tagIssues, array $translationMismatches ) {
         $this->tagIssues             = $tagIssues;
         $this->translationMismatches = $translationMismatches;
     }
@@ -35,22 +36,22 @@ class QAGlobalWarning extends QAWarning {
     /**
      * @return array
      */
-    public function render() {
+    public function render(): array {
 
         $this->structure = [
                 'ERROR'   => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ],
                 'WARNING' => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ],
                 'INFO'    => [
-                        'Categories' => new \ArrayObject()
+                        'Categories' => new ArrayObject()
                 ]
         ];
 
 
-        foreach ( $this->tagIssues as $position => $_item ) {
+        foreach ( $this->tagIssues as $_item ) {
 
             $exceptionList = QA::JSONtoExceptionList( $_item[ 'serialized_errors_list' ] );
 

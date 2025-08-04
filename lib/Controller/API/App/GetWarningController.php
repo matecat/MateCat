@@ -44,7 +44,7 @@ class GetWarningController extends KleinController {
 
             $chunk     = $this->getChunk( $id_job, $password );
             $warnings  = WarningDao::getWarningsByJobIdAndPassword( $id_job, $password );
-            $tMismatch = ( new SegmentDao() )->setCacheTTL( 10 * 60 /* 10 minutes cache */ )->getTranslationsMismatches( $id_job, $password );
+            $tMismatch = ( new SegmentDao() )->setCacheTTL( 10 * 60 /* 10-minute cache */ )->getTranslationsMismatches( $id_job, $password );
 
             $qa = new QAGlobalWarning( $warnings, $tMismatch );
 
