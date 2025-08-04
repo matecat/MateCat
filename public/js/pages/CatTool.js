@@ -423,13 +423,17 @@ function CatTool() {
     }
   }, [currentProjectTemplate])
 
+  const temporaryFakeTemplate = projectTemplates.find(
+    ({isTemporary}) => isTemporary,
+  )
+
   const isFakeCurrentTemplateReady =
     projectTemplates.length &&
-    typeof projectTemplates[1] !== 'undefined' &&
+    typeof temporaryFakeTemplate !== 'undefined' &&
     (!config.active_engine?.id ||
       (config.active_engine?.id &&
-        typeof projectTemplates[1].mt !== 'undefined')) &&
-    Array.isArray(projectTemplates[1].tm)
+        typeof temporaryFakeTemplate.mt !== 'undefined')) &&
+    Array.isArray(temporaryFakeTemplate.tm)
 
   useEffect(() => {
     if (isFakeCurrentTemplateReady && typeof jobMetadata?.job !== 'undefined') {
