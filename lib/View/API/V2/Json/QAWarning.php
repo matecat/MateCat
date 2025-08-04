@@ -12,7 +12,7 @@ use Utils\LQA\QA;
 
 class QAWarning {
 
-    protected $structure;
+    protected array $structure;
 
     const GLOSSARY_CATEGORY = "GLOSSARY";
     const TAGS_CATEGORY     = "TAGS";
