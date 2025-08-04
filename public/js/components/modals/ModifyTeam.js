@@ -239,8 +239,10 @@ export const ModifyTeam = ({team}) => {
   }
 
   const handleEnterKeyConfirmName = (e) => {
-    e.stopPropagation()
-    saveTeamName()
+    if (e.key === 'Enter') {
+      e.stopPropagation()
+      saveTeamName()
+    }
   }
 
   return (
