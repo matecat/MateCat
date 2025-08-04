@@ -112,6 +112,9 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
             if ( !empty( $filter ) ) {
                 $sortedKeys[] = array_values( $filter )[ 0 ];
             }
+
+            // owner a true solo se sono l'owner del job
+
         }
 
         return $sortedKeys;

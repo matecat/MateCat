@@ -17,6 +17,9 @@ class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      * @return mixed
      */
     public function getValue() {
+
+        $this->value = html_entity_decode($this->value);
+
         if ( Utils::isJson( $this->value ) ) {
             return json_decode( $this->value );
         }

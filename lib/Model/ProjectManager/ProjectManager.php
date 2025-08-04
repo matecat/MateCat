@@ -492,6 +492,15 @@ class ProjectManager {
             );
         }
 
+        // add Lara Glossaries here
+        if ( $this->projectStructure[ 'lara_glossaries' ] and !empty( $this->projectStructure[ 'lara_glossaries' ] ) ) {
+            $dao->set(
+                    $this->projectStructure[ 'id_project' ],
+                    'lara_glossaries',
+                    $this->projectStructure[ 'lara_glossaries' ]
+            );
+        }
+
         // add DeepL params here
         if ( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ) {
             $dao->set(

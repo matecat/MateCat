@@ -243,7 +243,8 @@
   }
 
   .active-table-ModernMT,
-  .active-table-DeepL {
+  .active-table-DeepL,
+  .active-table-Lara {
     .settings-panel-row-extra-content {
       transition: none;
       min-height: unset;
@@ -532,4 +533,8 @@
     align-items: center;
     gap: 5px;
   }
+}
+
+.manage-lara-glossary-button {
+  margin-left: auto;
 }
