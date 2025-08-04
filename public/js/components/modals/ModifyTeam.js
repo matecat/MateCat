@@ -238,6 +238,13 @@ export const ModifyTeam = ({team}) => {
     if (key === 'Enter' && isValidEmails) setTimeout(() => inviteMembers(), 100)
   }
 
+  const handleEnterKeyConfirmName = (e) => {
+    if (e.key === 'Enter') {
+      e.stopPropagation()
+      saveTeamName()
+    }
+  }
+
   return (
     <div className="team-modal" tabIndex={1} onKeyDown={handleEnterKey}>
       <div>
@@ -251,6 +258,7 @@ export const ModifyTeam = ({team}) => {
                 value={teamName}
                 onChange={(e) => setTeamName(e.currentTarget.value)}
                 autoFocus
+                onKeyDown={handleEnterKeyConfirmName}
               />
               <Button
                 type={BUTTON_TYPE.PRIMARY}
