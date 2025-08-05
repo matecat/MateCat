@@ -70,7 +70,7 @@ class Apertium extends AbstractEngine {
         return $this->_composeMTResponseAsMatch( $original[ "text" ], $decoded );
     }
 
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $param_data = json_encode( [
                 "mtsystem" => "apertium",

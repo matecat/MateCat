@@ -218,7 +218,7 @@ class MyMemory extends AbstractEngine {
 
 
     /**
-     * @param $_config
+     * @param array $_config
      *
      * @return GetMemoryResponse
      * @throws AuthenticationError
@@ -227,7 +227,7 @@ class MyMemory extends AbstractEngine {
      * @throws ReQueueException
      * @throws ValidationError
      */
-    public function get( $_config ): GetMemoryResponse {
+    public function get( array $_config ): GetMemoryResponse {
 
         $parameters                = [];
         $parameters[ 'q' ]         = $_config[ 'segment' ];

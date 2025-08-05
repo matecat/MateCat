@@ -65,7 +65,7 @@ class GoogleTranslate extends AbstractEngine {
 
     }
 
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $parameters = [];
 

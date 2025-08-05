@@ -15,9 +15,8 @@ use Model\DataAccess\IDaoStruct;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Projects\MetadataDao;
-use Model\Projects\MetadataStruct;
-use Model\Segments\SegmentNoteDao;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Params;
 
@@ -32,115 +31,115 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     /**
      * @var int
      */
-    public $id_file = null;
+    public int $id_file;
 
     /**
      * @var int
      */
-    public $id_segment = null;
+    public int $id_segment;
 
     /**
      * @var bool
      */
-    public $fromRevision = false;
+    public bool $fromRevision = false;
 
     /**
      * @var string
      */
-    public $segment = "";
+    public string $segment = "";
 
     /**
      * @var string
      */
-    public $translation = "";
+    public string $translation = "";
 
     /**
      * @var string
      */
-    public $oldSegment = "";
+    public string $oldSegment = "";
 
     /**
      * @var string
      */
-    public $oldTranslation = "";
+    public string $oldTranslation = "";
 
     /**
      * @var string
      */
-    public $context_before = "";
+    public string $context_before = "";
 
     /**
      * @var string
      */
-    public $context_after = "";
+    public string $context_after = "";
 
     /**
      * \AppConfig::$MYMEMORY_API_KEY
      * @var string
      */
-    public $api_key = "";
+    public string $api_key = "";
 
     /**
      * @var int
      */
-    public $id_job = null;
+    public int $id_job;
 
     /**
      * @var string
      */
-    public $job_password = "";
+    public string $job_password = "";
 
     /**
      * User login info needed to get information about the tm keys of the job
      * @var int
      */
-    public $uid = 0;
+    public int $uid = 0;
 
     /**
      * @var string
      */
-    public $oldTranslationStatus = TranslationStatus::STATUS_NEW;
+    public string $oldTranslationStatus = TranslationStatus::STATUS_NEW;
 
     /**
      * @var bool
      */
-    public $propagationRequest = true;
+    public bool $propagationRequest = true;
 
     /**
-     * @var array
+     * @var array|string
      */
     public $props = [];
 
     /**
      * @var integer
      */
-    public $id_mt;
+    public int $id_mt;
 
     public bool $contextIsSpice = false;
 
     /**
      * Global Cached record for jobs metadata
      *
-     * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
-     * because we want control the cache eviction from other entrypoints.
+     * WARNING these values are cached only globally and not locally by the "cachable" method (in the running process)
+     * because we want to control the cache eviction from other entrypoints.
      *
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      *
      * @throws ValidationError
      */
-    public function getJobStruct() {
+    public function getJobStruct(): JobStruct {
 
         if ( empty( $this->id_job ) ) {
             throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );
         }
 
-        return $this->cachable( '_contributionJob', $this, function () {
+        return $this->cachable( __METHOD__, function () {
             $JobDao              = new JobDao( Database::obtain() );
             $jobStruct           = new JobStruct();
             $jobStruct->id       = $this->id_job;
             $jobStruct->password = $this->job_password;
 
-            return @$JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];
+            return $JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];
         } );
 
     }
@@ -149,7 +148,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      * @return array
      * @throws ValidationError
      */
-    public function getProp() {
+    public function getProp(): array {
         $jobStruct = $this->getJobStruct();
         $props     = $this->props;
         if ( !is_array( $props ) ) {
@@ -177,10 +176,10 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
             throw new ValidationError( "Property " . get_class( $this ) . "::uid required." );
         }
 
-        return $this->cachable( '_userCredentials', $this, function ( $contributionStruct ) {
-            $userDao              = new \Model\Users\UserDao( Database::obtain() );
-            $userCredentials      = new \Model\Users\UserStruct();
-            $userCredentials->uid = $contributionStruct->uid;
+        return $this->cachable( __METHOD__, function () {
+            $userDao              = new UserDao( Database::obtain() );
+            $userCredentials      = new UserStruct();
+            $userCredentials->uid = $this->uid;
 
             return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
         } );
@@ -189,7 +188,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 
     public function getProject() {
 
-        return $this->cachable( '_projectStruct', $this, function ( $contributionStruct ) {
+        return $this->cachable( __METHOD__, function () {
             $jobStruct = $this->getJobStruct();
 
             return $jobStruct->getProject( 60 * 60 * 24 );
@@ -198,36 +197,14 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     }
 
     /**
-     * Get all project Metadata not related to features
-     *
-     * @return MetadataStruct[]
-     * @throws ValidationError
-     */
-    public function getProjectMetaData() {
-        $jobStruct   = $this->getJobStruct();
-        $projectMeta = array_filter( $jobStruct->getProjectMetadata(), function ( $metadataStruct ) {
-            return $metadataStruct->key != MetadataDao::FEATURES_KEY;
-        } );
-
-        return $projectMeta;
-    }
-
-    public function getSegmentNotes() {
-        return $this->cachable( '_segmentNote', $this, function () {
-            return SegmentNoteDao::getBySegmentId( $this->id_segment );
-        } );
-    }
-
-    /**
      * @return string
      */
-    public function getSessionId() {
+    public function getSessionId(): string {
         return md5( $this->id_file . '-' . $this->id_job . '-' . $this->job_password );
     }
 
     /**
      * @return string
-     * @throws \ReflectionException
      */
     public function __toString() {
         return json_encode( $this->toArray() );

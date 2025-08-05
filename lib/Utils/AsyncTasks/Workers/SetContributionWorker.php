@@ -78,10 +78,6 @@ class SetContributionWorker extends AbstractWorker {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
-        if ( empty( $jobStruct ) ) {
-            throw new Exception( "Job not found. Password changed?" );
-        }
-
         $this->_loadEngine( $jobStruct );
 
         /**

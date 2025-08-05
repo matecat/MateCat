@@ -130,10 +130,10 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getTranslator(): ?JobsTranslatorsStruct {
 
-        $this->_translator = $this->cachable( __METHOD__, $this, function ( JobStruct $jobStruct ) {
+        $this->_translator = $this->cachable( __METHOD__, function () {
             $jTranslatorsDao = new JobsTranslatorsDao();
 
-            return $jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $jobStruct )[ 0 ] ?? null;
+            return $jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $this )[ 0 ] ?? null;
         } );
 
         return $this->_translator;
@@ -146,10 +146,10 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getOutsource(): ?ConfirmationStruct {
 
-        $this->_outsource = $this->cachable( __METHOD__, $this, function ( JobStruct $jobStruct ) {
+        $this->_outsource = $this->cachable( __METHOD__, function () {
             $outsourceDao = new ConfirmationDao();
 
-            return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $jobStruct );
+            return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $this );
         } );
 
         if ( empty( $this->_outsource->id_vendor ) ) {
@@ -180,12 +180,12 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
 
     public function getOpenThreadsCount() {
 
-        $this->_openThreads = $this->cachable( __METHOD__, $this, function ( JobStruct $jobStruct ) {
+        $this->_openThreads = $this->cachable( __METHOD__, function () {
 
             $dao         = new CommentDao();
-            $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $jobStruct->id_project ] ); //ten minutes cache
+            $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $this->id_project ] ); //ten minutes cache
             foreach ( $openThreads as $openThread ) {
-                if ( $openThread->id_job == $jobStruct->id && $openThread->password == $jobStruct->password ) {
+                if ( $openThread->id_job == $this->id && $openThread->password == $this->password ) {
                     return $openThread->count;
                 }
             }
@@ -203,23 +203,23 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      */
     public function getProjectMetadata(): ?array {
 
-        return $this->cachable( __function__, $this, function ( $job ) {
+        return $this->cachable( __METHOD__, function () {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL( 60 * 60 * 24 * 30 )->allByProjectId( $job->id_project );
+            return $mDao->setCacheTTL( 60 * 60 * 24 * 30 )->allByProjectId( $this->id_project );
         } );
 
     }
 
     public function getWarningsCount(): object {
 
-        return $this->cachable( __function__, $this, function ( $jobStruct ) {
+        return $this->cachable( __METHOD__, function () {
             $dao                     = new WarningDao();
-            $warningsCount           = $dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] ) ?? [];
+            $warningsCount           = $dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $this->id_project ] ) ?? [];
             $ret                     = [];
             $ret[ 'warnings_count' ] = 0;
             foreach ( $warningsCount as $count ) {
-                if ( $count->id_job == $jobStruct->id && $count->password == $jobStruct->password ) {
+                if ( $count->id_job == $this->id && $count->password == $this->password ) {
                     $ret[ 'warnings_count' ]   = (int)$count->count;
                     $ret[ 'warning_segments' ] = array_map( function ( $id_segment ) {
                         return (int)$id_segment;
@@ -251,8 +251,8 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @return ProjectStruct
      */
     public function getProject( int $ttl = 86400 ): ProjectStruct {
-        return $this->cachable( __function__, $this, function ( $job ) use ( $ttl ) {
-            return ProjectDao::findById( $job->id_project, $ttl );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            return ProjectDao::findById( $this->id_project, $ttl );
         } );
     }
 
@@ -260,8 +260,8 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
      * @return JobStruct[]
      */
     public function getChunks(): array {
-        return $this->cachable( __METHOD__, $this, function ( $obj ) {
-            return ChunkDao::getByJobID( $obj->id );
+        return $this->cachable( __METHOD__, function () {
+            return ChunkDao::getByJobID( $this->id );
         } );
     }
 
@@ -274,7 +274,7 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct       $user
      * @param                  $role
      *
      * @return array

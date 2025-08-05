@@ -105,13 +105,12 @@ class MMT extends AbstractEngine {
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
      * @return array|TMSAbstractResponse
      * @throws ReflectionException
-     * @throws Exception
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         //This is not really needed because by default in analysis the Engine_MMT is accepted by Match
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {

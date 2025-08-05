@@ -103,7 +103,7 @@ trait Oauth {
     /**
      * @throws Exception
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $cycle = @(int)func_get_arg( 1 );
 

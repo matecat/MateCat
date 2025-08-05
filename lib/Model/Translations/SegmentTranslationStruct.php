@@ -67,8 +67,8 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
      * @return JobStruct|null
      */
     public function getJob(): ?JobStruct {
-        return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return JobDao::getById( $id_job )[ 0 ] ?? null;
+        return $this->cachable( __METHOD__, function () {
+            return JobDao::getById( $this->id_job )[ 0 ] ?? null;
         } );
     }
 
@@ -76,8 +76,8 @@ class SegmentTranslationStruct extends AbstractDaoSilentStruct implements IDaoSt
      * @return JobStruct[]|null
      */
     public function getChunk(): ?JobStruct {
-        return $this->cachable( __FUNCTION__, $this->id_job, function ( $id_job ) {
-            return JobDao::getById( $id_job )[ 0 ] ?? null;
+        return $this->cachable( __METHOD__, function () {
+            return JobDao::getById( $rhis->id_job )[ 0 ] ?? null;
         } );
     }
 

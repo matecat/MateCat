@@ -18,11 +18,11 @@ use Utils\Engines\Results\TMSAbstractResponse;
 interface EngineInterface {
 
     /**
-     * @param $_config
+     * @param array $_config
      *
      * @return TMSAbstractResponse
      */
-    public function get( $_config );
+    public function get( array $_config );
 
     /**
      * @param $_config

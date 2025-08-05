@@ -60,7 +60,7 @@ class DeepL extends AbstractEngine {
      * @inheritDoc
      * @throws Exception
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         try {
             $source = explode( "-", $_config[ 'source' ] );
