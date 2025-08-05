@@ -219,7 +219,13 @@ class TMAnalysisWorker extends AbstractWorker {
                 $queueElement->params->target
         );
         $check->performConsistencyCheck();
-        $suggestion = $check->getTargetSeg();
+
+        if( !$check->thereAreErrors() ){
+            $suggestion = $check->getTrgNormalized();
+        } else {
+            $suggestion = $check->getTargetSeg();
+        }
+
         $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
