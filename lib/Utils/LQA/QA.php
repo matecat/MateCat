@@ -463,7 +463,7 @@ class QA {
 
     protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
-    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1,2})/u'; //&#x1E;  &#xE;
+    protected static $regexpEntity = '/&#x?([0-1]{0,1}[0-9A-F]{1,2})/u'; //&#x1E;  &#xE;
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
@@ -992,9 +992,9 @@ class QA {
             foreach ( $matches[ 1 ] as $v ) {
                 $byte = sprintf( "%02X", hexdec( $v ) );
                 if ( $byte[ 0 ] == '0' ) {
-                    $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
+                    $regexp = '/&#x?([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
                 } else {
-                    $regexp = '/&#x(' . $byte . ');/u';
+                    $regexp = '/&#x?(' . $byte . ');/u';
                 }
 
                 $key = sprintf( "%02X", hexdec( $v ) );
@@ -1124,7 +1124,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return str_replace( self::$emptyHtmlTagsPlaceholder, '', $this->target_seg );
+        return $this->cleanOutputContent( $this->target_seg );
     }
 
     public function getDomMaps() {
@@ -2426,7 +2426,7 @@ class QA {
      * @return bool
      */
     protected
-    function _hasHeadNBSP( $s ) {
+    function _hasHeadNBSP( string $s ) {
         return preg_match( "/^\x{a0}/u", $s );
     }
 
@@ -2437,8 +2437,7 @@ class QA {
      *
      * @return bool
      */
-    protected
-    function _hasTailNBSP( $s ) {
+    protected function _hasTailNBSP( $s ) {
         return preg_match( "/\x{a0}$/u", $s );
     }
 
@@ -2448,8 +2447,7 @@ class QA {
      * @return string
      * @throws LogicException
      */
-    public
-    function getTrgNormalized() {
+    public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
 
@@ -2457,44 +2455,51 @@ class QA {
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-            /**
-             * Remove placeholder from empty HTML tags
-             */
-            $matches[ 1 ] = str_replace( self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ] );
+            return $this->cleanOutputContent( $matches[ 1 ] );
 
-            /**
-             * Why i do this?? I'm replacing Placeholders of non printable chars
-             * this because DomDocument can't handle non printable chars
-             * @see __construct
-             */
-            preg_match_all( self::$regexpPlaceHoldAscii, $matches[ 1 ], $matches_trg );
-            if ( !empty( $matches_trg[ 1 ] ) ) {
-
-                foreach ( $matches_trg[ 1 ] as $v ) {
-                    $matches[ 1 ] = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';', $matches[ 1 ], 1 );
-                }
-//                Log::hexDump($matches[1]);
-            }
-
-            //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'CatUtils', 'htmlentitiesFromUnicode' ], $matches[ 1 ] );
-
-            /*
-             * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
-             * return stripslashes( $matches[1] );
-             */
-
-            // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
-            // re-encode control special characters
-            $matches[ 1 ] = preg_replace( '/\n/u', '&#10;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/\r/u', '&#13;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/\t/u', '&#09;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/ /u', '&#160;', $matches[ 1 ] ); //NBSP character
-
-            return $matches[ 1 ];
         }
 
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison." );
+    }
+
+    private function cleanOutputContent( string $content ): string {
+
+        /**
+         * Remove placeholder from empty HTML tags
+         */
+        $content = str_replace( self::$emptyHtmlTagsPlaceholder, '', $content );
+
+        /**
+         * Why i do this?? I'm replacing Placeholders of non printable chars
+         * this because DomDocument can't handle non printable chars
+         * @see __construct
+         */
+        preg_match_all( self::$regexpPlaceHoldAscii, $content, $matches_trg );
+        if ( !empty( $matches_trg[ 1 ] ) ) {
+
+            foreach ( $matches_trg[ 1 ] as $v ) {
+                $content = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';', $content, 1 );
+            }
+//                Log::hexDump($matches[1]);
+        }
+
+        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
+        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'CatUtils', 'htmlentitiesFromUnicode' ], $content );
+
+        /*
+         * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
+         * return stripslashes( $matches[1] );
+         */
+
+        // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
+        // re-encode control special characters
+        $content = preg_replace( '/\n/u', '&#10;', $content );
+        $content = preg_replace( '/\r/u', '&#13;', $content );
+        $content = preg_replace( '/\t/u', '&#09;', $content );
+        $content = preg_replace( '/ /u', '&#160;', $content ); //NBSP character
+
+        return $content;
+
     }
 
     /**
