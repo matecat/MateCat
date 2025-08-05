@@ -402,7 +402,7 @@ class QA {
 
     protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
-    protected static $regexpEntity = '/&#x?([0-1]{0,1}[0-9A-F]{1,2})/u'; //&#x1E;  &#xE;
+    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1,2})/u'; //&#x1E;  &#xE;
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
@@ -866,8 +866,8 @@ class QA {
          * does not works for not printable chars
          *
          */
-        $source_seg = $this->replaceEntities( $source_seg );
-        $target_seg = $this->replaceEntities( $target_seg );
+        $source_seg = $this->replaceHexEntities( $source_seg );
+        $target_seg = $this->replaceHexEntities( $target_seg );
 
         /**
          * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
@@ -918,35 +918,50 @@ class QA {
     }
 
     /**
-     * @param $seg
+     * Replaces hexadecimal HTML entities in a string with placeholders defined in the static map `self::$asciiPlaceHoldMap`.
      *
-     * @return string|string[]|null
+     * This method processes HTML entities in the input string, converting them into placeholders to ensure compatibility
+     * with XML processing tools like `DOMDocument`.
+     *
+     * @param string $seg The input string containing hexadecimal HTML entities.
+     *
+     * @return string The modified string with HTML entities replaced by placeholders.
      */
-    private function replaceEntities( $seg ) {
+    private function replaceHexEntities( $seg ) {
 
+        // Find all HTML entities in the input string that match the pattern `self::$regexpEntity`.
         preg_match_all( self::$regexpEntity, $seg, $matches );
 
+        // If HTML entities were found, proceed with the replacement.
         if ( !empty( $matches[ 1 ] ) ) {
             $test_src = $seg;
+
+            // Iterate over each found HTML entity.
             foreach ( $matches[ 1 ] as $v ) {
+                // Convert the hexadecimal value of the entity to a two-character hexadecimal string.
                 $byte = sprintf( "%02X", hexdec( $v ) );
+
+                // Build a regular expression to match the exact HTML entity.
                 if ( $byte[ 0 ] == '0' ) {
-                    $regexp = '/&#x?([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
+                    $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
                 } else {
-                    $regexp = '/&#x?(' . $byte . ');/u';
+                    $regexp = '/&#x(' . $byte . ');/u';
                 }
 
+                // Check if the calculated hexadecimal value exists in the map `self::$asciiPlaceHoldMap`.
                 $key = sprintf( "%02X", hexdec( $v ) );
                 if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
+                    // Replace the HTML entity with the corresponding placeholder.
                     $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src );
                 }
 
             }
 
-            //Source Content wrong use placeholded one
+            // Update the original string with the modified version.
             $seg = $test_src;
         }
 
+        // Return the modified string.
         return $seg;
     }
 
