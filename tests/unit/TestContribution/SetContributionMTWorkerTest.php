@@ -93,6 +93,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $this->contributionStruct->fromRevision         = true;
         $this->contributionStruct->id_file              = 1888888;
         $this->contributionStruct->id_job               = 1999999;
+        $this->contributionStruct->id_mt                = 1999999;
         $this->contributionStruct->job_password         = "1d7903464318";
         $this->contributionStruct->id_segment           = 9876;
         $this->contributionStruct->segment              = $this->filter->fromLayer2ToLayer0( '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>' );
@@ -371,7 +372,12 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
+        $contributionMockQueueObject             = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
+        $contributionMockQueueObject->id_job     = 1999999;
+        $contributionMockQueueObject->id_file    = 1999999;
+        $contributionMockQueueObject->id_mt      = 1999999;
+        $contributionMockQueueObject->id_segment = 1999999;
+
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
@@ -432,7 +438,12 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         /**
          * @var $queueElement SetContributionRequest
          */
-        $contributionMockQueueObject = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
+        $contributionMockQueueObject             = @$this->getMockBuilder( SetContributionRequest::class )->getMock();
+        $contributionMockQueueObject->id_job     = 1999999;
+        $contributionMockQueueObject->id_file    = 1999999;
+        $contributionMockQueueObject->id_mt      = 1999999;
+        $contributionMockQueueObject->id_segment = 1999999;
+
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )
                 ->willReturn(
