@@ -12,7 +12,6 @@ class Yaml implements IDto, JsonSerializable {
     private array $inner_content_type      = [];
     private array $context_keys            = [];
     private array $character_limit         = [];
-    private bool  $char_limit_segmentation = false;
 
     /**
      * @param array $translate_keys
@@ -67,13 +66,6 @@ class Yaml implements IDto, JsonSerializable {
     }
 
     /**
-     * @param bool $char_limit_segmentation
-     */
-    public function setCharLimitSegmentation( bool $char_limit_segmentation ): void {
-        $this->char_limit_segmentation = $char_limit_segmentation;
-    }
-
-    /**
      * @param $data
      */
     public function fromArray( $data ) {
@@ -96,10 +88,6 @@ class Yaml implements IDto, JsonSerializable {
         if ( isset( $data[ 'character_limit' ] ) ) {
             $this->setCharacterLimit( $data[ 'character_limit' ] );
         }
-
-        if ( isset( $data[ 'char_limit_segmentation' ] ) ) {
-            $this->setCharLimitSegmentation( $data[ 'char_limit_segmentation' ] );
-        }
     }
 
     /**
@@ -119,7 +107,6 @@ class Yaml implements IDto, JsonSerializable {
         $format['inner_content_type'] = $this->inner_content_type;
         $format['context_keys'] = $this->context_keys;
         $format['character_limit'] = $this->character_limit;
-        $format['char_limit_segmentation'] = $this->char_limit_segmentation;
 
         return $format;
 
