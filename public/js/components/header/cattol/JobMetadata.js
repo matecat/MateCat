@@ -62,8 +62,8 @@ export const JobMetadata = ({metadata}) => {
       const fileInstructions = files.find(
         (file) =>
           file &&
-          file.metadata.instructions &&
-          file.metadata.instructions !== '',
+          ((file.metadata.instructions && file.metadata.instructions !== '') ||
+            typeof file.metadata['mtc:references'] === 'string'),
       )
       if (fileInstructions) {
         setFiles(files)
