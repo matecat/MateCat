@@ -276,7 +276,7 @@ const SegmentActions = {
       !segment.splitted &&
       segment.modified &&
       issues.length === 0 &&
-      segment.ice_locked !== '1'
+      !segment.ice_locked
     ) {
       SegmentActions.openIssuesPanel({sid: segment.sid}, true)
       setTimeout(() => SegmentActions.showIssuesMessage(segment.sid, 1))

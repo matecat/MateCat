@@ -161,7 +161,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
           let segData = {
             saving: false,
             splitted: true,
-            autopropagated_from: '0',
+            autopropagated_from: 0,
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
             readonly: 'false',
@@ -180,12 +180,12 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
               status.toUpperCase() === SEGMENTS_STATUS.APPROVED
                 ? SEGMENTS_STATUS.APPROVED2
                 : status,
-            time_to_edit: '0',
+            time_to_edit: 0,
             originalDecodedTranslation: translation ? translation : '',
             translation: translation ? translation : '',
             decodedTranslation:
               DraftMatecatUtils.transformTagsToText(translation),
-            warning: '0',
+            warning: 0,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
@@ -345,7 +345,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
         from,
       )
     } else {
-      this._segments = this._segments.setIn([index, 'autopropagated_from'], '0')
+      this._segments = this._segments.setIn([index, 'autopropagated_from'], 0)
     }
   },
   replaceTranslation(sid, translation) {
@@ -494,8 +494,8 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     if (
       index > -1 &&
       this._segments.get(index).get('readonly') == 'false' && //not readonly
-      (this._segments.get(index).get('ice_locked') === '0' || //not ice_locked
-        (this._segments.get(index).get('ice_locked') === '1' &&
+      (!this._segments.get(index).get('ice_locked') || //not ice_locked
+        (this._segments.get(index).get('ice_locked') &&
           this._segments.get(index).get('unlocked'))) //unlocked
     ) {
       this._segments = this._segments.setIn([index, 'inBulk'], true)
@@ -511,7 +511,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     this.segmentsInBulk = segmentsArray
     this._segments = this._segments.map((segment) => {
       if (segmentsArray.indexOf(segment.get('sid')) > -1) {
-        if (segment.get('ice_locked') == '1' && !segment.get('unlocked')) {
+        if (segment.get('ice_locked') && !segment.get('unlocked')) {
           let index = segmentsArray.indexOf(segment.get('sid'))
           this.segmentsInBulk.splice(index, 1) // if is a locked segment remove it from bulk
         } else {

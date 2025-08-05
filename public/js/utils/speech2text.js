@@ -174,7 +174,7 @@ const Speech2Text = {
     return (
       segment &&
       !(
-        (segment.autopropagated_from && segment.autopropagated_from != '0') ||
+        (segment.autopropagated_from && segment.autopropagated_from != 0) ||
         segment.suggestion_match === '100' ||
         segment.status !== 'NEW'
       )

@@ -58,7 +58,7 @@ const SegmentUtils = {
   //********** Tag Projection code end ******************/
 
   isIceSegment: function (segment) {
-    return segment.ice_locked === '1'
+    return segment.ice_locked
   },
   isSecondPassLockedSegment: function (segment) {
     return (
@@ -251,7 +251,7 @@ const SegmentUtils = {
       config.project_completion_feature_enabled &&
       !config.isReview &&
       config.job_completion_current_phase === 'revise'
-    return projectCompletionCheck || segment.readonly === 'true'
+    return projectCompletionCheck || segment.readonly
   },
   getRelativeTransUnitCharactersCounter: ({
     sid,

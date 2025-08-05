@@ -23,7 +23,7 @@ class UserController extends AbstractStatefulKleinController {
         if ( empty( $_SESSION[ 'user_profile' ] ) ) {
             $this->response->code( 401 );
         }
-        $this->response->json( $_SESSION[ 'user_profile' ] );
+        $this->response->json( $_SESSION[ 'user_profile' ] ?? [ 'error' => 'Invalid login.' ] );
     }
 
     /**
