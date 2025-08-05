@@ -11,6 +11,9 @@ class JobMetadataModal extends React.Component {
     }
   }
 
+  isMtcReferenceValued = ({metadata}) =>
+    typeof metadata?.['mtc:references'] === 'string'
+
   getMTCReferences({metadata}) {
     const removeNotAllowedLinksFromHtml = (html) => {
       const div = document.createElement('div')
@@ -32,7 +35,7 @@ class JobMetadataModal extends React.Component {
     }
 
     return (
-      typeof metadata?.['mtc:references'] === 'string' && (
+      this.isMtcReferenceValued({metadata}) && (
         <p
           dangerouslySetInnerHTML={{
             __html: `<b>Reference:</b> ${removeNotAllowedLinksFromHtml(filterXSS(metadata['mtc:references']))}`,
@@ -65,7 +68,7 @@ class JobMetadataModal extends React.Component {
 
       return (
         file.metadata &&
-        file.metadata.instructions && (
+        (file.metadata.instructions || this.isMtcReferenceValued(file)) && (
           <Accordion
             key={file.id}
             id={file.id}
@@ -76,11 +79,13 @@ class JobMetadataModal extends React.Component {
           >
             <div className="content">
               <div className="transition">
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: this.getHtml(file.metadata.instructions),
-                  }}
-                ></div>
+                {file.metadata.instructions && (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: this.getHtml(file.metadata.instructions),
+                    }}
+                  ></div>
+                )}
                 {this.getMTCReferences(file)}
               </div>
             </div>
@@ -143,7 +148,10 @@ class JobMetadataModal extends React.Component {
                 </div>
               )}
               {this.props.files &&
-                this.props.files.find((file) => file.metadata.instructions) && (
+                (this.props.files.find((file) => file.metadata.instructions) ||
+                  this.props.files.find((file) =>
+                    this.isMtcReferenceValued(file),
+                  )) && (
                   <div>
                     <h2>File instructions</h2>
                     <div className="ui styled fluid accordion">
