@@ -156,11 +156,6 @@
         "character_limit": {
           "type": "array",
           "nullable": true
-        },
-        "char_limit_segmentation": {
-          "type": "boolean",
-          "nullable": true,
-          "default": false
         }
       },
       "dependencies": {
