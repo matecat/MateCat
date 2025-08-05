@@ -9,7 +9,6 @@
   },
   "yaml": {
     "translate_keys": [],
-    "char_limit_segmentation": false,
     "character_limit": [],
     "context_keys": [],
     "inner_content_type": []

@@ -210,20 +210,6 @@ export const Yaml = () => {
 
       <div className="filters-params-option">
         <div>
-          <h3>Char limit segmentation</h3>
-          <p></p>
-        </div>
-        <Controller
-          control={control}
-          name="char_limit_segmentation"
-          render={({field: {onChange, value, name}}) => (
-            <Switch name={name} active={value} onChange={onChange} />
-          )}
-        />
-      </div>
-
-      <div className="filters-params-option">
-        <div>
           <h3>Translatable text content type</h3>
           <p>
             Select the content type of the translatable text to optimize
