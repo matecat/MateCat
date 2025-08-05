@@ -110,6 +110,9 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
+        $contributionStruct->id_file              = 1999999;
+        $contributionStruct->id_mt                = 1999999;
+        $contributionStruct->id_segment           = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
@@ -147,6 +150,9 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct                       = new SetContributionRequest();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
+        $contributionStruct->id_file              = 1999999;
+        $contributionStruct->id_mt                = 1999999;
+        $contributionStruct->id_segment           = 1999999;
         $contributionStruct->job_password         = "1d7903464318";
         $contributionStruct->api_key              = AppConfig::$MYMEMORY_API_KEY;
         $contributionStruct->uid                  = 1234;
