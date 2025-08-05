@@ -252,7 +252,7 @@ class Segment extends React.Component {
     }
     if (
       this.props.segment.modified ||
-      this.props.segment.autopropagated_from !== '0'
+      this.props.segment.autopropagated_from !== 0
     ) {
       classes.push('modified')
     }
@@ -392,7 +392,7 @@ class Segment extends React.Component {
       ((this.props.sideOpen &&
         (!this.props.segment.opened || !this.props.segment.openIssues)) ||
         !this.props.sideOpen) &&
-      !(this.props.segment.readonly === 'true') &&
+      !this.props.segment.readonly &&
       (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
       this.props.segment.sid
     ) {
@@ -788,7 +788,7 @@ class Segment extends React.Component {
               />
             </div>
 
-            {this.props.segment.ice_locked !== '1' &&
+            {!this.props.segment.ice_locked &&
             config.splitSegmentEnabled &&
             this.props.segment.opened ? (
               !this.props.segment.openSplit ? (
