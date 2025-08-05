@@ -82,7 +82,7 @@ class YandexTranslate extends AbstractEngine {
     /**
      * @throws Exception
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );

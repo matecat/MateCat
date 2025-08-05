@@ -144,14 +144,14 @@ class Lara extends AbstractEngine {
     /**
      * @inheritDoc
      *
-     * @param $_config
+     * @param array $_config
      *
      * @return array|TMSAbstractResponse
      * @throws ReflectionException
      * @throws LaraException
      * @throws Exception
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $tm_keys           = TmKeyManager::getOwnerKeys( [ $_config[ 'all_job_tm_keys' ] ?? '[]' ], 'r' );
         $_config[ 'keys' ] = array_map( function ( $tm_key ) {

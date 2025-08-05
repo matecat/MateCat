@@ -2,10 +2,15 @@
 
 namespace Utils\Engines;
 
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 /**
  * Created by PhpStorm.
@@ -72,12 +77,16 @@ class Altlang extends AbstractEngine {
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
      * @return array|TMSAbstractResponse|void
-     * @throws Exception
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         // Fallback on Match in case of not supported source/target combination
         if ( !$this->checkLanguageCombination( $_config[ 'source' ], $_config[ 'target' ] ) ) {

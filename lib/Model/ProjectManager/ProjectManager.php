@@ -2809,14 +2809,20 @@ class ProjectManager {
                 $check->setIdSegment( $translation_row [ 0 ] );
                 $check->performConsistencyCheck();
 
+                if( !$check->thereAreErrors() ){
+                    $translation = $check->getTrgNormalized();
+                } else {
+                    $translation = $check->getTargetSeg();
+                }
+
                 /* WARNING: do not change the order of the keys */
                 $sql_values = [
                         'id_segment'             => $translation_row [ 0 ],
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
                         'status'                 => $rule->asEditorStatus(),
-                        'translation'            => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
-                        'suggestion'             => $filter->fromLayer1ToLayer0( $check->getTargetSeg() ),
+                        'translation'            => $filter->fromLayer1ToLayer0( $translation ),
+                        'suggestion'             => $filter->fromLayer1ToLayer0( $translation ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
                         'eq_word_count'          => $rule->asEquivalentWordCount( $segment->raw_word_count, $payable_rates ),

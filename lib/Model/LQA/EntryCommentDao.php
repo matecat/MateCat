@@ -8,12 +8,12 @@ use PDO;
 
 class EntryCommentDao extends AbstractDao {
 
-    public function findByIssueId( $id_issue ) {
+    public function findByIssueId( $id_issue ): array {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
                 " ORDER BY create_date DESC ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, EntryCommentStruct::class );
         $stmt->execute( [ $id_issue ] );
 
         return $stmt->fetchAll();
@@ -23,7 +23,6 @@ class EntryCommentDao extends AbstractDao {
      * @param $data
      *
      * @return mixed
-     * @throws \ReflectionException
      */
     public function createComment( $data ) {
         $struct              = new EntryCommentStruct( $data );
@@ -39,7 +38,7 @@ class EntryCommentDao extends AbstractDao {
         Database::obtain()->begin();
 
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, EntryCommentStruct::class );
         $result = $stmt->execute( $struct->toArray(
                 [ 'uid', 'id_qa_entry', 'create_date', 'comment', 'source_page' ]
         ) );
@@ -59,7 +58,7 @@ class EntryCommentDao extends AbstractDao {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id = ? ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, EntryCommentStruct::class );
         $stmt->execute( [ $id ] );
 
         return $stmt->fetch();

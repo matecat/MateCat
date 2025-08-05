@@ -57,8 +57,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return JobStruct[]
      */
     public function getJobs( int $ttl = 0 ): array {
-        return $this->cachable( __function__, $this->id, function ( $id ) use ( $ttl ) {
-            return JobDao::getByProjectId( $id, $ttl );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            return JobDao::getByProjectId( $this->id, $ttl );
         } );
     }
 
@@ -110,10 +110,10 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return null|MetadataStruct[]
      */
     public function getMetadata(): array {
-        return $this->cachable( __function__, $this, function ( $project ) {
+        return $this->cachable( __METHOD__, function () {
             $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
+            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $this->id );
         } );
     }
 
@@ -122,11 +122,11 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      */
     public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct {
 
-        return $this->cachable( __function__, $this, function () {
+        return $this->cachable( __METHOD__, function () {
 
             $dao = new ProjectDao();
 
-            /** @var \Model\RemoteFiles\RemoteFileServiceNameStruct[] */
+            /** @var RemoteFileServiceNameStruct[] */
             return $dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[ 0 ] ?? null;
 
         } );
@@ -157,12 +157,12 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
     }
 
     /**
-     * @return \Model\FeaturesBase\FeatureSet
+     * @return FeatureSet
      */
     public function getFeaturesSet(): FeatureSet {
-        return $this->cachable( __METHOD__, $this, function ( ProjectStruct $project ) {
+        return $this->cachable( __METHOD__, function () {
             $featureSet = new FeatureSet();
-            $featureSet->loadForProject( $project );
+            $featureSet->loadForProject( $this );
 
             return $featureSet;
         } );
@@ -174,7 +174,7 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return JobStruct[]
      */
     public function getChunks( int $ttl = 0 ): array {
-        return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
             $dao = new ChunkDao( Database::obtain() );
 
             return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
@@ -185,13 +185,16 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return string
      */
     public function getWordCountType(): string {
-        return $this->cachable( __METHOD__, $this->getMetadataValue( MetadataDao::WORD_COUNT_TYPE_KEY ), function ( $type ) {
-            if ( $type == null ) {
-                return MetadataDao::WORD_COUNT_EQUIVALENT;
-            } else {
-                return $type;
-            }
-        } );
+
+        //this method is already cached internally by the MetadataDao.
+        // we can avoid using the cachable method here
+        $type = $this->getMetadataValue( MetadataDao::WORD_COUNT_TYPE_KEY );
+
+        if ( $type == null ) {
+            return MetadataDao::WORD_COUNT_EQUIVALENT;
+        } else {
+            return $type;
+        }
     }
 
     /**
@@ -200,8 +203,8 @@ class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, Array
      * @return ?ModelStruct
      */
     public function getLqaModel( $ttl = 86400 ): ?ModelStruct {
-        return $this->cachable( __METHOD__, $this->id_qa_model, function ( $id_qa_model ) use ( $ttl ) {
-            return ModelDao::findById( $id_qa_model, $ttl );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            return ModelDao::findById( $this->id_qa_model, $ttl );
         } );
     }
 

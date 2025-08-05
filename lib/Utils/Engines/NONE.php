@@ -13,7 +13,7 @@ use Utils\Engines\Results\MyMemory\GetMemoryResponse;
  */
 class NONE extends AbstractEngine {
 
-    public function get( $_config ) {
+    public function get( array $_config ) {
         return new GetMemoryResponse( [ 'responseStatus' => 200, 'responseData' => [] ] );
     }
 
