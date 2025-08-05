@@ -18,7 +18,7 @@ class QAGlobalWarning extends QAWarning {
     protected array $tagIssues;
     protected array $translationMismatches;
 
-    protected $structure;
+    protected array $structure;
 
     /**
      * QAGlobalWarning constructor.

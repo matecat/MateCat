@@ -615,7 +615,7 @@ class SegmentDao extends AbstractDao {
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
                 sod.map AS data_ref_map,
-                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 0, 1 ) AS readonly
                 , COALESCE( autopropagated_from, 0 ) as autopropagated_from
                 ,( SELECT COUNT( segment_hash )
                           FROM segment_translations
