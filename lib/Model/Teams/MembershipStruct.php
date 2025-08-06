@@ -22,7 +22,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     public bool $is_admin;
 
     /**
-     * @var \Model\Users\UserStruct|null
+     * @var UserStruct|null
      */
     private ?UserStruct $user = null;
 
@@ -58,7 +58,7 @@ class MembershipStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @return \Model\Users\UserStruct|null
+     * @return UserStruct|null
      * @throws ReflectionException
      */
     public function getUser(): UserStruct {

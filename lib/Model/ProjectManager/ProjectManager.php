@@ -1393,7 +1393,7 @@ class ProjectManager {
                     $newTmKey->tm              = true;
                     $newTmKey->glos            = true;
                     $newTmKey->owner           = true;
-                    $newTmKey->penalty         = $tmKeyObj[ 'penalty' ] ?? null;
+                    $newTmKey->penalty         = $tmKeyObj[ 'penalty' ] ?? 0;
                     $newTmKey->name            = $tmKeyObj[ 'name' ];
                     $newTmKey->key             = $tmKeyObj[ 'key' ];
                     $newTmKey->r               = $tmKeyObj[ 'r' ];

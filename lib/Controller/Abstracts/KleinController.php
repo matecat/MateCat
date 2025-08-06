@@ -120,7 +120,7 @@ abstract class KleinController implements IController {
      */
     public function refreshClientSessionIfNotApi() {
         if ( empty( $this->api_key ) ) {
-            Bootstrap::sessionStart();
+            static::sessionStart();
             AuthenticationHelper::refreshSession( $_SESSION );
         }
     }
