@@ -909,31 +909,31 @@ class CatUtils {
 
         $extraction_parameters = null;
 
-        if($filtersTemplateId > 0){
-            $filtersTemplateStruct = FiltersConfigTemplateDao::getById($filtersTemplateId);
+        if ( $filtersTemplateId > 0 ) {
+            $filtersTemplateStruct = FiltersConfigTemplateDao::getById( $filtersTemplateId );
 
-            if($filtersTemplateStruct !== null){
-                $extraction_parameters = self::getRightExtractionParameter($file_path, $filtersTemplateStruct);
+            if ( $filtersTemplateStruct !== null ) {
+                $extraction_parameters = self::getRightExtractionParameter( $file_path, $filtersTemplateStruct );
             }
         }
 
         $segmentationRule = Constants::validateSegmentationRules( $segmentationRule );
 
         $hash_name_for_disk =
-            sha1_file( $file_path )
-            . "_" .
-            sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
-            . "|" .
-            $source;
+                sha1_file( $file_path )
+                . "_" .
+                sha1( ( $segmentationRule ?? '' ) . ( $extraction_parameters ? json_encode( $extraction_parameters ) : '' ) )
+                . "|" .
+                $source;
 
         if ( !$hash_name_for_disk ) {
             return;
         }
 
-        $path_parts = pathinfo($file_path);
-        $hash_file_path = $path_parts['dirname'] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
+        $path_parts     = pathinfo( $file_path );
+        $hash_file_path = $path_parts[ 'dirname' ] . DIRECTORY_SEPARATOR . $hash_name_for_disk;
 
-        if(!file_exists($hash_file_path)){
+        if ( !file_exists( $hash_file_path ) ) {
             return;
         }
 
@@ -985,14 +985,15 @@ class CatUtils {
     }
 
     /**
-     * @param string $filePath
+     * @param string                      $filePath
      * @param FiltersConfigTemplateStruct $filters_extraction_parameters
+     *
      * @return IDto|null
      */
     private static function getRightExtractionParameter( string $filePath, FiltersConfigTemplateStruct $filters_extraction_parameters ): ?IDto {
 
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
-        $params = null;
+        $params    = null;
 
         if ( $filters_extraction_parameters !== null ) {
 
@@ -1042,6 +1043,32 @@ class CatUtils {
         }
 
         return $params;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return bool
+     */
+    public static function validateProjectName( $name ): bool {
+        $validName = self::filter_string_polyfill( $name );
+        $validName = html_entity_decode( $validName );
+
+        return $validName === $name;
+    }
+
+    /**
+     * This method can be use as polyfill of FILTER_SANITIZE_STRING,
+     * which is DEPRECATED in PHP >= 8.1
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function filter_string_polyfill( string $string ): string {
+        $str = preg_replace( '/\x00|<[^>]*>?/', '', $string );
+
+        return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
     }
 }
 
