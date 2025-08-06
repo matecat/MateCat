@@ -303,7 +303,6 @@ class Bootstrap {
     }
 
     private function setErrorReporting() {
-        ini_set( 'display_errors', false );
         if ( AppConfig::$PRINT_ERRORS || stripos( AppConfig::$ENV, 'develop' ) !== false ) {
             ini_set( 'error_log', AppConfig::$STORAGE_DIR . "/log_archive/php_errors.txt" );
             ini_set( 'error_reporting', E_ALL );

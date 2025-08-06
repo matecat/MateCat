@@ -2,6 +2,7 @@
 
 namespace Utils\OutsourceTo;
 
+use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
 
 use Model\Analysis\Status;
@@ -132,7 +133,7 @@ class Translated extends AbstractProvider {
 
         parent::__construct();
 
-        Bootstrap::sessionStart();
+        SessionStarter::sessionStart();
 
         $this->currency = "EUR";
 

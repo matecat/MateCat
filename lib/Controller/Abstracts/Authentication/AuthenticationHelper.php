@@ -28,9 +28,9 @@ class AuthenticationHelper {
     /**
      * @var true
      */
-    private bool          $logged;
-    private ?ApiKeyStruct $api_record = null;
-    private array         $session;
+    private bool                         $logged;
+    private ?ApiKeyStruct                $api_record = null;
+    private array                        $session;
     private static ?AuthenticationHelper $instance   = null;
 
     /**
@@ -81,7 +81,8 @@ class AuthenticationHelper {
 
             }
         } catch ( Throwable $ignore ) {
-            Log::doJsonLog( $ignore );
+            Log::setLogFileName( 'login_exceptions.txt' );
+            Log::doJsonLog( [ $ignore, $ignore->getTraceAsString(), 'session' => $this->session, 'api_key' => $api_key, 'api_secret' => $api_secret, 'cookie' => AuthCookie::getCredentials()[ 'user' ] ?? null ] );
         } finally {
             $this->logged = $this->user->isLogged();
         }
@@ -89,7 +90,7 @@ class AuthenticationHelper {
     }
 
     /**
-     * @throws ReflectionException
+     * @param array $session
      */
     public static function refreshSession( array &$session ) {
         unset( $session[ 'user' ] );
