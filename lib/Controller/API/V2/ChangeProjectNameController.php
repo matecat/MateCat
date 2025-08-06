@@ -5,7 +5,9 @@ namespace API\V2;
 use API\Commons\Validators\LoginValidator;
 use API\Commons\Validators\ProjectAccessValidator;
 use API\Commons\Validators\ProjectPasswordValidator;
+use CatUtils;
 use Exception;
+use InvalidArgumentException;
 use Projects_ProjectDao;
 use Projects_ProjectStruct;
 use Teams\MembershipDao;
@@ -27,35 +29,40 @@ class ChangeProjectNameController extends ChunkController
 
     public function changeName()
     {
-        $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT );
-        $password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-        $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-
-        if(
-            empty($id) or
-            empty($password)
-        ){
-            $code = 400;
-            $this->response->status()->setCode( $code );
-            $this->response->json( [
-                'error' => 'Missing required parameters [`id `, `password`]'
-            ] );
-            exit();
-        }
-
-        $name = Utils::sanitizeName($name);
-
-        if ( empty($name) ) {
-            $code = 400;
-            $this->response->status()->setCode( $code );
-            $this->response->json( [
-                'error' => 'Missing required parameters [`name`]'
-            ] );
-            exit();
-        }
-
         try {
+            $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT );
+            $password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
+            $name     = CatUtils::validateProjectName($this->request->param('name') );
+
+            if($name === false){
+                throw new InvalidArgumentException( $this->request->param('name') . " is not a valid project name", -3 );
+            }
+
+            if(
+                empty($id) or
+                empty($password)
+            ){
+                $code = 400;
+                $this->response->status()->setCode( $code );
+                $this->response->json( [
+                        'error' => 'Missing required parameters [`id `, `password`]'
+                ] );
+                exit();
+            }
+
+            $name = Utils::sanitizeName($name);
+
+            if ( empty($name) ) {
+                $code = 400;
+                $this->response->status()->setCode( $code );
+                $this->response->json( [
+                        'error' => 'Missing required parameters [`name`]'
+                ] );
+                exit();
+            }
+
             $this->validator->validate();
+
             ( new ProjectAccessValidator( $this, $this->validator->getProject() ) )->validate();
             $ownerEmail = $this->validator->getProject()->id_customer;
 
