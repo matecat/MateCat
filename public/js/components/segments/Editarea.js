@@ -152,11 +152,9 @@ class Editarea extends React.Component {
         'x',
       ])
     } else {
-      const cleanTagsTranslation =
-        DraftMatecatUtils.decodePlaceholdersToPlainText(
-          DraftMatecatUtils.removeTagsFromText(translation),
-        )
-      return cleanTagsTranslation
+      return DraftMatecatUtils.decodePlaceholdersToPlainText(
+        DraftMatecatUtils.removeTagsFromText(translation),
+      )
     }
   }
 
