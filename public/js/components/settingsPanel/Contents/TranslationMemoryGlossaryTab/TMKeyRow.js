@@ -161,6 +161,29 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const updateKeyName = () => {
+    const isAlreadyUsed = tmKeys
+      .filter((tm) => tm.id !== row.id)
+      .some((tm) => tm.name === name)
+
+    if (isAlreadyUsed) {
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      })
+
+      setTmKeys((prevState) =>
+        prevState.map((tm) =>
+          tm.id === row.id ? {...tm, name: valueName.current} : tm,
+        ),
+      )
+      setName(valueName.current)
+      return
+    }
+
     if (valueChange.current) {
       if (name.trim() !== '') {
         updateTmKey({
@@ -459,7 +482,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         Add penalty
       </Button>
     )
-  console.log(isLookup)
+
   return (
     <Fragment>
       <div className="tm-key-lookup align-center">
