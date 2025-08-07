@@ -466,7 +466,7 @@ class ProjectManager {
          */
         $this->features->loadProjectDependenciesFromProjectMetadata( $options );
 
-        if ( isset( $this->projectStructure[ 'filters_extraction_parameters' ] ) and $this->projectStructure[ 'filters_extraction_parameters' ] ) {
+        if ( isset( $this->projectStructure[ 'filters_extraction_parameters' ] ) && $this->projectStructure[ 'filters_extraction_parameters' ] ) {
             $options[ 'filters_extraction_parameters' ] = json_encode( $this->projectStructure[ 'filters_extraction_parameters' ] );
         }
 
@@ -485,7 +485,7 @@ class ProjectManager {
         }
 
         // add MMT Glossaries here
-        if ( $this->projectStructure[ 'mmt_glossaries' ] and !empty( $this->projectStructure[ 'mmt_glossaries' ] ) ) {
+        if ( !empty( $this->projectStructure[ 'mmt_glossaries' ] ) && $this->projectStructure[ 'mmt_glossaries' ] ) {
             $dao->set(
                     $this->projectStructure[ 'id_project' ],
                     'mmt_glossaries',
@@ -494,7 +494,7 @@ class ProjectManager {
         }
 
         // add Lara Glossaries here
-        if ( $this->projectStructure[ 'lara_glossaries' ] and !empty( $this->projectStructure[ 'lara_glossaries' ] ) ) {
+        if ( !empty( $this->projectStructure[ 'lara_glossaries' ] ) && $this->projectStructure[ 'lara_glossaries' ] ) {
             $dao->set(
                     $this->projectStructure[ 'id_project' ],
                     'lara_glossaries',
@@ -503,7 +503,7 @@ class ProjectManager {
         }
 
         // add DeepL params here
-        if ( $this->projectStructure[ 'deepl_formality' ] and !empty( $this->projectStructure[ 'deepl_formality' ] ) ) {
+        if ( !empty( $this->projectStructure[ 'deepl_formality' ] ) && $this->projectStructure[ 'deepl_formality' ] ) {
             $dao->set(
                     $this->projectStructure[ 'id_project' ],
                     'deepl_formality',
@@ -511,7 +511,7 @@ class ProjectManager {
             );
         }
 
-        if ( $this->projectStructure[ 'deepl_id_glossary' ] and !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) ) {
+        if ( !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) && $this->projectStructure[ 'deepl_id_glossary' ] ) {
             $dao->set(
                     $this->projectStructure[ 'id_project' ],
                     'deepl_id_glossary',
