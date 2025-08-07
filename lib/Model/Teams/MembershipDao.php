@@ -229,6 +229,7 @@ class MembershipDao extends AbstractDao {
 
         $this->destroyCacheForListByTeamId( $teamId );
         $this->destroyCacheUserTeams( $user );
+        $this->destroyCacheTeamByIdAndUser( $teamId, $user );
         if ( $stmt->rowCount() ) {
             return $user;
         } else {
@@ -283,6 +284,7 @@ class MembershipDao extends AbstractDao {
                 $membersList[] = $membershipStruct;
 
                 $this->destroyCacheUserTeams( $user );
+                $this->destroyCacheTeamByIdAndUser( $teamStruct->id, $user );
             }
         }
 

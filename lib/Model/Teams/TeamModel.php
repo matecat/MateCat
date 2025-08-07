@@ -32,7 +32,7 @@ class TeamModel {
     /**
      * @var MembershipStruct[]
      */
-    protected array $new_memberships;
+    protected array $new_memberships = [];
 
     /**
      * @var array
