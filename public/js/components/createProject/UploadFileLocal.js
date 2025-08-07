@@ -342,7 +342,7 @@ function UploadFileLocal() {
     )
 
     files.forEach((f) => {
-      if (f.uploaded && !f.error) {
+      if (f.uploaded && !f.error && !f.zipFolder) {
         const interval = startConvertFakeProgress(f.file)
         filesInterval.current.push(interval)
         convertFileRequest({
@@ -360,22 +360,54 @@ function UploadFileLocal() {
                 filters_extraction_parameters_template_id:
                   extractionParameterTemplateId,
               }),
-        }).then(({data, errors, warnings}) => {
-          clearInterval(interval)
-          setFiles((prevFiles) =>
-            prevFiles.map((file) =>
-              file.file === f.file
-                ? {
-                    ...file,
-                    convertedProgress: 100,
-                    converted: true,
-                    warning: warnings ? warnings[0].message : null,
-                  }
-                : file,
-            ),
-          )
-          CreateProjectActions.enableAnalyzeButton(true)
         })
+          .then(({data, warnings}) => {
+            clearInterval(interval)
+            setFiles((prevFiles) =>
+              prevFiles.map((file) =>
+                file.file === f.file
+                  ? {
+                      ...file,
+                      convertedProgress: 100,
+                      converted: true,
+                      warning: warnings ? warnings[0].message : null,
+                    }
+                  : file,
+              ),
+            )
+            if (data.data.zipFiles) {
+              data.data.zipFiles.forEach((zipFile) => {
+                setFiles((prevFiles) =>
+                  prevFiles.map((file) =>
+                    zipFile.name === file.name
+                      ? {
+                          ...file,
+                          convertedProgress: 100,
+                          converted: true,
+                        }
+                      : file,
+                  ),
+                )
+              })
+            }
+            CreateProjectActions.enableAnalyzeButton(true)
+          })
+          .catch((errors) => {
+            clearInterval(interval)
+            setFiles((prevFiles) =>
+              prevFiles.map((file) =>
+                file.file === f.file
+                  ? {
+                      ...file,
+                      uploaded: false,
+                      error: errors?.length
+                        ? errors[0].message
+                        : 'Server error, try again.',
+                    }
+                  : file,
+              ),
+            )
+          })
       }
     })
   }
