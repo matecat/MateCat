@@ -8,7 +8,7 @@ import Cookies from 'js-cookie'
 export const getSocketAuthToken = async () => {
   const tokenResponse = await fetch('/api/app/user/login/socket')
   if (tokenResponse.ok) {
-    return Promise.resolve({ok: true, token: Cookies.get('xsrf-token')})
+    return Promise.resolve({ok: true, token: tokenResponse.headers.get('xsrf-token')})
   } else {
     return Promise.reject(tokenResponse)
   }

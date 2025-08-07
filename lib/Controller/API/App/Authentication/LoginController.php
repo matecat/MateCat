@@ -11,7 +11,6 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
-use Controller\Abstracts\Authentication\CookieManager;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
@@ -76,14 +75,6 @@ class LoginController extends AbstractStatefulKleinController {
             return;
         }
 
-        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, '',
-                [
-                        'expires' => 0,
-                        'path'    => '/',
-                        'domain'  => AppConfig::$COOKIE_DOMAIN
-                ]
-        );
-
         $dao  = new UserDao();
         $user = $dao->getByEmail( $params[ 'email' ] );
 
@@ -117,18 +108,7 @@ class LoginController extends AbstractStatefulKleinController {
     public function token() {
         $jwt = new SimpleJWT( [ "csrf" => Utils::uuid4() ] );
         $jwt->setTimeToLive( 60 );
-
-        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
-                [
-                        'expires'  => time() + 60, /* now + 60 seconds */
-                        'path'     => '/',
-                        'domain'   => AppConfig::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => false,
-                        'samesite' => 'Strict',
-                ]
-        );
-
+        $this->response->header( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize() );
         $this->response->code( 200 );
     }
 
@@ -146,18 +126,7 @@ class LoginController extends AbstractStatefulKleinController {
 
         $jwt = new SimpleJWT( [ "uid" => $_SESSION[ 'user' ]->uid ] );
         $jwt->setTimeToLive( 60 );
-
-        CookieManager::setCookie( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize(),
-                [
-                        'expires'  => time() + 60, /* now + 60 seconds */
-                        'path'     => '/',
-                        'domain'   => AppConfig::$COOKIE_DOMAIN,
-                        'secure'   => true,
-                        'httponly' => false,
-                        'samesite' => 'Strict',
-                ]
-        );
-
+        $this->response->header( AppConfig::$XSRF_TOKEN, $jwt->jsonSerialize() );
         $this->response->code( 200 );
     }
 
