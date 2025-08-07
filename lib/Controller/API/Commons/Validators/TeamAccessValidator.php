@@ -13,6 +13,7 @@ namespace Controller\API\Commons\Validators;
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Model\Teams\MembershipDao;
 use Model\Teams\TeamStruct;
+use Utils\Constants\Teams;
 
 class TeamAccessValidator extends Base {
 
@@ -27,7 +28,7 @@ class TeamAccessValidator extends Base {
         $id_team = $this->request->param( 'id_team' );
         $name    = ( !empty( $this->request->param( 'team_name' ) ) ) ? base64_decode( $this->request->param( 'team_name' ) ) : null;
 
-        if ( $name !== null and $name !== 'Personal' ) {
+        if ( $name !== null and strtolower( $name ) !== Teams::PERSONAL ) {
             $this->team = ( new MembershipDao() )->setCacheTTL( 60 * 10 )->findTeamByIdAndName(
                     $id_team,
                     $name
