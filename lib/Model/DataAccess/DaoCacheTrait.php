@@ -143,18 +143,18 @@ trait DaoCacheTrait {
     /**
      * Destroy a single element in the hash set
      *
-     * @param string $reverseKeyMap
+     * @param string $keyMap
      * @param string $keyElementName
      *
      * @return bool|int
      * @throws ReflectionException
      */
-    protected function _removeObjectCacheMapElement( string $reverseKeyMap, string $keyElementName ) {
+    protected function _removeObjectCacheMapElement( string $keyMap, string $keyElementName ): bool {
         $this->_cacheSetConnection();
         if ( isset( self::$cache_con ) && !empty( self::$cache_con ) ) {
-            $keyMap = self::$cache_con->get( $reverseKeyMap );
+            self::$cache_con->del( md5( $keyElementName ) );
 
-            return self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] ); // let the hashset expire by himself instead of calling HLEN and DEL
+            return (bool)self::$cache_con->hdel( $keyMap, [ md5( $keyElementName ) ] ); // let the hashset expire by himself instead of calling HLEN and DEL
         }
 
         return false;
