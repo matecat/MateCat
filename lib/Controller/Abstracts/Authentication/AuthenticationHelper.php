@@ -63,15 +63,15 @@ class AuthenticationHelper {
 
             if ( $this->validKeys( $api_key, $api_secret ) ) {
                 $this->user = $this->api_record->getUser();
-            } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) {
+            } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) { // Credentials from session, still active and valid
                 $this->user = $this->session[ 'user' ]; // php deserialize this from session string
-                AuthCookie::setCredentials( $this->user ); //realign and revamp cookie
+                AuthCookie::setCredentials( $this->user, new SessionTokenRingHandler(), true ); //possibly revamp cookie
             } else {
                 // Credentials from AuthCookie
                 /**
                  * @var $user UserStruct
                  */
-                $user_cookie_credentials = AuthCookie::getCredentials();
+                $user_cookie_credentials = AuthCookie::getCredentials( new SessionTokenRingHandler() );
                 if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
                     $userDao = new UserDao();
                     $userDao->setCacheTTL( 60 * 60 * 24 );
@@ -82,7 +82,10 @@ class AuthenticationHelper {
             }
         } catch ( Throwable $ignore ) {
             Log::setLogFileName( 'login_exceptions.txt' );
-            Log::doJsonLog( [ $ignore, $ignore->getTraceAsString(), 'session' => $this->session, 'api_key' => $api_key, 'api_secret' => $api_secret, 'cookie' => AuthCookie::getCredentials()[ 'user' ] ?? null ] );
+            try {
+                Log::doJsonLog( [ $ignore, $ignore->getTraceAsString(), 'session' => $this->session, 'api_key' => $api_key, 'api_secret' => $api_secret, 'cookie' => AuthCookie::getCredentials()[ 'user' ] ?? null ] );
+            } catch ( ReflectionException $ignore ) {
+            }
         } finally {
             $this->logged = $this->user->isLogged();
         }
@@ -98,10 +101,13 @@ class AuthenticationHelper {
         self::$instance = new AuthenticationHelper( $session );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public static function destroyAuthentication( array &$session ) {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
-        AuthCookie::destroyAuthentication();
+        AuthCookie::destroyAuthentication( new SessionTokenRingHandler() );
     }
 
     /**

@@ -11,6 +11,7 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\SessionTokenRingHandler;
 use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
@@ -88,7 +89,7 @@ class LoginController extends AbstractStatefulKleinController {
             $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem();
 
-            AuthCookie::setCredentials( $user );
+            AuthCookie::setCredentials( $user, new SessionTokenRingHandler() );
             AuthenticationHelper::getInstance( $_SESSION );
 
             $this->response->code( 200 );

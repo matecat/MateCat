@@ -82,6 +82,9 @@ trait AuthenticationTrait {
         return $this->user;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function broadcastLogout() {
         $this->logout();
         $queueHandler = new AMQHandler();
@@ -97,6 +100,9 @@ trait AuthenticationTrait {
         $queueHandler->publishToNodeJsClients( AppConfig::$SOCKET_NOTIFICATIONS_QUEUE_NAME, new Message( $message ) );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function logout() {
         AuthenticationHelper::destroyAuthentication( $_SESSION );
     }
