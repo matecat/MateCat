@@ -77,6 +77,14 @@ class ConversionHandler {
         $this->result->setFileName( ZipArchiveHandler::getFileName( AbstractFilesStorage::basename_fix( $this->file_name ) ), $isZipContent );
 
         if ( !file_exists( $file_path ) ) {
+
+            if($_POST['file_name'] !== $this->file_name){
+                $this->result->setErrorCode( ConversionHandlerStatus::UPLOAD_ERROR );
+                $this->result->setErrorMessage( "Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>." );
+
+                return;
+            }
+
             $this->result->setErrorCode( ConversionHandlerStatus::UPLOAD_ERROR );
             $this->result->setErrorMessage( "Error during upload. Please retry." );
 
