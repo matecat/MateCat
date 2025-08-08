@@ -128,7 +128,7 @@ class AuthCookie {
                 ],
         ] );
 
-        $JWT->setTimeToLive( 15 /* AppConfig::$AUTHCOOKIEDURATION */ );
+        $JWT->setTimeToLive( AppConfig::$AUTHCOOKIEDURATION );
 
         return [ $JWT->jsonSerialize(), $JWT->getExpireDate() ];
     }
