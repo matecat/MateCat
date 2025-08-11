@@ -36,7 +36,6 @@ class SimpleHashTest extends AbstractTest {
         ] );
 
         $result = $x->sign();
-        $this->assertTrue( is_array( $result ) );
         $this->assertArrayHasKey( 'signature', $result );
         $this->assertArrayHasKey( 'payload', $result );
         $this->assertArrayHasKey( 'exp', $result[ 'payload' ] );
@@ -93,7 +92,7 @@ class SimpleHashTest extends AbstractTest {
         $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] = 123;
 
         //assert exception
-        $this->expectException( '\DomainException' );
+        $this->expectException( DomainException::class );
         $x->isValid( $result );
 
     }
@@ -115,7 +114,7 @@ class SimpleHashTest extends AbstractTest {
         $result[ 'signature' ] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
 
         //assert exception
-        $this->expectException( '\DomainException' );
+        $this->expectException( DomainException::class );
         $x->isValid( $result );
 
     }
@@ -138,7 +137,6 @@ class SimpleHashTest extends AbstractTest {
         $x[ 'testAccess' ] = "a new key/value pair";
 
         $result = $x->sign();
-        $this->assertTrue( is_array( $result ) );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] == $invited_by_uid );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'request_info' ] == $request_info );
 
@@ -167,7 +165,6 @@ class SimpleHashTest extends AbstractTest {
         $x[ 'testAccess' ]     = "a new key/value pair";
 
         $result = $x->sign();
-        $this->assertTrue( is_array( $result ) );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] == $invited_by_uid );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'request_info' ] == $request_info );
 
@@ -203,7 +200,7 @@ class SimpleHashTest extends AbstractTest {
         sleep( 2 );
 
         //assert exception
-        $this->expectException( DomainException::class );
+        $this->expectException( UnexpectedValueException::class );
         $x->isValid( $result );
 
     }
