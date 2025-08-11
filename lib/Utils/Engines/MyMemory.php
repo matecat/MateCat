@@ -403,7 +403,7 @@ class MyMemory extends AbstractEngine {
      *
      * @return TmxResponse
      */
-    public function entryStatus( string $uuid ): TmxResponse {
+    public function entryStatus( string $uuid ): TMSAbstractResponse {
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
@@ -412,10 +412,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-
-        /**
-         * @var TmxResponse
-         */
+        
         return $this->result;
     }
 
