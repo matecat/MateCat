@@ -1046,6 +1046,7 @@ class CatUtils {
     }
 
     /**
+
      * @param $name
      *
      * @return bool
@@ -1069,6 +1070,26 @@ class CatUtils {
         $str = preg_replace( '/\x00|<[^>]*>?/', '', $string );
 
         return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
+    }
+      
+    /**
+     * @param $filename
+     *
+     * @return string
+     */
+    public static function encodeFileName($filename)
+    {
+        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    }
+
+    /**
+     * @param $filename
+     *
+     * @return false|string
+     */
+    public static function decodeFileName($filename)
+    {
+        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
     }
 }
 
