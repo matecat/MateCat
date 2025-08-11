@@ -22,7 +22,7 @@ RewriteRule ^api/docs$ lib/View/APIDoc.php [L]
 
 # Route all through the router
 RewriteRule ^$ router.php [QSA,L]
-RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf)$ router.php [QSA,L]
+RewriteRule !.(css|fonts|gif|jpe?g?|png|ico|js|svg|woff|ttf|map)$ router.php [QSA,L]
 
 RedirectMatch 404 ^/\.git
 RedirectMatch 404 ^/vendor
@@ -39,7 +39,7 @@ ErrorDocument 503 /lib/View/503.html
 ErrorDocument 500 /lib/View/500.html
 
 SetEnvIf ^ ^ no-gzip
-SetEnvIfNoCase Request_URI \.(?:css|js)$ !no-gzip
+SetEnvIfNoCase Request_URI \.(?:css|js|map)$ !no-gzip
 
 <IfModule mod_expires.c>
     ExpiresActive On
