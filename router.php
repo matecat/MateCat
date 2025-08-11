@@ -80,6 +80,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
             case InvalidValue::class:
             case InvalidArgumentException::class:
             case DomainException::class:
+            case UnexpectedValueException::class:
             case Model_ValidationError::class:
                 $klein->response()->code( 400 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
