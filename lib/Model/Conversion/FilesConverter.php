@@ -160,6 +160,12 @@ class FilesConverter {
         return $this->resultStack;
     }
 
+    /**
+     * @param string $fileName
+     *
+     * @return ConversionHandler
+     * @throws Exception
+     */
     private function getConversionHandlerInstance( string $fileName ): ConversionHandler {
         $conversionHandler = new ConversionHandler();
         $conversionHandler->setFileName( $fileName );
