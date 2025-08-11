@@ -1046,16 +1046,25 @@ class CatUtils {
     }
 
     /**
+     * This functions removes symbols from a string
+     *
+     * @param string $name
+     *
+     * @return string
+     */
+    public static function sanitizeProjectName( string $name ): string {
+        return preg_replace( '/[^\p{L}\p{N}\s]/u', '', $name );
+    }
 
+    /**
+     * This functions check if the name contains any symbol
+     *
      * @param $name
      *
      * @return bool
      */
-    public static function validateProjectName( $name ): bool {
-        $validName = self::filter_string_polyfill( $name );
-        $validName = html_entity_decode( $validName );
-
-        return $validName === $name;
+    public static function validateProjectName( string $name ): bool {
+        return self::sanitizeProjectName( $name ) === $name;
     }
 
     /**
@@ -1071,15 +1080,14 @@ class CatUtils {
 
         return str_replace( [ "'", '"' ], [ '&#39;', '&#34;' ], $str );
     }
-      
+
     /**
      * @param $filename
      *
      * @return string
      */
-    public static function encodeFileName($filename)
-    {
-        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    public static function encodeFileName( $filename ) {
+        return rtrim( strtr( base64_encode( gzdeflate( $filename, 9 ) ), '+/', '-_' ), '=' );
     }
 
     /**
@@ -1087,9 +1095,8 @@ class CatUtils {
      *
      * @return false|string
      */
-    public static function decodeFileName($filename)
-    {
-        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
+    public static function decodeFileName( $filename ) {
+        return gzinflate( base64_decode( strtr( $filename, '-_', '+/' ) ) );
     }
 }
 

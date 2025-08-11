@@ -35,7 +35,7 @@ class ChangeProjectNameController extends ChunkController
             $name     = CatUtils::validateProjectName($this->request->param('name') );
 
             if($name === false){
-                throw new InvalidArgumentException( $this->request->param('name') . " is not a valid project name", -3 );
+                throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
             }
 
             if(

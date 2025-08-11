@@ -92,8 +92,12 @@ class NewController extends KleinController {
             $arFiles[] = $input_value->name;
         }
 
-        // if fileupload was failed, this index (0 = does not exist)
-        $default_project_name = @$arFiles[ 0 ];
+        if(empty($arFiles)){
+            throw new InvalidArgumentException("No files were uploaded.");
+        }
+
+        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
+
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
         }
@@ -576,7 +580,7 @@ class NewController extends KleinController {
         }
 
         if ( CatUtils::validateProjectName( $name ) === false ) {
-            throw new InvalidArgumentException( $name . " is not a valid project name", -3 );
+            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
         }
 
         return $name;

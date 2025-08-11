@@ -64,7 +64,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $this->data = $this->validateTheRequest();
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->data[ 'file_name' ], ENT_QUOTES, 'UTF-8' ) );
-        $default_project_name = $arFiles[ 0 ];
+        $default_project_name = CatUtils::sanitizeProjectName( $arFiles[ 0 ] );
 
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
@@ -409,12 +409,12 @@ class CreateProjectController extends AbstractStatefulKleinController {
      */
     private function validateProjectName( ?string $name = null ): ?string {
 
-        if(empty($name)){
+        if ( empty( $name ) ) {
             return null;
         }
 
-        if(CatUtils::validateProjectName($name) === false){
-            throw new InvalidArgumentException( $name . " is not a valid project name", -3 );
+        if ( CatUtils::validateProjectName( $name ) === false ) {
+            throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
         }
 
         return $name;
