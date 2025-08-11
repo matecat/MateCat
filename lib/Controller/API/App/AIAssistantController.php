@@ -3,6 +3,8 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Exception;
+use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
@@ -121,13 +123,15 @@ class AIAssistantController extends KleinController {
     }
 
     /**
-     * @param $queue
-     * @param $params
+     * @param string $queue
+     * @param array  $params
+     *
+     * @throws Exception
      */
-    private function enqueueWorker( $queue, $params ) {
+    private function enqueueWorker( string $queue, array $params ) {
         try {
-            Utils\ActiveMQ\WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => Utils\ActiveMQ\WorkerClient::$_HANDLER->persistent ] );
-        } catch ( \Exception $e ) {
+            WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
+        } catch ( Exception $e ) {
             # Handle the error, logging, ...
             $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
