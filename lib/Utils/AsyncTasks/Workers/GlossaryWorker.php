@@ -8,10 +8,6 @@ use Model\Users\UserStruct;
 use Stomp\Exception\StompException;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
-use Utils\Engines\Results\MyMemory\DomainsResponse;
-use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
-use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
-use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
@@ -73,12 +69,11 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var \Utils\Engines\Results\MyMemory\CheckGlossaryResponse $response */
         $response = $client->glossaryCheck( $payload[ 'source' ], $payload[ 'target' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
         $matches  = $response->matches;
 
         if ( empty( $matches[ 'id_segment' ] ) ) {
-            $id_segment              = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+            $id_segment              = $payload[ 'id_segment' ] ?? null;
             $matches[ 'id_segment' ] = $id_segment;
         }
 
@@ -105,7 +100,7 @@ class GlossaryWorker extends AbstractWorker {
 
         /** @var UpdateGlossaryResponse $response */
         $response   = $client->glossaryDelete( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $id_segment = $payload[ 'id_segment' ] ?? null;
 
         $message = [
                 'id_segment' => $id_segment,
@@ -155,10 +150,9 @@ class GlossaryWorker extends AbstractWorker {
     private function domains( $payload ) {
 
         $message    = [];
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $id_segment = $payload[ 'id_segment' ] ?? null;
         $client     = $this->getMyMemoryClient();
 
-        /** @var DomainsResponse $domains */
         $domains = $client->glossaryDomains( $payload[ 'keys' ] );
 
         $message[ 'entries' ]    = ( !empty( $domains->entries ) ) ? $domains->entries : [];
@@ -184,7 +178,6 @@ class GlossaryWorker extends AbstractWorker {
     private function get( $payload ) {
 
         if (
-                empty( $payload[ 'source' ] ) ||
                 empty( $payload[ 'id_segment' ] ) ||
                 empty( $payload[ 'source' ] ) ||
                 empty ( $payload[ 'source_language' ] ) ||
@@ -232,7 +225,6 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var KeysGlossaryResponse $response */
         $response = $client->glossaryKeys( $payload[ 'source_language' ], $payload[ 'target_language' ], $payload[ 'keys' ] );
 
         $this->publishToNodeJsClients(
@@ -252,8 +244,7 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @param $payload
      *
-     * @throws StompException
-     * @throws Exception
+     * @throws EndQueueException
      */
     private function search( $payload ) {
         $keys = [];
@@ -263,7 +254,6 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var SearchGlossaryResponse $response */
         $response = $client->glossarySearch( $payload[ 'sentence' ], $payload[ 'source_language' ], $payload[ 'target_language' ], $keys );
         $matches  = $response->matches;
         $matches  = $this->formatGetGlossaryMatches( $matches, $payload );
@@ -279,8 +269,8 @@ class GlossaryWorker extends AbstractWorker {
     }
 
     /**
-     * @param $matches
-     * @param $payload
+     * @param array $matches
+     * @param array $payload
      *
      * @return array
      * @throws EndQueueException
@@ -309,9 +299,8 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var SetGlossaryResponse $response */
         $response   = $client->glossarySet( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $id_segment = $payload[ 'id_segment' ] ?? null;
 
         $message = [
                 'id_segment' => $id_segment,
@@ -384,9 +373,8 @@ class GlossaryWorker extends AbstractWorker {
 
         $client = $this->getMyMemoryClient();
 
-        /** @var UpdateGlossaryResponse $response */
         $response   = $client->glossaryUpdate( $payload[ 'id_segment' ], $payload[ 'id_job' ], $payload[ 'password' ], $payload[ 'term' ] );
-        $id_segment = isset( $payload[ 'id_segment' ] ) ? $payload[ 'id_segment' ] : null;
+        $id_segment = $payload[ 'id_segment' ] ?? null;
 
         $message = [
                 'id_segment' => $id_segment,
@@ -444,7 +432,7 @@ class GlossaryWorker extends AbstractWorker {
      *
      * @return array
      */
-    private function setResponsePayload( $type, $id_client, $jobData, $message ) {
+    private function setResponsePayload( $type, $id_client, $jobData, $message ): array {
 
         return [
                 '_type' => $type,
@@ -473,7 +461,7 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param FeatureSet $featureSet
      *
-     * @return \Utils\Engines\MyMemory
+     * @return MyMemory
      * @throws Exception
      */
     private function getEngine( FeatureSet $featureSet ) {
@@ -487,7 +475,7 @@ class GlossaryWorker extends AbstractWorker {
     /**
      * @param $array
      *
-     * @return \Model\Users\UserStruct
+     * @return UserStruct
      */
     private function getUser( $array ) {
         return new UserStruct( [
@@ -502,7 +490,7 @@ class GlossaryWorker extends AbstractWorker {
      * @return MyMemory
      * @throws Exception
      */
-    private function getMyMemoryClient() {
+    private function getMyMemoryClient(): MyMemory {
        return $this->getEngine( new FeatureSet() );
     }
 }
