@@ -1,5 +1,6 @@
 import {NUM_CONCORDANCE_RESULTS} from '../../constants/Constants'
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
+import SegmentStore from '../../stores/SegmentStore'
 
 /**
  * Get concordance
