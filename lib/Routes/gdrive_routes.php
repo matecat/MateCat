@@ -7,7 +7,7 @@
  */
 
 route(
-        '/webhooks/gdrive/open', 'GET',
+        '/webhooks/gdrive/open', 'POST',
         [ 'Controller\API\GDrive\GDriveController', 'open' ]
 );
 
