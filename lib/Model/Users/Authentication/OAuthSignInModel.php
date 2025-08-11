@@ -4,7 +4,7 @@ namespace Model\Users\Authentication;
 
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
-use Controller\Abstracts\Authentication\SessionTokenRingHandler;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Defuse\Crypto\Exception\EnvironmentIsBrokenException;
 use Exception;
@@ -149,7 +149,7 @@ class OAuthSignInModel {
     /**
      */
     protected function _authenticateUser() {
-        AuthCookie::setCredentials( $this->user, new SessionTokenRingHandler() );
+        AuthCookie::setCredentials( $this->user, new SessionTokenStoreHandler() );
         AuthenticationHelper::getInstance( $_SESSION );
     }
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * Created by PhpStorm.
- * Handles session token ring operations for user authentication.
+ * Handles session token store operations for user authentication.
  * This class provides methods to manage login tokens in a persistent storage (e.g., Redis),
  * ensuring secure authentication and session management.
  *
@@ -16,7 +16,7 @@ use Model\DataAccess\DaoCacheTrait;
 use ReflectionException;
 use Utils\Logger\Log;
 
-class SessionTokenRingHandler {
+class SessionTokenStoreHandler {
 
     use DaoCacheTrait;
 
@@ -54,7 +54,7 @@ class SessionTokenRingHandler {
     }
 
     /**
-     * Activates a login token for a user in the session token ring.
+     * Activates a login token for a user in the session token store.
      *
      * This method sets a valid login token in the persistent storage (e.g., Redis)
      * and ensures it is active for the user's session. It should be called only
@@ -74,7 +74,7 @@ class SessionTokenRingHandler {
     }
 
     /**
-     * Checks if a login token is still active in the session token ring.
+     * Checks if a login token is still active in the session token store.
      *
      * This method validates whether the provided login token is still active
      * in the persistent storage. It should be called when a session does not exist (browser closed or user logged out)
@@ -93,7 +93,7 @@ class SessionTokenRingHandler {
     }
 
     /**
-     * Removes a login token from the session token ring.
+     * Removes a login token from the session token store.
      *
      * This method removes the specified login token from the persistent storage,
      * effectively invalidating it. It should be called when the user logs out
@@ -105,7 +105,7 @@ class SessionTokenRingHandler {
      * @return void
      * @throws ReflectionException If there is an issue with the cache operation.
      */
-    public function removeLoginCookieFromRing( int $userId, string $loginCookieValue ): void {
+    public function removeLoginCookieFromStore( int $userId, string $loginCookieValue ): void {
 
         if ( empty( $loginCookieValue ) ) {
             return;

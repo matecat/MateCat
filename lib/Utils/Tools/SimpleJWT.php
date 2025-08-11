@@ -84,7 +84,7 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
         }
 
         if ( time() > $_storage[ 'payload' ][ 'exp' ] ) {
-            throw new DomainException( "Token Expired", 2 );
+            throw new UnexpectedValueException( "Token Expired", 2 );
         }
 
         return true;

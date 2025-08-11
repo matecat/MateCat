@@ -49,10 +49,20 @@ class AuthenticationHelper {
     }
 
     /**
-     * @param array       $session
-     * @param string|null $api_key
-     * @param string|null $api_secret
+     * Constructor for the AuthenticationHelper class.
      *
+     * This constructor initializes the user session and attempts to authenticate the user
+     * using one of the following methods:
+     * 1. Valid API keys (if provided).
+     * 2. Existing session credentials (if available and valid).
+     * 3. Authentication cookie credentials (if present and valid).
+     *
+     * If authentication is successful, the user object is populated, and the session is updated.
+     * If authentication fails, the user remains unauthenticated.
+     *
+     * @param array       $session   Reference to the session array, used to store user data.
+     * @param string|null $api_key   Optional API key for authentication.
+     * @param string|null $api_secret Optional API secret for authentication.
      */
     protected function __construct( array &$session, ?string $api_key = null, ?string $api_secret = null ) {
 
@@ -62,31 +72,34 @@ class AuthenticationHelper {
         try {
 
             if ( $this->validKeys( $api_key, $api_secret ) ) {
+                // Authenticate using API keys and retrieve the associated user.
                 $this->user = $this->api_record->getUser();
-            } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) { // Credentials from session, still active and valid
-                $this->user = $this->session[ 'user' ]; // php deserialize this from session string
-                AuthCookie::setCredentials( $this->user, new SessionTokenRingHandler(), true ); //possibly revamp cookie
+            } elseif ( !empty( $this->session[ 'user' ] ) && !empty( $this->session[ 'user_profile' ] ) ) {
+                // Authenticate using session credentials if they are still active and valid.
+                $this->user = $this->session[ 'user' ]; // PHP deserializes this from the session string.
+                AuthCookie::setCredentials( $this->user, new SessionTokenStoreHandler(), true ); // Possibly revamp the cookie.
             } else {
-                // Credentials from AuthCookie
+                // Authenticate using credentials from the authentication cookie.
                 /**
                  * @var $user UserStruct
                  */
-                $user_cookie_credentials = AuthCookie::getCredentials( new SessionTokenRingHandler() );
+                $user_cookie_credentials = AuthCookie::getCredentials( new SessionTokenStoreHandler() );
                 if ( !empty( $user_cookie_credentials ) && !empty( $user_cookie_credentials[ 'user' ] ) ) {
                     $userDao = new UserDao();
-                    $userDao->setCacheTTL( 60 * 60 * 24 );
+                    $userDao->setCacheTTL( 60 * 60 * 24 ); // Set cache TTL to 24 hours.
                     $this->user = $userDao->getByUid( $user_cookie_credentials[ 'user' ][ 'uid' ] );
-                    $this->setUserSession();
+                    $this->setUserSession(); // Update the session with the authenticated user.
                 }
-
             }
         } catch ( Throwable $ignore ) {
+            // Log any exceptions encountered during the authentication process.
             Log::setLogFileName( 'login_exceptions.txt' );
             try {
                 Log::doJsonLog( [ $ignore, $ignore->getTraceAsString(), 'session' => $this->session, 'api_key' => $api_key, 'api_secret' => $api_secret, 'cookie' => AuthCookie::getCredentials()[ 'user' ] ?? null ] );
             } catch ( ReflectionException $ignore ) {
             }
         } finally {
+            // Set the logged status based on the user's authentication state.
             $this->logged = $this->user->isLogged();
         }
 
@@ -107,7 +120,7 @@ class AuthenticationHelper {
     public static function destroyAuthentication( array &$session ) {
         unset( $session[ 'user' ] );
         unset( $session[ 'user_profile' ] );
-        AuthCookie::destroyAuthentication( new SessionTokenRingHandler() );
+        AuthCookie::destroyAuthentication( new SessionTokenStoreHandler() );
     }
 
     /**
