@@ -82,7 +82,9 @@ const matecatConfig = async ({env}, {mode}) => {
     },
     output: {
       filename: isDev ? '[name].[fullhash].js' : '[name].[contenthash].js',
-      sourceMapFilename: isDev ? '[name].[fullhash].js.map' : '[file].map',
+      sourceMapFilename: isDev
+        ? '[name].[fullhash].js.map'
+        : '[name].[contenthash].js.map',
       path: path.resolve(__dirname, 'public/build'),
       chunkFilename: isDev
         ? '[name].[fullhash].chunk.js'
