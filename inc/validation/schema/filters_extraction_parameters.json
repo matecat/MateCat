@@ -2,13 +2,6 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "id": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "nullable": true
-    },
     "uid": {
       "type": [
         "integer",
@@ -18,34 +11,6 @@
     },
     "name": {
       "type": "string"
-    },
-    "created_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true
-    },
-    "modified_at": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "nullable": true
-    },
-    "isSelected": {
-      "type": [
-        "boolean",
-        "null"
-      ],
-      "nullable": true
-    },
-    "isTemporary": {
-      "type": [
-        "boolean",
-        "null"
-      ],
-      "nullable": true
     },
     "json": {
       "type": "object",
