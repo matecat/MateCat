@@ -203,10 +203,10 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
 
 $klein->with( '/api/v3/glossaries', function () {
 
-    route( '/check/', 'POST', [ '\Controller\API\V2\GlossariesController', 'check' ] );
-    route( '/import/', 'POST', [ '\Controller\API\V2\GlossariesController', 'import' ] );
-    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossariesController', 'uploadStatus' ] );
-    route( '/export/', 'POST', [ '\Controller\API\V2\GlossariesController', 'download' ] );
+    route( '/check/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'check' ] );
+    route( '/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
+    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'uploadStatus' ] );
+    route( '/export/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'download' ] );
 
 } );
 

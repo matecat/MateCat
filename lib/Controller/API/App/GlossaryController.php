@@ -44,6 +44,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function check() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/check.json';
@@ -78,6 +79,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function delete() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/delete.json';
@@ -103,6 +105,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function domains() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/domains.json';
@@ -126,6 +129,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function get() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/get.json';
@@ -150,6 +154,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function keys() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/keys.json';
@@ -180,6 +185,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function search() {
         $jsonSchemaPath   = AppConfig::$ROOT . '/inc/validation/schema/glossary/search.json';
@@ -204,6 +210,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function set() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/set.json';
@@ -234,6 +241,7 @@ class GlossaryController extends KleinController {
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      * @throws ReflectionException
+     * @throws \Exception
      */
     public function update() {
         $jsonSchemaPath = AppConfig::$ROOT . '/inc/validation/schema/glossary/update.json';
@@ -333,7 +341,7 @@ class GlossaryController extends KleinController {
             if ( isset( $tmKey[ 'r' ] ) and $tmKey[ 'r' ] == 1 ) {
 
                 // allowing only terms belonging to the owner of the job
-                if ( isset( $tmKey[ 'owner' ] ) and $tmKey[ 'owner' ] == true ) {
+                if ( isset( $tmKey[ 'owner' ] ) and $tmKey[ 'owner' ] ) {
                     $return[] = $tmKey;
                 }
             }
