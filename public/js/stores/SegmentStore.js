@@ -164,7 +164,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             autopropagated_from: 0,
             has_reference: 'false',
             parsed_time_to_edit: ['00', '00', '00', '00'],
-            readonly: 'false',
+            readonly: false,
             segment: splittedSourceAr[i],
             decodedSource: DraftMatecatUtils.transformTagsToText(
               segment.segment,
@@ -185,7 +185,7 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
             translation: translation ? translation : '',
             decodedTranslation:
               DraftMatecatUtils.transformTagsToText(translation),
-            warning: 0,
+            warning: false,
             warnings: {},
             tagged: !this.hasSegmentTagProjectionEnabled(segment),
             unlocked: false,
