@@ -944,16 +944,20 @@ const SegmentActions = {
   },
   getGlossaryForSegment: function ({sid, fid, text, shouldRefresh = false}) {
     if (!CatToolStore.haveKeysGlossary) return
+
     // refresh segment glossary already included
     if (shouldRefresh) {
-      getGlossaryForSegment({
-        idSegment: sid,
-        source: DraftMatecatUtils.removePlaceholdersForGlossary(
-          DraftMatecatUtils.removeTagsFromText(text),
-        ),
-      }).catch(() => {
-        OfflineUtils.failedConnection()
-      })
+      const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+        DraftMatecatUtils.removeTagsFromText(text),
+      )
+      if (source && source !== ' ') {
+        getGlossaryForSegment({
+          idSegment: sid,
+          source,
+        }).catch(() => {
+          OfflineUtils.failedConnection()
+        })
+      }
       return
     }
 
@@ -994,15 +998,19 @@ const SegmentActions = {
         segment &&
         (typeof segment.glossary === 'undefined' || sid === request.sid)
       ) {
-        //Response inside SSE Channel
-        getGlossaryForSegment({
-          idSegment: request.sid,
-          source: DraftMatecatUtils.removePlaceholdersForGlossary(
-            DraftMatecatUtils.removeTagsFromText(request.text),
-          ),
-        }).catch(() => {
-          OfflineUtils.failedConnection()
-        })
+        const source = DraftMatecatUtils.removePlaceholdersForGlossary(
+          DraftMatecatUtils.removeTagsFromText(request.text),
+        )
+
+        if (source && source !== ' ') {
+          //Response inside SSE Channel
+          getGlossaryForSegment({
+            idSegment: request.sid,
+            source,
+          }).catch(() => {
+            OfflineUtils.failedConnection()
+          })
+        }
       }
     }
   },

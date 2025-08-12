@@ -1,4 +1,5 @@
 import {saveAs} from 'file-saver'
+import {Base64} from 'js-base64'
 
 /**
  * Export TMX
@@ -13,7 +14,7 @@ export const downloadFile = async ({
   password = config.password,
 }) => {
   const response = await fetch(
-    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all`,
+    `${config.basepath}api/v2/translation/${idJob}/${password}?download_type=all&encoding=base64`,
     {
       credentials: 'include',
     },
@@ -24,6 +25,6 @@ export const downloadFile = async ({
   let filename = parts[1].split('=')[1]
   filename = filename.replace(/"/g, '')
   const blob = await response.blob()
-  saveAs(blob, filename)
+  saveAs(blob, Base64.decode(filename))
   return Promise.resolve()
 }

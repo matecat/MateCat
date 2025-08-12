@@ -240,17 +240,22 @@ const matchTag = (tx) => {
 
 export const decodePlaceholdersToPlainText = (str) => {
   return str
-    .replace(config.lfPlaceholderRegex, tagSignatures['lineFeed'].placeholder)
-    .replace(
-      config.crPlaceholderRegex,
-      tagSignatures['carriageReturn'].placeholder,
-    )
-    .replace(
-      config.crlfPlaceholderRegex,
-      `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
-    )
-    .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
-    .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+    ? str
+        .replace(
+          config.lfPlaceholderRegex,
+          tagSignatures['lineFeed'].placeholder,
+        )
+        .replace(
+          config.crPlaceholderRegex,
+          tagSignatures['carriageReturn'].placeholder,
+        )
+        .replace(
+          config.crlfPlaceholderRegex,
+          `${tagSignatures['carriageReturn'].placeholder}${tagSignatures['lineFeed'].placeholder}`,
+        )
+        .replace(config.tabPlaceholderRegex, tagSignatures['tab'].placeholder)
+        .replace(config.nbspPlaceholderRegex, tagSignatures['nbsp'].placeholder)
+    : str
 }
 
 export const removePlaceholdersForGlossary = (str) => {

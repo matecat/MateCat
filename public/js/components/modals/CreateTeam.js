@@ -63,7 +63,7 @@ export const CreateTeam = () => {
         <EmailsBadge
           name="team"
           value={emailsCollection}
-          separators={[',', SPECIALS_SEPARATORS.EnterKey]}
+          separators={[',', ' ', SPECIALS_SEPARATORS.EnterKey]}
           onChange={onChangeAddMembers}
           placeholder="Insert email or emails separated by commas"
         />

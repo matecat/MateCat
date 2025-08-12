@@ -446,9 +446,23 @@ const NewProject = () => {
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
-      const unsavedTemplate = templates.find(
-        (template) => template.id === id && template.isTemporary,
-      )
+      const unsavedTemplate = templates
+        .filter((template) => template.id === id && template.isTemporary)
+        .map(
+          ({
+            /* eslint-disable */
+            isSelected,
+            isTemporary,
+            id,
+            created_at,
+            modified_at,
+            createdAt,
+            deletedAt,
+            modifiedAt,
+            /* eslint-enable */
+            ...result
+          }) => result,
+        )[0]
 
       return unsavedTemplate
     }
@@ -528,6 +542,9 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
+      ...(mt?.extra?.lara_glossaries?.length && {
+        lara_glossaries: JSON.stringify(mt.extra.lara_glossaries),
+      }),
     })
 
     if (!projectSent) {

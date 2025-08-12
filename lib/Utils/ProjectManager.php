@@ -131,6 +131,7 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
+
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
@@ -444,6 +445,15 @@ class ProjectManager {
                     $this->projectStructure[ 'id_project' ],
                     'mmt_glossaries',
                     $this->projectStructure[ 'mmt_glossaries' ]
+            );
+        }
+
+        // add Lara Glossaries here
+        if ( $this->projectStructure[ 'lara_glossaries' ] and !empty( $this->projectStructure[ 'lara_glossaries' ] ) ) {
+            $dao->set(
+                    $this->projectStructure[ 'id_project' ],
+                    'lara_glossaries',
+                    $this->projectStructure[ 'lara_glossaries' ]
             );
         }
 
@@ -1052,10 +1062,14 @@ class ProjectManager {
             mkdir( $this->uploadDir, 0755 );
         }
 
+        $prefix = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR;
+        $file_info = AbstractFilesStorage::pathinfo_fix($fileName);
+        $fileName = $fs::createFileName($prefix, $file_info);
+
         /** @var $fs S3FilesStorage */
         $client              = $fs::getStaticS3Client();
         $params[ 'bucket' ]  = INIT::$AWS_STORAGE_BASE_BUCKET;
-        $params[ 'key' ]     = $fs::QUEUE_FOLDER . DIRECTORY_SEPARATOR . $fs::getUploadSessionSafeName( $fs->getTheLastPartOfKey( $this->uploadDir ) ) . DIRECTORY_SEPARATOR . $fileName;
+        $params[ 'key' ]     = $prefix . $fileName;
         $params[ 'save_as' ] = "$this->uploadDir/$fileName";
         $client->downloadItem( $params );
     }

@@ -73,6 +73,11 @@ route( '/api/v3/projects/[i:id_project]/[:password]/segment-analysis',  'GET',  
 route( '/api/v3/jobs/[i:id_job]/[:password]/segment-analysis',          'GET',  [ 'API\V3\SegmentAnalysisController', 'job' ] );
 route( '/api/v3/create-key',  'POST', [ 'API\V3\MyMemoryController', 'create' ] );
 
+// LARA
+$klein->with( '/api/v3/lara/[i:engineId]', function () {
+    route( '/glossaries', 'GET', [ 'Controller\API\V3\LaraController', 'glossaries' ] );
+} );
+
 // MMT
 $klein->with( '/api/v3/mmt/[i:engineId]', function () {
     route( '/keys', 'GET', [ '\API\V3\ModernMTController', 'keys' ] );
@@ -146,7 +151,6 @@ $klein->with( '/api/v3/projects/[:id_project]/[:password]', function () {
     route( '/archive', 'POST', [ 'API\V2\ProjectsController', 'archive' ] );
     route( '/active', 'POST', [ 'API\V2\ProjectsController', 'active' ] );
     route( '/r2', 'POST', [ 'API\V2\ReviewsController', 'createReview' ] );
-    route( '/analysis/status', 'GET', [ '\API\V3\StatusController', 'index' ] );
     route( '/change-name', 'POST', [ 'API\V2\ChangeProjectNameController', 'changeName' ] );
 } );
 
