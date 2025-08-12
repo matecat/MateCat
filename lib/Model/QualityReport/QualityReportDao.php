@@ -227,6 +227,13 @@ JOIN (
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param int      $job_id
+     * @param string   $password
+     * @param int|null $source_page
+     *
+     * @return ShapelessConcreteStruct[]
+     */
     public function getReviseIssuesByChunk( int $job_id, string $password, int $source_page = null ): array {
 
         if ( is_null( $source_page ) ) {

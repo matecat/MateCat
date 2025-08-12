@@ -12,10 +12,10 @@ use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use ReflectionException;
-use View\API\V2\Json\SegmentVersion as JsonFormatter;
+use View\API\V2\Json\SegmentVersion;
 
 
-class SegmentVersion extends KleinController {
+class SegmentVersionController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
      * @throws ReflectionException
@@ -44,7 +44,7 @@ class SegmentVersion extends KleinController {
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new JsonFormatter( $chunk, $results );
+        $formatted = new SegmentVersion( $chunk, $results );
 
         $this->response->json( [
                 'versions' => $formatted->render()
@@ -70,7 +70,7 @@ class SegmentVersion extends KleinController {
         $this->chunk = $chunk;
         $this->return404IfTheJobWasDeleted();
 
-        $formatted = new JsonFormatter( $chunk, $results );
+        $formatted = new SegmentVersion( $chunk, $results );
 
         $this->response->json( [
                 'versions' => $formatted->render()

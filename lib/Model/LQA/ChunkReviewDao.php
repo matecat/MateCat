@@ -365,10 +365,10 @@ class ChunkReviewDao extends AbstractDao {
      * @param     $review_password
      * @param     $id_job
      *
-     * @return ChunkReviewStruct
+     * @return ?ChunkReviewStruct
      */
 
-    public static function findByReviewPasswordAndJobId( $review_password, $id_job ): ChunkReviewStruct {
+    public static function findByReviewPasswordAndJobId( $review_password, $id_job ): ?ChunkReviewStruct {
         $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE review_password = :review_password " .
                 " AND id_job = :id_job ";
@@ -544,11 +544,13 @@ class ChunkReviewDao extends AbstractDao {
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division
         $sql = "INSERT INTO 
-            qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, total_tte ) 
+            qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte ) 
         VALUES( 
             :id,
             :id_job,
+            :id_project,
             :password,
+            :review_password,
             :penalty_points,
             :reviewed_words_count,
             :total_tte
@@ -569,6 +571,8 @@ class ChunkReviewDao extends AbstractDao {
         $stmt->execute( [
                 'id'                   => $chunkReviewID,
                 'id_job'               => $chunkReview->id_job,
+                'id_project'           => $chunkReview->id_project,
+                'review_password'      => $chunkReview->review_password,
                 'password'             => $chunkReview->password,
                 'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
                 'reviewed_words_count' => $data[ 'reviewed_words_count' ],

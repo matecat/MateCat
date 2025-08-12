@@ -12,7 +12,6 @@ class ModelDao extends AbstractDao {
     protected static array $auto_increment_field = [ 'id' ];
 
     protected static string $_sql_get_model_by_id          = "SELECT * FROM qa_models WHERE id = :id LIMIT 1";
-    protected static string $_sql_get_model_by_id_and_user = "SELECT * FROM qa_models WHERE id = :id and uid = :uid LIMIT 1";
 
     protected function _buildResult( array $array_result ) {
     }
@@ -31,28 +30,7 @@ class ModelDao extends AbstractDao {
         $stmt    = $conn->prepare( self::$_sql_get_model_by_id );
 
         /** @var ModelStruct $result */
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id ] );
-
-        return $result[ 0 ] ?? null;
-
-    }
-
-    /**
-     * @param int       $id
-     * @param int       $uid
-     * @param float|int $ttl
-     *
-     * @return ModelStruct
-     * @throws ReflectionException
-     */
-    public static function findByIdAndUser( int $id, int $uid, int $ttl = 0 ): ?ModelStruct {
-
-        $thisDao = new self();
-        $conn    = Database::obtain()->getConnection();
-        $stmt    = $conn->prepare( self::$_sql_get_model_by_id_and_user );
-
-        /** @var ModelStruct $result */
-        $result = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ModelStruct(), [ 'id' => $id, 'uid' => $uid ] );
+        $result = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ModelStruct::class, [ 'id' => $id ] );
 
         return $result[ 0 ] ?? null;
 

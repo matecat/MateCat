@@ -8,16 +8,16 @@ use Model\DataAccess\IDaoStruct;
 
 class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModelInterface {
 
-    public $id;
-    public $label;
-    public $create_date;
-    public $pass_type;
-    public $pass_options;
+    public ?int $id = null;
+    public string $label;
+    public string $create_date;
+    public string $pass_type;
+    public string $pass_options;
 
-    public $hash;
+    public string $hash;
 
-    public $qa_model_template_id;
-    public $uid;
+    public ?int $qa_model_template_id = null;
+    public int $uid;
 
     /**
      * Returns the serialized representation of categires and subcategories.
@@ -50,7 +50,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      * @return int[]
      * @throws Exception
      */
-    public function getLimit() {
+    public function getLimit(): array {
         $options = json_decode( $this->pass_options, true );
 
         if ( !array_key_exists( 'limit', $options ) ) {
@@ -65,11 +65,11 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
      *
      * Ex: {"limit":{"1":"8","2":"5"}} is normalized to [0 => 8, 1 => 5]
      *
-     * @param $limits
+     * @param array $limits
      *
      * @return array
      */
-    private function normalizeLimits( $limits ) {
+    private function normalizeLimits( array $limits ): array {
 
         $normalized = [];
 
@@ -83,7 +83,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     /**
      * @return array
      */
-    public function getDecodedModel() {
+    public function getDecodedModel(): array {
 
         $categoriesArray = [];
         foreach ( $this->getCategories() as $categoryStruct ) {
@@ -103,7 +103,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
         return [
                 'model' => [
                         "id"                => (int)$this->id,
-                        "uid"               => (int)$this->uid,
+                        "uid"               => $this->uid,
                         "template_model_id" => $this->qa_model_template_id ? (int)$this->qa_model_template_id : null,
                         "version"           => 1,
                         "label"             => $this->label,

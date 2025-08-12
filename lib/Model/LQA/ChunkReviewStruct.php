@@ -10,20 +10,20 @@ use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $id_project;
-    public $id_job;
-    public $password;
-    public $review_password;
-    public $penalty_points       = 0;
-    public $source_page;
-    public $is_pass;
-    public $force_pass_at;
-    public $reviewed_words_count = 0;
-    public $undo_data;
-    public $advancement_wc       = 0;
-    public $total_tte            = 0;
-    public $avg_pee              = 0;
+    public ?int    $id                   = null;
+    public int     $id_project;
+    public int     $id_job;
+    public string  $password;
+    public ?string $review_password      = null;
+    public ?float  $penalty_points       = 0;
+    public int     $source_page;
+    public ?bool   $is_pass              = null;
+    public ?string $force_pass_at        = null;
+    public int     $reviewed_words_count = 0;
+    public ?string $undo_data            = null;
+    public ?float  $advancement_wc       = 0;
+    public int     $total_tte            = 0;
+    public int     $avg_pee              = 0;
 
     /**
      * Sets default values for an empty struct
