@@ -70,26 +70,6 @@ class TranslationEventDao extends AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function getFinalRevisionForSegmentAndSourcePage( $id_job, $id_segment, $source_page ) {
-        $sql = "SELECT * FROM segment_translation_events
-                WHERE id_job = :id_job
-                    AND id_segment = :id_segment
-                    AND final_revision = 1
-                    AND source_page = :source_page
-                ";
-
-        $conn = $this->getDatabaseHandler()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
-        $stmt->execute( [
-                'id_job'      => $id_job,
-                'id_segment'  => $id_segment,
-                'source_page' => $source_page
-        ] );
-
-        return $stmt->fetch(); // expect one result only
-    }
-
     /**
      * @param int $id_job
      * @param int $id_segment

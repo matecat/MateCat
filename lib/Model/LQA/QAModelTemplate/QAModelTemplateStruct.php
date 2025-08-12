@@ -74,7 +74,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             $QAModelTemplateCategoryStruct->category_label = $category->label;
             $QAModelTemplateCategoryStruct->code           = $category->code;
 
-            if($category->sort){
+            if ( $category->sort ) {
                 $QAModelTemplateCategoryStruct->sort = $category->sort;
             }
 
@@ -85,7 +85,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
                 $severityModel->severity_code  = $severity->code;
                 $severityModel->penalty        = $severity->penalty;
 
-                if($severity->sort){
+                if ( $severity->sort ) {
                     $severityModel->sort = $severity->sort;
                 }
 
@@ -125,7 +125,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
             $category[ 'id' ]         = (int)$categoryStruct->id;
             $category[ 'label' ]      = $categoryStruct->category_label;
             $category[ 'code' ]       = $categoryStruct->code;
-            $category[ 'sort' ]       = $categoryStruct->sort ? (int)$categoryStruct->sort : null;
+            $category[ 'sort' ]       = $categoryStruct->sort ?: null;
             $category[ 'severities' ] = [];
 
             foreach ( $categoryStruct->severities as $severityStruct ) {
@@ -134,7 +134,7 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
                         'label'   => $severityStruct->severity_label,
                         'code'    => $severityStruct->severity_code,
                         'penalty' => floatval( $severityStruct->penalty ),
-                        'sort'    => $severityStruct->sort ? (int)$severityStruct->sort : null,
+                        'sort'    => $severityStruct->sort ?: null,
                 ];
             }
 
@@ -143,9 +143,9 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
 
         return [
                 'model' => [
-                        "uid"         => (int)$this->uid,
-                        "id_template" => (int)$this->id,
-                        "version"     => (int)$this->version,
+                        "uid"         => $this->uid,
+                        "id_template" => $this->id,
+                        "version"     => $this->version,
                         "label"       => $this->label,
                         "categories"  => $categoriesArray,
                         "passfail"    => [
@@ -164,10 +164,10 @@ class QAModelTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
      */
     public function jsonSerialize(): array {
         return [
-                'id'         => (int)$this->id,
-                'uid'        => (int)$this->uid,
+                'id'         => $this->id,
+                'uid'        => $this->uid,
                 'label'      => $this->label,
-                'version'    => (int)$this->version,
+                'version'    => $this->version,
                 'categories' => $this->categories,
                 'passfail'   => $this->passfail,
                 'createdAt'  => DateTimeUtil::formatIsoDate( $this->created_at ),

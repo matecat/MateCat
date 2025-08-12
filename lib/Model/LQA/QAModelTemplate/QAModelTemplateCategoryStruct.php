@@ -2,21 +2,22 @@
 
 namespace Model\LQA\QAModelTemplate;
 
+use JsonSerializable;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
-class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, \JsonSerializable {
-    public $id;
-    public $id_template;
-    public $id_parent;
-    public $category_label;
-    public $code;
-    public $sort;
+class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
+    public ?int   $id          = null;
+    public ?int   $id_template = null;
+    public ?int   $id_parent   = null;
+    public string $category_label;
+    public string $code;
+    public ?int   $sort        = 0;
 
     /**
      * @var QAModelTemplateSeverityStruct[]
      */
-    public $severities = [];
+    public array $severities = [];
 
     /**
      * @inheritDoc
@@ -29,7 +30,7 @@ class QAModelTemplateCategoryStruct extends AbstractDaoSilentStruct implements I
                 'label'       => $this->category_label,
                 'code'        => $this->code,
                 'severities'  => $this->severities,
-                'sort'        => $this->sort ? (int)$this->sort : null,
+                'sort'        => $this->sort ?: null,
         ];
     }
 }

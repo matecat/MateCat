@@ -4,28 +4,31 @@ namespace Model\LQA;
 
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
+use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Translations\SegmentTranslationDao;
+use ReflectionException;
 
 class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $uid;
-    public $id_segment;
-    public $id_job;
-    public $id_category;
-    public $severity;
-    public $translation_version;
-    public $start_node;
-    public $start_offset;
-    public $end_node;
-    public $end_offset;
-    public $is_full_segment;
-    public $penalty_points;
-    public $comment;
-    public $create_date;
-    public $target_text;
-    public $source_page;
-    public $deleted_at;
+    public ?int    $id                  = null;
+    public ?int    $uid                 = null;
+    public int     $id_segment;
+    public int     $id_job;
+    public int     $id_category;
+    public string  $severity;
+    public int     $translation_version = 0;
+    public ?int    $start_node          = 0;
+    public ?int    $start_offset        = 0;
+    public ?int    $end_node            = 0;
+    public ?int    $end_offset          = 0;
+    public ?int    $is_full_segment     = 0;
+    public ?float  $penalty_points      = 0.0;
+    public ?string $comment             = null;
+    public ?string $create_date         = null;
+    public ?string $target_text         = null;
+    public int     $source_page;
+    public ?string $deleted_at          = null;
 
     protected $_comments;
     protected $_diff;
@@ -33,13 +36,18 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @var EntryValidator
      */
-    private $validator;
+    private EntryValidator $validator;
 
     public function __construct( array $array_params = [] ) {
         parent::__construct( $array_params );
         $this->validator = new EntryValidator( $this );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws NotFoundException
+     */
     public function ensureValid() {
         $this->validator->ensureValid();
     }
@@ -65,7 +73,7 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @param mixed $diff
      */
-    public function setDiff( $diff ) {
+    public function setDiff( $diff ): EntryStruct {
         $this->_diff = $diff;
 
         return $this;
@@ -73,6 +81,8 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
     /**
      * @throws ValidationError
+     * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function setDefaults() {
 
@@ -80,14 +90,17 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
         // set the translation reading the version number on the
         // segment translation
-        $translation               = \Model\Translations\SegmentTranslationDao::findBySegmentAndJob( $this->id_segment, $this->id_job );
+        $translation               = SegmentTranslationDao::findBySegmentAndJob( $this->id_segment, $this->id_job );
         $this->translation_version = $translation->version_number;
 
         $this->penalty_points = $this->getPenaltyPoints();
         $this->id_category    = $this->validator->category->id;
     }
 
-    private function getPenaltyPoints() {
+    /**
+     * @return array|null
+     */
+    private function getPenaltyPoints(): ?float {
         $severities = $this->validator->category->getJsonSeverities();
 
         foreach ( $severities as $severity ) {
@@ -95,6 +108,8 @@ class EntryStruct extends AbstractDaoSilentStruct implements IDaoStruct {
                 return $severity[ 'penalty' ];
             }
         }
+
+        return null;
     }
 
 

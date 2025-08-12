@@ -2,6 +2,7 @@
 
 namespace View\API\V2\Json;
 
+use Model\DataAccess\IDaoStruct;
 use Model\LQA\EntryCommentDao;
 use Model\LQA\EntryStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -12,12 +13,12 @@ class SegmentTranslationIssue {
     /**
      * @var SplFileObject
      */
-    private $csvHandler;
+    private SplFileObject $csvHandler;
 
     public function __construct() {
     }
 
-    public function renderItem( $record ) {
+    public function renderItem( IdaoStruct $record ): array {
 
         $dao      = new EntryCommentDao();
         $comments = $dao->findByIssueId( $record->id );
@@ -26,10 +27,10 @@ class SegmentTranslationIssue {
         return [
                 'comment'             => $record->comment,
                 'created_at'          => date( 'c', strtotime( $record->create_date ) ),
-                'id'                  => (int)$record->id,
-                'id_category'         => (int)$record->id_category,
-                'id_job'              => (int)$record->id_job,
-                'id_segment'          => (int)$record->id_segment,
+                'id'                  => $record->id,
+                'id_category'         => $record->id_category,
+                'id_job'              => $record->id_job,
+                'id_segment'          => $record->id_segment,
                 'is_full_segment'     => $record->is_full_segment,
                 'severity'            => $record->severity,
                 'start_node'          => $record->start_node,
@@ -86,12 +87,14 @@ class SegmentTranslationIssue {
         return $filePath;
     }
 
-    private function decodeCategoryName( $id ) {
-
-        return null;
-    }
-
-    public function render( $array ) {
+    /**
+     * Render an array of records into a JSON format.
+     *
+     * @param EntryStruct[] $array
+     *
+     * @return array
+     */
+    public function render( array $array ): array {
         $out = [];
 
         foreach ( $array as $record ) {
@@ -101,7 +104,7 @@ class SegmentTranslationIssue {
         return $out;
     }
 
-    private function getDateValue( $strDate ) {
+    private function getDateValue( $strDate ): ?string {
         if ( $strDate != null ) {
             return date( 'c', strtotime( $strDate ) );
         }

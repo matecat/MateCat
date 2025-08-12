@@ -178,8 +178,8 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
 
     route( '/revise/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\ReviseTranslationIssuesController', 'index' ] );
 
-    route( '/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\SegmentVersion', 'index' ] );
-    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', [ '\Controller\API\V2\SegmentVersion', 'detail' ] );
+    route( '/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\SegmentVersionController', 'index' ] );
+    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', [ '\Controller\API\V2\SegmentVersionController', 'detail' ] );
 
     route( '/segments/[:id_segment]/translation-issues', 'POST', [ 'Controller\API\V2\SegmentTranslationIssueController', 'create' ] );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]', 'DELETE', [ 'Controller\API\V2\SegmentTranslationIssueController', 'delete' ] );

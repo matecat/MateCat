@@ -8,13 +8,14 @@
 
 namespace Plugins\Features\ReviewExtended;
 
+use Model\Jobs\JobStruct;
 use Model\LQA\ModelStruct;
 use Model\Projects\ProjectStruct;
 
 interface IChunkReviewModel {
 
     /**
-     * @return \Model\Jobs\JobStruct
+     * @return JobStruct
      */
     public function getChunk();
 
@@ -22,21 +23,21 @@ interface IChunkReviewModel {
      * adds penalty_points and updates pass fail result
      *
      * @param                         $penalty_points
-     * @param \Model\Projects\ProjectStruct $projectStruct
+     * @param ProjectStruct           $projectStruct
      *
      * @return
      */
-    public function addPenaltyPoints( $penalty_points, \Model\Projects\ProjectStruct $projectStruct );
+    public function addPenaltyPoints( $penalty_points, ProjectStruct $projectStruct );
 
     /**
      * subtract penalty_points and updates pass fail result
      *
-     * @param                         $penalty_points
-     * @param \Model\Projects\ProjectStruct $projectStruct
+     * @param float         $penalty_points
+     * @param ProjectStruct $projectStruct
      *
      * @return
      */
-    public function subtractPenaltyPoints( $penalty_points, \Model\Projects\ProjectStruct $projectStruct );
+    public function subtractPenaltyPoints( float $penalty_points, ProjectStruct $projectStruct );
 
     /**
      * Returns the calculated score

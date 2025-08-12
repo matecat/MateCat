@@ -12,18 +12,19 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
+use Model\Jobs\JobStruct;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
-use View\API\V2\Json\SegmentVersion as JsonFormatter;
+use View\API\V2\Json\SegmentVersion;
 
 
 class ChunkTranslationVersionController extends KleinController {
     use ChunkNotFoundHandlerTrait;
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( $chunk ) {
+    public function setChunk( JobStruct $chunk ): ChunkTranslationVersionController {
         $this->chunk = $chunk;
 
         return $this;
@@ -40,7 +41,7 @@ class ChunkTranslationVersionController extends KleinController {
 
         $this->featureSet->loadForProject( $this->chunk->getProject() );
 
-        $formatted = new JsonFormatter( $this->chunk, $results, false, $this->featureSet );
+        $formatted = new SegmentVersion( $this->chunk, $results, false, $this->featureSet );
 
         $this->response->json( [
                 'versions' => $formatted->render()
