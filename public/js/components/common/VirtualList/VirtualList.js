@@ -1,4 +1,4 @@
-import React, {forwardRef, useCallback, useEffect} from 'react'
+import React, {forwardRef, useCallback, useEffect, useRef} from 'react'
 import PropTypes from 'prop-types'
 import {useVirtual} from 'react-virtual'
 
@@ -29,11 +29,20 @@ const VirtualList = forwardRef(
       overscan,
     })
 
+    const scrollToIndexDebounceTmOut = useRef()
+
     // scroll to index
     useEffect(() => {
       if (typeof scrollToIndex?.value !== 'number') return
-      scrollToIndex.value >= 0 &&
-        fnScrollToIndex(scrollToIndex.value, {align: scrollToIndex?.align})
+      clearTimeout(scrollToIndexDebounceTmOut.current)
+
+      if (scrollToIndex.value >= 0) {
+        scrollToIndexDebounceTmOut.current = setTimeout(
+          () =>
+            fnScrollToIndex(scrollToIndex.value, {align: scrollToIndex?.align}),
+          100,
+        )
+      }
     }, [scrollToIndex?.value, scrollToIndex?.align, fnScrollToIndex])
 
     // rendered indexes

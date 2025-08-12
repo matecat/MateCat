@@ -38,10 +38,23 @@ export const UploadGdrive = () => {
   const openGDrivePrev = usePrevious(openGDrive)
 
   const currentFiltersExtractionParameters = useMemo(() => {
-    const unsavedTemplate = fileImportFiltersParamsTemplates.templates.find(
-      (template) =>
-        template.id === extractionParameterTemplateId && template.isTemporary,
-    )
+    const unsavedTemplate = fileImportFiltersParamsTemplates.templates
+      .filter(
+        (template) =>
+          template.id === extractionParameterTemplateId && template.isTemporary,
+      )
+      .map(
+        ({
+          /* eslint-disable */
+          isSelected,
+          isTemporary,
+          id,
+          created_at,
+          modified_at,
+          /* eslint-enable */
+          ...result
+        }) => result,
+      )[0]
 
     return unsavedTemplate
   }, [
@@ -184,50 +197,62 @@ export const UploadGdrive = () => {
               filters_extraction_parameters_template_id:
                 extractionParameterTemplateId,
             }),
-      }).then((response) => {
-        CreateProjectActions.hideErrors()
-        if (response.success) {
-          tryListGDriveFiles()
-        } else {
-          let message =
-            'There was an error retrieving the file from Google Drive. Try again and if the error persists contact the Support.'
-          if (response.error_class === 'Google\\Service\\Exception') {
-            message =
-              'There was an error retrieving the file from Google Drive: ' +
-              response.error_msg
-          }
-          if (response.error_code === 404) {
-            message = (
-              <span>
-                File retrieval error. To find out how to translate the desired
-                file, please{' '}
-                <a
-                  href="https://guides.matecat.com/google-drive-files-upload-issues"
-                  target="_blank"
-                >
-                  read this guide
-                </a>
-                .
-              </span>
-            )
-          }
-
-          CreateProjectActions.showError(message)
-
-          console.error(
-            'Error when processing request. Error class: ' +
-              response.error_class +
-              ', Error code: ' +
-              response.error_code +
-              ', Error message: ' +
-              message,
-          )
-          if (files.length === 0) {
-            setOpenGDrive(false)
-          }
-        }
-        setLoading(false)
       })
+        .then((response) => {
+          CreateProjectActions.hideErrors()
+          if (response.success) {
+            tryListGDriveFiles()
+          } else {
+            let message =
+              'There was an error retrieving the file from Google Drive. Try again and if the error persists contact the Support.'
+            if (response.error_class === 'Google\\Service\\Exception') {
+              message =
+                'There was an error retrieving the file from Google Drive: ' +
+                response.error_msg
+            }
+            if (response.error_code === 404) {
+              message = (
+                <span>
+                  File retrieval error. To find out how to translate the desired
+                  file, please{' '}
+                  <a
+                    href="https://guides.matecat.com/google-drive-files-upload-issues"
+                    target="_blank"
+                  >
+                    read this guide
+                  </a>
+                  .
+                </span>
+              )
+            }
+
+            CreateProjectActions.showError(message)
+
+            console.error(
+              'Error when processing request. Error class: ' +
+                response.error_class +
+                ', Error code: ' +
+                response.error_code +
+                ', Error message: ' +
+                message,
+            )
+            if (files.length === 0) {
+              setOpenGDrive(false)
+            }
+          }
+          setLoading(false)
+        })
+        .catch(() => {
+          const message = (
+            <span>
+              There was a problem uploading the file, please try again or
+              contact support.
+            </span>
+          )
+          CreateProjectActions.showError(message)
+          setLoading(false)
+          setOpenGDrive(false)
+        })
     }
   }
 
@@ -293,13 +318,22 @@ export const UploadGdrive = () => {
               filters_extraction_parameters_template_id:
                 extractionParameterTemplateId,
             }),
-      }).then((response) => {
-        setLoading(false)
-        if (response.success) {
+      })
+        .then((response) => {
+          setLoading(false)
           CreateProjectActions.enableAnalyzeButton(true)
           console.log('Source language changed.')
-        }
-      })
+        })
+        .catch((error) => {
+          const message = (
+            <span>
+              There was a problem uploading the file, please try again or
+              contact support.
+            </span>
+          )
+          CreateProjectActions.showError(message)
+          setLoading(false)
+        })
     }
   }
 

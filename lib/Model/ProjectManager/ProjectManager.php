@@ -172,6 +172,7 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
+
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [

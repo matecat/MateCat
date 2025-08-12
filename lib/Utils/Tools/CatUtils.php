@@ -1018,5 +1018,25 @@ class CatUtils {
 
         return $params;
     }
+
+    /**
+     * @param $filename
+     *
+     * @return string
+     */
+    public static function encodeFileName($filename)
+    {
+        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    }
+
+    /**
+     * @param $filename
+     *
+     * @return false|string
+     */
+    public static function decodeFileName($filename)
+    {
+        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
+    }
 }
 
