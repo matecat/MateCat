@@ -33,7 +33,7 @@ export const ProjectTemplate = ({portalTarget}) => {
     setProjectTemplates,
     currentProjectTemplate,
     modifyingCurrentTemplate,
-    subtemplatesNotSaved,
+    subtemplatesNotSaved = [],
   } = useContext(SettingsPanelContext)
 
   const [templateModifier, setTemplateModifier] = useState()
