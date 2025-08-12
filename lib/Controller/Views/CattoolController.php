@@ -32,6 +32,7 @@ use Model\Users\UserDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use ReflectionException;
 use stdClass;
+use Utils\Constants\SourcePages;
 use Utils\Constants\Teams;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\Intento;
@@ -183,7 +184,17 @@ class CattoolController extends BaseKleinViewController {
                 'review_password'                       => $isRevision ? $chunkReviewStruct->review_password : ( new ChunkReviewDao() )->findChunkReviewsForSourcePage( $chunkStruct, Utils::getSourcePage() + 1 )[ 0 ]->review_password,
                 'revisionNumber'                        => $revisionNumber,
                 'searchable_statuses'                   => new PHPTalMap( $this->searchableStatuses() ),
-                'secondRevisionsCount'                  => count( ChunkReviewDao::findByProjectId( $chunkStruct->getProject()->id ) ),
+                'secondRevisionsCount'                  => count(
+                        array_filter(
+                                ChunkReviewDao::findByProjectId( $chunkStruct->getProject()->id ),
+                                function ( $chunkReviewStruct ) use ( $chunkStruct ) {
+                                    /**
+                                     * @var $chunkReviewStruct ChunkReviewStruct
+                                     */
+                                    return $chunkReviewStruct->id_job == $chunkStruct->id && $chunkReviewStruct->source_page > SourcePages::SOURCE_PAGE_REVISION;
+                                }
+                        )
+                ),
                 'segmentFilterEnabled'                  => new PHPTalBoolean( true ),
                 'segmentQACheckInterval'                => CatUtils::isCJK( $chunkStruct->target ) ? 3000 * ( AppConfig::$SEGMENT_QA_CHECK_INTERVAL ) : 1000 * ( AppConfig::$SEGMENT_QA_CHECK_INTERVAL ),
                 'show_tag_projection'                   => new PHPTalBoolean( true ),

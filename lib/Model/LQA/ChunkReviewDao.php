@@ -21,6 +21,8 @@ class ChunkReviewDao extends AbstractDao {
             'id'
     ];
 
+    const sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
+
     protected function _buildResult( array $array_result ) {
     }
 
@@ -341,15 +343,22 @@ class ChunkReviewDao extends AbstractDao {
      * @throws ReflectionException
      */
     public static function findByProjectId( int $id_project, int $ttl = 60 * 60 ): array {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id_project = :id_project ORDER BY id ";
-
         $self = new self();
         $self->setCacheTTL( $ttl );
-        $stmt = $self->_getStatementForQuery( $sql );
+        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
 
         return $self->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
 
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public static function destroyCacheByProjectId( int $id_project ): bool {
+        $self = new self();
+        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
+
+        return $self->_destroyObjectCache( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
     }
 
     /**
@@ -509,7 +518,7 @@ class ChunkReviewDao extends AbstractDao {
         return $struct;
     }
 
-    public static function deleteByJobId(int $id_job ): bool {
+    public static function deleteByJobId( int $id_job ): bool {
         $sql  = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
