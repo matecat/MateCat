@@ -33,6 +33,7 @@ export const ProjectTemplate = ({portalTarget}) => {
     setProjectTemplates,
     currentProjectTemplate,
     modifyingCurrentTemplate,
+    subtemplatesNotSaved,
   } = useContext(SettingsPanelContext)
 
   const [templateModifier, setTemplateModifier] = useState()
@@ -349,7 +350,12 @@ export const ProjectTemplate = ({portalTarget}) => {
         <div className="settings-panel-templates-container-select">
           <h3>Project template</h3>
           <TemplateSelect
-            {...{projectTemplates, setProjectTemplates, currentProjectTemplate}}
+            {...{
+              projectTemplates,
+              setProjectTemplates,
+              currentProjectTemplate,
+              subtemplatesNotSaved,
+            }}
           />
           {templateModifier && <TemplateNameInput />}
         </div>
