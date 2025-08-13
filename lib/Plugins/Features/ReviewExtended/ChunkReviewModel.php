@@ -103,7 +103,7 @@ class ChunkReviewModel implements IChunkReviewModel {
     /**
      * @return float
      */
-    public function getPenaltyPoints(): float {
+    public function getPenaltyPoints(): ?float {
         return $this->chunk_review->penalty_points;
     }
 
