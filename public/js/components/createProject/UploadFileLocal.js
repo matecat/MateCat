@@ -519,7 +519,9 @@ function UploadFileLocal() {
         // iterate in the files dropped
         let f = files[i]
         if (f.type === '' && f.size % 4096 === 0) {
-          CreateProjectActions.showError("You can't upload folders.")
+          CreateProjectActions.showError(
+            'Uploading unzipped folders is not allowed. Please upload individual files, or a zipped folder.',
+          )
           files = files.filter((file) => file !== f)
         }
       }
