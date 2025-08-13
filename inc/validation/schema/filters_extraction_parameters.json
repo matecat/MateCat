@@ -111,7 +111,16 @@
           "nullable": true
         },
         "inner_content_type": {
-          "type": "array",
+          "type": "string",
+          "enum": [
+            "text/html",
+            "text/xml",
+            "application/xml",
+            "text/csv",
+            "application/json",
+            "text/markdown",
+            "text/x-markdown"
+          ],
           "nullable": true
         },
         "context_keys": {

@@ -9,9 +9,9 @@ class Yaml implements IDto, JsonSerializable {
 
     private array $translate_keys          = [];
     private array $do_not_translate_keys   = [];
-    private array $inner_content_type      = [];
     private array $context_keys            = [];
     private array $character_limit         = [];
+    private ?string $inner_content_type    = null;
 
     /**
      * @param array $translate_keys
@@ -28,9 +28,9 @@ class Yaml implements IDto, JsonSerializable {
     }
 
     /**
-     * @param array $inner_content_type
+     * @param string|null $inner_content_type
      */
-    public function setInnerContentType( array $inner_content_type ): void {
+    public function setInnerContentType( ?string $inner_content_type ): void {
 
         $mimeTypes = [
             'text/html',
@@ -42,9 +42,7 @@ class Yaml implements IDto, JsonSerializable {
             'text/x-markdown',
         ];
 
-        $inner_content_type = array_unique($inner_content_type);
-
-        if(!empty(array_diff($inner_content_type, $mimeTypes))){
+        if(!in_array($inner_content_type, $mimeTypes)){
             throw new DomainException("YAML Inner content type not valid. Allowed values: ['text/html', 'text/xml', 'application/xml', 'text/csv', 'application/json', 'text/markdown', 'text/x-markdown']");
         }
 
