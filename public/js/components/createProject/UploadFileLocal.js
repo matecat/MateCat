@@ -118,7 +118,7 @@ function UploadFileLocal() {
   }, [files])
 
   const handleFiles = (selectedFiles) => {
-    const fileList = Array.from(selectedFiles).map((file) => {
+    const fileList = selectedFiles.map((file) => {
       let name = file.name
       // Check if file with the same name already exists
       const filesSameName = files.filter((f) => f.originalName === name)
@@ -511,9 +511,20 @@ function UploadFileLocal() {
   const handleDrop = useCallback(
     (e) => {
       e.preventDefault()
-      handleFiles(e.dataTransfer.files)
-      setIsDragging(false)
+      CreateProjectActions.hideErrors()
       dragCounter.current = 0
+      let files = Array.from(e.dataTransfer.files)
+
+      for (var i = 0; i < files.length; i++) {
+        // iterate in the files dropped
+        let f = files[i]
+        if (f.type === '' && f.size % 4096 === 0) {
+          CreateProjectActions.showError("You can't upload folders.")
+          files = files.filter((file) => file !== f)
+        }
+      }
+      handleFiles(files)
+      setIsDragging(false)
     },
     [handleFiles],
   )
@@ -535,7 +546,7 @@ function UploadFileLocal() {
   }, [])
 
   const handleChange = (e) => {
-    handleFiles(e.target.files)
+    handleFiles(Array.from(e.target.files))
     e.target.value = ''
   }
 
