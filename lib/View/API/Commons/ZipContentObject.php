@@ -19,8 +19,8 @@ use stdClass;
 class ZipContentObject extends stdClass {
 
     public string  $output_filename;
-    public ?string $input_filename = null;
-    public string  $document_content;
+    public ?string $input_filename   = null;
+    public ?string $document_content = null;
 
     /**
      * @return string

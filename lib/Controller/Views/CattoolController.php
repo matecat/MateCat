@@ -218,7 +218,7 @@ class CattoolController extends BaseKleinViewController {
                 'translation_matches_enabled'           => new PHPTalBoolean( true ),
                 'warningPollingInterval'                => 1000 * ( AppConfig::$WARNING_POLLING_INTERVAL ),
                 'word_count_type'                       => $chunkStruct->getProject()->getWordCountType(),
-
+                'analysis_enabled'                      => new PHPTalBoolean( AppConfig::$VOLUME_ANALYSIS_ENABLED ),
 
                 'brPlaceholdEnabled'   => new PHPTalBoolean( true ),
                 'lfPlaceholder'        => CatUtils::lfPlaceholder,
