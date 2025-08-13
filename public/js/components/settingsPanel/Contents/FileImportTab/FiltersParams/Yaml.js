@@ -225,11 +225,9 @@ export const Yaml = () => {
               placeholder="Select inner content type"
               options={INNER_CONTENT_TYPE_OPTIONS}
               activeOption={INNER_CONTENT_TYPE_OPTIONS?.find(
-                ({id}) => id === value?.[0],
+                ({id}) => id === value,
               )}
-              onSelect={(option) =>
-                onChange(typeof option?.id === 'string' ? [option.id] : [])
-              }
+              onSelect={(option) => onChange(option.id)}
               maxHeightDroplist={260}
             />
           )}

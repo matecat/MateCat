@@ -11,7 +11,7 @@
     "translate_keys": [],
     "character_limit": [],
     "context_keys": [],
-    "inner_content_type": []
+    "inner_content_type": null
   },
   "json": {
     "extract_arrays": true,
