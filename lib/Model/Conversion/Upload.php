@@ -4,7 +4,6 @@ namespace Model\Conversion;
 
 use Exception;
 use Model\Conversion\MimeTypes\MimeTypes;
-use stdClass;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -14,7 +13,7 @@ use Utils\Tools\Utils;
  *
  * @example
  * <pre>
- *   if( \Registry::getInstance ()->get ( "HttpRequest", 'requestMethod' ) == 'POST' ) {
+ *   if( 'requestMethod' == 'POST' ) {
  *       $uploadInstance = new Upload();
  *       $uploadInstance->uploadFiles( $_FILES );
  *   }
@@ -69,12 +68,12 @@ class Upload {
      *
      * @param array $filesToUpload
      *
-     * @return stdClass
+     * @return UploadElement
      * @throws Exception
      */
-    public function uploadFiles( array $filesToUpload ): stdClass {
+    public function uploadFiles( array $filesToUpload ): UploadElement {
 
-        $result = new stdClass();
+        $result = new UploadElement();
 
         if ( empty( $filesToUpload ) ) {
             throw new Exception ( "No files received." );
@@ -92,14 +91,14 @@ class Upload {
         return $result;
     }
 
-    public static function getUniformGlobalFilesStructure( array $filesToUpload ): stdClass {
+    public static function getUniformGlobalFilesStructure( array $filesToUpload ): UploadElement {
 
-        $result = new stdClass();
+        $result = new UploadElement();
         foreach ( $filesToUpload as $inputName => $file ) {
 
             if ( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ) {
 
-                $_file = [];
+                $_file = new UploadElement();
                 foreach ( $file[ 'tmp_name' ] as $index => $value ) {
                     $_file[ 'tmp_name' ]            = $file[ 'tmp_name' ][ $index ];
                     $_file[ 'name' ]                = $file[ 'name' ][ $index ];
@@ -110,7 +109,7 @@ class Upload {
                 }
 
             } else {
-                $result->$inputName = $file;
+                $result->$inputName = new UploadElement( $file );
             }
 
         }
@@ -123,16 +122,12 @@ class Upload {
      * Upload File from $_FILES
      * $RegistryKeyIndex MUST BE form name Element
      *
-     * @param $fileUp
+     * @param UploadElement $fileUp
      *
      * @return object
      * @throws Exception
      */
-    protected function _uploadFile( $fileUp ): object {
-
-        if ( empty ( $fileUp ) ) {
-            throw new Exception ( __METHOD__ . " -> File Not Found In Registry Instance." );
-        }
+    protected function _uploadFile( UploadElement $fileUp ): object {
 
         // fix possibly XSS on the file name
         $fileUp[ 'name' ] = $this->fixFileName( $fileUp[ 'name' ] );
@@ -148,9 +143,6 @@ class Upload {
         if ( $fileSize == 0 ) {
             throw new Exception ( "The file '$out_filename' is empty." );
         }
-
-        $fileUp = (object)$fileUp;
-
 
         if ( !empty ( $fileError ) ) {
 
