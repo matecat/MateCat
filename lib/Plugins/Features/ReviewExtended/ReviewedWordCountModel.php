@@ -160,12 +160,13 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         for ( $i = 0; $i < count( $this->_chunkReviews ); $i++ ) {
 
             // build a new ChunkReviewStruct for partials
-            $chunkReview              = new ChunkReviewStruct();
-            $chunkReview->id          = $this->_chunkReviews[ $i ]->id;
-            $chunkReview->id_project  = $this->_chunkReviews[ $i ]->id_project;
-            $chunkReview->id_job      = $this->_chunkReviews[ $i ]->id_job;
-            $chunkReview->password    = $this->_chunkReviews[ $i ]->password;
-            $chunkReview->source_page = $this->_chunkReviews[ $i ]->source_page;
+            $chunkReview                  = new ChunkReviewStruct();
+            $chunkReview->id              = $this->_chunkReviews[ $i ]->id;
+            $chunkReview->id_project      = $this->_chunkReviews[ $i ]->id_project;
+            $chunkReview->id_job          = $this->_chunkReviews[ $i ]->id_job;
+            $chunkReview->password        = $this->_chunkReviews[ $i ]->password;
+            $chunkReview->review_password = $this->_chunkReviews[ $i ]->review_password;
+            $chunkReview->source_page     = $this->_chunkReviews[ $i ]->source_page;
 
             if ( $this->_event->isADraftChange() ) {
                 continue;
@@ -311,12 +312,12 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         }
 
         $segmentInfo = [
-            'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
-            'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
-            'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
-            'old_status'      => $this->_event->getOldTranslation()->status,
-            'new_status'      => $this->_event->getWantedTranslation()->status,
-            'issues'          => $serialized_issues
+                'segment_source'  => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getSegmentStruct()->segment ),
+                'old_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getOldTranslation()->translation ),
+                'new_translation' => Utils::htmlentitiesToUft8WithoutDoubleEncoding( $this->_event->getWantedTranslation()->translation ),
+                'old_status'      => $this->_event->getOldTranslation()->status,
+                'new_status'      => $this->_event->getWantedTranslation()->status,
+                'issues'          => $serialized_issues
         ];
 
         foreach ( $finalRevisions as $finalRevision ) {
@@ -351,7 +352,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
 
         $emails = $this->_chunk->getProject()->getFeaturesSet()->filter( 'filterRevisionChangeNotificationList', $emails );
 
-        if( !empty( $revision ) ){
+        if ( !empty( $revision ) ) {
             $url = CanonicalRoutes::revise(
                     $this->_chunk->getProject()->name,
                     $revision->id_job,
