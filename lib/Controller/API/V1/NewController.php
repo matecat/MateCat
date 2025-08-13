@@ -184,7 +184,7 @@ class NewController extends KleinController {
         }
 
         // mmtGlossaries
-         if ( $request[ 'mmt_glossaries' ] ) {
+        if ( $request[ 'mmt_glossaries' ] ) {
             $projectStructure[ 'mmt_glossaries' ] = $request[ 'mmt_glossaries' ];
         }
 
@@ -686,7 +686,7 @@ class NewController extends KleinController {
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $private_tm_key_json;
 
-                $validator  = new JSONValidator( $schema );
+                $validator = new JSONValidator( $schema );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 

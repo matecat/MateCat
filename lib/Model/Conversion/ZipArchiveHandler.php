@@ -156,7 +156,7 @@ class ZipArchiveHandler extends ZipArchive {
                 continue;
             }
 
-            $pathBySlash = array_map( [ 'Conversion\ZipArchiveHandler', 'treeKey' ], $pathBySlash );
+            $pathBySlash = array_map( [ ZipArchiveHandler::class, 'treeKey' ], $pathBySlash );
 
             $pathWithoutFile = $pathBySlash;
             $fileName        = array_pop( $pathWithoutFile );
@@ -224,7 +224,7 @@ class ZipArchiveHandler extends ZipArchive {
         $this->tree     = $Tree;
         $this->treeList = array_unique( $filePaths );
         $this->treeList = str_replace( DIRECTORY_SEPARATOR, self::INTERNAL_SEPARATOR, $this->treeList );
-        $this->treeList = array_map( [ 'Conversion\ZipArchiveHandler', 'prependZipFileName' ], $this->treeList );
+        $this->treeList = array_map( [ ZipArchiveHandler::class, 'prependZipFileName' ], $this->treeList );
 
     }
 
