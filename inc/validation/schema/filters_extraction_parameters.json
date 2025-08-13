@@ -146,8 +146,9 @@
           "nullable": true
         },
         "inner_content_type": {
-          "type": "string",
+          "type": ["null", "string"],
           "enum": [
+            null,
             "text/html",
             "text/xml",
             "application/xml",
