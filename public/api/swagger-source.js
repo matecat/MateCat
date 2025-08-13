@@ -2542,6 +2542,47 @@ var spec = {
         },
       },
     },
+    '/api/v3/xliff/{id_job}/{password}/{id_job}.zip': {
+      get: {
+        tags: ['Job', 'Files'],
+        summary: 'Download the xliff file(s)',
+        description: 'Download the job xliff file(s) in zip format',
+        parameters: [
+          {
+            name: 'id_job',
+            in: 'path',
+            description: 'The id of the job',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'password',
+            in: 'path',
+            description: 'The password of the job (Translate password)',
+            required: true,
+            type: 'string',
+          },
+          {
+            name: 'id_file',
+            in: 'path',
+            description: 'The ID of the job file',
+            required: true,
+            type: 'string',
+          },
+        ],
+        produces: [
+          'application/zip'
+        ],
+        responses: {
+          200: {
+            description: 'OK',
+          },
+          default: {
+            description: 'Unexpected error',
+          },
+        }
+      }
+    },
     '/api/v3/jobs/{id_job}/{password}/file/{id_file}/instructions': {
       get: {
         tags: ['Job', 'Files'],
