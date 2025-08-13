@@ -146,7 +146,7 @@ class GetWarningController extends KleinController {
      * @throws Exception
      */
     private function validateTheLocalRequest(): array {
-        $id                 = filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_NUMBER_INT );
+        $id                 = (int)filter_var( $this->request->param( 'id' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ] );
         $id_job             = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $src_content        = filter_var( $this->request->param( 'src_content' ), FILTER_UNSAFE_RAW );
         $trg_content        = filter_var( $this->request->param( 'trg_content' ), FILTER_UNSAFE_RAW );
