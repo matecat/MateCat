@@ -203,6 +203,15 @@ var spec = {
             example: '{"it-IT": true, "en-US": false, "fr-FR": false}',
           },
           {
+            name: 'lara_glossaries',
+            in: 'formData',
+            description:
+                'Specify the Lara\'s glossaries you want to use in the project',
+            required: false,
+            type: 'string',
+            example: '["gls_xyz123"]',
+          },
+          {
             name: 'mmt_glossaries',
             in: 'formData',
             description: 'Load specific MMT glossaries',
