@@ -112,6 +112,8 @@ use Utils\Shop\ItemHTSQuoteJob;
  */
 class Translated extends AbstractProvider {
 
+    use SessionStarter;
+
     private string $fixedDelivery;
     private string $typeOfService;
     private array  $_curlOptions;
@@ -133,7 +135,7 @@ class Translated extends AbstractProvider {
 
         parent::__construct();
 
-        SessionStarter::sessionStart();
+        static::sessionStart();
 
         $this->currency = "EUR";
 
