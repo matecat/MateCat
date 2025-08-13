@@ -398,7 +398,7 @@ class SegmentTranslationDao extends AbstractDao {
             $query .= ", version_number = :version_number";
         }
 
-        if ( isset( $translation[ 'autopropagated_from' ] ) ) {
+        if ( !isset( $translation[ 'autopropagated_from' ] ) ) {
             $query .= ", autopropagated_from = NULL";
         }
 
