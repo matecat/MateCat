@@ -391,16 +391,10 @@ class SegmentTranslationDao extends AbstractDao {
                 time_to_edit = time_to_edit + VALUES( time_to_edit ),
                 translation = :translation,
                 translation_date = :translation_date,
-                warning = :warning
+                warning = :warning,
+                version_number = :version_number,
+                autopropagated_from = :autopropagated_from
                 ";
-
-        if ( array_key_exists( 'version_number', $translation ) ) {
-            $query .= ", version_number = :version_number";
-        }
-
-        if ( !isset( $translation[ 'autopropagated_from' ] ) ) {
-            $query .= ", autopropagated_from = NULL";
-        }
 
         if ( empty( $translation[ 'translation' ] ) && !is_numeric( $translation[ 'translation' ] ) ) {
             $msg = "Error setTranslationUpdate. Empty translation found." . var_export( $_POST, true );
