@@ -206,7 +206,7 @@ var spec = {
             name: 'lara_glossaries',
             in: 'formData',
             description:
-                'Specify the Lara\'s glossaries you want to use in the project',
+                'Lara glossaries to be used for the project. Only works if a Lara engine is used.',
             required: false,
             type: 'string',
             example: '["gls_xyz123"]',
