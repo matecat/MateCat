@@ -52,15 +52,16 @@ function route( string $path, string $method, array $callback ) {
  *
  * @param int $code The HTTP error code.
  */
-$klein->onHttpError( function ( int $code, Klein $klein ) {
+$klein->onHttpError( function ( int $code, Klein $klein ) use ( &$isView ) {
     // Check if the error code is 404 (page not found)
     if ( $code == 404 ) {
-        // Create a new instance of the custom page view
-        $view = new CustomPageView();
-        // Set the view file for the 404 error page
-        $view->setView( '404.html' );
-        // Render the view with the 404 error code
-        $view->render( 404 );
+        if ( $isView ) {
+            throw new NotFoundException( 'Not Found.' ); // This will be caught by the Bootstrap exception handler
+        } else {
+            // If not a view, return a JSON response with the error
+            $klein->response()->code( 404 );
+            $klein->response()->json( ( new Error( new NotFoundException( 'Not Found.' ) ) )->render() );
+        }
     }
 } );
 
@@ -80,6 +81,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
             case InvalidValue::class:
             case InvalidArgumentException::class:
             case DomainException::class:
+            case UnexpectedValueException::class:
             case Model_ValidationError::class:
                 $klein->response()->code( 400 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );

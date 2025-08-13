@@ -221,6 +221,7 @@ class JobContainer extends React.Component {
           data.new_pwd,
           data.old_pwd,
           null,
+          null,
         )
         setTimeout(function () {
           $('.undo-password').off('click')

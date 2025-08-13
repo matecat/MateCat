@@ -8,6 +8,11 @@ use PDO;
 
 class EntryCommentDao extends AbstractDao {
 
+    /**
+     * @param $id_issue
+     *
+     * @return EntryCommentStruct[]
+     */
     public function findByIssueId( $id_issue ): array {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id_qa_entry = ? " .
                 " ORDER BY create_date DESC ";
@@ -20,11 +25,11 @@ class EntryCommentDao extends AbstractDao {
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
-     * @return mixed
+     * @return EntryCommentStruct
      */
-    public function createComment( $data ) {
+    public function createComment( array $data ): EntryCommentStruct {
         $struct              = new EntryCommentStruct( $data );
         $struct->create_date = date( 'Y-m-d H:i:s' );
 
@@ -54,7 +59,7 @@ class EntryCommentDao extends AbstractDao {
         return $struct;
     }
 
-    public function findById( $id ) {
+    public function findById( $id ): ?EntryCommentStruct {
         $sql  = "SELECT * FROM qa_entry_comments WHERE id = ? ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -64,7 +69,14 @@ class EntryCommentDao extends AbstractDao {
         return $stmt->fetch();
     }
 
-    public function fetchCommentsGroupedByIssueIds( $ids ) {
+    /**
+     * Fetches comments grouped by issue IDs.
+     *
+     * @param array $ids
+     *
+     * @return array
+     */
+    public function fetchCommentsGroupedByIssueIds( $ids ): array {
         $sql = "SELECT id_qa_entry, qa_entry_comments.* FROM qa_entry_comments WHERE id_qa_entry " .
                 " IN ( " . implode( ', ', $ids ) . " ) " .
                 " ORDER BY id_qa_entry, id ";

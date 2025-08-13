@@ -22,6 +22,7 @@ use Plugins\Features\ReviewExtended\Email\RevisionChangedNotificationEmail;
 use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationEvents\Model\TranslationEventStruct;
+use ReflectionException;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
 
@@ -63,6 +64,9 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      */
     private CounterModel $_jobWordCounter;
 
+    /**
+     * @throws ReflectionException
+     */
     public function __construct( TranslationEvent $event, CounterModel $jobWordCounter, array $chunkReviews ) {
         $this->_event          = $event;
         $this->_chunkReviews   = $chunkReviews;
@@ -109,7 +113,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         $chunkReview->reviewed_words_count -= $this->_event->getSegmentStruct()->raw_word_count;
         $chunkReview->penalty_points       -= $this->getPenaltyPointsForSourcePage( $chunkReview->source_page );
 
-        $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page );
+        $this->_event->setFinalRevisionToRemove( $chunkReview->source_page );
         $this->_event->setChunkReviewForPassFailUpdate( $chunkReview );
     }
 
@@ -122,7 +126,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
         if ( !$this->aFinalRevisionExistsForThisChunk( $chunkReview ) ) {
             $chunkReview->reviewed_words_count += $this->_event->getSegmentStruct()->raw_word_count;
         } else {
-            $this->_event->setFinalRevisionToRemove( (int)$chunkReview->source_page ); // remove the previous final flag to allow the new one
+            $this->_event->setFinalRevisionToRemove( $chunkReview->source_page ); // remove the previous final flag to allow the new one
         }
 
         // in this case, the tte is added by definition
@@ -244,8 +248,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      * Delete all issues
      *
      */
-    public
-    function deleteIssues() {
+    public function deleteIssues() {
         foreach ( $this->_event->getIssuesToDelete() as $issue ) {
             $issue->addComments( ( new EntryCommentStruct() )->getEntriesById( $issue->id ) );
             EntryDao::deleteEntry( $issue );
@@ -255,8 +258,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * @throws Exception
      */
-    public
-    function sendNotificationEmail() {
+    public function sendNotificationEmail() {
         if ( $this->_event->isPropagationSource() && $this->_event->isLowerTransition() ) {
             $chunkReviewsWithFinalRevisions = [];
             foreach ( $this->_chunkReviews as $chunkReview ) {
@@ -270,10 +272,11 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     }
 
     /**
-     * @param $source_page
+     * @param int $source_page
+     *
+     * @throws ReflectionException
      */
-    private
-    function flagIssuesToBeDeleted( $source_page ) {
+    private function flagIssuesToBeDeleted( int $source_page ) {
 
         $issue = EntryDao::findByIdSegmentAndSourcePage( $this->_event->getSegmentStruct()->id, $this->_chunk->id, $source_page );
         foreach ( $issue as $issueToDelete ) {
@@ -288,8 +291,7 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
      *
      * @throws Exception
      */
-    private
-    function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
+    private function _sendNotificationEmail( $finalRevisions, $chunkReviewsWithFinalRevisions ) {
         $emails                   = [];
         $userWhoChangedTheSegment = $this->_event->getUser();
         $revision                 = $chunkReviewsWithFinalRevisions[ $this->_event->getPreviousEventSourcePage() ] ?? null;
@@ -389,12 +391,11 @@ class ReviewedWordCountModel implements IReviewedWordCountModel {
     /**
      * Returns the sum of penalty points to subtract, reading from the previously populated _issuesDeletionList.
      *
-     * @param $source_page
+     * @param int $source_page
      *
      * @return int
      */
-    private
-    function getPenaltyPointsForSourcePage( $source_page ): int {
+    private function getPenaltyPointsForSourcePage( int $source_page ): int {
 
         $toReduce = $this->_event->getIssuesToDelete();
         $issues   = array_filter( $toReduce, function ( EntryStruct $issue ) use ( $source_page ) {

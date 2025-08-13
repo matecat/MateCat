@@ -8,13 +8,12 @@
 
 namespace Controller\API\V2;
 
-use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Klein\Request;
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Utils\Logger\Log;
@@ -23,29 +22,28 @@ use Utils\TMS\TMSService;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\GlossaryCSVValidator;
 
-class GlossariesController extends AbstractStatefulKleinController {
+class GlossaryFilesController extends KleinController {
 
     /**
      * @var Request
      */
     protected Request $request;
 
-    protected $name;
-    protected $tm_key;
+    protected string $name;
+    protected string $tm_key;
 
     /**
      * @var TMSService
      */
-    protected $TMService;
+    protected TMSService $TMService;
 
     /**
      * @var string
      */
-    public $downloadToken;
+    public string $downloadToken;
 
     protected function afterConstruct() {
         $this->TMService = new TMSService();
-        Bootstrap::sessionClose();
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
@@ -176,7 +174,7 @@ class GlossariesController extends AbstractStatefulKleinController {
      * @throws ValidationError
      * @throws Exception
      */
-    private function validateCSVFile( $file ) {
+    private function validateCSVFile( $file ): GlossaryCSVValidator {
 
         $validator = new GlossaryCSVValidator();
         $validator->validate( ValidatorObject::fromArray( [
@@ -201,7 +199,7 @@ class GlossariesController extends AbstractStatefulKleinController {
         $result = $this->TMService->glossaryUploadStatus( $uuid );
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccessResponse( $result->responseStatus, $result[ 'data' ] );
+            $this->setSuccessResponse( $result[ 'data' ]->responseStatus, $result[ 'data' ] );
         }
 
     }

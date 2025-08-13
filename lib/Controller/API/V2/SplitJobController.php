@@ -3,18 +3,18 @@
 namespace Controller\API\V2;
 
 use ArrayObject;
-use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
 use Model\Jobs\JobStruct;
-use Model\ProjectManager;
+use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 
-class SplitJobController extends AbstractStatefulKleinController {
+class SplitJobController extends KleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -195,9 +195,9 @@ class SplitJobController extends AbstractStatefulKleinController {
 
     /**
      * @param                  $jid
-     * @param \Model\Jobs\JobStruct[] $jobList
+     * @param JobStruct[]      $jobList
      *
-     * @return \Model\Jobs\JobStruct[]
+     * @return JobStruct[]
      * @throws Exception
      */
     private function checkMergeAccess( $jid, array $jobList ): array {

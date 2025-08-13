@@ -232,13 +232,15 @@ class QAModelTemplateDao extends AbstractDao {
     }
 
     /**
-     * @param int $uid
-     * @param int $current
-     * @param int $pagination
-     * @param int $ttl
+     * @param int    $uid
+     * @param string $baseRoute
+     * @param int    $current
+     * @param int    $pagination
+     * @param int    $ttl
      *
      * @return array
      * @throws ReflectionException
+     * @throws Exception
      */
     public static function getAllPaginated( int $uid, string $baseRoute, int $current = 1, int $pagination = 20, int $ttl = 60 * 60 * 24 ): array {
 
@@ -328,7 +330,7 @@ class QAModelTemplateDao extends AbstractDao {
         $QAModelTemplatePassfailStruct->thresholds = $stmt->fetchAll();
 
         // qa_model_template_categories
-        $stmt = $conn->prepare( "SELECT * FROM qa_model_template_categories WHERE id_template=:id_template ORDER BY sort ASC" );
+        $stmt = $conn->prepare( "SELECT * FROM qa_model_template_categories WHERE id_template=:id_template ORDER BY sort " );
         $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateCategoryStruct::class );
         $stmt->execute( [
                 'id_template' => $QAModelTemplateStruct->id
@@ -337,7 +339,7 @@ class QAModelTemplateDao extends AbstractDao {
         $QAModelTemplateCategoryStructs = $stmt->fetchAll();
 
         foreach ( $QAModelTemplateCategoryStructs as $QAModelTemplateCategoryStruct ) {
-            $stmt = $conn->prepare( "SELECT * FROM qa_model_template_severities WHERE id_category=:id_category ORDER BY sort ASC " );
+            $stmt = $conn->prepare( "SELECT * FROM qa_model_template_severities WHERE id_category=:id_category ORDER BY sort " );
             $stmt->setFetchMode( PDO::FETCH_CLASS, QAModelTemplateSeverityStruct::class );
             $stmt->execute( [
                     'id_category' => $QAModelTemplateCategoryStruct->id
@@ -400,7 +402,7 @@ class QAModelTemplateDao extends AbstractDao {
                     VALUES (:id_template, :id_parent, :category_label, :code, :sort) " );
                 $stmt->execute( [
                         'id_template'    => $categoryStruct->id_template,
-                        'id_parent'      => ( $categoryStruct->id_parent ) ? $categoryStruct->id_parent : null,
+                        'id_parent'      => ( $categoryStruct->id_parent ) ?: null,
                         'category_label' => $categoryStruct->category_label,
                         'code'           => $categoryStruct->code,
                         'sort'           => (int)( $categoryStruct->sort ) ? $categoryStruct->sort : (int)( $csort + 1 ),
@@ -442,10 +444,10 @@ class QAModelTemplateDao extends AbstractDao {
     /**
      * @param QAModelTemplateStruct $modelTemplateStruct
      *
-     * @return mixed
+     * @return QAModelTemplateStruct
      * @throws Exception
      */
-    public static function update( QAModelTemplateStruct $modelTemplateStruct ) {
+    public static function update( QAModelTemplateStruct $modelTemplateStruct ): QAModelTemplateStruct {
         $conn = Database::obtain()->getConnection();
         $conn->beginTransaction();
 
@@ -497,7 +499,7 @@ class QAModelTemplateDao extends AbstractDao {
                     VALUES (:id_template,:id_parent,:category_label,:code,:sort) " );
                 $stmt->execute( [
                         'id_template'    => $categoryStruct->id_template,
-                        'id_parent'      => ( $categoryStruct->id_parent ) ? $categoryStruct->id_parent : null,
+                        'id_parent'      => ( $categoryStruct->id_parent ) ?: null,
                         'category_label' => $categoryStruct->category_label,
                         'code'           => $categoryStruct->code,
                         'sort'           => ( $categoryStruct->sort ) ? (int)$categoryStruct->sort : (int)( $csort + 1 ),

@@ -21,6 +21,8 @@ class ChunkReviewDao extends AbstractDao {
             'id'
     ];
 
+    const sql_for_get_by_project_id = "SELECT * FROM qa_chunk_reviews WHERE id_project = :id_project ORDER BY id";
+
     protected function _buildResult( array $array_result ) {
     }
 
@@ -341,25 +343,32 @@ class ChunkReviewDao extends AbstractDao {
      * @throws ReflectionException
      */
     public static function findByProjectId( int $id_project, int $ttl = 60 * 60 ): array {
-        $sql = "SELECT * FROM qa_chunk_reviews " .
-                " WHERE id_project = :id_project ORDER BY id ";
-
         $self = new self();
         $self->setCacheTTL( $ttl );
-        $stmt = $self->_getStatementForQuery( $sql );
+        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
 
         return $self->_fetchObjectMap( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
 
     }
 
     /**
+     * @throws ReflectionException
+     */
+    public static function destroyCacheByProjectId( int $id_project ): bool {
+        $self = new self();
+        $stmt = $self->_getStatementForQuery( self::sql_for_get_by_project_id );
+
+        return $self->_destroyObjectCache( $stmt, ChunkReviewStruct::class, [ 'id_project' => $id_project ] );
+    }
+
+    /**
      * @param     $review_password
      * @param     $id_job
      *
-     * @return ChunkReviewStruct
+     * @return ?ChunkReviewStruct
      */
 
-    public static function findByReviewPasswordAndJobId( $review_password, $id_job ): ChunkReviewStruct {
+    public static function findByReviewPasswordAndJobId( $review_password, $id_job ): ?ChunkReviewStruct {
         $sql = "SELECT * FROM qa_chunk_reviews " .
                 " WHERE review_password = :review_password " .
                 " AND id_job = :id_job ";
@@ -509,7 +518,7 @@ class ChunkReviewDao extends AbstractDao {
         return $struct;
     }
 
-    public static function deleteByJobId(int $id_job ): bool {
+    public static function deleteByJobId( int $id_job ): bool {
         $sql  = "DELETE FROM qa_chunk_reviews WHERE id_job = :id_job ";
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -535,11 +544,13 @@ class ChunkReviewDao extends AbstractDao {
         // in MySQL a sum of a null value to an integer returns 0
         // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division
         $sql = "INSERT INTO 
-            qa_chunk_reviews ( id, id_job, password, penalty_points, reviewed_words_count, total_tte ) 
+            qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte ) 
         VALUES( 
             :id,
             :id_job,
+            :id_project,
             :password,
+            :review_password,
             :penalty_points,
             :reviewed_words_count,
             :total_tte
@@ -560,6 +571,8 @@ class ChunkReviewDao extends AbstractDao {
         $stmt->execute( [
                 'id'                   => $chunkReviewID,
                 'id_job'               => $chunkReview->id_job,
+                'id_project'           => $chunkReview->id_project,
+                'review_password'      => $chunkReview->review_password,
                 'password'             => $chunkReview->password,
                 'penalty_points'       => empty( $data[ 'penalty_points' ] ) ? 0 : $data[ 'penalty_points' ],
                 'reviewed_words_count' => $data[ 'reviewed_words_count' ],

@@ -14,7 +14,6 @@ use Model\LQA\EntryDao as EntryDao;
 use Model\LQA\EntryStruct;
 use Plugins\Features\ReviewExtended\ReviewUtils;
 use Plugins\Features\ReviewExtended\TranslationIssueModel;
-use ReflectionException;
 use View\API\V2\Json\SegmentTranslationIssue as TranslationIssueFormatter;
 use View\API\V2\Json\TranslationIssueComment;
 
@@ -70,7 +69,7 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
         );
 
         if ( $this->request->param( 'diff' ) ) {
-            $model->setDiff( $this->request->param( 'diff' ) );
+            $model->setDiff( (array)$this->request->param( 'diff' ) );
         }
 
         $struct = $model->save();
@@ -121,7 +120,6 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
     }
 
     /**
-     * @throws ReflectionException
      */
     public function createComment() {
 
@@ -170,12 +168,12 @@ class SegmentTranslationIssueController extends AbstractStatefulKleinController 
 
     }
 
-    private function getVersionNumber() {
+    private function getVersionNumber(): int {
         if ( null !== $this->request->param( 'version_number' ) ) {
-            return $this->request->param( 'version_number' );
+            return (int)$this->request->param( 'version_number' );
         }
 
-        return $this->validator->translation->version_number;
+        return (int)$this->validator->translation->version_number;
     }
 
 }

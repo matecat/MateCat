@@ -403,7 +403,7 @@ class MyMemory extends AbstractEngine {
      *
      * @return TmxResponse
      */
-    public function entryStatus( string $uuid ): TmxResponse {
+    public function entryStatus( string $uuid ): TMSAbstractResponse {
 
         // 1 second timeout
         $this->_setAdditionalCurlParams( [
@@ -412,10 +412,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-
-        /**
-         * @var TmxResponse
-         */
+        
         return $this->result;
     }
 
@@ -644,11 +641,11 @@ class MyMemory extends AbstractEngine {
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param string $term
+     * @param array  $term
      *
      * @return SetGlossaryResponse
      */
-    public function glossarySet( string $idSegment, string $idJob, string $password, string $term ): SetGlossaryResponse {
+    public function glossarySet( string $idSegment, string $idJob, string $password, array $term ): SetGlossaryResponse {
         $payload = [
                 'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,
@@ -666,11 +663,11 @@ class MyMemory extends AbstractEngine {
      * @param string $idSegment
      * @param string $idJob
      * @param string $password
-     * @param string $term
+     * @param array  $term
      *
      * @return UpdateGlossaryResponse
      */
-    public function glossaryUpdate( string $idSegment, string $idJob, string $password, string $term ): UpdateGlossaryResponse {
+    public function glossaryUpdate( string $idSegment, string $idJob, string $password, array $term ): UpdateGlossaryResponse {
         $payload = [
                 'de'         => AppConfig::$MYMEMORY_API_KEY,
                 "id_segment" => $idSegment,

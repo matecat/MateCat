@@ -7,29 +7,29 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use Model\Segments\SegmentDao;
+use Model\Segments\SegmentStruct;
+use ReflectionException;
 
 class EntryValidator {
 
-    public $segment;
-    public $project;
-    public $chunk;
-    public $translation;
-    public $qa_model;
-    public $category;
-    public $issue;
+    public ?SegmentStruct  $segment;
+    public ?ProjectStruct  $project;
+    public ?ModelStruct    $qa_model = null;
+    public ?CategoryStruct $category = null;
 
-    protected $errors = [];
+    protected array $errors = [];
 
-    protected $struct;
+    protected EntryStruct $struct;
 
-    protected $validated = false;
+    protected bool    $validated = false;
 
-    public function __construct( $struct ) {
+    public function __construct( EntryStruct $struct ) {
         $this->struct = $struct;
     }
 
-    public function getErrors() {
+    public function getErrors(): array {
         return $this->errors;
     }
 
@@ -37,17 +37,19 @@ class EntryValidator {
         $this->errors = [];
     }
 
-    public function getErrorMessages() {
+    public function getErrorMessages(): array {
         return array_map( function ( $item ) {
             return implode( ' ', $item );
         }, $this->errors );
     }
 
-    public function getErrorsAsString() {
+    public function getErrorsAsString(): string {
         return implode( ', ', $this->getErrorMessages() );
     }
 
     /**
+     * @throws NotFoundException
+     * @throws ReflectionException
      * @throws ValidationError
      */
     public function ensureValid() {
@@ -56,7 +58,11 @@ class EntryValidator {
         }
     }
 
-    public function isValid() {
+    /**
+     * @throws ReflectionException
+     * @throws NotFoundException
+     */
+    public function isValid(): bool {
         $this->flushErrors();
         $this->validate();
         $errors          = $this->getErrors();
@@ -67,6 +73,7 @@ class EntryValidator {
 
     /**
      * @throws NotFoundException
+     * @throws ReflectionException
      */
 
     public function validate() {
@@ -77,8 +84,8 @@ class EntryValidator {
             throw new NotFoundException( 'segment not found' );
         }
 
-        $this->job     = JobDao::getById( $this->struct->id_job )[ 0 ];
-        $this->project = ProjectDao::findById( $this->job->id_project );
+        $job           = JobDao::getById( $this->struct->id_job )[ 0 ];
+        $this->project = ProjectDao::findById( $job->id_project );
 
         $this->validateCategoryId();
         $this->validateInSegmentScope();
@@ -92,6 +99,9 @@ class EntryValidator {
         }
     }
 
+    /**
+     * @throws ReflectionException
+     */
     private function validateCategoryId() {
         $this->qa_model = ModelDao::findById( $this->project->id_qa_model );
         $this->category = CategoryDao::findById( $this->struct->id_category );

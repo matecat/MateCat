@@ -52,8 +52,8 @@ $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
 
     route( '/revise/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\ReviseTranslationIssuesController', 'index' ] );
 
-    route( '/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\SegmentVersion', 'index' ] );
-    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', [ '\Controller\API\V2\SegmentVersion', 'detail' ] );
+    route( '/segments/[:id_segment]/translation-versions', 'GET', [ '\Controller\API\V2\SegmentVersionController', 'index' ] );
+    route( '/segments/[:id_segment]/translation-versions/[:version_number]', 'GET', [ '\Controller\API\V2\SegmentVersionController', 'detail' ] );
 
     route( '/segments/[:id_segment]/translation-issues', 'POST', [ 'Controller\API\V2\SegmentTranslationIssueController', 'create' ] );
     route( '/segments/[:id_segment]/translation-issues/[:id_issue]', 'DELETE', [ 'Controller\API\V2\SegmentTranslationIssueController', 'delete' ] );
@@ -77,10 +77,10 @@ $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
 
 $klein->with( '/api/v2/glossaries', function () {
 
-    route( '/check/', 'POST', [ '\Controller\API\V2\GlossariesController', 'check' ] );
-    route( '/import/', 'POST', [ '\Controller\API\V2\GlossariesController', 'import' ] );
-    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossariesController', 'uploadStatus' ] );
-    route( '/export/', 'POST', [ '\Controller\API\V2\GlossariesController', 'download' ] );
+    route( '/check/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'check' ] );
+    route( '/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
+    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'uploadStatus' ] );
+    route( '/export/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'download' ] );
 
 } );
 

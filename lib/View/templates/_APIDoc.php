@@ -1,6 +1,7 @@
 <?php
 
 
+use Controller\Views\CustomPageView;
 use Model\FeaturesBase\FeatureSet;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
@@ -52,17 +53,14 @@ $csp       = str_replace( '${x_nonce_unique_id}', $csp_nonce, $csp );
     <script src='/public/api/swagger-source.js' type='text/javascript'></script>
     <?php
 
-    $reflect  = new ReflectionClass( 'CustomPageView' );
-    $instance = $reflect->newInstanceArgs( [] );
+    $reflect  = new ReflectionClass( CustomPageView::class );
+    $instance = $reflect->newInstanceArgs();
 
     $featureSet = new FeatureSet();
 
     if($instance->getUser()->email !== null){
         $featureSet->loadFromUserEmail( $instance->getUser()->email );
     }
-
-    $appendJS = $featureSet->filter( 'overloadAPIDocs', [] );
-    echo implode( "\n", $appendJS );
 
     ?>
     <script nonce="<?= $csp_nonce ?>" type="application/javascript">

@@ -142,6 +142,8 @@ class Bootstrap {
                 break;
             case InvalidArgumentException::class:
             case ValidationError:: class:
+            case DomainException::class:
+            case UnexpectedValueException::class:
             case Model\Exceptions\ValidationError::class:
                 $code = 400;
                 Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );

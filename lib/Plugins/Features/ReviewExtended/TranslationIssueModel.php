@@ -10,12 +10,12 @@ namespace Plugins\Features\ReviewExtended;
 
 use Exception;
 use Model\Exceptions\ValidationError;
+use Model\Jobs\JobStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryDao;
 use Model\LQA\EntryStruct;
 use Model\Projects\ProjectStruct;
-use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
 use Plugins\Features\TranslationVersions\Model\TranslationVersionStruct;
 use Utils\Tools\Utils;
@@ -25,24 +25,24 @@ class TranslationIssueModel {
     /**
      * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
-    private $diff;
+    private ?array $diff = null;
 
     /**
      * @var EntryStruct
      */
-    protected $issue;
+    protected EntryStruct $issue;
 
     /**
-     * @var ChunkReviewStruct
+     * @var ChunkReviewStruct|null
      */
-    protected $chunk_review;
+    protected ?ChunkReviewStruct $chunk_review;
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
-    protected $chunk;
+    protected JobStruct $chunk;
 
     /**
      * @param             $id_job
@@ -65,7 +65,7 @@ class TranslationIssueModel {
      * This change was introduced for the new revision, in which issues have to come with a diff object because
      * selection is referred to the difference between segments.
      */
-    public function setDiff( $diff ) {
+    public function setDiff( ?array $diff = null ) {
         $this->diff = $diff;
     }
 
@@ -77,7 +77,7 @@ class TranslationIssueModel {
      * @throws ValidationError
      * @throws Exception
      */
-    public function save() {
+    public function save(): EntryStruct {
         $this->setDefaultIssueValues();
 
         if ( !empty( $this->diff ) ) {
@@ -105,6 +105,9 @@ class TranslationIssueModel {
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function saveDiff() {
         $string_to_save = json_encode( $this->diff );
 
@@ -124,11 +127,11 @@ class TranslationIssueModel {
         );
 
         if ( !$version_record ) {
-            $insert = TranslationVersionDao::insertStruct( $struct );
+            TranslationVersionDao::insertStruct( $struct );
         } else {
             // in case the record exists, we have to update it with the diff anyway
             $version_record->raw_diff = $string_to_save;
-            $update                   = TranslationVersionDao::updateStruct( $version_record, [ 'fields' => [ 'raw_diff' ] ] );
+            TranslationVersionDao::updateStruct( $version_record, [ 'fields' => [ 'raw_diff' ] ] );
         }
 
     }
@@ -147,16 +150,9 @@ class TranslationIssueModel {
         // $this->chunkReview may not refer to the chunk review associated to issue source page
         //
         $chunkReview    = ChunkReviewDao::findByIdJobAndPasswordAndSourcePage( $this->chunk->id, $this->chunk->password, $this->issue->source_page );
-        $final_revision = ( new TranslationEventDao() )->getFinalRevisionForSegmentAndSourcePage(
-                $chunkReview->id_job,
-                $this->issue->id_segment,
-                $this->issue->source_page
-        );
 
-        if ( $final_revision ) {
-            $chunk_review_model = new ChunkReviewModel( $chunkReview );
-            $this->subtractPenaltyPoints( $chunk_review_model );
-        }
+        $chunk_review_model = new ChunkReviewModel( $chunkReview );
+        $this->subtractPenaltyPoints( $chunk_review_model );
     }
 
     /**

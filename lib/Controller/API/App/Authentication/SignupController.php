@@ -5,7 +5,7 @@ namespace Controller\API\App\Authentication;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\AuthCookie;
 use Controller\Abstracts\Authentication\AuthenticationHelper;
-use Controller\Abstracts\Authentication\SessionTokenRingHandler;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
 use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\Traits\RateLimiterTrait;
@@ -121,7 +121,7 @@ class SignupController extends AbstractStatefulKleinController {
 
             $user = $signupModel->confirm();
 
-            AuthCookie::setCredentials( $user, new SessionTokenRingHandler() );
+            AuthCookie::setCredentials( $user, new SessionTokenStoreHandler() );
             AuthenticationHelper::getInstance( $_SESSION );
 
             if ( InvitedUser::hasPendingInvitations() ) {
