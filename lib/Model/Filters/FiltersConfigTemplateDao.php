@@ -117,7 +117,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getById( int $id, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id' => $id,
         ] );
 
@@ -138,7 +138,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
         ] );
@@ -160,7 +160,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
                 'uid'  => $uid,
                 'name' => $name,
         ] );

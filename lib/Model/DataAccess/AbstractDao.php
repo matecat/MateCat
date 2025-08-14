@@ -186,25 +186,6 @@ abstract class AbstractDao {
     }
 
     /**
-     * @param PDOStatement $stmt
-     * @param IDaoStruct   $fetchClass
-     * @param array        $bindParams
-     *
-     * @return IDaoStruct[]
-     * @throws ReflectionException
-     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
-     *
-     */
-    protected function _fetchObject( PDOStatement $stmt, IDaoStruct $fetchClass, array $bindParams ): array {
-
-        $trace = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
-
-        $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
-
-        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
-    }
-
-    /**
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
