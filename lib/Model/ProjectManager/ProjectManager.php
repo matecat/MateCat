@@ -568,6 +568,7 @@ class ProjectManager {
      * Creates record in projects tabele and instantiates the project struct
      * internally.
      *
+     * @throws ReflectionException
      */
     private function __createProjectRecord() {
         $this->project = ProjectManagerModel::createProjectRecord( $this->projectStructure );
@@ -2232,6 +2233,7 @@ class ProjectManager {
                         // segment original data
                         if ( !empty( $segmentOriginalData ) ) {
 
+                            // this seems not to be used, SegmentOriginalDataStruct do not have a 'data' key.
                             $segmentOriginalDataStruct = new SegmentOriginalDataStruct( [
                                     'data' => $segmentOriginalData,
                             ] );

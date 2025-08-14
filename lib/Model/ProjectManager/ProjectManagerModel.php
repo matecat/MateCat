@@ -64,12 +64,12 @@ class ProjectManagerModel {
      * @param string      $file_name
      * @param string      $mime_type
      * @param string      $fileDateSha1Path
-     * @param array|null  $meta
+     * @param ArrayObject $meta
      *
      * @return string
      * @throws Exception
      */
-    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?array $meta = null ): string {
+    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ArrayObject $meta ): string {
 
         $data                         = [];
         $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
