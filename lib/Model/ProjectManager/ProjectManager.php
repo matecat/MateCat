@@ -99,10 +99,10 @@ class ProjectManager {
      *
      * @var int
      */
-    protected int $show_in_cattool_segs_counter = 0;
-    protected int $files_word_count             = 0;
-    protected int $total_segments               = 0;
-    protected array $min_max_segments_id = [];
+    protected int   $show_in_cattool_segs_counter = 0;
+    protected int   $files_word_count             = 0;
+    protected int   $total_segments               = 0;
+    protected array $min_max_segments_id          = [];
 
     /**
      * @var ArrayObject|RecursiveArrayObject
@@ -265,7 +265,7 @@ class ProjectManager {
         $this->_log( $this->features->getCodes() );
 
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
+        $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
         $this->filter = $filter;
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
@@ -314,7 +314,8 @@ class ProjectManager {
     }
 
     /**
-     * Project name is required to build the analysis URL. Project name is memoized in an instance variable
+     * Project name is required to build the analysis URL.
+     * The project name is memoized in an instance variable
      * so to perform the check only the first time on $projectStructure['project_name'].
      *
      * @throws Exception
@@ -362,7 +363,7 @@ class ProjectManager {
                 }
             }
 
-            // when the request comes from ProjectCreation daemon, it is already an ArrayObject
+            // when the request comes from the ProjectCreation daemon, it is already an ArrayObject
             $this->projectStructure[ 'xliff_parameters' ] = XliffRulesModel::fromArrayObject( $this->projectStructure[ 'xliff_parameters' ] );
 
         } catch ( DomainException $ex ) {
@@ -452,7 +453,7 @@ class ProjectManager {
         }
 
         // mt evaluation => ice_mt already in metadata
-        // add json parameters to the project metadata as json string
+        // adds JSON parameters to the project metadata as JSON string
         if ( $options[ 'mt_qe_workflow_enabled' ] ?? false ) {
             $options[ 'mt_qe_workflow_parameters' ] = json_encode( $options[ 'mt_qe_workflow_parameters' ] );
         }
@@ -540,7 +541,7 @@ class ProjectManager {
 
     /**
      * Perform sanitization of the projectStructure and assign errors.
-     * Resets the errors array to avoid subsequent calls to pile up errors.
+     * Resets the error array to avoid further calls to pile up errors.
      *
      * Please NOTE: this method is called by controllers and by ProjectManager itself, in the latter case
      *  'project_features' field already contains a RecursiveArrayObject,
@@ -635,7 +636,7 @@ class ProjectManager {
             return false;
         }
 
-        //sort files in order to process TMX first
+        //sort files to process TMX first
         $sortedFiles      = [];
         $sortedMeta       = [];
         $firstTMXFileName = "";
@@ -684,7 +685,7 @@ class ProjectManager {
 
         Log::doJsonLog( $uploadDir );
 
-        //we are going to access the storage, get model object to manipulate it
+        //we are going to access the storage, get a model object to manipulate it
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
         Log::doJsonLog( $linkFiles );
@@ -716,25 +717,25 @@ class ProjectManager {
             $meta            = $this->projectStructure[ 'array_files_meta' ][ $pos ];
             $mustBeConverted = $meta[ 'mustBeConverted' ];
 
-            //if it's one of the listed formats or conversion is not enabled in first place
+            //if it's one of the listed formats, or conversion is not enabled in the first place
             if ( !$mustBeConverted ) {
                 /*
-                   filename is already a xliff, and it's in upload directory
+                   the filename is already a xliff, and it's in the upload directory
                    we have to make a cache package from it to avoid altering the original path
                  */
-                //get file
+                //get the file
                 $filePathName = "$this->uploadDir/$fileName";
 
                 // NOTE: 12 Aug 2019
-                // I am not absolute sure that the queue file exists,
-                // so I check it and in negative case I force the download of the file to file system from S3
+                // I am not sure that the queue file exists,
+                // so I check it, and in negative case I force the download of the file to the file system from S3
                 $isFsOnS3 = AbstractFilesStorage::isOnS3();
 
                 if ( $isFsOnS3 and false === file_exists( $filePathName ) ) {
                     $this->getSingleS3QueueFile( $fileName );
                 }
 
-                // calculate hash + add the fileName, if I load 3 equal files with the same content
+                // calculate hash and add the fileName, if I load 3 equal files with the same content,
                 // they will be squashed to the last one
                 $sha1 = sha1_file( $filePathName );
 
@@ -748,14 +749,14 @@ class ProjectManager {
                     ];
                 }
 
-                // put reference to cache in upload dir to link cache to session
+                // put reference to cache in the upload dir to link cache to session
                 $fs->linkSessionToCacheForAlreadyConvertedFiles(
                         $sha1,
                         $this->projectStructure[ 'uploadToken' ],
                         $fileName
                 );
 
-                //add newly created link to list
+                //add a newly created link to the list
                 $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ];
 
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . AbstractFilesStorage::OBJECTS_SAFE_DELIMITER . $this->projectStructure[ 'source_language' ] ][] = $fileName;
@@ -794,12 +795,12 @@ class ProjectManager {
                 $sha1_original = $hashFile[ 0 ];
                 $lang          = $hashFile[ 1 ];
 
-                //use hash and lang to fetch file from package
+                //use hash and lang to fetch the file from the package
                 $cachedXliffFilePathName = $fs->getXliffFromCache( $sha1_original, $lang );
 
-                //associate the hash to the right file in upload directory
+                //associate the hash with the right file in upload directory
                 //get original file name, to insert into DB and cp in storage
-                //PLEASE NOTE, this can be an array when the same file added more
+                //PLEASE NOTE; this can be an array when the same file added more
                 // than once and with different names
                 $_originalFileNames = $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $linkFile ];
 
@@ -852,7 +853,7 @@ class ProjectManager {
                         ];
                     } // SEVERE EXCEPTIONS HERE
                     elseif ( $e->getCode() == -6 ) {
-                        //"File not found on server after upload."
+                        //"File isn't found on server after upload."
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
                                 "code"    => $e->getCode(),
                                 "message" => $e->getMessage()
@@ -866,7 +867,7 @@ class ProjectManager {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
                                 "code" => $e->getCode(), "message" => $e->getMessage()
                         ];
-                        //we can not write to disk!! Break project creation
+                        //we cannot write to disk!! Break project creation
                     } // S3 EXCEPTIONS HERE
                     elseif ( $e->getCode() == -200 ) {
                         $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -894,7 +895,7 @@ class ProjectManager {
 
                 }
 
-                //array append like array_merge, but it does not renumber the numeric keys, so we can preserve the files id
+                //this is an "array append" like array_merge, but it does not renumber the numeric keys, so we can preserve the files id
                 $totalFilesStructure += $filesStructure;
 
             } //end of conversion hash-link loop
@@ -927,12 +928,12 @@ class ProjectManager {
                 }
             }
 
-            //Allow projects with less than 250.000 words or characters ( for cjk languages )
+            //Allow projects with less than 250.000 words or characters (for cjk languages)
             if ( $this->files_word_count > AppConfig::$MAX_SOURCE_WORDS ) {
                 throw new Exception( "Matecat is unable to create your project. Please contact us at " . AppConfig::$SUPPORT_MAIL . ", we will be happy to help you!", 128 );
             }
 
-            // check for project Creation, before wasting disk space
+            // check for project Creation before wasting disk space
             $this->features->run( "beforeProjectCreation", $this->projectStructure, [
                             'total_project_segments' => $this->total_segments,
                             'files_raw_wc'           => $this->files_word_count
@@ -958,7 +959,7 @@ class ProjectManager {
                         "message" => "No text to translate in the file " . ZipArchiveHandler::getFileName( $e->getMessage() ) . "."
                 ];
                 if ( AppConfig::$FILE_STORAGE_METHOD != 's3' ) {
-                    $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile );
+                    $fs->deleteHashFromUploadDir( $this->uploadDir, $linkFile ?? '' );
                 }
             } elseif ( $e->getCode() == -4 ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][] = [
@@ -1018,7 +1019,7 @@ class ProjectManager {
             // Save the instruction notes in the same order of files
             //
             // `array_files` array contains the original file list (with correct file order).
-            // The file order in $totalFilesStructure instead (which comes from a conversion process) may do not correspond.
+            // The file order in $totalFilesStructure instead (which comes from a conversion process) may not correspond.
             //
             $array_files = $this->getProjectStructure()[ 'array_files' ];
             foreach ( $array_files as $index => $filename ) {
@@ -1277,7 +1278,7 @@ class ProjectManager {
         foreach ( $memoryFiles as $file ) {
 
             //is the TM loaded?
-            //wait until current TMX is loaded
+            //wait until the current TMX is loaded
             while ( true ) {
 
                 try {
@@ -1288,12 +1289,12 @@ class ProjectManager {
 
                         //"$fileName" has been loaded into Match"
                         // OR the indexer is down or stopped for maintenance
-                        // exit the loop, the import will be executed in a later time
+                        // exit the loop, the import will be executed at a later time
                         break;
 
                     }
 
-                    //"waiting for "$fileName" to be loaded into Match"
+                    //waiting for "$fileName" to be loaded into Match
                     sleep( 3 );
 
                 } catch ( Exception $e ) {
@@ -1322,7 +1323,7 @@ class ProjectManager {
 
         $fs = FilesStorageFactory::create();
 
-        //begin of zip hashes manipulation
+        //begin with zip hashes manipulation
         foreach ( $linkFiles[ 'zipHashes' ] as $zipHash ) {
 
             $result = $fs->linkZipToProject(
@@ -1355,7 +1356,7 @@ class ProjectManager {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
 
-            // get payable rates from mt_qe_workflow, this take the priority over the other payable rates
+            // get payable rates from mt_qe_workflow, this takes the priority over the other payable rates
             if ( $projectStructure[ 'mt_qe_workflow_payable_rate' ] ) {
                 $payableRatesTemplate = null;
                 $payableRates         = json_encode( $projectStructure[ 'mt_qe_workflow_payable_rate' ] );
@@ -1409,7 +1410,7 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
-            // Replace {{pid}} with project ID for new keys created with empty name
+            // Replace {{pid}} with project ID for new keys created with an empty name
             $projectStructure[ 'tm_keys' ] = str_replace( "{{pid}}", $projectStructure[ 'id_project' ], $projectStructure[ 'tm_keys' ] );
 
             $newJob                    = new JobStruct();
@@ -1517,7 +1518,7 @@ class ProjectManager {
      *
      * @param ArrayObject $projectStructure
      * @param int         $num_split
-     * @param array       $requestedWordsPerSplit Matecat Equivalent Words ( Only valid for Pro Version )
+     * @param array       $requestedWordsPerSplit Matecat Equivalent Words (Only valid for Pro Version)
      * @param string      $count_type
      *
      * @return ArrayObject
@@ -1544,7 +1545,7 @@ class ProjectManager {
             throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ], -5 );
         }
 
-        $row_totals = array_pop( $rows ); //get the last row ( ROLLUP )
+        $row_totals = array_pop( $rows ); //get the last row (ROLLUP)
         unset( $row_totals[ 'id' ] );
 
         if ( empty( $row_totals[ 'job_first_segment' ] ) || empty( $row_totals[ 'job_last_segment' ] ) ) {
@@ -1553,7 +1554,7 @@ class ProjectManager {
 
         $total_words = $row_totals[ $count_type ];
 
-        // if the requested $count_type is empty (for example: equivalent raw count = 0),
+        // if the requested $count_type is empty (for example, equivalent raw count = 0),
         // switch to the other one
         if ( $total_words < $num_split ) {
             $new_count_type = ( $count_type === ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE ) ? ProjectsMetadataDao::SPLIT_RAW_WORD_TYPE : ProjectsMetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
@@ -1568,7 +1569,7 @@ class ProjectManager {
 
         if ( empty( $requestedWordsPerSplit ) ) {
             /*
-             * Simple Split with pretty equivalent number of words per chunk
+             * Simple Split with a pretty equivalent number of words per chunk
              */
             $words_per_job = array_fill( 0, $num_split, round( $total_words / $num_split ) );
         } else {
@@ -1601,7 +1602,7 @@ class ProjectManager {
             $counter[ $chunk ][ 'raw_word_count' ]      += $row[ 'raw_word_count' ];
             $counter[ $chunk ][ 'segment_end' ]         = $row[ 'id' ];
 
-            //if last_opened segment is not set and if that segment can be showed in cattool
+            //if the last_opened segment is not set and if that segment can be shown in cattool
             //set that segment as the default last visited
             ( $counter[ $chunk ][ 'last_opened_segment' ] == 0 && $row[ 'show_in_cattool' ] == 1 ? $counter[ $chunk ][ 'last_opened_segment' ] = $row[ 'id' ] : null );
 
@@ -1609,7 +1610,7 @@ class ProjectManager {
             //create a chunk when we reach the requested number of words,
             //and we are below the requested number of splits.
             //in this manner, we add to the last chunk all rests
-            if ( $counter[ $chunk ][ $count_type ] >= $words_per_job[ $chunk ] && $chunk < $num_split - 1 /* chunk is zero based */ ) {
+            if ( $counter[ $chunk ][ $count_type ] >= $words_per_job[ $chunk ] && $chunk < $num_split - 1 /* chunk is zero-based */ ) {
                 $counter[ $chunk ][ 'standard_word_count' ] = (int)$counter[ $chunk ][ 'standard_word_count' ];
                 $counter[ $chunk ][ 'eq_word_count' ]       = (int)$counter[ $chunk ][ 'eq_word_count' ];
                 $counter[ $chunk ][ 'raw_word_count' ]      = (int)$counter[ $chunk ][ 'raw_word_count' ];
@@ -1651,7 +1652,7 @@ class ProjectManager {
     /**
      * Do the split based on previous getSplitData analysis
      * It clones the original job in the right number of chunks and fill these rows with:
-     * first/last segments of every chunk, last opened segment as first segment of new job
+     * first/last segments of every chunk, last opened segment as the first segment of the new job
      * and the timestamp of creation
      *
      * @param ArrayObject $projectStructure
@@ -1726,7 +1727,7 @@ class ProjectManager {
             $stmt->closeCursor();
             unset( $stmt );
 
-            //add here job id to list
+            //add here the job id to list
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $projectStructure[ 'job_to_split' ] );
             //add here passwords to list
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob[ 'password' ] );
@@ -1765,7 +1766,7 @@ class ProjectManager {
     }
 
     /**
-     * Apply new structure of job
+     * Apply new structure of the job
      *
      * @param ArrayObject $projectStructure
      *
@@ -1795,11 +1796,11 @@ class ProjectManager {
         $first_job         = reset( $jobStructs );
         $job_first_segment = $first_job[ 'job_first_segment' ];
 
-        //the max segment from job list
+        //the max segment from the job list
         $last_job         = end( $jobStructs );
         $job_last_segment = $last_job[ 'job_last_segment' ];
 
-        //change values of first job
+        //change values of the first job
         $first_job[ 'job_first_segment' ] = $job_first_segment; // redundant
         $first_job[ 'job_last_segment' ]  = $job_last_segment;
 
@@ -1870,7 +1871,7 @@ class ProjectManager {
     }
 
     /**
-     * Extract sources and pre-translations from sdlxliff file and put them in Database
+     * Extract sources and pre-translations from an xliff file and put them in Database
      *
      * @param int   $fid
      * @param array $file_info
@@ -2368,8 +2369,7 @@ class ProjectManager {
             if ( !empty( $originalFileName ) ) {
 
                 // get metadata
-                $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
-                // $cachedXliffFileName = AbstractFilesStorage::pathinfo_fix( $cachedXliffFilePathName, PATHINFO_FILENAME );
+                $meta     = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 

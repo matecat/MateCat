@@ -14,7 +14,7 @@ class SegmentMetadataDao extends AbstractDao {
      * @param int $id_segment
      * @param int $ttl
      *
-     * NOTE: 604800 sec = 1 week
+     * NOTE: 604,800 sec = 1 week
      *
      * @return SegmentMetadataStruct[]
      * @throws ReflectionException
@@ -58,7 +58,7 @@ class SegmentMetadataDao extends AbstractDao {
      * @param string $key
      * @param int    $ttl
      *
-     * NOTE: 604800 sec = 1 week
+     * NOTE: 604,800 sec = 1 week
      *
      * @return array
      * @throws ReflectionException

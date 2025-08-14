@@ -337,7 +337,7 @@ class S3FilesStorage extends AbstractFilesStorage {
      * @return bool
      * @throws Exception
      */
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
+    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ): bool {
         $hashes   = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $datePath = $hashes[ 0 ];
         $hash     = $hashes[ 1 ];

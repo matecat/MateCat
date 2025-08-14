@@ -36,7 +36,7 @@ class JobDao extends AbstractDao {
     /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
-     * Use when counters of the job value are not important but only the metadata are needed
+     * Use when counters of the job value are not important, but only the metadata is needed
      *
      * @param JobStruct $jobQuery
      *
@@ -108,7 +108,7 @@ class JobDao extends AbstractDao {
         /**
          * @var JobStruct
          */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct, [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [
                 'id_job'     => $translation->id_job,
                 'id_segment' => $translation->id_segment
         ] )[ 0 ];
@@ -133,7 +133,7 @@ class JobDao extends AbstractDao {
             join jobs j on j.id=st.id_job and st.id_segment BETWEEN j.job_first_segment AND j.job_last_segment
             where j.id = :id_job and j.password = :password" );
 
-        $struct = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $struct = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password
         ] )[ 0 ] ?? null;
@@ -169,7 +169,7 @@ class JobDao extends AbstractDao {
             "
         );
 
-        $data = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $data = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'   => $id_job,
                 'password' => $password
         ] )[ 0 ] ?? null;
@@ -237,7 +237,7 @@ class JobDao extends AbstractDao {
         $conn    = Database::obtain()->getConnection();
         $stmt    = $conn->prepare( self::$_sql_get_jobs_by_project );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct(), [ $id_project, JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ $id_project, JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -257,7 +257,7 @@ class JobDao extends AbstractDao {
 
         /**
          * Select all rows raw_word_count and eq_word_count
-         * and their totals ( ROLLUP )
+         * and their totals (ROLLUP)
          * reserve also two columns for job_first_segment and job_last_segment
          *
          * +----------------+-------------------+---------+-------------------+------------------+
@@ -292,7 +292,7 @@ class JobDao extends AbstractDao {
 
         return $this
                 ->setCacheTTL( $ttl )
-                ->_fetchObject( $stmt, new ShapelessConcreteStruct(), [ 'id_job' => $id, 'password' => $password, 'deleted' => JobStatus::STATUS_DELETED ] );
+                ->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [ 'id_job' => $id, 'password' => $password, 'deleted' => JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -311,7 +311,7 @@ class JobDao extends AbstractDao {
         $stmt    = $conn->prepare( "SELECT * FROM jobs WHERE id = ? AND status_owner != ? ORDER BY job_first_segment" );
 
         /** @var JobStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct, [ $id_job, JobStatus::STATUS_DELETED ] );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ $id_job, JobStatus::STATUS_DELETED ] );
 
     }
 
@@ -328,7 +328,7 @@ class JobDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = :id_project AND id = :id_job" );
 
-        return ( new self() )->setCacheTTL( $ttl )->_fetchObject( $stmt, new JobStruct, [ 'id_project' => $id_project, 'id_job' => $id_job ] );
+        return ( new self() )->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, JobStruct::class, [ 'id_project' => $id_project, 'id_job' => $id_job ] );
     }
 
     /**
@@ -393,12 +393,6 @@ class JobDao extends AbstractDao {
         ] );
 
         return $stmt->rowCount();
-    }
-
-    public static function getTODOWords( JobStruct $jStruct ) {
-
-        return array_sum( [ $jStruct->new_words, $jStruct->draft_words ] );
-
     }
 
     /**
@@ -467,7 +461,7 @@ class JobDao extends AbstractDao {
         /**
          * @var EditLogSegmentStruct[]
          */
-        return $this->_fetchObject( $stmt, new EditLogSegmentStruct(), [
+        return $this->_fetchObjectMap( $stmt, EditLogSegmentStruct::class, [
                 'id_job'             => $jStruct->id,
                 'password'           => $jStruct->password,
                 'status_new'         => TranslationStatus::STATUS_NEW,
@@ -528,7 +522,7 @@ class JobDao extends AbstractDao {
         $stmt = $this->database->getConnection()->prepare( $query );
 
         /** @var ShapelessConcreteStruct */
-        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'             => $id_job,
                 'password'           => $password,
                 'status_new'         => TranslationStatus::STATUS_NEW,
@@ -600,7 +594,7 @@ class JobDao extends AbstractDao {
         $stmt   = $this->database->getConnection()->prepare( $query );
 
         /** @var ShapelessConcreteStruct */
-        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'      => $id_job,
                 'status'      => $status,
                 'source_page' => $source_page
@@ -676,7 +670,7 @@ class JobDao extends AbstractDao {
     public static function deleteOnMerge( JobStruct $first_job ): bool {
 
         $conn  = Database::obtain()->getConnection();
-        $query = "DELETE FROM jobs WHERE id = :id AND password != :first_job_password "; //use new password
+        $query = "DELETE FROM jobs WHERE id = :id AND password != :first_job_password "; //use the new password
         $stmt  = $conn->prepare( $query );
 
         return $stmt->execute( [
@@ -718,7 +712,7 @@ class JobDao extends AbstractDao {
         $stmt = $thisDao->getDatabaseHandler()->getConnection()->prepare( $query );
 
         /** @var ShapelessConcreteStruct[] */
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job' => $chunkStruct->id
         ] );
 
@@ -818,7 +812,7 @@ class JobDao extends AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $id_job,
                 'password'       => $password,
                 'revisionNumber' => $revisionNumber
@@ -839,7 +833,7 @@ class JobDao extends AbstractDao {
         $query = "select count(*) as total from segment_translations where id_job IN ( " . implode( ', ', $idJobs ) . " );";
 
         $stmt    = $conn->prepare( $query );
-        $records = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [] );
+        $records = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [] );
 
         if ( empty( $records ) ) {
             return null;
@@ -871,7 +865,7 @@ class JobDao extends AbstractDao {
             where id_job = :id_job
         " );
 
-        $object = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $object = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job' => $id_job,
         ] )[ 0 ] ?? null;
 

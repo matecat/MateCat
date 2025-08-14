@@ -10,11 +10,12 @@
 namespace Model\Segments;
 
 
+use ArrayAccess;
 use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\ArrayAccessTrait;
 use Model\DataAccess\IDaoStruct;
 
-class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, \ArrayAccess {
+class SegmentUIStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 

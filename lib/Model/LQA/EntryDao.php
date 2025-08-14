@@ -259,7 +259,7 @@ class EntryDao extends AbstractDao {
         Log::doJsonLog( $entryStruct );
 
         if ( $entryStruct->start_node == $entryStruct->end_node ) {
-            // if start node and stop node are the same, just order the offsets if needed
+            // if start node and stop node are the same, order the offsets if needed
             if ( intval( $entryStruct->start_offset ) > intval( $entryStruct->end_offset ) ) {
                 $tmp                       = $entryStruct->start_offset;
                 $entryStruct->start_offset = $entryStruct->end_offset;

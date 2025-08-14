@@ -75,12 +75,12 @@ class MembershipDao extends AbstractDao {
 
         $stmt = $this->_getStatementForQuery( self::$_query_user_teams );
 
-        return static::resultOrNull( $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap( $stmt,
                 TeamStruct::class,
                 [
                         'uid' => $user->uid,
                 ]
-        ) );
+        ) ?? null;
 
     }
 
@@ -115,7 +115,7 @@ class MembershipDao extends AbstractDao {
     public function findTeamByIdAndUser( int $id, UserStruct $user ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_uid_and_id );
 
-        return static::resultOrNull( $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $user->uid, $id ] )[ 0 ] ?? null );
+        return $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $user->uid, $id ] )[ 0 ] ?? null;
     }
 
     /**
@@ -128,7 +128,7 @@ class MembershipDao extends AbstractDao {
     public function findTeamByIdAndName( int $id, string $name ): ?TeamStruct {
         $stmt = $this->_getStatementForQuery( self::$_query_team_from_id_and_name );
 
-        return static::resultOrNull( $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $id, $name ] )[ 0 ] );
+        return $this->_fetchObjectMap( $stmt, TeamStruct::class, [ $id, $name ] )[ 0 ] ?? null;
     }
 
     /**
@@ -242,10 +242,7 @@ class MembershipDao extends AbstractDao {
      * This method takes a list of email addresses as an argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
-     * @param $obj_arr array [
-     *            'team'     => TeamStruct,
-     *            'members'  => emails[]
-     *            ]
+     * @param $obj_arr array [ 'team' => TeamStruct, 'members' => emails[] ]
      *
      * @return MembershipStruct[]
      * @throws Exception

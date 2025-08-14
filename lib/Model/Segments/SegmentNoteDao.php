@@ -56,7 +56,7 @@ class SegmentNoteDao extends AbstractDao {
      * @return array array aggregated by id_segment
      */
 
-    public static function getAggregatedBySegmentIdInInterval( $start, $stop ): array {
+    public static function getAggregatedBySegmentIdInInterval( int $start, int $stop ): array {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
                 "SELECT id_segment, id, note FROM segment_notes " .

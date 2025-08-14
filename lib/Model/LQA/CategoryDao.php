@@ -93,7 +93,7 @@ class CategoryDao extends AbstractDao {
     }
 
     /**
-     * Returns a json encoded representation of categories and subcategories
+     * Returns a JSON encoded representation of categories and subcategories
      *
      * @param $id_model
      *
@@ -129,7 +129,7 @@ class CategoryDao extends AbstractDao {
                 $out[ $row[ 'id' ] ][ 'severities' ] = $severities;
 
             } else {
-                // process as child
+                // process as a child
                 $current = [
                         'label'      => $row[ 'label' ],
                         'id'         => $row[ 'id' ],

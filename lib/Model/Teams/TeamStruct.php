@@ -48,7 +48,7 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return bool
      */
-    public function hasUser( $uid ) {
+    public function hasUser( $uid ): bool {
         foreach ( $this->getMembers() as $member ) {
             if ( $member->uid === $uid ) {
                 return true;
