@@ -1161,7 +1161,9 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
     return this._segments?.first()?.get('sid')
   },
   getCurrentSegment: function () {
-    let current = SegmentStore.getSegmentById(SegmentStore.currentSegmentId),
+    let current = SegmentStore.getSegmentById(
+        SegmentStore.currentSegmentId,
+      )?.toJS(),
       tmpCurrent = null
     tmpCurrent = this._segments.find((segment) => {
       return segment.get('opened') === true
