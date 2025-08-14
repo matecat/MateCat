@@ -14,23 +14,26 @@ use ArrayObject;
 use Exception;
 use Model\DataAccess\Database;
 use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 use PDOException;
 use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
+use ReflectionException;
 use Utils\Logger\Log;
 use Utils\Tools\Utils;
 
 class ProjectManagerModel {
 
     /**
-     * Creates record in projects tabele and instantiates the project struct
+     * Creates record in projects table and instantiates the project struct
      * internally.
      *
      * @param ArrayObject $projectStructure
      *
-     * @return \Model\Projects\ProjectStruct
+     * @return ProjectStruct
+     * @throws ReflectionException
      */
-    public static function createProjectRecord( ArrayObject $projectStructure ) {
+    public static function createProjectRecord( ArrayObject $projectStructure ): ProjectStruct {
 
         $data                        = [];
         $data[ 'id' ]                = $projectStructure[ 'id_project' ];
@@ -58,15 +61,15 @@ class ProjectManagerModel {
 
     /**
      * @param ArrayObject $projectStructure
-     * @param             $file_name
-     * @param             $mime_type
-     * @param             $fileDateSha1Path
+     * @param string      $file_name
+     * @param string      $mime_type
+     * @param string      $fileDateSha1Path
      * @param array|null  $meta
      *
-     * @return mixed|string
+     * @return string
      * @throws Exception
      */
-    public static function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $meta = null ) {
+    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?array $meta = null ): string {
 
         $data                         = [];
         $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
@@ -121,7 +124,7 @@ class ProjectManagerModel {
 
         Log::doJsonLog( "Pre-Translations: Total Rows to insert: " . count( $query_translations_values ) );
 
-        //split the query in to chunks if there are too much segments
+        //split the query in to chunks if there are too many segments
         $query_translations_values = array_chunk( $query_translations_values, 100 );
 
         Log::doJsonLog( "Pre-Translations: Total Queries to execute: " . count( $query_translations_values ) );
@@ -241,7 +244,7 @@ class ProjectManagerModel {
         $insert_values = [];
         $chunk_size    = 30;
 
-        foreach ( $notes as $internal_id => $v ) {
+        foreach ( $notes as $v ) {
 
             $attributes = $v[ 'from' ];
             $entries    = $v[ 'entries' ];
@@ -308,7 +311,7 @@ class ProjectManagerModel {
      *
      * @return bool
      */
-    private static function isAMetadata( $metaKey ) {
+    private static function isAMetadata( $metaKey ): bool {
         $metaDataKeys = [
                 'id_request',
                 'id_content',
@@ -334,7 +337,7 @@ class ProjectManagerModel {
 
         $id_project = $projectStructure[ 'id_project' ];
 
-        foreach ( $projectStructure[ 'context-group' ] as $internal_id => $v ) {
+        foreach ( $projectStructure[ 'context-group' ] as $v ) {
 
             $context_json = json_encode( $v[ 'context_json' ] );
             $segments     = $v[ 'context_json_segment_ids' ];

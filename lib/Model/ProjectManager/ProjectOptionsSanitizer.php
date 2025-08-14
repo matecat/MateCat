@@ -103,7 +103,7 @@ class ProjectOptionsSanitizer {
 
     ];
     /**
-     * All combinations of languages for Tag Ptojection
+     * All combinations of languages for Tag Projection
      */
     public static array $tag_projection_allowed_languages = [
             'en-de' => 'English - German',
@@ -228,13 +228,13 @@ class ProjectOptionsSanitizer {
         }
     }
 
-    // No special sanitization for speech2text required
+    // No special sanitization for the speech2text field is required
     private function sanitizeSpeech2Text() {
         $this->sanitized[ 'speech2text' ] = !!$this->options[ 'speech2text' ];
     }
 
     /**
-     * If Lexiqa is requested to be enabled, then check if language is in combination
+     * If Lexiqa is requested to be enabled, then check if the language is in combination
      * @throws Exception
      */
     private function sanitizeLexiQA() {

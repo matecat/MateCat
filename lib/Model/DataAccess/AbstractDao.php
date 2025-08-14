@@ -462,19 +462,4 @@ abstract class AbstractDao {
 
     }
 
-    /**
-     *  Use this function whenever you want to make an empty result
-     * returned as null instead of PDO's default FALSE.
-     *
-     * @return mixed|null
-     *
-     */
-    public static function resultOrNull( $result ) {
-        if ( $result ) {
-            return $result;
-        } else {
-            return null;
-        }
-    }
-
 }

@@ -27,11 +27,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     const ORIGINAL_ZIP_PLACEHOLDER = "__##originalZip##";
     const OBJECTS_SAFE_DELIMITER   = '__';
 
-    protected $filesDir;
-    protected $cacheDir;
-    protected $zipDir;
+    protected string $filesDir;
+    protected string $cacheDir;
+    protected string $zipDir;
 
-    public function __construct( $files = null, $cache = null, $zip = null ) {
+    /**
+     * @param string|null $files
+     * @param string|null $cache
+     * @param string|null $zip
+     */
+    public function __construct( ?string $files = null, ?string $cache = null, ?string $zip = null ) {
 
         //override default config
         if ( $files ) {
@@ -60,11 +65,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
      */
 
     /**
-     * @param $path
+     * @param string $path
      *
      * @return mixed
      */
-    public static function basename_fix( $path ) {
+    public static function basename_fix( string $path ) {
         $rawPath = explode( DIRECTORY_SEPARATOR, $path );
 
         return array_pop( $rawPath );
@@ -130,11 +135,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * @param $path
+     * @param string $path
      *
      * @return bool|string
      */
-    public function getSingleFileInPath( $path ) {
+    public function getSingleFileInPath( string $path ) {
 
         //check if it actually exists
         $filePath = false;
@@ -174,14 +179,14 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * Delete a hash from upload directory if the hash is changed
+     * Delete a hash from the upload directory if the hash is changed
      *
-     * @param $uploadDirPath
-     * @param $linkFile
+     * @param string $uploadDirPath
+     * @param string $linkFile
      *
      * @return bool
      */
-    public function deleteHashFromUploadDir( $uploadDirPath, $linkFile ): bool {
+    public function deleteHashFromUploadDir( string $uploadDirPath, string $linkFile ): bool {
         [ $shaSum, ] = explode( "|", $linkFile );
         [ $shaSum, ] = explode( "_", $shaSum ); // remove the segmentation rule from hash to clean all reverse index maps
 
@@ -208,11 +213,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * @param $create_date
+     * @param string|null $create_date
      *
      * @return string
      */
-    public function getDatePath( $create_date ): string {
+    public function getDatePath( ?string $create_date = null ): string {
         return date_create( $create_date )->format( 'Ymd' );
     }
 
@@ -225,11 +230,11 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     /**
      * Return an array to build the cache path from a hash
      *
-     * @param $hash
+     * @param string $hash
      *
      * @return array
      */
-    public static function composeCachePath( $hash ): array {
+    public static function composeCachePath( string $hash ): array {
 
         return [
                 'firstLevel'  => $hash[ 0 ] . $hash[ 1 ],
@@ -240,13 +245,13 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * @param $hash
-     * @param $uid
-     * @param $realFileName
+     * @param string $hash
+     * @param string $uid
+     * @param string $realFileName
      *
      * @return int
      */
-    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $uid, $realFileName ): int {
+    public function linkSessionToCacheForAlreadyConvertedFiles( string $hash, string $uid, string $realFileName ): int {
         //get upload dir
         $dir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
@@ -255,13 +260,13 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * @param $hash
-     * @param $uid
-     * @param $realFileName
+     * @param string $hash
+     * @param string $uid
+     * @param string $realFileName
      *
      * @return int
      */
-    public function linkSessionToCacheForOriginalFiles( $hash, $uid, $realFileName ): int {
+    public function linkSessionToCacheForOriginalFiles( string $hash, string $uid, string $realFileName ): int {
         //get upload dir
         $dir = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
 
@@ -270,16 +275,16 @@ abstract class AbstractFilesStorage implements IFilesStorage {
     }
 
     /**
-     * Appends a string like $dir. DIRECTORY_SEPARATOR. $hash. "|". $lang (the path in cache package of a file in file storage system)
+     * Appends a string like `$dir.DIRECTORY_SEPARATOR.$hash."|".$lang` (the path in the cache package of a file in the file storage system)
      * on $realFileName file
      *
-     * @param $dir
-     * @param $hash
-     * @param $realFileName
+     * @param string $dir
+     * @param string $hash
+     * @param string $realFileName
      *
      * @return int
      */
-    protected function _linkToCache( $dir, $hash, $realFileName ): int {
+    protected function _linkToCache( string $dir, string $hash, string $realFileName ): int {
         $filePath     = $dir . DIRECTORY_SEPARATOR . $hash;
         $content      = [];
         $bytesWritten = 0;
@@ -365,13 +370,13 @@ abstract class AbstractFilesStorage implements IFilesStorage {
                 $results[ $k ][ 'originalFilePath' ] = $originalPath;
             }
 
-            //we MUST have originalFilePath
+            //we MUST have the originalFilePath
             if ( $getXliffPath ) {
 
-                //note that we trust this to succeed on first try since, at this stage, we already built the file package
+                //note that we trust this to succeed on the first try since, at this stage, we already built the file package
                 $results[ $k ][ 'xliffFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
-                //when we ask for XliffPath ($getXliffPath == true) we are downloading translations
+                //when we ask for XliffPath ($getXliffPath == true), we are downloading translations
                 //  if the original file path is empty means that the file was already a supported xliff type (ex: trados sdlxliff)
                 //use the xliff as original
                 if ( empty( $originalPath ) ) {
@@ -381,7 +386,7 @@ abstract class AbstractFilesStorage implements IFilesStorage {
             } else {
 
                 //when we do NOT ask for XliffPath ($getXliffPath == false), we are downloading original
-                // if original file path is empty means that the file was already a supported xliff type (ex: trados sdlxliff)
+                // if the original file path is empty means that the file was already a supported xliff type (ex: trados sdlxliff)
                 //// get the original xliff
                 if ( empty( $originalPath ) ) {
                     $results[ $k ][ 'originalFilePath' ] = $this->getXliffFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );

@@ -166,7 +166,7 @@ class MTQEWorkflowTemplateDao extends AbstractDao {
     }
 
     /**
-     * WARNING Use this method only when no user authentication is needed or when it is already performed
+     * WARNING: Use this method only when no user authentication is needed or when it is already performed
      *
      * @param     $id
      * @param int $ttl

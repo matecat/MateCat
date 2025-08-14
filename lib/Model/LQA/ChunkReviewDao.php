@@ -542,7 +542,7 @@ class ChunkReviewDao extends AbstractDao {
         $data[ 'force_pass_at' ] = ReviewUtils::filterLQAModelLimit( $chunkReview->getChunk()->getProject()->getLqaModel(), $chunkReview->source_page );
 
         // in MySQL a sum of a null value to an integer returns 0
-        // in MySQL division by zero returns NULL, so we have to coalesce null values from is_pass division
+        // in MySQL, division by zero returns NULL, so we have to coalesce null values from is_pass division
         $sql = "INSERT INTO 
             qa_chunk_reviews ( id, id_job, id_project, password, review_password, penalty_points, reviewed_words_count, total_tte ) 
         VALUES( 

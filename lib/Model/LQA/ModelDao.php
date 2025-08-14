@@ -144,7 +144,7 @@ class ModelDao extends AbstractDao {
         }
 
         /*
-         * Any other key found in the json array will populate the `options` field
+         * Any other key found in the JSON array will populate the `options` field
          */
         $options = [];
 

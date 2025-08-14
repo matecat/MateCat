@@ -304,8 +304,8 @@ class SegmentDao extends AbstractDao {
                 ) as TT2";
 
         /*
-         * This query is an union of the last two queries with only one difference:
-         * the queryAfter parts differs for the equal sign.
+         * This query is a union of the last two queries with only one difference:
+         * the queryAfter parts differ for the equal sign.
          *
          */
         $queryCenter = "
@@ -708,7 +708,7 @@ class SegmentDao extends AbstractDao {
     /**
      * @throws ReflectionException
      */
-    public function destroyCacheForGlobalTranslationMismatches( JobStruct $job ) {
+    public function destroyCacheForGlobalTranslationMismatches( JobStruct $job ): bool {
         $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
         return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
@@ -742,14 +742,14 @@ class SegmentDao extends AbstractDao {
 
         /**
          * Get all the available translations for this segment id,
-         * the amount of equal translations,
+         * the number of equal translations,
          * a list of id,
-         * and an editable boolean field identifying if jobs is mine or not
+         * and an editable boolean field identifying if jobs are mine or not
          *
          * ---------------------------------------
          * NOTE 2020-07-07
          * ---------------------------------------
-         * A more strict condition was added in order to check the translation mismatch
+         * A more strict condition was added to check the translation mismatch
          *
          */
         if ( $sid != null ) {
@@ -771,7 +771,7 @@ class SegmentDao extends AbstractDao {
         } else {
 
             /*
-             * This block of code make the same of this query, but it is ~10 times faster for jobs that are split in a big number of chunks.
+             * This block of code makes the same of this query, but it is ~10 times faster for jobs that are split in a big number of chunks.
              * From 10s to 1,5s
              *
              *            $query = "
@@ -796,7 +796,7 @@ class SegmentDao extends AbstractDao {
                     ]
             );
 
-            // create a specific array with segment id as key
+            // create a specific array with segment id as a key
             $segment_list = [];
             array_walk( $list, function ( $element ) use ( &$segment_list ) {
                 $segment_list[ $element[ 'id_segment' ] ] = $element;
@@ -830,7 +830,7 @@ class SegmentDao extends AbstractDao {
 
                     $twin_segments[ $segment_hash ][ 'total_sources' ] += 1;
 
-                    // array_unique : the translation related to a specific segment_hash
+                    // array_unique: the translation related to a specific segment_hash
                     if ( !isset( $reverse_translation_index[ $unique_key ] ) ) {
                         $twin_segments[ $segment_hash ][ 'translations' ][] = $translation;
                     }

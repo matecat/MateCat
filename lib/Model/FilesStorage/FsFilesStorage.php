@@ -197,7 +197,7 @@ class FsFilesStorage extends AbstractFilesStorage {
      *
      * @return bool
      */
-    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
+    public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ): bool {
 
         [ $datePath, $hash ] = explode( DIRECTORY_SEPARATOR, $dateHashPath );
         $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );

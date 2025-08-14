@@ -13,6 +13,7 @@ namespace Model\Teams;
 use Controller\Abstracts\FlashMessage;
 use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
+use Exception;
 use Klein\Response;
 use ReflectionException;
 use Utils\Redis\RedisHandler;
@@ -42,6 +43,9 @@ class InvitedUser {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function prepareUserInvitedSignUpRedirect() {
 
         $_SESSION[ 'invited_to_team' ] = $this->jwt;
@@ -72,7 +76,7 @@ class InvitedUser {
     /**
      * @throws ReflectionException
      */
-    public static function hasPendingInvitations() {
+    public static function hasPendingInvitations(): bool {
 
         if ( !isset( $_SESSION[ 'invited_to_team' ] ) || empty( $_SESSION[ 'invited_to_team' ][ 'team_id' ] ) ) { // check if this is the right session caller
             return false;

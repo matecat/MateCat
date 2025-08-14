@@ -76,7 +76,7 @@ class EntryCommentDao extends AbstractDao {
      *
      * @return array
      */
-    public function fetchCommentsGroupedByIssueIds( $ids ): array {
+    public function fetchCommentsGroupedByIssueIds( array $ids ): array {
         $sql = "SELECT id_qa_entry, qa_entry_comments.* FROM qa_entry_comments WHERE id_qa_entry " .
                 " IN ( " . implode( ', ', $ids ) . " ) " .
                 " ORDER BY id_qa_entry, id ";

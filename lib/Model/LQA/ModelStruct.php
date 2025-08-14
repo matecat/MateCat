@@ -20,7 +20,7 @@ class ModelStruct extends AbstractDaoSilentStruct implements IDaoStruct, QAModel
     public ?int $uid = null; // nullable for backward compatibility
 
     /**
-     * Returns the serialized representation of categires and subcategories.
+     * Returns the serialized representation of categories and subcategories.
      *
      * @return array
      */

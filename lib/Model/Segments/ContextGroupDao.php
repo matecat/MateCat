@@ -31,7 +31,7 @@ class ContextGroupDao extends AbstractDao {
      * @return ProjectStruct[]
      * @throws ReflectionException
      */
-    public function getAllByProject( ProjectStruct $project ) {
+    public function getAllByProject( ProjectStruct $project ): array {
         $stmt = $this->_getStatementForQuery( self::$query_get_all_by_project );
 
         return $this->_fetchObjectMap( $stmt,

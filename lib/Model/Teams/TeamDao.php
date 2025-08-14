@@ -122,7 +122,7 @@ class TeamDao extends AbstractDao {
             Database::obtain()->getConnection()->beginTransaction();
         }
 
-        // get fresh cache from the master database
+        // get fresh cache from the primary database
         ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $teamStruct->id );
 
         $membersList = ( new MembershipDao )->createList( [
@@ -251,16 +251,16 @@ class TeamDao extends AbstractDao {
      * @return TeamStruct|null
      * @throws ReflectionException
      */
-    public function findUserCreatedTeams( UserStruct $user ) {
+    public function findUserCreatedTeams( UserStruct $user ): ?TeamStruct {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
-        return static::resultOrNull( $this->_fetchObjectMap( $stmt,
+        return $this->_fetchObjectMap( $stmt,
                 TeamStruct::class,
                 [
                         'created_by' => $user->uid,
                 ]
-        )[ 0 ] );
+        )[ 0 ] ?? null;
 
     }
 
@@ -270,7 +270,7 @@ class TeamDao extends AbstractDao {
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheUserCreatedTeams( UserStruct $user ) {
+    public function destroyCacheUserCreatedTeams( UserStruct $user ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();

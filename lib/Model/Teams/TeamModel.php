@@ -143,9 +143,6 @@ class TeamModel {
      * @throws Exception
      */
     public function create(): TeamStruct {
-        if ( !$this->user ) {
-            throw new Exception( 'User is not set' );
-        }
 
         $this->struct->type = strtolower( $this->struct->type );
 
@@ -161,6 +158,9 @@ class TeamModel {
         return $this->struct;
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _sendEmailsToInvited() {
         foreach ( $this->_getInvitedEmails() as $email ) {
             $email = new InvitedToTeamEmail( $this->user, $email, $this->struct );
@@ -260,7 +260,7 @@ class TeamModel {
                 'members' => $this->member_emails
         ] );
 
-        $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are obviously all existent members
+        $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are all existent members
 
         Database::obtain()->commit();
 
