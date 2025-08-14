@@ -252,10 +252,6 @@ class ProjectTemplateDao extends AbstractDao {
             if ( isset( $mt->id ) ) {
                 $engine = EnginesFactory::getInstance( $mt->id );
 
-                if ( empty( $engine ) ) {
-                    throw new Exception( "Not existing engine." );
-                }
-
                 $engineRecord = $engine->getEngineRecord();
 
                 if ( $engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid ) {
@@ -325,7 +321,7 @@ class ProjectTemplateDao extends AbstractDao {
         /**
          * @var $result ProjectTemplateStruct[]
          */
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
                 'uid'        => $uid,
                 'is_default' => 1,
         ] );
@@ -346,7 +342,7 @@ class ProjectTemplateDao extends AbstractDao {
         /**
          * @var $result ProjectTemplateStruct[]
          */
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
                 'id' => $id,
         ] );
 
@@ -367,7 +363,7 @@ class ProjectTemplateDao extends AbstractDao {
         /**
          * @var $result ProjectTemplateStruct[]
          */
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
         ] );

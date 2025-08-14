@@ -234,8 +234,8 @@ class TranslationVersionDao extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $this->_fetchObject( $stmt,
-                ( new ShapelessConcreteStruct() ),
+        return $this->_fetchObjectMap( $stmt,
+                ShapelessConcreteStruct::class,
                 [ 'id_job' => $id_job, 'id_segment' => $id_segment ]
         );
 
