@@ -104,10 +104,10 @@ class MembershipDao extends AbstractDao {
     }
 
     /**
-     * Finds an team in user scope.
+     * Finds a team in user scope.
      *
-     * @param int                     $id
-     * @param \Model\Users\UserStruct $user
+     * @param int        $id
+     * @param UserStruct $user
      *
      * @return null|TeamStruct
      * @throws ReflectionException
@@ -134,7 +134,7 @@ class MembershipDao extends AbstractDao {
     /**
      * Cache deletion for @param int $id
      *
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct $user
      *
      * @return bool
      * @throws ReflectionException
@@ -214,7 +214,7 @@ class MembershipDao extends AbstractDao {
      * @param int $uid
      * @param int $teamId
      *
-     * @return \Model\Users\UserStruct|null
+     * @return UserStruct|null
      * @throws ReflectionException
      */
     public function deleteUserFromTeam( int $uid, int $teamId ): ?UserStruct {
@@ -239,7 +239,7 @@ class MembershipDao extends AbstractDao {
 
 
     /**
-     * This method takes a list of email addresses as argument.
+     * This method takes a list of email addresses as an argument.
      * If email corresponds to existing users, a membership is created into the team.
      *
      * @param $obj_arr array [
