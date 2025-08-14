@@ -44,6 +44,11 @@ class ConversionHandler {
     public FeatureSet $features;
 
     /**
+     * @var bool|null
+     */
+    protected ?bool $legacy_icu;
+
+    /**
      * ConversionHandler constructor.
      */
     public function __construct() {
@@ -148,7 +153,8 @@ class ConversionHandler {
                 $this->source_lang,
                 $single_language,
                 $this->segmentation_rule,
-                $extraction_parameters
+                $extraction_parameters,
+                $this->legacy_icu
         );
         Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
 
@@ -516,4 +522,10 @@ class ConversionHandler {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
+    /**
+     * @param bool|null $legacy_icu
+     */
+    public function setFiltersLegacyIcu( ?bool $legacy_icu = false ) {
+        $this->legacy_icu = $legacy_icu;
+    }
 }
