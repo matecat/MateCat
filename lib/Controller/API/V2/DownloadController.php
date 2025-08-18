@@ -919,8 +919,9 @@ class DownloadController extends AbstractDownloadController {
                         //
                         // Much better using AbstractFilesStorage::pathinfo_fix function to get the real filename (with no xlf extension)
                         //
-                        $declaredOutputFileName = AbstractFilesStorage::pathinfo_fix( $newInternalZipFile->output_filename, PATHINFO_FILENAME );
-                        $isTheSameFile          = ( $declaredOutputFileName == $newRealZipFilePath );
+                        $declaredOutputFileName     = AbstractFilesStorage::pathinfo_fix( $newInternalZipFile->output_filename, PATHINFO_FILENAME );
+                        $newRealZipFilePathBaseName = AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_BASENAME );
+                        $isTheSameFile              = ( $declaredOutputFileName == $newRealZipFilePathBaseName );
                     } else {
                         $isTheSameFile = ( $newInternalZipFile->output_filename == $newRealZipFilePath );
                     }
@@ -933,7 +934,7 @@ class DownloadController extends AbstractDownloadController {
                         if ( AbstractFilesStorage::pathinfo_fix( $newRealZipFilePath, PATHINFO_EXTENSION ) == 'pdf' ) {
                             $newRealZipFilePath .= '.docx';
                         } elseif ( $this->forceXliff ) {
-                            $newRealZipFilePath = $newInternalZipFile->output_filename;
+                            $newRealZipFilePath = $newInternalZipFile->output_filename; //xlf
                         }
 
                         $zip->addFromString( $newRealZipFilePath, $newInternalZipFile->getContent() );
