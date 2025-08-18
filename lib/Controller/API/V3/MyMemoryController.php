@@ -1,101 +1,99 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Engine;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
-use TmKeyManagement_TmKeyStruct;
-use TMS\TMSService;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+use Utils\TmKeyManagement\TmKeyStruct;
+use Utils\TMS\TMSService;
 
-class MyMemoryController extends KleinController
-{
-    protected function afterConstruct()
-    {
+class MyMemoryController extends KleinController {
+    protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
     /**
      * Create a MM key and assign to the logged user
      */
-    public function create()
-    {
+    public function create() {
         try {
             $json = $this->request->body();
-            $json = json_decode($json, true);
+            $json = json_decode( $json, true );
 
-            $name = null;
-            $key = null;
+            $key  = null;
 
-            if(!isset($json['name'])){
-                throw new InvalidArgumentException('Missing `name` param', 403);
+            if ( !isset( $json[ 'name' ] ) ) {
+                throw new InvalidArgumentException( 'Missing `name` param', 403 );
             }
 
-            if(isset($json['key'])){
-                $key = filter_var( $json['key'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+            if ( isset( $json[ 'key' ] ) ) {
+                $key = filter_var( $json[ 'key' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
             }
 
-            $name = filter_var( $json['name'], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+            $name = filter_var( $json[ 'name' ], FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
 
-            if($key !== null){
-                $newKey = $this->checkTheKeyAndAssignToUser($key, $name);
+            if ( $key !== null ) {
+                $newKey = $this->checkTheKeyAndAssignToUser( $key, $name );
             } else {
-                $newKey = $this->createANewKeyAndAssignToUser($name);
+                $newKey = $this->createANewKeyAndAssignToUser( $name );
             }
 
             $this->response->status()->setCode( 200 );
             $this->response->json( [
-                'key' => $newKey
+                    'key' => $newKey
             ] );
             exit();
 
-        } catch (\Exception $exception){
+        } catch ( Exception $exception ) {
             $this->response->status()->setCode( $exception->getCode() );
             $this->response->json( [
-                'errors' => [
-                    'code' => $exception->getCode(),
-                    'message' => $exception->getMessage()
-                ]
+                    'errors' => [
+                            'code'    => $exception->getCode(),
+                            'message' => $exception->getMessage()
+                    ]
             ] );
             exit();
         }
     }
 
     /**
-     * @param $name
+     * @param string $name
+     *
      * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    private function createANewKeyAndAssignToUser($name)
-    {
-        $tms = Engine::getInstance( 1 );
+    private function createANewKeyAndAssignToUser( string $name ) {
+        $tms = EnginesFactory::getInstance( 1 );
+        /** @var MyMemory $tms */
         $newKey = $tms->createMyMemoryKey();
 
-        $this->saveMemoryKey($newKey->key, $name);
+        $this->saveMemoryKey( $newKey->key, $name );
 
         return $newKey->key;
     }
 
     /**
-     * @param $key
-     * @param $name
-     * @return mixed
-     * @throws \Exception
+     * @param string $key
+     * @param string $name
+     *
+     * @return string
+     * @throws Exception
      */
-    private function checkTheKeyAndAssignToUser($key, $name)
-    {
+    private function checkTheKeyAndAssignToUser( string $key, string $name ) {
         $tmxHandler = new TMSService();
-        $keyExists = $tmxHandler->checkCorrectKey( $key );
+        $keyExists  = $tmxHandler->checkCorrectKey( $key );
 
-        if($keyExists === false){
-            throw new Exception($key . " is not a valid key");
+        if ( $keyExists === false ) {
+            throw new Exception( $key . " is not a valid key" );
         }
 
-        $this->saveMemoryKey($key, $name);
+        $this->saveMemoryKey( $key, $name );
 
         return $key;
     }
@@ -103,26 +101,26 @@ class MyMemoryController extends KleinController
     /**
      * @param string $key
      * @param string $name
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    private function saveMemoryKey($key, $name)
-    {
-        $tmKeyStruct       = new TmKeyManagement_TmKeyStruct();
+    private function saveMemoryKey( string $key, string $name ) {
+        $tmKeyStruct       = new TmKeyStruct();
         $tmKeyStruct->key  = $key;
         $tmKeyStruct->name = $name;
         $tmKeyStruct->tm   = true;
         $tmKeyStruct->glos = true;
 
-        $mkDao = new TmKeyManagement_MemoryKeyDao();
+        $mkDao = new MemoryKeyDao();
 
-        $newMemoryKey         = new TmKeyManagement_MemoryKeyStruct();
+        $newMemoryKey         = new MemoryKeyStruct();
         $newMemoryKey->uid    = $this->user->uid;
         $newMemoryKey->tm_key = $tmKeyStruct;
 
         try {
-            $mkDao->create($newMemoryKey);
-        } catch (\Exception $exception){
-            $mkDao->atomicUpdate($newMemoryKey);
+            $mkDao->create( $newMemoryKey );
+        } catch ( Exception $exception ) {
+            $mkDao->atomicUpdate( $newMemoryKey );
         }
     }
 }

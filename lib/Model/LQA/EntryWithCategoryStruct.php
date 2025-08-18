@@ -6,11 +6,11 @@
  * Time: 14:34
  */
 
-namespace LQA;
+namespace Model\LQA;
 
 
 class EntryWithCategoryStruct extends EntryStruct {
 
-    public $category;
+    public string $category;
 
 }

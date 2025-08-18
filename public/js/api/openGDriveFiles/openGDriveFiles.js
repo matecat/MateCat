@@ -1,15 +1,21 @@
 export const openGDriveFiles = async ({
-  encodedJson,
+  stateJson,
   sourceLang,
   targetLang,
   segmentation_rule,
   filters_extraction_parameters_template_id,
   filters_extraction_parameters_template,
 }) => {
-  let url = `/webhooks/gdrive/open?isAsync=true&state=${encodedJson}&source=${sourceLang}&target=${targetLang}&segmentation_rule=${segmentation_rule}${typeof filters_extraction_parameters_template_id !== 'undefined' ? '&filters_extraction_parameters_template_id=' + filters_extraction_parameters_template_id : ''}`
+  let url = `/webhooks/gdrive/open`
 
   const dataParams = {
+    isAsync: true,
     filters_extraction_parameters_template,
+    state: stateJson,
+    source: sourceLang,
+    target: targetLang,
+    segmentation_rule: segmentation_rule,
+    filters_extraction_parameters_template_id,
   }
   const formData = new FormData()
 

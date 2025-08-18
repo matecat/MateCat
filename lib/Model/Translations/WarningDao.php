@@ -1,14 +1,14 @@
 <?php
 
 
-namespace Translations;
+namespace Model\Translations;
 
-use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Jobs\WarningsCountStruct;
-use Jobs_JobStruct;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\Jobs\WarningsCountStruct;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class WarningDao extends AbstractDao {
 
@@ -26,8 +26,8 @@ class WarningDao extends AbstractDao {
      */
     public function getWarningsByProjectIds( $projectIds ): array {
 
-        $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
-        $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
+        $statuses[] = TranslationStatus::STATUS_TRANSLATED;
+        $statuses[] = TranslationStatus::STATUS_APPROVED;
 
         $arrayCount   = count( $projectIds );
         $rowCount     = ( $arrayCount ? $arrayCount - 1 : 0 );
@@ -52,16 +52,16 @@ class WarningDao extends AbstractDao {
 
         $stmt = $con->prepare( $sql );
 
-        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+        return $this->_fetchObjectMap( $stmt, WarningsCountStruct::class, $params );
 
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return int
      */
-    public function getErrorsByChunk( Jobs_JobStruct $chunk ): int {
+    public function getErrorsByChunk( JobStruct $chunk ): int {
         $con = $this->database->getConnection();
 
         $stmt = $con->prepare( $this->_query_warnings_by_chunk );
@@ -69,7 +69,7 @@ class WarningDao extends AbstractDao {
                 'id'       => $chunk->id,
                 'password' => $chunk->password,
                 'level'    => WarningModel::ERROR,
-                'status'   => Constants_TranslationStatus::STATUS_NEW
+                'status'   => TranslationStatus::STATUS_NEW
         ] );
 
         $result = $stmt->fetch();
@@ -103,10 +103,10 @@ class WarningDao extends AbstractDao {
 
         $stmt = $db->getConnection()->prepare( $query );
 
-        return $thisDao->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'         => $jid,
                 'password'       => $jpassword,
-                'segment_status' => Constants_TranslationStatus::STATUS_NEW
+                'segment_status' => TranslationStatus::STATUS_NEW
         ] );
 
     }

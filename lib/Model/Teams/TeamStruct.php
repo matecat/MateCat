@@ -6,31 +6,31 @@
  * Time: 10:17
  */
 
-namespace Teams;
+namespace Model\Teams;
 
-use Constants_Teams;
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Utils\Constants\Teams;
 
 class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $name;
-    public $created_by;
-    public $created_at;
-    public $type = Constants_Teams::PERSONAL;
+    public ?int   $id   = null;
+    public string $name;
+    public int    $created_by;
+    public string $created_at;
+    public string $type = Teams::PERSONAL;
 
     /**
      * @var MembershipStruct[]
      */
-    protected $members;
+    protected array $members;
 
     /**
      * @param MembershipStruct[] $list
      *
      * @return $this
      */
-    public function setMembers( $list ): TeamStruct {
+    public function setMembers( array $list ): TeamStruct {
         $this->members = $list;
 
         return $this;
@@ -39,7 +39,7 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     /**
      * @return null|MembershipStruct[]
      */
-    public function getMembers() {
+    public function getMembers(): ?array {
         return $this->members;
     }
 
@@ -48,7 +48,7 @@ class TeamStruct extends AbstractDaoSilentStruct implements IDaoStruct {
      *
      * @return bool
      */
-    public function hasUser( $uid ) {
+    public function hasUser( $uid ): bool {
         foreach ( $this->getMembers() as $member ) {
             if ( $member->uid === $uid ) {
                 return true;

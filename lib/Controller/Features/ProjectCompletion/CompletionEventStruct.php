@@ -6,10 +6,10 @@
  * Time: 17:33
  */
 
-namespace Features\ProjectCompletion;
+namespace Controller\Features\ProjectCompletion;
 
 
-use DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
 
 class CompletionEventStruct extends AbstractDaoObjectStruct {
 

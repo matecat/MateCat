@@ -7,38 +7,39 @@
  *
  */
 
-namespace API\V3\Json;
+namespace View\API\V3\Json;
 
 
 use Exception;
-use Features\ReviewExtended\Model\QualityReportDao;
-use Features\ReviewExtended\ReviewUtils;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use LQA\ChunkReviewStruct;
-use LQA\EntryDao;
-use Projects_ProjectStruct;
-use Revise\FeedbackDAO;
-use RevisionFactory;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewStruct;
+use Model\LQA\EntryDao;
+use Model\Projects\ProjectStruct;
+use Model\QualityReport\QualityReportDao;
+use Model\ReviseFeedback\FeedbackDAO;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\RevisionFactory;
+use ReflectionException;
 
 class QualitySummary {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    protected $chunk;
+    protected JobStruct $chunk;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected $project;
+    protected ProjectStruct $project;
 
     /**
      * QualitySummary constructor.
      *
-     * @param Jobs_JobStruct     $chunk
-     * @param Projects_ProjectStruct $project
+     * @param JobStruct     $chunk
+     * @param ProjectStruct $project
      */
-    public function __construct( Jobs_JobStruct $chunk, Projects_ProjectStruct $project ) {
+    public function __construct( JobStruct $chunk, ProjectStruct $project ) {
         $this->chunk   = $chunk;
         $this->project = $project;
     }
@@ -49,7 +50,7 @@ class QualitySummary {
      * @return array
      * @throws Exception
      */
-    public function render( $chunkReviewList ) {
+    public function render( array $chunkReviewList ): array {
 
         $result                      = [];
         $result[ 'quality_summary' ] = [];
@@ -64,10 +65,10 @@ class QualitySummary {
     /**
      * @param ChunkReviewStruct $chunkReview
      *
-     * @return mixed
+     * @return array
      * @throws Exception
      */
-    protected function renderItem( ChunkReviewStruct $chunkReview ) {
+    protected function renderItem( ChunkReviewStruct $chunkReview ): array {
 
         [
                 $passFail,
@@ -105,45 +106,47 @@ class QualitySummary {
     }
 
     /**
-     * @param                $chunkReviewPassword
-     * @param                $source_page
-     * @param Jobs_JobStruct $jStruct
+     * @param int            $source_page
+     * @param JobStruct      $jStruct
      * @param                $quality_overall
-     * @param                $reviseIssues
-     * @param                $score
-     * @param                $categories
-     * @param                $total_issues_weight
-     * @param                $total_reviewed_words_count
-     * @param                $passfail
+     * @param array          $reviseIssues
+     * @param float          $score
+     * @param array          $categories
+     * @param float|null     $total_issues_weight
+     * @param int            $total_reviewed_words_count
+     * @param array          $passfail
      *
-     * @param                $total_tte
-     * @param                $is_pass
+     * @param float          $total_tte
+     * @param bool|null      $is_pass
      *
-     * @param                $model_version
-     * @param                $model_id
-     * @param                $model_label
-     * @param                $model_template_id
+     * @param int            $model_version
+     * @param int|null       $model_id
+     * @param string|null    $model_label
+     * @param int|null       $model_template_id
      *
-     * @return mixed
+     * @param string|null    $chunkReviewPassword
+     *
+     * @return array
+     * @throws ReflectionException
      */
-    public static function populateQualitySummarySection(
-            $source_page,
-            Jobs_JobStruct $jStruct,
-            $quality_overall,
-            $reviseIssues,
-            $score,
-            $categories,
-            $total_issues_weight,
-            $total_reviewed_words_count,
-            $passfail,
-            $total_tte,
-            $is_pass,
-            $model_version,
-            $model_id = null,
-            $model_label = null,
-            $model_template_id = null,
-            $chunkReviewPassword = null
-    ) {
+    private static function populateQualitySummarySection(
+            int       $source_page,
+            JobStruct $jStruct,
+                      $quality_overall,
+            array     $reviseIssues,
+            float     $score,
+            array     $categories,
+            ?float    $total_issues_weight,
+            int       $total_reviewed_words_count,
+            array     $passfail,
+            float     $total_tte,
+            ?bool     $is_pass,
+            int       $model_version,
+            int       $model_id = null,
+            ?string   $model_label = null,
+            ?int      $model_template_id = null,
+            ?string   $chunkReviewPassword = null
+    ): array {
 
         $revisionNumber = ReviewUtils::sourcePageToRevisionNumber( $source_page );
 
@@ -155,18 +158,18 @@ class QualitySummary {
         return [
                 'revision_number'            => $revisionNumber,
                 'feedback'                   => ( $feedback and isset( $feedback[ 'feedback' ] ) ) ? $feedback[ 'feedback' ] : null,
-                'model_version'              => ( $model_version ? (int)$model_version : null ),
-                'model_id'                   => ( !empty( $model_id ) ? (int)$model_id : null ),
-                'model_label'                => ( !empty( $model_label ) ? $model_label : null ),
-                'model_template_id'          => ( $model_template_id ? (int)$model_template_id : null ),
+                'model_version'              => $model_version ?: null,
+                'model_id'                   => $model_id ?: null,
+                'model_label'                => $model_label ?: null,
+                'model_template_id'          => $model_template_id ?: null,
                 'is_pass'                    => $is_pass,
                 'quality_overall'            => $quality_overall,
-                'errors_count'               => (int)$jStruct->getErrorsCount(),
+                'errors_count'               => $jStruct->getErrorsCount(),
                 'revise_issues'              => $reviseIssues,
-                'score'                      => floatval( $score ),
+                'score'                      => $score,
                 'categories'                 => $categories,
-                'total_issues_weight'        => (float)$total_issues_weight,
-                'total_reviewed_words_count' => (int)$total_reviewed_words_count,
+                'total_issues_weight'        => round( $total_issues_weight ),
+                'total_reviewed_words_count' => $total_reviewed_words_count,
                 'passfail'                   => $passfail,
                 'total_time_to_edit'         => (int)$total_tte,
                 'details'                    => self::getDetails( $jStruct->id, $jStruct->password, $revisionNumber + 1 ),
@@ -174,15 +177,15 @@ class QualitySummary {
     }
 
     /**
-     * @param Jobs_JobStruct     $jStruct
-     * @param Projects_ProjectStruct $project
-     * @param                        $chunkReview
+     * @param JobStruct         $jStruct
+     * @param ProjectStruct     $project
+     * @param ChunkReviewStruct $chunkReview
      *
      * @return array
      * @throws Exception
      * @internal param $reviseIssues
      */
-    protected static function revisionQualityVars( Jobs_JobStruct $jStruct, Projects_ProjectStruct $project, $chunkReview ) {
+    protected static function revisionQualityVars( JobStruct $jStruct, ProjectStruct $project, ChunkReviewStruct $chunkReview ): array {
 
         $reviseIssues = [];
 
@@ -248,11 +251,14 @@ class QualitySummary {
         ];
     }
 
-    private static function getDetails( $idJob, $password, $revisionNumber ) {
+    /**
+     * @throws ReflectionException
+     */
+    private static function getDetails( int $idJob, string $password, int $revisionNumber ): array {
 
         $details = [];
 
-        $fileParts = Jobs_JobDao::getReviewedWordsCountGroupedByFileParts( $idJob, $password, $revisionNumber );
+        $fileParts = JobDao::getReviewedWordsCountGroupedByFileParts( $idJob, $password, $revisionNumber );
 
         foreach ( $fileParts as $filePart ) {
 

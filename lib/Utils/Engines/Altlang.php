@@ -1,5 +1,17 @@
 <?php
 
+namespace Utils\Engines;
+
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Exception;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Engines\Results\TMSAbstractResponse;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+
 /**
  * Created by PhpStorm.
  * @property string client_secret
@@ -8,8 +20,7 @@
  * Time: 12.17
  *
  */
-
-class Engines_Altlang extends Engines_AbstractEngine {
+class Altlang extends AbstractEngine {
 
     protected array $_config = [
             'segment' => null,
@@ -20,8 +31,8 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -40,10 +51,10 @@ class Engines_Altlang extends Engines_AbstractEngine {
      * @param array $parameters
      * @param null  $function
      *
-     * @return array|Engines_Results_MT
+     * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ): array {
 
         $all_args = func_get_args();
 
@@ -62,25 +73,29 @@ class Engines_Altlang extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($original[ "text" ], $decoded);
+        return $this->_composeMTResponseAsMatch( $original[ "text" ], $decoded );
     }
 
     /**
-     * @param $_config
+     * @param array $_config
      *
-     * @return array|Engines_Results_AbstractResponse|void
-     * @throws Exception
+     * @return array|TMSAbstractResponse|void
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
-        // Fallback on MyMemory in case of not supported source/target combination
+        // Fallback on Match in case of not supported source/target combination
         if ( !$this->checkLanguageCombination( $_config[ 'source' ], $_config[ 'target' ] ) ) {
 
-            /** @var Engines_MyMemory $myMemory */
-            $myMemory = Engine::getInstance( 1 );
+            /** @var MyMemory $myMemory */
+            $myMemory = EnginesFactory::getInstance( 1 );
 
             /**
-             * @var $result Engines_Results_MyMemory_TMS
+             * @var $result GetMemoryResponse
              */
             $result       = $myMemory->get( $_config );
             $this->result = $result->get_matches_as_array();
@@ -122,19 +137,19 @@ class Engines_Altlang extends Engines_AbstractEngine {
 
     }
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
 
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
+    public function update( $_config ): bool {
 
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         //if engine does not implement DELETE method, exit
         return true;
@@ -146,7 +161,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
      *
      * @return mixed
      */
-    private function convertLanguageCode( $code ) {
+    private function convertLanguageCode( string $code ) {
 
         $code = str_replace( "-", "_", $code );
         $code = str_replace( "es_AR", "es_LA", $code );
@@ -164,7 +179,7 @@ class Engines_Altlang extends Engines_AbstractEngine {
      *
      * @return bool
      */
-    private function checkLanguageCombination( $source, $target ) {
+    private function checkLanguageCombination( string $source, string $target ): bool {
 
         $supportedCombinations = [
                 [ 'pt_BR' => 'pt_PT' ],

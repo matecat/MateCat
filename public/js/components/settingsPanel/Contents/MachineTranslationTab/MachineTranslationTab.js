@@ -31,6 +31,7 @@ import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
 import InfoIcon from '../../../../../img/icons/InfoIcon'
+import {LaraGlossary} from './LaraGlossary/LaraGlossary'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -121,9 +122,9 @@ export const MachineTranslationTab = () => {
 
   const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
     [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
-      ? [{name: 'Engine Name'}, {name: 'Description'}, {name: 'Formality'}]
+      ? [{name: 'EnginesFactory Name'}, {name: 'Description'}, {name: 'Formality'}]
       : [
-          {name: 'Engine Name'},
+          {name: 'EnginesFactory Name'},
           {name: 'Description'},
           {name: 'Formality'},
           {name: 'Use in this project'},
@@ -290,7 +291,9 @@ export const MachineTranslationTab = () => {
         ? MTGlossary
         : activeMTEngineData.engine_type === 'DeepL'
           ? DeepLGlossary
-          : undefined
+          : activeMTEngineData.engine_type === 'Lara'
+            ? LaraGlossary
+            : undefined
 
     return {
       ...((shouldShowDeleteConfirmation || GlossaryComponent) && {

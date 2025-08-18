@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class DropTranslationRemoteId extends AbstractMatecatMigration {
     public $sql_up = "ALTER TABLE `files` DROP COLUMN `translation_remote_id`";
 

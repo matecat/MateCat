@@ -1,7 +1,9 @@
 <?php
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\FeaturesBase\FeatureSet;
 use TestHelpers\AbstractTest;
+use Utils\LQA\PostProcess;
 
 
 class PostProcessTest extends AbstractTest {

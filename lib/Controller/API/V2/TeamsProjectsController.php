@@ -6,34 +6,37 @@
  * Time: 10:06
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthorizationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectExistsInTeamValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\Commons\Validators\TeamProjectValidator;
-use API\V2\Json\Project;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectExistsInTeamValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
+use Controller\API\Commons\Validators\TeamProjectValidator;
 use Exception;
-use Exceptions\ValidationError;
-use ManageUtils;
+use Model\Exceptions\ValidationError;
+use Model\Projects\ManageModel;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Teams\TeamStruct;
 use Projects\ProjectModel;
-use Projects_ProjectDao;
 use ReflectionException;
-use Teams\TeamStruct;
+use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {
 
-    protected $project;
+    /**
+     * @var ProjectStruct
+     */
+    protected ProjectStruct $project;
 
     /** @var TeamStruct */
-    protected $team;
+    protected TeamStruct $team;
 
     /**
-     * @throws \Exceptions\NotFoundException
      * @throws AuthorizationError
      * @throws ReflectionException
      * @throws ValidationError
@@ -72,9 +75,10 @@ class TeamsProjectsController extends KleinController {
 
     /**
      * @return $this
+     * @throws ReflectionException
      */
-    protected function _appendSingleProjectTeamValidators() {
-        $this->project = Projects_ProjectDao::findById( $this->request->id_project ); //check login and auth before request the project info
+    protected function _appendSingleProjectTeamValidators(): TeamsProjectsController {
+        $this->project = ProjectDao::findById( $this->request->param( 'id_project' ) ); //check login and auth before request the project info
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
 
@@ -82,7 +86,7 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
      * @throws Exception
      */
     public function get() {
@@ -92,13 +96,14 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function getByName() {
         $start                 = 0;
         $step                  = 25;
-        $search_in_pname       = $this->request->project_name;
+        $search_in_pname       = $this->request->param( 'project_name' );
         $search_source         = null;
         $search_target         = null;
         $search_status         = "active";
@@ -107,7 +112,7 @@ class TeamsProjectsController extends KleinController {
         $assignee              = null;
         $no_assignee           = null;
 
-        $projects = ManageUtils::getProjects( $this->user, $start, $step,
+        $projects = ManageModel::getProjects( $this->user, $start, $step,
                 $search_in_pname,
                 $search_source, $search_target, $search_status,
                 $search_only_completed, $project_id,
@@ -122,14 +127,15 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @throws \Exceptions\NotFoundException
+     * @throws ReflectionException
      * @throws Exception
      */
     public function getAll() {
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
 
-        $projectsList = Projects_ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
+        /** @var ProjectStruct[] $projectsList */
+        $projectsList = ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
 
         $projectsList = ( new Project( $projectsList ) )->render();
         $this->response->json( [ 'projects' => $projectsList ] );

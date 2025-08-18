@@ -6,24 +6,24 @@
  * Time: 10:57
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
 
-use Database;
 use Exception;
-use Features;
-use Features\ReviewExtended\BatchReviewProcessor;
-use Features\ReviewExtended\ReviewUtils;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Features\TranslationEvents\TranslationEventsHandler;
-use Jobs_JobStruct;
+use Model\DataAccess\Database;
+use Model\FeaturesBase\FeatureCodes;
+use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationDao;
+use Model\Users\UserDao;
+use Plugins\Features\ReviewExtended\BatchReviewProcessor;
+use Plugins\Features\ReviewExtended\ReviewUtils;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
+use Plugins\Features\TranslationEvents\TranslationEventsHandler;
 use ReflectionException;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
-use Translations_SegmentTranslationDao;
-use Users_UserDao;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 
 class BulkSegmentStatusChangeWorker extends AbstractWorker {
@@ -52,10 +52,10 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         $params = $queueElement->params->toArray();
 
-        $chunk       = new Jobs_JobStruct( $params[ 'chunk' ] );
+        $chunk       = new JobStruct( $params[ 'chunk' ] );
         $status      = $params[ 'destination_status' ];
         $client_id   = $params[ 'client_id' ];
-        $user        = ( new Users_UserDao() )->getByUid( $params[ 'id_user' ] );
+        $user        = ( new UserDao() )->getByUid( $params[ 'id_user' ] );
         $source_page = ReviewUtils::revisionNumberToSourcePage( $params[ 'revision_number' ] );
 
 
@@ -66,7 +66,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
         $batchEventCreator->setFeatureSet( $chunk->getProject()->getFeaturesSet() );
         $batchEventCreator->setProject( $chunk->getProject() );
 
-        $old_translations = Translations_SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
+        $old_translations = SegmentTranslationDao::getAllSegmentsByIdListAndJobId( $params[ 'segment_ids' ], $chunk->id );
 
         $new_translations = [];
 
@@ -83,7 +83,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
             $new_translations[] = $new_translation;
 
-            if ( $chunk->getProject()->hasFeature( Features::TRANSLATION_VERSIONS ) ) {
+            if ( $chunk->getProject()->hasFeature( FeatureCodes::TRANSLATION_VERSIONS ) ) {
 
                 try {
                     $segmentTranslationEvent = new TranslationEvent( $old_translation, $new_translation, $user, $source_page );
@@ -97,7 +97,7 @@ class BulkSegmentStatusChangeWorker extends AbstractWorker {
 
         }
 
-        Translations_SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
+        SegmentTranslationDao::updateTranslationAndStatusAndDateByList( $new_translations );
 
         $batchEventCreator->save( new BatchReviewProcessor() );
 

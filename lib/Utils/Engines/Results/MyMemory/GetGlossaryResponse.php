@@ -1,6 +1,11 @@
 <?php
 
-class Engines_Results_MyMemory_GetGlossaryResponse extends Engines_Results_AbstractResponse {
+namespace Utils\Engines\Results\MyMemory;
+
+use Exception;
+use Utils\Engines\Results\TMSAbstractResponse;
+
+class GetGlossaryResponse extends TMSAbstractResponse {
 
     public $matches = [];
 
