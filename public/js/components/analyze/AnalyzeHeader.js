@@ -343,10 +343,10 @@ class AnalyzeHeader extends React.Component {
   }
 
   downloadAnalysisReport() {
-    var pid = config.id_project
-    var ppassword = config.password
+    const pid = this.props.project.get('id')
+    const ppassword = this.props.project.get('password')
 
-    var form =
+    const form =
       '			<form id="downloadAnalysisReportForm" action="/api/app/download-analysis-report" method="post">' +
       '				<input type=hidden name="id_project" value="' +
       pid +
