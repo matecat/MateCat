@@ -40,7 +40,7 @@
     "react-datepicker": "^8.0.0",
     "react-dom": "^18.0.0",
     "react-hook-form": "^7.45.4",
-    "react-hotkeys-hook": "^4.5.0",
+    "react-hotkeys-hook": "^5.0.0",
     "react-joyride": "^2.9.3",
     "react-mentions": "^4.4.10",
     "react-tagsinput": "^3.19.0",
