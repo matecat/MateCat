@@ -8,7 +8,7 @@ branches:
   only:
     - develop
     - /^v?(\d+\.)?(\d+\.)?(\d+)(-[a-z\d]+)?$/
-    - freddy
+    #  - freddy
     #  - master
 
 git:
@@ -61,7 +61,7 @@ script:
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-web-node:latest
       docker push 449641877310.dkr.ecr.eu-central-1.amazonaws.com/matecat/matecat-daemons-node:latest
 
-    elif [[ "${TRAVIS_BRANCH}" == "freddy" ]] ; then
+    elif [[ "${TRAVIS_BRANCH}" == "develop" && TRAVIS_PULL_REQUEST == "false" ]] ; then
 
       export AWS_ACCESS_KEY_ID=${BETA_AWS_ACCESS_KEY_ID}
       export AWS_SECRET_ACCESS_KEY=${BETA_AWS_SECRET_ACCESS_KEY}
