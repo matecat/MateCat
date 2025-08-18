@@ -446,9 +446,23 @@ const NewProject = () => {
     } = currentProjectTemplate
 
     const getTemplateUnsavedById = (id, templates) => {
-      const unsavedTemplate = templates.find(
-        (template) => template.id === id && template.isTemporary,
-      )
+      const unsavedTemplate = templates
+        .filter((template) => template.id === id && template.isTemporary)
+        .map(
+          ({
+            /* eslint-disable */
+            isSelected,
+            isTemporary,
+            id,
+            created_at,
+            modified_at,
+            createdAt,
+            deletedAt,
+            modifiedAt,
+            /* eslint-enable */
+            ...result
+          }) => result,
+        )[0]
 
       return unsavedTemplate
     }
@@ -615,9 +629,6 @@ const NewProject = () => {
     if (!isUserLogged) return
 
     retrieveSupportedLanguages()
-
-    // UI.addEvents()
-
     const hideAllErrors = () => {
       setErrors()
       setWarnings()

@@ -1,8 +1,8 @@
 <?php
 
-use LQA\BxExG\Validator;
-use LQA\QA;
 use TestHelpers\AbstractTest;
+use Utils\LQA\BxExG\Validator;
+use Utils\LQA\QA;
 
 
 class BxExGValidatorTest extends AbstractTest {

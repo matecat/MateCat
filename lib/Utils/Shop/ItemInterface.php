@@ -3,17 +3,19 @@
  * Created by PhpStorm.
  */
 
+namespace Utils\Shop;
+
 /**
- * Interface implemented in abstract class Shop_AbstractItem
+ * Interface implemented in abstract class AbstractItem
  *
- * @see    Shop_AbstractItem
+ * @see    AbstractItem
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 23/04/14
  * Time: 10.34
  *
  */
-interface Shop_ItemInterface {
+interface ItemInterface {
 
 
     /**
@@ -31,7 +33,7 @@ interface Shop_ItemInterface {
      * @see Shop_ItemJob::getInflate
      *
      */
-    public static function getInflate( $storage );
+    public static function getInflate( $storage ): AbstractItem;
 
 
 } 

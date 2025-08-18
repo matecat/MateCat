@@ -6,14 +6,16 @@
  * Time: 23:55
  */
 
-namespace API\V2;
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\ProjectPasswordValidator;
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use ProjectManager;
+namespace Controller\API\V2;
+
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Exception;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\ProjectManager;
 
 
 class JobMergeController extends KleinController {
@@ -23,22 +25,26 @@ class JobMergeController extends KleinController {
      */
     private $validator;
 
-    private $job ;
+    private $job;
 
+    /**
+     * @throws NotFoundException
+     * @throws Exception
+     */
     public function merge() {
 
         $pManager = new ProjectManager();
         $pManager->setProjectAndReLoadFeatures( $this->validator->getProject() );
 
-        $pStruct = $pManager->getProjectStructure();
-        $pStruct['id_customer'] = $this->validator->getProject()->id_customer ;
+        $pStruct                   = $pManager->getProjectStructure();
+        $pStruct[ 'id_customer' ]  = $this->validator->getProject()->id_customer;
         $pStruct[ 'job_to_merge' ] = $this->job->id;
 
         $jobStructs = $this->checkMergeAccess( $this->validator->getProject()->getJobs() );
 
         $pManager->mergeALL( $pStruct, $jobStructs );
 
-        $this->response->code(200);
+        $this->response->code( 200 );
         $this->response->json( [ 'success' => true ] );
     }
 
@@ -46,7 +52,7 @@ class JobMergeController extends KleinController {
         $this->validator->validate();
         // TODO: additional validation to be included in a ProjectAndJob Validation object
 
-        $this->job = Jobs_JobDao::getById( $this->request->id_job )[0];
+        $this->job = JobDao::getById( $this->request->param( 'id_job' ) )[ 0 ];
 
         if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id || $this->job->isDeleted() ) {
             throw new NotFoundException();
@@ -59,15 +65,15 @@ class JobMergeController extends KleinController {
     }
 
     /**
-     * @param Jobs_JobStruct[] $jobList
+     * @param JobStruct[] $jobList
      *
-     * @return Jobs_JobStruct[]
+     * @return JobStruct[]
      * @throws NotFoundException
      */
-    protected function checkMergeAccess( array $jobList ) {
+    protected function checkMergeAccess( array $jobList ): array {
 
-        $jid   = $this->job->id;
-        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( $jid ) {
+        $jid        = $this->job->id;
+        $jobToMerge = array_filter( $jobList, function ( JobStruct $jobStruct ) use ( $jid ) {
             return $jobStruct->id == $jid and !$jobStruct->isDeleted(); // exclude deleted jobs
         } );
 

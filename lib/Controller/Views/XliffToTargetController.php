@@ -1,8 +1,8 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
+use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 
 class XliffToTargetController extends BaseKleinViewController {

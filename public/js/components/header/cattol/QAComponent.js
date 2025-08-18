@@ -120,7 +120,7 @@ class QAComponent extends React.Component {
       warning = [],
       info = []
     if (this.state.warnings) {
-      if (this.state.warnings.ERROR.total > 0) {
+      if (this.state.warnings.ERROR?.total > 0) {
         Object.keys(this.state.warnings.ERROR.Categories).map((key, index) => {
           if (this.state.warnings.ERROR.Categories[key].length > 0) {
             if (key === 'TAGS') {

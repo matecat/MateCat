@@ -292,7 +292,7 @@ class AssignToTranslator extends React.Component {
                       this.setState({
                         time: parseInt(id),
                       })
-                      self.checkSendToTranslatorButton()
+                      this.checkSendToTranslatorButton()
                     }}
                     activeOption={timeOptions.find(
                       ({id}) => parseInt(id) === this.state.time,

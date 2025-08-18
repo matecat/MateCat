@@ -6,18 +6,21 @@
  * Time: 12:07
  */
 
-namespace Features;
+namespace Plugins\Features;
 
 
 interface IBaseFeature {
     /**
      * This method returns true if the feature is to be added to project metadata `features` key.
      *
-     * @return mixed
+     * @return bool
      */
-    public function isAutoActivableOnProject() ;
+    public function isAutoActivableOnProject(): bool;
 
-    public function isForceableOnProject();
+    /**
+     * @return bool
+     */
+    public function isForceableOnProject(): bool;
 
     /**
      * These are the dependencies we need to make to be enabled when a dependecy is
@@ -25,8 +28,11 @@ interface IBaseFeature {
      *
      * @return array
      */
-    public static function getDependencies();
+    public static function getDependencies(): array;
 
-    public static function getConflictingDependencies();
+    /**
+     * @return array
+     */
+    public static function getConflictingDependencies(): array;
 
 }

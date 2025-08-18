@@ -7,25 +7,30 @@
  *
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 
-use API\Commons\Exceptions\ValidationError;
+use Controller\Abstracts\FlashMessage;
+use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
-use FlashMessage;
+use Exception;
 use Klein\Response;
-use RedisHandler;
-use SimpleJWT;
+use ReflectionException;
+use Utils\Redis\RedisHandler;
+use Utils\Tools\SimpleJWT;
 
 class InvitedUser {
 
     /**
      * @var string
      */
-    protected $jwt;
+    protected string $jwt;
 
-    protected $response;
+    protected Response $response;
 
+    /**
+     * @throws ValidationError
+     */
     public function __construct( $jwt, Response $response ) {
 
         try {
@@ -38,6 +43,9 @@ class InvitedUser {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function prepareUserInvitedSignUpRedirect() {
 
         $_SESSION[ 'invited_to_team' ] = $this->jwt;
@@ -46,11 +54,14 @@ class InvitedUser {
 
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public static function completeTeamSignUp( $user, $invitation ) {
 
         $teamStruct = ( new TeamDao )->findById( $invitation[ 'team_id' ] );
 
-        $teamModel = new \TeamModel( $teamStruct );
+        $teamModel = new TeamModel( $teamStruct );
         $teamModel->setUser( $user );
         $teamModel->addMemberEmail( $invitation[ 'email' ] );
         $teamModel->updateMembers();
@@ -62,7 +73,10 @@ class InvitedUser {
 
     }
 
-    public static function hasPendingInvitations() {
+    /**
+     * @throws ReflectionException
+     */
+    public static function hasPendingInvitations(): bool {
 
         if ( !isset( $_SESSION[ 'invited_to_team' ] ) || empty( $_SESSION[ 'invited_to_team' ][ 'team_id' ] ) ) { // check if this is the right session caller
             return false;
@@ -70,7 +84,7 @@ class InvitedUser {
 
         $pendingInvitation = new PendingInvitations( ( new RedisHandler() )->getConnection(), $_SESSION[ 'invited_to_team' ] );
         if ( !$pendingInvitation->hasPengingInvitation( $_SESSION[ 'invited_to_team' ][ 'team_id' ] ) ) {
-            return false; // pending invitation already accepted ( one-time token consumed )
+            return false; // pending invitation already accepted (one-time token consumed)
         }
 
         return true;

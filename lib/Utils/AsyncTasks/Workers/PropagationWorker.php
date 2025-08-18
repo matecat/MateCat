@@ -7,21 +7,21 @@
  *
  */
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Database;
 use Exception;
-use Features\TranslationVersions\Model\TranslationVersionDao;
-use Jobs_JobStruct;
+use Model\DataAccess\Database;
+use Model\Jobs\JobStruct;
+use Model\Projects\ProjectStruct;
+use Model\Propagation\PropagationTotalStruct;
+use Model\Translations\SegmentTranslationStruct;
 use PDOException;
-use Projects_ProjectStruct;
-use Propagation_PropagationTotalStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Params;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
-use Translations_SegmentTranslationStruct;
+use Plugins\Features\TranslationVersions\Model\TranslationVersionDao;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\Params;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
 
 class PropagationWorker extends AbstractWorker {
 
@@ -52,12 +52,12 @@ class PropagationWorker extends AbstractWorker {
         $translationVersionsDao = new TranslationVersionDao();
 
         /**
-         * @var $propagationTotalStruct ?Propagation_PropagationTotalStruct
+         * @var $propagationTotalStruct ?\Model\Propagation\PropagationTotalStruct
          */
         $propagationTotalStruct = $structures[ 'propagationAnalysis' ];
 
         /**
-         * @var $propagatorSegment Translations_SegmentTranslationStruct
+         * @var $propagatorSegment \Model\Translations\SegmentTranslationStruct
          */
         $propagatorSegment = $structures[ 'translationStructTemplate' ];
 
@@ -159,7 +159,7 @@ class PropagationWorker extends AbstractWorker {
                         . "\n"
                         . $propagationSql
                         . "\n"
-                        . $increaseVersionSql
+                        . ( $increaseVersionSql ?? '' )
                         . "\n"
                         . var_export( $propagatorSegment, true )
                         . "\n"
@@ -177,11 +177,11 @@ class PropagationWorker extends AbstractWorker {
         $paramsArray = $params->toArray();
 
         return [
-                'translationStructTemplate' => new Translations_SegmentTranslationStruct( $paramsArray[ 'translationStructTemplate' ] ),
+                'translationStructTemplate' => new SegmentTranslationStruct( $paramsArray[ 'translationStructTemplate' ] ),
                 'id_segment'                => $params->id_segment,
-                'job'                       => new Jobs_JobStruct( $paramsArray[ 'job' ] ),
-                'project'                   => new Projects_ProjectStruct( $paramsArray[ 'project' ] ),
-                'propagationAnalysis'       => new Propagation_PropagationTotalStruct( $paramsArray[ 'propagationAnalysis' ] ),
+                'job'                       => new JobStruct( $paramsArray[ 'job' ] ),
+                'project'                   => new ProjectStruct( $paramsArray[ 'project' ] ),
+                'propagationAnalysis'       => new PropagationTotalStruct( $paramsArray[ 'propagationAnalysis' ] ),
                 'execute_update'            => $params->execute_update
         ];
     }

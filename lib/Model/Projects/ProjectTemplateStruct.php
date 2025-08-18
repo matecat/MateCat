@@ -1,13 +1,13 @@
 <?php
 
-namespace Projects;
+namespace Model\Projects;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 use stdClass;
 
-class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
+class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     public ?int    $id                           = null;
     public string  $name                         = "";
     public bool    $is_default                   = false;
@@ -130,10 +130,10 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
                 'segmentation_rule'            => $this->getSegmentationRule(),
                 'mt'                           => $this->getMt(),
                 'tm'                           => $this->getTm(),
-                'payable_rate_template_id'     => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : 0,
-                'qa_model_template_id'         => $this->qa_model_template_id ? (int)$this->qa_model_template_id : 0,
-                'filters_template_id'          => $this->filters_template_id ? (int)$this->filters_template_id : 0,
-                'xliff_config_template_id'     => $this->xliff_config_template_id ? (int)$this->xliff_config_template_id : 0,
+                'payable_rate_template_id'     => $this->payable_rate_template_id ?: 0,
+                'qa_model_template_id'         => $this->qa_model_template_id ?: 0,
+                'filters_template_id'          => $this->filters_template_id ?: 0,
+                'xliff_config_template_id'     => $this->xliff_config_template_id ?: 0,
                 'get_public_matches'           => $this->get_public_matches,
                 'pretranslate_100'             => $this->pretranslate_100,
                 'pretranslate_101'             => $this->pretranslate_101,

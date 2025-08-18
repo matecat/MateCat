@@ -1,21 +1,24 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
 use Exception;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
-class MMTValidator {
+class MMTValidator extends AbstractValidator {
     /**
      * Example:
      * {"glossaries": [1, 2, 3, 4], "ignore_glossary_case": true }
      *
-     * @param $mmtGlossaries
-     * @param $uid
+     * @param ValidatorObject $object
      *
+     * @return ValidatorObject|null
      * @throws Exception
      */
-    public static function validateGlossary( $mmtGlossaries ) {
-        $mmtGlossariesArray = json_decode( $mmtGlossaries, true );
+    public function validate( ValidatorObject $object ): ?ValidatorObject {
+
+        $mmtGlossariesArray = json_decode( $object[ 'glossaryString' ], true );
 
         if ( !is_array( $mmtGlossariesArray ) ) {
             throw new Exception( "mmt_glossaries is not a valid JSON" );
@@ -38,5 +41,8 @@ class MMTValidator {
                 throw new Exception( "`glossaries` array contains a non integer value in `mmt_glossaries` JSON" );
             }
         }
+
+        return $object;
+
     }
 }

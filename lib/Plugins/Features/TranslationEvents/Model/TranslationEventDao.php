@@ -6,19 +6,19 @@
  * Time: 17:20
  */
 
-namespace Features\TranslationEvents\Model;
+namespace Plugins\Features\TranslationEvents\Model;
 
-use Constants_TranslationStatus;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Database;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\IDaoStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 use PDO;
 use ReflectionException;
+use Utils\Constants\TranslationStatus;
 
 class TranslationEventDao extends AbstractDao {
 
     const TABLE       = "segment_translation_events";
-    const STRUCT_TYPE = "\Features\TranslationVersions\Model\TranslationEventStruct";
+    const STRUCT_TYPE = TranslationEventStruct::class;
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
@@ -41,13 +41,13 @@ class TranslationEventDao extends AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $min_segment
-     * @param $max_segment
+     * @param int $id_job
+     * @param int $min_segment
+     * @param int $max_segment
      *
      * @return TranslationEventStruct[]
      */
-    public function getLatestEventsInSegmentInterval( $id_job, $min_segment, $max_segment ) {
+    public function getLatestEventsInSegmentInterval( int $id_job, int $min_segment, int $max_segment ): array {
 
         $sql = "SELECT * FROM  segment_translation_events 
                 JOIN (
@@ -70,27 +70,13 @@ class TranslationEventDao extends AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function getFinalRevisionForSegmentAndSourcePage( $id_job, $id_segment, $source_page ) {
-        $sql = "SELECT * FROM segment_translation_events
-                WHERE id_job = :id_job
-                    AND id_segment = :id_segment
-                    AND final_revision = 1
-                    AND source_page = :source_page
-                ";
-
-        $conn = $this->getDatabaseHandler()->getConnection();
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, TranslationEventStruct::class );
-        $stmt->execute( [
-                'id_job'      => $id_job,
-                'id_segment'  => $id_segment,
-                'source_page' => $source_page
-        ] );
-
-        return $stmt->fetch(); // expect one result only
-    }
-
-    public function getAllFinalRevisionsForSegment( $id_job, $id_segment ) {
+    /**
+     * @param int $id_job
+     * @param int $id_segment
+     *
+     * @return TranslationEventStruct[]
+     */
+    public function getAllFinalRevisionsForSegment( int $id_job, int $id_segment ): array {
         $sql = "SELECT * FROM segment_translation_events
                 WHERE id_job = :id_job
                     AND id_segment = :id_segment
@@ -104,7 +90,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         return $stmt->fetchAll();
@@ -132,7 +118,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt->execute( [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
-                'draft'      => Constants_TranslationStatus::STATUS_DRAFT
+                'draft'      => TranslationStatus::STATUS_DRAFT
         ] );
 
         $res = $stmt->fetchAll();
@@ -145,10 +131,10 @@ class TranslationEventDao extends AbstractDao {
      * @param array $id_segment_list
      * @param int   $id_job
      *
-     * @return \DataAccess\IDaoStruct[]
+     * @return IDaoStruct[]
      * @throws ReflectionException
      */
-    public function getTteForSegments( $id_segment_list, $id_job ) {
+    public function getTteForSegments( array $id_segment_list, int $id_job ): ?array {
         $in  = str_repeat( '?,', count( $id_segment_list ) - 1 ) . '?';
         $sql = "
             SELECT 
@@ -167,106 +153,7 @@ class TranslationEventDao extends AbstractDao {
         $stmt              = $this->_getStatementForQuery( $sql );
         $id_segment_list[] = $id_job;
 
-        return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, $id_segment_list ) ?? null;
+        return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, $id_segment_list ) ?? null;
     }
 
-    /**
-     * @param TranslationEventStruct[] $structs
-     *
-     * @return bool
-     */
-    public function bulkInsert( array $structs = [] ) {
-        $sql = "INSERT INTO segment_translation_events
-            (
-                `id_job`,
-                `id_segment`,
-                `uid`,
-                `version_number`,
-                `source_page`,
-                `status`,
-                `create_date`,
-                `final_revision`,
-                `time_to_edit`
-            )
-            VALUES ";
-
-        $bind_values = [];
-
-        foreach ( $structs as $index => $struct ) {
-            $isLast = ( $index === ( count( $structs ) - 1 ) );
-
-            $sql .= "(?,?,?,?,?,?,?,?,?)";
-
-            if ( !$isLast ) {
-                $sql .= ',';
-            }
-
-            $bind_values[] = $struct->id_job;
-            $bind_values[] = $struct->id_segment;
-            $bind_values[] = $struct->uid;
-            $bind_values[] = $struct->version_number;
-            $bind_values[] = $struct->source_page;
-            $bind_values[] = $struct->status;
-            $bind_values[] = ( ( $struct->create_date instanceof \DateTime ) ? $struct->create_date->format( "Y-m-d H:i:s" ) : $struct->create_date );
-            $bind_values[] = $struct->final_revision;
-            $bind_values[] = $struct->time_to_edit;
-        }
-
-        if ( !empty( $bind_values ) ) {
-            $conn = Database::obtain()->getConnection();
-            $stmt = $conn->prepare( $sql );
-
-            return $stmt->execute( $bind_values );
-        }
-    }
-
-    /**
-     * @param TranslationEventStruct $struct
-     *
-     * @return int
-     */
-    public function insert( TranslationEventStruct $struct ) {
-        $sql = "INSERT INTO segment_translation_events
-                    (
-                        `id_job`,
-                        `id_segment`,
-                        `uid`,
-                        `version_number`,
-                        `source_page`,
-                        `status`,
-                        `create_date`,
-                        `final_revision`,
-                        `time_to_edit`
-                    )
-                    VALUES
-                    (
-                        :id_job,
-                        :id_segment,
-                        :uid,
-                        :version_number,
-                        :source_page,
-                        :status,
-                        :create_date,
-                        :final_revision,
-                        :time_to_edit
-                    )
-                ";
-
-        $conn = $this->getDatabaseHandler()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $stmt->execute( [
-                'id_job'         => $struct->id_job,
-                'id_segment'     => $struct->id_segment,
-                'uid'            => $struct->uid,
-                'version_number' => $struct->version_number,
-                'source_page'    => $struct->source_page,
-                'status'         => $struct->status,
-                'create_date'    => ( ( $struct->create_date instanceof \DateTime ) ? $struct->create_date->format( "Y-m-d H:i:s" ) : $struct->create_date ),
-                'final_revision' => $struct->final_revision == 1,
-                'time_to_edit'   => $struct->time_to_edit,
-        ] );
-
-        return $stmt->rowCount();
-    }
 }

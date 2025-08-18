@@ -7,7 +7,7 @@
  *
  */
 
-namespace Teams;
+namespace Model\Teams;
 
 
 use Predis\Client;
@@ -19,9 +19,9 @@ class PendingInvitations {
     /**
      * @var Client
      */
-    protected $redisClient;
+    protected Client $redisClient;
 
-    protected $payload;
+    protected array $payload;
 
     public function __construct( Client $redis, $payload ) {
         $this->redisClient = $redis;
@@ -31,17 +31,17 @@ class PendingInvitations {
     public function set() {
 
         $this->redisClient->sadd( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
-        $this->redisClient->expire( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), 60 * 60 * 24 * 3 ); //3 days renew
+        $this->redisClient->expire( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), 60 * 60 * 24 * 3 ); //3-day renew
 
     }
 
-    public function remove() {
+    public function remove(): int {
 
         return $this->redisClient->srem( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'team_id' ] ), $this->payload[ 'email' ] );
 
     }
 
-    public function hasPengingInvitation( $id_team ) {
+    public function hasPengingInvitation( $id_team ): array {
 
         return $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_team ) );
 

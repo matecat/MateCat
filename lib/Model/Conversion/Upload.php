@@ -1,12 +1,11 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Conversion\MimeTypes\MimeTypes;
 use Exception;
-use INIT;
-use stdClass;
-use Utils;
+use Model\Conversion\MimeTypes\MimeTypes;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 /**
  *
@@ -14,7 +13,7 @@ use Utils;
  *
  * @example
  * <pre>
- *   if( \Registry::getInstance ()->get ( "HttpRequest", 'requestMethod' ) == 'POST' ) {
+ *   if( 'requestMethod' == 'POST' ) {
  *       $uploadInstance = new Upload();
  *       $uploadInstance->uploadFiles( $_FILES );
  *   }
@@ -56,7 +55,7 @@ class Upload {
             $this->uploadToken = $uploadToken;
         }
 
-        $this->dirUpload = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadToken;
+        $this->dirUpload = AppConfig::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->uploadToken;
 
         if ( !file_exists( $this->dirUpload ) ) {
             mkdir( $this->dirUpload, 0775 );
@@ -69,19 +68,19 @@ class Upload {
      *
      * @param array $filesToUpload
      *
-     * @return stdClass
+     * @return UploadElement
      * @throws Exception
      */
-    public function uploadFiles( array $filesToUpload ): stdClass {
+    public function uploadFiles( array $filesToUpload ): UploadElement {
 
-        $result = new stdClass();
+        $result = new UploadElement();
 
         if ( empty( $filesToUpload ) ) {
             throw new Exception ( "No files received." );
         }
 
         if ( $this->_filesAreTooMuch( $filesToUpload ) ) {
-            throw new Exception ( "Too much files uploaded. Maximum value is " . INIT::$MAX_NUM_FILES );
+            throw new Exception ( "Too much files uploaded. Maximum value is " . AppConfig::$MAX_NUM_FILES );
         }
 
         $uploadStruct = static::getUniformGlobalFilesStructure( $filesToUpload );
@@ -92,14 +91,14 @@ class Upload {
         return $result;
     }
 
-    public static function getUniformGlobalFilesStructure( array $filesToUpload ): stdClass {
+    public static function getUniformGlobalFilesStructure( array $filesToUpload ): UploadElement {
 
-        $result = new stdClass();
+        $result = new UploadElement();
         foreach ( $filesToUpload as $inputName => $file ) {
 
             if ( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ) {
 
-                $_file = [];
+                $_file = new UploadElement();
                 foreach ( $file[ 'tmp_name' ] as $index => $value ) {
                     $_file[ 'tmp_name' ]            = $file[ 'tmp_name' ][ $index ];
                     $_file[ 'name' ]                = $file[ 'name' ][ $index ];
@@ -110,7 +109,7 @@ class Upload {
                 }
 
             } else {
-                $result->$inputName = $file;
+                $result->$inputName = new UploadElement( $file );
             }
 
         }
@@ -123,16 +122,12 @@ class Upload {
      * Upload File from $_FILES
      * $RegistryKeyIndex MUST BE form name Element
      *
-     * @param $fileUp
+     * @param UploadElement $fileUp
      *
      * @return object
      * @throws Exception
      */
-    protected function _uploadFile( $fileUp ): object {
-
-        if ( empty ( $fileUp ) ) {
-            throw new Exception ( __METHOD__ . " -> File Not Found In Registry Instance." );
-        }
+    protected function _uploadFile( UploadElement $fileUp ): object {
 
         // fix possibly XSS on the file name
         $fileUp[ 'name' ] = $this->fixFileName( $fileUp[ 'name' ] );
@@ -148,9 +143,6 @@ class Upload {
         if ( $fileSize == 0 ) {
             throw new Exception ( "The file '$out_filename' is empty." );
         }
-
-        $fileUp = (object)$fileUp;
-
 
         if ( !empty ( $fileError ) ) {
 
@@ -230,7 +222,7 @@ class Upload {
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
 
             $filePathInfo = pathinfo( $out_filename );
-            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? INIT::$MAX_UPLOAD_TMX_FILE_SIZE : INIT::$MAX_UPLOAD_FILE_SIZE;
+            $fileMaxSize  = ( $filePathInfo[ 'extension' ] === 'tmx' ) ? AppConfig::$MAX_UPLOAD_TMX_FILE_SIZE : AppConfig::$MAX_UPLOAD_FILE_SIZE;
 
             if ( $fileSize >= $fileMaxSize ) {
                 $this->setObjectErrorOrThrowException(
@@ -313,7 +305,7 @@ class Upload {
             }
         }
 
-        return $count > INIT::$MAX_NUM_FILES;
+        return $count > AppConfig::$MAX_NUM_FILES;
 
     }
 
@@ -327,7 +319,7 @@ class Upload {
     protected function _isRightMime( object $fileUp ): bool {
 
         //Mime White List, take them from ProjectManager.php
-        foreach ( INIT::$MIME_TYPES as $key => $value ) {
+        foreach ( AppConfig::$MIME_TYPES as $key => $value ) {
             if ( strpos( $key, $fileUp->type ) !== false ) {
                 return true;
             }
@@ -347,7 +339,7 @@ class Upload {
     protected function _isRightExtension( object $fileUp ): bool {
 
         $acceptedExtensions = [];
-        foreach ( INIT::$SUPPORTED_FILE_TYPES as $value2 ) {
+        foreach ( AppConfig::$SUPPORTED_FILE_TYPES as $value2 ) {
             $acceptedExtensions = array_unique( array_merge( $acceptedExtensions, array_keys( $value2 ) ) );
         }
 

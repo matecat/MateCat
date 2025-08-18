@@ -6,28 +6,28 @@
  * Time: 12:56
  */
 
-namespace API\V2\Json;
+namespace View\API\V2\Json;
 
 
-use TmKeyManagement_MemoryKeyStruct;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 class MemoryKeys {
 
     /**
-     * @var TmKeyManagement_MemoryKeyStruct[]
+     * @var MemoryKeyStruct[]
      */
     protected $data = [];
 
     /**
      * Project constructor.
      *
-     * @param TmKeyManagement_MemoryKeyStruct[] $data
+     * @param MemoryKeyStruct[] $data
      */
     public function __construct( array $data = [] ) {
         $this->data = $data;
     }
 
-    public static function renderItem( TmKeyManagement_MemoryKeyStruct $keyStruct ) {
+    public static function renderItem( MemoryKeyStruct $keyStruct ) {
 
 
         return [

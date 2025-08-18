@@ -7,7 +7,7 @@
  *
  */
 
-namespace Conversion;
+namespace Model\Conversion;
 
 class ConvertedFileList {
 

@@ -122,9 +122,9 @@ export const MachineTranslationTab = () => {
 
   const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
     [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
-      ? [{name: 'Engine Name'}, {name: 'Description'}, {name: 'Formality'}]
+      ? [{name: 'EnginesFactory Name'}, {name: 'Description'}, {name: 'Formality'}]
       : [
-          {name: 'Engine Name'},
+          {name: 'EnginesFactory Name'},
           {name: 'Description'},
           {name: 'Formality'},
           {name: 'Use in this project'},

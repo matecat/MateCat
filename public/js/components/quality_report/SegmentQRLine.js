@@ -156,7 +156,7 @@ const SegmentQRLine = ({
           </div>
         </div>
       ) : null}
-      {!(showIceMatchInfo && segment.get('ice_locked') === '1') &&
+      {!(showIceMatchInfo && segment.get('ice_locked')) &&
       !showSuggestionSource &&
       !showSegmentWords &&
       !tte &&

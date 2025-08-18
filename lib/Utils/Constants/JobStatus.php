@@ -1,4 +1,6 @@
 <?php
+
+namespace Utils\Constants;
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,8 +8,7 @@
  * Time: 19.08
  *
  */
-
-class Constants_JobStatus {
+class JobStatus {
 
     /**
      * Created by PhpStorm.

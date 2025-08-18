@@ -1,6 +1,8 @@
 <?php
 
 use TestHelpers\AbstractTest;
+use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -14,7 +16,7 @@ class MultiCurlHandlerTest extends AbstractTest {
 
     public function testInstance() {
         $mh = new MultiCurlHandler();
-        $this->assertInstanceOf( 'MultiCurlHandler', $mh );
+        $this->assertInstanceOf( MultiCurlHandler::class, $mh );
     }
 
     public function testCreateSingle() {
@@ -22,13 +24,13 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 
         $mh = new MultiCurlHandler();
 
-        $tokenHash = $mh->createResource( 'http://www.google.com/', $options );
+        $tokenHash = $mh->createResource( 'https://www.google.com/', $options );
         $this->assertNotEmpty( $tokenHash );
 
         $mh->multiExec();
@@ -46,10 +48,10 @@ class MultiCurlHandlerTest extends AbstractTest {
     public function testAddSingle() {
 
         $options = [
-                CURLOPT_URL            => 'http://www.google.com/',
+                CURLOPT_URL            => 'https://www.google.com/',
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 
@@ -77,14 +79,14 @@ class MultiCurlHandlerTest extends AbstractTest {
         $options = [
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         ];
 
         $mh     = new MultiCurlHandler();
         $hashes = [];
 
-        $tokenHash1 = $mh->createResource( 'http://www.google.com/', $options );
+        $tokenHash1 = $mh->createResource( 'https://www.google.com/', $options );
         $this->assertNotEmpty( $tokenHash1 );
         $hashes[] = $tokenHash1;
 

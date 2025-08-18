@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\V3\Json;
+namespace View\API\V3\Json;
 
 
 class FilesInfo {

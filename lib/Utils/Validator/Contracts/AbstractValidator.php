@@ -1,35 +1,35 @@
 <?php
 
-namespace Validator\Contracts;
+namespace Utils\Validator\Contracts;
 
-use Validator\Errors\JsonValidatorExceptionInterface;
+use Exception;
 
 abstract class AbstractValidator {
 
     /**
      * @return ValidatorErrorObject[]
      */
-    protected $errors = [];
+    protected array $errors = [];
 
     /**
      * @param ValidatorObject $object
      *
-     * @return bool
-     * @throws \Exception
+     * @return ValidatorObject|null
+     * @throws Exception
      */
-    abstract public function validate( ValidatorObject $object );
+    abstract public function validate( ValidatorObject $object ): ?ValidatorObject;
 
     /**
      * @return ValidatorErrorObject[]
      */
-    public function getExceptions() {
+    public function getExceptions(): array {
         return $this->errors;
     }
 
     /**
-     * @param $error
+     * @param ValidatorExceptionInterface $error
      */
-    public function addException( JsonValidatorExceptionInterface $error ) {
+    public function addException( ValidatorExceptionInterface $error ) {
         $errorObject        = new ValidatorErrorObject();
         $errorObject->error = $error;
         $this->errors[]     = $errorObject;
@@ -38,7 +38,7 @@ abstract class AbstractValidator {
     /**
      * @return bool
      */
-    public function isValid() {
+    public function isValid(): bool {
         return empty( $this->errors );
     }
 }

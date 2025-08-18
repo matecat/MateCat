@@ -7,41 +7,31 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\AuthorizationError;
-use API\V2\Json\CreationStatus;
-use API\V2\Json\WaitCreation;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use ProjectQueue\Queue;
-use Projects_ProjectDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Model\Exceptions\NotFoundException;
+use Model\Projects\ProjectDao;
+use Utils\ActiveMQ\ClientHelpers\ProjectQueue;
+use View\API\V2\Json\CreationStatus;
+use View\API\V2\Json\WaitCreation;
 
 class ProjectCreationStatusController extends KleinController {
 
     /**
-     * @throws AuthorizationError
-     * @throws AuthenticationError
-     * @throws NotFoundException
-     * @throws ValidationError
-     * @throws EndQueueException
-     * @throws ReQueueException
      * @throws Exception
      */
     public function get() {
 
         // validate id_project
-        if ( !is_numeric( $this->request->id_project ) ) {
+        if ( !is_numeric( $this->request->param( 'id_project' ) ) ) {
             throw new Exception( "ID project is not a valid integer", -1 );
         }
 
-        $result = Queue::getPublishedResults( $this->request->id_project );
+        $result = ProjectQueue::getPublishedResults( $this->request->param( 'id_project' ) );
 
         if ( empty( $result ) ) {
 
@@ -57,7 +47,7 @@ class ProjectCreationStatusController extends KleinController {
 
             // project is created, find it with password
             try {
-                $project = Projects_ProjectDao::findByIdAndPassword( $this->request->id_project, $this->request->password );
+                $project = ProjectDao::findByIdAndPassword( $this->request->param( 'id_project' ), $this->request->param( 'password' ) );
             } catch ( NotFoundException $e ) {
                 throw new AuthorizationError( 'Not Authorized.' );
             }
@@ -65,7 +55,7 @@ class ProjectCreationStatusController extends KleinController {
             $featureSet = $project->getFeaturesSet();
             $result     = $featureSet->filter( 'filterCreationStatus', $result, $project );
 
-            if ( empty( $result['id_project'] ) ) {
+            if ( empty( $result[ 'id_project' ] ) ) {
                 $this->_letsWait();
             } else {
                 $result = (object)$result;
