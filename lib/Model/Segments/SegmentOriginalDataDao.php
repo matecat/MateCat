@@ -41,7 +41,7 @@ class SegmentOriginalDataDao extends AbstractDao {
             return [];
         }
 
-        $dataRefMapArray = json_decode( $dataRefMap->map, true );
+        $dataRefMapArray =  $dataRefMap->getMap();
 
         return ( !empty( $dataRefMapArray ) ) ? $dataRefMapArray : [];
     }
