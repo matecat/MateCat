@@ -2546,7 +2546,7 @@ var spec = {
       get: {
         tags: ['Job', 'Files'],
         summary: 'Download the xliff file(s)',
-        description: 'Download the job xliff file(s) in zip format',
+        description: 'Download the xliff file(s) for a specific job',
         parameters: [
           {
             name: 'id_job',
