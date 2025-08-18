@@ -595,10 +595,6 @@ class SegmentSource extends React.Component {
           onDragStart: dragFragment,
           onMouseUp: () => {
             setTimeout(() => {
-              console.log(
-                'this.editor._latestEditorState.getSelection().isCollapsed()',
-                this.editor._latestEditorState.getSelection().isCollapsed(),
-              )
               this.setState({
                 isShowingOptionsToolbar: !this.editor._latestEditorState
                   .getSelection()
