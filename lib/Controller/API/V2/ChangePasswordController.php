@@ -54,7 +54,7 @@ class ChangePasswordController extends ChunkController {
             $new_pwd    = $new_password;
             $actual_pwd = $password;
         } else {
-            $new_pwd    = Utils::randomString( 15, true );
+            $new_pwd    = Utils::randomString();
             $actual_pwd = $password;
         }
 
