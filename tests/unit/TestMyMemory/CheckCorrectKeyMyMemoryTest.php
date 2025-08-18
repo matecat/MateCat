@@ -1,11 +1,18 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\AuthKeyResponse;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Match;
 
 
 /**
  * @group  regression
- * @covers Engines_MyMemory::checkCorrectKey
+ * @covers MyMemory::checkCorrectKey
  * User: dinies
  * Date: 19/05/16
  * Time: 16.09
@@ -15,21 +22,21 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::checkCorrectKey
+     * @covers MyMemory::checkCorrectKey
      */
     public function test_checkCorrectKey_with_success() {
         $key_param         = "bfb9bd80a43253670c8d";
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
 
         $engine_MyMemory->checkCorrectKey( $key_param );
 
@@ -40,7 +47,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         $object_result = $property->getValue( $engine_MyMemory );
 
 
-        $this->assertTrue( $object_result instanceof Engines_Results_MyMemory_AuthKeyResponse );
+        $this->assertTrue( $object_result instanceof AuthKeyResponse );
         $this->assertTrue( property_exists( $object_result, 'responseStatus' ) );
         $this->assertTrue( property_exists( $object_result, 'responseDetails' ) );
         $this->assertTrue( property_exists( $object_result, 'responseData' ) );
@@ -51,21 +58,21 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::checkCorrectKey
+     * @covers MyMemory::checkCorrectKey
      */
     public function test_checkCorrectKey_with_failure_with_fake_tmKey() {
         $key_param         = "b2invalid2d";
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
 
         $bool_result = $engine_MyMemory->checkCorrectKey( $key_param );
 
@@ -76,7 +83,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         $object_result = $property->getValue( $engine_MyMemory );
 
 
-        $this->assertTrue( $object_result instanceof Engines_Results_MyMemory_AuthKeyResponse );
+        $this->assertTrue( $object_result instanceof AuthKeyResponse );
         $this->assertEquals( 200, $object_result->responseStatus );
         $this->assertEquals( "", $object_result->responseDetails );
         $this->assertEquals( 0, $object_result->responseData );
@@ -96,7 +103,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::checkCorrectKey
+     * @covers MyMemory::checkCorrectKey
      */
     public function test_checkCorrectKey_mocked() {
         $key_param       = "bfb9bd80a43253670c8d";
@@ -108,21 +115,21 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         ];
 
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
         /**
          * creation of the engine
-         * @var Engines_MyMemory
+         * @var Match
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_raw_value );
 
 
@@ -138,7 +145,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         /**
          * check on the values of TMS object returned
          */
-        $this->assertTrue( $object_result instanceof Engines_Results_MyMemory_AuthKeyResponse );
+        $this->assertTrue( $object_result instanceof AuthKeyResponse );
         $this->assertEquals( 200, $object_result->responseStatus );
         $this->assertEquals( "", $object_result->responseDetails );
         $this->assertEquals( 1, $object_result->responseData );
@@ -156,7 +163,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
 
     /**
      * @group  regression
-     * @covers Engines_MyMemory::checkCorrectKey
+     * @covers MyMemory::checkCorrectKey
      */
     public function test_checkCorrectKey_with_error_from_mocked__call_for_coverage_purpose() {
 
@@ -177,21 +184,21 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest {
         ];
 
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
         /**
          * creation of the engine
-         * @var Engines_MyMemory
+         * @var Match
          */
-        $engine_MyMemory = $this->getMockBuilder( '\Engines_MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = $this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 
         $this->expectException( 'Exception' );

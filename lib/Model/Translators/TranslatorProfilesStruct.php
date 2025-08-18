@@ -7,20 +7,20 @@
  *
  */
 
-namespace Translators;
+namespace Model\Translators;
 
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-class TranslatorProfilesStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+class TranslatorProfilesStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $uid_translator;
-    public $is_revision;
-    public $translated_words;
-    public $revised_words;
-    public $source;
-    public $target;
+    public ?int   $id               = null;
+    public int    $uid_translator;
+    public int    $is_revision;
+    public int    $translated_words = 0;
+    public int    $revised_words    = 0;
+    public string $source;
+    public string $target;
 
 }

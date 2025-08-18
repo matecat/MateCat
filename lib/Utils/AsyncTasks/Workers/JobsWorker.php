@@ -1,16 +1,16 @@
 <?php
 
-namespace AsyncTasks\Workers;
+namespace Utils\AsyncTasks\Workers;
 
-use Jobs_JobDao;
-use Jobs_JobStruct;
-use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\QueueElement;
-use TaskRunner\Exceptions\EndQueueException;
-use Utils;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Utils\TaskRunner\Commons\AbstractElement;
+use Utils\TaskRunner\Commons\AbstractWorker;
+use Utils\TaskRunner\Commons\QueueElement;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\Tools\Utils;
 
-//include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
+//include_once AppConfig::$UTILS_ROOT . "/Match.copyrighted.php";
 
 /**
  * Created by PhpStorm.
@@ -30,7 +30,7 @@ class JobsWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $jobStruct = new Jobs_JobStruct( $queueElement->params->toArray() );
+        $jobStruct = new JobStruct( $queueElement->params->toArray() );
 
         //re-initialize DB if socked is closed
         $this->_checkDatabaseConnection();
@@ -65,9 +65,9 @@ class JobsWorker extends AbstractWorker {
 
     }
 
-    protected function _recountAvgPee( Jobs_JobStruct $jobStruct ) {
+    protected function _recountAvgPee( JobStruct $jobStruct ) {
 
-        $jDao = new Jobs_JobDao();
+        $jDao = new JobDao();
 
         $segments = $jDao->getAllModifiedSegmentsForPee( $jobStruct );
 

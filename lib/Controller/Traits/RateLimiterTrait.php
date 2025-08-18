@@ -1,12 +1,12 @@
 <?php
 
-namespace Traits;
+namespace Controller\Traits;
 
 use DateTime;
 use Exception;
 use Klein\Response;
 use Predis\Client;
-use RedisHandler;
+use Utils\Redis\RedisHandler;
 
 trait RateLimiterTrait {
     /**

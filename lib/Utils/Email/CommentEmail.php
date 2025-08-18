@@ -1,10 +1,10 @@
 <?php
 
-namespace Email;
+namespace Utils\Email;
 
 class CommentEmail extends BaseCommentEmail {
 
-    protected $title = "New comment";
+    protected ?string $title = "New comment";
 
     protected function _getTemplateVariables(): array {
         $vars                 = parent::_getTemplateVariables();

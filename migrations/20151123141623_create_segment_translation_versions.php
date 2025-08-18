@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateSegmentTranslationVersions extends AbstractMatecatMigration {
   public $sql_up = <<<EOF
 CREATE TABLE `segment_translation_versions` (

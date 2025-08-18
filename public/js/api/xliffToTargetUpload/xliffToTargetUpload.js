@@ -26,7 +26,7 @@ export const xliffToTargetUpload = (file, onProgress, onSuccess, onError) => {
   }
 
   xhr.onerror = () => {
-    onError('Errore di connessione')
+    onError('Connection error')
   }
 
   xhr.open('POST', '/api/app/xliff-to-target/convert', true)

@@ -494,7 +494,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_translation')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={0}
             />
@@ -513,7 +513,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_revise')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={1}
             />
@@ -532,7 +532,7 @@ class SegmentQR extends React.Component {
               tte={this.props.segment.get('time_to_edit_revise_2')}
               showIsPretranslated={
                 this.props.segment.get('is_pre_translated') &&
-                this.props.segment.get('ice_locked') !== '1'
+                !this.props.segment.get('ice_locked')
               }
               rev={2}
             />

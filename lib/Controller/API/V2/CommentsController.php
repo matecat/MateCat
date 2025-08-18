@@ -6,23 +6,24 @@
  * Time: 15:08
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-
-use API\Commons\Validators\ChunkPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use Comments_CommentDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ChunkPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
 use Exception;
-use Jobs_JobStruct;
+use Model\Comments\CommentDao;
+use Model\Jobs\JobStruct;
 
-class CommentsController extends BaseChunkController {
-
+class CommentsController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param \Model\Jobs\JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): CommentsController {
+    public function setChunk( JobStruct $chunk ): CommentsController {
         $this->chunk = $chunk;
 
         return $this;
@@ -35,7 +36,7 @@ class CommentsController extends BaseChunkController {
 
         $this->return404IfTheJobWasDeleted();
 
-        $comments = Comments_CommentDao::getCommentsForChunk( $this->chunk, [
+        $comments = CommentDao::getCommentsForChunk( $this->chunk, [
                 'from_id' => $this->request->param( 'from_id' )
         ] );
 

@@ -1,8 +1,7 @@
 <?php
 
-namespace LQA;
+namespace Utils\LQA;
 
-use CatUtils;
 use DOMDocument;
 use DOMElement;
 use DOMException;
@@ -10,72 +9,12 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use Exception;
-use FeatureSet;
-use Jobs_JobStruct;
-use Log;
 use LogicException;
-use LQA\BxExG\Validator;
-use Segments_SegmentMetadataDao;
-
-/**
- * Class errObject
- * Object vector for error reporting.
- * json_encode facilities of public properties.
- *
- * __toString method are used for array_count_values and array_unique over container
- *
- */
-class errObject {
-
-    public $outcome;
-    public $debug;
-    public $tip = "";
-
-    protected $orig_debug;
-
-    /**
-     * Output externally the original debug string, needed for occurrence count
-     * @return string
-     */
-    public function getOrigDebug() {
-        return $this->orig_debug;
-    }
-
-    /**
-     * Outputs externally the error tip
-     * @return string
-     */
-    public function getTip() {
-        return $this->tip;
-    }
-
-    /**
-     * Static instance constructor
-     *
-     * @param array $errors
-     *
-     * @return errObject
-     */
-    public static function get( array $errors ) {
-        $errObj             = new self();
-        $errObj->outcome    = $errors[ 'outcome' ];
-        $errObj->orig_debug = $errors[ 'debug' ];
-        $errObj->debug      = $errors[ 'debug' ];
-
-        ( !empty( $errors[ 'tip' ] ) ) ? $errObj->tip = $errors[ 'tip' ] : null;
-
-        return $errObj;
-    }
-
-    /**
-     * Return string id
-     * @return string
-     */
-    public function __toString() {
-        return (string)$this->outcome;
-    }
-
-}
+use Model\FeaturesBase\FeatureSet;
+use Model\Segments\SegmentMetadataDao;
+use Utils\Logger\Log;
+use Utils\LQA\BxExG\Validator;
+use Utils\Tools\CatUtils;
 
 /**
  * Translation string quality assurance.
@@ -132,12 +71,12 @@ class errObject {
 class QA {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      */
     protected $chunk;
 
     /**
-     * @var FeatureSet
+     * @var \Model\FeaturesBase\FeatureSet
      */
     protected $featureSet;
 
@@ -476,14 +415,14 @@ class QA {
     /**
      * List of Errors from  check analysis
      *
-     * @var array(errObject(number:string))
+     * @var array(ErrObject(number:string))
      */
     protected $exceptionList = [ self::ERROR => [], self::WARNING => [], self::INFO => [] ];
 
     /**
      * List of warnings from check analysis
      *
-     * @var array(errObject(number,string))
+     * @var array(ErrObject(number,string))
      */
     protected $warningList = [];
 
@@ -518,35 +457,35 @@ class QA {
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
             case self::ERR_TAG_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAG_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_TAG_MISMATCH )
                 ] );
                 break;
             case self::ERR_TAG_ID:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAG_ID,
                         'debug'   => $this->_errorMap[ self::ERR_TAG_ID ],
                         'tip'     => $this->_getTipValue( self::ERR_TAG_ID )
                 ] );
                 break;
             case self::ERR_EX_BX_COUNT_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_COUNT_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_COUNT_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_COUNT_MISMATCH )
                 ] );
                 break;
             case self::ERR_EX_BX_NESTED_IN_G:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_NESTED_IN_G,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_NESTED_IN_G ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_NESTED_IN_G )
                 ] );
                 break;
             case self::ERR_EX_BX_WRONG_POSITION:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                $this->exceptionList[ self::WARNING ][] = ErrObject::get( [
                         'outcome' => self::ERR_EX_BX_WRONG_POSITION,
                         'debug'   => $this->_errorMap[ self::ERR_EX_BX_WRONG_POSITION ],
                         'tip'     => $this->_getTipValue( self::ERR_EX_BX_WRONG_POSITION )
@@ -555,14 +494,14 @@ class QA {
             case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_UNCLOSED_G_TAG:
             case self::SMART_COUNT_PLURAL_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
                 ] );
                 break;
             case self::SMART_COUNT_MISMATCH:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::SMART_COUNT_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::SMART_COUNT_MISMATCH )
@@ -570,7 +509,7 @@ class QA {
                 break;
 
             case self::ERR_SIZE_RESTRICTION:
-                $this->exceptionList[ self::ERROR ][] = errObject::get( [
+                $this->exceptionList[ self::ERROR ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ self::ERR_SIZE_RESTRICTION ],
                         'tip'     => $this->_getTipValue( self::ERR_SIZE_RESTRICTION )
@@ -579,7 +518,7 @@ class QA {
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
@@ -589,7 +528,7 @@ class QA {
 
             case self::ERR_TAB_HEAD:
             case self::ERR_TAB_TAIL:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_TAB_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
@@ -597,7 +536,7 @@ class QA {
                 break;
 
             case self::ERR_BOUNDARY_HEAD:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_HEAD_SPACE_MISMATCH )
@@ -607,7 +546,7 @@ class QA {
             case self::ERR_BOUNDARY_TAIL:
                 // if source target is CJ we won't to add an trailing space mismatch error
                 if ( false === CatUtils::isCJ( $this->getSourceSegLang() ) ) {
-                    $this->exceptionList[ self::INFO ][] = errObject::get( [
+                    $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                             'outcome' => self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH,
                             'debug'   => $this->_errorMap[ self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH ],
                             'tip'     => $this->_getTipValue( self::ERR_BOUNDARY_TAIL_SPACE_MISMATCH )
@@ -616,7 +555,7 @@ class QA {
                 break;
 
             case self::ERR_SPACE_MISMATCH_AFTER_TAG:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_AFTER_TAG,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_AFTER_TAG ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_AFTER_TAG )
@@ -624,7 +563,7 @@ class QA {
                 break;
 
             case self::ERR_SPACE_MISMATCH_BEFORE_TAG:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH_BEFORE_TAG,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_BEFORE_TAG ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_BEFORE_TAG )
@@ -633,7 +572,7 @@ class QA {
 
 
             case self::ERR_BOUNDARY_HEAD_TEXT:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SPACE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH )
@@ -652,7 +591,7 @@ class QA {
             case self::ERR_STARSIGN_MISMATCH :
             case self::ERR_SPECIAL_ENTITY_MISMATCH :
             case self::ERR_SYMBOL_MISMATCH :
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_SYMBOL_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_SYMBOL_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_SYMBOL_MISMATCH )
@@ -660,7 +599,7 @@ class QA {
                 break;
 
             case self::ERR_NEWLINE_MISMATCH:
-                $this->exceptionList[ self::INFO ][] = errObject::get( [
+                $this->exceptionList[ self::INFO ][] = ErrObject::get( [
                         'outcome' => self::ERR_NEWLINE_MISMATCH,
                         'debug'   => $this->_errorMap[ self::ERR_NEWLINE_MISMATCH ],
                         'tip'     => $this->_getTipValue( self::ERR_NEWLINE_MISMATCH )
@@ -669,7 +608,7 @@ class QA {
 
             case self::ERR_TAG_ORDER:
             default:
-                $this->exceptionList[ self::WARNING ][] = errObject::get( [
+                $this->exceptionList[ self::WARNING ][] = ErrObject::get( [
                         'outcome' => $errCode,
                         'debug'   => $this->_errorMap[ $errCode ],
                         'tip'     => $this->_getTipValue( $errCode )
@@ -751,7 +690,7 @@ class QA {
     /**
      * Get Warning level errors
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     public function getWarnings() {
         return $this->checkErrorNone( self::WARNING );
@@ -797,7 +736,7 @@ class QA {
     /**
      * Get Notice level errors
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     public function getNotices() {
         return $this->checkErrorNone( self::INFO );
@@ -818,7 +757,7 @@ class QA {
      * <pre>
      * Array
      * (
-     *     [0] => errObject Object
+     *     [0] => ErrObject Object
      *         (
      *             [outcome] => 0
      *             [debug] =>
@@ -829,13 +768,13 @@ class QA {
      * @param string $level
      * @param bool   $count
      *
-     * @return errObject[]
+     * @return ErrObject[]
      */
     protected function checkErrorNone( $level = self::ERROR, $count = false ) {
 
         if ( !$this->_thereAreErrorLevel( $level ) ) {
             return [
-                    errObject::get( [
+                    ErrObject::get( [
                             'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[ self::ERR_NONE ] . " [ 0 ]"
                     ] )
             ];
@@ -859,7 +798,7 @@ class QA {
              * count same values in array of errors.
              * we use array_map with strval callback function because array_count_values can count only strings or int
              * so:
-             * __toString was made internally in errObject class
+             * __toString was made internally in ErrObject class
              *
              * @see http://www.php.net/manual/en/function.array-count-values.php
              **/
@@ -868,14 +807,14 @@ class QA {
              * array_unique remove duplicated values in array,
              * Two elements are considered equal if and only if (string) $elem1 === (string) $elem2
              * so:
-             * __toString was made internally in errObject class
+             * __toString was made internally in ErrObject class
              *
              * @see http://www.php.net/manual/en/function.array-unique.php
              */
             $list = array_values( array_unique( $list ) );
 
             /**
-             * @var $errObj errObject
+             * @var $errObj ErrObject
              */
             foreach ( $list as $errObj ) {
                 $errObj->debug = $errObj->getOrigDebug() .
@@ -927,8 +866,8 @@ class QA {
          * does not works for not printable chars
          *
          */
-        $source_seg = $this->replaceEntities( $source_seg );
-        $target_seg = $this->replaceEntities( $target_seg );
+        $source_seg = $this->replaceHexEntities( $source_seg );
+        $target_seg = $this->replaceHexEntities( $target_seg );
 
         /**
          * We insert a default placeholder inside empty html tags to avoid saveXML() function invoked by getTrgNormalized()
@@ -979,35 +918,50 @@ class QA {
     }
 
     /**
-     * @param $seg
+     * Replaces hexadecimal HTML entities in a string with placeholders defined in the static map `self::$asciiPlaceHoldMap`.
      *
-     * @return string|string[]|null
+     * This method processes HTML entities in the input string, converting them into placeholders to ensure compatibility
+     * with XML processing tools like `DOMDocument`.
+     *
+     * @param string $seg The input string containing hexadecimal HTML entities.
+     *
+     * @return string The modified string with HTML entities replaced by placeholders.
      */
-    private function replaceEntities( $seg ) {
+    private function replaceHexEntities( $seg ) {
 
+        // Find all HTML entities in the input string that match the pattern `self::$regexpEntity`.
         preg_match_all( self::$regexpEntity, $seg, $matches );
 
+        // If HTML entities were found, proceed with the replacement.
         if ( !empty( $matches[ 1 ] ) ) {
             $test_src = $seg;
+
+            // Iterate over each found HTML entity.
             foreach ( $matches[ 1 ] as $v ) {
+                // Convert the hexadecimal value of the entity to a two-character hexadecimal string.
                 $byte = sprintf( "%02X", hexdec( $v ) );
+
+                // Build a regular expression to match the exact HTML entity.
                 if ( $byte[ 0 ] == '0' ) {
                     $regexp = '/&#x([' . $byte[ 0 ] . ']{0,1}' . $byte[ 1 ] . ');/u';
                 } else {
                     $regexp = '/&#x(' . $byte . ');/u';
                 }
 
+                // Check if the calculated hexadecimal value exists in the map `self::$asciiPlaceHoldMap`.
                 $key = sprintf( "%02X", hexdec( $v ) );
                 if ( array_key_exists( $key, self::$asciiPlaceHoldMap ) ) {
+                    // Replace the HTML entity with the corresponding placeholder.
                     $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src );
                 }
 
             }
 
-            //Source Content wrong use placeholded one
+            // Update the original string with the modified version.
             $seg = $test_src;
         }
 
+        // Return the modified string.
         return $seg;
     }
 
@@ -1072,7 +1026,7 @@ class QA {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return \Model\Jobs\JobStruct
      */
     public function getChunk() {
         return $this->chunk;
@@ -1091,7 +1045,7 @@ class QA {
 
 
     /**
-     * @param FeatureSet $featureSet
+     * @param \Model\FeaturesBase\FeatureSet $featureSet
      *
      * @return $this
      */
@@ -1102,7 +1056,7 @@ class QA {
     }
 
     /**
-     * @return FeatureSet
+     * @return \Model\FeaturesBase\FeatureSet
      * @throws Exception
      */
     public function getFeatureSet() {
@@ -1124,7 +1078,7 @@ class QA {
      * @return string
      */
     public function getTargetSeg() {
-        return str_replace( self::$emptyHtmlTagsPlaceholder, '', $this->target_seg );
+        return $this->cleanOutputContent( $this->target_seg );
     }
 
     public function getDomMaps() {
@@ -1476,16 +1430,16 @@ class QA {
      */
     protected function _getTagDiff() {
 
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->source_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<(?:[^>]+id\s*=[^>]+)[\/]{0,1}>)/', $this->target_seg, $matches );
+        preg_match_all( '#(<(?:[^>]+id\s*=[^>]+)[/]{0,1}>)#', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[ 1 ];
 
         //this is for </g>
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->source_seg, $matches );
         $_closingSrcTag = $matches[ 1 ];
 
-        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+        preg_match_all( '#(</[a-zA-Z]+>)#', $this->target_seg, $matches );
         $_closingTrgTag = $matches[ 1 ];
 
         $clonedSrc = $malformedXmlSrcStruct;
@@ -1560,7 +1514,7 @@ class QA {
     /**
      * Perform all integrity check and comparisons on source and target string
      *
-     * @return errObject[]
+     * @return ErrObject[]
      * @throws Exception
      */
     public function performConsistencyCheck() {
@@ -1587,7 +1541,7 @@ class QA {
     /**
      * Perform integrity check only for tag mismatch
      *
-     * @return errObject[]
+     * @return ErrObject[]
      * @throws Exception
      */
     public function performTagCheckOnly() {
@@ -1969,7 +1923,7 @@ class QA {
      * After realignment a Tag consistency check is performed ( QA::performTagCheckOnly() )
      * if no errors where found the dom is reloaded and tags map are updated.
      *
-     * @return errObject[]|null
+     * @return ErrObject[]|null
      * @throws Exception|DOMException
      */
     public
@@ -2426,7 +2380,7 @@ class QA {
      * @return bool
      */
     protected
-    function _hasHeadNBSP( $s ) {
+    function _hasHeadNBSP( string $s ) {
         return preg_match( "/^\x{a0}/u", $s );
     }
 
@@ -2437,8 +2391,7 @@ class QA {
      *
      * @return bool
      */
-    protected
-    function _hasTailNBSP( $s ) {
+    protected function _hasTailNBSP( $s ) {
         return preg_match( "/\x{a0}$/u", $s );
     }
 
@@ -2448,8 +2401,7 @@ class QA {
      * @return string
      * @throws LogicException
      */
-    public
-    function getTrgNormalized() {
+    public function getTrgNormalized() {
 
         if ( !$this->thereAreErrors() ) {
 
@@ -2457,44 +2409,51 @@ class QA {
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-            /**
-             * Remove placeholder from empty HTML tags
-             */
-            $matches[ 1 ] = str_replace( self::$emptyHtmlTagsPlaceholder, '', $matches[ 1 ] );
+            return $this->cleanOutputContent( $matches[ 1 ] );
 
-            /**
-             * Why i do this?? I'm replacing Placeholders of non printable chars
-             * this because DomDocument can't handle non printable chars
-             * @see __construct
-             */
-            preg_match_all( self::$regexpPlaceHoldAscii, $matches[ 1 ], $matches_trg );
-            if ( !empty( $matches_trg[ 1 ] ) ) {
-
-                foreach ( $matches_trg[ 1 ] as $v ) {
-                    $matches[ 1 ] = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';', $matches[ 1 ], 1 );
-                }
-//                Log::hexDump($matches[1]);
-            }
-
-            //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
-            $matches[ 1 ] = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'CatUtils', 'htmlentitiesFromUnicode' ], $matches[ 1 ] );
-
-            /*
-             * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
-             * return stripslashes( $matches[1] );
-             */
-
-            // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
-            // re-encode control special characters
-            $matches[ 1 ] = preg_replace( '/\n/u', '&#10;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/\r/u', '&#13;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/\t/u', '&#09;', $matches[ 1 ] );
-            $matches[ 1 ] = preg_replace( '/ /u', '&#160;', $matches[ 1 ] ); //NBSP character
-
-            return $matches[ 1 ];
         }
 
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison." );
+    }
+
+    private function cleanOutputContent( string $content ): string {
+
+        /**
+         * Remove placeholder from empty HTML tags
+         */
+        $content = str_replace( self::$emptyHtmlTagsPlaceholder, '', $content );
+
+        /**
+         * Why i do this?? I'm replacing Placeholders of non printable chars
+         * this because DomDocument can't handle non printable chars
+         * @see __construct
+         */
+        preg_match_all( self::$regexpPlaceHoldAscii, $content, $matches_trg );
+        if ( !empty( $matches_trg[ 1 ] ) ) {
+
+            foreach ( $matches_trg[ 1 ] as $v ) {
+                $content = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';', $content, 1 );
+            }
+//                Log::hexDump($matches[1]);
+        }
+
+        //Substitute 4(+)-byte characters from a UTF-8 string to htmlentities
+        $content = preg_replace_callback( '/([\xF0-\xF7]...)/s', [ 'Utils\Tools\CatUtils', 'htmlentitiesFromUnicode' ], $content );
+
+        /*
+         * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
+         * return stripslashes( $matches[1] );
+         */
+
+        // Note: DomDocument class forces the conversion of some entities like &#10; to the original character "\n"
+        // re-encode control special characters
+        $content = preg_replace( '/\n/u', '&#10;', $content );
+        $content = preg_replace( '/\r/u', '&#13;', $content );
+        $content = preg_replace( '/\t/u', '&#09;', $content );
+        $content = preg_replace( '/ /u', '&#160;', $content ); //NBSP character
+
+        return $content;
+
     }
 
     /**
@@ -2604,7 +2563,7 @@ class QA {
             return true;
         }
 
-        $limit = Segments_SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
+        $limit = SegmentMetadataDao::get( $segmentId, self::SIZE_RESTRICTION )[ 0 ] ?? null;
 
         if ( $limit ) {
 

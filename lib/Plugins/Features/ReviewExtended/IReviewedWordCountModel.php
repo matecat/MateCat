@@ -7,7 +7,7 @@
  */
 
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 interface IReviewedWordCountModel {
     public function evaluateChunkReviewEventTransitions(): void;

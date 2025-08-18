@@ -6,42 +6,47 @@
  * Time: 15:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
-use CatUtils;
-use Comments_CommentStruct;
-use Users_UserStruct;
+use Exception;
+use Model\Comments\CommentDao;
+use Model\Comments\CommentStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Jobs\JobStruct;
+use Model\Users\UserStruct;
+use ReflectionException;
 
 class BaseCommentEmail extends AbstractEmail {
 
     /**
-     * @var Users_UserStruct
+     * @var UserStruct
      */
-    protected $user;
+    protected UserStruct $user;
 
     /**
-     * @var Comments_CommentStruct
+     * @var CommentStruct
      */
-    protected Comments_CommentStruct $comment;
+    protected CommentStruct $comment;
 
     /**
      * @var string
      */
-    protected $url;
+    protected string $url;
 
-    protected $project;
+    protected ShapelessConcreteStruct $project;
 
-    protected $job;
+    protected JobStruct $job;
 
     /**
      * BaseCommentEmail constructor.
-     * @param Users_UserStruct $user
-     * @param Comments_CommentStruct $comment
-     * @param $url
-     * @param $project
-     * @param $job
+     *
+     * @param UserStruct              $user
+     * @param CommentStruct           $comment
+     * @param string                  $url
+     * @param ShapelessConcreteStruct $project
+     * @param JobStruct               $job
      */
-    public function __construct( Users_UserStruct $user, Comments_CommentStruct $comment, $url, $project, $job ) {
+    public function __construct( UserStruct $user, CommentStruct $comment, string $url, ShapelessConcreteStruct $project, JobStruct $job ) {
 
         $this->project = $project;
         $this->user    = $user;
@@ -52,6 +57,9 @@ class BaseCommentEmail extends AbstractEmail {
         $this->_setTemplate( 'Comment/action_on_a_comment.html' );
     }
 
+    /**
+     * @throws Exception
+     */
     public function send() {
 
         $recipient = [ $this->user->email, $this->user->first_name ];
@@ -62,8 +70,11 @@ class BaseCommentEmail extends AbstractEmail {
         );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function _getTemplateVariables(): array {
-        $content = \Comments_CommentDao::placeholdContent( $this->comment->message );
+        $content = CommentDao::placeholdContent( $this->comment->message );
 
         return [
                 'user'      => $this->user->toArray(),

@@ -1,6 +1,6 @@
 <?php
 
-use Analysis\PayableRates;
+use Model\Analysis\PayableRates;
 use TestHelpers\AbstractTest;
 
 /**

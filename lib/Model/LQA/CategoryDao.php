@@ -1,10 +1,10 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use DataAccess\AbstractDao;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
 use PDO;
-use ReflectionException;
 
 class CategoryDao extends AbstractDao {
     const TABLE = 'qa_categories';
@@ -12,11 +12,11 @@ class CategoryDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return mixed
+     * @return CategoryStruct
      */
-    public static function findById( $id ) {
+    public static function findById( $id ): ?CategoryStruct {
         $sql  = "SELECT * FROM qa_categories WHERE id = :id LIMIT 1";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id' => $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
@@ -28,11 +28,11 @@ class CategoryDao extends AbstractDao {
      * @param $id_model
      * @param $id_parent
      *
-     * @return mixed
+     * @return CategoryStruct[]
      */
-    public function findByIdModelAndIdParent( $id_model, $id_parent ) {
+    public function findByIdModelAndIdParent( $id_model, $id_parent ): array {
         $sql  = "SELECT * FROM qa_categories WHERE id_model = :id_model AND id_parent = :id_parent ";
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [ 'id_model' => $id_model, 'id_parent' => $id_parent ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
@@ -54,7 +54,7 @@ class CategoryDao extends AbstractDao {
                 " VALUES " .
                 " ( :id_model, :label, :id_parent, :severities, :options )";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $categoryStruct->toArray(
                 [
@@ -76,11 +76,11 @@ class CategoryDao extends AbstractDao {
      *
      * @return CategoryStruct[]
      */
-    public static function getCategoriesByModel( ModelStruct $model ) {
+    public static function getCategoriesByModel( ModelStruct $model ): array {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model " .
                 " ORDER BY COALESCE(id_parent, 0) ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( PDO::FETCH_CLASS, CategoryStruct::class );
         $stmt->execute(
@@ -93,16 +93,16 @@ class CategoryDao extends AbstractDao {
     }
 
     /**
-     * Returns a json encoded representation of categories and subcategories
+     * Returns a JSON encoded representation of categories and subcategories
      *
      * @param $id_model
      *
      * @return array
      */
-    public static function getCategoriesAndSeverities( $id_model ) {
+    public static function getCategoriesAndSeverities( $id_model ): array {
         $sql = "SELECT * FROM qa_categories WHERE id_model = :id_model ORDER BY COALESCE(id_parent, 0) ";
 
-        $conn = \Database::obtain()->getConnection();
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $stmt->execute(
                 [
@@ -129,7 +129,7 @@ class CategoryDao extends AbstractDao {
                 $out[ $row[ 'id' ] ][ 'severities' ] = $severities;
 
             } else {
-                // process as child
+                // process as a child
                 $current = [
                         'label'      => $row[ 'label' ],
                         'id'         => $row[ 'id' ],
@@ -157,7 +157,7 @@ class CategoryDao extends AbstractDao {
      *
      * @return array
      */
-    private static function extractSeverities( $json ) {
+    private static function extractSeverities( $json ): array {
         return array_map( function ( $element ) {
             $return = [
                     'label'   => $element[ 'label' ],
@@ -178,7 +178,7 @@ class CategoryDao extends AbstractDao {
      *
      * @return array
      */
-    private static function extractOptions( $json ) {
+    private static function extractOptions( $json ): array {
 
         $map     = [];
         $options = json_decode( $json[ 'options' ], true );
@@ -188,14 +188,14 @@ class CategoryDao extends AbstractDao {
             foreach ( $options as $key => $value ) {
 
                 $allowedKeys = [
-                    'code',
-                    'sort'
+                        'code',
+                        'sort'
                 ];
 
-                if(in_array($key, $allowedKeys)){
+                if ( in_array( $key, $allowedKeys ) ) {
                     $map[] = [
-                        'key' => $key,
-                        'value' => $value
+                            'key'   => $key,
+                            'value' => $value
                     ];
                 }
             }

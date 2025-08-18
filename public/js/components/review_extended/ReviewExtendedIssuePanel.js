@@ -11,13 +11,14 @@ import {
   SEGMENTS_STATUS,
 } from '../../constants/Constants'
 import SegmentUtils from '../../utils/segmentUtils'
+import CatToolActions from '../../actions/CatToolActions'
 
 class ReviewExtendedIssuePanel extends React.Component {
   static contextType = SegmentContext
 
   constructor(props) {
     super(props)
-    this.issueCategoriesFlat = JSON.parse(config.lqa_flat_categories)
+    this.issueCategoriesFlat = config.lqa_flat_categories
     this.state = {
       submitDisabled: false,
       categorySelectedIndex: 0,
@@ -26,7 +27,7 @@ class ReviewExtendedIssuePanel extends React.Component {
       severityIndex: 0,
     }
     this.issueCategories = orderBy(
-      JSON.parse(config.lqa_nested_categories).categories,
+      config.lqa_nested_categories.categories,
       ['id'],
     )
 
@@ -105,7 +106,7 @@ class ReviewExtendedIssuePanel extends React.Component {
 
   handleFail(response) {
     if (response.errors && response.errors[0].code === -2000) {
-      UI.processErrors(response.errors, 'createIssue')
+      CatToolActions.processErrors(response.errors, 'createIssue')
     } else {
       CommonUtils.genericErrorAlertMessage()
     }

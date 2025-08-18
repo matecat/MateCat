@@ -1,6 +1,14 @@
 <?php
 
-class Engines_YandexTranslate extends Engines_AbstractEngine {
+namespace Utils\Engines;
+
+use Exception;
+use Utils\Constants\EngineConstants;
+
+/**
+ * @property ?string $client_secret
+ */
+class YandexTranslate extends AbstractEngine {
 
     protected array $_config = [
             'segment' => null,
@@ -8,10 +16,13 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
             'target'  => null,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
-            throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
+            throw new Exception( "EnginesFactory {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
 
@@ -32,10 +43,10 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
      * @param array $parameters
      * @param null  $function
      *
-     * @return array|Engines_Results_MT
+     * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ): array {
         $all_args = func_get_args();
 
         if ( is_string( $rawValue ) ) {
@@ -65,13 +76,16 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch($all_args[ 1 ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
     }
 
-    public function get( $_config ) {
+    /**
+     * @throws Exception
+     */
+    public function get( array $_config ) {
 
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
         if ( $this->client_secret != '' && $this->client_secret != null ) {
@@ -95,19 +109,19 @@ class Engines_YandexTranslate extends Engines_AbstractEngine {
 
     }
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
 
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
+    public function update( $_config ): bool {
 
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         //if engine does not implement DELETE method, exit
         return true;

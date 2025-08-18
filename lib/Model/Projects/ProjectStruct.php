@@ -1,15 +1,25 @@
 <?php
 
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\ArrayAccessTrait;
-use DataAccess\IDaoStruct;
-use LQA\ModelDao;
-use LQA\ModelStruct;
-use RemoteFiles\RemoteFileServiceNameStruct;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+namespace Model\Projects;
 
-class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
+use ArrayAccess;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\LQA\ModelDao;
+use Model\LQA\ModelStruct;
+use Model\RemoteFiles\RemoteFileServiceNameStruct;
+use Model\Teams\TeamDao;
+use Model\Teams\TeamStruct;
+use ReflectionException;
+use Utils\Constants\ProjectStatus;
+
+class ProjectStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
@@ -37,18 +47,18 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      */
     public function analysisComplete(): bool {
         return
-                $this->status_analysis == Constants_ProjectStatus::STATUS_DONE ||
-                $this->status_analysis == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
+                $this->status_analysis == ProjectStatus::STATUS_DONE ||
+                $this->status_analysis == ProjectStatus::STATUS_NOT_TO_ANALYZE;
     }
 
     /**
      * @param int $ttl
      *
-     * @return Jobs_JobStruct[]
+     * @return JobStruct[]
      */
     public function getJobs( int $ttl = 0 ): array {
-        return $this->cachable( __function__, $this->id, function ( $id ) use ( $ttl ) {
-            return Jobs_JobDao::getByProjectId( $id, $ttl );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            return JobDao::getByProjectId( $this->id, $ttl );
         } );
     }
 
@@ -62,7 +72,7 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @throws ReflectionException
      */
     public function setMetadata( string $key, string $value ): bool {
-        $dao = new Projects_MetadataDao( Database::obtain() );
+        $dao = new MetadataDao( Database::obtain() );
 
         return $dao->set( $this->id, $key, $value );
     }
@@ -97,13 +107,13 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
     }
 
     /**
-     * @return null|Projects_MetadataStruct[]
+     * @return null|MetadataStruct[]
      */
     public function getMetadata(): array {
-        return $this->cachable( __function__, $this, function ( $project ) {
-            $mDao = new Projects_MetadataDao();
+        return $this->cachable( __METHOD__, function () {
+            $mDao = new MetadataDao();
 
-            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $project->id );
+            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $this->id );
         } );
     }
 
@@ -112,9 +122,9 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      */
     public function getRemoteFileServiceName(): ?RemoteFileServiceNameStruct {
 
-        return $this->cachable( __function__, $this, function () {
+        return $this->cachable( __METHOD__, function () {
 
-            $dao = new Projects_ProjectDao();
+            $dao = new ProjectDao();
 
             /** @var RemoteFileServiceNameStruct[] */
             return $dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[ 0 ] ?? null;
@@ -150,9 +160,9 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return FeatureSet
      */
     public function getFeaturesSet(): FeatureSet {
-        return $this->cachable( __METHOD__, $this, function ( Projects_ProjectStruct $project ) {
+        return $this->cachable( __METHOD__, function () {
             $featureSet = new FeatureSet();
-            $featureSet->loadForProject( $project );
+            $featureSet->loadForProject( $this );
 
             return $featureSet;
         } );
@@ -161,11 +171,11 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
     /**
      * @param int $ttl
      *
-     * @return Jobs_JobStruct[]
+     * @return JobStruct[]
      */
     public function getChunks( int $ttl = 0 ): array {
-        return $this->cachable( __METHOD__, $this, function () use ( $ttl ) {
-            $dao = new Chunks_ChunkDao( Database::obtain() );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            $dao = new ChunkDao( Database::obtain() );
 
             return $dao->setCacheTTL( $ttl )->getByProjectID( $this->id );
         } );
@@ -175,13 +185,16 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return string
      */
     public function getWordCountType(): string {
-        return $this->cachable( __METHOD__, $this->getMetadataValue( Projects_MetadataDao::WORD_COUNT_TYPE_KEY ), function ( $type ) {
-            if ( $type == null ) {
-                return Projects_MetadataDao::WORD_COUNT_EQUIVALENT;
-            } else {
-                return $type;
-            }
-        } );
+
+        //this method is already cached internally by the MetadataDao.
+        // we can avoid using the cachable method here
+        $type = $this->getMetadataValue( MetadataDao::WORD_COUNT_TYPE_KEY );
+
+        if ( $type == null ) {
+            return MetadataDao::WORD_COUNT_EQUIVALENT;
+        } else {
+            return $type;
+        }
     }
 
     /**
@@ -190,8 +203,8 @@ class Projects_ProjectStruct extends AbstractDaoSilentStruct implements IDaoStru
      * @return ?ModelStruct
      */
     public function getLqaModel( $ttl = 86400 ): ?ModelStruct {
-        return $this->cachable( __METHOD__, $this->id_qa_model, function ( $id_qa_model ) use ( $ttl ) {
-            return ModelDao::findById( $id_qa_model, $ttl );
+        return $this->cachable( __METHOD__, function () use ( $ttl ) {
+            return ModelDao::findById( $this->id_qa_model, $ttl );
         } );
     }
 

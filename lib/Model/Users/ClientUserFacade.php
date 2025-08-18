@@ -1,4 +1,9 @@
 <?php
+
+namespace Model\Users;
+
+use stdClass;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -6,20 +11,19 @@
  * Time: 18.45
  *
  */
+class ClientUserFacade extends stdClass {
 
-class Users_ClientUserFacade extends stdClass {
-
-    public $uid;
-    public $email;
-    public $first_name;
-    public $last_name;
+    public int    $uid;
+    public string $email;
+    public string $first_name;
+    public string $last_name;
 
     /**
      * ClientUserFacade constructor.
      *
-     * @param Users_UserStruct $userStruct
+     * @param UserStruct $userStruct
      */
-    public function __construct( Users_UserStruct $userStruct ) {
+    public function __construct( UserStruct $userStruct ) {
 
         foreach ( $userStruct as $property => $value ) {
             if ( property_exists( $this, $property ) ) {

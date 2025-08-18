@@ -1,19 +1,20 @@
 <?php
 
-namespace API\V2 ;
+namespace Controller\API\V2;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\ProjectPasswordValidator;
-use API\Commons\Validators\ProjectValidator;
-use Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
-use Projects_ProjectStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\ProjectPasswordValidator;
+use Controller\API\Commons\Validators\ProjectValidator;
+use Exception;
+use Model\Projects\ProjectStruct;
+use Plugins\Features\ProjectCompletion\Model\ProjectCompletionStatusModel;
 
 class ProjectCompletionStatus extends KleinController {
 
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    private $project ;
+    private ProjectStruct $project;
 
     public function afterConstruct() {
 
@@ -23,17 +24,17 @@ class ProjectCompletionStatus extends KleinController {
             $projectPasswordValidator = new ProjectPasswordValidator( $this );
             $projectPasswordValidator->onSuccess( function () use ( $projectPasswordValidator, $projectValidator ) {
                 $this->project = $projectPasswordValidator->getProject();
-                $projectValidator->setProject($this->project);
+                $projectValidator->setProject( $this->project );
             } );
 
             $this->appendValidator( $projectPasswordValidator );
         }
 
-        if($this->getUser()){
+        if ( $this->getUser() ) {
             $projectValidator->setUser( $this->getUser() );
         }
 
-        $projectValidator->setIdProject( $this->request->id_project );
+        $projectValidator->setIdProject( $this->request->param( 'id_project' ) );
         $projectValidator->setFeature( 'project_completion' );
 
         $projectValidator->onSuccess( function () use ( $projectValidator ) {
@@ -43,12 +44,15 @@ class ProjectCompletionStatus extends KleinController {
         $this->appendValidator( $projectValidator );
     }
 
+    /**
+     * @throws Exception
+     */
     public function status() {
 
-        $model = new ProjectCompletionStatusModel( $this->project ) ;
+        $model = new ProjectCompletionStatusModel( $this->project );
         $this->response->json( [
-            'project_status' => $model->getStatus()
-        ] ) ;
+                'project_status' => $model->getStatus()
+        ] );
     }
 
 }

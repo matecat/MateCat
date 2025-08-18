@@ -1,13 +1,13 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use TmKeyManagement_MemoryKeyDao;
-use TmKeyManagement_MemoryKeyStruct;
+use Model\DataAccess\Database;
+use Model\TmKeyManagement\MemoryKeyDao;
+use Model\TmKeyManagement\MemoryKeyStruct;
 
 class TmKeyManagementController extends KleinController {
 
@@ -21,8 +21,8 @@ class TmKeyManagementController extends KleinController {
     public function getByUser() {
 
         try {
-            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
+            $_keyDao = new MemoryKeyDao( Database::obtain() );
+            $dh      = new MemoryKeyStruct( [ 'uid' => $this->user->uid ] );
             $keyList = $_keyDao->read( $dh );
 
             $list = [ 'tm_keys' => [] ];

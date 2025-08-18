@@ -7,7 +7,7 @@
  *
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
 use ArrayAccess;
 
@@ -33,7 +33,7 @@ class ShapelessConcreteStruct extends AbstractDaoObjectStruct implements ArrayAc
     }
 
     public function getArrayCopy(): array {
-        return (array)$this;
+        return $this->toArray();
     }
 
 }

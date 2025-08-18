@@ -1,21 +1,21 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\ExternalServiceException;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Engine;
-use Engines_MyMemory;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\ExternalServiceException;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentOriginalDataDao;
 use ReflectionException;
-use Segments_SegmentOriginalDataDao;
-use Utils;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+use Utils\Logger\Log;
+use Utils\Tools\Utils;
 
 class GetTagProjectionController extends KleinController {
 
@@ -30,19 +30,19 @@ class GetTagProjectionController extends KleinController {
      */
     public function call(): void {
 
-        Log::$fileName = 'tagProjection.log';
+        Log::setLogFileName( 'tagProjection.log' );
 
         $request   = $this->validateTheRequest();
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
+        $jobStruct = ChunkDao::getByIdAndPassword( $request[ 'id_job' ], $request[ 'password' ] );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         /**
-         * @var $engine Engines_MyMemory
+         * @var $engine MyMemory
          */
-        $engine = Engine::getInstance( 1 );
+        $engine = EnginesFactory::getInstance( 1 );
         $engine->setFeatureSet( $this->featureSet );
 
-        $dataRefMap = Segments_SegmentOriginalDataDao::getSegmentDataRefMap( $request[ 'id_segment' ] );
+        $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $request[ 'id_segment' ] );
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $this->getFeatureSet(), $request[ 'source_lang' ], $request[ 'target_lang' ], $dataRefMap );
 

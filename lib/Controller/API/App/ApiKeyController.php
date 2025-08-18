@@ -1,12 +1,13 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use ApiKeys_ApiKeyDao;
-use ApiKeys_ApiKeyStruct;
-use Utils;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Exception;
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Utils\Tools\Utils;
 
 class ApiKeyController extends KleinController {
 
@@ -17,12 +18,12 @@ class ApiKeyController extends KleinController {
     /**
      * create an api key for a logged user
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function create() {
 
         $this->allowOnlyInternalUsers();
-        $apiKeyDao = new ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao();
 
         // check if logged user already has a key
         if ( $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
@@ -44,11 +45,11 @@ class ApiKeyController extends KleinController {
     }
 
     /**
-     * @return ApiKeys_ApiKeyStruct
+     * @return ApiKeyStruct
      */
     private function createApiKeyStruct() {
 
-        return new ApiKeys_ApiKeyStruct( [
+        return new ApiKeyStruct( [
                 'uid'        => $this->getUser()->uid,
                 'api_key'    => Utils::randomString( 20, true ),
                 'api_secret' => Utils::randomString( 20, true ),
@@ -64,7 +65,7 @@ class ApiKeyController extends KleinController {
      */
     public function show() {
 
-        $apiKeyDao = new ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
             $this->response->json( [
@@ -88,7 +89,7 @@ class ApiKeyController extends KleinController {
     public function delete() {
 
         $this->allowOnlyInternalUsers();
-        $apiKeyDao = new ApiKeys_ApiKeyDao();
+        $apiKeyDao = new ApiKeyDao();
 
         if ( !$apiKey = $apiKeyDao->getByUid( $this->getUser()->uid ) ) {
             $this->response->status()->setCode( 404 );
@@ -110,7 +111,7 @@ class ApiKeyController extends KleinController {
                     ]
             ] );
 
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
             $this->response->status()->setCode( 500 );
             $this->response->json( [
                     'errors' => [

@@ -1,6 +1,6 @@
 <?php
 
-namespace LQA\BxExG;
+namespace Utils\LQA\BxExG;
 
 use DOMDocument;
 use DOMElement;
@@ -15,7 +15,7 @@ class Mapper {
      *
      * @return Element[]
      */
-    public static function extract( $string ) {
+    public static function extract( $string ): array {
 
         $map = [];
 
@@ -63,7 +63,7 @@ class Mapper {
      *
      * @return Element
      */
-    private static function appendBxExGTagMapElement( DOMNode $node ) {
+    private static function appendBxExGTagMapElement( DOMNode $node ): Element {
 
         $element  = new Element();
         $nodeName = $node->nodeName;

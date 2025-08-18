@@ -1,8 +1,8 @@
 <?php
 
-namespace Search;
+namespace Model\Search;
 
-use DataAccess\ShapelessConcreteStruct;
+use Model\DataAccess\ShapelessConcreteStruct;
 
 class ReplaceEventStruct extends ShapelessConcreteStruct {
 

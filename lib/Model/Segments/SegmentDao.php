@@ -1,24 +1,35 @@
 <?php
 
-use Utils\Constants\SegmentSize;
-use DataAccess\AbstractDao;
-use DataAccess\ShapelessConcreteStruct;
-use Files\FileStruct;
-use Segments\SegmentUIStruct;
+namespace Model\Segments;
 
-class Segments_SegmentDao extends AbstractDao {
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Files\FileStruct;
+use Model\Jobs\JobDao;
+use Model\Jobs\JobStruct;
+use Model\QualityReport\QualityReportSegmentStruct;
+use PDO;
+use PDOException;
+use ReflectionException;
+use Utils\Constants\SegmentSize;
+use Utils\Constants\TranslationStatus;
+use Utils\Logger\Log;
+
+class SegmentDao extends AbstractDao {
     const TABLE = 'segments';
     protected static array $auto_increment_field = [ 'id' ];
 
 
     const ISSUE_CATEGORY_ALL = 'all';
 
-    protected static $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
+    protected static string $queryForGlobalMismatches = " SELECT id_segment, id_job , segment_hash, translation 
                          FROM segment_translations 
                          WHERE id_job = :id_job
                          AND segment_translations.status IN( :st_translated, :st_approved, :st_approved2 )";
 
-    protected static $queryForLocalMismatches = "
+    protected static string $queryForLocalMismatches = "
                 SELECT
                 translation,
                 jobs.source as source,
@@ -40,7 +51,7 @@ class Segments_SegmentDao extends AbstractDao {
                     GROUP BY translation, id_job
             ";
 
-    public function countByFile( FileStruct $file ) {
+    public function countByFile( FileStruct $file ): int {
         $conn = $this->database->getConnection();
         $sql  = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file ";
 
@@ -51,60 +62,15 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * Returns an array of segments for the given file.
-     * In order to limit the amount of memory, this method accepts an array of
-     * columns to be returned.
+     * @param int    $id_job
+     * @param string $password
+     * @param int    $id_segment
+     * @param int    $ttl (default 86400 = 24 hours)
      *
-     * @param $id_file
-     * @param $fields_list array
-     *
-     * @return Segments_SegmentStruct[]
+     * @return SegmentStruct|null
+     * @throws ReflectionException
      */
-    public function getByFileId( $id_file, $fields_list = [] ) {
-        $conn = $this->database->getConnection();
-
-        if ( empty( $fields_list ) ) {
-            $fields_list[] = '*';
-        }
-
-        $sql  = " SELECT " . implode( ', ', $fields_list ) . " FROM segments WHERE id_file = :id_file ";
-        $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
-        $stmt->execute( [ 'id_file' => $id_file ] );
-
-        return $stmt->fetchAll();
-    }
-
-    /**
-     * @param Jobs_JobStruct $chunk
-     *
-     * @return mixed
-     */
-    function countByChunk( Jobs_JobStruct $chunk ) {
-        $conn  = $this->database->getConnection();
-        $query = "SELECT COUNT(1) FROM segments s
-            JOIN segment_translations st ON s.id = st.id_segment
-            JOIN jobs ON st.id_job = jobs.id
-            WHERE jobs.id = :id_job
-            AND jobs.password = :password
-            AND s.show_in_cattool ;
-            ";
-        $stmt  = $conn->prepare( $query );
-        $stmt->execute( [ 'id_job' => $chunk->id, 'password' => $chunk->password ] );
-        $result = $stmt->fetch();
-
-        return (int)$result[ 0 ];
-    }
-
-    /**
-     * @param     $id_job
-     * @param     $password
-     * @param     $id_segment
-     * @param int $ttl (default 86400 = 24 hours)
-     *
-     * @return Segments_SegmentStruct|null
-     */
-    function getByChunkIdAndSegmentId( $id_job, $password, $id_segment, int $ttl = 86400 ): ?Segments_SegmentStruct {
+    function getByChunkIdAndSegmentId( int $id_job, string $password, int $id_segment, int $ttl = 86400 ): ?SegmentStruct {
 
         $query = " SELECT segments.* FROM segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
@@ -119,9 +85,9 @@ class Segments_SegmentDao extends AbstractDao {
         $stmt    = $conn->prepare( $query );
 
         /**
-         * @var $fetched Segments_SegmentStruct[]
+         * @var $fetched SegmentStruct[]
          */
-        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Segments_SegmentStruct(), [
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, SegmentStruct::class, [
                 'id_job'     => $id_job,
                 'password'   => $password,
                 'id_segment' => $id_segment
@@ -131,12 +97,12 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param int    $id_job
+     * @param string $password
      *
-     * @return Segments_SegmentStruct[]
+     * @return SegmentStruct[]
      */
-    function getByChunkId( $id_job, $password ) {
+    function getByChunkId( int $id_job, string $password ): array {
         $conn = $this->database->getConnection();
 
         $query = "SELECT segments.* FROM segments
@@ -156,39 +122,40 @@ class Segments_SegmentDao extends AbstractDao {
                 'password' => $password
         ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, SegmentStruct::class );
 
         return $stmt->fetchAll();
     }
 
     /**
-     * @param $id_segment
+     * @param int $id_segment
      *
-     * @return Segments_SegmentStruct
+     * @return SegmentStruct
      */
-    public function getById( $id_segment ) {
+    public function getById( int $id_segment ): ?SegmentStruct {
         $conn = $this->database->getConnection();
 
         $query = "select * from segments where id = :id";
         $stmt  = $conn->prepare( $query );
-        $stmt->execute( [ 'id' => (int)$id_segment ] );
+        $stmt->execute( [ 'id' => $id_segment ] );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, SegmentStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?? null;
     }
 
     /**
-     * @param $id_list
+     * @param array $id_list
      *
      * @return object
+     * @throws ReflectionException
      */
-    public function getContextAndSegmentByIDs( $id_list ) {
-        $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ASC";
+    public function getContextAndSegmentByIDs( array $id_list ): object {
+        $query = "SELECT id, segment FROM segments WHERE id IN( :id_before, :id_segment, :id_after ) ORDER BY id ";
         $stmt  = $this->_getStatementForQuery( $query );
-        /** @var $res Segments_SegmentStruct[] */
-        $res = $this->_fetchObject( $stmt,
-                new Segments_SegmentStruct(),
+        /** @var $res SegmentStruct[] */
+        $res = $this->_fetchObjectMap( $stmt,
+                SegmentStruct::class,
                 $id_list
         );
 
@@ -201,19 +168,19 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct     $chunk
-     * @param int                $step
-     * @param                    $ref_segment
-     * @param string             $where
+     * @param JobStruct $chunk
+     * @param int       $step
+     * @param int       $ref_segment
+     * @param string    $where
      *
-     * @param array              $options
+     * @param array     $options
      *
      * @return array
      * @throws Exception
      * @internal param $jid
      * @internal param $password
      */
-    public function getSegmentsIdForQR( Jobs_JobStruct $chunk, $step, $ref_segment, $where = "after", $options = [] ) {
+    public function getSegmentsIdForQR( JobStruct $chunk, int $step, int $ref_segment, string $where = "after", array $options = [] ): array {
 
         $db = Database::obtain()->getConnection();
 
@@ -221,9 +188,9 @@ class Segments_SegmentDao extends AbstractDao {
         $options_join_query        = "";
         $options_conditions_values = [];
         $statuses                  = array_merge(
-                Constants_TranslationStatus::$INITIAL_STATUSES,
-                Constants_TranslationStatus::$TRANSLATION_STATUSES,
-                Constants_TranslationStatus::$REVISION_STATUSES
+                TranslationStatus::$INITIAL_STATUSES,
+                TranslationStatus::$TRANSLATION_STATUSES,
+                TranslationStatus::$REVISION_STATUSES
         );
 
         //
@@ -295,7 +262,7 @@ class Segments_SegmentDao extends AbstractDao {
             }
         }
 
-        if ( isset( $options[ 'filter' ][ 'id_segment' ] ) && !empty( $options[ 'filter' ][ 'id_segment' ] ) ) {
+        if ( !empty( $options[ 'filter' ][ 'id_segment' ] ) ) {
             $options_conditions_query                  .= " AND s.id = :id_segment ";
             $options_conditions_values[ 'id_segment' ] = $options[ 'filter' ][ 'id_segment' ];
 
@@ -337,8 +304,8 @@ class Segments_SegmentDao extends AbstractDao {
                 ) as TT2";
 
         /*
-         * This query is an union of the last two queries with only one difference:
-         * the queryAfter parts differs for the equal sign.
+         * This query is a union of the last two queries with only one difference:
+         * the queryAfter parts differ for the equal sign.
          *
          */
         $queryCenter = "
@@ -396,11 +363,9 @@ class Segments_SegmentDao extends AbstractDao {
         $stmt->execute( $conditions_values );
         $segments_id = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        $segments_id = array_map( function ( $segment_row ) {
+        return array_map( function ( $segment_row ) {
             return $segment_row[ '__sid' ];
         }, $segments_id );
-
-        return $segments_id;
     }
 
     /**
@@ -408,10 +373,10 @@ class Segments_SegmentDao extends AbstractDao {
      * @param $job_id
      * @param $job_password
      *
-     * @return \QualityReport_QualityReportSegmentStruct[]
+     * @return QualityReportSegmentStruct[]
      */
 
-    public function getSegmentsForQr( $segments_id, $job_id, $job_password ) {
+    public function getSegmentsForQr( $segments_id, $job_id, $job_password ): array {
         $db = Database::obtain()->getConnection();
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
@@ -470,19 +435,17 @@ class Segments_SegmentDao extends AbstractDao {
 
                  WHERE j.id = ? AND j.password = ?
 
-            ORDER BY sid ASC";
+            ORDER BY sid";
 
         $stmt = $db->prepare( $query );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, "\QualityReport_QualityReportSegmentStruct" );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, QualityReportSegmentStruct::class );
         $stmt->execute( array_merge( [ $job_id, $min, $max ], $segments_id, [ $job_id, $job_password ] ) );
 
-        $results = $stmt->fetchAll();
-
-        return $results;
+        return $stmt->fetchAll();
     }
 
     /**
-     * @param Segments_SegmentStruct[] $obj_arr
+     * @param SegmentStruct[] $obj_arr
      *
      * @throws Exception
      */
@@ -555,16 +518,16 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStruct $jStruct
-     * @param                $step
-     * @param                $ref_segment
-     * @param                $where
-     * @param array          $options
+     * @param JobStruct   $jStruct
+     * @param int         $step
+     * @param int         $ref_segment
+     * @param string|null $where
+     * @param array       $options
      *
      * @return SegmentUIStruct[]
      * @throws ReflectionException
      */
-    public function getPaginationSegments( Jobs_JobStruct $jStruct, $step, $ref_segment, $where, $options = [] ): array {
+    public function getPaginationSegments( JobStruct $jStruct, int $step, int $ref_segment, ?string $where = 'center', array $options = [] ): array {
 
         switch ( $where ) {
             case 'after':
@@ -601,6 +564,7 @@ class Segments_SegmentDao extends AbstractDao {
                 ";
                 break;
             case 'center':
+            default:
                 $subQuery = "
                   SELECT * FROM ( 
                         SELECT segments.id AS __sid
@@ -651,7 +615,7 @@ class Segments_SegmentDao extends AbstractDao {
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
                 sod.map AS data_ref_map,
-                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 0, 1 ) AS readonly
                 , COALESCE( autopropagated_from, 0 ) as autopropagated_from
                 ,( SELECT COUNT( segment_hash )
                           FROM segment_translations
@@ -675,7 +639,7 @@ class Segments_SegmentDao extends AbstractDao {
 
             WHERE j.id = :id_job
             AND j.password = :password
-            ORDER BY sid ASC
+            ORDER BY sid
 ";
 
         $bind_keys = [
@@ -686,20 +650,17 @@ class Segments_SegmentDao extends AbstractDao {
 
         $stm = $this->getDatabaseHandler()->getConnection()->prepare( $query );
 
-        /** @var SegmentUIStruct[] $r */
-        $r = $this->_fetchObject( $stm, new SegmentUIStruct(), $bind_keys );
-
-        return $r;
+        return $this->_fetchObjectMap( $stm, SegmentUIStruct::class, $bind_keys );
 
     }
 
     /**
-     * @param Jobs_JobStruct $jStruct
-     * @param                $id_file
+     * @param JobStruct $jStruct
+     * @param int       $id_file
      *
      * @return array
      */
-    public function getSegmentsDownload( Jobs_JobStruct $jStruct, $id_file ) {
+    public function getSegmentsDownload( JobStruct $jStruct, int $id_file ): array {
 
         $query = "SELECT
             s.id AS sid, 
@@ -744,27 +705,31 @@ class Segments_SegmentDao extends AbstractDao {
 
     }
 
-    public function destroyCacheForGlobalTranslationMismatches( Jobs_JobStruct $job ) {
+    /**
+     * @throws ReflectionException
+     */
+    public function destroyCacheForGlobalTranslationMismatches( JobStruct $job ): bool {
         $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
 
         return $this->_destroyObjectCache( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'        => $job->id,
-                'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
-                'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
-                'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                'st_approved'   => TranslationStatus::STATUS_APPROVED,
+                'st_approved2'  => TranslationStatus::STATUS_APPROVED2,
+                'st_translated' => TranslationStatus::STATUS_TRANSLATED,
         ] );
     }
 
     /**
-     * @param int    $jid
-     * @param string $jpassword
-     * @param null   $sid
+     * @param int      $jid
+     * @param string   $jpassword
+     * @param int|null $sid
      *
      * @return array
+     * @throws ReflectionException
      */
-    public function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
+    public function getTranslationsMismatches( int $jid, string $jpassword, int $sid = null ): array {
 
-        $jStructs = Jobs_JobDao::getById( $jid, $this->cacheTTL );
+        $jStructs = JobDao::getById( $jid, $this->cacheTTL );
         $filtered = array_filter( $jStructs, function ( $item ) use ( $jpassword ) {
             return $item->password == $jpassword;
         } );
@@ -777,27 +742,27 @@ class Segments_SegmentDao extends AbstractDao {
 
         /**
          * Get all the available translations for this segment id,
-         * the amount of equal translations,
+         * the number of equal translations,
          * a list of id,
-         * and an editable boolean field identifying if jobs is mine or not
+         * and an editable boolean field identifying if jobs are mine or not
          *
          * ---------------------------------------
          * NOTE 2020-07-07
          * ---------------------------------------
-         * A more strict condition was added in order to check the translation mismatch
+         * A more strict condition was added to check the translation mismatch
          *
          */
         if ( $sid != null ) {
 
             $stmt = $this->_getStatementForQuery( self::$queryForLocalMismatches );
 
-            return $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
+            return $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                             'job_first_segment' => $jStructs[ 0 ]->job_first_segment,
                             'job_last_segment'  => end( $jStructs )->job_last_segment,
                             'job_password'      => $currentJob->password,
-                            'st_approved'       => Constants_TranslationStatus::STATUS_APPROVED,
-                            'st_approved2'      => Constants_TranslationStatus::STATUS_APPROVED2,
-                            'st_translated'     => Constants_TranslationStatus::STATUS_TRANSLATED,
+                            'st_approved'       => TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'      => TranslationStatus::STATUS_APPROVED2,
+                            'st_translated'     => TranslationStatus::STATUS_TRANSLATED,
                             'id_job'            => $jStructs[ 0 ]->id,
                             'id_segment'        => $sid
                     ]
@@ -806,7 +771,7 @@ class Segments_SegmentDao extends AbstractDao {
         } else {
 
             /*
-             * This block of code make the same of this query, but it is ~10 times faster for jobs that are split in a big number of chunks.
+             * This block of code makes the same of this query, but it is ~10 times faster for jobs that are split in a big number of chunks.
              * From 10s to 1,5s
              *
              *            $query = "
@@ -823,15 +788,15 @@ class Segments_SegmentDao extends AbstractDao {
              *            ";
              */
             $stmt = $this->_getStatementForQuery( self::$queryForGlobalMismatches );
-            $list = $this->_fetchObject( $stmt, new ShapelessConcreteStruct, [
+            $list = $this->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                             'id_job'        => $currentJob->id,
-                            'st_approved'   => Constants_TranslationStatus::STATUS_APPROVED,
-                            'st_approved2'  => Constants_TranslationStatus::STATUS_APPROVED2,
-                            'st_translated' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                            'st_approved'   => TranslationStatus::STATUS_APPROVED,
+                            'st_approved2'  => TranslationStatus::STATUS_APPROVED2,
+                            'st_translated' => TranslationStatus::STATUS_TRANSLATED,
                     ]
             );
 
-            // create a specific array with segment id as key
+            // create a specific array with segment id as a key
             $segment_list = [];
             array_walk( $list, function ( $element ) use ( &$segment_list ) {
                 $segment_list[ $element[ 'id_segment' ] ] = $element;
@@ -865,7 +830,7 @@ class Segments_SegmentDao extends AbstractDao {
 
                     $twin_segments[ $segment_hash ][ 'total_sources' ] += 1;
 
-                    // array_unique : the translation related to a specific segment_hash
+                    // array_unique: the translation related to a specific segment_hash
                     if ( !isset( $reverse_translation_index[ $unique_key ] ) ) {
                         $twin_segments[ $segment_hash ][ 'translations' ][] = $translation;
                     }
@@ -894,40 +859,6 @@ class Segments_SegmentDao extends AbstractDao {
 
             return array_values( $twin_segments );
 
-            /**
-             * This query gets, for each hash with more than one translation available, the min id of the segments
-             *
-             * If we want also to check for mismatches against approved translations also,
-             * we have to add the APPROVED status condition.
-             *
-             * But be careful, queries are much more heaviest.
-             * ( Ca. 4X -> 0.01/0.02s for a job with 55k segments on a dev environment )
-             *
-             */
-//            $query = "
-//                SELECT
-//                COUNT( segment_hash ) AS total_sources,
-//                COUNT( DISTINCT translation ) AS translations_available,
-//                MIN( IF( password = :chunk_password AND id_segment between :chunk_first_segment AND :chunk_last_segment,  id_segment , NULL ) ) AS first_of_my_job
-//                    FROM segment_translations
-//                    JOIN jobs ON id_job = id AND id_segment between :job_first_segment AND :job_last_segment
-//                    WHERE id_job = :id_job
-//                    AND segment_translations.status IN( :st_translated , :st_approved )
-//                    GROUP BY segment_hash, CONCAT( id_job, '-', password )
-//                    HAVING translations_available > 1
-//            ";
-//
-//            $bind_keys = [
-//                    'id_job'              => $currentJob->id,
-//                    'job_first_segment'   => $jStructs[ 0 ]->job_first_segment,
-//                    'job_last_segment'    => end( $jStructs )->job_last_segment,
-//                    'chunk_first_segment' => $currentJob->job_first_segment,
-//                    'chunk_last_segment'  => $currentJob->job_last_segment,
-//                    'chunk_password'      => $currentJob->password,
-//                    'st_approved'         => Constants_TranslationStatus::STATUS_APPROVED,
-//                    'st_translated'       => Constants_TranslationStatus::STATUS_TRANSLATED,
-//            ];
-
         }
 
     }
@@ -935,25 +866,25 @@ class Segments_SegmentDao extends AbstractDao {
     /**
      * Used to get a resultset of segments id and statuses
      *
-     * @param      $sid
-     * @param      $jid
-     * @param      $password
-     * @param bool $getTranslatedInstead
+     * @param int    $sid
+     * @param int    $jid
+     * @param string $password
+     * @param bool   $getTranslatedInstead
      *
      * @return array
      */
-    public static function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
+    public static function getNextSegment( int $sid, int $jid, string $password = '', bool $getTranslatedInstead = false ): array {
 
         if ( !$getTranslatedInstead ) {
             $translationStatus = " ( st.status IN (
-                '" . Constants_TranslationStatus::STATUS_NEW . "',
-                '" . Constants_TranslationStatus::STATUS_DRAFT . "',
-                '" . Constants_TranslationStatus::STATUS_REJECTED . "'
-            ) OR st.status IS NULL )"; //status NULL is not possible
+                '" . TranslationStatus::STATUS_NEW . "',
+                '" . TranslationStatus::STATUS_DRAFT . "',
+                '" . TranslationStatus::STATUS_REJECTED . "'
+            ) OR st.status IS NULL )"; //status NULL isn't possible
         } else {
             $translationStatus = " st.status IN(
-            '" . Constants_TranslationStatus::STATUS_TRANSLATED . "',
-            '" . Constants_TranslationStatus::STATUS_APPROVED . "'
+            '" . TranslationStatus::STATUS_TRANSLATED . "',
+            '" . TranslationStatus::STATUS_APPROVED . "'
         )";
         }
 
@@ -984,16 +915,16 @@ class Segments_SegmentDao extends AbstractDao {
     }
 
     /**
-     * @param     $idJob
-     * @param     $password
-     * @param     $limit
-     * @param     $offset
-     * @param int $ttl
+     * @param int    $idJob
+     * @param string $password
+     * @param int    $limit
+     * @param int    $offset
+     * @param int    $ttl
      *
-     * @return array|\DataAccess\IDaoStruct[]
+     * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    public static function getSegmentsForAnalysisFromIdJobAndPassword( $idJob, $password, $limit, $offset, $ttl = 0 ) {
+    public static function getSegmentsForAnalysisFromIdJobAndPassword( int $idJob, string $password, int $limit, int $offset, int $ttl = 0 ): array {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $query   = "
@@ -1072,23 +1003,23 @@ class Segments_SegmentDao extends AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_job'   => $idJob,
                 'password' => $password,
-        ] );
+        ] ) ?? [];
     }
 
     /**
-     * @param     $idProject
-     * @param     $password
-     * @param     $limit
-     * @param     $offset
-     * @param int $ttl
+     * @param int    $idProject
+     * @param string $password
+     * @param int    $limit
+     * @param int    $offset
+     * @param int    $ttl
      *
-     * @return array|\DataAccess\IDaoStruct[]
+     * @return ShapelessConcreteStruct[]
      * @throws ReflectionException
      */
-    public static function getSegmentsForAnalysisFromIdProjectAndPassword( $idProject, $password, $limit, $offset, $ttl = 0 ) {
+    public static function getSegmentsForAnalysisFromIdProjectAndPassword( int $idProject, string $password, int $limit, int $offset, int $ttl = 0 ): array {
         $thisDao = new self();
         $conn    = Database::obtain()->getConnection();
         $query   = "
@@ -1164,9 +1095,9 @@ class Segments_SegmentDao extends AbstractDao {
 
         $stmt = $conn->prepare( $query );
 
-        return @$thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        return $thisDao->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id_project' => $idProject,
                 'password'   => $password,
-        ] );
+        ] ) ?? [];
     }
 }

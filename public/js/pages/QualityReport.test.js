@@ -47,6 +47,7 @@ test('renders properly', async () => {
   })
 
   mswServer.use(
+    http.get('/sse/channel/updates/socket.io', () => {}),
     http.get(
       config.basepath +
         'api/app/jobs/:job_id/:password/quality-report/segments',

@@ -10,13 +10,14 @@ const DownloadFileUtils = {
   downloadFile: function (idJob, pass, callback) {
     downloadFile({idJob, password: pass})
       .then(() => callback())
-      .catch(() => {
+      .catch((e) => {
         const notification = {
           title: 'Error',
           text: 'Download failed. Please try again. If the error persists, contact support.',
           type: 'error',
         }
         CatToolActions.addNotification(notification)
+        callback()
       })
   },
 
