@@ -28,7 +28,7 @@ class DeepLStruct extends EngineStruct {
     /**
      * @var array
      */
-    public array $others = [
+    public $others = [
             "relative_glossaries_url" => "glossaries",
     ];
 
