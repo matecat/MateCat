@@ -239,30 +239,30 @@ class MyMemory extends AbstractEngine {
 
         // TM prioritization
         $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
+        $penalties = [];
 
+        // TM penalties
         if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
-            $penalties = [];
-
             foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( is_numeric( $penalty[ 'penalty' ] ) ) {
+                if ( isset( $penalty[ 'penalty' ] ) and is_numeric( $penalty[ 'penalty' ] ) ) {
                     $penalties[] = [
                             'key'     => $penalty[ 'key' ],
                             'penalty' => $penalty[ 'penalty' ] / 100,
                     ];
                 }
             }
+        }
 
-            // public_tm_penalty
-            if ( $_config[ 'public_tm_penalty' ] !== null and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
-                $penalties[] = [
-                        'key'     => 'public',
-                        'penalty' => $_config[ 'public_tm_penalty' ] / 100,
-                ];
-            }
+        // public_tm_penalty
+        if ( $_config[ 'public_tm_penalty' ] !== null and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+            $penalties[] = [
+                    'key'     => 'public',
+                    'penalty' => $_config[ 'public_tm_penalty' ] / 100,
+            ];
+        }
 
-            if ( !empty( $penalties ) ) {
-                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
-            }
+        if ( !empty( $penalties ) ) {
+            $parameters[ 'penalty_key' ] = json_encode($penalties);
         }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
