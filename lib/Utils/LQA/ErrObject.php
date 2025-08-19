@@ -20,7 +20,7 @@ namespace Utils\LQA;
  */
 class ErrObject {
 
-    public ?string $outcome = null;
+    public ?int $outcome = null;
     public ?string $debug   = null;
     public string  $tip     = "";
 
