@@ -119,7 +119,7 @@ function CatTool() {
           modifiedTemplate = {
             ...prevTemplate,
             tm: updatedTmKeys.filter(({isActive}) => isActive),
-            getPublicMatches: config.get_public_matches === 1,
+            getPublicMatches: config.get_public_matches ?? true,
           }
           return modifiedTemplate
         })

@@ -219,6 +219,7 @@ class CattoolController extends BaseKleinViewController {
                 'warningPollingInterval'                => 1000 * ( AppConfig::$WARNING_POLLING_INTERVAL ),
                 'word_count_type'                       => $chunkStruct->getProject()->getWordCountType(),
                 'analysis_enabled'                      => new PHPTalBoolean( AppConfig::$VOLUME_ANALYSIS_ENABLED ),
+                'get_public_matches'                    => new PHPTalBoolean( !$chunkStruct->only_private_tm ),
 
                 'brPlaceholdEnabled'   => new PHPTalBoolean( true ),
                 'lfPlaceholder'        => CatUtils::lfPlaceholder,
