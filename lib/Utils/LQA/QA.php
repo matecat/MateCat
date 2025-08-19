@@ -2409,7 +2409,7 @@ class QA {
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match( '/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML( $this->normalizedTrgDOM->documentElement ), $matches );
 
-            return $this->cleanOutputContent( $matches[ 1 ] );
+            return $this->cleanOutputContent( $matches[ 1 ] ?? '' );
 
         }
 
