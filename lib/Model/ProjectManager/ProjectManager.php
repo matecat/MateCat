@@ -1919,6 +1919,12 @@ class ProjectManager {
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
 
+            // save external-file attribute
+            if ( isset( $xliff_file[ 'attr' ][ 'external-file' ] ) ) {
+                $externalFile = $xliff_file[ 'attr' ][ 'external-file' ];
+                $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
+            }
+
             // save x-jsont* datatype
             if ( isset( $xliff_file[ 'attr' ][ 'data-type' ] ) ) {
                 $dataType = $xliff_file[ 'attr' ][ 'data-type' ];
@@ -2097,8 +2103,7 @@ class ProjectManager {
                             //
 
                             // if its empty pass create a SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStructMap = ( !empty( $dataRefMap ) ) ? [ 'map' => $dataRefMap ] : [];
-                            $segmentOriginalDataStruct    = new SegmentOriginalDataStruct( $segmentOriginalDataStructMap );
+                            $segmentOriginalDataStruct    = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //
@@ -2465,11 +2470,11 @@ class ProjectManager {
             /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
             $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
 
-            if ( isset( $segmentOriginalDataStruct->map ) ) {
+            if ( !empty( $segmentOriginalDataStruct->getMap() ) ) {
 
                 // We add two filters here (sanitizeOriginalDataMap and correctTagErrors)
                 // to allow the correct tag handling by the plugins
-                $map = $this->features->filter( 'sanitizeOriginalDataMap', $segmentOriginalDataStruct->map );
+                $map = $this->features->filter( 'sanitizeOriginalDataMap', $segmentOriginalDataStruct->getMap() );
 
                 // persist original data map if present
                 SegmentOriginalDataDao::insertRecord( $id_segment, $map );

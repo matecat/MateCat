@@ -55,8 +55,6 @@ class ConversionHandler {
     }
 
     public function getLocalFilePath(): string {
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-
         return $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
@@ -334,8 +332,7 @@ class ConversionHandler {
      */
     public function extractZipFile(): array {
 
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-        $file_path       = $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $file_path = $this->getLocalFilePath();
 
         //The zip file name is set in $this->file_name
         $this->result->setFileName( AbstractFilesStorage::basename_fix( $this->file_name ) );
@@ -443,10 +440,19 @@ class ConversionHandler {
     }
 
     /**
-     * @param mixed $file_name
+     * @param $file_name
+     *
+     * @throws Exception
      */
     public function setFileName( $file_name ) {
-        $this->file_name = $file_name;
+
+        $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
+
+        if($decoded_filename !== $file_name){
+            throw new Exception("Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>.");
+        }
+
+        $this->file_name = $decoded_filename;
     }
 
     /**
