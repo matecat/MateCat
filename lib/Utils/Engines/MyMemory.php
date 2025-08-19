@@ -209,7 +209,7 @@ class MyMemory extends AbstractEngine {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
-                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+                if ( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false ) {
                     $match->match = $this->getStandardMtPenaltyString();
                 }
             }
@@ -244,9 +244,20 @@ class MyMemory extends AbstractEngine {
             $penalties = [];
 
             foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( is_numeric( $penalty ) ) {
-                    $penalties[] = $penalty / 100;
+                if ( is_numeric( $penalty[ 'penalty' ] ) ) {
+                    $penalties[] = [
+                            'key'     => $penalty[ 'key' ],
+                            'penalty' => $penalty[ 'penalty' ] / 100,
+                    ];
                 }
+            }
+
+            // public_tm_penalty
+            if ( $_config[ 'public_tm_penalty' ] !== null and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+                $penalties[] = [
+                        'key'     => 'public',
+                        'penalty' => $_config[ 'public_tm_penalty' ] / 100,
+                ];
             }
 
             if ( !empty( $penalties ) ) {
@@ -412,7 +423,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-        
+
         return $this->result;
     }
 

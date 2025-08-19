@@ -158,6 +158,7 @@ class NewController extends KleinController {
         $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
+        $projectStructure[ 'public_tm_penalty' ]        = $request[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
         $projectStructure[ 'pretranslate_101' ]         = isset( $request[ 'pretranslate_101' ] ) ? (int)$request[ 'pretranslate_101' ] : 1;
 
@@ -310,6 +311,7 @@ class NewController extends KleinController {
         $payable_rate_template_name                = filter_var( $this->request->param( 'payable_rate_template_name' ), FILTER_SANITIZE_STRING );
         $project_info                              = filter_var( $this->request->param( 'project_info' ), FILTER_SANITIZE_STRING );
         $project_name                              = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $public_tm_penalty                         = filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_100                          = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_101                          = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_VALIDATE_BOOLEAN );
         $private_tm_key                            = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -346,6 +348,7 @@ class NewController extends KleinController {
 
         $lang_handler = Languages::getInstance();
 
+        $public_tm_penalty = $this->validatePublicTMPenalty( $public_tm_penalty );
         $source_lang = $this->validateSourceLang( $lang_handler, $source_lang );
         $target_lang = $this->validateTargetLangs( $lang_handler, $target_lang );
         [ $tms_engine, $mt_engine ] = $this->validateEngines( $tms_engine, $mt_engine );
@@ -413,6 +416,7 @@ class NewController extends KleinController {
                 'source_lang'                               => $source_lang,
                 'target_lang'                               => $target_lang,
                 'subject'                                   => $subject,
+                'public_tm_penalty'                         => $public_tm_penalty,
                 'pretranslate_100'                          => $pretranslate_100,
                 'pretranslate_101'                          => $pretranslate_101,
                 'id_team'                                   => $id_team,
@@ -562,6 +566,20 @@ class NewController extends KleinController {
         }
 
         return $subject;
+    }
+
+    /**
+     * @param int|null $public_tm_penalty
+     *
+     * @return int|null
+     */
+    private function validatePublicTMPenalty(?int $public_tm_penalty = null)
+    {
+        if($public_tm_penalty < 0 || $public_tm_penalty > 100){
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
+        }
+
+        return $public_tm_penalty;
     }
 
     /**
