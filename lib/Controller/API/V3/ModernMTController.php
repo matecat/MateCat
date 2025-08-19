@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -10,9 +11,9 @@ use Model\Conversion\Upload;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Csv;
 use Utils\Engines\AbstractEngine;
+use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT;
 use Utils\Files\CSV as CSVParser;
-use Utils\Validator\EngineValidator;
 
 
 class ModernMTController extends KleinController {
@@ -423,8 +424,8 @@ class ModernMTController extends KleinController {
      * @return MMT
      * @throws Exception
      */
-    private function getModernMTClient( $engineId ): AbstractEngine {
-        return EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, MMT::class );
+    private function getModernMTClient( $engineId ): MMT {
+        return EnginesFactory::getInstanceByIdAndUser( $engineId, $this->user->uid, MMT::class );
     }
 
     /**

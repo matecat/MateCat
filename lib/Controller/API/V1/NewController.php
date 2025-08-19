@@ -55,7 +55,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
-use Utils\Validator\EngineValidator;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 use Utils\Validator\MMTValidator;
@@ -535,7 +534,7 @@ class NewController extends KleinController {
             }
 
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }
@@ -958,7 +957,7 @@ class NewController extends KleinController {
         // any other engine than Match
         if ( $mt_engine !== null and $mt_engine > 1 ) {
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage() );
             }
