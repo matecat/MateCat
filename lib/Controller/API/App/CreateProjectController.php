@@ -2,7 +2,7 @@
 
 namespace Controller\API\App;
 
-use API\Commons\Traits\ScanDirectoryForConvertedFiles;
+use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Utils\Tools\CatUtils;
 use Controller\Abstracts\AbstractStatefulKleinController;
 use Controller\Abstracts\Authentication\CookieManager;

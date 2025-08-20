@@ -10,10 +10,9 @@
 namespace API\Commons\Traits;
 
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
 use Matecat\XliffParser\Utils\Files as XliffFiles;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
+use Model\FilesStorage\AbstractFilesStorage;
 use Utils\Registry\AppConfig;
 
 trait ScanDirectoryForConvertedFiles {
