@@ -777,7 +777,7 @@ class NewController extends KleinController {
                 $this_tm_key = [
                         'key'     => $tm_key[ 'key' ],
                         'name'    => null,
-                        'penalty' => $tm_key[ 'penalty' ] ?? null,
+                        'penalty' => $tm_key[ 'penalty' ] ?? 0,
                         'r'       => $tm_key[ 'r' ],
                         'w'       => $tm_key[ 'w' ]
                 ];
