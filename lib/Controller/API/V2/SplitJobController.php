@@ -8,11 +8,13 @@ use Controller\API\Commons\Exceptions\AuthenticationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobStruct;
 use Model\ProjectManager\ProjectManager;
 use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
+use ReflectionException;
 
 class SplitJobController extends KleinController {
 
@@ -26,7 +28,7 @@ class SplitJobController extends KleinController {
     public function merge(): void {
 
         $request          = $this->validateTheRequest();
-        $projectStructure = $this->getProjectStructure(
+        $projectStructure = $this->getProjectData(
                 $request[ 'project_id' ],
                 $request[ 'project_pass' ],
                 $request[ 'split_raw_words' ]
@@ -97,7 +99,7 @@ class SplitJobController extends KleinController {
      */
     private function checkSplit( array $request ): array {
 
-        $projectStructure = $this->getProjectStructure(
+        $projectStructure = $this->getProjectData(
                 $request[ 'project_id' ],
                 $request[ 'project_pass' ],
                 $request[ 'split_raw_words' ]
@@ -169,14 +171,16 @@ class SplitJobController extends KleinController {
     }
 
     /**
-     * @param      $project_id
-     * @param      $project_pass
-     * @param bool $split_raw_words
+     * @param int    $project_id
+     * @param string $project_pass
+     * @param bool   $split_raw_words
      *
      * @return array
+     * @throws NotFoundException
+     * @throws ReflectionException
      * @throws Exception
      */
-    private function getProjectStructure( $project_id, $project_pass, bool $split_raw_words = false ): array {
+    private function getProjectData( int $project_id, string $project_pass, bool $split_raw_words = false ): array {
         $count_type     = $split_raw_words ? MetadataDao::SPLIT_RAW_WORD_TYPE : MetadataDao::SPLIT_EQUIVALENT_WORD_TYPE;
         $project_struct = ProjectDao::findByIdAndPassword( $project_id, $project_pass, 60 * 60 );
 
@@ -194,25 +198,25 @@ class SplitJobController extends KleinController {
     }
 
     /**
-     * @param                  $jid
-     * @param JobStruct[]      $jobList
+     * @param int         $jid
+     * @param JobStruct[] $jobList
      *
      * @return JobStruct[]
      * @throws Exception
      */
-    private function checkMergeAccess( $jid, array $jobList ): array {
+    private function checkMergeAccess( int $jid, array $jobList ): array {
         return $this->filterJobsById( $jid, $jobList );
     }
 
     /**
-     * @param ProjectStruct          $project_struct
-     * @param                        $jid
-     * @param                        $job_pass
-     * @param array                  $jobList
+     * @param ProjectStruct $project_struct
+     * @param int           $jid
+     * @param string        $job_pass
+     * @param array         $jobList
      *
-     * @throws Exception
+     * @throws AuthenticationError
      */
-    private function checkSplitAccess( ProjectStruct $project_struct, $jid, $job_pass, array $jobList ) {
+    private function checkSplitAccess( ProjectStruct $project_struct, int $jid, string $job_pass, array $jobList ) {
 
         $jobToSplit = $this->filterJobsById( $jid, $jobList );
 
@@ -224,13 +228,13 @@ class SplitJobController extends KleinController {
     }
 
     /**
-     * @param       $jid
+     * @param int   $jid
      * @param array $jobList
      *
      * @return array
-     * @throws Exception
+     * @throws AuthenticationError
      */
-    private function filterJobsById( $jid, array $jobList ): array {
+    private function filterJobsById( int $jid, array $jobList ): array {
 
         $filteredJobs = array_values( array_filter( $jobList, function ( JobStruct $jobStruct ) use ( $jid ) {
             return $jobStruct->id == $jid and !$jobStruct->isDeleted();
