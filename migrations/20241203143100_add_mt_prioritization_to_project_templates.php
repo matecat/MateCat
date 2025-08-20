@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddMtPrioritizationToProjectTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [

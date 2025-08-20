@@ -1,12 +1,15 @@
 <?php
 
-use ConnectedServices\Google\GoogleProvider;
+
+use Model\ConnectedServices\Oauth\Google\GoogleProvider;
+use Model\DataAccess\Database;
+use Utils\Registry\AppConfig;
 
 $root = realpath( dirname( __FILE__ ) . '/../../../' );
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db        = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+$db        = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 $db->debug = false;
 $db->connect();
 
@@ -32,13 +35,13 @@ if ( !array_key_exists( 'id_service', $options ) ) {
 }
 
 
-$dao     = new \ConnectedServices\ConnectedServiceDao();
+$dao     = new \Model\ConnectedServices\ConnectedServiceDao();
 $service = $dao->findById( $options[ 'id_service' ] );
 
 //FIX
-$client = GoogleProvider::getClient( INIT::$HTTPHOST . "/gdrive/oauth/response" );
+$client = GoogleProvider::getClient( AppConfig::$HTTPHOST . "/gdrive/oauth/response" );
 
-$verifier = new \ConnectedServices\GDriveTokenVerifyModel( $service );
+$verifier = new \Model\ConnectedServices\GDrive\GDriveTokenVerifyModel( $service );
 $verifier->validOrRefreshed( $client );
 var_dump( $verifier );
 

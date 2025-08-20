@@ -1,19 +1,19 @@
 <?php
 
-namespace Filters;
+namespace Model\Filters;
 
-use DataAccess\ShapelessConcreteStruct;
-use DataAccess\AbstractDao;
-use Database;
 use DateTime;
 use Exception;
-use Pagination\Pager;
-use Pagination\PaginationParameters;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Pagination\Pager;
+use Model\Pagination\PaginationParameters;
+use Model\Projects\ProjectTemplateDao;
+use Model\Projects\ProjectTemplateStruct;
 use PDO;
-use Projects\ProjectTemplateDao;
-use Projects\ProjectTemplateStruct;
 use ReflectionException;
-use Utils;
+use Utils\Tools\Utils;
 
 class FiltersConfigTemplateDao extends AbstractDao {
     const TABLE = 'filters_config_templates';
@@ -117,7 +117,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getById( int $id, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id' => $id,
         ] );
 
@@ -138,7 +138,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getByIdAndUser( int $id, int $uid, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_id_and_uid );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ShapelessConcreteStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ShapelessConcreteStruct::class, [
                 'id'  => $id,
                 'uid' => $uid,
         ] );
@@ -160,7 +160,7 @@ class FiltersConfigTemplateDao extends AbstractDao {
      */
     public static function getByUidAndName( int $uid, string $name, int $ttl = 60 ): ?FiltersConfigTemplateStruct {
         $stmt   = self::getInstance()->_getStatementForQuery( self::query_by_uid_name );
-        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObject( $stmt, new ProjectTemplateStruct(), [
+        $result = self::getInstance()->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, ProjectTemplateStruct::class, [
                 'uid'  => $uid,
                 'name' => $name,
         ] );

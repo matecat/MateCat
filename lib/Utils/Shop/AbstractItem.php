@@ -3,20 +3,25 @@
  * Created by PhpStorm.
  */
 
+namespace Utils\Shop;
+use ArrayObject;
+use DomainException;
+use LogicException;
+
 /**
- * Abstract parent for Items to use with Shop_Cart class
+ * Abstract parent for Items to use with Cart class
  *
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 17/04/14
  * Time: 16.44
  *
  */
-abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterface {
+abstract class AbstractItem extends ArrayObject implements ItemInterface {
 
     /**
      * This is the real storage for cart items
      *
-     * These fields are mandatory to use with Class Shop_Cart
+     * These fields are mandatory to use with Class Cart
      *
      * <pre>
      * $__storage = array(
@@ -29,12 +34,21 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @var array
      */
-    protected $__storage = [
+    protected array $__storage = [
             '_id_type_class' => null,
             'id'             => null,
             'quantity'       => null,
             'price'          => null,
     ];
+
+    public static function getInflate( $storage ): AbstractItem {
+        $obj = new $storage[ '_id_type_class' ]();
+        foreach ( $storage as $key => $value ) {
+            $obj->offsetSet( $key, $value );
+        }
+
+        return $obj;
+    }
 
     /**
      * Class Constructor
@@ -66,7 +80,7 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * @return array
      */
-    public function getStorage() {
+    public function getStorage(): array {
         return $this->getArrayCopy();
     }
 
@@ -75,7 +89,7 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      *
      * Only items defined in the concrete Item class will be added and/or permitted
      *
-     * @param mixed $offset <p>
+     * @param mixed $key    <p>
      *                      The offset to assign the value to.
      *                      </p>
      * @param mixed $value  <p>
@@ -90,18 +104,18 @@ abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterfa
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
      */
-    public function offsetSet( $offset, $value ) {
+    public function offsetSet( $key, $value ) {
 
-        if ( empty( $offset ) ) {
+        if ( empty( $key ) ) {
             throw new LogicException( "Can not assign a value to an EMPTY key." );
         }
 
-        if ( !array_key_exists( $offset, $this->__storage ) ) {
-            throw new DomainException( "Field $offset does not exists in " . __CLASS__ . " structure." );
+        if ( !array_key_exists( $key, $this->__storage ) ) {
+            throw new DomainException( "Field $key does not exists in " . __CLASS__ . " structure." );
         }
 
         $value = filter_var( $value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES );
-        parent::offsetSet( $offset, $value );
+        parent::offsetSet( $key, $value );
 
     }
 

@@ -1,10 +1,19 @@
-<?php 
+<?php
+
+
+use Model\ApiKeys\ApiKeyDao;
+use Model\ApiKeys\ApiKeyStruct;
+use Model\DataAccess\Database;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 $root = realpath(dirname(__FILE__) . '/../../');
-include_once $root . "/inc/Bootstrap.php";
+include_once $root . "/lib/Bootstrap.php";
 Bootstrap::start();
 
-$db = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+$db = Database::obtain(AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE);
 $db->debug = false;
 $db->connect();
 
@@ -24,11 +33,11 @@ if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
 if (!array_key_exists('email', $options))     usage() ; 
 
-$dao = new Users_UserDao( Database::obtain() ) ; 
-$result = $dao->read( new Users_UserStruct(array('email' => $options['email']))); 
+$dao = new UserDao( Database::obtain() ) ;
+$result = $dao->read( new UserStruct(array( 'email' => $options['email'])));
 $user = $result[0]; 
 
-$dao = new ApiKeys_ApiKeyDao( Database::obtain() ); 
+$dao = new ApiKeyDao( Database::obtain() );
 
 $values = array(
   'uid' => $user->uid, 
@@ -37,7 +46,7 @@ $values = array(
   'enabled' => true
 );
 
-$insert = $dao->create( new ApiKeys_ApiKeyStruct( $values ) ); 
+$insert = $dao->create( new ApiKeyStruct( $values ) );
 
 echo "News keys added to $user->email:\n"; 
 echo "\n" ; 

@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class RenameColumnScoreToPenaltyPoints extends AbstractMatecatMigration {
 
     public $sql_up = 'ALTER TABLE `qa_chunk_reviews` CHANGE `score` `penalty_points` bigint(20);';

@@ -24,10 +24,8 @@ class ReviewExtendedIssuesContainer extends React.Component {
       lastIssueAdded: null,
       visible: true,
     }
-    this.issueFlatCategories = JSON.parse(config.lqa_flat_categories)
-    this.issueNestedCategories = JSON.parse(
-      config.lqa_nested_categories,
-    ).categories
+    this.issueFlatCategories = config.lqa_flat_categories
+    this.issueNestedCategories = config.lqa_nested_categories.categories
     this.is2ndPassReviewEnabled =
       config.secondRevisionsCount && config.secondRevisionsCount > 0
     this.reviewType = config.revisionNumber

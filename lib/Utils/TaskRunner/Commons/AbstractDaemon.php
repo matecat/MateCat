@@ -7,12 +7,12 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
-use AMQHandler;
 use Exception;
-use INIT;
-use Log;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
 
 /**
  * The abstract Daemon definition.
@@ -78,8 +78,8 @@ abstract class AbstractDaemon {
      * @param ?string $contextIndex
      */
     protected function __construct( string $configFile = null, string $contextIndex = null ) {
-        INIT::$PRINT_ERRORS = true;
-        $this->myProcessPid = posix_getpid();
+        AppConfig::$PRINT_ERRORS = true;
+        $this->myProcessPid      = posix_getpid();
     }
 
     /**
@@ -104,7 +104,7 @@ abstract class AbstractDaemon {
      * @param $msg
      */
     protected function _logTimeStampedMsg( $msg ) {
-        if ( INIT::$DEBUG ) {
+        if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
         }
         Log::doJsonLog( $msg );

@@ -1,27 +1,29 @@
 <?php
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use API\Commons\Exceptions\ValidationError;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\RateLimiterTrait;
 use Exception;
 use Klein\Response;
-use Traits\RateLimiterTrait;
-use Users\Authentication\ChangePasswordModel;
+use Model\Users\Authentication\ChangePasswordModel;
+use Model\Users\Authentication\PasswordRules;
 
 class UserController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * @return void
      */
     public function show() {
-        if( empty( $_SESSION[ 'user_profile' ] ) ){
+        if ( empty( $_SESSION[ 'user_profile' ] ) ) {
             $this->response->code( 401 );
         }
-        $this->response->json( $_SESSION[ 'user_profile' ] );
+        $this->response->json( $_SESSION[ 'user_profile' ] ?? [ 'error' => 'Invalid login.' ] );
     }
 
     /**
@@ -57,8 +59,11 @@ class UserController extends AbstractStatefulKleinController {
         $new_password_confirmation = filter_var( $this->request->param( 'password_confirmation' ), FILTER_SANITIZE_STRING );
 
         try {
+
+            $this->validatePasswordRequirements( $new_password, $new_password_confirmation );
+
             $cpModel = new ChangePasswordModel( $this->user );
-            $cpModel->changePassword( $old_password, $new_password, $new_password_confirmation );
+            $cpModel->changePassword( $old_password, $new_password );
 
             $this->broadcastLogout();
 

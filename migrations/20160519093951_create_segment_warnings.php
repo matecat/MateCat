@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateSegmentWarnings extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF

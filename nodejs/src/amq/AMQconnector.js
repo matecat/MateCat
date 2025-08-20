@@ -23,7 +23,7 @@ module.exports.AmqConnectionManager = class {
       logger.error('ConnectionManager Error', error);
     });
 
-    this.connectionManager.on('connect', (msg) => {
+    this.connectionManager.on('connect', () => {
       logger.debug('Connection Manager connected');
     });
 

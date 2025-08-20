@@ -1,9 +1,8 @@
 <?php
 
-namespace Views;
+namespace Controller\Views;
 
-use AbstractControllers\BaseKleinViewController;
-use API\Commons\ViewValidators\ViewLoginRedirectValidator;
+use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 
 class SignInController extends BaseKleinViewController {

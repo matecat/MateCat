@@ -1,14 +1,14 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use Exceptions\NotFoundException;
-use LQA\ModelDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
-use QAModelTemplate\QAModelTemplateDao;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
+use Model\Exceptions\NotFoundException;
+use Model\LQA\ModelDao;
+use Model\LQA\QAModelTemplate\QAModelTemplateDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
 
 class QualityFrameworkController extends KleinController {
 
@@ -26,7 +26,7 @@ class QualityFrameworkController extends KleinController {
         $password  = $this->request->param( 'password' );
 
         try {
-            $project = ( new Projects_ProjectDao() )->findByIdAndPassword( $idProject, $password );
+            $project = ( new ProjectDao() )->findByIdAndPassword( $idProject, $password );
         } catch ( NotFoundException $exception ) {
             $this->response->code( 500 );
             $this->response->json( [
@@ -49,7 +49,7 @@ class QualityFrameworkController extends KleinController {
         $idJob    = $this->request->param( 'id_job' );
         $password = $this->request->param( 'password' );
 
-        $job = \CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
+        $job = \Utils\Tools\CatUtils::getJobFromIdAndAnyPassword( $idJob, $password );
 
         if ( $job === null ) {
             $this->response->code( 500 );
@@ -66,11 +66,11 @@ class QualityFrameworkController extends KleinController {
     }
 
     /**
-     * @param Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct $projectStruct
      *
      * @return array
      */
-    private function renderQualityFramework( Projects_ProjectStruct $projectStruct ) {
+    private function renderQualityFramework( ProjectStruct $projectStruct ) {
         $idQaModel = $projectStruct->id_qa_model;
         $qaModel   = ModelDao::findById( $idQaModel );
 

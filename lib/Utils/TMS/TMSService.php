@@ -1,56 +1,56 @@
 <?php
 
-namespace TMS;
+namespace Utils\TMS;
 
-use API\Commons\Exceptions\UnprocessableException;
-use Chunks_ChunkDao;
-use Constants_Engines;
-use Constants_TranslationStatus;
-use Conversion\Upload;
+use Controller\API\Commons\Exceptions\UnprocessableException;
 use DateTime;
 use DateTimeZone;
-use Engine;
-use Engines_MyMemory;
-use Engines_Results_MyMemory_ExportResponse;
-use Engines_Results_MyMemory_TmxResponse;
-use EnginesModel_EngineStruct;
 use Exception;
-use FeatureSet;
-use INIT;
 use InvalidArgumentException;
-use Jobs_JobStruct;
-use Log;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Conversion\Upload;
+use Model\Engines\Structs\EngineStruct;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\TMSService\TMSServiceDao;
+use Model\Users\MetadataDao;
+use Model\Users\UserStruct;
+use ReflectionException;
 use SplTempFileObject;
 use stdClass;
-use TMSService\TMSServiceDao;
-use Users\MetadataDao;
-use Users_UserStruct;
-use Utils;
+use Utils\Constants\EngineConstants;
+use Utils\Constants\TranslationStatus;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\CreateUserResponse;
+use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class TMSService {
 
     /**
-     * @var FeatureSet
+     * @var FeatureSet|null
      */
-    protected $featureSet;
+    protected ?FeatureSet $featureSet;
 
     /**
      * @var string The name of the uploaded TMX
      */
-    protected $name;
+    protected string $name = '';
 
     /**
-     * @var TMSFile[]
+     * @var stdClass
      */
-    private $file;
+    private stdClass $file;
 
     /**
-     * @var Engines_MyMemory
+     * @var MyMemory
      */
-    protected $mymemory_engine;
+    protected MyMemory $mymemory_engine;
 
-    private $output_type;
+    private string $output_type;
 
     /**
      *
@@ -60,8 +60,10 @@ class TMSService {
      */
     public function __construct( FeatureSet $featureSet = null ) {
 
-        //get MyMemory service
-        $this->mymemory_engine = Engine::getInstance( 1 );
+        //get Match service
+        /** @var $mymemory_engine MyMemory */
+        $mymemory_engine       = EnginesFactory::getInstance( 1 );
+        $this->mymemory_engine = $mymemory_engine;
 
         $this->output_type = 'translation';
 
@@ -75,7 +77,7 @@ class TMSService {
     /**
      * @param string $output_type
      */
-    public function setOutputType( $output_type ) {
+    public function setOutputType( string $output_type ) {
         $this->output_type = $output_type;
     }
 
@@ -84,7 +86,7 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function checkCorrectKey( $tm_key ) {
+    public function checkCorrectKey( string $tm_key ): ?bool {
 
         //validate the key
         //This piece of code need to be executed every time
@@ -105,12 +107,12 @@ class TMSService {
     }
 
     /**
-     * Create a new MyMemory Key
+     * Create a new Match Key
      *
-     * @return stdClass
+     * @return CreateUserResponse
      * @throws Exception
      */
-    public function createMyMemoryKey() {
+    public function createMyMemoryKey(): CreateUserResponse {
 
         try {
             $newUser = $this->mymemory_engine->createMyMemoryKey();
@@ -129,7 +131,7 @@ class TMSService {
      * @return stdClass
      * @throws Exception
      */
-    public function uploadFile() {
+    public function uploadFile(): stdClass {
         try {
 
             $uploadManager = new Upload();
@@ -144,10 +146,10 @@ class TMSService {
     }
 
     /**
-     * Import TMX file in MyMemory
+     * Import TMX file in Match
      * @throws Exception
      */
-    public function addTmxInMyMemory( TMSFile $file, Users_UserStruct $user ): array {
+    public function addTmxInMyMemory( TMSFile $file, UserStruct $user ): array {
 
         try {
 
@@ -174,7 +176,7 @@ class TMSService {
             $file->setUuid( $importStatus->id );
 
             // load tmx in engines with adaptivity
-            $engineList = Constants_Engines::getAvailableEnginesList();
+            $engineList = EngineConstants::getAvailableEnginesList();
 
             $warnings = [];
 
@@ -182,16 +184,16 @@ class TMSService {
 
                 try {
 
-                    $struct             = EnginesModel_EngineStruct::getStruct();
+                    $struct             = EngineStruct::getStruct();
                     $struct->class_load = $engineName;
-                    $struct->type       = Constants_Engines::MT;
-                    $engine             = Engine::createTempInstance( $struct );
+                    $struct->type       = EngineConstants::MT;
+                    $engine             = EnginesFactory::createTempInstance( $struct );
 
                     if ( $engine->isAdaptiveMT() ) {
-                        //retrieve OWNER Engine License
+                        //retrieve OWNER EnginesFactory License
                         $ownerMmtEngineMetaData = ( new MetadataDao() )->setCacheTTL( 60 * 60 * 24 * 30 )->get( $user->uid, $engine->getEngineRecord()->class_load ); // engine_id
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
-                            $engine = Engine::getInstance( $ownerMmtEngineMetaData->value );
+                            $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
 
                             Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
@@ -200,7 +202,7 @@ class TMSService {
                     }
 
                 } catch ( Exception $e ) {
-                    if ( $engineName != Constants_Engines::MY_MEMORY ) {
+                    if ( $engineName != EngineConstants::MY_MEMORY ) {
                         //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
                         Log::doJsonLog( $e->getMessage() );
                         $engineName = explode( "\\", $engineName );
@@ -221,7 +223,7 @@ class TMSService {
     }
 
     /**
-     * Import TMX file in MyMemory
+     * Import TMX file in Match
      *
      * @param TMSFile $file
      *
@@ -240,9 +242,6 @@ class TMSService {
         );
 
         //check for errors during the import
-        /**
-         * @var $importStatus Engines_Results_MyMemory_TmxResponse
-         */
         switch ( $importStatus->responseStatus ) {
             case "400" :
                 throw new Exception( "Can't load Glossary file right now, try later", -15 );
@@ -257,7 +256,7 @@ class TMSService {
                     throw new UnprocessableException( $message, $importStatus->responseStatus );
                 }
 
-                $message = 'Invalid TM key provided, please provide a valid MyMemory key.';
+                $message = 'Invalid TM key provided, please provide a valid Match key.';
                 throw new InvalidArgumentException( $message, $importStatus->responseStatus );
 
             default:
@@ -268,12 +267,12 @@ class TMSService {
     }
 
     /**
-     * @param $uuid
+     * @param string $uuid
      *
-     * @return mixed
+     * @return array
      * @throws Exception
      */
-    public function glossaryUploadStatus( $uuid ) {
+    public function glossaryUploadStatus( string $uuid ): array {
 
         $allMemories = $this->mymemory_engine->getGlossaryImportStatus( $uuid );
 
@@ -288,13 +287,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;
@@ -307,22 +306,24 @@ class TMSService {
     }
 
     /**
-     * @param $key
-     * @param $keyName
-     * @param $userEmail
-     * @param $userName
+     * @param string $key
+     * @param string $keyName
+     * @param string $userEmail
+     * @param string $userName
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return ExportResponse
      */
-    public function glossaryExport( $key, $keyName, $userEmail, $userName ) {
+    public function glossaryExport( string $key, string $keyName, string $userEmail, string $userName ): ExportResponse {
         return $this->mymemory_engine->glossaryExport( $key, $keyName, $userEmail, $userName );
     }
 
     /**
+     * @param string $uuid
+     *
      * @return array
      * @throws Exception
      */
-    public function tmxUploadStatus( $uuid ) {
+    public function tmxUploadStatus( string $uuid ): array {
 
         $allMemories = $this->mymemory_engine->getStatus( $uuid );
 
@@ -337,13 +338,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into MyMemory" );
+                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into MyMemory" );
+                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;
@@ -356,11 +357,11 @@ class TMSService {
     }
 
     /**
-     * @param $message
+     * @param string $message
      *
-     * @return mixed
+     * @return string
      */
-    private function formatErrorMessage( $message ) {
+    private function formatErrorMessage( string $message ): string {
         if ( $message === "THE CHARACTER SET PROVIDED IS INVALID." ) {
             return "The encoding of the TMX file uploaded is not valid, please open it in a text editor, convert its encoding to UTF-8 (character corruption might happen) and retry upload";
         }
@@ -373,24 +374,8 @@ class TMSService {
      *
      * @return $this
      */
-    public function setName( $name ) {
+    public function setName( string $name ): TMSService {
         $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @param TMSFile[] $file
-     *
-     * <code>
-     *   //required
-     *   $file->file_path
-     * </code>
-     *
-     * @return $this
-     */
-    public function setFile( $file ) {
-        $this->file = $file;
 
         return $this;
     }
@@ -398,16 +383,16 @@ class TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
-     * @param      $userMail
-     * @param      $userName
-     * @param      $userSurname
-     * @param      $tm_key
-     * @param bool $strip_tags
+     * @param string $userMail
+     * @param string $userName
+     * @param string $userSurname
+     * @param string $tm_key
+     * @param bool   $strip_tags
      *
-     * @return Engines_Results_MyMemory_ExportResponse
+     * @return ExportResponse
      * @throws Exception
      */
-    public function requestTMXEmailDownload( $userMail, $userName, $userSurname, $tm_key, $strip_tags = false ) {
+    public function requestTMXEmailDownload( string $userMail, string $userName, string $userSurname, string $tm_key, bool $strip_tags = false ): ExportResponse {
 
         return $this->mymemory_engine->emailExport(
                 $tm_key,
@@ -422,28 +407,30 @@ class TMSService {
     /**
      * Export Job as Tmx File
      *
-     * @param          $jid
-     * @param          $jPassword
-     * @param          $sourceLang
-     * @param          $targetLang
+     * @param int      $jid
+     * @param string   $jPassword
+     * @param string   $sourceLang
+     * @param string   $targetLang
      *
      * @param int|null $uid
      *
      * @return SplTempFileObject $tmpFile
      *
+     * @throws ReflectionException
      * @throws Exception
      */
-    public function exportJobAsTMX( $jid, $jPassword, $sourceLang, $targetLang, $uid = null ) {
+    public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplTempFileObject {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [] );
+        /** @var MateCatFilter $Filter */
+        $Filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
         $tmpFile    = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">
     <header
             creationtool="Matecat-Cattool"
-            creationtoolversion="' . INIT::$BUILD_NUMBER . '"
+            creationtoolversion="' . AppConfig::$BUILD_NUMBER . '"
 	    o-tmf="Matecat"
             creationid="Matecat"
             datatype="plaintext"
@@ -474,10 +461,7 @@ class TMSService {
                 break;
         }
 
-        /**
-         * @var $chunks Jobs_JobStruct[]
-         */
-        $chunks = Chunks_ChunkDao::getByJobID( $jid );
+        $chunks = ChunkDao::getByJobID( $jid );
 
         foreach ( $result as $k => $row ) {
 
@@ -528,14 +512,13 @@ class TMSService {
         </tuv>';
 
             //if segment is confirmed or we want show all segments
-            if ( array_search( $row[ 'status' ],
+            if ( in_array( $row[ 'status' ],
                             [
-                                    Constants_TranslationStatus::STATUS_TRANSLATED,
-                                    Constants_TranslationStatus::STATUS_APPROVED,
-                                    Constants_TranslationStatus::STATUS_APPROVED2,
-                                    Constants_TranslationStatus::STATUS_FIXED
-                            ]
-                    ) !== false || !$hideUnconfirmedRows ) {
+                                    TranslationStatus::STATUS_TRANSLATED,
+                                    TranslationStatus::STATUS_APPROVED,
+                                    TranslationStatus::STATUS_APPROVED2,
+                                    TranslationStatus::STATUS_FIXED
+                            ] ) || !$hideUnconfirmedRows ) {
 
                 $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
@@ -573,7 +556,7 @@ class TMSService {
      * @return SplTempFileObject $tmpFile
      *
      */
-    public function exportJobAsCSV( $jid, $jPassword, $sourceLang, $targetLang ) {
+    public function exportJobAsCSV( $jid, $jPassword, $sourceLang, $targetLang ): SplTempFileObject {
 
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 15MB */ );
 
@@ -585,7 +568,7 @@ class TMSService {
 
         $result = TMSServiceDao::getTranslationsForTMXExport( $jid, $jPassword );
 
-        foreach ( $result as $k => $row ) {
+        foreach ( $result as $row ) {
 
             $row_array = [
                     $row[ 'segment' ], $row[ 'translation' ]

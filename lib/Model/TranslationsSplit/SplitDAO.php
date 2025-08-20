@@ -1,7 +1,11 @@
 <?php
 
-use DataAccess\AbstractDao;
-use DataAccess\IDaoStruct;
+namespace Model\TranslationsSplit;
+
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
 
 
 /**
@@ -10,19 +14,19 @@ use DataAccess\IDaoStruct;
  * Date: 24/03/15
  * Time: 13.21
  */
-class TranslationsSplit_SplitDAO extends AbstractDao {
+class SplitDAO extends AbstractDao {
 
     const TABLE = "segment_translations_splits";
 
-    const STRUCT_TYPE = "TranslationsSplit_SplitStruct";
+    const STRUCT_TYPE = SegmentSplitStruct::class;
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
-     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return SegmentSplitStruct[]
      * @throws Exception
      */
-    public function read( TranslationsSplit_SplitStruct $obj ) {
+    public function read( SegmentSplitStruct $obj ): array {
 
         $where_conditions = [];
         $values           = [];
@@ -33,15 +37,11 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
                                     target_chunk_lengths
                              FROM " . self::TABLE . " WHERE ";
 
-        if ( $obj->id_segment !== null ) {
-            $where_conditions[]     = "id_segment = :id_segment";
-            $values[ 'id_segment' ] = $obj->id_segment;
-        }
+        $where_conditions[]     = "id_segment = :id_segment";
+        $values[ 'id_segment' ] = $obj->id_segment;
 
-        if ( $obj->id_job !== null ) {
-            $where_conditions[] = "id_job = :id_job";
-            $values[ 'id_job' ] = $obj->id_job;
-        }
+        $where_conditions[] = "id_job = :id_job";
+        $values[ 'id_job' ] = $obj->id_job;
 
         if ( count( $where_conditions ) ) {
             $query .= implode( " AND ", $where_conditions );
@@ -53,23 +53,21 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $query );
 
-        $result = $this->_fetchObject( $stmt, $obj, $values );
+        $result = $this->_fetchObjectMap( $stmt, SegmentSplitStruct::class, $values );
 
         return $this->_buildResult( $result );
 
     }
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
-     * @return null|TranslationsSplit_SplitStruct
+     * @return null|SegmentSplitStruct
      * @throws Exception
      */
-    public function atomicUpdate( TranslationsSplit_SplitStruct $obj ): ?TranslationsSplit_SplitStruct {
+    public function atomicUpdate( SegmentSplitStruct $obj ): ?SegmentSplitStruct {
 
         $obj = $this->sanitize( $obj );
-
-        $this->_validatePrimaryKey( $obj );
 
         $res = self::insertStruct( $obj, [
                 'no_nulls'            => true,
@@ -90,17 +88,15 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
     }
 
     /**
-     * @param TranslationsSplit_SplitStruct $input
+     * @param SegmentSplitStruct $input
      *
-     * @return TranslationsSplit_SplitStruct
+     * @return SegmentSplitStruct
      * @throws Exception
      */
     public function sanitize( IDaoStruct $input ) {
 
         parent::_sanitizeInput( $input, self::STRUCT_TYPE );
 
-        $input->id_segment           = ( $input->id_segment !== null ) ? $input->id_segment : null;
-        $input->id_job               = ( $input->id_job !== null ) ? $input->id_job : null;
         $input->source_chunk_lengths = ( $input->source_chunk_lengths !== null ) ? json_encode( $input->source_chunk_lengths ) : null;
         $input->target_chunk_lengths = ( $input->target_chunk_lengths !== null ) ? json_encode( $input->target_chunk_lengths ) : null;
 
@@ -109,32 +105,22 @@ class TranslationsSplit_SplitDAO extends AbstractDao {
 
 
     /**
-     * @param TranslationsSplit_SplitStruct $obj
+     * @param SegmentSplitStruct $obj
      *
      * @return void
      * @throws Exception
      */
     protected function _validatePrimaryKey( IDaoStruct $obj ): void {
 
-        /**
-         * @var $obj TranslationsSplit_SplitStruct
-         */
-        if ( $obj->id_segment === null ) {
-            throw new Exception( "ID segment required" );
-        }
-
-        if ( $obj->id_job === null ) {
-            throw new Exception( "ID job required" );
-        }
     }
 
 
     /**
-     * @param $array_result IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @param $array_result SegmentSplitStruct[]
      *
-     * @return IDaoStruct[]|TranslationsSplit_SplitStruct[]
+     * @return SegmentSplitStruct[]
      */
-    protected function _buildResult( array $array_result ) {
+    protected function _buildResult( array $array_result ): array {
         foreach ( $array_result as $item ) {
             $item->source_chunk_lengths = json_decode( $item->source_chunk_lengths, true );
             $item->target_chunk_lengths = json_decode( $item->target_chunk_lengths, true );

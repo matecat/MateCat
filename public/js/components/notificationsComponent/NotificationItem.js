@@ -3,16 +3,16 @@ import React, {useState, useRef, useEffect} from 'react'
 
 const NotificationItem = ({
   uid,
-  position,
+  position = 'bl',
   title,
   text,
-  type,
-  autoDismiss,
+  type = 'info',
+  autoDismiss = true,
   closeCallback,
   openCallback,
-  allowHtml,
-  timer,
-  dismissable,
+  allowHtml = false,
+  timer = 7000,
+  dismissable = true,
   onRemove,
   remove,
 }) => {
@@ -163,15 +163,6 @@ NotificationItem.propTypes = {
   allowHtml: PropTypes.bool,
   timer: PropTypes.number,
   dismissable: PropTypes.bool,
-}
-
-NotificationItem.defaultProps = {
-  position: 'bl',
-  type: 'info',
-  autoDismiss: true,
-  allowHtml: false,
-  dismissable: true,
-  timer: 7000,
 }
 
 export default NotificationItem

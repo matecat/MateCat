@@ -6,18 +6,18 @@
  * Time: 11:08 AM
  */
 
-namespace Features\SegmentFilter\Model;
+namespace Plugins\Features\SegmentFilter\Model;
 
-use DataAccess\ShapelessConcreteStruct;
 use Exception;
-use Jobs_JobStruct;
+use Model\Jobs\JobStruct;
+use Model\Translations\SegmentTranslationStruct;
 
 class SegmentFilterModel {
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var FilterDefinition
@@ -27,18 +27,18 @@ class SegmentFilterModel {
     /**
      * SegmentFilterModel constructor.
      *
-     * @param Jobs_JobStruct   $chunk
+     * @param JobStruct        $chunk
      * @param FilterDefinition $filter
      *
      * @throws Exception
      */
-    public function __construct( Jobs_JobStruct $chunk, FilterDefinition $filter ) {
+    public function __construct( JobStruct $chunk, FilterDefinition $filter ) {
         $this->chunk  = $chunk;
         $this->filter = $filter;
     }
 
     /**
-     * @return ShapelessConcreteStruct[]
+     * @return null|SegmentTranslationStruct[]
      * @throws Exception
      */
     public function getSegmentList(): array {

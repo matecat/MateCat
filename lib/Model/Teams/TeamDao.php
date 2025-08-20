@@ -6,16 +6,16 @@
  * Time: 10:04
  */
 
-namespace Teams;
+namespace Model\Teams;
 
-use Constants_Teams;
-use DataAccess\AbstractDao;
-use Database;
 use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Users_UserStruct;
-use Utils;
+use Utils\Constants\Teams;
+use Utils\Tools\Utils;
 
 class TeamDao extends AbstractDao {
 
@@ -67,14 +67,12 @@ class TeamDao extends AbstractDao {
     public function findById( $id ): ?TeamStruct {
 
         $stmt          = $this->_getStatementForQuery( self::$_query_find_by_id );
-        $teamQuery     = new TeamStruct();
-        $teamQuery->id = $id;
 
         /** @var $res TeamStruct */
-        $res = $this->_fetchObject( $stmt,
-                $teamQuery,
+        $res = $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'id' => $teamQuery->id,
+                        'id' => $id,
                 ]
         )[ 0 ] ?? null;
 
@@ -83,27 +81,27 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function createPersonalTeam( Users_UserStruct $user ): TeamStruct {
+    public function createPersonalTeam( UserStruct $user ): TeamStruct {
         return $this->createUserTeam( $user, [
                 'name' => 'Personal',
-                'type' => Constants_Teams::PERSONAL
+                'type' => Teams::PERSONAL
         ] );
     }
 
     /**
-     * @param Users_UserStruct $orgCreatorUser
-     * @param array            $params
+     * @param UserStruct $orgCreatorUser
+     * @param array      $params
      *
      * @return  TeamStruct
      * @throws ReflectionException
      * @throws Exception
      */
-    public function createUserTeam( Users_UserStruct $orgCreatorUser, array $params = [] ): TeamStruct {
+    public function createUserTeam( UserStruct $orgCreatorUser, array $params = [] ): TeamStruct {
 
         $teamStruct = new TeamStruct( [
                 'name'       => $params[ 'name' ],
@@ -124,7 +122,7 @@ class TeamDao extends AbstractDao {
             Database::obtain()->getConnection()->beginTransaction();
         }
 
-        // get fresh cache from the master database
+        // get fresh cache from the primary database
         ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $teamStruct->id );
 
         $membersList = ( new MembershipDao )->createList( [
@@ -151,8 +149,8 @@ class TeamDao extends AbstractDao {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_assignee_with_projects );
 
-        return $this->_fetchObject( $stmt,
-                new MembershipStruct(),
+        return $this->_fetchObjectMap( $stmt,
+                MembershipStruct::class,
                 [
                         'id_team' => $team->id,
                 ]
@@ -197,12 +195,12 @@ class TeamDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct
      * @throws ReflectionException
      */
-    public function getPersonalByUser( Users_UserStruct $user ): TeamStruct {
+    public function getPersonalByUser( UserStruct $user ): TeamStruct {
         return $this->getPersonalByUid( $user->uid );
     }
 
@@ -214,17 +212,15 @@ class TeamDao extends AbstractDao {
      */
     public function getPersonalByUid( int $uid ): TeamStruct {
         $stmt                  = $this->_getStatementForQuery( self::$_query_get_personal_by_id );
-        $teamQuery             = new TeamStruct();
-        $teamQuery->created_by = $uid;
 
         /**
          * @var TeamStruct
          */
-        return $this->_fetchObject( $stmt,
-                $teamQuery,
+        return $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'created_by' => $teamQuery->created_by,
-                        'type'       => Constants_Teams::PERSONAL
+                        'created_by' => $uid,
+                        'type'       => Teams::PERSONAL
                 ]
         )[ 0 ];
     }
@@ -244,40 +240,37 @@ class TeamDao extends AbstractDao {
                 TeamStruct::class,
                 [
                         'created_by' => $teamQuery->created_by,
-                        'type'       => Constants_Teams::PERSONAL
+                        'type'       => Teams::PERSONAL
                 ]
         );
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return TeamStruct|null
      * @throws ReflectionException
      */
-    public function findUserCreatedTeams( Users_UserStruct $user ) {
+    public function findUserCreatedTeams( UserStruct $user ): ?TeamStruct {
 
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
-        $teamQuery             = new TeamStruct();
-        $teamQuery->created_by = $user->uid;
-
-        return static::resultOrNull( $this->_fetchObject( $stmt,
-                $teamQuery,
+        return $this->_fetchObjectMap( $stmt,
+                TeamStruct::class,
                 [
-                        'created_by' => $teamQuery->created_by,
+                        'created_by' => $user->uid,
                 ]
-        )[ 0 ] );
+        )[ 0 ] ?? null;
 
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return bool
      * @throws ReflectionException
      */
-    public function destroyCacheUserCreatedTeams( Users_UserStruct $user ) {
+    public function destroyCacheUserCreatedTeams( UserStruct $user ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_get_user_teams );
 
         $teamQuery             = new TeamStruct();
