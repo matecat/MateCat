@@ -16,6 +16,7 @@ export const updateJobKeys = async ({
   password = config.password,
   currentPassword = config.currentPassword,
   getPublicMatches,
+  publicTmPenalty,
   dataTm,
 }) => {
   const paramsData = Object.entries({
@@ -23,6 +24,7 @@ export const updateJobKeys = async ({
     job_id: idJob,
     job_pass: password,
     get_public_matches: getPublicMatches,
+    public_tm_penalty: publicTmPenalty,
     data: dataTm,
     current_password: currentPassword,
   })

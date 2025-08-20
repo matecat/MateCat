@@ -44,15 +44,15 @@ class GetContributionController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-        $id_client           = $request[ 'id_client' ];
-        $id_job              = (int)$request[ 'id_job' ];
-        $id_segment          = $request[ 'id_segment' ];
-        $num_results         = $request[ 'num_results' ];
-        $password            = $request[ 'password' ];
-        $received_password   = $request[ 'received_password' ];
-        $concordance_search  = $request[ 'concordance_search' ];
-        $switch_languages    = $request[ 'switch_languages' ];
-        $cross_language      = $request[ 'cross_language' ];
+        $id_client          = $request[ 'id_client' ];
+        $id_job             = (int)$request[ 'id_job' ];
+        $id_segment         = $request[ 'id_segment' ];
+        $num_results        = $request[ 'num_results' ];
+        $password           = $request[ 'password' ];
+        $received_password  = $request[ 'received_password' ];
+        $concordance_search = $request[ 'concordance_search' ];
+        $switch_languages   = $request[ 'switch_languages' ];
+        $cross_language     = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -65,7 +65,7 @@ class GetContributionController extends KleinController {
         $this->featureSet->loadForProject( $projectStruct );
 
         $contributionRequest = new GetContributionRequest();
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
 
@@ -124,9 +124,14 @@ class GetContributionController extends KleinController {
             $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
-        $mt_evaluation   = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $jobsMetadataDao   = new MetadataDao();
+        $dialect_strict    = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+        $mt_evaluation     = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $public_tm_penalty = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60 );
+
+        if ( $public_tm_penalty !== null ) {
+            $contributionRequest->public_tm_penalty = $public_tm_penalty->value;
+        }
 
         if ( $dialect_strict !== null ) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
@@ -152,9 +157,9 @@ class GetContributionController extends KleinController {
 
         foreach ( $tmKeys as $tmKey ) {
             if ( isset( $tmKey[ 'penalty' ] ) and is_numeric( $tmKey[ 'penalty' ] ) ) {
-                $penalty_key[] = $tmKey[ 'penalty' ];
+                $penalty_key[] = [ 'key' => $tmKey[ 'key' ], 'penalty' => $tmKey[ 'penalty' ] ];
             } else {
-                $penalty_key[] = 0;
+                $penalty_key[] = [ 'key' => $tmKey[ 'key' ], 'penalty' => 0 ];
             }
         }
 

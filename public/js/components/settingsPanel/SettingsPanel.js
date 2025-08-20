@@ -41,6 +41,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
   [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
+    SCHEMA_KEYS.publicTmPenalty,
     SCHEMA_KEYS.pretranslate100,
     SCHEMA_KEYS.tmPrioritization,
   ],

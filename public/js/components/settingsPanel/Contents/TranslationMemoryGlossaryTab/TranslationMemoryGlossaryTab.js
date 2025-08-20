@@ -116,6 +116,7 @@ export const TranslationMemoryGlossaryTab = () => {
     useContext(SettingsPanelContext)
   const {userInfo} = useContext(ApplicationWrapperContext)
   const getPublicMatches = currentProjectTemplate.getPublicMatches
+  const publicTmPenalty = currentProjectTemplate.publicTmPenalty
   const isPretranslate100Active = currentProjectTemplate.pretranslate100
   const setIsPretranslate100Active = (value) =>
     modifyingCurrentTemplate((prevTemplate) => ({
@@ -133,6 +134,7 @@ export const TranslationMemoryGlossaryTab = () => {
     {
       ...DEFAULT_TRANSLATION_MEMORY,
       r: getPublicMatches,
+      penalty: publicTmPenalty,
     },
   ])
   const [keyRows, setKeyRows] = useState([])
@@ -203,6 +205,7 @@ export const TranslationMemoryGlossaryTab = () => {
     if (config.is_cattool) {
       updateJobKeys({
         getPublicMatches,
+        publicTmPenalty,
         dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
       })
         .then(() => {
@@ -358,6 +361,7 @@ export const TranslationMemoryGlossaryTab = () => {
       const prevTmKeysActive = current.tmKeys.filter(({isActive}) => isActive)
 
       const shouldUpdateTmKeysJob =
+        publicTmPenalty !== current.publicTmPenalty ||
         getPublicMatches !== current.getPublicMatches ||
         tmKeysActive.length !== prevTmKeysActive.length ||
         tmKeysActive
@@ -379,6 +383,7 @@ export const TranslationMemoryGlossaryTab = () => {
 
         updateJobKeys({
           getPublicMatches,
+          publicTmPenalty,
           dataTm: getTmDataStructureToSendServer({tmKeys, keysOrdered}),
         })
           .then(() => {
@@ -424,7 +429,7 @@ export const TranslationMemoryGlossaryTab = () => {
     current.tmKeys = tmKeys
     current.getPublicMatches = getPublicMatches
     current.tmPrioritization = tmPrioritization
-  }, [tmKeys, getPublicMatches, tmPrioritization])
+  }, [tmKeys, getPublicMatches, tmPrioritization, publicTmPenalty])
 
   const onAddSharedResource = () =>
     setSpecialRows([

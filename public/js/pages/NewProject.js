@@ -435,6 +435,7 @@ const NewProject = () => {
       segmentationRule,
       idTeam,
       getPublicMatches,
+      publicTmPenalty,
       qaModelTemplateId,
       payableRateTemplateId,
       XliffConfigTemplateId,
@@ -512,6 +513,7 @@ const NewProject = () => {
         ? {payable_rate_template: payableRateTemplate}
         : {payable_rate_template_id: payableRateTemplateId}),
       get_public_matches: getPublicMatches,
+      public_tm_penalty: publicTmPenalty,
       ...(mt?.extra?.glossaries?.length && {
         mmt_glossaries: JSON.stringify({
           glossaries: mt.extra.glossaries,

@@ -35,6 +35,11 @@
     "target_language": {
       "type":  ["null", "array"]
     },
+    "public_tm_penalty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
     "mt_quality_value_in_editor": {
       "type": "number",
       "minimum": 76,
