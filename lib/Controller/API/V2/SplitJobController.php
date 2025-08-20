@@ -221,7 +221,7 @@ class SplitJobController extends KleinController {
         $jobToSplit = $this->filterJobsById( $jid, $jobList );
 
         if ( array_shift( $jobToSplit )->password != $job_pass ) {
-            throw new InvalidArgumentException( "Wrong Password. Access denied", -10 );
+            throw new InvalidArgumentException( "Access denied", -10 );
         }
 
         $project_struct->getFeaturesSet()->run( 'checkSplitAccess', $jobList );
