@@ -22,6 +22,7 @@ use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
 use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
@@ -108,10 +109,10 @@ class TMSService {
     /**
      * Create a new Match Key
      *
-     * @return stdClass
+     * @return CreateUserResponse
      * @throws Exception
      */
-    public function createMyMemoryKey(): stdClass {
+    public function createMyMemoryKey(): CreateUserResponse {
 
         try {
             $newUser = $this->mymemory_engine->createMyMemoryKey();
