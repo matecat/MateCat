@@ -368,15 +368,6 @@ class JobStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAcce
     }
 
     /**
-     * @throws Exception
-     */
-    public function isMarkedComplete( $params ): bool {
-        $params = Utils::ensure_keys( $params, [ 'is_review' ] );
-
-        return ChunkCompletionEventDao::isCompleted( $this, [ 'is_review' => $params[ 'is_review' ] ] );
-    }
-
-    /**
      * @throws ReflectionException
      */
     public function getQualityOverall( array $chunkReviews = [] ): ?string {
