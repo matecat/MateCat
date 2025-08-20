@@ -90,7 +90,7 @@ class EntryDao extends AbstractDao {
         $stmt->execute( [ 'id' => $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, EntryStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**

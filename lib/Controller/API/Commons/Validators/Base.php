@@ -38,7 +38,7 @@ abstract class Base {
     protected abstract function _validate(): void;
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function validate() {
         try {
@@ -48,7 +48,7 @@ abstract class Base {
             if ( !empty( $this->_failureCallback ) ) {
                 ( $this->_failureCallback )( $exception ); // PHP7 closure call syntax: support operations on arbitrary (...) expressions
             } else {
-                throw new Exception( $exception->getMessage(), $exception->getCode(), $exception );
+                throw $exception;
             }
         }
     }

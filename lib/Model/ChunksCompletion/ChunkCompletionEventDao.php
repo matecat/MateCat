@@ -171,7 +171,6 @@ class ChunkCompletionEventDao extends AbstractDao {
                 ]
         );
 
-        // TODO: change this returned object to be a Struct
         return $stmt->fetch() ?: [];
     }
 
