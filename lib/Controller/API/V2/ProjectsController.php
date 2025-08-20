@@ -3,12 +3,12 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
-use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessTokenValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\API\Commons\Validators\ProjectPasswordValidator;
 use Exception;
+use Model\Exceptions\NotFoundException;
 use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
