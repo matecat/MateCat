@@ -85,7 +85,7 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct       $user
      * @param                  $id_service
      *
      * @return ?ConnectedServiceStruct
@@ -103,12 +103,12 @@ class ConnectedServiceDao extends AbstractDao {
                 [ 'uid' => $user->uid, 'id' => $id_service ]
         );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
 
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct $user
      *
      * @return ConnectedServiceStruct[]
      */
@@ -129,7 +129,7 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct       $user
      * @param                  $name
      *
      * @return ConnectedServiceStruct[]
@@ -152,7 +152,7 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param \Model\Users\UserStruct $user
+     * @param UserStruct       $user
      * @param                  $name
      *
      * @return ConnectedServiceStruct|null
@@ -171,13 +171,7 @@ class ConnectedServiceDao extends AbstractDao {
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
 
-        $result = $stmt->fetch();
-        if ( empty( $result ) ) {
-            return null;
-        }
-
-        /** @var $result ConnectedServiceStruct */
-        return $result;
+        return $stmt->fetch() ?: null;
 
     }
 
@@ -202,7 +196,7 @@ class ConnectedServiceDao extends AbstractDao {
                 'email'   => $email
         ] );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     public function findByRemoteIdAndCode( $remote_id, $service ) {

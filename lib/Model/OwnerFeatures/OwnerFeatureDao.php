@@ -114,16 +114,16 @@ class OwnerFeatureDao extends AbstractDao {
      *
      * @param int $id
      *
-     * @return OwnerFeatureStruct
+     * @return ?OwnerFeatureStruct
      */
-    public static function getById( int $id ): OwnerFeatureStruct {
+    public static function getById( int $id ): ?OwnerFeatureStruct {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( " SELECT * FROM owner_features WHERE id = ? " );
         $stmt->execute( [ $id ] );
         $stmt->setFetchMode( PDO::FETCH_CLASS, OwnerFeatureStruct::class );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
 }
