@@ -2,7 +2,6 @@
 
 namespace Model\FilesStorage;
 
-use CatUtils;
 use DirectoryIterator;
 use DomainException;
 use Exception;
@@ -10,7 +9,6 @@ use FilesystemIterator;
 use Matecat\SimpleS3\Client;
 use Matecat\SimpleS3\Components\Cache\RedisCache;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use Predis\Connection\ConnectionException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
@@ -18,6 +16,7 @@ use UnexpectedValueException;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
 /**
@@ -78,7 +77,6 @@ class S3FilesStorage extends AbstractFilesStorage {
      * to all static methods like moveFileFromUploadSessionToQueuePath()
      *
      * @return Client
-     * @throws ConnectionException
      * @throws ReflectionException
      */
     public static function getStaticS3Client() {

@@ -370,7 +370,7 @@ class NewController extends KleinController {
 
             // engines restrictions
             if ( $mt_engine <= 1 ) {
-                throw new InvalidArgumentException( "MT EnginesFactory id $mt_engine is not supported for QE Workflows" );
+                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
             }
 
             $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
@@ -524,13 +524,13 @@ class NewController extends KleinController {
     private function validateEngines( int $tms_engine, int $mt_engine ): array {
 
         if ( $tms_engine > 1 ) {
-            throw new InvalidArgumentException( "Invalid TM EnginesFactory.", -21 );
+            throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
         }
 
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
-                throw new InvalidArgumentException( "Invalid MT EnginesFactory.", -2 );
+                throw new InvalidArgumentException( "Invalid MT Engine.", -2 );
             }
 
             try {
