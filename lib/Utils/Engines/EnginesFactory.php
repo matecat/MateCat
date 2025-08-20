@@ -40,7 +40,7 @@ class EnginesFactory {
         $engineRecord = $eng[ 0 ] ?? null;
 
         if ( empty( $engineRecord ) ) {
-            throw new Exception( "EnginesFactory $id not found", -2 );
+            throw new Exception( "Engine $id not found", -2 );
         }
 
         $className = self::getFullyQualifiedClassName( $engineRecord->class_load );
@@ -93,11 +93,11 @@ class EnginesFactory {
         $engineRecord = $engine->getEngineRecord();
 
         if ( $engineRecord->uid != $uid ) {
-            throw new Exception( "EnginesFactory doesn't belong to the user" );
+            throw new Exception( "Engine doesn't belong to the user" );
         }
 
         if ( $engineRecord->active == 0 ) {
-            throw new Exception( "EnginesFactory is no longer active" );
+            throw new Exception( "Engine is no longer active" );
         }
 
         if ( $engineClass !== null and !is_a( $engine, $engineClass, true ) ) {
