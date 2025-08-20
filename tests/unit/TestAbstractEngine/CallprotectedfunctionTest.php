@@ -55,7 +55,7 @@ class CallprotectedfunctionTest extends AbstractTest {
         /**
          * engine insertion
          */
-        $this->sql_insert_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo EnginesFactory', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
+        $this->sql_insert_engine = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', " . $this->id_user . ");";
         $this->database_instance->getConnection()->query( $this->sql_insert_engine );
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 

@@ -64,7 +64,7 @@ H;
     public function constructor_should_raise_exception_when_is_not_an_MT_engine() {
 
         $this->expectException( Exception::class );
-        $this->expectExceptionMessage( "EnginesFactory $this->not_valid_engine_id is not a MT engine, found TM -> MMT" );
+        $this->expectExceptionMessage( "Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT" );
         EnginesFactory::getInstance( $this->not_valid_engine_id );
 
     }
