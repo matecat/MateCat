@@ -139,7 +139,7 @@ class ChunkCompletionEventDao extends AbstractDao {
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ): array {
+    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ) {
         $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
         $is_review = $params[ 'is_review' ];
 
@@ -172,7 +172,29 @@ class ChunkCompletionEventDao extends AbstractDao {
         );
 
         // TODO: change this returned object to be a Struct
-        return $stmt->fetch() ?: [];
+        return $stmt->fetch();
+    }
+
+    public static function isChunkCompleted( JobStruct $chunk, array $params = [] ) {
+        $fetched = self::lastCompletionRecord( $chunk, $params );
+
+        return $fetched != false;
+    }
+
+    public static function isProjectCompleted( ProjectStruct $proj ) {
+        $uncompletedChunksByProjectId = ProjectDao::uncompletedChunksByProjectId( $proj->id );
+
+        return $uncompletedChunksByProjectId == false;
+    }
+
+    public static function isCompleted( $obj, array $params = [] ) {
+        if ( $obj instanceof JobStruct ) {
+            return self::isChunkCompleted( $obj, $params );
+        } elseif ( $obj instanceof ProjectStruct ) {
+            return self::isProjectCompleted( $obj );
+        } else {
+            throw new Exception( "Not a supported type" );
+        }
     }
 
     protected function _buildResult( array $array_result ) {

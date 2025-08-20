@@ -33,8 +33,11 @@ class CatDecorator extends AbstractDecorator {
         $job             = $this->arguments->getJob();
 
         $this->stats = CatUtils::getFastStatsForJob( $this->arguments->getWordCountStruct() );
+        $completed   = $job->isMarkedComplete( [ 'is_review' => $this->arguments->isRevision() ] );
 
-        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord( $job, [ 'is_review' => $this->arguments->isRevision() ] );
+        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord(
+                $job, [ 'is_review' => $this->arguments->isRevision() ]
+        );
 
         $dao                 = new ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase( $this->arguments->getJob() );
@@ -44,6 +47,9 @@ class CatDecorator extends AbstractDecorator {
 
         if ( $lastCompletionEvent ) {
             $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent[ 'id_event' ];
+        }
+
+        if ( $completed ) {
             $this->varsForComplete();
         } else {
             $this->varsForUncomplete();
@@ -52,7 +58,7 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForUncomplete() {
-        $this->template->{'job_marked_complete'} = new PHPTalBoolean( false );
+        $this->template->{'job_marked_complete'}      = new PHPTalBoolean( false );
 
         if ( $this->completable() ) {
             $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean( true );
