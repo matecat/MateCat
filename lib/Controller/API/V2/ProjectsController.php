@@ -3,6 +3,7 @@
 namespace Controller\API\V2;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessTokenValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
@@ -13,6 +14,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
+use Throwable;
 use Utils\Constants\JobStatus;
 use Utils\Tools\Utils;
 use View\API\V2\Json\Project;
@@ -142,21 +144,50 @@ class ProjectsController extends KleinController {
 
     }
 
+    /**
+     * Handles the initialization process after object construction by setting up
+     * project validation, error handling, and appending necessary validators.
+     *
+     * This method performs the following steps:
+     * - Creates a `ProjectPasswordValidator` instance to validate the project password.
+     * - Defines success and failure callbacks for the password validator:
+     *   - On success, retrieves and assigns the validated project to the `$project` property.
+     *   - On failure, checks if the exception is a `NotFoundException` and attempts to validate
+     *     the project using a `ProjectAccessTokenValidator`. If validation succeeds, assigns
+     *     the validated project to the `$project` property. Otherwise, rethrows the exception.
+     * - Appends a `LoginValidator` and the `ProjectPasswordValidator` to the list of validators.
+     *
+     * @return void
+     * @throws Throwable If the project is not found and no valid access token is provided.
+     * @throws Exception For other validation failures or unexpected errors.
+     */
     protected function afterConstruct() {
 
+        // Initialize the project password validator.
         $projectValidator = ( new ProjectPasswordValidator( $this ) );
 
+        // Define the success callback for the password validator.
         $projectValidator->onSuccess( function () use ( $projectValidator ) {
             $this->project = $projectValidator->getProject();
-        } )->onFailure( function () {
-            $projectByTokenValidator = new ProjectAccessTokenValidator( $this );
-            $projectByTokenValidator->onSuccess( function () use ( $projectByTokenValidator ) {
-                $this->project = $projectByTokenValidator->getProject();
-            } )->validate();
+        } )
+                // Define the failure callback for the password validator.
+                ->onFailure( function ( Throwable $exception ) {
+                    if ( $exception instanceof NotFoundException ) {
+                        // If the project is not found, attempt validation using an access token.
+                        $projectByTokenValidator = new ProjectAccessTokenValidator( $this );
+                        $projectByTokenValidator->onSuccess( function () use ( $projectByTokenValidator ) {
+                            $this->project = $projectByTokenValidator->getProject();
+                        } )->validate();
+                    } else {
+                        // Rethrow the exception for other validation failures.
+                        throw $exception;
+                    }
+                } );
 
-        } );
-
+        // Append the login validator to the list of validators.
         $this->appendValidator( new LoginValidator( $this ) );
+
+        // Append the project password validator to the list of validators.
         $this->appendValidator( $projectValidator );
     }
 
