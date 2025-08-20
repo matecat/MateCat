@@ -504,7 +504,7 @@ class Utils {
      *
      * @return string The updated name with the incremented count number.
      */
-    protected function upCountNameCallback( array $matches ): string {
+    protected static function upCountNameCallback( array $matches ): string {
         $index = isset( $matches[ 1 ] ) ? intval( $matches[ 1 ] ) + 1 : 1;
         $ext   = $matches[ 2 ] ?? '';
 
@@ -520,7 +520,7 @@ class Utils {
      */
     protected static function upCountName( string $name ): string {
         return preg_replace_callback(
-                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ '\Utils\Tools\Utils', 'upCountNameCallback' ], $name, 1
+                '/(?:(?:_\((\d+)\))?(\.[^.]+))?$/', [ Utils::class, 'upCountNameCallback' ], $name, 1
         );
     }
 
