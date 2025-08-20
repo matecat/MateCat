@@ -129,7 +129,7 @@ class PluginsLoader {
 
         if ( !isset( $instance->PLUGIN_CLASSES[ $feature->feature_code ] ) ) {
             //try default autoloading for internal plugins
-            $baseClass = '\\Features\\' . Utils::underscoreToCamelCase( $feature->feature_code );
+            $baseClass = '\\Plugins\\Features\\' . Utils::underscoreToCamelCase( $feature->feature_code );
         } else {
             $baseClass = $instance->PLUGIN_CLASSES[ $feature->feature_code ];
         }
