@@ -33,12 +33,13 @@ use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
-use Predis\Connection\ConnectionException;
 use ReflectionException;
 use Utils\Langs\Languages;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\XliffReplacer\XliffReplacerCallback;
@@ -70,29 +71,29 @@ class DownloadController extends AbstractDownloadController {
 
     const FILES_CHUNK_SIZE = 3;
 
-    protected $encoding;
-
     /**
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function index() {
         $this->downloadFile();
     }
 
     /**
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function forceXliff() {
         $this->downloadFile( true );
@@ -101,13 +102,14 @@ class DownloadController extends AbstractDownloadController {
     /**
      * @param bool $forceXliff
      *
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     private function downloadFile( bool $forceXliff = false ) {
         $__postInput = filter_var_array( $this->request->params(), [
@@ -118,9 +120,6 @@ class DownloadController extends AbstractDownloadController {
                 'id_file'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'download_type' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
-                'encoding' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'password'      => [
@@ -138,7 +137,6 @@ class DownloadController extends AbstractDownloadController {
         $this->id_file       = $__postInput[ 'id_file' ];
         $this->id_job        = $__postInput[ 'id_job' ];
         $this->download_type = $__postInput[ 'download_type' ];
-        $this->encoding      = $__postInput[ 'encoding' ];
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
@@ -162,24 +160,30 @@ class DownloadController extends AbstractDownloadController {
      * Process the download of the file
      *
      * @return void
-     * @throws ConnectionException
      * @throws AuthenticationError
-     * @throws ReflectionException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @throws Exception
      */
     private function processDownload() {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = $this->job = JobDao::getByIdAndPassword( $this->id_job, $this->password );
+        $jobData = JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, $this->id_job );
-            $jobData           = $this->job = $chunkReviewStruct->getChunk();
+            if ( empty( $chunkReviewStruct ) ) {
+                throw new NotFoundException( "Not found." );
+            }
+            $jobData = $chunkReviewStruct->getChunk();
         }
+
+        $this->job = $jobData;
 
         // check for Password correctness
         if ( empty( $jobData ) ) {
@@ -845,7 +849,6 @@ class DownloadController extends AbstractDownloadController {
      * @param ZipContentObject[] $newInternalZipFiles
      *
      * @return string
-     * @throws ConnectionException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -952,13 +955,12 @@ class DownloadController extends AbstractDownloadController {
     }
 
     /**
-     * @param $zipPath
-     * @param $tmpDir
+     * @param string $zipPath
+     * @param string $tmpDir
      *
      * @throws ReflectionException
-     * @throws ConnectionException
      */
-    public function transferZipFromS3ToTmpDir( $zipPath, $tmpDir ) {
+    public function transferZipFromS3ToTmpDir( string $zipPath, string $tmpDir ) {
 
         Log::doJsonLog( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
 
