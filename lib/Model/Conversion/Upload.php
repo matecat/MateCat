@@ -98,8 +98,8 @@ class Upload {
 
             if ( isset( $file[ 'tmp_name' ] ) && is_array( $file[ 'tmp_name' ] ) ) {
 
-                $_file = new UploadElement();
                 foreach ( $file[ 'tmp_name' ] as $index => $value ) {
+                    $_file                          = new UploadElement();
                     $_file[ 'tmp_name' ]            = $file[ 'tmp_name' ][ $index ];
                     $_file[ 'name' ]                = $file[ 'name' ][ $index ];
                     $_file[ 'size' ]                = $file[ 'size' ][ $index ];
