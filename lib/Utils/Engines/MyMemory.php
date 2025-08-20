@@ -254,7 +254,7 @@ class MyMemory extends AbstractEngine {
         }
 
         // public_tm_penalty
-        if ( $_config[ 'public_tm_penalty' ] !== null and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+        if ( isset($_config[ 'public_tm_penalty' ]) and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
             $penalties[] = [
                     'key'     => 'public',
                     'penalty' => $_config[ 'public_tm_penalty' ] / 100,
