@@ -30,9 +30,9 @@ class ChangeProjectNameController extends JobsController {
         try {
             $id       = filter_var($this->request->param('id_project'), FILTER_SANITIZE_NUMBER_INT );
             $password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
-            $name     = CatUtils::validateProjectName($this->request->param('name') );
+            $name     = filter_var($this->request->param('name'), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
 
-            if($name === false){
+            if(CatUtils::validateProjectName($this->request->param('name') ) === false){
                 throw new InvalidArgumentException( "Invalid project name. Symbols are not allowed in project names", -3 );
             }
 
