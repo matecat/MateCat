@@ -114,6 +114,13 @@ class ProjectsController extends KleinController {
     /**
      * @throws Exception
      */
+    public function delete() {
+        $this->changeStatus( JobStatus::STATUS_DELETED );
+    }
+
+    /**
+     * @throws Exception
+     */
     protected function changeStatus( $status ) {
 
         ( new ProjectAccessValidator( $this, $this->project ) )->validate();
