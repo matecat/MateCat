@@ -11,12 +11,12 @@ $klein->with( '/api/v3/projects', function () {
     route( '/analysis/status/[i:id_project]/[:password]', 'GET', [ '\Controller\API\V3\StatusController', 'index' ] );
 } );
 
-$klein->with('/api/v3/projects/[i:id_project]/[:password]', function() {
-    route( '/cancel', 'POST', [ 'Controller\API\V3\ChangeProjectStatusController', 'cancel' ] );
-    route( '/delete', 'POST', [ 'Controller\API\V3\ChangeProjectStatusController', 'delete' ] );
-    route( '/archive', 'POST', [ 'Controller\API\V3\ChangeProjectStatusController', 'archive' ] );
-    route( '/active', 'POST', [ 'Controller\API\V3\ChangeProjectStatusController', 'active' ] );
-});
+$klein->with( '/api/v3/projects/[i:id_project]/[:password]', function () {
+    route( '/cancel', 'POST', [ 'Controller\API\V2\ProjectsController', 'cancel' ] );
+    route( '/delete', 'POST', [ 'Controller\API\V2\ProjectsController', 'delete' ] );
+    route( '/archive', 'POST', [ 'Controller\API\V2\ProjectsController', 'archive' ] );
+    route( '/active', 'POST', [ 'Controller\API\V2\ProjectsController', 'active' ] );
+} );
 
 $klein->with( '/api/v3/jobs/[i:id_job]/[:password]', function () {
     route( '', 'GET', [ '\Controller\API\V3\ChunkController', 'show' ] ); //this does not show some info like teams and translators
@@ -29,10 +29,10 @@ $klein->with( '/api/v3/jobs/[i:id_job]/[:password]', function () {
 
     route( '/warnings', 'GET', [ 'Controller\API\App\GetWarningController', 'global' ] );
 
-    route( '/delete', 'POST', [ 'Controller\API\V3\ChangeJobStatusController', 'delete' ] );
-    route( '/cancel', 'POST', [ 'Controller\API\V3\ChangeJobStatusController', 'cancel' ] );
-    route( '/archive', 'POST', [ 'Controller\API\V3\ChangeJobStatusController', 'archive' ] );
-    route( '/active', 'POST', [ 'Controller\API\V3\ChangeJobStatusController', 'active' ] );
+    route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
+    route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
+    route( '/archive', 'POST', [ 'Controller\API\V2\JobsController', 'archive' ] );
+    route( '/active', 'POST', [ 'Controller\API\V2\JobsController', 'active' ] );
 } );
 
 $klein->with( '/api/v3/teams', function () {
@@ -69,9 +69,9 @@ $klein->with( '/api/v3/tm-keys', function () {
     route( '/list', 'GET', [ '\Controller\API\V3\TmKeyManagementController', 'getByUser' ] );
 } );
 
-route( '/api/v3/projects/[i:id_project]/[:password]/segment-analysis',  'GET',  [ 'Controller\API\V3\SegmentAnalysisController', 'project' ] );
-route( '/api/v3/jobs/[i:id_job]/[:password]/segment-analysis',          'GET',  [ 'Controller\API\V3\SegmentAnalysisController', 'job' ] );
-route( '/api/v3/create-key',  'POST', [ 'Controller\API\V3\MyMemoryController', 'create' ] );
+route( '/api/v3/projects/[i:id_project]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'project' ] );
+route( '/api/v3/jobs/[i:id_job]/[:password]/segment-analysis', 'GET', [ 'Controller\API\V3\SegmentAnalysisController', 'job' ] );
+route( '/api/v3/create-key', 'POST', [ 'Controller\API\V3\MyMemoryController', 'create' ] );
 
 // LARA
 $klein->with( '/api/v3/lara/[i:engineId]', function () {
@@ -155,17 +155,17 @@ $klein->with( '/api/v3/projects/[:id_project]/[:password]', function () {
     route( '/change-name', 'POST', [ 'Controller\API\V2\ChangeProjectNameController', 'changeName' ] );
 } );
 
-$klein->with('/api/v3/activity', function () {
+$klein->with( '/api/v3/activity', function () {
 
-    route( '/project/[:id_project]/[:password]', 'GET', ['\Controller\API\V2\ActivityLogController', 'allOnProject'] );
-    route( '/project/[:id_project]/[:password]/last', 'GET', ['\Controller\API\V2\ActivityLogController', 'lastOnProject'] );
-    route( '/job/[:id_job]/[:password]/last', 'GET', ['Controller\API\V2\ActivityLogController', 'lastOnJob'] );
+    route( '/project/[:id_project]/[:password]', 'GET', [ '\Controller\API\V2\ActivityLogController', 'allOnProject' ] );
+    route( '/project/[:id_project]/[:password]/last', 'GET', [ '\Controller\API\V2\ActivityLogController', 'lastOnProject' ] );
+    route( '/job/[:id_job]/[:password]/last', 'GET', [ 'Controller\API\V2\ActivityLogController', 'lastOnJob' ] );
 
 } );
 
 $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
 
-    route( '', 'GET', [ 'Controller\API\V2\ChunkController', 'show' ] );
+    route( '', 'GET', [ 'Controller\API\V2\JobsController', 'show' ] );
     route( '/comments', 'GET', [ 'Controller\API\V2\CommentsController', 'index' ] );
 
     route( '/quality-report', 'GET', [ 'Controller\API\V3\QualityReportControllerAPI', 'show' ] );
@@ -195,10 +195,10 @@ $klein->with( '/api/v3/jobs/[:id_job]/[:password]', function () {
     route( '/options', 'POST', [ 'Controller\API\V2\ChunkOptionsController', 'update' ] );
 
 
-    route( '/delete', 'POST', [ 'Controller\API\V2\ChunkController', 'delete' ] );
-    route( '/cancel', 'POST', [ 'Controller\API\V2\ChunkController', 'cancel' ] );
-    route( '/archive', 'POST', [ 'Controller\API\V2\ChunkController', 'archive' ] );
-    route( '/active', 'POST', [ 'Controller\API\V2\ChunkController', 'active' ] );
+    route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
+    route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
+    route( '/archive', 'POST', [ 'Controller\API\V2\JobsController', 'archive' ] );
+    route( '/active', 'POST', [ 'Controller\API\V2\JobsController', 'active' ] );
 
 } );
 
@@ -257,5 +257,5 @@ route( '/api/v3/SDLXLIFF/[:id_job]/[:password]/[:filename]', 'GET', [ 'Controlle
 route( '/api/v3/TMX/[:id_job]/[:password]', 'GET', [ 'Controller\API\V2\DownloadJobTMXController', 'index' ] );
 
 // User
-route('/api/v3/user', 'PUT',  ['Controller\API\V2\UserController', 'edit']);
-route('/api/v3/user/metadata', 'PUT',  ['Controller\API\V2\UserController', 'setMetadata']);
+route( '/api/v3/user', 'PUT', [ 'Controller\API\V2\UserController', 'edit' ] );
+route( '/api/v3/user/metadata', 'PUT', [ 'Controller\API\V2\UserController', 'setMetadata' ] );

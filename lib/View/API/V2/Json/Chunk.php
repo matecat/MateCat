@@ -15,7 +15,7 @@ use Model\Jobs\JobStruct;
 class Chunk extends Job {
 
     /**
-     * @param \Model\Jobs\JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return array
      * @throws Exception
