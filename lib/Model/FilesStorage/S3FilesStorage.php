@@ -2,7 +2,6 @@
 
 namespace Model\FilesStorage;
 
-use CatUtils;
 use DirectoryIterator;
 use DomainException;
 use Exception;
@@ -18,6 +17,7 @@ use UnexpectedValueException;
 use Utils\Logger\Log;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
 /**
