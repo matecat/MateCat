@@ -1,12 +1,10 @@
 <?php
 
-namespace Projects;
+namespace Model\Projects;
 
 use Controller\API\Commons\Exceptions\AuthorizationError;
 use Exception;
 use Model\Exceptions\ValidationError;
-use Model\Projects\ProjectDao;
-use Model\Projects\ProjectStruct;
 use Model\Teams\MembershipDao;
 use Model\Teams\MembershipStruct;
 use Model\Teams\TeamDao;
@@ -18,7 +16,7 @@ use Utils\Email\ProjectAssignedEmail;
 
 /**
  * Class ProjectModel
- * @package Projects
+ * @package Model\Projects
  *
  */
 class ProjectModel {
