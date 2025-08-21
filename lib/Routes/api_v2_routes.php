@@ -103,7 +103,6 @@ $klein->with( '/api/v2/teams', function () {
     route( '/[i:id_team]/projects/[i:id_project]', 'PUT', [ 'Controller\API\V2\TeamsProjectsController', 'update' ] );
     route( '/[i:id_team]/projects/[i:id_project]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'get' ] );
     route( '/[i:id_team]/projects/[:project_name]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'getByName' ] );
-    route( '/[i:id_team]/projects', 'GET', [ '\Controller\API\V2\TeamsProjectsController', 'getAll' ] );
 
 } );
 

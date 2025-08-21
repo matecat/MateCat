@@ -126,22 +126,6 @@ class TeamsProjectsController extends KleinController {
         $this->response->json( [ 'projects' => $projects ] );
     }
 
-    /**
-     * @throws ReflectionException
-     * @throws Exception
-     */
-    public function getAll() {
-
-        $this->featureSet->loadFromUserEmail( $this->user->email );
-
-        /** @var ProjectStruct[] $projectsList */
-        $projectsList = ProjectDao::findByTeamId( $this->params[ 'id_team' ], [], 60 );
-
-        $projectsList = ( new Project( $projectsList ) )->render();
-        $this->response->json( [ 'projects' => $projectsList ] );
-
-    }
-
     public function setTeam( $team ) {
         $this->team = $team;
     }

@@ -57,7 +57,7 @@ abstract class AbstractStatus {
      */
     protected ProjectStruct $project;
     /**
-     * @var \Model\Users\UserStruct|null
+     * @var UserStruct|null
      */
     protected ?UserStruct $user;
     /**
@@ -66,13 +66,13 @@ abstract class AbstractStatus {
     protected $subject;
 
     /**
-     * @param array                          $_project_data
-     * @param \Model\FeaturesBase\FeatureSet $features
-     * @param \Model\Users\UserStruct|null   $user
+     * @param array           $_project_data
+     * @param FeatureSet      $features
+     * @param UserStruct|null $user
      *
      * @throws ReflectionException
      */
-    public function __construct( array $_project_data, FeatureSet $features, UserStruct $user = null ) {
+    public function __construct( array $_project_data, FeatureSet $features, ?UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
             $user      = new UserStruct();
             $user->uid = -1;
