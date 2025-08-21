@@ -9,6 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\Upload;
+use Model\Conversion\UploadElement;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
@@ -17,7 +18,6 @@ use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use ReflectionException;
 use SplTempFileObject;
-use stdClass;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Engines\EnginesFactory;
@@ -39,11 +39,6 @@ class TMSService {
      * @var string The name of the uploaded TMX
      */
     protected string $name = '';
-
-    /**
-     * @var stdClass
-     */
-    private stdClass $file;
 
     /**
      * @var MyMemory
@@ -128,21 +123,13 @@ class TMSService {
     /**
      * Saves the uploaded file and returns the file info.
      *
-     * @return stdClass
+     * @return UploadElement
      * @throws Exception
      */
-    public function uploadFile(): stdClass {
-        try {
+    public function uploadFile(): UploadElement {
+        $uploadManager = new Upload();
 
-            $uploadManager = new Upload();
-            $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
-
-        } catch ( Exception $e ) {
-//            Log::doJsonLog( $e->getMessage() );
-            throw new Exception( $e->getMessage(), -8 );
-        }
-
-        return $this->file = $uploadedFiles;
+        return $uploadManager->uploadFiles( $_FILES );
     }
 
     /**
@@ -155,7 +142,7 @@ class TMSService {
 
             $this->checkCorrectKey( $file->getTmKey() );
 
-            Log::doJsonLog( $this->file );
+            Log::doJsonLog( $file );
 
             $importStatus = $this->mymemory_engine->importMemory(
                     $file->getFilePath(),
@@ -233,7 +220,7 @@ class TMSService {
 
         $this->checkCorrectKey( $file->getTmKey() );
 
-        Log::doJsonLog( $this->file );
+        Log::doJsonLog( $file );
 
         $importStatus = $this->mymemory_engine->glossaryImport(
                 $file->getFilePath(),
@@ -423,8 +410,8 @@ class TMSService {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $Filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
-        $tmpFile    = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
+        $Filter  = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
+        $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>
 <tmx version="1.4">

@@ -2747,10 +2747,44 @@ var spec = {
         ],
         responses: {
           200: {
-            description: 'Check Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        }
+                      },
+                    },
+                  },
+                }
+              },
+              success: {
+                type: 'boolean',
+              }
+            },
+            description: 'Upload and check a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
@@ -2788,10 +2822,44 @@ var spec = {
         ],
         responses: {
           200: {
-            description: 'Import Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        }
+                      },
+                    },
+                  },
+                }
+              },
+              success: {
+                type: 'boolean',
+              }
+            },
+            description: 'Check and import a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
@@ -7071,27 +7139,20 @@ var spec = {
 
     Error: {
       type: 'object',
+      description: 'This property contains any debug data that can serve for better understanding of the error',
       properties: {
         errors: {
           type: 'array',
           items: {
             type: 'object',
             properties: {
-              code: 'integer',
-              message: 'string',
+              code: {type: 'integer'},
+              message: {type: 'string'},
             },
           },
         },
-        data: {
-          type: 'array',
-          items: {type: 'object'},
-          description:
-            'This property contains any debug data that can ' +
-            'serve for better understanding of the error',
-        },
       },
     },
-
     Split: {
       type: 'object',
       properties: {
@@ -7109,11 +7170,11 @@ var spec = {
               items: {
                 type: 'object',
                 properties: {
-                  eq_word_count: 'integer',
-                  raw_word_count: 'integer',
-                  segment_start: 'integer',
-                  segment_end: 'integer',
-                  last_opened_segment: 'integer',
+                  eq_word_count: {type: 'integer'},
+                  raw_word_count: {type: 'integer'},
+                  segment_start: {type: 'integer'},
+                  segment_end: {type: 'integer'},
+                  last_opened_segment: {type: 'integer'},
                 },
               },
             },
