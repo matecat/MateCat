@@ -104,8 +104,8 @@ $klein->with( '/api/v3/deepl/[:engineId]', function () {
 // PROJECT TEMPLATE
 $klein->with( '/api/v3/project-template', function () {
     route( '/schema', 'GET', [ '\Controller\API\V3\ProjectTemplateController', 'schema' ] );
-    route( '/', 'GET', [ '\Controller\API\V3\ProjectTemplateController', 'all' ] );
-    route( '/', 'POST', [ '\Controller\API\V3\ProjectTemplateController', 'create' ] );
+    route( '/?', 'GET', [ '\Controller\API\V3\ProjectTemplateController', 'all' ] );
+    route( '/?', 'POST', [ '\Controller\API\V3\ProjectTemplateController', 'create' ] );
     route( '/[i:id]', 'DELETE', [ '\Controller\API\V3\ProjectTemplateController', 'delete' ] );
     route( '/[i:id]', 'PUT', [ '\Controller\API\V3\ProjectTemplateController', 'update' ] );
     route( '/[i:id]', 'GET', [ '\Controller\API\V3\ProjectTemplateController', 'get' ] );
@@ -114,8 +114,8 @@ $klein->with( '/api/v3/project-template', function () {
 // FILTERS AND XLIFF CONFIG
 $klein->with( '/api/v3/xliff-config-template', function () {
     route( '/schema', 'GET', [ '\Controller\API\V3\XliffConfigTemplateController', 'schema' ] );
-    route( '/', 'GET', [ '\Controller\API\V3\XliffConfigTemplateController', 'all' ] );
-    route( '/', 'POST', [ '\Controller\API\V3\XliffConfigTemplateController', 'create' ] );
+    route( '/?', 'GET', [ '\Controller\API\V3\XliffConfigTemplateController', 'all' ] );
+    route( '/?', 'POST', [ '\Controller\API\V3\XliffConfigTemplateController', 'create' ] );
     route( '/[i:id]', 'DELETE', [ '\Controller\API\V3\XliffConfigTemplateController', 'delete' ] );
     route( '/[i:id]', 'PUT', [ '\Controller\API\V3\XliffConfigTemplateController', 'update' ] );
     route( '/[i:id]', 'GET', [ '\Controller\API\V3\XliffConfigTemplateController', 'get' ] );
@@ -123,8 +123,8 @@ $klein->with( '/api/v3/xliff-config-template', function () {
 
 $klein->with( '/api/v3/filters-config-template', function () {
     route( '/schema', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'schema' ] );
-    route( '/', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'all' ] );
-    route( '/', 'POST', [ '\Controller\API\V3\FiltersConfigTemplateController', 'create' ] );
+    route( '/?', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'all' ] );
+    route( '/?', 'POST', [ '\Controller\API\V3\FiltersConfigTemplateController', 'create' ] );
     route( '/[i:id]', 'DELETE', [ '\Controller\API\V3\FiltersConfigTemplateController', 'delete' ] );
     route( '/[i:id]', 'PUT', [ '\Controller\API\V3\FiltersConfigTemplateController', 'update' ] );
     route( '/[i:id]', 'GET', [ '\Controller\API\V3\FiltersConfigTemplateController', 'get' ] );
