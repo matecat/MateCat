@@ -242,17 +242,6 @@ class Lara extends AbstractEngine {
             $time_end            = microtime( true );
             $time                = $time_end - $time_start;
 
-            Log::doJsonLog( [
-                    'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
-                    'timing'       => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
-                    'q'            => $request_translation,
-                    'adapt_to'     => $_lara_keys,
-                    'source'       => $_config[ 'source' ],
-                    'target'       => $_config[ 'target' ],
-                    'content_type' => 'application/xliff+xml',
-                    'multiline'    => false,
-            ] );
-
             $translation = "";
             $tList       = $translationResponse->getTranslation();
             foreach ( $tList as $t ) {
@@ -266,6 +255,19 @@ class Lara extends AbstractEngine {
             if ( isset( $_config[ 'include_score' ] ) and $_config[ 'include_score' ] ) {
                 $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] ?? '2' );
             }
+
+            Log::doJsonLog( [
+                    'LARA REQUEST' => 'GET https://api.laratranslate.com/translate',
+                    'timing'       => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
+                    'q'            => $request_translation,
+                    'adapt_to'     => $_lara_keys,
+                    'source'       => $_config[ 'source' ],
+                    'target'       => $_config[ 'target' ],
+                    'content_type' => 'application/xliff+xml',
+                    'multiline'    => false,
+                    'translation'  => $translation,
+                    'score'        => $score ?? null,
+            ] );
 
         } catch ( LaraException $t ) {
             if ( $t->getCode() == 429 ) {
