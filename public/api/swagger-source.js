@@ -1796,6 +1796,23 @@ var spec = {
             in: 'path',
             required: true,
           },
+          {
+            in: "query",
+            name: 'page',
+            type: 'integer',
+            required: false,
+            default: 1,
+            description: "page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results."
+          },
+          {
+            in: "query",
+            name: 'step',
+            type: 'integer',
+            required: false,
+            default: 20,
+            maximum: 50,
+            description: "step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results."
+          },
         ],
         responses: {
           200: {
@@ -6710,6 +6727,43 @@ var spec = {
     ProjectList: {
       type: 'object',
       properties: {
+        _links: {
+          type: 'object',
+          properties: {
+            base: {
+              type: 'string',
+              description: 'Base URL for the API',
+            },
+            self: {
+              type: 'string',
+              description: 'Link to the current page of projects',
+            },
+            next: {
+              type: 'string',
+              description: 'Link to the next page of projects if available',
+            },
+            prev: {
+              type: 'string',
+              description: 'Link to the previous page of projects if available',
+            },
+            page: {
+              type: 'integer',
+              description: 'The current page number',
+            },
+            step: {
+              type: 'integer',
+              description: 'Number of projects per page',
+            },
+            totals: {
+              type: 'integer',
+              description: 'Total number of projects available',
+            },
+            total_pages: {
+              type: 'integer',
+              description: 'Total number of pages of projects available',
+            },
+          }
+        },
         projects: {
           type: 'array',
           items: {

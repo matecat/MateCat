@@ -14,6 +14,7 @@ use Model\Users\UserStruct;
 use Utils\Logger\Log;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class UserKeysModel {
 
@@ -59,7 +60,7 @@ class UserKeysModel {
         foreach ( $keyList as $_j => $key ) {
 
             /**
-             * @var $_client_tm_key \Utils\TmKeyManagement\TmKeyStruct
+             * @var $_client_tm_key TmKeyStruct
              */
 
             //create a reverse lookup
