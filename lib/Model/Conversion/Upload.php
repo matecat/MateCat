@@ -2,6 +2,7 @@
 
 namespace Model\Conversion;
 
+use DomainException;
 use Exception;
 use Model\Conversion\MimeTypes\MimeTypes;
 use Utils\Registry\AppConfig;
@@ -204,7 +205,7 @@ class Upload {
                 if ( !$this->_isRightMime( $fileUp ) ) {
                     $this->setObjectErrorOrThrowException(
                             $fileUp,
-                            new Exception ( "File format not supported. '" . $out_filename . "'" )
+                            new DomainException ( "File format not supported. '" . $out_filename . "'" )
                     );
                 }
 
@@ -213,7 +214,7 @@ class Upload {
             if ( !$this->_isRightExtension( $fileUp ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( "File Extension Not Allowed. '" . $out_filename . "'" )
+                        new DomainException ( "File Extension Not Allowed. '" . $out_filename . "'" )
                 );
 
             }
@@ -227,14 +228,14 @@ class Upload {
             if ( $fileSize >= $fileMaxSize ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( "File Dimensions Not Allowed. '$out_filename'" )
+                        new DomainException ( "File Dimensions Not Allowed. '$out_filename'" )
                 );
             }
 
             if ( !Utils::isValidFileName( $fileUp->name ) ) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( "Invalid File Name '" . $out_filename . "'" )
+                        new DomainException ( "Invalid File Name '" . $out_filename . "'" )
                 );
             }
 
