@@ -593,7 +593,7 @@ class MMT extends AbstractEngine {
      * @throws MMTServiceApiException
      * @throws MMTServiceApiRequestException
      */
-    public function updateGlossary( string $id, array $data  ) {
+    public function updateGlossary( string $id, array $data ) {
         $client = $this->_getClient();
 
         return $client->updateGlossary( $id, $data );
@@ -666,5 +666,18 @@ class MMT extends AbstractEngine {
         }
 
         return $config;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+        ];
     }
 }

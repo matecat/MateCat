@@ -257,6 +257,8 @@ class ProjectTemplateDao extends AbstractDao {
                 if ( $engineRecord->id > 1 and $engineRecord->uid != $projectTemplateStruct->uid ) {
                     throw new Exception( "Engine doesn't belong to the user.", 403 );
                 }
+
+                $mt->extra; // array chiave valore
             }
         }
 

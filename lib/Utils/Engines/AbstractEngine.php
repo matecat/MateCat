@@ -10,6 +10,7 @@ use Model\Engines\Structs\GoogleTranslateStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserStruct;
+use stdClass;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
@@ -168,6 +169,11 @@ abstract class  AbstractEngine implements EngineInterface {
             throw new DomainException( "Property $key does not exists in " . get_class( $this ) );
         }
     }
+
+    /**
+     * @return array
+     */
+    abstract public function getExtraParams(): array;
 
     /**
      * @param mixed $rawValue
@@ -473,5 +479,10 @@ abstract class  AbstractEngine implements EngineInterface {
         ] );
 
         return $mt_match_res->getMatches( $layerNum );
+    }
+
+    public function validateExtraParams(stdClass $object)
+    {
+
     }
 }

@@ -588,4 +588,13 @@ class Lara extends AbstractEngine {
         return $glossaries->getAll();
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'lara_glossaries',
+        ];
+    }
 }

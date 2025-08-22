@@ -163,5 +163,12 @@ class SmartMATE extends AbstractEngine {
         return $parameters;
     }
 
-
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+        ];
+    }
 }
