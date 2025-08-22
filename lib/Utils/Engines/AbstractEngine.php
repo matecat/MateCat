@@ -481,8 +481,21 @@ abstract class  AbstractEngine implements EngineInterface {
         return $mt_match_res->getMatches( $layerNum );
     }
 
-    public function validateExtraParams(stdClass $object)
+    /**
+     * Validate extra params
+     *
+     * @param array $extra
+     *
+     * @return bool
+     */
+    public function validateExtraParams(array $extra): bool
     {
+        foreach (array_keys($extra) as $key){
+            if(!in_array($key, $this->getExtraParams())){
+                return false;
+            }
+        }
 
+        return true;
     }
 }

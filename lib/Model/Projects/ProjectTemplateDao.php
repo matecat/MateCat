@@ -258,7 +258,9 @@ class ProjectTemplateDao extends AbstractDao {
                     throw new Exception( "Engine doesn't belong to the user.", 403 );
                 }
 
-                $mt->extra; // array chiave valore
+                if ( isset( $mt->extra ) and !$engine->validateExtraParams( $mt->extra ) ) {
+                    throw new Exception( "Engine config parameters are not valid.", 401 );
+                }
             }
         }
 
