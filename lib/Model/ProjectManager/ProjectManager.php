@@ -481,42 +481,6 @@ class ProjectManager {
                 );
             }
         }
-
-        // add MMT Glossaries here
-        if ( !empty( $this->projectStructure[ 'mmt_glossaries' ] ) && $this->projectStructure[ 'mmt_glossaries' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'mmt_glossaries',
-                    $this->projectStructure[ 'mmt_glossaries' ]
-            );
-        }
-
-        // add Lara Glossaries here
-        if ( !empty( $this->projectStructure[ 'lara_glossaries' ] ) && $this->projectStructure[ 'lara_glossaries' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'lara_glossaries',
-                    $this->projectStructure[ 'lara_glossaries' ]
-            );
-        }
-
-        // add DeepL params here
-        if ( !empty( $this->projectStructure[ 'deepl_formality' ] ) && $this->projectStructure[ 'deepl_formality' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'deepl_formality',
-                    $this->projectStructure[ 'deepl_formality' ]
-            );
-        }
-
-        if ( !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) && $this->projectStructure[ 'deepl_id_glossary' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'deepl_id_glossary',
-                    $this->projectStructure[ 'deepl_id_glossary' ]
-            );
-        }
-
     }
 
     /**
@@ -1469,6 +1433,31 @@ class ProjectManager {
                 }
             }
 
+            // MT extra config parameters
+            $extraKeys = [
+                    'pre_translate_files',
+                    'mmt_glossaries',
+                    'mmt_pre_import_tm',
+                    'mmt_activate_context_analyzer',
+                    'mmt_glossaries_case_sensitive_matching',
+                    'lara_glossaries',
+                    'deepl_formality',
+                    'deepl_id_glossary',
+                    'deepl_engine_type',
+                    'intento_routing',
+            ];
+
+            foreach ( $extraKeys as $extraKey ) {
+                if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
+                    $jobsMetadataDao->set(
+                            $newJob->id,
+                            $newJob->password,
+                            $extraKey,
+                            $this->projectStructure[ $extraKey ]
+                    );
+                }
+            }
+
             try {
                 if ( isset( $projectStructure[ 'payable_rate_model_id' ] ) and !empty( $projectStructure[ 'payable_rate_model_id' ] ) and $payableRatesTemplate !== null ) {
                     CustomPayableRateDao::assocModelToJob(
@@ -2103,7 +2092,7 @@ class ProjectManager {
                             //
 
                             // if its empty pass create a SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStruct    = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
+                            $segmentOriginalDataStruct = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //

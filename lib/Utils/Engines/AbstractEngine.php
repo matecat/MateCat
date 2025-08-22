@@ -484,13 +484,13 @@ abstract class  AbstractEngine implements EngineInterface {
     /**
      * Validate extra params
      *
-     * @param array $extra
+     * @param stdClass $extra
      *
      * @return bool
      */
-    public function validateExtraParams(array $extra): bool
+    public function validateExtraParams(stdClass $extra): bool
     {
-        foreach (array_keys($extra) as $key){
+        foreach (array_keys(get_object_vars($extra)) as $key){
             if(!in_array($key, $this->getExtraParams())){
                 return false;
             }
