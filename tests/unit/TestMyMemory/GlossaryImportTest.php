@@ -21,7 +21,7 @@ use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\ErrorResponse;
-use Utils\Engines\Results\MyMemory\TmxResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Langs\Languages;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
@@ -78,7 +78,7 @@ class GlossaryImportTest extends AbstractTest {
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-Glossary.csv' );
 
-        $this->assertTrue( $result instanceof TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertEquals( 202, $result->responseStatus );
         $this->assertArrayHasKey( 'UUID', $result->responseData );
         $this->assertTrue( Utils::isTokenValid( $result->responseData[ 'UUID' ] ) );
@@ -113,7 +113,7 @@ class GlossaryImportTest extends AbstractTest {
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'Final-Matecat-new_glossary_format-InvalidTargetLangCopy.csv' );
 
-        $this->assertTrue( $result instanceof TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertEquals( 403, $result->responseStatus );
         $this->assertEquals( "HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseDetails );
         $this->assertEquals( "HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseData[ 'translatedText' ] );
@@ -137,7 +137,7 @@ class GlossaryImportTest extends AbstractTest {
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, 'GlossaryInvalidHeaderCopy.csv' );
 
-        $this->assertTrue( $result instanceof TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertEquals( 403, $result->responseStatus );
         $this->assertEquals( "HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseDetails );
         $this->assertEquals( "HEADER DON'T MATCH THE CORRECT STRUCTURE", $result->responseData[ 'translatedText' ] );
@@ -177,7 +177,7 @@ class GlossaryImportTest extends AbstractTest {
         Languages::getInstance();
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, "GlossaryInvalidHeaderCopy.csv" );
 
-        $this->assertTrue( $result instanceof TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertNull( $result->id );
         $this->assertEquals( 0, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );

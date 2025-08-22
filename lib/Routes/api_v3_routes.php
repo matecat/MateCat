@@ -206,7 +206,7 @@ $klein->with( '/api/v3/glossaries', function () {
 
     route( '/check/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'check' ] );
     route( '/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
-    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'uploadStatus' ] );
+    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'importStatus' ] );
     route( '/export/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'download' ] );
 
 } );

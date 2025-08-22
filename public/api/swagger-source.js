@@ -2864,35 +2864,32 @@ var spec = {
         },
       },
     },
-    '/api/v3/glossaries/import/status/{tm_key}': {
+    '/api/v3/glossaries/import/status/{uuid}': {
       get: {
         summary: 'Glossary Upload status.',
         description: 'Glossary Upload status.',
         parameters: [
           {
-            name: 'tm_key',
+            name: 'uuid',
             in: 'path',
-            description: 'The tm key.',
+            description: 'The UUID token received from `/api/v3/glossaries/import/` api.',
             required: true,
             type: 'string',
-          },
-          {
-            name: 'name',
-            in: 'query',
-            description: 'The file name.',
-            type: 'string',
-          },
+          }
         ],
         tags: ['Glossary'],
         responses: {
           200: {
             description: 'Glossary Upload status',
             schema: {
-              $ref: '#/definitions/UploadGlossaryStatusObject',
+              $ref: '#/definitions/UploadGlossaryStatus',
             },
           },
           default: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
@@ -6488,23 +6485,6 @@ var spec = {
         },
       },
     },
-    UploadGlossaryStatusObject: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-        },
-        data: {
-          $ref: '#/definitions/UploadGlossaryStatus',
-        },
-        success: {
-          type: 'boolean',
-        },
-      },
-    },
     UploadGlossaryStatus: {
       type: 'object',
       properties: {
@@ -6525,7 +6505,6 @@ var spec = {
         },
       },
     },
-
     Languages: {
       type: 'array',
       items: {
