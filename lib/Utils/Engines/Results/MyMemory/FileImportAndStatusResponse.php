@@ -11,7 +11,7 @@ use Utils\Logger\Log;
  * Date: 03/03/15
  * Time: 15.33
  */
-class TmxResponse extends TMSAbstractResponse {
+class FileImportAndStatusResponse extends TMSAbstractResponse {
 
     /*
     {

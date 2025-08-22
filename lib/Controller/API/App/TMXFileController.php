@@ -15,7 +15,7 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSFile;
 use Utils\TMS\TMSService;
 
-class LoadTMXController extends KleinController {
+class TMXFileController extends KleinController {
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -24,7 +24,7 @@ class LoadTMXController extends KleinController {
     /**
      * @throws Exception
      */
-    public function newTM(): void {
+    public function import(): void {
 
         $request   = $this->validateTheRequest();
         $TMService = new TMSService();
@@ -87,11 +87,11 @@ class LoadTMXController extends KleinController {
     /**
      * @throws Exception
      */
-    public function uploadStatus(): void {
+    public function importStatus(): void {
 
-        $request   = $this->validateTheRequest();
+        $uuid      = filter_var( $this->request->param( 'uuid' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ] );
         $TMService = new TMSService();
-        $status    = $TMService->tmxUploadStatus( $request[ 'uuid' ] );
+        $status    = $TMService->tmxUploadStatus( $uuid );
 
         $this->response->json( [
                 'errors' => [],

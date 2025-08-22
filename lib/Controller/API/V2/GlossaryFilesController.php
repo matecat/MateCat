@@ -192,7 +192,7 @@ class GlossaryFilesController extends KleinController {
     /**
      * @throws Exception
      */
-    public function uploadStatus() {
+    public function importStatus() {
 
         $uuid = $this->params[ 'uuid' ];
 

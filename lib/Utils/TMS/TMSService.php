@@ -84,7 +84,7 @@ class TMSService {
     public function checkCorrectKey( string $tm_key ): ?bool {
 
         //validate the key
-        //This piece of code need to be executed every time
+        //This piece of code must be executed every time
         try {
 
             $isValid = $this->mymemory_engine->checkCorrectKey( $tm_key );
@@ -254,14 +254,11 @@ class TMSService {
     }
 
     /**
-     * @param string $uuid
-     *
-     * @return array
      * @throws Exception
      */
-    public function glossaryUploadStatus( string $uuid ): array {
+    public function _fileUploadStatus( string $uuid, string $type ): array {
 
-        $allMemories = $this->mymemory_engine->getGlossaryImportStatus( $uuid );
+        $allMemories = $this->mymemory_engine->getImportStatus( $uuid );
 
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
@@ -285,11 +282,21 @@ class TMSService {
                 $result[ 'completed' ] = true;
                 break;
             default:
-                throw new Exception( "Invalid Glossary (\"" . $this->name . "\")", -14 ); // this should never happen
+                throw new Exception( "Invalid $type (\"" . $this->name . "\")", -14 ); // this should never happen
         }
 
         return $result;
 
+    }
+
+    /**
+     * @param string $uuid
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function glossaryUploadStatus( string $uuid ): array {
+        return $this->_fileUploadStatus( $uuid, "Glossary" );
     }
 
     /**
@@ -311,36 +318,7 @@ class TMSService {
      * @throws Exception
      */
     public function tmxUploadStatus( string $uuid ): array {
-
-        $allMemories = $this->mymemory_engine->getStatus( $uuid );
-
-        if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
-            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
-            //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( 'Error: ' . $this->formatErrorMessage( $allMemories->responseData[ 'log' ] ), -15 );
-        }
-
-        switch ( $allMemories->responseData[ 'status' ] ) {
-            case "0":
-            case "-1":
-                //wait for the daemon to process it
-                //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
-                $result[ 'data' ]      = $allMemories->responseData;
-                $result[ 'completed' ] = false;
-                break;
-            case "1":
-                //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
-                $result[ 'data' ]      = $allMemories->responseData;
-                $result[ 'completed' ] = true;
-                break;
-            default:
-                throw new Exception( "Invalid TMX (\"" . $this->name . "\")", -14 ); // this should never happen
-        }
-
-        return $result;
-
+        return $this->_fileUploadStatus( $uuid, "TMX" );
     }
 
     /**
