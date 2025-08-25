@@ -1922,7 +1922,7 @@ class ProjectManager {
             // save external-file attribute
             if ( isset( $xliff_file[ 'attr' ][ 'external-file' ] ) ) {
                 $externalFile = $xliff_file[ 'attr' ][ 'external-file' ];
-                $this->metadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
+                $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'mtc:references', $externalFile );
             }
 
             // save x-jsont* datatype
