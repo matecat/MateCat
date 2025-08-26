@@ -2468,7 +2468,7 @@ class ProjectManager {
             $this->projectStructure[ 'segments' ][ $fid ][ $position ]->id = $id_segment;
 
             /** @var ?SegmentOriginalDataStruct $segmentOriginalDataStruct */
-            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? null;
+            $segmentOriginalDataStruct = $this->projectStructure[ 'segments-original-data' ][ $fid ][ $position ] ?? new SegmentOriginalDataStruct(); // If not set, create an empty struct to be safe. Avoid 'Call to a member function getMap() on null'
 
             if ( !empty( $segmentOriginalDataStruct->getMap() ) ) {
 
