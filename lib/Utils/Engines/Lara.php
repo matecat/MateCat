@@ -24,6 +24,7 @@ use Stomp\Transport\Message;
 use Throwable;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\Constants\EngineConstants;
+use Utils\Engines\Lara\Headers;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
@@ -213,6 +214,7 @@ class Lara extends AbstractEngine {
             $translateOptions->setAdaptTo( $_lara_keys );
             $translateOptions->setMultiline( false );
             $translateOptions->setContentType( 'application/xliff+xml' );
+            $translateOptions->setHeaders( ( new Headers( AppConfig::$LARA_PRE_SHARED_KEY_HEADER, $_config[ 'tuid' ] ) )->getArrayCopy() );
 
             if ( !empty( $_config[ 'project_id' ] ) ) {
                 $metadataDao = new MetadataDao();
@@ -221,7 +223,7 @@ class Lara extends AbstractEngine {
                 if ( $metadata !== null ) {
                     $metadata            = html_entity_decode( $metadata->value );
                     $laraGlossariesArray = json_decode( $metadata, true );
-                    $translateOptions->setGlossaries($laraGlossariesArray);
+                    $translateOptions->setGlossaries( $laraGlossariesArray );
                 }
             }
 
@@ -578,10 +580,10 @@ class Lara extends AbstractEngine {
      * @throws Exception
      */
     public function getGlossaries(): array {
-        $client = $this->_getClient();
+        $client     = $this->_getClient();
         $glossaries = $client->glossaries;
 
-        if(empty($glossaries)){
+        if ( empty( $glossaries ) ) {
             return [];
         }
 

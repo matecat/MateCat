@@ -206,6 +206,15 @@ class AppConfig {
     public static string $DEFAULT_MMT_KEY = '';
 
     /**
+     * Holds the value of the LARA pre-shared key.
+     *
+     * This property stores the actual pre-shared key used for LARA authentication.
+     *
+     * @var string
+     */
+    public static string $LARA_PRE_SHARED_KEY_HEADER = ''; //TODO: to be removed when Lara will read directly from the internal queue
+
+    /**
      * If you don't have a client id and client secret, please visit
      * Google Developer Console (https://console.developers.google.com/)
      * and follow these instructions:
