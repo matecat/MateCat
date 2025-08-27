@@ -47,6 +47,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
     protected function _formatAuthenticateError( $objResponse ) {
 
         //format as a normal Translate Response and send to decoder to output the data
+        $objResponse[ 'error_description' ] = json_decode( $objResponse[ 'error' ][ 'response' ] )->error;
         return $objResponse;
 
     }
@@ -67,16 +68,20 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
                             ]
                     ]
             ];
+
+            return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+
         } else {
+
 
             if ( $rawValue[ 'error' ][ 'code' ] == 0 && $rawValue[ 'responseStatus' ] >= 400 ) {
                 $rawValue[ 'error' ][ 'code' ] = -$rawValue[ 'responseStatus' ];
             }
 
-            $decoded = $rawValue; // already decoded in case of error
+            Log::doJsonLog( $rawValue );
+            return $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 

@@ -49,8 +49,8 @@ trait Oauth {
         if ( isset( $objResponse[ 'error' ] ) ) {
 
             //format as a normal Translate Response and send to decoder to output the data
-            //$rawValue = $this->_formatAuthenticateError( $objResponse );
-            $this->result = $this->_decode( $rawValue, $this->_auth_parameters );
+            $rawValue = $this->_formatAuthenticateError( $objResponse );
+            $this->result = $this->_decode( $rawValue, $this->_auth_parameters, __FUNCTION__ );
 
             //no more valid token
             $this->token = null;
@@ -100,7 +100,7 @@ trait Oauth {
 
     public function get( $_config ) {
 
-        $cycle = @(int)func_get_arg( 1 );
+        $cycle = (int)func_get_arg( 1 ) ?? 0;
 
         if ( $cycle == 10 ) {
             return $this->_formatRecursionError();
