@@ -195,5 +195,17 @@ class DeepL extends AbstractEngine {
     public function getGlossaryEntries( string $id ) {
         return $this->_getClient()->getGlossaryEntries( $id );
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+        ];
+    }
 }
     

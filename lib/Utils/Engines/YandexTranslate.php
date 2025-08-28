@@ -128,4 +128,12 @@ class YandexTranslate extends AbstractEngine {
 
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+        ];
+    }
 }

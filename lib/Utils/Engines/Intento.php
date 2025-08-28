@@ -281,4 +281,14 @@ class Intento extends AbstractEngine {
 
         return $_providers;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [
+                'pre_translate_files',
+                'intento_routing',
+        ];
+    }
 }

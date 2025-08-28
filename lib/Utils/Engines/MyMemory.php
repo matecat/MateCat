@@ -801,4 +801,11 @@ class MyMemory extends AbstractEngine {
         return $this->result;
 
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getExtraParams(): array {
+        return [];
+    }
 }
