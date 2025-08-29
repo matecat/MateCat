@@ -19,7 +19,7 @@ use Model\Users\Authentication\PasswordResetModel;
 use Model\Users\Authentication\PasswordRules;
 use Model\Users\Authentication\SignupModel;
 use Predis\PredisException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 use Utils\Url\CanonicalRoutes;
@@ -183,7 +183,7 @@ class ForgotPasswordController extends AbstractStatefulKleinController {
             try {
 
                 if ( !$signupModel->forgotPassword() ) {
-                    Log::doJsonLog( 'Failed attempt to recover password with email ' . $email );
+                    LoggerFactory::doJsonLog( 'Failed attempt to recover password with email ' . $email );
                 }
 
             } catch ( Exception $exception ) {

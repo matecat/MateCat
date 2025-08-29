@@ -815,6 +815,9 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
 
+        //TODO test
+        $contributionStruct->translation_origin = 'Lara';
+
         /*
          * This parameter is not used by the application, but we use it to for information integrity
          *

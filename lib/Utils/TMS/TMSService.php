@@ -24,7 +24,7 @@ use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -92,7 +92,7 @@ class TMSService {
         } catch ( Exception $e ) {
 
             /* PROVIDED KEY IS NOT VALID OR WRONG, Key IS NOT SET */
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
             throw $e;
 
         }
@@ -142,7 +142,7 @@ class TMSService {
 
             $this->checkCorrectKey( $file->getTmKey() );
 
-            Log::doJsonLog( $file );
+            LoggerFactory::doJsonLog( $file );
 
             $importStatus = $this->mymemory_engine->importMemory(
                     $file->getFilePath(),
@@ -182,7 +182,7 @@ class TMSService {
                         if ( !empty( $ownerMmtEngineMetaData ) ) {
                             $engine = EnginesFactory::getInstance( $ownerMmtEngineMetaData->value );
 
-                            Log::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
+                            LoggerFactory::doJsonLog( "User [$user->uid, '$user->email'] start importing memory: {$engine->getEngineRecord()->class_load} -> " . $file->getFilePath() . " -> " . $file->getTmKey() );
                             $engine->importMemory( $file->getFilePath(), $file->getTmKey(), $user );
 
                         }
@@ -191,7 +191,7 @@ class TMSService {
                 } catch ( Exception $e ) {
                     if ( $engineName != EngineConstants::MY_MEMORY ) {
                         //NOTICE: ModernMT response is 404 NOT FOUND if the key on which we are importing the tmx is not synced with it
-                        Log::doJsonLog( $e->getMessage() );
+                        LoggerFactory::doJsonLog( $e->getMessage() );
                         $engineName = explode( "\\", $engineName );
                         $engineName = end( $engineName );
                         $warnings[] = [ 'engine' => $engineName, 'message' => $e->getMessage(), 'file' => $file->getName() ];
@@ -220,7 +220,7 @@ class TMSService {
 
         $this->checkCorrectKey( $file->getTmKey() );
 
-        Log::doJsonLog( $file );
+        LoggerFactory::doJsonLog( $file );
 
         $importStatus = $this->mymemory_engine->glossaryImport(
                 $file->getFilePath(),
@@ -261,7 +261,7 @@ class TMSService {
         $allMemories = $this->mymemory_engine->getImportStatus( $uuid );
 
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
-            Log::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
+            LoggerFactory::doJsonLog( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
             //what the hell? No memories although I've just loaded some? Eject!
             throw new Exception( "Error response from TMX status check", -15 );
         }
@@ -271,13 +271,13 @@ class TMSService {
             case "-1":
                 //wait for the daemon to process it
                 //LOADING
-                Log::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
+                LoggerFactory::doJsonLog( "waiting for \"" . $this->name . "\" to be loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
-                Log::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
+                LoggerFactory::doJsonLog( "\"" . $this->name . "\" has been loaded into Match" );
                 $result[ 'data' ]      = $allMemories->responseData;
                 $result[ 'completed' ] = true;
                 break;

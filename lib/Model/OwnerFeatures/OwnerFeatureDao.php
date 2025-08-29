@@ -7,7 +7,7 @@ use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class OwnerFeatureDao extends AbstractDao {
 
@@ -37,7 +37,7 @@ class OwnerFeatureDao extends AbstractDao {
                 " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
-        Log::doJsonLog( $obj->toArray() );
+        LoggerFactory::doJsonLog( $obj->toArray() );
 
         $values = array_diff_key( $obj->toArray(), [ 'id' => null ] );
 

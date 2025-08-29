@@ -15,7 +15,7 @@ use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
 use Utils\Constants\ProjectStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class ProjectDao extends AbstractDao {
@@ -434,7 +434,7 @@ class ProjectDao extends AbstractDao {
                 AND jobs.id_project = :id_project
                 ";
 
-        Log::doJsonLog( $sql );
+        LoggerFactory::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

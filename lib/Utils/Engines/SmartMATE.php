@@ -88,7 +88,7 @@ class SmartMATE extends AbstractEngine {
                 $rawValue[ 'error' ][ 'code' ] = -$rawValue[ 'responseStatus' ];
             }
 
-            Log::doJsonLog( $rawValue );
+            Log::log( $rawValue );
             return $rawValue; // already decoded in case of error
         }
 

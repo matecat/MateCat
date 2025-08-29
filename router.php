@@ -6,13 +6,12 @@ use Controller\API\Commons\Exceptions\AuthorizationError;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\API\Commons\Exceptions\UnprocessableException;
 use Controller\API\Commons\Exceptions\ValidationError;
-use Controller\Views\CustomPageView;
 use Klein\Klein;
 use Model\Exceptions\ValidationError as Model_ValidationError;
 use Model\FeaturesBase\PluginsLoader;
 use Swaggest\JsonSchema\InvalidValue;
 use Utils\Langs\InvalidLanguageException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use View\API\Commons\Error;
@@ -70,7 +69,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
     if ( !$isView ) {
 
         $klein->response()->noCache();
-        Log::setLogFileName( 'fatal_errors.txt' );
+        $logger = LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
 
         switch ( get_class( $exception ) ) {
             case \Swaggest\JsonSchema\Exception::class:
@@ -97,8 +96,8 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 break;
             case NotFoundException::class:
             case Model\Exceptions\NotFoundException::class:
-                Log::doJsonLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
-                Log::doJsonLog( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->log( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
+                $logger->log( json_encode( ( new Error( $exception ) )->render( true ) ) );
                 $klein->response()->code( 404 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
@@ -108,12 +107,12 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 break;
             case PDOException::class:
                 $klein->response()->code( 503 );
-                Log::doJsonLog( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->log( json_encode( ( new Error( $exception ) )->render( true ) ) );
                 break;
             default:
                 $httpCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
                 $klein->response()->code( $httpCode );
-                Log::doJsonLog( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->log( json_encode( ( new Error( $exception ) )->render( true ) ) );
                 $klein->response()->json( new Error( $exception ) );
                 break;
         }

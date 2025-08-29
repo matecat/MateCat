@@ -7,7 +7,7 @@ use Model\Exceptions\ValidationError;
 use PDO;
 use PDOStatement;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Created by PhpStorm.
@@ -383,7 +383,7 @@ abstract class AbstractDao {
                 self::structKeys( $struct )
         );
 
-        Log::doJsonLog( [
+        LoggerFactory::doJsonLog( [
                 'table'  => static::TABLE,
                 'sql'    => $sql,
                 'attr'   => $attrs,
@@ -431,7 +431,7 @@ abstract class AbstractDao {
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        Log::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
+        LoggerFactory::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
 
         $stmt->execute( $data );
 

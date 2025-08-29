@@ -13,7 +13,7 @@ use Google_Client;
 use Google_Service_Drive;
 use Google_Service_Drive_DriveFile;
 use Model\RemoteFiles\RemoteFileStruct;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class RemoteFileService {
 
@@ -84,7 +84,7 @@ class RemoteFileService {
             // Exception Caught, check if the token is expired:
             $this->__checkTokenExpired();
 
-            Log::doJsonLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
+            LoggerFactory::doJsonLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
 
             throw $e;
 

@@ -14,7 +14,7 @@ use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\Constants;
 use Utils\Langs\InvalidLanguageException;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -146,7 +146,7 @@ class GDriveController extends AbstractStatefulKleinController {
     private function doImport() {
 
         $state = json_decode( $this->request->param( 'state' ), true );
-        Log::doJsonLog( $state );
+        LoggerFactory::doJsonLog( $state );
 
         // set the upload directory name if there are files from gDrive
         if ( !$this->isAsyncReq ) {

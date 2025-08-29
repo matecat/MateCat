@@ -17,7 +17,7 @@ use Model\DataAccess\IDatabase;
 use PDO;
 use PDOException;
 use stdClass;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class SearchModel {
 
@@ -190,7 +190,7 @@ class SearchModel {
             $stmt->execute();
             $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), $e->getCode() * -1, $e );
         }
 

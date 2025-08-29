@@ -9,7 +9,7 @@ use Model\Jobs\JobStruct;
 use Model\Users\UserDao;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class CommentDao extends AbstractDao {
 
@@ -201,7 +201,7 @@ class CommentDao extends AbstractDao {
 
         } catch ( Exception $e ) {
             $err = $e->getMessage();
-            Log::doJsonLog( "Error: " . var_export( $err, true ) );
+            LoggerFactory::doJsonLog( "Error: " . var_export( $err, true ) );
             $this->database->rollback();
         }
 

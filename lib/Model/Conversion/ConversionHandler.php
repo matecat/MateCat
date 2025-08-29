@@ -14,7 +14,7 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -180,7 +180,7 @@ class ConversionHandler {
 
             } catch ( FileSystemException $e ) {
 
-                Log::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+                LoggerFactory::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
@@ -189,7 +189,7 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                Log::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
+                LoggerFactory::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
@@ -220,7 +220,7 @@ class ConversionHandler {
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
             } else {
-                Log::doJsonLog( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
+                LoggerFactory::doJsonLog( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
             }
 
         }
@@ -384,7 +384,7 @@ class ConversionHandler {
 
         } catch ( Exception $e ) {
 
-            Log::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
+            LoggerFactory::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
 
             $this->result->setErrorCode( $e->getCode() );
             $this->result->setErrorMessage( "Zip error: " . $e->getMessage() );

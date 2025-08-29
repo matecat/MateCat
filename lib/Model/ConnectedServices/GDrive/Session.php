@@ -33,7 +33,7 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -396,7 +396,7 @@ class Session {
 
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
 
-            Log::doJsonLog( 'File ' . $fileId . ' removed.' );
+            LoggerFactory::doJsonLog( 'File ' . $fileId . ' removed.' );
 
             $success = true;
         }

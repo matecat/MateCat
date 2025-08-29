@@ -12,7 +12,15 @@
 
 namespace Utils\Engines\Lara;
 
-class Headers {
+use Iterator;
+
+/**
+ * Class Headers
+ *
+ * This class implements the Iterator interface to manage HTTP headers for the LARA engine.
+ * It provides methods to set and retrieve specific headers, such as the TUID and translation origin.
+ */
+class Headers implements Iterator {
 
     /**
      * Header name for the LARA pre-shared key.
@@ -39,79 +47,166 @@ class Headers {
     const LARA_TRANSLATION_ORIGIN_HEADER = 'X-Lara-Engine-Translation-Origin';
 
     /**
-     * Stores the value of the pre-shared key.
+     * Stores the headers as an associative array.
      *
-     * @var string
+     * @var HeaderField[]
      */
-    private string $preSharedKey;
+    private array $headers = [];
 
     /**
-     * Stores the value of the TUID.
+     * Stores the keys of the headers for iteration.
      *
-     * @var string
+     * @var array
      */
-    private string $tuid;
+    private array $keys;
 
     /**
-     * Stores the value of the translation origin.
+     * Tracks the current position for iteration.
      *
-     * @var string
+     * @var int
      */
-    private string $translationOrigin;
+    private int $position;
 
     /**
      * Constructor for the Headers class.
      * Initializes the pre-shared key, TUID, and translation origin.
      *
-     * @param string $preSharedKey      The pre-shared key value.
-     * @param string $tuid              The TUID value.
-     * @param string $translationOrigin The translation origin value (optional).
+     * @param string|null $tuid              The TUID value.
+     * @param string|null $translationOrigin The translation origin value (optional).
      */
-    public function __construct( string $preSharedKey, string $tuid, string $translationOrigin = '' ) {
-        $this->preSharedKey      = $preSharedKey;
-        $this->tuid              = $tuid;
-        $this->translationOrigin = $translationOrigin;
-    }
+    public function __construct( ?string $tuid = null, ?string $translationOrigin = null ) {
 
-    /**
-     * Retrieves the pre-shared key as an object containing the header name and its value.
-     *
-     * @return HeaderField An object with 'key' and 'value' properties.
-     */
-    public function getPreSharedKey(): HeaderField {
-        return new HeaderField( self::LARA_PRE_SHARED_KEY_HEADER, $this->preSharedKey );
+        if ( $tuid ) {
+            $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField( self::LARA_TUID_HEADER, $tuid );
+        }
+
+        if ( $translationOrigin ) {
+            $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField( self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin );
+        }
+
+        $this->keys     = array_keys( $this->headers );
+        $this->position = 0;
+
     }
 
     /**
      * Retrieves the TUID as an object containing the header name and its value.
      *
-     * @return HeaderField An object with 'key' and 'value' properties.
+     * @return ?HeaderField An object with 'key' and 'value' properties.
      */
-    public function getTuid(): HeaderField {
-        return new HeaderField( self::LARA_TUID_HEADER, $this->tuid );
+    public function getTuid(): ?HeaderField {
+        if ( isset( $this->headers[ self::LARA_TUID_HEADER ] ) ) {
+            return clone $this->headers[ self::LARA_TUID_HEADER ];
+        }
+
+        return null;
     }
 
     /**
      * Retrieves the translation origin as an object containing the header name and its value.
      *
-     * @return HeaderField An object with 'key' and 'value' properties.
+     * @return ?HeaderField An object with 'key' and 'value' properties.
      */
-    public function getTranslationOrigin(): HeaderField {
-        return new HeaderField( self::LARA_TRANSLATION_ORIGIN_HEADER, $this->translationOrigin );
+    public function getTranslationOrigin(): ?HeaderField {
+        if ( isset( $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] ) ) {
+            return clone $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ];
+        }
+
+        return null;
     }
 
     /**
-     * Retrieves all headers as an associative array.
-     * Combines the pre-shared key, TUID, and translation origin headers.
+     * Sets the value of the TUID.
      *
-     * @return array An associative array of header fields.
+     * @param string $tuid The TUID to set.
+     *
+     * @return $this Returns the current instance for method chaining.
+     */
+    public function setTuid( string $tuid ): Headers {
+        $this->headers[ self::LARA_TUID_HEADER ] = new HeaderField( self::LARA_TUID_HEADER, $tuid );
+        $this->keys                              = array_keys( $this->headers );
+
+        return $this;
+    }
+
+    /**
+     * Sets the value of the translation origin.
+     *
+     * @param string $translationOrigin The translation origin to set.
+     *
+     * @return $this Returns the current instance for method chaining.
+     */
+    public function setTranslationOrigin( string $translationOrigin ): Headers {
+        $this->headers[ self::LARA_TRANSLATION_ORIGIN_HEADER ] = new HeaderField( self::LARA_TRANSLATION_ORIGIN_HEADER, $translationOrigin );
+        $this->keys                                            = array_keys( $this->headers );
+
+        return $this;
+    }
+
+    /**
+     * Returns the current header field in the iteration.
+     *
+     * @return HeaderField The current header field.
+     */
+    public function current(): HeaderField {
+        return $this->headers[ $this->keys[ $this->position ] ];
+    }
+
+    /**
+     * Returns the key of the current header field in the iteration.
+     *
+     * @return string The key of the current header field.
+     */
+    public function key(): string {
+        return $this->keys[ $this->position ];
+    }
+
+    /**
+     * Moves the iterator to the next header field.
+     *
+     * @return void
+     */
+    public function next(): void {
+        ++$this->position;
+    }
+
+    /**
+     * Rewinds the iterator to the first header field.
+     *
+     * @return void
+     */
+    public function rewind(): void {
+        $this->position = 0;
+    }
+
+    /**
+     * Checks if the current position is valid in the iteration.
+     *
+     * @return bool True if the current position is valid, false otherwise.
+     */
+    public function valid(): bool {
+        return isset( $this->keys[ $this->position ] );
+    }
+
+    /**
+     * Returns an associative array of header keys and their non-empty values.
+     *
+     * Iterates over the internal `$headers` array and includes only those headers
+     * whose `getValue()` method returns a non-empty value. The result is an array
+     * where each key is the header name and each value is the corresponding header value.
+     *
+     * @return array An associative array of header keys and their non-empty values.
      */
     public function getArrayCopy(): array {
-        return array_merge(
-                $this->getPreSharedKey()->getArrayCopy(),
-                $this->getTuid()->getArrayCopy(),
-                ( $this->getTranslationOrigin()->getValue() !== '' ) ? $this->getTranslationOrigin()->getArrayCopy() : []
-        );
+        $headers = [];
+
+        foreach ( $this->headers as $header ) {
+            if ( !empty( $header->getValue() ) ) {
+                $headers[ $header->getKey() ] = $header->getValue();
+            }
+        }
+
+        return $headers;
     }
 
 }

@@ -12,7 +12,7 @@ use Swaggest\JsonSchema\InvalidValue;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
@@ -466,7 +466,7 @@ class GlossaryController extends KleinController {
             $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             Utils::sendErrMailReport( $output );
         }
     }

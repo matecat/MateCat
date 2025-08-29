@@ -14,7 +14,8 @@ use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 
@@ -25,7 +26,7 @@ use Utils\Registry\AppConfig;
  * Time: 11.59
  *
  */
-abstract class  AbstractEngine implements EngineInterface {
+abstract class AbstractEngine implements EngineInterface {
 
     /**
      * @var EngineStruct
@@ -60,6 +61,7 @@ abstract class  AbstractEngine implements EngineInterface {
     protected ?int        $mt_penalty = null;
 
     const GET_REQUEST_TIMEOUT = 10;
+    protected MatecatLogger $logger;
 
     public function __construct( $engineRecord ) {
         $this->engineRecord = $engineRecord;
@@ -75,6 +77,7 @@ abstract class  AbstractEngine implements EngineInterface {
         ];
 
         $this->featureSet = new FeatureSet();
+        $this->logger     = LoggerFactory::getLogger( 'engines' );
     }
 
     /**
@@ -226,7 +229,7 @@ abstract class  AbstractEngine implements EngineInterface {
             } else {
                 $log[ 'response' ] = $rawValue;
             }
-            Log::doJsonLog( $log );
+            $this->logger->log( $log );
         }
 
         return $rawValue;

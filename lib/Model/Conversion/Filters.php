@@ -9,7 +9,7 @@ use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -54,7 +54,7 @@ class Filters {
             }
 
             $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
-            Log::doJsonLog( "Calling: " . $url );
+            LoggerFactory::doJsonLog( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -262,7 +262,7 @@ class Filters {
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
                     ] );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
+            LoggerFactory::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
 
             return;
         }
@@ -297,9 +297,9 @@ class Filters {
         try {
             $preparedStatement = $conn->prepare( $query );
             $preparedStatement->execute( array_values( $info ) );
-            Log::doJsonLog( $info );
+            LoggerFactory::doJsonLog( $info );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
+            LoggerFactory::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
         if ( $response[ 'successful' ] !== true ) {
@@ -330,7 +330,7 @@ class Filters {
         $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
 
         if ( !rename( $sentFile, $backupFile ) ) {
-            Log::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+            LoggerFactory::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;
         }

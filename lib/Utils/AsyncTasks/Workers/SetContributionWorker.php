@@ -177,9 +177,10 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
         $config[ 'set_mt' ]         = !( ( $id_mt_engine != 1 ) );
 
-        $config[ 'newsegment' ]     = $contributionStruct->segment;
-        $config[ 'newtranslation' ] = $contributionStruct->translation;
-        $config[ 'spiceMatch' ]     = $contributionStruct->contextIsSpice;
+        $config[ 'newsegment' ]         = $contributionStruct->segment;
+        $config[ 'newtranslation' ]     = $contributionStruct->translation;
+        $config[ 'spiceMatch' ]         = $contributionStruct->contextIsSpice;
+        $config[ 'translation_origin' ] = $contributionStruct->translation_origin;
 
         $this->_doLog( "Executing Update on " . get_class( $this->_engine ) );
         $res = $this->_engine->update( $config );

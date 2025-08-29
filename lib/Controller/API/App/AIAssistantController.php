@@ -7,7 +7,7 @@ use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -136,7 +136,7 @@ class AIAssistantController extends KleinController {
             $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $params, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             Utils::sendErrMailReport( $output );
         }
     }

@@ -29,7 +29,7 @@ use Utils\Engines\MMT;
 use Utils\Engines\MyMemory;
 use Utils\Engines\NONE;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractDaemon;
 use Utils\TaskRunner\Commons\Context;
@@ -102,9 +102,6 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
-    /**
-     * @throws Exception
-     */
     protected function __construct( string $configFile, ?string $contextIndex = null ) {
 
         parent::__construct();
@@ -112,8 +109,7 @@ class FastAnalysis extends AbstractDaemon {
         $this->_configFile   = $configFile;
         $this->_contextIndex = $contextIndex;
 
-        Log::resetLogger();
-        Log::setLogFileName( 'fastAnalysis.log' );
+        $this->logger = LoggerFactory::getLogger( 'fast_analysis', 'fastAnalysis.log' );
 
         try {
             $this->queueHandler = new AMQHandler();
@@ -543,7 +539,7 @@ class FastAnalysis extends AbstractDaemon {
 
                 } elseif ( $perform_Tms_Analysis ) {
 
-                    Log::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
+                    LoggerFactory::doJsonLog( 'Skipped Fast Segment: ' . var_export( $this->segments[ $k ], true ) );
                     // this segment must not be sent to the TM analysis queue
                     unset( $this->segments[ $k ] );
 
@@ -818,7 +814,7 @@ HD;
             $stmt->execute( [ $pid ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
             throw $e;
         }
 

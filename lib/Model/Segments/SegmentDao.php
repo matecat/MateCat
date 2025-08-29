@@ -15,7 +15,7 @@ use PDOException;
 use ReflectionException;
 use Utils\Constants\SegmentSize;
 use Utils\Constants\TranslationStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class SegmentDao extends AbstractDao {
     const TABLE = 'segments';
@@ -470,7 +470,7 @@ class SegmentDao extends AbstractDao {
                             ) VALUES ";
 
 
-        Log::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
+        LoggerFactory::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
         $tuple_marks = "( " . rtrim( str_repeat( "?,  ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
 
@@ -505,10 +505,10 @@ class SegmentDao extends AbstractDao {
 
                 $stm = $this->database->getConnection()->prepare( $query );
                 $stm->execute( $values );
-                Log::doJsonLog( "Segments: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::doJsonLog( "Segments: Executed Query " . ( $i + 1 ) );
 
             } catch ( PDOException $e ) {
-                Log::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
+                LoggerFactory::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
                 throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - " . var_export( $chunk, true ), -2 );
             }
 

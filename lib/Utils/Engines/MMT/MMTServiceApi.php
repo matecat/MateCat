@@ -9,18 +9,20 @@
 namespace Utils\Engines\MMT;
 
 use CURLFile;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 
 class MMTServiceApi {
 
     const DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
-    private string  $baseUrl;
-    private ?string $license         = null;
-    private int     $client          = 0;
-    private ?string $platform        = null;
-    private ?string $platformVersion = null;
+    private string                      $baseUrl;
+    private ?string                     $license         = null;
+    private int                         $client          = 0;
+    private ?string                     $platform        = null;
+    private ?string                     $platformVersion = null;
+    private MatecatLogger $logger;
 
     /**
      * @param string|null $baseUrl
@@ -40,6 +42,7 @@ class MMTServiceApi {
      */
     private function __construct( string $baseUrl ) {
         $this->baseUrl = $baseUrl;
+        $this->logger  = LoggerFactory::getLogger( 'engines' );
     }
 
     /**
@@ -564,7 +567,7 @@ class MMTServiceApi {
         $log               = $handler->getSingleLog( $resourceHashId );
         $log[ 'response' ] = $result;
 
-        Log::doJsonLog( $log, "mmt.log" );
+        $this->logger->log( $log );
 
         return $this->parse( $result );
 

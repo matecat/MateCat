@@ -8,7 +8,7 @@ use Model\Projects\ProjectDao;
 use Model\Projects\ProjectStruct;
 use Model\Users\UserStruct;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * @daprecated this should extend Base
@@ -111,8 +111,8 @@ class ProjectValidator extends Base {
             throw new AuthenticationError( "Invalid API key", 401 );
         }
 
-        Log::doJsonLog( $this->user->email );
-        Log::doJsonLog( $this->project->id_customer );
+        LoggerFactory::doJsonLog( $this->user->email );
+        LoggerFactory::doJsonLog( $this->project->id_customer );
 
         return $this->user->email == $this->project->id_customer;
     }

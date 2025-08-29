@@ -71,7 +71,7 @@ use Utils\Constants\ProjectStatus;
 use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\LQA\QA;
 use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
@@ -288,9 +288,9 @@ class ProjectManager {
     }
 
     protected function _log( $_msg, ?Throwable $exception = null ) {
-        Log::doJsonLog( $_msg );
+        LoggerFactory::doJsonLog( $_msg );
         if ( $exception ) {
-            Log::doJsonLog( ( new Error( $exception ) )->render( true ) );
+            LoggerFactory::doJsonLog( ( new Error( $exception ) )->render( true ) );
         }
     }
 
@@ -684,12 +684,12 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
-        Log::doJsonLog( $uploadDir );
+        LoggerFactory::doJsonLog( $uploadDir );
 
         //we are going to access the storage, get a model object to manipulate it
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
-        Log::doJsonLog( $linkFiles );
+        LoggerFactory::doJsonLog( $linkFiles );
 
         /*
             loop through all input files to
@@ -1061,11 +1061,11 @@ class ProjectManager {
         try {
 
             if ( AbstractFilesStorage::isOnS3() ) {
-                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
+                LoggerFactory::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
             } else {
-                Log::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                LoggerFactory::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
                 Utils::deleteDir( $this->uploadDir );
                 if ( is_dir( $this->uploadDir . '_converted' ) ) {
                     Utils::deleteDir( $this->uploadDir . '_converted' );

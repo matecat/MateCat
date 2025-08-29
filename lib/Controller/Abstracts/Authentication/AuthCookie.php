@@ -6,7 +6,7 @@ use DomainException;
 use Model\Users\UserStruct;
 use ReflectionException;
 use UnexpectedValueException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\SimpleJWT;
 
@@ -90,7 +90,7 @@ class AuthCookie {
 
         } catch ( ReflectionException $e ) {
             // Log any errors encountered while setting the login token as active.
-            Log::doJsonLog( "Error setting login token active: " . $e->getMessage() );
+            LoggerFactory::doJsonLog( "Error setting login token active: " . $e->getMessage() );
         }
 
     }
@@ -203,7 +203,7 @@ class AuthCookie {
             try {
                 return SimpleJWT::getValidPayload( $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
             } catch ( DomainException | UnexpectedValueException $e ) {
-                Log::doJsonLog( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
+                LoggerFactory::doJsonLog( $e->getMessage() . " " . $_COOKIE[ AppConfig::$AUTHCOOKIENAME ] );
                 self::destroyAuthentication();
             }
 
