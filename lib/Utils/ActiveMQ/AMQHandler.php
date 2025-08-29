@@ -19,7 +19,7 @@ use Stomp\StatefulStomp;
 use Stomp\Transport\Frame;
 use Stomp\Transport\Message;
 use Utils\AsyncTasks\Workers\Analysis\RedisKeys;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
@@ -264,7 +264,7 @@ class AMQHandler {
     public function reQueue( $failed_segment, Context $queueInfo ) {
 
         if ( !empty( $failed_segment ) ) {
-            Log::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
+            LoggerFactory::doJsonLog( "Failed " . var_export( $failed_segment, true ) );
             $this->publishToQueues( $queueInfo->queue_name, new Message( strval( $failed_segment ), [ 'persistent' => $this->persistent ] ) );
         }
 

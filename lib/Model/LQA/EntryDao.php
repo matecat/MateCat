@@ -10,7 +10,7 @@ use Model\Exceptions\ValidationError;
 use Model\Jobs\JobStruct;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class EntryDao extends AbstractDao {
@@ -54,7 +54,7 @@ class EntryDao extends AbstractDao {
                 " qa_entry_comments WHERE id_qa_entry = :id " .
                 " ) WHERE id = :id ";
 
-        Log::doJsonLog( $sql );
+        LoggerFactory::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -256,7 +256,7 @@ class EntryDao extends AbstractDao {
      */
     private static function ensureStartAndStopPositionAreOrdered( EntryStruct $entryStruct ): EntryStruct {
 
-        Log::doJsonLog( $entryStruct );
+        LoggerFactory::doJsonLog( $entryStruct );
 
         if ( $entryStruct->start_node == $entryStruct->end_node ) {
             // if start node and stop node are the same, order the offsets if needed

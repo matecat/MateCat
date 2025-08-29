@@ -15,7 +15,7 @@ use Model\Projects\MetadataDao;
 use Model\Projects\ProjectStruct;
 use PHPTAL;
 use Plugins\Features\BaseFeature;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -264,7 +264,7 @@ class FeatureSet implements FeatureSetInterface {
                 } catch ( ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e ) {
                     throw $e;
                 } catch ( Exception $e ) {
-                    Log::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
+                    LoggerFactory::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
                 }
             }
         }

@@ -11,7 +11,8 @@ namespace Utils\TaskRunner\Commons;
 
 use Exception;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 /**
@@ -72,10 +73,17 @@ abstract class AbstractDaemon {
     protected $_queueContextList = [];
 
     /**
+     * @var MatecatLogger
+     */
+    protected MatecatLogger $logger;
+
+    /**
      * AbstractDaemon constructor.
      *
      * @param ?string $configFile
      * @param ?string $contextIndex
+     *
+     * @throws Exception
      */
     protected function __construct( string $configFile = null, string $contextIndex = null ) {
         AppConfig::$PRINT_ERRORS = true;
@@ -89,6 +97,7 @@ abstract class AbstractDaemon {
      * @param $queueIndex
      *
      * @return static
+     * @throws Exception
      */
     public static function getInstance( $config_file = null, $queueIndex = null ): AbstractDaemon {
 
@@ -107,7 +116,7 @@ abstract class AbstractDaemon {
         if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
         }
-        Log::doJsonLog( $msg );
+        $this->logger->log( $msg );
     }
 
     /**
@@ -126,7 +135,7 @@ abstract class AbstractDaemon {
     abstract public function cleanShutDown();
 
     /**
-     * Every cycle reload and update Daemon configuration.
+     * Every cycle reloads and updates Daemon configuration.
      * @return void
      * @throws Exception
      */

@@ -147,6 +147,7 @@ abstract class BaseKleinViewController extends AbstractStatefulKleinController i
         $this->response->code( $code ?? $this->httpCode );
         $this->response->body( $this->view->execute() );
         $this->response->send();
+        $this->_logWithTime();
         die();
     }
 

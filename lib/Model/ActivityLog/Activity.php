@@ -5,7 +5,7 @@ namespace Model\ActivityLog;
 use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Created by PhpStorm.
@@ -25,7 +25,7 @@ class Activity {
             $output = "**** Activity Log failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $activityLog, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
 
         }
     }

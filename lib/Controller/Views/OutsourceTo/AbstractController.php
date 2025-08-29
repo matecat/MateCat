@@ -9,7 +9,7 @@ use Controller\Abstracts\BaseKleinViewController;
 use Exception;
 use LogicException;
 use Model\Outsource\ConfirmationStruct;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Shop\Cart;
 use Utils\Tools\SimpleJWT;
 
@@ -114,8 +114,8 @@ abstract class AbstractController extends BaseKleinViewController {
 
         $this->data_key_content = $__getInput[ $this->dataKeyName ];
 
-        Log::doJsonLog( $_GET );
-        Log::doJsonLog( $_SERVER[ 'QUERY_STRING' ] );
+        LoggerFactory::doJsonLog( $_GET );
+        LoggerFactory::doJsonLog( $_SERVER[ 'QUERY_STRING' ] );
 
     }
 

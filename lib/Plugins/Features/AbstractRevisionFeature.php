@@ -28,7 +28,7 @@ use Plugins\Features\TranslationEvents\Model\TranslationEventDao;
 use ReflectionException;
 use Utils\Collections\RecursiveArrayObject;
 use Utils\Constants\SourcePages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -357,7 +357,7 @@ abstract class AbstractRevisionFeature extends BaseFeature {
                 ]
         ] );
 
-        Log::doJsonLog( "CompletionEventController deleting event: " . var_export( $event->getArrayCopy(), true ) );
+        LoggerFactory::doJsonLog( "CompletionEventController deleting event: " . var_export( $event->getArrayCopy(), true ) );
 
     }
 

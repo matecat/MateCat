@@ -9,6 +9,7 @@
 
 namespace Utils\Contribution;
 
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
@@ -118,7 +119,12 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool $contextIsSpice = false;
 
     /**
-     * Global Cached record for jobs metadata
+     * @var string
+     */
+    public string $translation_origin = InternalMatchesConstants::TM;
+
+    /**
+     * Global-Cached record for jobs metadata
      *
      * WARNING these values are cached only globally and not locally by the "cachable" method (in the running process)
      * because we want to control the cache eviction from other entrypoints.

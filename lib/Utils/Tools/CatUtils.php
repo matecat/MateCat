@@ -24,7 +24,7 @@ use ReflectionException;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\IsJobRevisionValidator;
 
@@ -465,7 +465,7 @@ class CatUtils {
         file_put_contents( $tmpOrigFName, $documentContent );
 
         $cmd = "file -i $tmpOrigFName";
-        Log::doJsonLog( $cmd );
+        LoggerFactory::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
         [ , $charset ] = explode( "=", $file_info );
@@ -594,7 +594,7 @@ class CatUtils {
         if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
-            Log::doJsonLog( "BackWard compatibility set Counter." );
+            LoggerFactory::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
         }

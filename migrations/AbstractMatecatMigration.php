@@ -3,7 +3,7 @@
 namespace migrations;
 
 use Phinx\Migration\AbstractMigration;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Class AbstractMatecatMigration
@@ -20,7 +20,7 @@ class AbstractMatecatMigration extends AbstractMigration {
         }
 
         foreach ( $this->sql_up as $sql ) {
-            Log::doJsonLog( $sql . "\n" );
+            LoggerFactory::doJsonLog( $sql . "\n" );
             $this->execute( $sql );
         }
     }

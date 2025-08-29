@@ -12,7 +12,7 @@ use Exception;
 use LogicException;
 use Model\FeaturesBase\FeatureSet;
 use Model\Segments\SegmentMetadataDao;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\LQA\BxExG\Validator;
 use Utils\Tools\CatUtils;
 
@@ -1932,7 +1932,7 @@ class QA {
         try {
             $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
-            Log::doJsonLog( "tryRealignTagID: " . $ex->getMessage() );
+            LoggerFactory::doJsonLog( "tryRealignTagID: " . $ex->getMessage() );
 
             return $this->getErrors();
         }

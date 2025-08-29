@@ -11,12 +11,12 @@ namespace Controller\Traits;
 
 
 use Controller\Abstracts\IController;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 trait TimeLoggerTrait {
 
-    protected string $timingLogFileName  = 'ui_calls_time.log';
+    protected string $timingLogFileName  = 'fallback_calls_time.log';
     protected array  $timingCustomObject = [];
     protected int    $startExecutionTime = 0;
 
@@ -33,8 +33,6 @@ trait TimeLoggerTrait {
      */
     protected function logPageCall() {
 
-        Log::setLogFileName( $this->timingLogFileName );
-
         /** @var $this IController|TimeLoggerTrait */
 
         $_request_uri = parse_url( $_SERVER[ 'REQUEST_URI' ] );
@@ -44,7 +42,6 @@ trait TimeLoggerTrait {
         }
 
         $object = [
-                "client_ip"     => Utils::getRealIpAddr(),
                 "user"          => ( $this->isLoggedIn() ? [
                         "uid"        => $this->getUser()->getUid(),
                         "email"      => $this->getUser()->getEmail(),
@@ -57,7 +54,8 @@ trait TimeLoggerTrait {
                 "Total Time"    => $this->getTimer()
         ];
 
-        Log::doJsonLog( $object );
+        $logger = LoggerFactory::getLogger( $this->timingLogFileName, $this->timingLogFileName );
+        $logger->log( $object );
 
     }
 

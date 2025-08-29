@@ -52,7 +52,7 @@ class PropagationWorker extends AbstractWorker {
         $translationVersionsDao = new TranslationVersionDao();
 
         /**
-         * @var $propagationTotalStruct ?\Model\Propagation\PropagationTotalStruct
+         * @var $propagationTotalStruct ?PropagationTotalStruct
          */
         $propagationTotalStruct = $structures[ 'propagationAnalysis' ];
 

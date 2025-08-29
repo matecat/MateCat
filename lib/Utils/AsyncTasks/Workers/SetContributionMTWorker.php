@@ -72,13 +72,14 @@ class SetContributionMTWorker extends SetContributionWorker {
      */
     protected function _update( array $config, SetContributionRequest $contributionStruct, int $id_mt_engine = 0 ) {
 
-        $config[ 'segment' ]        = $contributionStruct->segment;
-        $config[ 'translation' ]    = $contributionStruct->translation;
-        $config[ 'tuid' ]           = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
-        $config[ 'session' ]        = $contributionStruct->getSessionId();
-        $config[ 'set_mt' ]         = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
-        $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'context_after' ]  = $contributionStruct->context_after;
+        $config[ 'segment' ]            = $contributionStruct->segment;
+        $config[ 'translation' ]        = $contributionStruct->translation;
+        $config[ 'tuid' ]               = $contributionStruct->id_job . ":" . $contributionStruct->id_segment;
+        $config[ 'session' ]            = $contributionStruct->getSessionId();
+        $config[ 'set_mt' ]             = $id_mt_engine == 1; // negate, if mt is 1, then is mymemory, and the flag set_mt must be set to true
+        $config[ 'context_before' ]     = $contributionStruct->context_before;
+        $config[ 'context_after' ]      = $contributionStruct->context_after;
+        $config[ 'translation_origin' ] = $contributionStruct->translation_origin;
 
         // set the contribution for every key in the job belonging to the user
         $res = $this->_engine->update( $config );

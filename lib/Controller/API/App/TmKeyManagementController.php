@@ -14,7 +14,7 @@ use Model\Users\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\EnginesFactory;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\TmKeyManagement\TmKeyStruct;
@@ -140,7 +140,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
             }
 
         } catch ( Exception $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
         }
 
         $this->response->code( 404 );
@@ -183,7 +183,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
             } catch ( Exception $e ) {
                 if ( $engineName != EngineConstants::MY_MEMORY ) {
-                    Log::doJsonLog( $e->getMessage() );
+                    LoggerFactory::doJsonLog( $e->getMessage() );
                 }
             }
 

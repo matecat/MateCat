@@ -13,7 +13,7 @@ use Model\DataAccess\Database;
 use PDO;
 use PDOException;
 use RuntimeException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 trait ProjectWordCount {
 
@@ -58,7 +58,7 @@ trait ProjectWordCount {
             $stmt->execute( [ 'pid' => $pid ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
 
             throw new RuntimeException( $e );
         }

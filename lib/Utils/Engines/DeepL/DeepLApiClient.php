@@ -3,13 +3,15 @@
 namespace Utils\Engines\DeepL;
 
 use InvalidArgumentException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Network\MultiCurlHandler;
 
 class DeepLApiClient {
     const DEFAULT_BASE_URL = 'https://api.deepl.com/v1';
 
-    private string $apiKey;
+    private string        $apiKey;
+    private MatecatLogger $logger;
 
     /**
      * @param string $apiKey
@@ -27,6 +29,7 @@ class DeepLApiClient {
      */
     private function __construct( string $apiKey ) {
         $this->apiKey = $apiKey;
+        $this->logger = LoggerFactory::getLogger( 'engines' );
     }
 
     /**
@@ -39,7 +42,7 @@ class DeepLApiClient {
      * @return mixed
      * @throws DeepLApiException
      */
-    public function translate( string $text, string  $sourceLang, string  $targetLang, ?string $formality = null, ?string $idGlossary = null ) {
+    public function translate( string $text, string $sourceLang, string $targetLang, ?string $formality = null, ?string $idGlossary = null ) {
         $args = [
                 'text'        => [
                         $text
@@ -182,7 +185,7 @@ class DeepLApiClient {
         $log               = $handler->getSingleLog( $resourceHashId );
         $log[ 'response' ] = $result;
 
-        Log::doJsonLog( $log, "deepl.log" );
+        $this->logger->log( $log );
 
         return $this->parse( $result );
     }

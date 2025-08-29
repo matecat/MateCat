@@ -12,7 +12,7 @@ namespace Utils\Contribution;
 use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GetContributionWorker;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Class Set
@@ -36,7 +36,7 @@ class Get {
             $output  = "**** GetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $contribution, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             throw $e;
 
         }

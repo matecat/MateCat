@@ -58,7 +58,7 @@ class ChunkCompletionUpdateDao extends AbstractDao {
 
         $sql = $sql . implode( $conditions );
 
-        \Utils\Logger\Log::doJsonLog( $sql );
+        \Utils\Logger\LoggerFactory::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

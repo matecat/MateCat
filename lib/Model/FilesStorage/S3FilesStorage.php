@@ -13,7 +13,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionException;
 use UnexpectedValueException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
@@ -198,7 +198,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 'source' => $xliffPath
             ] );
 
-            Log::doJsonLog( 'Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+            LoggerFactory::doJsonLog( 'Successfully uploaded file ' . $xliffDestination . ' into ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
 
             unlink( $xliffPath );
 
@@ -216,7 +216,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                     'key'    => $origDestination,
             ] );
 
-            Log::doJsonLog( 'Deleting original cache file ' . $origDestination . ' from ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
+            LoggerFactory::doJsonLog( 'Deleting original cache file ' . $origDestination . ' from ' . static::$FILES_STORAGE_BUCKET . ' bucket.' );
 
             throw $e;
         }
@@ -269,7 +269,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                 'source' => $originalPath
         ] );
 
-        Log::doJsonLog( 'Successfully uploaded file ' . $origDestination . ' into ' . $bucketName . ' bucket.' );
+        LoggerFactory::doJsonLog( 'Successfully uploaded file ' . $origDestination . ' into ' . $bucketName . ' bucket.' );
 
         $file_extension = '.sdlxliff';
 
@@ -380,7 +380,7 @@ class S3FilesStorage extends AbstractFilesStorage {
                     ],
             ] );
 
-            Log::doJsonLog( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
+            LoggerFactory::doJsonLog( $this->getArrayMessageForLogs( $idFile, $datePath, $sourceItems, $destItems, $copied ) );
 
             return $copied;
         } catch ( Exception $e ) {

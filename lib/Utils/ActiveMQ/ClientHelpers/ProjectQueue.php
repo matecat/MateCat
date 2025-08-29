@@ -17,7 +17,7 @@ use ReflectionException;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ProjectCreationWorker;
 use Utils\Constants\ProjectStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 
 /**
@@ -45,7 +45,7 @@ class ProjectQueue {
             $output = "**** Project Enqueue failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
             $output .= var_export( $projectStructure, true );
-            Log::doJsonLog( $output );
+            LoggerFactory::doJsonLog( $output );
             throw $e;
 
         }
