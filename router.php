@@ -18,6 +18,7 @@ use View\API\Commons\Error;
 
 require_once './lib/Bootstrap.php';
 
+/** @noinspection PhpUnhandledExceptionInspection */
 Bootstrap::start();
 
 $klein  = new Klein();

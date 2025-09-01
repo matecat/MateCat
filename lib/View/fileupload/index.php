@@ -7,6 +7,8 @@ error_reporting( E_ALL | E_STRICT );
 ini_set( 'max_input_time', 3600 );
 
 require_once realpath( dirname( __FILE__ ) . '/../../../' ) . '/lib/Bootstrap.php';
+
+/** @noinspection PhpUnhandledExceptionInspection */
 Bootstrap::start();
 
 require_once( 'UploadHandler.php' );

@@ -29,10 +29,16 @@ class Bootstrap {
      */
     private FeatureSet $autoLoadedFeatureSet;
 
+    /**
+     * @throws Exception
+     */
     public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
         new self( $config_file, $task_runner_config_file );
     }
 
+    /**
+     * @throws Exception
+     */
     private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
         ini_set( 'display_errors', false );
@@ -65,14 +71,13 @@ class Bootstrap {
 
     }
 
+    /**
+     * @throws Exception
+     */
     private function installApplicationSingletons() {
-        try {
-            LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
-            WorkerClient::init();
-            Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
-        } catch ( Exception $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
-        }
+        LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
+        WorkerClient::init();
+        Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
     }
 
     /**
