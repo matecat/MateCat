@@ -43,8 +43,6 @@ trait DaoCacheTrait {
                 self::$cache_con->get( 1 );
             } catch ( Exception $e ) {
                 self::$cache_con = null;
-                LoggerFactory::doJsonLog( $e->getMessage() );
-                LoggerFactory::doJsonLog( "No Redis server(s) configured." );
                 throw $e;
             }
 
@@ -53,12 +51,14 @@ trait DaoCacheTrait {
 
 
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
-        LoggerFactory::doJsonLog( [
-                "type" => $type,
-                "key"  => $key,
-                "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
-            //"result_set" => $value,
-        ], "query_cache.log" );
+        LoggerFactory::getLogger( 'query_cache' )->debug(
+                [
+                        "type" => $type,
+                        "key"  => $key,
+                        "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+                    //"result_set" => $value,
+                ]
+        );
     }
 
     /**

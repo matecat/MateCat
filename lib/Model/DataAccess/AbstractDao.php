@@ -383,7 +383,7 @@ abstract class AbstractDao {
                 self::structKeys( $struct )
         );
 
-        LoggerFactory::doJsonLog( [
+        LoggerFactory::getLogger( 'dao' )->debug( [
                 'table'  => static::TABLE,
                 'sql'    => $sql,
                 'attr'   => $attrs,
@@ -431,7 +431,7 @@ abstract class AbstractDao {
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        LoggerFactory::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
+        LoggerFactory::getLogger( 'dao' )->debug( [ "SQL" => $sql, "values" => $data ] );
 
         $stmt->execute( $data );
 

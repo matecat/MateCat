@@ -185,7 +185,7 @@ class DeepLApiClient {
         $log               = $handler->getSingleLog( $resourceHashId );
         $log[ 'response' ] = $result;
 
-        $this->logger->log( $log );
+        $this->logger->debug( $log );
 
         return $this->parse( $result );
     }

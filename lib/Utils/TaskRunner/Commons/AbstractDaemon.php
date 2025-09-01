@@ -11,7 +11,6 @@ namespace Utils\TaskRunner\Commons;
 
 use Exception;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
@@ -112,11 +111,11 @@ abstract class AbstractDaemon {
      *
      * @param $msg
      */
-    protected function _logTimeStampedMsg( $msg ) {
+    protected function _logTimeStampedMsg( $msg, array $context = [] ) {
         if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $msg ) . "\n";
         }
-        $this->logger->log( $msg );
+        $this->logger->debug( $msg, $context );
     }
 
     /**

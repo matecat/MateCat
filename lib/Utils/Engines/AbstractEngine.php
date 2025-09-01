@@ -77,7 +77,12 @@ abstract class AbstractEngine implements EngineInterface {
         ];
 
         $this->featureSet = new FeatureSet();
-        $this->logger     = LoggerFactory::getLogger( 'engines' );
+        /**
+         * Set the initial value to a specific log file, if not already initialized by the Executor.
+         * This is useful when engines are used outside the TaskRunner context
+         * @see \Utils\TaskRunner\Executor::__construct()
+         */
+        $this->logger = LoggerFactory::getLogger( 'engines', 'app_engines_call.log' );
     }
 
     /**
@@ -229,7 +234,7 @@ abstract class AbstractEngine implements EngineInterface {
             } else {
                 $log[ 'response' ] = $rawValue;
             }
-            $this->logger->log( $log );
+            $this->logger->debug( $log );
         }
 
         return $rawValue;

@@ -12,7 +12,6 @@ use Model\FilesStorage\FilesStorageFactory;
 use Model\Jobs\JobDao;
 use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
-use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 use View\API\Commons\ZipContentObject;
 
@@ -61,9 +60,7 @@ class DownloadOriginalController extends AbstractDownloadController {
         // check for Password correctness
         if ( empty( $jobData ) ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            LoggerFactory::doJsonLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
+            $this->logger->debug( $msg );
             return null;
         }
 

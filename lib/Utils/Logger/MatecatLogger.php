@@ -15,6 +15,7 @@ namespace Utils\Logger;
 
 use Exception;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Utils\Registry\AppConfig;
 
 /**
@@ -25,7 +26,7 @@ use Utils\Registry\AppConfig;
  *
  * @package Utils\Logger
  */
-class MatecatLogger {
+class MatecatLogger implements LoggerInterface {
 
     /**
      * @var Logger The Monolog Logger instance used for logging.
@@ -42,42 +43,16 @@ class MatecatLogger {
     }
 
     /**
-     * Logs the provided content. If the message is an array or object, it is
-     * merged with the context (if provided) and converted to JSON before logging.
-     * In case of an exception, the log is written to a fallback file.
+     * Logs a debug-level message with optional context.
      *
-     * This method first determines if the message is structured (array or object).
-     * If structured message is provided along with a context array, the two are merged.
-     * The message is then converted to JSON if structured, or left as-is otherwise.
-     * The logging operation is attempted using the Monolog logger. If an exception
-     * occurs during logging, the message is written to a fallback log file.
+     * This method delegates the logging of a debug-level message to the `log` method,
+     * passing the `Logger::DEBUG` level along with the provided message and context.
      *
-     * @param mixed $message The content to be logged. Can be a string, array, or object.
-     * @param array $context Additional context to merge with the content. Defaults to an empty array.
+     * @param mixed $message The debug message to log. Can be a string, array, or object.
+     * @param array $context Additional context to include with the log. Defaults to an empty array.
      */
-    public function log( $message, array $context = [] ) {
-        $isStructured = is_array( $message ) || is_object( $message );
-
-        if ( $isStructured ) {
-            if ( !empty ( $context ) ) {
-                $context = array_merge( (array)$message, $context );
-            } else {
-                $context = (array)$message;
-            }
-            $message = 'Log Entry:'; // Generic message when structured content is logged
-        }
-
-        try {
-            // Log structured data with a generic message, or log string directly
-            $this->logger->debug( $message, $context );
-        } catch ( Exception $e ) {
-            // On failure, write the log data to a fallback file
-            file_put_contents(
-                    self::getFileNamePath( 'logging_configuration_exception.log' ),
-                    json_encode( [ 'message' => $message, 'context' => $context ] ) . PHP_EOL,
-                    FILE_APPEND
-            );
-        }
+    public function debug( $message, array $context = [] ) {
+        $this->log( Logger::DEBUG, $message, $context );
     }
 
     /**
@@ -102,13 +77,100 @@ class MatecatLogger {
         return new MatecatLogger( $this->logger->withName( $name ) );
     }
 
+    public function emergency( $message, array $context = [] ) {
+        $this->log( Logger::EMERGENCY, $message, $context );;
+    }
+
+    public function alert( $message, array $context = [] ) {
+        $this->log( Logger::ALERT, $message, $context );
+    }
+
+    public function critical( $message, array $context = [] ) {
+        $this->log( Logger::CRITICAL, $message, $context );
+    }
+
+    public function error( $message, array $context = [] ) {
+        $this->log( Logger::ERROR, $message, $context );
+    }
+
+    public function warning( $message, array $context = [] ) {
+        $this->log( Logger::WARNING, $message, $context );
+    }
+
+    public function notice( $message, array $context = [] ) {
+        $this->log( Logger::NOTICE, $message, $context );
+    }
+
+    public function info( $message, array $context = [] ) {
+        $this->log( Logger::INFO, $message, $context );
+    }
+
     /**
-     * Retrieves the underlying Monolog Logger instance.
+     * Logs a message at a specific log level with optional context.
      *
-     * @return Logger The Monolog Logger instance.
+     * This method formats the provided message and context into a structured array
+     * using the `_formatMessage` method. It then attempts to log the formatted data
+     * using the Monolog logger. If an exception occurs during the logging process,
+     * the log data is written to a fallback file.
+     *
+     * @param mixed $level   The log level (e.g., DEBUG, INFO, ERROR).
+     * @param mixed $message The message to log. Can be a string, array, or object.
+     * @param array $context Additional context to include with the log. Defaults to an empty array.
+     *
      */
-    public function getLogger(): Logger {
-        return $this->logger;
+    public function log( $level, $message, array $context = [] ) {
+
+        // Format the message and context into a structured array.
+        $r = $this->_formatMessage( $message, $context );
+
+        try {
+            // Log the formatted message and context using the Monolog logger.
+            $this->logger->log( $level, $r[ 'message' ], $r[ 'context' ] );
+        } catch ( Exception $e ) {
+            // If logging fails, write the log data to a fallback file.
+            file_put_contents(
+                    self::getFileNamePath( 'logging_configuration_exception.log' ),
+                    json_encode( $r ) . PHP_EOL,
+                    FILE_APPEND
+            );
+        }
+
+    }
+
+    /**
+     * Formats a log message and its context into a structured array.
+     *
+     * This method checks if the provided message is structured (an array or object).
+     * If the message is structured, it merges it with the provided context (if any)
+     * and assigns a generic message "Log Entry:". Otherwise, the message is returned
+     * as-is along with the context.
+     *
+     * @param mixed $message The log message, which can be a string, array, or object.
+     * @param array $context Additional context to merge with the message. Defaults to an empty array.
+     *
+     * @return array An array containing the formatted message and context:
+     *               - 'message': The formatted log message.
+     *               - 'context': The merged or original context.
+     */
+    private function _formatMessage( $message, array $context = [] ): array {
+
+        // Determine if the message is structured (array or object).
+        $isStructured = is_array( $message ) || is_object( $message );
+
+        if ( $isStructured ) {
+            // Merge the structured message with the context if the context is not empty.
+            if ( !empty ( $context ) ) {
+                $context = array_merge( (array)$message, $context );
+            } else {
+                $context = (array)$message;
+            }
+            // Assign a generic message for structured content.
+            $message = 'Log Entry:';
+        }
+
+        // Return the formatted message and context as an array.
+        return [ 'message' => $message, 'context' => $context ];
+
     }
 
 }

@@ -27,6 +27,9 @@ class Filters {
      * @return array
      */
     private static function sendToFilters( array $dataGroups, string $endpoint ): array {
+
+        $logger = LoggerFactory::getLogger( "conversion" );
+
         $multiCurl = new MultiCurlHandler();
 
         // Each group is a POST request
@@ -54,7 +57,7 @@ class Filters {
             }
 
             $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
-            LoggerFactory::doJsonLog( "Calling: " . $url );
+            $logger->debug( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -262,8 +265,7 @@ class Filters {
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
                     ] );
         } catch ( Exception $ex ) {
-            LoggerFactory::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
-
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
             return;
         }
 
@@ -297,9 +299,9 @@ class Filters {
         try {
             $preparedStatement = $conn->prepare( $query );
             $preparedStatement->execute( array_values( $info ) );
-            LoggerFactory::doJsonLog( $info );
+            LoggerFactory::getLogger( "conversion" )->debug( $info );
         } catch ( Exception $ex ) {
-            LoggerFactory::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
+            LoggerFactory::getLogger( "conversion" )->debug( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
         if ( $response[ 'successful' ] !== true ) {
@@ -330,7 +332,7 @@ class Filters {
         $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
 
         if ( !rename( $sentFile, $backupFile ) ) {
-            LoggerFactory::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;
         }

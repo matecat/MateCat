@@ -214,6 +214,6 @@ abstract class KleinController implements IController {
      * @param      $message
      */
     protected function log( $message ): void {
-        $this->logger->log( $message );
+        $this->logger->debug( $message );
     }
 }

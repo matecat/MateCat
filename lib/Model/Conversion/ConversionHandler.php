@@ -15,6 +15,7 @@ use Model\Filters\DTO\IDto;
 use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -41,13 +42,15 @@ class ConversionHandler {
     /**
      * @var FeatureSet
      */
-    public FeatureSet $features;
+    public FeatureSet     $features;
+    private MatecatLogger $logger;
 
     /**
      * ConversionHandler constructor.
      */
     public function __construct() {
         $this->result = new ConvertedFileModel();
+        $this->logger = LoggerFactory::getLogger( "conversion" );
     }
 
     public function fileMustBeConverted() {
@@ -180,7 +183,7 @@ class ConversionHandler {
 
             } catch ( FileSystemException $e ) {
 
-                LoggerFactory::doJsonLog( "FileSystem Exception: Message: " . $e->getMessage() );
+                $this->logger->debug( "FileSystem Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
@@ -189,7 +192,7 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                LoggerFactory::doJsonLog( "S3 Exception: Message: " . $e->getMessage() );
+                $this->logger->debug( "S3 Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
@@ -220,7 +223,7 @@ class ConversionHandler {
                         AbstractFilesStorage::basename_fix( $file_path )
                 );
             } else {
-                LoggerFactory::doJsonLog( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
+                $this->logger->debug( "File not found in path. linkSessionToCacheForOriginalFiles Skipped." );
             }
 
         }
@@ -384,7 +387,7 @@ class ConversionHandler {
 
         } catch ( Exception $e ) {
 
-            LoggerFactory::doJsonLog( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
+            $this->logger->debug( "ExtendedZipArchive Exception: {$e->getCode()} : {$e->getMessage()}" );
 
             $this->result->setErrorCode( $e->getCode() );
             $this->result->setErrorMessage( "Zip error: " . $e->getMessage() );
@@ -448,8 +451,8 @@ class ConversionHandler {
 
         $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
 
-        if($decoded_filename !== $file_name){
-            throw new Exception("Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>.");
+        if ( $decoded_filename !== $file_name ) {
+            throw new Exception( "Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>." );
         }
 
         $this->file_name = $decoded_filename;

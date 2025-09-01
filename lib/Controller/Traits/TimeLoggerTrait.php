@@ -55,7 +55,7 @@ trait TimeLoggerTrait {
         ];
 
         $logger = LoggerFactory::getLogger( $this->timingLogFileName, $this->timingLogFileName );
-        $logger->log( $object );
+        $logger->debug( $object );
 
     }
 

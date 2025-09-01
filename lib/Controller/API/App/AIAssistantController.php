@@ -7,14 +7,15 @@ use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\AIAssistantWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
-use Utils\Tools\Utils;
 
 class AIAssistantController extends KleinController {
 
     const AI_ASSISTANT_EXPLAIN_MEANING = 'AI_ASSISTANT_EXPLAIN_MEANING';
 
+    /**
+     * @throws Exception
+     */
     public function index() {
         if ( empty( AppConfig::$OPENAI_API_KEY ) ) {
             $this->response->code( 500 );
@@ -129,15 +130,6 @@ class AIAssistantController extends KleinController {
      * @throws Exception
      */
     private function enqueueWorker( string $queue, array $params ) {
-        try {
-            WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-            # Handle the error, logging, ...
-            $output = "**** AI Assistant Worker enqueue request failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $params, true );
-            LoggerFactory::doJsonLog( $output );
-            Utils::sendErrMailReport( $output );
-        }
+        WorkerClient::enqueue( $queue, AIAssistantWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 }

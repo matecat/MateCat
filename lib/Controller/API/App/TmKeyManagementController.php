@@ -120,27 +120,24 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
         return $sortedKeys;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function getByUserAndKey() {
 
-        try {
+        $_keyDao = new MemoryKeyDao( Database::obtain() );
+        $dh      = new MemoryKeyStruct( [
+                'uid'    => $this->getUser()->uid,
+                'tm_key' => new TmKeyStruct( [
+                                'key' => $this->request->param( 'key' )
+                        ]
+                )
+        ] );
 
-            $_keyDao = new MemoryKeyDao( Database::obtain() );
-            $dh      = new MemoryKeyStruct( [
-                    'uid'    => $this->getUser()->uid,
-                    'tm_key' => new TmKeyStruct( [
-                                    'key' => $this->request->param( 'key' )
-                            ]
-                    )
-            ] );
+        if ( !empty( $_keyDao->read( $dh )[ 0 ] ) ) {
+            $this->response->json( $this->_checkForAdaptiveEngines( $dh ) );
 
-            if ( !empty( $_keyDao->read( $dh )[ 0 ] ) ) {
-                $this->response->json( $this->_checkForAdaptiveEngines( $dh ) );
-
-                return;
-            }
-
-        } catch ( Exception $e ) {
-            LoggerFactory::doJsonLog( $e->getMessage() );
+            return;
         }
 
         $this->response->code( 404 );
@@ -183,7 +180,7 @@ class TmKeyManagementController extends AbstractStatefulKleinController {
 
             } catch ( Exception $e ) {
                 if ( $engineName != EngineConstants::MY_MEMORY ) {
-                    LoggerFactory::doJsonLog( $e->getMessage() );
+                    LoggerFactory::getLogger( 'engines' )->debug( $e->getMessage() );
                 }
             }
 

@@ -2,10 +2,8 @@
 
 namespace Model\ActivityLog;
 
-use Exception;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\ActivityLogWorker;
-use Utils\Logger\LoggerFactory;
 
 /**
  * Created by PhpStorm.
@@ -16,18 +14,7 @@ use Utils\Logger\LoggerFactory;
 class Activity {
 
     public static function save( ActivityLogStruct $activityLog ) {
-
-        try {
-            WorkerClient::enqueue( 'ACTIVITYLOG', ActivityLogWorker::class, $activityLog->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-
-            # Handle the error, logging, ...
-            $output = "**** Activity Log failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $activityLog, true );
-            LoggerFactory::doJsonLog( $output );
-
-        }
+        WorkerClient::enqueue( 'ACTIVITYLOG', ActivityLogWorker::class, $activityLog->getArrayCopy(), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 
 }

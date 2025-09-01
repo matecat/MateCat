@@ -264,7 +264,7 @@ class FeatureSet implements FeatureSetInterface {
                 } catch ( ValidationError|NotFoundException|AuthenticationError|ReQueueException|EndQueueException $e ) {
                     throw $e;
                 } catch ( Exception $e ) {
-                    LoggerFactory::doJsonLog( "Exception running filter " . $method . ": " . $e->getMessage() );
+                    LoggerFactory::getLogger( 'feature_set' )->error( "Exception running filter " . $method . ": " . $e->getMessage() );
                 }
             }
         }

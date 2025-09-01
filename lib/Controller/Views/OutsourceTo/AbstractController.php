@@ -86,6 +86,8 @@ abstract class AbstractController extends BaseKleinViewController {
      */
     protected function validateTheRequest() {
 
+        $this->logger = LoggerFactory::getLogger( 'outsource' );
+
         // Check if the required properties are set in the concrete class
         if ( empty( $this->review_order_page ) ) {
             throw new LogicException( "Property 'review_order_page' can not be EMPTY" );
@@ -114,8 +116,8 @@ abstract class AbstractController extends BaseKleinViewController {
 
         $this->data_key_content = $__getInput[ $this->dataKeyName ];
 
-        LoggerFactory::doJsonLog( $_GET );
-        LoggerFactory::doJsonLog( $_SERVER[ 'QUERY_STRING' ] );
+        $this->logger->debug( $_GET );
+        $this->logger->debug( $_SERVER[ 'QUERY_STRING' ] );
 
     }
 

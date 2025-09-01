@@ -23,7 +23,7 @@ class UploadHandler {
 
     function __construct() {
 
-        $this->logger = LoggerFactory::getLogger( "upload_handler", "upload.log" );
+        $this->logger = LoggerFactory::getLogger( "upload_handler" );
 
         $this->options = [
                 'script_url'              => $this->getFullUrl() . '/',
@@ -241,7 +241,7 @@ class UploadHandler {
 
     protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ): stdClass {
 
-        $this->logger->log( $uploaded_file );
+        $this->logger->debug( $uploaded_file );
 
         $file           = new stdClass();
         $file->name     = $this->trim_file_name( $name );
@@ -274,7 +274,7 @@ class UploadHandler {
                         $file_path, fopen( 'php://input', 'r' ), $append_file ? FILE_APPEND : 0
                 );
             }
-            $this->logger->log( $res );
+            $this->logger->debug( $res );
 
             clearstatcache();
             $file_size = filesize( $file_path );
@@ -289,7 +289,7 @@ class UploadHandler {
             $file->size = $file_size;
             $this->set_file_delete_url( $file );
 
-            $this->logger->log( "Size on disk: $file_size - Declared size: $file->size" );
+            $this->logger->debug( "Size on disk: $file_size - Declared size: $file->size" );
 
             //As opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.
             if ( property_exists( $file, 'error' ) ) {

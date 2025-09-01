@@ -72,6 +72,7 @@ use Utils\Constants\XliffTranslationStatus;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\LQA\QA;
 use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
@@ -152,6 +153,7 @@ class ProjectManager {
      * @var MetadataDao
      */
     protected MetadataDao $filesMetadataDao;
+    private MatecatLogger $logger;
 
     /**
      * ProjectManager constructor.
@@ -165,6 +167,7 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
+        $this->logger = LoggerFactory::getLogger( 'project_manager' );
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
@@ -262,8 +265,6 @@ class ProjectManager {
             $this->features->loadAutoActivableOwnerFeatures( $this->projectStructure[ 'id_customer' ] );
         }
 
-        $this->_log( $this->features->getCodes() );
-
         /** @var MateCatFilter $filter */
         $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
         $this->filter = $filter;
@@ -288,9 +289,9 @@ class ProjectManager {
     }
 
     protected function _log( $_msg, ?Throwable $exception = null ) {
-        LoggerFactory::doJsonLog( $_msg );
+        $this->logger->debug( $_msg );
         if ( $exception ) {
-            LoggerFactory::doJsonLog( ( new Error( $exception ) )->render( true ) );
+            $this->logger->debug( ( new Error( $exception ) )->render( true ) );
         }
     }
 
@@ -684,12 +685,12 @@ class ProjectManager {
 
         $uploadDir = $this->uploadDir = AppConfig::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
-        LoggerFactory::doJsonLog( $uploadDir );
+        $this->_log( $uploadDir );
 
         //we are going to access the storage, get a model object to manipulate it
         $linkFiles = $fs->getHashesFromDir( $this->uploadDir );
 
-        LoggerFactory::doJsonLog( $linkFiles );
+        $this->_log( $linkFiles );
 
         /*
             loop through all input files to
@@ -1061,11 +1062,11 @@ class ProjectManager {
         try {
 
             if ( AbstractFilesStorage::isOnS3() ) {
-                LoggerFactory::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from S3' );
+                $this->_log( 'Deleting folder' . $this->uploadDir . ' from S3' );
                 /** @var $fs S3FilesStorage */
                 $fs->deleteQueue( $this->uploadDir );
             } else {
-                LoggerFactory::doJsonLog( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
+                $this->_log( 'Deleting folder' . $this->uploadDir . ' from filesystem' );
                 Utils::deleteDir( $this->uploadDir );
                 if ( is_dir( $this->uploadDir . '_converted' ) ) {
                     Utils::deleteDir( $this->uploadDir . '_converted' );
@@ -2103,7 +2104,7 @@ class ProjectManager {
                             //
 
                             // if its empty pass create a SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStruct    = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
+                            $segmentOriginalDataStruct = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //

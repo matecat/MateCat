@@ -29,7 +29,6 @@ use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\TmKeyManager;
@@ -262,7 +261,7 @@ class Lara extends AbstractEngine {
                 $score = $this->getQualityEstimation( $_config[ 'source' ], $_config[ 'target' ], $_config[ 'segment' ], $translation, $_config[ 'mt_qe_engine_id' ] ?? '2' );
             }
 
-            $this->logger->log( [
+            $this->logger->debug( [
                     'LARA REQUEST'  => 'GET https://api.laratranslate.com/translate',
                     'timing'        => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
                     'q'             => $request_translation,
@@ -279,7 +278,7 @@ class Lara extends AbstractEngine {
         } catch ( LaraException $t ) {
             if ( $t->getCode() == 429 ) {
 
-                $this->logger->log( "Lara quota exceeded. You have exceeded your 'api_translation_chars' quota" );
+                $this->logger->debug( "Lara quota exceeded. You have exceeded your 'api_translation_chars' quota" );
 
                 $engine_type = explode( "\\", self::class );
                 $engine_type = array_pop( $engine_type );
@@ -300,7 +299,7 @@ class Lara extends AbstractEngine {
 
                 return [];
             } elseif ( $t->getCode() == 401 || $t->getCode() == 403 ) {
-                $this->logger->log( [ "Missing or invalid authentication header.", $t->getMessage(), $t->getCode() ] );
+                $this->logger->debug( [ "Missing or invalid authentication header.", $t->getMessage(), $t->getCode() ] );
                 throw new LaraException( "Lara credentials not valid, please verify their validity and try again", $t->getCode(), $t );
             }
 
@@ -336,7 +335,7 @@ class Lara extends AbstractEngine {
         try {
             $score = $this->mmt_GET_Fallback->getQualityEstimation( $source, $target, $sentence, $translation, $mt_qe_engine_id );
 
-            $this->logger->log( [
+            $this->logger->debug( [
                     'MMT QUALITY ESTIMATION' => 'GET https://api.modernmt.com/translate/qe',
                     'source'                 => $source,
                     'target'                 => $target,
@@ -347,7 +346,7 @@ class Lara extends AbstractEngine {
             ] );
 
         } catch ( MMTServiceApiException $exception ) {
-            $this->logger->log( [
+            $this->logger->debug( [
                     'MMT QUALITY ESTIMATION ERROR' => 'GET https://api.modernmt.com/translate/qe',
                     'error'                        => $exception->getMessage(),
             ] );
@@ -373,7 +372,7 @@ class Lara extends AbstractEngine {
         $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
 
         if ( empty( $_keys ) ) {
-            $this->logger->log( [ "LARA: update skipped. No keys provided." ] );
+            $this->logger->debug( [ "LARA: update skipped. No keys provided." ] );
 
             return true;
         }
@@ -397,7 +396,7 @@ class Lara extends AbstractEngine {
             $time_end = microtime( true );
             $time     = $time_end - $time_start;
 
-            $this->logger->log( [
+            $this->logger->debug( [
                     'LARA REQUEST'       => 'PUT https://api.laratranslate.com/memories/content',
                     'timing'             => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
                     'keys'               => $_keys,
@@ -504,7 +503,7 @@ class Lara extends AbstractEngine {
         gzclose( $fp_out );
 
         $res = $clientMemories->importTmx( 'ext_my_' . $memoryKey, "$filePath.gz", true );
-        $this->logger->log( $res );
+        $this->logger->debug( $res );
 
         $fp_out = null;
 
@@ -542,13 +541,13 @@ class Lara extends AbstractEngine {
                 $keyIds = $this->_reMapKeyList( array_values( array_unique( $keyIds ) ) );
                 $client = $this->_getClient();
                 $res    = $client->memories->connect( $keyIds );
-                $this->logger->log( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
+                $this->logger->debug( "Keys connected: " . implode( ',', $keyIds ) . " -> " . json_encode( $res ) );
 
             }
 
         } catch ( Exception $e ) {
-            $this->logger->log( $e->getMessage() );
-            $this->logger->log( $e->getTraceAsString() );
+            $this->logger->debug( $e->getMessage() );
+            $this->logger->debug( $e->getTraceAsString() );
         }
 
     }

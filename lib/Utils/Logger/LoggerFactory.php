@@ -29,7 +29,7 @@ class LoggerFactory {
      */
     protected static function _writeTo( MatecatLogger $logger, $stringData ) {
         try {
-            $logger->log( $stringData );
+            $logger->debug( $stringData );
         } catch ( Exception $e ) {
             file_put_contents( self::getFileNamePath( 'logging_configuration_exception.log' ), $stringData, FILE_APPEND );
         }

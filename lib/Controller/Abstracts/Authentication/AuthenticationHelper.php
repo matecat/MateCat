@@ -94,7 +94,7 @@ class AuthenticationHelper {
         } catch ( Throwable $ignore ) {
             // Log any exceptions encountered during the authentication process.
             try {
-                LoggerFactory::doJsonLog(
+                LoggerFactory::getLogger( 'login_exceptions' )->debug(
                         [
                                 $ignore,
                                 $ignore->getTraceAsString(),
@@ -102,8 +102,7 @@ class AuthenticationHelper {
                                 'api_key'    => $api_key,
                                 'api_secret' => $api_secret,
                                 'cookie'     => AuthCookie::getCredentials()[ 'user' ] ?? null
-                        ],
-                        'login_exceptions.txt'
+                        ]
                 );
             } catch ( ReflectionException $ignore ) {
             }

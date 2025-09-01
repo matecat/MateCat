@@ -45,12 +45,12 @@ class SessionTokenStoreHandler {
      * @return void
      */
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
-        LoggerFactory::doJsonLog( [
+        LoggerFactory::getLogger( "login_cookie_cache" )->debug( [
                 "type"  => $type,
                 "key"   => $key,
                 "value" => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
             //"result_set" => $value,
-        ], "login_cookie_cache.log" );
+        ] );
     }
 
     /**

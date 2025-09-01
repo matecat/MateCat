@@ -56,9 +56,7 @@ class GetTagProjectionController extends KleinController {
 
         if ( !empty( $result->error ) ) {
 
-            $logger = LoggerFactory::getLogger( 'tagProjection.log' );
-
-            $logger->log(
+            LoggerFactory::getLogger( 'tag_projection' )->debug(
                     [
                             'request' => $config,
                             'error'   => $result->error
@@ -119,7 +117,7 @@ class GetTagProjectionController extends KleinController {
 
         if ( empty( $id_job ) ) {
             $msg = "\n\n Critical. Quit. \n\n " . var_export( $_POST, true );
-            $this->log( $msg );
+            $this->debug( $msg );
             Utils::sendErrMailReport( $msg );
 
             throw new InvalidArgumentException( "id_job not valid", -4 );

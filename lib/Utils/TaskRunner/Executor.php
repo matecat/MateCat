@@ -94,7 +94,7 @@ class Executor implements SplObserver {
     protected function _logMsg( $_msg ) {
         if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
-            $this->logger->log( $_msg );
+            $this->logger->debug( $_msg );
         }
     }
 
@@ -125,7 +125,7 @@ class Executor implements SplObserver {
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
         $this->logger = LoggerFactory::getLogger( 'executor', $_context->loggerName );
-        LoggerFactory::setAliases( [ 'engines' ], $this->logger );
+        LoggerFactory::setAliases( [ 'engines', 'project_manager', 'feature_set' ], $this->logger );
 
         $this->_executionContext = $_context;
 

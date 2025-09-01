@@ -110,6 +110,7 @@ class FastAnalysis extends AbstractDaemon {
         $this->_contextIndex = $contextIndex;
 
         $this->logger = LoggerFactory::getLogger( 'fast_analysis', 'fastAnalysis.log' );
+        LoggerFactory::setAliases( [ 'engines' ], $this->logger );
 
         try {
             $this->queueHandler = new AMQHandler();
@@ -154,12 +155,12 @@ class FastAnalysis extends AbstractDaemon {
             }
 
             if ( empty( $projects_list ) ) {
-                $this->_logTimeStampedMsg( "No projects: wait 3 seconds." );
+//                $this->_logTimeStampedMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
                 continue;
             }
 
-            $this->_logTimeStampedMsg( "Projects found: " . var_export( $projects_list, true ) . "." );
+            $this->_logTimeStampedMsg( "Projects found",  $projects_list );
 
             $featureSet = new FeatureSet();
 

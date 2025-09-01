@@ -138,14 +138,14 @@ class PluginsLoader {
         $cls = "$baseClass\\Decorator\\$decoratorName";
 
         // if this line is missing, it won't log load errors.
-        LoggerFactory::doJsonLog( 'Loading Decorator ' . $cls, 'decorators.log' );
+        LoggerFactory::getLogger( 'decorators' )->debug( 'Loading Decorator ' . $cls );
 
         if ( class_exists( $cls ) ) {
             return $cls;
         }
 
         // if this line is missing, it won't log load errors.
-        LoggerFactory::doJsonLog( 'Failed Loading Decorator ' . $cls, 'decorators.log' );
+        LoggerFactory::getLogger( 'decorators' )->debug( 'Failed Loading Decorator ' . $cls );
 
         return false;
 
