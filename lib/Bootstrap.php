@@ -271,7 +271,6 @@ class Bootstrap {
 
         if ( $enable_outsource == "false" ) {
             $configuration[ "ENABLE_OUTSOURCE" ] = false;
-            LoggerFactory::doJsonLog( "DISABLED OUTSOURCE" );
         }
 
         return $configuration;
