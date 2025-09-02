@@ -1,9 +1,10 @@
 <?php
 
 
+use Model\DataAccess\Database;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
 
 /**
  * @group  regression
@@ -14,7 +15,7 @@ use WordCount\WordCountStruct;
  */
 class ConstructorTest extends AbstractTest {
     /**
-     * @var  Database
+     * @var  \Model\DataAccess\Database
      */
     protected $database_instance;
     protected $sql_delete_job;
@@ -33,8 +34,8 @@ class ConstructorTest extends AbstractTest {
         parent::setUp();
 
         $this->word_count_struct = new WordCountStruct();
-        $this->word_count_struct->setIdJob( $this->job_id );
-        $this->word_count_struct->setJobPassword( $this->job_password );
+        $this->word_count_struct->setIdJob( 1 );
+        $this->word_count_struct->setJobPassword( 'string');
         $this->word_count_struct->setNewWords( 0 );
         $this->word_count_struct->setDraftWords( 0 );
         $this->word_count_struct->setTranslatedWords( 30 );
@@ -59,7 +60,7 @@ class ConstructorTest extends AbstractTest {
         $constCache          = $mirror_word_counter->getProperty( 'constCache' );
         $constCache->setAccessible( true );
 
-        $this->assertCount( 8, $constCache->getValue( $word_counter ) );
+        $this->assertCount( 7, $constCache->getValue( $word_counter ) );
         $this->assertEquals( "STATUS_NEW", $constCache->getValue( $word_counter )[ 'NEW' ] );
         $this->assertEquals( "STATUS_DRAFT", $constCache->getValue( $word_counter )[ 'DRAFT' ] );
         $this->assertEquals( "STATUS_TRANSLATED", $constCache->getValue( $word_counter )[ 'TRANSLATED' ] );
@@ -67,7 +68,6 @@ class ConstructorTest extends AbstractTest {
         $this->assertEquals( "STATUS_APPROVED2", $constCache->getValue( $word_counter )[ 'APPROVED2' ] );
         $this->assertEquals( "STATUS_REJECTED", $constCache->getValue( $word_counter )[ 'REJECTED' ] );
         $this->assertEquals( "STATUS_FIXED", $constCache->getValue( $word_counter )[ 'FIXED' ] );
-        $this->assertEquals( "STATUS_REBUTTED", $constCache->getValue( $word_counter )[ 'REBUTTED' ] );
 
 
         $old_w_count = $mirror_word_counter->getProperty( 'oldWCount' );

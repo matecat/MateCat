@@ -33,7 +33,7 @@ export const getGlossaryForSegment = async ({
   }
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/_get`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/_get`,
     {
       method: 'POST',
       credentials: 'include',

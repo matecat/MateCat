@@ -142,7 +142,7 @@ test('Add MT', async () => {
 
 test('In cattool', async () => {
   global.config.isLoggedIn = true
-  global.config.ownerIsMe = 1
+  global.config.ownerIsMe = true
   config.is_cattool = true
   const values = {
     mtEngines: mtEnginesMock,

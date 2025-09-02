@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class CreateTableMtQeTemplates extends AbstractMatecatMigration {
 
     public $sql_up = [

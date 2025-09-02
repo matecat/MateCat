@@ -1,11 +1,14 @@
 <?php
 
 use TestHelpers\AbstractTest;
-use Validator\GlossaryCSVValidator;
-use Validator\GlossaryCSVValidatorObject;
+use Utils\Validator\Contracts\ValidatorObject;
+use Utils\Validator\GlossaryCSVValidator;
 
 class GlossaryCSVValidatorTest extends AbstractTest {
 
+    /**
+     * @throws Exception
+     */
     public function testFiles() {
         $invalids = [
                 __DIR__ . '/../../resources/files/csv/glossary/NV - Header vuoto.csv',
@@ -30,21 +33,21 @@ class GlossaryCSVValidatorTest extends AbstractTest {
         ];
 
         foreach ( $invalids as $invalid ) {
-            $validatorObject      = new GlossaryCSVValidatorObject();
-            $validatorObject->csv = $invalid;
-            $validator            = new GlossaryCSVValidator();
 
-            $validator->validate( $validatorObject );
+            $validator = new GlossaryCSVValidator();
+            $validator->validate( ValidatorObject::fromArray( [
+                    'csv' => $invalid
+            ] ) );
 
             $this->assertFalse( $validator->isValid() );
         }
 
         foreach ( $valids as $valid ) {
-            $validatorObject      = new GlossaryCSVValidatorObject();
-            $validatorObject->csv = $valid;
-            $validator            = new GlossaryCSVValidator();
 
-            $validator->validate( $validatorObject );
+            $validator = new GlossaryCSVValidator();
+            $validator->validate( ValidatorObject::fromArray( [
+                    'csv' => $valid
+            ] ) );
 
             $this->assertTrue( $validator->isValid() );
         }

@@ -1,6 +1,15 @@
 <?php
 
-class Engines_Intento extends Engines_AbstractEngine {
+namespace Utils\Engines;
+
+use Exception;
+use ReflectionException;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MTResponse;
+use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
+
+class Intento extends AbstractEngine {
 
     const INTENTO_USER_AGENT   = 'Intento.MatecatPlugin/1.0.0';
     const INTENTO_PROVIDER_KEY = 'd3ic8QPYVwRhy6IIEHi6yiytaORI2kQk';
@@ -17,19 +26,22 @@ class Engines_Intento extends Engines_AbstractEngine {
     private $providerKey;
     private $providerCategory;
 
+    /**
+     * @throws Exception
+     */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
 
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
 
         $extra = $engineRecord->getExtraParamsAsArray();
 
-        $this->apiKey = $extra['apikey'] ?? null;
-        $this->provider = $extra['provider'] ?? [];
-        $this->providerKey = $extra['providerkey'] ?? null;
-        $this->providerCategory = $extra['providercategory'] ?? null;
+        $this->apiKey           = $extra[ 'apikey' ] ?? null;
+        $this->provider         = $extra[ 'provider' ] ?? [];
+        $this->providerKey      = $extra[ 'providerkey' ] ?? null;
+        $this->providerCategory = $extra[ 'providercategory' ] ?? null;
     }
 
     /**
@@ -49,7 +61,7 @@ class Engines_Intento extends Engines_AbstractEngine {
      * @param null $parameters
      * @param null $function
      *
-     * @return array|Engines_Results_MT
+     * @return array|MTResponse
      * @throws Exception
      */
     protected function _decode( $rawValue, $parameters = null, $function = null ) {
@@ -60,32 +72,32 @@ class Engines_Intento extends Engines_AbstractEngine {
             if ( $result and isset( $result->id ) ) {
                 $id = $result->id;
 
-                if ( isset( $result->response ) and !empty($result->response) and isset( $result->done ) and $result->done == true ) {
+                if ( isset( $result->response ) and !empty( $result->response ) and isset( $result->done ) and $result->done ) {
                     $text    = $result->response[ 0 ]->results[ 0 ];
                     $decoded = [
-                        'data' => [
-                            'translations' => [
-                                [ 'translatedText' => $text ]
+                            'data' => [
+                                    'translations' => [
+                                            [ 'translatedText' => $text ]
+                                    ]
                             ]
-                        ]
                     ];
 
-                } elseif ( isset( $result->done ) and $result->done == false ) {
+                } elseif ( isset( $result->done ) and !$result->done ) {
                     sleep( 2 );
                     $cnf = [ 'async' => true, 'id' => $id ];
 
                     return $this->_curl_async( $cnf, $parameters, $function );
-                } elseif ( isset( $result->error ) and !empty($result->error) ) {
+                } elseif ( isset( $result->error ) and !empty( $result->error ) ) {
 
-                    $httpCode = $result->error->data[0]->response->body->error->code ?? 500;
-                    $message = $result->error->data[0]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
+                    $httpCode = $result->error->data[ 0 ]->response->body->error->code ?? 500;
+                    $message  = $result->error->data[ 0 ]->response->body->error->message ?? $result->error->reason ?? "Unknown error";
 
                     $decoded = [
-                        'error' => [
-                            'code'    => -2,
-                            'message' => $message,
-                            'http_code' => $httpCode
-                        ]
+                            'error' => [
+                                    'code'      => -2,
+                                    'message'   => $message,
+                                    'http_code' => $httpCode
+                            ]
                     ];
                 } else {
                     $cnf = [ 'async' => true, 'id' => $id ];
@@ -121,16 +133,19 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         }
 
-        return $this->_composeMTResponseAsMatch($parameters[ 'context' ][ 'text' ], $decoded);
+        return $this->_composeMTResponseAsMatch( $parameters[ 'context' ][ 'text' ], $decoded );
     }
 
-    public function get( $_config ) {
+    /**
+     * @throws Exception
+     */
+    public function get( array $_config ) {
 
-        $_config[ 'source' ]  = $this->_fixLangCode( $_config[ 'source' ] );
-        $_config[ 'target' ]  = $this->_fixLangCode( $_config[ 'target' ] );
+        $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = [];
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
@@ -141,15 +156,15 @@ class Engines_Intento extends Engines_AbstractEngine {
         $providerKey                       = $this->providerKey;
         $providerCategory                  = $this->providerCategory;
 
-        if ( !empty($provider) ) {
+        if ( !empty( $provider ) ) {
             $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider['id'];
+            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
 
-            if ( !empty($providerKey) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider['id'] ] = [json_decode( $providerKey, true )];
+            if ( !empty( $providerKey ) ) {
+                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
             }
 
-            if ( !empty($providerCategory) ) {
+            if ( !empty( $providerCategory ) ) {
                 $parameters[ 'context' ][ 'category' ] = $providerCategory;
             }
         }
@@ -160,7 +175,7 @@ class Engines_Intento extends Engines_AbstractEngine {
                 [
                         CURLOPT_POST       => true,
                         CURLOPT_POSTFIELDS => json_encode( $parameters ),
-                        CURLOPT_HTTPHEADER => $_headers
+                        CURLOPT_HTTPHEADER => $_headers ?? []
                 ]
         );
 
@@ -170,10 +185,13 @@ class Engines_Intento extends Engines_AbstractEngine {
 
     }
 
+    /**
+     * @throws Exception
+     */
     protected function _curl_async( $config, $parameters = null, $function = null ) {
         $id = $config[ 'id' ];
 
-        if ( !empty($this->apiKey) ) {
+        if ( !empty( $this->apiKey ) ) {
             $_headers = [ 'apikey: ' . $this->apiKey, 'Content-Type: application/json' ];
         }
 
@@ -181,7 +199,7 @@ class Engines_Intento extends Engines_AbstractEngine {
 
         $this->_setAdditionalCurlParams(
                 [
-                        CURLOPT_HTTPHEADER => $_headers
+                        CURLOPT_HTTPHEADER => $_headers ?? []
                 ]
         );
 
@@ -196,19 +214,19 @@ class Engines_Intento extends Engines_AbstractEngine {
 
     }
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
 
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
+    public function update( $_config ): bool {
 
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         //if engine does not implement DELETE method, exit
         return true;
@@ -219,11 +237,12 @@ class Engines_Intento extends Engines_AbstractEngine {
      *  Set Matecat + Intento user agent
      */
     private function _setIntentoUserAgent() {
-        $this->curl_additional_params[ CURLOPT_USERAGENT ] = self::INTENTO_USER_AGENT . ' ' . INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER;
+        $this->curl_additional_params[ CURLOPT_USERAGENT ] = self::INTENTO_USER_AGENT . ' ' . AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER;
     }
 
     /**
      * Get provider list
+     * @throws ReflectionException
      */
     public static function getProviderList() {
         $redisHandler = new RedisHandler();
@@ -239,7 +258,7 @@ class Engines_Intento extends Engines_AbstractEngine {
                 CURLOPT_HTTPHEADER     => [ 'apikey: ' . self::INTENTO_PROVIDER_KEY, 'Content-Type: application/json' ],
                 CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
+                CURLOPT_USERAGENT      => AppConfig::MATECAT_USER_AGENT . AppConfig::$BUILD_NUMBER . ' ' . self::INTENTO_USER_AGENT,
                 CURLOPT_CONNECTTIMEOUT => 10,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2

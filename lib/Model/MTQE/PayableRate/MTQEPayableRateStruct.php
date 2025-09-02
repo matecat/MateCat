@@ -7,14 +7,14 @@
  *
  */
 
-namespace MTQE\PayableRate;
+namespace Model\MTQE\PayableRate;
 
-use \DataAccess\AbstractDaoSilentStruct;
 use DomainException;
 use JsonSerializable;
-use MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\MTQE\PayableRate\DTO\MTQEPayableRateBreakdowns;
 
-class MTQEPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implements JsonSerializable {
+class MTQEPayableRateStruct extends AbstractDaoSilentStruct implements JsonSerializable {
 
     public int     $id          = 0;
     public string  $name        = "";
@@ -107,7 +107,7 @@ class MTQEPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
      * @inheritDoc
      */
     public function jsonSerialize() {
-        return (array)$this;
+        return $this->getArrayCopy();
     }
 
     public function __toString(): string {

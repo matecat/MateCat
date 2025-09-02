@@ -2,28 +2,31 @@
 
 namespace Model\Analysis;
 
-use AMQHandler;
-use API\App\Json\Analysis\AnalysisChunk;
-use API\App\Json\Analysis\AnalysisFile;
-use API\App\Json\Analysis\AnalysisJob;
-use API\App\Json\Analysis\AnalysisProject;
-use API\App\Json\Analysis\AnalysisProjectSummary;
-use Chunks_ChunkDao;
-use Constants_ProjectStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use FeatureSet;
-use Jobs_JobStruct;
-use Langs\LanguageDomains;
-use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Analysis\Constants\MatchConstantsFactory;
-use OutsourceTo_OutsourceAvailable;
-use Projects_MetadataDao;
-use Projects_ProjectDao;
-use Projects_ProjectStruct;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Users\UserStruct;
 use ReflectionException;
-use Routes;
-use Users_UserStruct;
+use Utils\ActiveMQ\AMQHandler;
+use Utils\Constants\ProjectStatus;
+use Utils\Langs\LanguageDomains;
+use Utils\OutsourceTo\OutsourceAvailable;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Url\CanonicalRoutes;
+use View\API\App\Json\Analysis\AnalysisChunk;
+use View\API\App\Json\Analysis\AnalysisFile;
+use View\API\App\Json\Analysis\AnalysisJob;
+use View\API\App\Json\Analysis\AnalysisProject;
+use View\API\App\Json\Analysis\AnalysisProjectSummary;
 
 /**
  * Created by PhpStorm.
@@ -35,49 +38,47 @@ use Users_UserStruct;
  */
 abstract class AbstractStatus {
 
-    protected $_data_struct = [];
-
     /**
-     * Carry the result from Executed Controller Action and returned in json format to the Client
+     * Carry the result from Executed Controller Action and returned in JSON format to the Client
      *
      * @var ?AnalysisProject
      */
     protected ?AnalysisProject $result = null;
 
-    protected int   $total_segments = 0;
-    protected array $_resultSet     = [];
-    protected int   $_others_in_queue = 0;
-    protected array $_project_data    = [];
+    protected int    $total_segments   = 0;
+    protected array  $_resultSet       = [];
+    protected int    $_others_in_queue = 0;
+    protected array  $_project_data    = [];
     protected string $status_project   = "";
 
     protected FeatureSet $featureSet;
     /**
-     * @var Projects_ProjectStruct
+     * @var ProjectStruct
      */
-    protected Projects_ProjectStruct $project;
+    protected ProjectStruct $project;
     /**
-     * @var Users_UserStruct|null
+     * @var UserStruct|null
      */
-    protected ?Users_UserStruct $user;
+    protected ?UserStruct $user;
     /**
      * @var mixed
      */
     protected $subject;
 
     /**
-     * @param array                 $_project_data
-     * @param FeatureSet            $features
-     * @param Users_UserStruct|null $user
+     * @param array           $_project_data
+     * @param FeatureSet      $features
+     * @param UserStruct|null $user
      *
      * @throws ReflectionException
      */
-    public function __construct( array $_project_data, FeatureSet $features, Users_UserStruct $user = null ) {
+    public function __construct( array $_project_data, FeatureSet $features, ?UserStruct $user = null ) {
         if ( is_null( $user ) ) { // avoid null pointer exception when calling methods on class property user
-            $user      = new Users_UserStruct();
+            $user      = new UserStruct();
             $user->uid = -1;
         }
         $this->user          = $user;
-        $this->project       = Projects_ProjectDao::findById( $_project_data[ 0 ][ 'pid' ], 60 * 60 );
+        $this->project       = ProjectDao::findById( $_project_data[ 0 ][ 'pid' ], 60 * 60 );
         $this->_project_data = $_project_data;
         $this->featureSet    = $features;
     }
@@ -109,7 +110,7 @@ abstract class AbstractStatus {
 
         $this->total_segments = count( $this->_resultSet );
 
-        //get status of project
+        //get the status of a project
         $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
 
         $subject_handler = LanguageDomains::getInstance();
@@ -130,14 +131,22 @@ abstract class AbstractStatus {
     }
 
     /**
+     * @param $targetLang
+     * @param $id_customer
+     * @param $idJob
+     *
      * @return bool
-     * @throws Exception
+     * @throws AuthenticationError
+     * @throws NotFoundException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      */
-    protected function isOutsourceEnabled( $targetLang, $id_customer, $idJob ) {
+    protected function isOutsourceEnabled( $targetLang, $id_customer, $idJob ): bool {
 
         $outsourceAvailableInfo = $this->featureSet->filter( 'outsourceAvailableInfo', $targetLang, $id_customer, $idJob );
 
-        // if the hook is not triggered by any plugin
+        // if any plugin does not trigger the hook
         if ( !is_array( $outsourceAvailableInfo ) or empty( $outsourceAvailableInfo ) ) {
             $outsourceAvailableInfo = [
                     'disabled_email'         => false,
@@ -146,7 +155,7 @@ abstract class AbstractStatus {
             ];
         }
 
-        return OutsourceTo_OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
+        return OutsourceAvailable::isOutsourceAvailable( $outsourceAvailableInfo );
 
     }
 
@@ -156,7 +165,7 @@ abstract class AbstractStatus {
     protected function loadObjects(): AbstractStatus {
 
         $target                 = null;
-        $mt_qe_workflow_enabled = $this->project->getMetadataValue( Projects_MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
+        $mt_qe_workflow_enabled = $this->project->getMetadataValue( MetadataDao::MT_QE_WORKFLOW_ENABLED ) ?? false;
         $matchConstantsClass    = MatchConstantsFactory::getInstance( $mt_qe_workflow_enabled );
 
         $this->result = $project = new AnalysisProject(
@@ -189,7 +198,7 @@ abstract class AbstractStatus {
             }
 
             if ( !isset( $chunk ) || $chunk->getPassword() != $segInfo[ 'jpassword' ] ) {
-                $chunkStruct = Chunks_ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
+                $chunkStruct = ChunkDao::getByIdAndPassword( $segInfo[ 'jid' ], $segInfo[ 'jpassword' ], 60 * 10 );
                 $chunk       = new AnalysisChunk( $chunkStruct, $this->_project_data[ 0 ][ 'pname' ], $this->user, $matchConstantsClass );
                 $job->setPayableRates( json_decode( $chunkStruct->payable_rates ) );
                 $job->setChunk( $chunk );
@@ -249,15 +258,15 @@ abstract class AbstractStatus {
 
         if ( $project->getSummary()->getSegmentsAnalyzed() == 0 && in_array( $this->status_project,
                         [
-                                Constants_ProjectStatus::STATUS_NEW,
-                                Constants_ProjectStatus::STATUS_BUSY
+                                ProjectStatus::STATUS_NEW,
+                                ProjectStatus::STATUS_BUSY
                         ]
                 ) ) {
 
-            //Related to an issue in the outsource
-            //Here, the Fast analysis was not performed, return the number of raw word count
+            //Related to an issue in the outsourcing
+            //Here, the Fast analysis was not performed, return the number of raw word counts
             //Needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
-            //( there are no segment_translations )
+            //(there are no segment_translations)
 
             foreach ( $this->_project_data as $_job_fallback ) {
 
@@ -269,7 +278,7 @@ abstract class AbstractStatus {
                 $job->incrementEquivalent( round( $_job_fallback[ 'standard_analysis_wc' ] ?? 0 ) );  //backward compatibility, some old projects may have this field set as null
                 $job->incrementRaw( round( $_job_fallback[ 'standard_analysis_wc' ] ) );
 
-                $chunkStruct                = new Jobs_JobStruct();
+                $chunkStruct                = new JobStruct();
                 $chunkStruct->id            = $_job_fallback[ 'jid' ];
                 $chunkStruct->password      = $_job_fallback[ 'jpassword' ];
                 $chunkStruct->source        = $lang_pair[ 0 ];
@@ -298,8 +307,8 @@ abstract class AbstractStatus {
      * @return string
      * @throws Exception
      */
-    private function getAnalyzeLink() {
-        return Routes::analyze( [
+    private function getAnalyzeLink(): string {
+        return CanonicalRoutes::analyze( [
                 'project_name' => $this->project->name,
                 'id_project'   => $this->project->id,
                 'password'     => $this->project->password,

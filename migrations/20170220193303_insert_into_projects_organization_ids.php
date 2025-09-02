@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class InsertIntoProjectsOrganizationIds extends AbstractMatecatMigration
 {
 

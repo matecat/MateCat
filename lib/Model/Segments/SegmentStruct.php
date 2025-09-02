@@ -1,40 +1,29 @@
 <?php
 
-use DataAccess\ArrayAccessTrait;
+namespace Model\Segments;
 
-class Segments_SegmentStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, ArrayAccess {
+use ArrayAccess;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\ArrayAccessTrait;
+use Model\DataAccess\IDaoStruct;
+
+class SegmentStruct extends AbstractDaoSilentStruct implements IDaoStruct, ArrayAccess {
 
     use ArrayAccessTrait;
 
-    public    $id;
-    public    $id_file;
-    public    $id_file_part;
-    protected $id_project; //keep private, this is not implemented in Database schema
-    public    $internal_id;
-    public    $xliff_mrk_id;
-    public    $xliff_ext_prec_tags;
-    public    $xliff_mrk_ext_prec_tags;
-    public    $segment;
-    public    $segment_hash;
-    public    $xliff_mrk_ext_succ_tags;
-    public    $xliff_ext_succ_tags;
-    public    $raw_word_count;
-    public    $show_in_cattool;
-
-    /**
-     * @return Segments_SegmentNoteStruct[]
-     */
-    public function getNotes() {
-        return $this->cachable( __function__, $this->id, function ( $id ) {
-            return Segments_SegmentNoteDao::getBySegmentId( $id );
-        } );
-    }
-
-    public function findTranslation( $id_job ) {
-        return Translations_SegmentTranslationDao::findBySegmentAndJob(
-                $this->id,
-                $id_job
-        );
-    }
+    public int     $id;
+    public int     $id_file;
+    public ?int    $id_file_part            = null;
+    protected ?int $id_project              = null; //keep private, this is not implemented in Database schema
+    public string  $internal_id;
+    public ?string $xliff_mrk_id            = null;
+    public ?string $xliff_ext_prec_tags     = null;
+    public ?string $xliff_mrk_ext_prec_tags = null;
+    public string  $segment;
+    public string  $segment_hash;
+    public ?string $xliff_mrk_ext_succ_tags = null;
+    public ?string $xliff_ext_succ_tags     = null;
+    public int     $raw_word_count;
+    public bool    $show_in_cattool         = true;
 
 }

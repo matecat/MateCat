@@ -1,10 +1,10 @@
 <?php
 
-namespace Xliff\DTO;
+namespace Model\Xliff\DTO;
 
-use Constants\XliffTranslationStatus;
-use Constants_TranslationStatus;
 use LogicException;
+use Utils\Constants\TranslationStatus;
+use Utils\Constants\XliffTranslationStatus;
 
 class DefaultRule extends AbstractXliffRule {
 
@@ -32,7 +32,7 @@ class DefaultRule extends AbstractXliffRule {
         // default behavior
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) {
             if ( XliffTranslationStatus::isStateQualifierNew( $this->getStates( "state-qualifiers" )[ 0 ] ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
+                return TranslationStatus::STATUS_NEW;
             }
         }
 
@@ -42,35 +42,35 @@ class DefaultRule extends AbstractXliffRule {
             $state = $this->getStates( "states" )[ 0 ];
 
             if ( XliffTranslationStatus::isStatusNew( $state ) ) {
-                return Constants_TranslationStatus::STATUS_NEW;
+                return TranslationStatus::STATUS_NEW;
             }
 
             if ( XliffTranslationStatus::isTranslated( $state ) ) {
-                return Constants_TranslationStatus::STATUS_TRANSLATED;
+                return TranslationStatus::STATUS_TRANSLATED;
             }
 
             if ( XliffTranslationStatus::isRevision( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED;
+                return TranslationStatus::STATUS_APPROVED;
             }
 
             if ( XliffTranslationStatus::isFinalState( $state ) ) {
-                return Constants_TranslationStatus::STATUS_APPROVED2;
+                return TranslationStatus::STATUS_APPROVED2;
             }
 
         }
 
         // retro-compatibility
-        return Constants_TranslationStatus::STATUS_APPROVED;
+        return TranslationStatus::STATUS_APPROVED;
 
     }
 
     /**
-     * @param string|null $source
-     * @param string|null $target
+     * @param string $source
+     * @param string $target
      *
      * @return bool
      */
-    public function isTranslated( string $source = null, string $target = null ): bool {
+    public function isTranslated( string $source, string $target ): bool {
 
         if ( !empty( $this->getStates( "state-qualifiers" )[ 0 ] ) ) { // default behavior
             // Ignore translations for fuzzy matches (xliff 1.2)

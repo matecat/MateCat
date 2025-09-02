@@ -1,5 +1,9 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\OwnerFeatures\OwnerFeatureDao;
+use Model\OwnerFeatures\OwnerFeatureStruct;
+
 class Factory_OwnerFeature extends Factory_Base {
 
     static function create( $values ) {
@@ -10,8 +14,8 @@ class Factory_OwnerFeature extends Factory_Base {
                 'enabled'      => true,
         ], $values );
 
-        $dao    = new OwnerFeatures_OwnerFeatureDao( Database::obtain() );
-        $struct = new OwnerFeatures_OwnerFeatureStruct( $values );
+        $dao    = new OwnerFeatureDao( Database::obtain() );
+        $struct = new OwnerFeatureStruct( $values );
 
         return $dao->create( $struct );
     }

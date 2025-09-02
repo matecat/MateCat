@@ -119,7 +119,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
               'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
-          ...(config.ownerIsMe === 1
+          ...(config.ownerIsMe
             ? [
                 {
                   id: SETTINGS_PANEL_TABS.editorOther,

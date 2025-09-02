@@ -1,10 +1,16 @@
 <?php
 
-use DataAccess\AbstractDao;
-use Exceptions\NotFoundException;
-use Projects\ChunkOptionsModel;
+namespace Model\Projects;
 
-class Projects_MetadataDao extends AbstractDao {
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\ChunkOptionsModel;
+use Model\Jobs\JobStruct;
+use ReflectionException;
+
+class MetadataDao extends AbstractDao {
     const FEATURES_KEY = 'features';
     const TABLE        = 'project_metadata';
 
@@ -26,11 +32,11 @@ class Projects_MetadataDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return Projects_MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws ReflectionException
      */
     public static function getByProjectId( $id ): array {
-        $dao = new Projects_MetadataDao();
+        $dao = new MetadataDao();
 
         return $dao->setCacheTTL( 60 * 60 )->allByProjectId( $id );
     }
@@ -38,7 +44,7 @@ class Projects_MetadataDao extends AbstractDao {
     /**
      * @param $id
      *
-     * @return Projects_MetadataStruct[]
+     * @return MetadataStruct[]
      * @throws ReflectionException
      */
     public function allByProjectId( $id ): array {
@@ -47,9 +53,9 @@ class Projects_MetadataDao extends AbstractDao {
         $stmt = $conn->prepare( self::$_query_get_metadata );
 
         /**
-         * @var Projects_MetadataStruct[]
+         * @var MetadataStruct[]
          */
-        return $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [ 'id_project' => $id ] );
+        return $this->_fetchObjectMap( $stmt, MetadataStruct::class, [ 'id_project' => $id ] );
 
     }
 
@@ -59,7 +65,7 @@ class Projects_MetadataDao extends AbstractDao {
     public function destroyMetadataCache( $id ): bool {
         $stmt = $this->_getStatementForQuery( self::$_query_get_metadata );
 
-        return $this->_destroyObjectCache( $stmt, Projects_MetadataStruct::class, [ 'id_project' => $id ] );
+        return $this->_destroyObjectCache( $stmt, MetadataStruct::class, [ 'id_project' => $id ] );
     }
 
     /**
@@ -67,10 +73,10 @@ class Projects_MetadataDao extends AbstractDao {
      * @param string $key
      * @param int    $ttl
      *
-     * @return Projects_MetadataStruct|null
+     * @return MetadataStruct|null
      * @throws ReflectionException
      */
-    public function get( int $id_project, string $key, int $ttl = 0 ): ?Projects_MetadataStruct {
+    public function get( int $id_project, string $key, int $ttl = 0 ): ?MetadataStruct {
         $stmt = $this->setCacheTTL( $ttl )->_getStatementForQuery(
                 "SELECT * FROM project_metadata WHERE " .
                 " id_project = :id_project " .
@@ -78,9 +84,9 @@ class Projects_MetadataDao extends AbstractDao {
         );
 
         /**
-         * @var $result Projects_MetadataStruct[]
+         * @var $result MetadataStruct[]
          */
-        $result = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), [
+        $result = $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
                 'id_project' => $id_project,
                 'key'        => $key
         ] );
@@ -138,7 +144,7 @@ class Projects_MetadataDao extends AbstractDao {
 
     }
 
-    public static function buildChunkKey( $key, Jobs_JobStruct $chunk ): string {
+    public static function buildChunkKey( $key, JobStruct $chunk ): string {
         return "{$key}_chunk_{$chunk->id}_$chunk->password";
     }
 
@@ -152,7 +158,7 @@ class Projects_MetadataDao extends AbstractDao {
      */
     public function cleanupChunksOptions( array $jobs ) {
         foreach ( $jobs as $job ) {
-            $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
+            $chunk = ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
 
             foreach ( ChunkOptionsModel::$valid_keys as $key ) {
                 $this->delete(

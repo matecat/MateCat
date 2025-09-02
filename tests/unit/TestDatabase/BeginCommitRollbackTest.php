@@ -1,6 +1,8 @@
 <?php
 
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -8,8 +10,8 @@ use TestHelpers\AbstractTest;
  *
  * @group  regression
  * @covers Database::begin
- * @covers Database::commit
- * @covers Database::rollback
+ * @covers \Model\DataAccess\Database::commit
+ * @covers \Model\DataAccess\Database::rollback
  * User: dinies
  * Date: 12/04/16
  * Time: 17.15
@@ -37,15 +39,15 @@ class BeginCommitRollbackTest extends AbstractTest {
         parent::setUp();
 
         $this->raw_client_instance = new PDO(
-                "mysql:host=" . INIT::$DB_SERVER . ";dbname=" . INIT::$DB_DATABASE . ";charset=UTF8",
-                INIT::$DB_USER,
-                INIT::$DB_PASS,
+                "mysql:host=" . AppConfig::$DB_SERVER . ";dbname=" . AppConfig::$DB_DATABASE . ";charset=UTF8",
+                AppConfig::$DB_USER,
+                AppConfig::$DB_PASS,
                 [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Raise exceptions on errors
                 ]
         );
 
-        $this->client_1_instance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->client_1_instance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT)";
         $this->sql_drop   = "DROP TABLE Persons";
@@ -69,7 +71,7 @@ class BeginCommitRollbackTest extends AbstractTest {
      *
      * Moreover
      * @group  regression
-     * @covers Database::begin
+     * @covers \Model\DataAccess\Database::begin
      */
     public function test_begin_and_rollback() {
 
@@ -104,7 +106,7 @@ class BeginCommitRollbackTest extends AbstractTest {
      * the state of the database, raw_client_instance will be able
      * to read data updated;
      * @group  regression
-     * @covers Database::commit
+     * @covers \Model\DataAccess\Database::commit
      */
     public function test_commit() {
 

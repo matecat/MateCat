@@ -6,16 +6,16 @@
  * Time: 15:08
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
-use Jobs_JobStruct;
-use LQA\ModelStruct;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ModelStruct;
+use Model\Projects\ProjectStruct;
 
 interface IChunkReviewModel {
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
     public function getChunk();
 
@@ -23,21 +23,21 @@ interface IChunkReviewModel {
      * adds penalty_points and updates pass fail result
      *
      * @param                         $penalty_points
-     * @param \Projects_ProjectStruct $projectStruct
+     * @param ProjectStruct           $projectStruct
      *
      * @return
      */
-    public function addPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct );
+    public function addPenaltyPoints( $penalty_points, ProjectStruct $projectStruct );
 
     /**
      * subtract penalty_points and updates pass fail result
      *
-     * @param                         $penalty_points
-     * @param \Projects_ProjectStruct $projectStruct
+     * @param float         $penalty_points
+     * @param ProjectStruct $projectStruct
      *
      * @return
      */
-    public function subtractPenaltyPoints( $penalty_points, \Projects_ProjectStruct $projectStruct );
+    public function subtractPenaltyPoints( float $penalty_points, ProjectStruct $projectStruct );
 
     /**
      * Returns the calculated score
@@ -54,8 +54,8 @@ interface IChunkReviewModel {
      * This method invokes the recount of reviewed_words_count and
      * penalty_points for the chunk and updates the passfail result.
      *
-     * @param Projects_ProjectStruct $project
+     * @param ProjectStruct $project
      *
      */
-    public function recountAndUpdatePassFailResult( Projects_ProjectStruct $project );
+    public function recountAndUpdatePassFailResult( ProjectStruct $project );
 }

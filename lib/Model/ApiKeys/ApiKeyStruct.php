@@ -1,9 +1,13 @@
 <?php
+namespace Model\ApiKeys;
 
-use DataAccess\AbstractDaoObjectStruct;
-use DataAccess\IDaoStruct;
+use Model\DataAccess\AbstractDaoObjectStruct;
+use Model\DataAccess\Database;
+use Model\DataAccess\IDaoStruct;
+use Model\Users\UserDao;
+use ReflectionException;
 
-class ApiKeys_ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
+class ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct {
 
     public ?int    $id = null;
     public int    $uid;
@@ -21,7 +25,7 @@ class ApiKeys_ApiKeyStruct extends AbstractDaoObjectStruct implements IDaoStruct
      * @throws ReflectionException
      */
     public function getUser() {
-        $dao = new Users_UserDao( Database::obtain() );
+        $dao = new UserDao( Database::obtain() );
         $dao->setCacheTTL( 3600 );
 
         return $dao->getByUid( $this->uid );

@@ -7,16 +7,18 @@
  *
  */
 
-namespace Engines\Traits;
+namespace Utils\Engines\Traits;
 
 
-use Database;
-use EnginesModel_EngineDAO;
 use Exception;
+use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
 
 trait Oauth {
 
-    protected function getAuthParameters() {
+    protected int $token_endlife = 0;
+
+    protected function getAuthParameters(): array {
         return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => http_build_query( $this->_auth_parameters ), //microsoft doesn't want multi-part form data
@@ -27,10 +29,10 @@ trait Oauth {
     /**
      * Check for time to live and refresh cache and token info
      *
-     * @return mixed
+     * @return void
      * @throws Exception
      */
-    protected function _authenticate() {
+    protected function _authenticate(): void {
 
         $this->_auth_parameters[ 'client_id' ]     = $this->client_id;
         $this->_auth_parameters[ 'client_secret' ] = $this->client_secret;
@@ -69,18 +71,18 @@ trait Oauth {
 
         $record = clone( $this->getEngineRecord() );
 
-        $engineDAO = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO = new EngineDAO( Database::obtain() );
 
         /**
-         * Use a generic Engine and not Engine_MicrosoftHubStruct
-         * because the Engine Factory Class built the query as generic engine
+         * Use a generic EnginesFactory and not Engine_MicrosoftHubStruct
+         * because the EnginesFactory Factory Class built the query as generic engine
          *
          */
         $engineStruct     = $this->_getEngineStruct();
         $engineStruct->id = $record->id;
 
         //variable assignment only used for debugging purpose
-        $debugParam = $engineDAO->destroyCache( $engineStruct );
+        $engineDAO->destroyCache( $engineStruct );
         $engineDAO->updateByStruct( $record );
 
         if ( is_null( $this->token ) ) {
@@ -89,7 +91,7 @@ trait Oauth {
 
     }
 
-    private function isJson( $string ) {
+    private function isJson( $string ): bool {
         if ( is_array( $string ) ) {
             return false;
         }
@@ -98,7 +100,10 @@ trait Oauth {
         return ( json_last_error() == JSON_ERROR_NONE );
     }
 
-    public function get( $_config ) {
+    /**
+     * @throws Exception
+     */
+    public function get( array $_config ) {
 
         $cycle = (int)func_get_arg( 1 ) ?? 0;
 
@@ -150,7 +155,7 @@ trait Oauth {
 
     abstract protected function _checkAuthFailure();
 
-    abstract protected function _setTokenEndLife( $expires_in_seconds = null );
+    abstract protected function _setTokenEndLife( ?int $expires_in_seconds = null );
 
     abstract protected function _fillCallParameters( $_config );
 

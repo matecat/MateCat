@@ -1,23 +1,23 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use API\Commons\Exceptions\AuthenticationError;
-use Constants\ConversionHandlerStatus;
+use Controller\API\Commons\Exceptions\AuthenticationError;
 use Exception;
-use Exceptions\NotFoundException;
-use Exceptions\ValidationError;
-use FeatureSet;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\Exceptions\FileSystemException;
-use FilesStorage\FilesStorageFactory;
-use Filters\DTO\IDto;
-use Filters\FiltersConfigTemplateStruct;
-use INIT;
-use Log;
 use Matecat\XliffParser\XliffUtils\XliffProprietaryDetect;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Model\Exceptions\NotFoundException;
+use Model\Exceptions\ValidationError;
+use Model\FeaturesBase\FeatureSet;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\Exceptions\FileSystemException;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Filters\DTO\IDto;
+use Model\Filters\FiltersConfigTemplateStruct;
+use Utils\Constants\ConversionHandlerStatus;
+use Utils\Logger\Log;
+use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 
 class ConversionHandler {
 
@@ -51,12 +51,10 @@ class ConversionHandler {
     }
 
     public function fileMustBeConverted() {
-        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, INIT::$FILTERS_ADDRESS );
+        return XliffProprietaryDetect::fileMustBeConverted( $this->getLocalFilePath(), true, AppConfig::$FILTERS_ADDRESS );
     }
 
     public function getLocalFilePath(): string {
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-
         return $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
     }
 
@@ -334,8 +332,7 @@ class ConversionHandler {
      */
     public function extractZipFile(): array {
 
-        $this->file_name = html_entity_decode( $this->file_name, ENT_QUOTES );
-        $file_path       = $this->uploadDir . DIRECTORY_SEPARATOR . $this->file_name;
+        $file_path = $this->getLocalFilePath();
 
         //The zip file name is set in $this->file_name
         $this->result->setFileName( AbstractFilesStorage::basename_fix( $this->file_name ) );
@@ -443,10 +440,19 @@ class ConversionHandler {
     }
 
     /**
-     * @param mixed $file_name
+     * @param $file_name
+     *
+     * @throws Exception
      */
     public function setFileName( $file_name ) {
-        $this->file_name = $file_name;
+
+        $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
+
+        if($decoded_filename !== $file_name){
+            throw new Exception("Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>.");
+        }
+
+        $this->file_name = $decoded_filename;
     }
 
     /**
