@@ -204,12 +204,17 @@ class GlossaryFilesController extends KleinController {
 
     }
 
+    /**
+     * @throws Exception
+     */
     public function download() {
 
         $result = $this->TMService->glossaryExport( $this->tm_key, $this->name, $this->getUser()->getEmail(), $this->getUser()->fullName() );
 
-        if ( !$this->response->isLocked() ) {
+        if ( !$this->response->isLocked() && in_array( $result->responseStatus, [ 200, 202 ], true ) ) {
             $this->setSuccessResponse( $result->responseStatus, $result->responseData );
+        } else {
+            throw new Exception( "Error while requesting export", $result->responseStatus );
         }
 
     }

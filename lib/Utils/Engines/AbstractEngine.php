@@ -205,14 +205,14 @@ abstract class  AbstractEngine implements EngineInterface {
         if ( $mh->hasError( $resourceHash ) ) {
             $curl_error       = $mh->getError( $resourceHash );
             $responseRawValue = $mh->getSingleContent( $resourceHash );
-            $rawValue         = [
+            $rawValue         = json_encode( [
                     'error'          => [
-                            'code'     => -$curl_error[ 'errno' ],
+                            'code'     => -(int)$curl_error[ 'errno' ],
                             'message'  => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] . ")",
                             'response' => $responseRawValue // Some useful info might still be contained in the response body
                     ],
-                    'responseStatus' => $curl_error[ 'http_code' ]
-            ]; //return a negative number
+                    'responseStatus' => (int)$curl_error[ 'http_code' ]
+            ] ); //return a negative number
         } else {
             $rawValue = $mh->getSingleContent( $resourceHash );
         }

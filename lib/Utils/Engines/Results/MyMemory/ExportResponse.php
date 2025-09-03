@@ -21,7 +21,7 @@ class ExportResponse extends TMSAbstractResponse {
 
     public function __construct( $response ) {
 
-        $this->responseStatus  = $response[ 'responseStatus' ] ?? '';
+        $this->responseStatus  = (int)$response[ 'responseStatus' ] ?? '';
         $this->responseData    = $response[ 'responseData' ] ?? '';
         $this->id              = $response[ 'responseData' ][ 'id' ] ?? '';
         $this->resourceLink    = $response[ 'resourceLink' ] ?? '';
