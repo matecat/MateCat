@@ -3,6 +3,7 @@
 namespace Utils\Engines;
 
 use Exception;
+use Model\Projects\MetadataDao;
 use ReflectionException;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MTResponse;
@@ -167,6 +168,14 @@ class Intento extends AbstractEngine {
             if ( !empty( $providerCategory ) ) {
                 $parameters[ 'context' ][ 'category' ] = $providerCategory;
             }
+        }
+
+        // custom routing
+        $metadataDao   = new MetadataDao();
+        $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
+
+        if ( $customRouting !== null ) {
+            $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
         }
 
         $this->_setIntentoUserAgent(); //Set Intento User Agent

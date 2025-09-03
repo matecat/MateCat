@@ -165,7 +165,6 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
-
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
@@ -243,7 +242,14 @@ class ProjectManager {
                             'filters_extraction_parameters'          => new RecursiveArrayObject(),
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
-                            'mt_qe_workflow_payable_rate'            => null
+                            'mt_qe_workflow_payable_rate'            => null,
+                            'pre_translate_files'                    => null,
+                            'mmt_pre_import_tm'                      => null,
+                            'mmt_activate_context_analyzer'          => null,
+                            'mmt_glossaries_case_sensitive_matching' => null,
+                            'lara_glossaries'                        => null,
+                            'deepl_engine_type'                      => null,
+                            'intento_routing'                        => null,
                     ] );
         }
 
@@ -419,6 +425,8 @@ class ProjectManager {
                     implode( ',', $featureCodes )
             );
         }
+
+
     }
 
     /**
@@ -470,6 +478,26 @@ class ProjectManager {
 
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options );
+        }
+
+        // MT extra config parameters
+        $extraKeys = [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_routing',
+        ];
+
+        foreach ( $extraKeys as $extraKey ) {
+            if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
+                $options[ $extraKey ] = $this->projectStructure[ $extraKey ];
+            }
         }
 
         if ( !empty( $options ) ) {
@@ -1430,31 +1458,6 @@ class ProjectManager {
                     if ( trim( $lang ) === trim( $newJob->target ) ) {
                         $jobsMetadataDao->set( $newJob->id, $newJob->password, 'dialect_strict', $value );
                     }
-                }
-            }
-
-            // MT extra config parameters
-            $extraKeys = [
-                        'pre_translate_files',
-                        'mmt_glossaries',
-                        'mmt_pre_import_tm',
-                        'mmt_activate_context_analyzer',
-                        'mmt_glossaries_case_sensitive_matching',
-                        'lara_glossaries',
-                        'deepl_formality',
-                        'deepl_id_glossary',
-                        'deepl_engine_type',
-                        'intento_routing',
-            ];
-
-            foreach ( $extraKeys as $extraKey ) {
-                if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
-                    $jobsMetadataDao->set(
-                            $newJob->id,
-                            $newJob->password,
-                            $extraKey,
-                            $this->projectStructure[ $extraKey ]
-                    );
                 }
             }
 
