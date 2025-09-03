@@ -1435,16 +1435,16 @@ class ProjectManager {
 
             // MT extra config parameters
             $extraKeys = [
-                    'pre_translate_files',
-                    'mmt_glossaries',
-                    'mmt_pre_import_tm',
-                    'mmt_activate_context_analyzer',
-                    'mmt_glossaries_case_sensitive_matching',
-                    'lara_glossaries',
-                    'deepl_formality',
-                    'deepl_id_glossary',
-                    'deepl_engine_type',
-                    'intento_routing',
+                        'pre_translate_files',
+                        'mmt_glossaries',
+                        'mmt_pre_import_tm',
+                        'mmt_activate_context_analyzer',
+                        'mmt_glossaries_case_sensitive_matching',
+                        'lara_glossaries',
+                        'deepl_formality',
+                        'deepl_id_glossary',
+                        'deepl_engine_type',
+                        'intento_routing',
             ];
 
             foreach ( $extraKeys as $extraKey ) {
