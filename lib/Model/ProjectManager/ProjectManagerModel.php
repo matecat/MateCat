@@ -69,7 +69,7 @@ class ProjectManagerModel {
      * @return string
      * @throws Exception
      */
-    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ArrayObject $meta ): string {
+    public static function insertFile( ArrayObject $projectStructure, string $file_name, string $mime_type, string $fileDateSha1Path, ?ArrayObject $meta = null ): string {
 
         $data                         = [];
         $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
