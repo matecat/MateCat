@@ -449,7 +449,7 @@ class ConversionHandler {
         $decoded_filename = html_entity_decode( $file_name, ENT_QUOTES );
 
         if($decoded_filename !== $file_name){
-            throw new Exception("Invalid file name: file names cannot contain XML escape sequences. <a href='#'>More details</a>.");
+            throw new Exception("Invalid file name: escaped entities (e.g. &amp;) are not allowed.");
         }
 
         $this->file_name = $decoded_filename;
