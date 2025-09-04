@@ -14,7 +14,7 @@ class AnalyzeResponse extends TMSAbstractResponse {
 
     public function __construct( $response ) {
 
-        $this->responseStatus  = $response[ 'responseStatus' ] ?? '';
+        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
         $this->responseDetails = $response[ 'responseData' ] ?? '';
         $this->responseData    = $response[ 'data' ] ?? '';
 
