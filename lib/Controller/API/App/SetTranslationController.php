@@ -373,7 +373,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 } catch ( Exception $e ) {
                     $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                     $redisHandler->getConnection()->del( 'job_completeness:' . $this->data[ 'id_job' ] );
-                    $this->debug( $msg );
+                    $this->logger->debug( $msg );
                 }
 
             }
@@ -484,7 +484,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'project'                 => $chunk->getProject()
         ];
 
-        $this->debug( $data );
+        $this->logger->debug( $data );
 
         return $data;
     }
@@ -527,7 +527,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
-            $this->debug( "Empty Translation \n\n" . var_export( $_POST, true ) );
+            $this->logger->debug( "Empty Translation \n\n" . var_export( $_POST, true ) );
             throw new RuntimeException( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
 

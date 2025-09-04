@@ -49,8 +49,8 @@ class SplitSegmentController extends KleinController {
         $result         = $translationDao->atomicUpdate( $translationStruct );
 
         if ( !$result ) {
-            $this->debug( "Failed while splitting/merging segment." );
-            $this->debug( $translationStruct );
+            $this->logger->debug( "Failed while splitting/merging segment." );
+            $this->logger->debug( $translationStruct );
             throw new RuntimeException( "Failed while splitting/merging segment." );
         }
 
