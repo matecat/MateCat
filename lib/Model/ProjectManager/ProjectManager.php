@@ -165,7 +165,6 @@ class ProjectManager {
      */
     public function __construct( ArrayObject $projectStructure = null ) {
 
-
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
@@ -243,7 +242,14 @@ class ProjectManager {
                             'filters_extraction_parameters'          => new RecursiveArrayObject(),
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
-                            'mt_qe_workflow_payable_rate'            => null
+                            'mt_qe_workflow_payable_rate'            => null,
+                            'pre_translate_files'                    => null,
+                            'mmt_pre_import_tm'                      => null,
+                            'mmt_activate_context_analyzer'          => null,
+                            'mmt_glossaries_case_sensitive_matching' => null,
+                            'lara_glossaries'                        => null,
+                            'deepl_engine_type'                      => null,
+                            'intento_routing'                        => null,
                     ] );
         }
 
@@ -419,6 +425,8 @@ class ProjectManager {
                     implode( ',', $featureCodes )
             );
         }
+
+
     }
 
     /**
@@ -472,6 +480,26 @@ class ProjectManager {
             $options = $this->sanitizeProjectOptions( $options );
         }
 
+        // MT extra config parameters
+        $extraKeys = [
+                'pre_translate_files',
+                'mmt_glossaries',
+                'mmt_pre_import_tm',
+                'mmt_activate_context_analyzer',
+                'mmt_glossaries_case_sensitive_matching',
+                'lara_glossaries',
+                'deepl_formality',
+                'deepl_id_glossary',
+                'deepl_engine_type',
+                'intento_routing',
+        ];
+
+        foreach ( $extraKeys as $extraKey ) {
+            if ( !empty( $this->projectStructure[ $extraKey ] ) && $this->projectStructure[ $extraKey ] ) {
+                $options[ $extraKey ] = $this->projectStructure[ $extraKey ];
+            }
+        }
+
         if ( !empty( $options ) ) {
             foreach ( $options as $key => $value ) {
                 $dao->set(
@@ -481,42 +509,6 @@ class ProjectManager {
                 );
             }
         }
-
-        // add MMT Glossaries here
-        if ( !empty( $this->projectStructure[ 'mmt_glossaries' ] ) && $this->projectStructure[ 'mmt_glossaries' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'mmt_glossaries',
-                    $this->projectStructure[ 'mmt_glossaries' ]
-            );
-        }
-
-        // add Lara Glossaries here
-        if ( !empty( $this->projectStructure[ 'lara_glossaries' ] ) && $this->projectStructure[ 'lara_glossaries' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'lara_glossaries',
-                    $this->projectStructure[ 'lara_glossaries' ]
-            );
-        }
-
-        // add DeepL params here
-        if ( !empty( $this->projectStructure[ 'deepl_formality' ] ) && $this->projectStructure[ 'deepl_formality' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'deepl_formality',
-                    $this->projectStructure[ 'deepl_formality' ]
-            );
-        }
-
-        if ( !empty( $this->projectStructure[ 'deepl_id_glossary' ] ) && $this->projectStructure[ 'deepl_id_glossary' ] ) {
-            $dao->set(
-                    $this->projectStructure[ 'id_project' ],
-                    'deepl_id_glossary',
-                    $this->projectStructure[ 'deepl_id_glossary' ]
-            );
-        }
-
     }
 
     /**
@@ -2103,7 +2095,7 @@ class ProjectManager {
                             //
 
                             // if its empty pass create a SegmentOriginalDataStruct with no data
-                            $segmentOriginalDataStruct    = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
+                            $segmentOriginalDataStruct = ( new SegmentOriginalDataStruct )->setMap( $dataRefMap ?? [] );
                             $this->projectStructure[ 'segments-original-data' ][ $fid ]->append( $segmentOriginalDataStruct );
 
                             //
