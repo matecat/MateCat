@@ -63,11 +63,11 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
      */
     public function __construct( JobStruct $chunkStruct, ?int $id_segment, UserStruct $userStruct, ProjectStruct $projectStruct ) {
 
-        $this->chunkStruct   = $chunkStruct;
-        $this->id_job        = $chunkStruct->id;
-        $this->id_segment    = $id_segment;
-        $this->uid           = $userStruct->uid;
-        $this->dao           = new TranslationVersionDao();
+        $this->chunkStruct = $chunkStruct;
+        $this->id_job      = $chunkStruct->id;
+        $this->id_segment  = $id_segment;
+        $this->uid         = $userStruct->uid;
+        $this->dao         = new TranslationVersionDao();
         $this->projectStruct = $projectStruct;
 
     }
@@ -104,7 +104,7 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
                 $this->chunkStruct,
                 $this->id_segment,
                 $this->projectStruct,
-                );
+        );
     }
 
     /**
@@ -119,10 +119,6 @@ class TranslationVersionsHandler implements VersionHandlerInterface {
             SegmentTranslationStruct $new_translation,
             SegmentTranslationStruct $old_translation
     ) {
-
-        if ( $old_translation->translation === null ) {
-            return false;
-        }
 
         if ( Utils::stringsAreEqual( $new_translation->translation, $old_translation->translation ?? '' ) ) {
             return false;
