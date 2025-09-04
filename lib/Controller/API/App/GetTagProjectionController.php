@@ -117,7 +117,7 @@ class GetTagProjectionController extends KleinController {
 
         if ( empty( $id_job ) ) {
             $msg = "\n\n Critical. Quit. \n\n " . var_export( $_POST, true );
-            $this->debug( $msg );
+            $this->logger->debug( $msg );
             Utils::sendErrMailReport( $msg );
 
             throw new InvalidArgumentException( "id_job not valid", -4 );

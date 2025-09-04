@@ -367,7 +367,7 @@ class GetSearchController extends AbstractStatefulKleinController {
 
                 } catch ( Exception $e ) {
                     $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
-                    $this->debug( $msg );
+                    $this->logger->debug( $msg );
                     Utils::sendErrMailReport( $msg );
                     $db->rollback();
 
@@ -420,7 +420,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                 SegmentTranslationDao::updateTranslationAndStatusAndDate( $new_translation );
                 $db->commit();
             } catch ( Exception $e ) {
-                $this->debug( "Lock: Transaction Aborted. " . $e->getMessage() );
+                $this->logger->debug( "Lock: Transaction Aborted. " . $e->getMessage() );
                 $db->rollback();
 
                 throw new RuntimeException( "A fatal error occurred during saving of segments" );
@@ -438,7 +438,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                         'source_page_code' => ReviewUtils::revisionNumberToSourcePage( $revisionNumber )
                 ] );
             } catch ( Exception $e ) {
-                $this->debug( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
+                $this->logger->debug( "Exception in setTranslationCommitted callback . " . $e->getMessage() . "\n" . $e->getTraceAsString() );
 
                 throw new RuntimeException( "Exception in setTranslationCommitted callback" );
             }
@@ -505,6 +505,6 @@ class GetSearchController extends AbstractStatefulKleinController {
         $srh->save( $event );
         $srh->updateIndex( $replace_version );
 
-        $this->debug( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
+        $this->logger->debug( 'Replacement event for segment #' . $tRow[ 'id_segment' ] . ' correctly saved.' );
     }
 }
