@@ -495,6 +495,7 @@ class GetContributionWorker extends AbstractWorker {
                 $config[ 'context_list_before' ] = $contributionStruct->context_list_before;
                 $config[ 'context_list_after' ]  = $contributionStruct->context_list_after;
                 $config[ 'user_id' ]             = $contributionStruct->getUser()->uid;
+                $config[ 'tuid' ]                = $jobStruct->id . ":" . $contributionStruct->segmentId;
 
                 if ( $contributionStruct->mt_evaluation ) {
                     $config[ 'include_score' ] = $contributionStruct->mt_evaluation;
@@ -537,6 +538,7 @@ class GetContributionWorker extends AbstractWorker {
      * @param GetContributionRequest $contributionStruct
      *
      * @throws ReflectionException
+     * @throws Exception
      */
     private function updateAnalysisSuggestion( array $matches, GetContributionRequest $contributionStruct ) {
 
@@ -556,7 +558,7 @@ class GetContributionWorker extends AbstractWorker {
 
                     // normalize data for saving `suggestions_array`
 
-                    if ( $m[ 'created_by' ] == 'MT!'  ) {
+                    if ( $m[ 'created_by' ] == 'MT!' ) {
                         $matches[ $k ][ 'created_by' ] = EngineConstants::MT; //Match returns MT!
                     } else {
                         $user = new UserStruct();

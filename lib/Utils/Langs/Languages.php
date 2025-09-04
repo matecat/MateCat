@@ -2,7 +2,7 @@
 
 namespace Utils\Langs;
 
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 
 class Languages {
@@ -39,7 +39,7 @@ class Languages {
 
         $file = AppConfig::$UTILS_ROOT . '/Langs/supported_langs.json';
         if ( !file_exists( $file ) ) {
-            Log::doJsonLog( "no language defs found in $file" );
+            LoggerFactory::doJsonLog( "no language defs found in $file" );
             exit;
         }
         $string = file_get_contents( $file );

@@ -11,11 +11,11 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
-
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 
 abstract class KleinController implements IController {
 
@@ -56,6 +56,8 @@ abstract class KleinController implements IController {
      * @var ?FeatureSet
      */
     protected ?FeatureSet $featureSet = null;
+
+    protected MatecatLogger $logger;
 
     /**
      * @return FeatureSet
@@ -111,6 +113,8 @@ abstract class KleinController implements IController {
         $this->featureSet = new FeatureSet();
         $this->identifyUser( $this->useSession );
         $this->afterConstruct();
+
+        $this->logger = LoggerFactory::getLogger();
 
     }
 
@@ -208,9 +212,8 @@ abstract class KleinController implements IController {
 
     /**
      * @param      $message
-     * @param null $filename
      */
-    protected function log( $message, $filename = null ): void {
-        Log::doJsonLog( $message, $filename );
+    protected function log( $message ): void {
+        $this->logger->debug( $message );
     }
 }

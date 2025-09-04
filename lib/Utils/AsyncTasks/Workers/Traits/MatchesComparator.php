@@ -79,7 +79,7 @@ trait MatchesComparator {
     }
 
     public function isMtMatch( array $match ): bool {
-        return stripos( $match[ 'created_by' ], InternalMatchesConstants::MT ) !== false;
+        return stripos( $match[ 'created_by' ] ?? '', InternalMatchesConstants::MT ) !== false;
     }
 
 }

@@ -10,7 +10,7 @@ use Model\TmKeyManagement\MemoryKeyStruct;
 use Model\Users\UserDao;
 use Model\Users\UserStruct;
 use PDOException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 /**
@@ -119,8 +119,8 @@ class TmKeyManager {
             $tmKey = json_decode( $tmKey, true );
 
             if ( is_null( $tmKey ) ) {
-                Log::doJsonLog( __METHOD__ . " -> Invalid JSON." );
-                Log::doJsonLog( var_export( $tmKey, true ) );
+                LoggerFactory::doJsonLog( __METHOD__ . " -> Invalid JSON." );
+                LoggerFactory::doJsonLog( var_export( $tmKey, true ) );
                 throw new Exception ( "Invalid JSON: " . var_export( $jsonTmKeys_array, true ), -2 );
             }
 
@@ -517,7 +517,7 @@ class TmKeyManager {
                         }
 
                     } catch ( Exception $e ) {
-                        Log::doJsonLog( $e->getMessage() );
+                        LoggerFactory::doJsonLog( $e->getMessage() );
                     }
 
                 }

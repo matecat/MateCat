@@ -18,7 +18,8 @@ use SplObserver;
 use SplSubject;
 use Stomp\Transport\Frame;
 use Utils\ActiveMQ\AMQHandler;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\Context;
@@ -93,9 +94,16 @@ class Executor implements SplObserver {
     protected function _logMsg( $_msg ) {
         if ( AppConfig::$DEBUG ) {
             echo "[" . date( DATE_RFC822 ) . "] " . json_encode( $_msg ) . "\n";
-            Log::doJsonLog( $_msg );
+            $this->logger->debug( $_msg );
         }
     }
+
+    /**
+     * Logger instance
+     *
+     * @var MatecatLogger
+     */
+    protected MatecatLogger $logger;
 
     /**
      * Concrete worker
@@ -108,13 +116,16 @@ class Executor implements SplObserver {
      * Executor constructor.
      *
      * @param Context $_context
+     *
+     * @throws Exception
      */
     protected function __construct( Context $_context ) {
 
         $this->_executorPID          = posix_getpid();
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
-        Log::setLogFileName( $_context->loggerName );
+        $this->logger = LoggerFactory::getLogger( 'executor', $_context->loggerName );
+        LoggerFactory::setAliases( [ 'engines', 'project_manager', 'feature_set' ], $this->logger );
 
         $this->_executionContext = $_context;
 
@@ -147,6 +158,7 @@ class Executor implements SplObserver {
      * @param Context $queueContext
      *
      * @return static
+     * @throws Exception
      */
     public static function getInstance( Context $queueContext ): Executor {
 
@@ -359,16 +371,14 @@ class Executor implements SplObserver {
      * Update method, called by the subject when the application tells him to notify the Observer
      *
      * @param SplSubject $subject
+     *
+     * @throws Exception
      */
     public function update( SplSubject $subject ) {
-
         /**
          * @var $subject AbstractWorker
          */
-        Log::setLogFileName( $subject->getLoggerName() );
         $this->_logMsg( $subject->getLogMsg() );
-        Log::setLogFileName( $this->_executionContext->loggerName );
-
     }
 
     public function forceAck( SplSubject $subject ) {

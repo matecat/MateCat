@@ -6,7 +6,7 @@
 namespace Utils\Network;
 
 use LogicException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Manager for a Multi Curl connection
@@ -209,7 +209,7 @@ class MultiCurlHandler {
     }
 
     protected function _log( $logging ) {
-        Log::doJsonLog( $logging );
+        LoggerFactory::doJsonLog( $logging );
     }
 
     /**

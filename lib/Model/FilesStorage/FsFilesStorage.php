@@ -9,7 +9,7 @@ use Model\FilesStorage\Exceptions\FileSystemException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use UnexpectedValueException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
 
@@ -206,8 +206,8 @@ class FsFilesStorage extends AbstractFilesStorage {
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . self::OBJECTS_SAFE_DELIMITER . $lang . DIRECTORY_SEPARATOR . "package";
 
-        Log::doJsonLog( $fileDir );
-        Log::doJsonLog( $cacheDir );
+        LoggerFactory::doJsonLog( $fileDir );
+        LoggerFactory::doJsonLog( $cacheDir );
 
         $res = true;
         //check if it doesn't exist
@@ -225,7 +225,7 @@ class FsFilesStorage extends AbstractFilesStorage {
         //BUG: this stuff may not work if FILES and CACHES are on different filesystems
         //orig, suppress error because of xliff files have not original one
         $origDir = $cacheDir . DIRECTORY_SEPARATOR . "orig";
-        Log::doJsonLog( $origDir );
+        LoggerFactory::doJsonLog( $origDir );
 
         $origFilePath    = $this->getSingleFileInPath( $origDir );
         $tmpOrigFileName = $origFilePath;
@@ -246,10 +246,10 @@ class FsFilesStorage extends AbstractFilesStorage {
          * Force the new filename if it is provided
          */
         $d = $cacheDir . DIRECTORY_SEPARATOR . "work";
-        Log::doJsonLog( $d );
+        LoggerFactory::doJsonLog( $d );
         $convertedFilePath = $this->getSingleFileInPath( $d );
 
-        Log::doJsonLog( $convertedFilePath );
+        LoggerFactory::doJsonLog( $convertedFilePath );
 
         $tmpConvertedFilePath = $convertedFilePath;
         if ( !empty( $newFileName ) ) {
@@ -259,11 +259,11 @@ class FsFilesStorage extends AbstractFilesStorage {
             }
         }
 
-        Log::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
+        LoggerFactory::doJsonLog( $convertedFilePath );  // <--------- TODO: this is empty!
 
         $dest = $fileDir . DIRECTORY_SEPARATOR . "xliff" . DIRECTORY_SEPARATOR . static::basename_fix( $tmpConvertedFilePath );
 
-        Log::doJsonLog( $dest );
+        LoggerFactory::doJsonLog( $dest );
 
         $res &= $this->link( $convertedFilePath, $dest );
 

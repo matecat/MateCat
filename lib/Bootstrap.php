@@ -7,7 +7,7 @@ use Model\DataAccess\Database;
 use Model\FeaturesBase\FeatureSet;
 use Model\FeaturesBase\PluginsLoader;
 use Utils\ActiveMQ\WorkerClient;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 
 /**
@@ -29,16 +29,23 @@ class Bootstrap {
      */
     private FeatureSet $autoLoadedFeatureSet;
 
+    /**
+     * @throws Exception
+     */
     public static function start( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
         new self( $config_file, $task_runner_config_file );
     }
 
+    /**
+     * @throws Exception
+     */
     private function __construct( SplFileInfo $config_file = null, SplFileInfo $task_runner_config_file = null ) {
 
         ini_set( 'display_errors', false );
         self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
+        LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
         set_exception_handler( [ Bootstrap::class, 'exceptionHandler' ] );
         register_shutdown_function( [ Bootstrap::class, 'shutdownFunctionHandler' ] );
 
@@ -46,6 +53,8 @@ class Bootstrap {
 
         //get the environment configuration
         $this->initRegistryClass();
+
+        $this->setLoggers();
 
         $this->setErrorReporting();
 
@@ -65,14 +74,29 @@ class Bootstrap {
 
     }
 
+    private function setLoggers() {
+        LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
+        LoggerFactory::getLogger( 'dao', 'dao.log' );
+        LoggerFactory::getLogger( 'query_cache', 'query_cache.log' );
+        LoggerFactory::getLogger( "conversion", "conversion.log" );
+        LoggerFactory::getLogger( "downloads", "downloads.log" );
+        LoggerFactory::getLogger( 'login_exceptions', 'login_exceptions.log' );
+        LoggerFactory::getLogger( 'login_cookie_cache', 'login_cookie_cache.log' );
+        LoggerFactory::getLogger( 'tag_projection', 'tag_projection.log' );
+        LoggerFactory::getLogger( 'outsource', 'outsource.log' );
+        LoggerFactory::getLogger( 'decorators', 'decorators.log' );
+        LoggerFactory::getLogger( 'feature_set', 'feature_set.log' );
+        LoggerFactory::getLogger( 'project_manager', 'project_manager.log' );
+        LoggerFactory::getLogger( "upload_handler", "upload.log" );
+        LoggerFactory::getLogger( "tos_external_call", "tos.log" );
+    }
+
+    /**
+     * @throws Exception
+     */
     private function installApplicationSingletons() {
-        try {
-            Log::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
-            WorkerClient::init();
-            Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
-        } catch ( Exception $e ) {
-            Log::doJsonLog( $e->getMessage() );
-        }
+        WorkerClient::init();
+        Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
     }
 
     /**
@@ -133,12 +157,12 @@ class Bootstrap {
 
     public static function exceptionHandler( Throwable $exception ) {
 
-        Log::setLogFileName( 'fatal_errors.txt' );
+        $logger = LoggerFactory::getLogger( 'exception_handler' );
 
         switch ( get_class( $exception ) ) {
             case AuthenticationError::class: // authentication requested
                 $code = 401;
-                Log::doJsonLog( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                $logger->debug( [ "error" => 'Authentication error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case InvalidArgumentException::class:
             case ValidationError:: class:
@@ -146,25 +170,25 @@ class Bootstrap {
             case UnexpectedValueException::class:
             case Model\Exceptions\ValidationError::class:
                 $code = 400;
-                Log::doJsonLog( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                $logger->debug( [ "error" => 'Bad request error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case Model\Exceptions\NotFoundException:: class:
             case Controller\API\Commons\Exceptions\NotFoundException::class:
                 $code = 404;
-                Log::doJsonLog( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                $logger->debug( [ "error" => 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case Model\Exceptions\AuthorizationError::class:
             case Controller\API\Commons\Exceptions\AuthorizationError::class:
                 $code = 403;
-                Log::doJsonLog( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
+                $logger->debug( [ "error" => 'Access not allowed error for URI: ' . $_SERVER[ 'REQUEST_URI' ] . " - " . "{$exception->getMessage()} ", "trace" => $exception->getTrace() ] );
                 break;
             case PDOException::class:
                 $code = 503;
-                Log::doJsonLog( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
                 break;
             default:
                 $code = 500;
-                Log::doJsonLog( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
                 break;
         }
 
@@ -223,7 +247,8 @@ class Bootstrap {
                 case E_USER_ERROR:
                 case E_RECOVERABLE_ERROR:
 
-                    Log::setLogFileName( 'fatal_errors.txt' );
+                    $logger = LoggerFactory::getLogger( 'exception_handler' );
+
                     $exception = new Exception( $errorType[ $error[ 'type' ] ] . " " . $error[ 'message' ] );
 
                     try {
@@ -235,7 +260,7 @@ class Bootstrap {
 
                     }
 
-                    Log::doJsonLog( $exception->getTrace() );
+                    $logger->debug( $exception->getTrace() );
                     self::formatOutputExceptions( 500, $exception );
                     die();
 
@@ -265,7 +290,6 @@ class Bootstrap {
 
         if ( $enable_outsource == "false" ) {
             $configuration[ "ENABLE_OUTSOURCE" ] = false;
-            Log::doJsonLog( "DISABLED OUTSOURCE" );
         }
 
         return $configuration;

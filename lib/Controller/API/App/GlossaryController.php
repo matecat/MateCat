@@ -12,12 +12,10 @@ use Swaggest\JsonSchema\InvalidValue;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
-use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -459,15 +457,6 @@ class GlossaryController extends KleinController {
      * @throws Exception
      */
     private function enqueueWorker( $queue, $params ) {
-        try {
-            WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-            # Handle the error, logging, ...
-            $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $params, true );
-            Log::doJsonLog( $output );
-            Utils::sendErrMailReport( $output );
-        }
+        WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 }

@@ -46,7 +46,6 @@ use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -478,7 +477,6 @@ class NewController extends KleinController {
                 $metadata = $parsedMetadata;
             }
 
-            Log::doJsonLog( "Passed parameter metadata as json string." );
         } else {
             $metadata = [];
         }

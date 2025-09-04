@@ -50,7 +50,7 @@ class CopyAllSourceToTargetController extends KleinController {
         $id_job          = filter_var( $this->request->param( 'id_job' ), FILTER_SANITIZE_NUMBER_INT );
         $revision_number = filter_var( $this->request->param( 'revision_number' ), FILTER_SANITIZE_NUMBER_INT );
 
-        $this->log( "Requested massive copy-source-to-target for job $id_job." );
+        $this->debug( "Requested massive copy-source-to-target for job $id_job." );
 
         if ( empty( $id_job ) ) {
             throw new InvalidArgumentException( "Empty id job", -1 );
@@ -149,8 +149,8 @@ class CopyAllSourceToTargetController extends KleinController {
                 'segments_modified' => $affected_rows
         ];
 
-        $this->log( 'Segment Translation events saved completed' );
-        $this->log( $data );
+        $this->debug( 'Segment Translation events saved completed' );
+        $this->debug( $data );
 
         $database->commit(); // COMMIT TRANSACTION
 

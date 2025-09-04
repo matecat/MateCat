@@ -59,13 +59,17 @@ class Altlang extends AbstractEngine {
         $all_args = func_get_args();
 
         if ( is_string( $rawValue ) ) {
-            $original = json_decode( $all_args[ 1 ][ "data" ], true );
+            $original = json_decode( $all_args[ 1 ][ "data" ] ?? '', true );
             $decoded  = json_decode( $rawValue, true );
+
+            if ( isset( $decoded[ 'error' ] ) ) {
+                return []; // error
+            }
 
             $decoded = [
                     'data' => [
                             "translations" => [
-                                    [ 'translatedText' => $decoded[ "text" ] ]
+                                    [ 'translatedText' => $decoded[ "text" ]  ]
                             ]
                     ]
             ];
@@ -73,7 +77,7 @@ class Altlang extends AbstractEngine {
             $decoded = $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch( $original[ "text" ], $decoded );
+        return $this->_composeMTResponseAsMatch( $original[ "text" ] ?? '', $decoded );
     }
 
     /**
@@ -85,6 +89,7 @@ class Altlang extends AbstractEngine {
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
+     * @throws Exception
      */
     public function get( array $_config ) {
 
@@ -94,9 +99,6 @@ class Altlang extends AbstractEngine {
             /** @var MyMemory $myMemory */
             $myMemory = EnginesFactory::getInstance( 1 );
 
-            /**
-             * @var $result GetMemoryResponse
-             */
             $result       = $myMemory->get( $_config );
             $this->result = $result->get_matches_as_array();
 

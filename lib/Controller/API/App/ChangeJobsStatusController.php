@@ -35,7 +35,7 @@ class ChangeJobsStatusController extends KleinController {
                 $project = ProjectDao::findByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Project Status \n\n " . var_export( $_POST, true ) . "\n";
-                $this->log( $msg );
+                $this->debug( $msg );
                 Utils::sendErrMailReport( $msg );
                 throw new NotFoundException( "Job not found" );
             }
@@ -55,7 +55,7 @@ class ChangeJobsStatusController extends KleinController {
                 $firstChunk = ChunkDao::getByIdAndPassword( $request[ 'res_id' ], $request[ 'password' ] );
             } catch ( Exception $e ) {
                 $msg = "Error : wrong password provided for Change Job Status \n\n " . var_export( $_POST, true ) . "\n";
-                $this->log( $msg );
+                $this->debug( $msg );
                 Utils::sendErrMailReport( $msg );
                 throw new NotFoundException( "Job not found" );
             }

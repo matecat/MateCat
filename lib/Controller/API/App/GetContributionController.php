@@ -4,7 +4,6 @@ namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\AuthenticationError;
-use Controller\API\Commons\Exceptions\ValidationError;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
@@ -44,15 +43,15 @@ class GetContributionController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-        $id_client           = $request[ 'id_client' ];
-        $id_job              = (int)$request[ 'id_job' ];
-        $id_segment          = $request[ 'id_segment' ];
-        $num_results         = $request[ 'num_results' ];
-        $password            = $request[ 'password' ];
-        $received_password   = $request[ 'received_password' ];
-        $concordance_search  = $request[ 'concordance_search' ];
-        $switch_languages    = $request[ 'switch_languages' ];
-        $cross_language      = $request[ 'cross_language' ];
+        $id_client          = $request[ 'id_client' ];
+        $id_job             = (int)$request[ 'id_job' ];
+        $id_segment         = $request[ 'id_segment' ];
+        $num_results        = $request[ 'num_results' ];
+        $password           = $request[ 'password' ];
+        $received_password  = $request[ 'received_password' ];
+        $concordance_search = $request[ 'concordance_search' ];
+        $switch_languages   = $request[ 'switch_languages' ];
+        $cross_language     = $request[ 'cross_language' ];
 
         if ( empty( $num_results ) ) {
             $num_results = AppConfig::$DEFAULT_NUM_RESULTS_FROM_TM;
@@ -65,7 +64,7 @@ class GetContributionController extends KleinController {
         $this->featureSet->loadForProject( $projectStruct );
 
         $contributionRequest = new GetContributionRequest();
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
 

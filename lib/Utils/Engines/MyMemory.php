@@ -16,6 +16,7 @@ use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DomainsResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Engines\Results\MyMemory\GetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
@@ -24,10 +25,8 @@ use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\TagProjectionResponse;
-use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -669,7 +668,7 @@ class MyMemory extends AbstractEngine {
             throw new Exception( $this->result->error->message, $this->result->responseStatus );
         }
 
-        Log::doJsonLog( 'TMX exported to E-mail.' );
+        $this->logger->debug( 'TMX exported to E-mail.' );
 
         return $this->result;
     }
@@ -716,7 +715,7 @@ class MyMemory extends AbstractEngine {
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            $this->logger->debug( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 
