@@ -1504,10 +1504,6 @@ body.archived section .status-container a.status:hover {
   outline-color: #96c8da;
 }
 
-body.rtl-target .editor .editarea span {
-  display: inline-block;
-}
-
 .source {
   position: relative;
   z-index: 0;
@@ -2143,15 +2139,17 @@ section.opened.editor .status {
   direction: rtl !important;
   text-align: right !important;
 }
-
-body.rtl-source section .source,
-body.rtl-target section .targetarea,
-body.rtl-source .footer .sugg-source,
-body.rtl-target .footer .sugg-target {
+.rtl-target .editor .editarea span {
+  display: inline-block;
+}
+section.rtl-source .source,
+section.rtl-target .targetarea,
+.rtl-source .footer .sugg-source,
+.rtl-target .footer .sugg-target {
   direction: rtl !important;
   text-align: right !important;
 }
-body.rtl-target section.ice-locked .target {
+section.ice-locked.rtl-target .target {
   text-align: right;
 }
 
