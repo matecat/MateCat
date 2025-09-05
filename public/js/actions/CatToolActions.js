@@ -400,9 +400,10 @@ let CatToolActions = {
           ModalsActions.showModalComponent(
             AlertModal,
             {
-              text:
+              /* text:
                 'You cannot change the status of an ICE segment to "Translated" without editing it first.</br>' +
-                'Please edit the segment first if you want to change its status to "Translated".',
+                'Please edit the segment first if you want to change its status to "Translated".',*/
+              text: error.message,
             },
             'Error',
           )
