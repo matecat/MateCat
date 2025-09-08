@@ -142,6 +142,10 @@ class Intento extends AbstractEngine {
      */
     public function get( array $_config ) {
 
+        if ( $this->_isAnalysis && $this->_skipAnalysis ) {
+            return [];
+        }
+
         $_config[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 

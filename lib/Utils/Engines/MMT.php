@@ -18,6 +18,7 @@ use SplFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\MMT\MMTServiceApiRequestException;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Logger\Log;
@@ -112,26 +113,27 @@ class MMT extends AbstractEngine {
      */
     public function get( array $_config ) {
 
-        //This is not really needed because by default in analysis the Engine_MMT is accepted by Match
         if ( $this->_isAnalysis && $this->_skipAnalysis ) {
             return [];
         }
 
-        $client = $this->_getClient();
-        $_keys  = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $client      = $this->_getClient();
+        $_keys       = $this->_reMapKeyList( $_config[ 'keys' ] ?? [] );
+        $metadataDao = new ProjectsMetadataDao();
 
-        $metadata = null;
+        $glossaries      = null;
+        $contextAnalyzer = null;
+
         if ( !empty( $_config[ 'project_id' ] ) ) {
-            $metadataDao = new ProjectsMetadataDao();
-            $metadata    = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
+            $glossaries = $metadataDao->setCacheTTL( 86400 )->get( $_config[ 'project_id' ], 'mmt_glossaries' );
         }
 
-        if ( $metadata !== null ) {
-            $metadata           = html_entity_decode( $metadata->value );
-            $mmtGlossariesArray = json_decode( $metadata, true );
+        if ( $glossaries !== null ) {
+            $glossaries         = html_entity_decode( $glossaries->value );
+            $mmtGlossariesArray = json_decode( $glossaries, true );
 
             $_config[ 'glossaries' ]           = implode( ",", $mmtGlossariesArray[ 'glossaries' ] );
-            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ];
+            $_config[ 'ignore_glossary_case' ] = $mmtGlossariesArray[ 'ignore_glossary_case' ]; // ???? mmt_glossaries_case_sensitive_matching
         }
 
         $_config = $this->configureAnalysisContribution( $_config );
@@ -319,7 +321,12 @@ class MMT extends AbstractEngine {
 
         $pid = $projectRow[ 'id' ];
 
-        if ( !empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ] ) ) {
+        // @TODO ho fatto il fallback
+        $metadataDao = new ProjectsMetadataDao();
+        $pre_import_tm = $metadataDao->get($pid, "mmt_pre_import_tm") ? $metadataDao->get($pid, "mmt_pre_import_tm")->value : $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ];
+        $context_analyzer = $metadataDao->get($pid, "mmt_activate_context_analyzer") ? $metadataDao->get($pid, "mmt_pre_import_tm")->value : $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-context-analyzer' ];
+
+        if ( !empty( $context_analyzer ) ) {
 
             $source       = $segments[ 0 ][ 'source' ];
             $targets      = [];
@@ -374,7 +381,7 @@ class MMT extends AbstractEngine {
             // send user keys on a project basis
             // ==============================================
             //
-            $preImportIsDisabled = empty( $this->getEngineRecord()->getExtraParamsAsArray()[ 'MMT-preimport' ] );
+            $preImportIsDisabled = empty( $pre_import_tm );
             $user                = ( new UserDao )->getByEmail( $projectRow[ 'id_customer' ] );
 
             if ( $preImportIsDisabled ) {

@@ -20,6 +20,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao as ProjectsMetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\WordCount\CounterModel;
@@ -717,6 +718,19 @@ class TMAnalysisWorker extends AbstractWorker {
 
             //tell to the engine that this is the analysis phase (some engines want to skip the analysis)
             $mtEngine->setAnalysis();
+
+            // @TODO does it work???
+            // pre_translate_files
+            $pid = $queueElement->params->pid;
+
+            if($pid){
+                $metadataDao = new ProjectsMetadataDao();
+                $pre_translate_files = $metadataDao->get( $pid, 'pre_translate_files' );
+
+                if($pre_translate_files === true){
+                    $mtEngine->setSkipAnalysis( false );
+                }
+            }
 
             // If mt_qe_workflow_enabled is true, force set EnginesFactory.skipAnalysis to `false` to allow the Lara engine to perform the analysis.
             if ( $queueElement->params->mt_qe_workflow_enabled ) {
