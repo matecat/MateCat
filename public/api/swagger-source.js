@@ -1617,26 +1617,28 @@ var spec = {
           {
             name: 'type',
             type: 'string',
-            in: 'fromData',
+            in: 'formData',
+            description:
+                'Allowed values: [general, personal]',
             required: true,
           },
           {
             name: 'name',
             type: 'string',
-            in: 'fromData',
+            in: 'formData',
             required: true,
           },
           {
             name: 'members',
             type: 'array',
-            in: 'fromData',
+            in: 'formData',
             items: {
               type: 'string',
               format: 'email',
               collectionFormat: 'multi',
             },
             description:
-              'Array of email addresses of people to invite in a project',
+              'Array of email addresses of people to invite in a project. Example: members[0][email]="john_doe@acme.com", members[1][email]="jane_smith@acme.com"',
             required: true,
           },
         ],
@@ -1730,7 +1732,7 @@ var spec = {
           {
             name: 'members',
             type: 'array',
-            in: 'fromData',
+            in: 'formData',
             items: {
               type: 'string',
               format: 'email',
@@ -2808,7 +2810,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The file name.',
+            description: 'The glossary\'s name.',
             type: 'string',
             required: false,
           },
@@ -2816,7 +2818,7 @@ var spec = {
             name: 'tm_key',
             in: 'formData',
             description: 'The tm key.',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
@@ -2941,8 +2943,8 @@ var spec = {
     '/api/v3/create-key': {
       post: {
         tags: ['TM keys'],
-        summary: 'Create a TM key.',
-        description: 'Create a TM key.',
+        summary: 'Create (or update) a TM key.',
+        description: 'Create (or update) a TM key.',
         consumes: ['application/json'],
         parameters: [
           {
@@ -2953,10 +2955,11 @@ var spec = {
                 key: {
                   type: 'string',
                   example: '1234_xxxx',
+                  description: 'In case of already existent TM key, it will be updated.',
                 },
                 name: {
                   type: 'string',
-                  example: 'My new key',
+                  example: 'My new key'
                 },
               },
             },
