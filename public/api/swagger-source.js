@@ -378,7 +378,7 @@ var spec = {
           name: 'new_password',
           in: 'formData',
           description:
-            'Use this to define the new password of the resource whose password you are changing. Becomes mandatory if undo is set to "true".',
+            'Use this to define the new password of the resource whose password you are changing. Ignored if "undo" is not set or set to "false", mandatory if undo is set to "true".',
           required: false,
           type: 'string',
         },
@@ -738,8 +738,8 @@ var spec = {
     '/api/v3/jobs/{id_job}/{password}/active': {
       post: {
         tags: ['Job'],
-        summary: 'Active API',
-        description: 'API to active a Job',
+        summary: 'Activate API',
+        description: 'API to activate a Job',
         parameters: [
           {
             name: 'id_job',
@@ -796,7 +796,7 @@ var spec = {
             in: 'formData',
             description:
               'The id of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
           {
@@ -804,7 +804,7 @@ var spec = {
             in: 'formData',
             description:
               'The password of the job you intend to generate the Revise 2 step for',
-            required: false,
+            required: true,
             type: 'string',
           },
         ],
@@ -1082,8 +1082,8 @@ var spec = {
     '/api/v3/projects/{id_project}/{password}/active': {
       post: {
         tags: ['Project'],
-        summary: 'Active API',
-        description: 'API to active a Project',
+        summary: 'Activate API',
+        description: 'API to activate a Project',
         parameters: [
           {
             name: 'id_project',
@@ -1121,21 +1121,21 @@ var spec = {
         parameters: [
           {
             name: 'id_project',
-            in: 'formData',
+            in: 'path',
             description: 'The id of the project',
             required: true,
             type: 'string',
           },
           {
             name: 'password',
-            in: 'formData',
+            in: 'path',
             description: 'The password of the project',
             required: true,
             type: 'string',
           },
           {
             name: 'id_job',
-            in: 'formData',
+            in: 'path',
             required: true,
             type: 'string',
           },
@@ -1483,7 +1483,7 @@ var spec = {
         description: 'Download the quality report',
         parameters: [
           {
-            name: 'idJob',
+            name: 'jid',
             in: 'formData',
             description: 'The id of the job',
             required: true,
@@ -1499,19 +1499,19 @@ var spec = {
           {
             name: 'format',
             in: 'formData',
-            description: 'The QR format (csv or json)',
-            required: true,
+            description: 'The QR format: xml, csv or json. Default value: csv',
+            required: false,
             type: 'string',
           },
           {
             name: 'segmentsPerFile',
             in: 'formData',
             description: 'The number of segments per file (max 100)',
-            required: true,
+            required: false,
             type: 'integer',
           },
         ],
-        produces: ['text/csv', 'application/json'],
+        produces: ['text/csv', 'application/json', 'application/xml'],
         responses: {
           200: {
             description: 'ok',
@@ -1754,8 +1754,8 @@ var spec = {
     '/api/v3/teams/{id_team}/members/{id_member}': {
       delete: {
         tags: ['Teams'],
-        summary: 'List team members',
-        description: 'List team members.',
+        summary: 'Remove a specific member from a team',
+        description: 'Remove a specific member from a team.',
         parameters: [
           {
             name: 'id_team',
@@ -1768,7 +1768,7 @@ var spec = {
             type: 'integer',
             in: 'path',
             required: true,
-            description: 'Id of the user to remove from team',
+            description: 'Id of the user (uid) to remove from team',
           },
         ],
         responses: {
@@ -2274,7 +2274,7 @@ var spec = {
             {
               name: 'password',
               in: 'formData',
-              description: 'The password of the job (Translate password)',
+              description: 'The password of the job (second pass review password)',
               required: true,
               type: 'string',
             },
