@@ -55,6 +55,12 @@ class TeamsController extends KleinController {
                 ]
         ] );
 
+        $params[ 'name' ] = trim( $params[ 'name' ] );
+
+        if ( empty( $params[ 'name' ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
+        }
+
         $teamStruct = new TeamStruct( [
                 'created_by' => $this->user->uid,
                 'name'       => $params[ 'name' ],
@@ -97,7 +103,7 @@ class TeamsController extends KleinController {
 
         $org       = new TeamStruct();
         $org->id   = $params[ 'id_team' ];
-        $org->name = $params[ 'name' ];
+        $org->name = trim( $params[ 'name' ] );
 
         if ( empty( $org->name ) ) {
             throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
