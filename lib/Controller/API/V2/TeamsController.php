@@ -21,6 +21,7 @@ use Model\Teams\TeamDao;
 use Model\Teams\TeamModel;
 use Model\Teams\TeamStruct;
 use ReflectionException;
+use Utils\Constants\Teams;
 use View\API\V2\Json\Team;
 
 class TeamsController extends KleinController {
@@ -58,7 +59,15 @@ class TeamsController extends KleinController {
         $params[ 'name' ] = trim( $params[ 'name' ] );
 
         if ( empty( $params[ 'name' ] ) ) {
-            throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
+            throw new InvalidArgumentException( "Wrong parameter: name is empty", 400 );
+        }
+
+        if ( empty( $params[ 'type' ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter: type is empty", 400 );
+        }
+
+        if ( !in_array( $params[ 'type' ], [ Teams::GENERAL, Teams::PERSONAL ] ) ) {
+            throw new InvalidArgumentException( "Wrong parameter: type is not allowed [Allowed values: personal, general]", 400 );
         }
 
         $teamStruct = new TeamStruct( [
@@ -106,7 +115,7 @@ class TeamsController extends KleinController {
         $org->name = trim( $params[ 'name' ] );
 
         if ( empty( $org->name ) ) {
-            throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
+            throw new InvalidArgumentException( "Wrong parameter: name is empty", 400 );
         }
 
         $membershipDao = new MembershipDao();
@@ -116,7 +125,7 @@ class TeamsController extends KleinController {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
 
-        $org->name = $params[ 'name' ];
+        $org->name = trim( $params[ 'name' ] );
 
         $teamDao = new TeamDao();
 
