@@ -2733,7 +2733,7 @@ var spec = {
           {
             name: 'name',
             in: 'formData',
-            description: 'The file name.',
+            description: 'The glossary\'s name',
             type: 'string',
             required: false,
           },
@@ -3618,7 +3618,7 @@ var spec = {
     },
     '/api/v3/filters-config-template': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary:
           'Shows the list of filters analysis configuration models available for the currents user',
         description:
@@ -3639,7 +3639,7 @@ var spec = {
         },
       },
       post: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Creates a new filters analysis configuration model',
         description: 'Creates a new filters analysis configuration model',
         parameters: [
@@ -3668,7 +3668,7 @@ var spec = {
     },
     '/api/v3/filters-config-template/{id}': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Shows a particular filters analysis configuration model',
         description: 'Shows a particular filters analysis configuration model',
         parameters: [
@@ -3693,7 +3693,7 @@ var spec = {
         },
       },
       delete: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Deletes a particular filters analysis configuration model',
         description:
           'Deletes a particular filters analysis configuration model',
@@ -3721,7 +3721,7 @@ var spec = {
         },
       },
       put: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary: 'Updates a particular filters analysis configuration model',
         description:
           'Updates a particular filters analysis configuration model',
@@ -3756,39 +3756,9 @@ var spec = {
         },
       },
     },
-    '/api/v3/filters-config-template/validate': {
-      post: {
-        tags: ['Filters analysis configuration'],
-        summary:
-          'Validates a filters analysis configuration model before creation',
-        description:
-          'Validates a filters analysis configuration model before creation',
-        parameters: [
-          {
-            in: 'body',
-            schema: {
-              $ref: '#/definitions/FiltersConfigSchema',
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: 'validate',
-            examples: {
-              'application/json': {
-                errors: [],
-              },
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/filters-config-template/schema': {
       get: {
-        tags: ['Filters analysis configuration'],
+        tags: ['Extraction parameter configuration'],
         summary:
           'Shows the filters analysis configuration model creation schema',
         description:
@@ -3809,7 +3779,7 @@ var spec = {
     },
     '/api/v3/xliff-config-template': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary:
           'Shows the list of xliff analysis configuration models available for the currents user',
         description:
@@ -3830,7 +3800,7 @@ var spec = {
         },
       },
       post: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Creates a new xliff analysis configuration model',
         description: 'Creates a new xliff analysis configuration model',
         parameters: [
@@ -3859,7 +3829,7 @@ var spec = {
     },
     '/api/v3/xliff-config-template/{id}': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Shows a particular xliff analysis configuration model',
         description: 'Shows a particular xliff analysis configuration model',
         parameters: [
@@ -3884,7 +3854,7 @@ var spec = {
         },
       },
       delete: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Deletes a particular xliff analysis configuration model',
         description: 'Deletes a particular xliff analysis configuration model',
         parameters: [
@@ -3911,7 +3881,7 @@ var spec = {
         },
       },
       put: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Updates a particular xliff analysis configuration model',
         description: 'Updates a particular xliff analysis configuration model',
         parameters: [
@@ -3945,39 +3915,9 @@ var spec = {
         },
       },
     },
-    '/api/v3/xliff-config-template/validate': {
-      post: {
-        tags: ['Xliff analysis configuration'],
-        summary:
-          'Validates a xliff analysis configuration model before creation',
-        description:
-          'Validates a xliff analysis configuration model before creation',
-        parameters: [
-          {
-            in: 'body',
-            schema: {
-              $ref: '#/definitions/XliffConfigSchema',
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: 'validate',
-            examples: {
-              'application/json': {
-                errors: [],
-              },
-            },
-          },
-          default: {
-            description: 'Unexpected error',
-          },
-        },
-      },
-    },
     '/api/v3/xliff-config-template/schema': {
       get: {
-        tags: ['Xliff analysis configuration'],
+        tags: ['Xliff import configuration'],
         summary: 'Shows the xliff analysis configuration model creation schema',
         description:
           'Shows the xliff analysis configuration model creation schema',
