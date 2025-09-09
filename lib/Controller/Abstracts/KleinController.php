@@ -16,6 +16,7 @@ use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
+use Throwable;
 
 abstract class KleinController implements IController {
 
@@ -163,6 +164,7 @@ abstract class KleinController implements IController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     protected function validateRequest() {
         foreach ( $this->validators as $validator ) {
