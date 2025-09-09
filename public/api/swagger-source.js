@@ -1196,7 +1196,7 @@ var spec = {
               name: 'split_values',
               in: 'formData',
               description:
-                'Number of word count values of each chunk returned in split check API',
+                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
               type: 'array',
               items: {type: 'double'},
             },
@@ -1267,7 +1267,7 @@ var spec = {
               name: 'split_values',
               in: 'formData',
               description:
-                'Number of word count values of each chunk returned in split check API',
+                'Number of word count values of each chunk returned in split check API. Example: split_values[0]=19.0, split_values[1]=29.0',
               type: 'array',
               items: {type: 'double'},
             },
@@ -2923,9 +2923,9 @@ var spec = {
     '/api/v3/engines/list': {
       get: {
         tags: ['Engines'],
-        summary: 'Retrieve personal engine list.',
+        summary: 'Retrieve personal MT engine list.',
         description:
-          'Retrieve personal engine list ( Google, Microsoft, etc. ).',
+          'Retrieve personal MT engine list (ModernMT, Google, Microsoft, etc.). A machine translation (MT) engine is a software tool that uses artificial intelligence, such as neural networks and natural language processing (NLP), to automatically translate text from a source language to a target language without human involvement.',
         parameters: [],
         responses: {
           200: {
