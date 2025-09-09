@@ -15,6 +15,7 @@ use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\Log;
 
 abstract class KleinController implements IController {
@@ -159,6 +160,7 @@ abstract class KleinController implements IController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     protected function validateRequest() {
         foreach ( $this->validators as $validator ) {
