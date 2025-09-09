@@ -17,6 +17,7 @@ use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
 use ReflectionException;
+use SplFileInfo;
 use SplTempFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
@@ -55,7 +56,7 @@ class TMSService {
      *
      * @throws Exception
      */
-    public function __construct( FeatureSet $featureSet = null ) {
+    public function __construct( ?FeatureSet $featureSet = null ) {
 
         //get Match service
         /** @var $mymemory_engine MyMemory */
@@ -271,7 +272,7 @@ class TMSService {
 
         if ( $allMemories->responseStatus >= 400 || $allMemories->responseData[ 'status' ] == 2 ) {
             $this->logger->debug( "Error response from TMX status check: " . $allMemories->responseData[ 'log' ] );
-            //what the hell? No memories although I've just loaded some? Eject!
+            //what the hell? No memories, although I've just loaded some? Eject!
             throw new Exception( "Error response from TMX status check", -15 );
         }
 
@@ -355,7 +356,7 @@ class TMSService {
     }
 
     /**
-     * Send a mail with link for direct prepared download
+     * Send mail with a link for direct prepared download
      *
      * @param string $userMail
      * @param string $userName
@@ -393,7 +394,7 @@ class TMSService {
      * @throws ReflectionException
      * @throws Exception
      */
-    public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplTempFileObject {
+    public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplFileInfo {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
@@ -415,7 +416,7 @@ class TMSService {
 
         /*
          * This is a feature for Xbench compatibility
-         * in case of mt and tm ( OmegaT set this flg to false )
+         * in the case of mt and tm (OmegaT set this flg to false)
          */
         $hideUnconfirmedRows = true;
 
@@ -440,8 +441,8 @@ class TMSService {
         foreach ( $result as $k => $row ) {
 
             /**
-             * evaluate the incremental chunk index.
-             * If there's more than 1 chunk, add a 'id_chunk' prop to the segment
+             * Evaluate the incremental chunk index.
+             * If there's more than 1 chunk, add an 'id_chunk' prop to the segment
              */
             $idChunk         = 1;
             $chunkPropString = '';
@@ -485,7 +486,7 @@ class TMSService {
             <seg>' . $Filter->fromLayer0ToRawXliff( $row[ 'segment' ] ) . '</seg>
         </tuv>';
 
-            //if segment is confirmed or we want show all segments
+            //if the segment is confirmed, or we want to show all the segments
             if ( in_array( $row[ 'status' ],
                             [
                                     TranslationStatus::STATUS_TRANSLATED,
