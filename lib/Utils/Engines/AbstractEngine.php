@@ -229,7 +229,7 @@ abstract class AbstractEngine implements EngineInterface {
 
         if ( $this->logging ) {
             $log = $mh->getSingleLog( $resourceHash );
-            if ( $this->content_type == 'json' ) {
+            if ( $this->content_type == 'json' && !$mh->hasError( $resourceHash ) ) {
                 $log[ 'response' ] = json_decode( $rawValue, true );
             } else {
                 $log[ 'response' ] = $rawValue;
