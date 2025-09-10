@@ -1,6 +1,7 @@
 <?php
 
 namespace Controller\API\V3;
+
 use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Exceptions\NotFoundException;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
@@ -40,7 +41,7 @@ class IssueCheckController extends KleinController {
 
         $modifiedSegments = ( new SegmentTranslationDao() )
                 ->setCacheTTL( 60 * 5 )
-                ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
+                ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $job->password, $source_page );
 
         $result[ 'modified_segments_count' ] = count( $modifiedSegments );
 
