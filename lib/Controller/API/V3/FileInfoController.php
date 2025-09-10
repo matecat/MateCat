@@ -14,6 +14,7 @@ use Controller\API\Commons\Validators\ChunkPasswordValidator;
 use Controller\API\Commons\Validators\LoginValidator;
 use Controller\API\Commons\Validators\ProjectAccessValidator;
 use Controller\Traits\ChunkNotFoundHandlerTrait;
+use InvalidArgumentException;
 use Model\Exceptions\ValidationError;
 use Model\Files\FilesInfoUtility;
 use Model\Jobs\JobStruct;
@@ -120,8 +121,14 @@ class FileInfoController extends KleinController {
 
         $instructions = $this->featureSet->filter( 'decodeInstructions', $instructions );
 
+        if(empty($instructions)){
+            throw new InvalidArgumentException("Empty instructions provided");
+        }
+
         if ( $filesInfoUtility->setInstructions( $id_file, $instructions ) ) {
-            $this->response->json( true );
+            $this->response->json( [
+                "success" => true,
+            ] );
         } else {
             throw new NotFoundException( 'File not found on this project' );
         }
