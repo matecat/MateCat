@@ -476,7 +476,7 @@ class SegmentTranslationDao extends AbstractDao {
             join jobs j ON j.id = ste.id_job
             where j.id = :id_job and j.password = :password
             
-            and ste.status = 'APPROVED'
+            and (ste.status = 'APPROVED' or ste.status = 'APPROVED2')
             group by ste.id_segment) as r1
             on r1.id_segment = ste.id_segment
             
@@ -570,10 +570,10 @@ class SegmentTranslationDao extends AbstractDao {
     public
     static function propagateTranslation(
             SegmentTranslationStruct $segmentTranslationStruct,
-            JobStruct                $chunkStruct,
-            int                      $_idSegment,
-            ProjectStruct            $project,
-            bool                     $execute_update = true
+            JobStruct $chunkStruct,
+            int $_idSegment,
+            ProjectStruct $project,
+            bool $execute_update = true
     ): array {
         $db = Database::obtain();
 
