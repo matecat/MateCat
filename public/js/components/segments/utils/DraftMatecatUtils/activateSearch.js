@@ -50,25 +50,28 @@ const activateSearch = (
     const text = contentBlock.getText()
     const key = contentBlock.getKey()
     let matchArr, start, end
-    let index = 0
+    let lastElement = occurrences.findIndex((item) => item.key === key)
+    let index = lastElement > -1 ? lastElement : 0
     while ((matchArr = regex.exec(text)) !== null) {
       start = matchArr.index
       end = start + matchArr[0].length
       if (occurrences[index]) {
-        if (!occurrences[index].start || occurrences[index].key === key) {
-          occurrences[index].start = start
-          occurrences[index].end = end
-          occurrences[index].key = key
-        } else if (occurrences[index + 1]) {
-          occurrences[index + 1].start = start
-          occurrences[index].end = end
-          occurrences[index + 1].key = key
-          // index++
+        if (occurrences[index].key !== key) {
+          if (!occurrences[index].start) {
+            occurrences[index].start = start
+            occurrences[index].end = end
+            occurrences[index].key = key
+          } else {
+            let elementToUpdate = occurrences.findIndex((item) => !item.key)
+            occurrences[elementToUpdate].start = start
+            occurrences[elementToUpdate].end = end
+            occurrences[elementToUpdate].key = key
+          }
         }
+        index++
       }
       //!isTag(start, tagRange) && callback(start, end)
       TEXT_UTILS.handleTagInside(start, end, contentBlock, callback)
-      index++
     }
   }
 
