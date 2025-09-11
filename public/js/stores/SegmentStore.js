@@ -908,6 +908,10 @@ const SegmentStore = assign({}, EventEmitter.prototype, {
       this.removeLexiqaWarning()
     }
   },
+  hasGlobalErrors: function (sid) {
+    const categories = this._globalWarnings.matecat.ERROR.Categories
+    return Object.values(categories).some((sids) => sids.includes(sid))
+  },
   removeLexiqaWarning: function () {
     this._segments = this._segments.map((segment) => segment.delete('lexiqa'))
   },
