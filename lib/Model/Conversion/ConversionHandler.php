@@ -16,6 +16,7 @@ use Model\Filters\FiltersConfigTemplateStruct;
 use Utils\Constants\ConversionHandlerStatus;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
+use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -236,6 +237,14 @@ class ConversionHandler {
         );
 
         $this->result->setSize( filesize( $file_path ) );
+
+        if(isset($convertResult["pdfAnalysis"]) and !empty($convertResult["pdfAnalysis"])){
+            $this->result->setPdfAnalysis($convertResult["pdfAnalysis"]);
+
+            // save pdfAnalysis.json
+            $redisKey = md5($file_path . "__pdfAnalysis.json");
+            ( new RedisHandler() )->getConnection()->set( $redisKey, serialize( $convertResult["pdfAnalysis"] ), 'ex', 60 );
+        }
 
     }
 

@@ -2403,6 +2403,11 @@ class ProjectManager {
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
+                // pdfAnalysis
+                if(!empty($meta['pdfAnalysis'])){
+                    $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']) );
+                }
+
                 $fileStructures[ $fid ] = [
                         'fid'               => $fid,
                         'original_filename' => $originalFileName,
