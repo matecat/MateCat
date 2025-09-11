@@ -912,4 +912,21 @@ class Utils {
         return $nameString;
 
     }
+
+    /**
+     * @param $value
+     *
+     * @return int|mixed
+     */
+    public static function formatStringValue( $value ) {
+        if ( is_numeric( $value ) ) {
+            return (int)$value;
+        }
+
+        if ( Utils::isJson( $value ) ) {
+            return json_decode($value);
+        }
+
+        return $value;
+    }
 }
