@@ -29,6 +29,7 @@ import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
+import {SegmentQAIcon} from './SegmentQAIcon'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext
@@ -851,6 +852,7 @@ class Segment extends React.Component {
                 {translationIssues}
               </div>
             )}
+            <SegmentQAIcon sid={this.props.segment.sid} />
           </div>
           <div className="segment-side-container">
             {config.comments_enabled && this.props.segment.openComments ? (

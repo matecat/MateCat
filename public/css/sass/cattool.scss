@@ -78,6 +78,18 @@ body.cattool {
   width: 7%;
   top: 0;
   height: 100%;
+  .icon-warning-sign.qa-icon {
+    color: colors.$redDefault;
+    font-size: 25px;
+    position: absolute;
+    padding: 5px 7px 5px;
+    width: 55px;
+    top: 40px;
+    cursor: pointer;
+    &.review {
+      top: 61px;
+    }
+  }
 }
 
 //ICE MATCH
