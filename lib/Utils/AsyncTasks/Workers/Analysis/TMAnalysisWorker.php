@@ -220,13 +220,13 @@ class TMAnalysisWorker extends AbstractWorker {
         );
         $check->performConsistencyCheck();
 
-        if( !$check->thereAreErrors() ){
+        if ( !$check->thereAreErrors() ) {
             $suggestion = $check->getTrgNormalized();
         } else {
             $suggestion = $check->getTargetSeg();
         }
 
-        $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
+        $err_json2 = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
@@ -732,6 +732,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // set for lara engine in case this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
+            $config[ 'tuid' ]            = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
 
             if ( !isset( $config[ 'job_id' ] ) ) {
                 $config[ 'job_id' ] = $queueElement->params->id_job;

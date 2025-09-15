@@ -45,16 +45,13 @@ class Bootstrap {
         self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-        LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
+        //get the environment configuration
+        $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
+        $this->initRegistryClass();
+        $this->setLoggers();
+
         set_exception_handler( [ Bootstrap::class, 'exceptionHandler' ] );
         register_shutdown_function( [ Bootstrap::class, 'shutdownFunctionHandler' ] );
-
-        $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
-
-        //get the environment configuration
-        $this->initRegistryClass();
-
-        $this->setLoggers();
 
         $this->setErrorReporting();
 
@@ -76,6 +73,7 @@ class Bootstrap {
 
     private function setLoggers() {
         LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
+        LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
         LoggerFactory::getLogger( 'dao', 'dao.log' );
         LoggerFactory::getLogger( 'query_cache', 'query_cache.log' );
         LoggerFactory::getLogger( "conversion", "conversion.log" );
