@@ -183,7 +183,7 @@ class ConversionHandler {
 
             } catch ( FileSystemException $e ) {
 
-                $this->logger->debug( "FileSystem Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "FileSystem Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
@@ -192,7 +192,7 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                $this->logger->debug( "S3 Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "S3 Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );

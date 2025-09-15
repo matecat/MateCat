@@ -75,7 +75,7 @@ class TMSService {
          * This is useful when engines are used outside the TaskRunner context
          * @see \Utils\TaskRunner\Executor::__construct()
          */
-        $this->logger = LoggerFactory::getLogger( 'engines', 'app_engines_call.log' );
+        $this->logger = LoggerFactory::getLogger( 'engines' );
 
     }
 

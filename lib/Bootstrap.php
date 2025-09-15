@@ -89,6 +89,8 @@ class Bootstrap {
         LoggerFactory::getLogger( 'project_manager', 'project_manager.log' );
         LoggerFactory::getLogger( "upload_handler", "upload.log" );
         LoggerFactory::getLogger( "tos_external_call", "tos.log" );
+        LoggerFactory::getLogger( 'engines', 'app_engines_call.log' ); //default handler for engines called by web node
+        LoggerFactory::getLogger( 'files', 'files_storage.log' );
     }
 
     /**

@@ -451,7 +451,7 @@ class SegmentDao extends AbstractDao {
      */
     public function createList( array $obj_arr ) {
 
-        $obj_arr            = array_chunk( $obj_arr, 100 );
+        $obj_arr = array_chunk( $obj_arr, 100 );
 
         $baseQuery = "INSERT INTO segments ( 
                             id, 
@@ -470,7 +470,7 @@ class SegmentDao extends AbstractDao {
                             ) VALUES ";
 
 
-        LoggerFactory::doJsonLog( "Segments: Total Queries to execute: " . count( $obj_arr ) );
+        LoggerFactory::getLogger( 'project_manager' )->debug( "Segments: Total Queries to execute: " . count( $obj_arr ) );
 
         $tuple_marks = "( " . rtrim( str_repeat( "?,  ", 13 ), ", " ) . " )";  //set to 13 when implements id_project
 
@@ -505,10 +505,10 @@ class SegmentDao extends AbstractDao {
 
                 $stm = $this->database->getConnection()->prepare( $query );
                 $stm->execute( $values );
-                LoggerFactory::doJsonLog( "Segments: Executed Query " . ( $i + 1 ) );
+                LoggerFactory::getLogger( 'project_manager' )->debug( "Segments: Executed Query " . ( $i + 1 ) );
 
             } catch ( PDOException $e ) {
-                LoggerFactory::doJsonLog( "Segment import - DB Error: " . $e->getMessage() );
+                LoggerFactory::getLogger( 'project_manager' )->error( "Segment import - DB Error: " . $e->getMessage() );
                 throw new Exception( "Segment import - DB Error: " . $e->getMessage() . " - " . var_export( $chunk, true ), -2 );
             }
 

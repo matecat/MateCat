@@ -743,7 +743,8 @@ class ProjectManager {
 
                 // make a cache package (with work/ only, empty orig/)
                 try {
-                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], null, $filePathName );
+                    $this->logger->debug( "File $fileName converted to cache" );
                 } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
                             "code"    => -230,
