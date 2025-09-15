@@ -9,7 +9,6 @@
 namespace Model\QualityReport;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
