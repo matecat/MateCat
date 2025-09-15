@@ -14,12 +14,9 @@ import {MTRow} from './MTRow'
 import {SettingsPanelContext} from '../../SettingsPanelContext'
 import {deleteMTEngine} from '../../../../api/deleteMTEngine'
 import {DEFAULT_ENGINE_MEMORY} from '../../SettingsPanel'
-import {MTGlossary} from './MTGlossary'
 
 import AddWide from '../../../../../img/icons/AddWide'
 import {DeepL} from './MtEngines/DeepL'
-import {DeepLGlossary} from './DeepLGlossary'
-import {MTDeepLRow} from './MTDeepLRow'
 import CreateProjectActions from '../../../../actions/CreateProjectActions'
 import CatToolActions from '../../../../actions/CatToolActions'
 import {DeleteResource} from './DeleteResource'
@@ -29,9 +26,8 @@ import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
 import IconClose from '../../../icons/IconClose'
 import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
-import {NumericStepper} from '../../../common/NumericStepper/NumericStepper'
-import InfoIcon from '../../../../../img/icons/InfoIcon'
-import {LaraGlossary} from './LaraGlossary/LaraGlossary'
+import {OptionsContainer} from './OptionsContainer'
+import {ApplicationThreshold} from './ApplicationThreshold'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -87,13 +83,6 @@ export const MachineTranslationTab = () => {
           : {},
     }))
 
-  const mtQualityValue = currentProjectTemplate.mtQualityValueInEditor
-  const setMtQualityValue = (value) =>
-    modifyingCurrentTemplate((prevTemplate) => ({
-      ...prevTemplate,
-      mtQualityValueInEditor: value,
-    }))
-
   const [addMTVisible, setAddMTVisible] = useState(
     typeof engineIdFromFromQueryString === 'string',
   )
@@ -112,25 +101,13 @@ export const MachineTranslationTab = () => {
   const [deleteMTRequest, setDeleteMTRequest] = useState()
 
   const COLUMNS_TABLE = config.is_cattool
-    ? [{name: 'Engine Name'}, {name: 'Description'}]
+    ? [{name: 'Active'}, {name: 'Engine Name'}, {name: 'Description'}]
     : [
+        {name: 'Active'},
         {name: 'Engine Name'},
         {name: 'Description'},
-        {name: 'Use in this project'},
         {name: 'Action'},
       ]
-
-  const CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE = {
-    [enginesList.find(({name}) => name === 'DeepL').name]: config.is_cattool
-      ? [{name: 'EnginesFactory Name'}, {name: 'Description'}, {name: 'Formality'}]
-      : [
-          {name: 'EnginesFactory Name'},
-          {name: 'Description'},
-          {name: 'Formality'},
-          {name: 'Use in this project'},
-          {name: 'Action'},
-        ],
-  }
 
   const addMTEngineRequest = (data) => {
     setIsAddMTEngineRequestInProgress(true)
@@ -274,30 +251,17 @@ export const MachineTranslationTab = () => {
       ? mtEngines.find(({id}) => id === activeMTEngine)
       : config.active_engine
 
-  const activeColumns = CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[
-    activeMTEngineData?.name
-  ]
-    ? CUSTOM_ACTIVE_COLUMNS_TABLE_BY_ENGINE[activeMTEngineData.name]
-    : COLUMNS_TABLE
-
-  const ActiveMTRow =
-    activeMTEngineData?.engine_type === 'DeepL' ? MTDeepLRow : MTRow
+  const ActiveMTRow = MTRow
 
   const getExtraNodeActiveRow = () => {
     const shouldShowDeleteConfirmation =
       deleteMTRequest && activeMTEngineData.id === deleteMTRequest
-    const GlossaryComponent =
-      activeMTEngineData.engine_type === 'MMT'
-        ? MTGlossary
-        : activeMTEngineData.engine_type === 'DeepL'
-          ? DeepLGlossary
-          : activeMTEngineData.engine_type === 'Lara'
-            ? LaraGlossary
-            : undefined
+
+    const shouldShowOptions = true
 
     return {
-      ...((shouldShowDeleteConfirmation || GlossaryComponent) && {
-        isExpanded: true,
+      ...((shouldShowDeleteConfirmation || shouldShowOptions) && {
+        isExpanded: activeMTEngineData.engine_type !== 'MMTLite',
         extraNode: (
           <>
             {deleteMTRequest && activeMTEngineData.id === deleteMTRequest && (
@@ -307,14 +271,12 @@ export const MachineTranslationTab = () => {
                 onConfirm={deleteMT.current}
               />
             )}
-            {GlossaryComponent && (
-              <GlossaryComponent
-                {...{
-                  ...activeMTEngineData,
-                  isCattoolPage: config.is_cattool,
-                }}
-              />
-            )}
+            <OptionsContainer
+              {...{
+                activeMTEngineData,
+                isCattoolPage: config.is_cattool,
+              }}
+            />
           </>
         ),
       }),
@@ -358,28 +320,6 @@ export const MachineTranslationTab = () => {
         <div className="machine-translation-tab-table-title">
           <div className="machine-translation-tab-title-container">
             <h2>Active MT</h2>
-            {typeof mtQualityValue === 'number' && (
-              <div className="mt-quality-value">
-                <div className="mt-quality-value-label">
-                  <h4>Application threshold</h4>
-                  <a
-                    href="https://guides.matecat.com/mt-settings#MT-application-threshold"
-                    target="_blank"
-                  >
-                    <InfoIcon />
-                  </a>
-                </div>
-                <NumericStepper
-                  value={mtQualityValue}
-                  valuePlaceholder={`${mtQualityValue}%`}
-                  onChange={setMtQualityValue}
-                  minimumValue={76}
-                  maximumValue={101}
-                  stepValue={1}
-                  disabled={config.is_cattool}
-                />
-              </div>
-            )}
           </div>
           {!config.is_cattool && !addMTVisible && (
             <button
@@ -392,9 +332,10 @@ export const MachineTranslationTab = () => {
           )}
         </div>
 
+        <ApplicationThreshold />
+
         <SettingsPanelTable
-          columns={activeColumns}
-          className={`active-table-${activeMTEngineData?.name}`}
+          columns={COLUMNS_TABLE}
           rows={
             typeof activeMTEngine === 'number'
               ? [
