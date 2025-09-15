@@ -48,6 +48,7 @@ class Bootstrap {
         //get the environment configuration
         $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
         $this->initRegistryClass();
+        $this->createSystemDirectories();
         $this->setLoggers();
 
         set_exception_handler( [ Bootstrap::class, 'exceptionHandler' ] );
@@ -63,7 +64,6 @@ class Bootstrap {
 
         $this->installApplicationSingletons();
 
-        $this->createSystemDirectories();
 
         $this->initMandatoryPlugins();
         $this->notifyBootCompleted();
