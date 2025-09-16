@@ -321,7 +321,7 @@ class Bootstrap {
         ];
 
         foreach ( $directories as $directory ) {
-            if ( !is_dir( $directory ) && is_writable( $directory ) ) {
+            if ( !is_dir( $directory ) ) {
                 mkdir( $directory, 0755, true );
             }
         }
