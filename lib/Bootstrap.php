@@ -184,11 +184,11 @@ class Bootstrap {
                 break;
             case PDOException::class:
                 $code = 503;
-                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new View\API\Commons\Error( $exception ) )->render( true ) );
                 break;
             default:
                 $code = 500;
-                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new View\API\Commons\Error( $exception ) )->render( true ) );
                 break;
         }
 

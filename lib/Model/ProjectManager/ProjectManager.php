@@ -2759,6 +2759,13 @@ class ProjectManager {
                 $position = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment  = ( new SegmentDao() )->getById( $translation_row [ 0 ] );
 
+                //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
+                // SegmentDao::getById returns false if the id is not found in the database
+                // Skip the segment and lose the translation if the segment id is not found in the database
+                if( !$segment ) {
+                    continue;
+                }
+
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );
                 } else {
