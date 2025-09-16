@@ -233,7 +233,7 @@ class Executor implements SplObserver {
                 //set/increment the reQueue number
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
-                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
+                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext, $this->logger );
                 $amqHandlerPublisher->getClient()->disconnect();
 
             } catch ( EmptyElementException $e ) {
@@ -247,7 +247,7 @@ class Executor implements SplObserver {
 
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
-                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
+                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext, $this->logger );
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep( 2 );
 
