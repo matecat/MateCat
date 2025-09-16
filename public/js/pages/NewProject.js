@@ -555,7 +555,7 @@ const NewProject = () => {
         .then(({data}) => {
           handleCreationStatus(data.id_project, data.password)
         })
-        .catch((errors) => {
+        .catch(({errors}) => {
           let errorMsg
           if (errors && errors.length) {
             switch (errors[0].code) {
