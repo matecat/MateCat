@@ -136,9 +136,8 @@
 .settings-panel-row-extra-content-expanded {
   visibility: visible;
   min-height: 50px;
-  max-height: 400px;
+  max-height: fit-content;
   opacity: 1;
-  overflow: auto;
 }
 
 .settings-panel-mt-row {

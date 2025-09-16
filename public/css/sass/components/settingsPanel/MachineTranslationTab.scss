@@ -267,9 +267,9 @@
 }
 
 .mt-glossary {
+  position: relative;
   display: flex;
   flex-direction: column;
-  background-color: colors.$white;
 
   .expand-button {
     height: 32px;
@@ -303,14 +303,25 @@
       color: black;
 
       & > :first-child {
-        text-align: center;
+        text-align: left;
+        padding-left: 0;
       }
     }
+    .settings-panel-table-rowHeading,
     .settings-panel-row-content {
-      grid-template-columns: 15% minmax(0, 1fr) 22% 5%;
+      grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
+      background-color: unset;
+    }
+    .settings-panel-row-content {
+      grid-template-columns: 8% minmax(0, 1fr) 22% 5%;
+      background-color: unset;
+
+      & > :first-child {
+        padding-left: 12px;
+      }
     }
     .row-content-create {
-      grid-template-columns: 15% minmax(0, 1fr) 22% 5%;
+      grid-template-columns: 8% minmax(0, 1fr) 18% 5%;
     }
     .settings-panel-row {
       border: none;
@@ -333,9 +344,8 @@
 
   .main-buttons-container {
     position: absolute;
-    width: 100%;
-    padding: 0 10px 0 230px;
-    margin-top: 54px;
+    right: 15px;
+    margin-top: 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -352,7 +362,7 @@
   }
 
   .tooltip-input-name {
-    min-width: 70%;
+    min-width: 75%;
   }
 }
 
@@ -365,6 +375,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   overflow: hidden;
+  background-color: rgba(white, 0.8);
 
   &.active,
   &:focus,
@@ -498,10 +509,6 @@
   padding: 2px 8px 2px 4px;
 }
 
-.create-glossary-button-disabled {
-  visibility: hidden;
-}
-
 .machine-translation-tab-title-container {
   display: flex;
   align-items: center;
@@ -515,7 +522,7 @@
   justify-content: space-between;
   background-color: colors.$grey4;
   padding: 12px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: solid 1px colors.$grey3;
   margin-bottom: 16px;
 
@@ -601,6 +608,10 @@
       padding: 15px 0;
       text-align: left;
 
+      h3 {
+        margin: 0;
+      }
+
       > :first-child {
         width: 55%;
       }
@@ -617,5 +628,24 @@
       font-size: 16px;
       line-height: 24px;
     }
+
+    h2 {
+      margin-top: 25px;
+      padding: 0;
+    }
+  }
+
+  .select {
+    color: colors.$black;
+    border-color: colors.$grey8;
+  }
+
+  .select-with-label__wrapper .select {
+    padding: 9px 46px 9px 12px;
+    height: auto;
+  }
+
+  .select--is-disabled {
+    background-color: colors.$grey9;
   }
 }

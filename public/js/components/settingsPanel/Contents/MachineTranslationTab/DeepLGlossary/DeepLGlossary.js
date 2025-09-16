@@ -2,7 +2,6 @@ import React, {useCallback, useContext, useRef, useState} from 'react'
 import PropTypes from 'prop-types'
 import {SettingsPanelContext} from '../../../SettingsPanelContext'
 import {useEffect} from 'react'
-import ArrowDown from '../../../../../../img/icons/ArrowDown'
 import {SettingsPanelTable} from '../../../SettingsPanelTable'
 import IconAdd from '../../../../icons/IconAdd'
 import {getDeepLGlosssaries} from '../../../../../api/getDeepLGlosssaries/getDeepLGlosssaries'
@@ -19,7 +18,7 @@ import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmD
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
 
 const COLUMNS_TABLE = [
-  {name: 'Activate'},
+  {name: 'Active'},
   {name: 'Glossary'},
   {name: ''},
   {name: ''},
@@ -27,18 +26,17 @@ const COLUMNS_TABLE = [
 
 export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
 
-export const DeepLGlossary = ({id, isCattoolPage = false}) => {
+export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
   const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
     useContext(SettingsPanelContext)
 
-  const {mt: {extra: deeplGlossaryProps} = {}} = currentProjectTemplate ?? {}
+  const {mt: {extra} = {}} = currentProjectTemplate ?? {}
 
-  const [isShowingRows, setIsShowingRows] = useState(false)
   const [rows, setRows] = useState()
   const [deleteGlossaryRequest, setDeleteGlossaryRequest] = useState()
 
   const activeGlossaryRef = useRef()
-  activeGlossaryRef.current = deeplGlossaryProps?.deepl_id_glossary
+  activeGlossaryRef.current = extra?.deepl_id_glossary
 
   const deleteGlossary = useRef()
   deleteGlossary.current = (glossary = deleteGlossaryRequest) => {
@@ -267,25 +265,8 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
     const activeRow = rows.find(({isActive}) => isActive)
 
-    modifyingCurrentTemplate((prevTemplate) => {
-      const prevMt = prevTemplate.mt
-      const prevMTExtra = prevMt?.extra ?? {}
-      const {deepl_id_glossary, ...deepLExtra} = prevMTExtra //eslint-disable-line
-
-      return {
-        ...prevTemplate,
-        mt: {
-          ...prevMt,
-          extra: {
-            ...deepLExtra,
-            ...(activeRow && {
-              deepl_id_glossary: activeRow.id,
-            }),
-          },
-        },
-      }
-    })
-  }, [rows, isCattoolPage, modifyingCurrentTemplate])
+    if (typeof activeRow?.id !== 'undefined') setGlossaries(activeRow.id)
+  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
 
   const addGlossary = () => {
     const row = {
@@ -300,19 +281,6 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
     ])
   }
 
-  const onShowingRows = () => {
-    setIsShowingRows((prevState) => !prevState)
-    if (!isCattoolPage) {
-      // setActiveMTEngine((prevState) => ({
-      //   ...prevState,
-      //   deeplGlossaryProps: {
-      //     ...prevState.deeplGlossaryProps,
-      //     isOpened: !isShowingRows,
-      //   },
-      // }))
-    }
-  }
-
   const haveRecords = rows?.length > 0
   const shouldHideNewButton = rows?.some(
     ({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID,
@@ -320,58 +288,48 @@ export const DeepLGlossary = ({id, isCattoolPage = false}) => {
 
   return (
     <div className="mt-glossary">
-      <div className="expand-button">
-        <button
-          className={`${isShowingRows ? 'rotate' : ''}`}
-          onClick={onShowingRows}
-          title="Glossary options"
-        >
-          <ArrowDown />
-          Glossary options
-        </button>
-      </div>
-      {isShowingRows && (
-        <>
-          {haveRecords && (
-            <SettingsPanelTable
-              columns={COLUMNS_TABLE}
-              rows={rows}
-              className="mt-glossary-table"
-            />
-          )}
-
-          {!isCattoolPage &&
-            (haveRecords ? (
-              <div className="main-buttons-container">
-                <button
-                  className={`grey-button create-glossary-button${shouldHideNewButton ? ' create-glossary-button-disabled' : ''}`}
-                  onClick={addGlossary}
-                >
-                  <IconAdd size={18} />
-                  New
-                </button>
-              </div>
-            ) : Array.isArray(rows) ? (
-              <div className="empty-list-mode">
-                <p>Start using DeepL's glossary feature</p>
-                <button
-                  className="grey-button create-glossary-button"
-                  onClick={addGlossary}
-                >
-                  <IconAdd size={18} />
-                  New glossary
-                </button>
-              </div>
-            ) : (
-              <p className="loading-list-mode">Loading...</p>
-            ))}
-        </>
+      {haveRecords && (
+        <SettingsPanelTable
+          columns={COLUMNS_TABLE}
+          rows={rows}
+          className="mt-glossary-table"
+        />
       )}
+
+      {!isCattoolPage &&
+        (haveRecords ? (
+          <div className="main-buttons-container">
+            {!shouldHideNewButton && (
+              <button
+                className="ui primary button settings-panel-button-icon confirm-button create-glossary-button"
+                onClick={addGlossary}
+                title="Add glossary"
+              >
+                <IconAdd size={18} />
+                New glossary
+              </button>
+            )}
+          </div>
+        ) : Array.isArray(rows) ? (
+          <div className="empty-list-mode">
+            <p>Start using DeepL's glossary feature</p>
+            <button
+              className="grey-button create-glossary-button"
+              onClick={addGlossary}
+            >
+              <IconAdd size={18} />
+              New glossary
+            </button>
+          </div>
+        ) : (
+          <p className="loading-list-mode">Loading...</p>
+        ))}
     </div>
   )
 }
 
 DeepLGlossary.propTypes = {
   id: PropTypes.number.isRequired,
+  setGlossaries: PropTypes.func.isRequired,
   isCattoolPage: PropTypes.bool,
 }

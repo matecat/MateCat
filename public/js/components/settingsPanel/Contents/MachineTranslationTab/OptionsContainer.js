@@ -2,9 +2,13 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import ArrowDown from '../../../../../img/icons/ArrowDown'
 import {MMTOptions} from './MMTOptions'
+import {LaraOptions} from './LaraOptions/LaraOptions'
+import {DeepLOptions} from './DeepLOptions/DeepLOptions'
 
 const ContentComponent = {
   MMT: MMTOptions,
+  Lara: LaraOptions,
+  DeepL: DeepLOptions,
 }
 
 export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
