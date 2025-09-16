@@ -389,12 +389,13 @@ class CatUtils {
             $ctype = trim( $match[ 2 ] );
             $ctype = str_replace( '"', '', $ctype );
             $ctype = str_replace( 'ctype=', '', $ctype );
-
-            if ( $ctype !== CTypeEnum::HTML ) {
-                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
-            } else {
+            
+            if ( in_array( $ctype, [ CTypeEnum::HTML, CTypeEnum::XML ] ) ) {
                 $string = str_replace( $match[ 0 ], '', $string ); // count html snippets as zero words
+            } else {
+                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
             }
+
         }
 
         // remove all residual xliff tags
@@ -1024,9 +1025,8 @@ class CatUtils {
      *
      * @return string
      */
-    public static function encodeFileName($filename)
-    {
-        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    public static function encodeFileName( $filename ) {
+        return rtrim( strtr( base64_encode( gzdeflate( $filename, 9 ) ), '+/', '-_' ), '=' );
     }
 
     /**
@@ -1034,9 +1034,8 @@ class CatUtils {
      *
      * @return false|string
      */
-    public static function decodeFileName($filename)
-    {
-        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
+    public static function decodeFileName( $filename ) {
+        return gzinflate( base64_decode( strtr( $filename, '-_', '+/' ) ) );
     }
 }
 
