@@ -389,7 +389,7 @@ class CatUtils {
             $ctype = trim( $match[ 2 ] );
             $ctype = str_replace( '"', '', $ctype );
             $ctype = str_replace( 'ctype=', '', $ctype );
-            
+
             if ( in_array( $ctype, [ CTypeEnum::HTML, CTypeEnum::XML ] ) ) {
                 $string = str_replace( $match[ 0 ], '', $string ); // count html snippets as zero words
             } else {
