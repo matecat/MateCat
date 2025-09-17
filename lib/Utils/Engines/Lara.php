@@ -215,7 +215,10 @@ class Lara extends AbstractEngine {
             $translateOptions->setContentType( 'application/xliff+xml' );
 
             $headers = new Headers();
-            $headers->setTuid( $_config[ 'tuid' ] );
+
+            if(!empty($_config[ 'tuid' ]) and is_string($_config[ 'tuid' ])){
+                $headers->setTuid( $_config[ 'tuid' ] );
+            }
 
             $translateOptions->setHeaders( $headers->getArrayCopy() );
 
