@@ -237,7 +237,7 @@ test('Modern MT and glossary', async () => {
     {
       ...projectTemplatesMock.items[1],
       id: 4,
-      mt: {id: 5, extra: {glossaries: [374333]}},
+      mt: {id: 5, extra: {mmt_glossaries: [374333]}},
     },
   ]
   const currentProjectTemplate = {
@@ -275,7 +275,7 @@ test('Modern MT and glossary', async () => {
 
   expect(modifiedTemplate).toEqual({
     ...currentProjectTemplate,
-    mt: {id: 5, extra: {glossaries: [374333]}},
+    mt: {id: 5, extra: {mmt_glossaries: [374333]}},
   })
 
   const spyShowModal = jest.spyOn(ModalsActions, 'showModalComponent')
@@ -287,7 +287,7 @@ test('Modern MT and glossary', async () => {
     'The glossary you are about to delete is linked to an MT license and used in the following project creation template(s):',
   )
 
-  const newButton = screen.getByText('New')
+  const newButton = screen.getByText('New glossary')
   expect(newButton).toBeInTheDocument()
 
   await user.click(newButton)
@@ -382,7 +382,6 @@ test('DeepL and glossary', async () => {
   )
   expect(rowGlossary1).toBeInTheDocument()
   expect(rowGlossary2).toBeInTheDocument()
-
   await user.click(rowGlossary2)
   expect(rowGlossary2).toBeChecked()
 
@@ -414,7 +413,7 @@ test('DeepL and glossary', async () => {
     'The glossary you are about to delete is linked to a DeepL license and used in the following project creation template(s):',
   )
 
-  const newButton = screen.getByText('New')
+  const newButton = screen.getByText('New glossary')
   expect(newButton).toBeInTheDocument()
 
   await user.click(newButton)
@@ -435,12 +434,16 @@ test('DeepL and glossary', async () => {
 
   await user.click(screen.getByText('Formal'))
 
+  console.log(modifiedTemplate, currentProjectTemplate)
   expect(modifiedTemplate).toEqual({
     ...currentProjectTemplate,
     mt: {
       id: 7,
       extra: {
+        deepl_engine_type: undefined,
         deepl_formality: 'prefer_more',
+        deepl_id_glossary: '316e350e-81d1-4781-900c-2ab69aa4e6f4',
+        pre_translate_files: undefined,
       },
     },
   })

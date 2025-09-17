@@ -52,6 +52,13 @@ function useOptions() {
     }
   }, [formData, modifyingCurrentTemplate, setValue])
 
+  // set default values
+  useEffect(() => {
+    Object.entries(mtExtra.current).forEach(([key, value]) =>
+      setValue(key, value),
+    )
+  }, [currentProjectTemplate.mt?.id, setValue])
+
   console.log(formData)
 
   return {control, setValue}
