@@ -1445,6 +1445,11 @@ class ProjectManager {
 
             $jobsMetadataDao = new \Model\Jobs\MetadataDao();
 
+            // public_tm_penalty
+            if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+            }
+
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
                 $jobsMetadataDao->set( $newJob->id, $newJob->password, 'character_counter_count_tags', ( $projectStructure[ 'character_counter_count_tags' ] ? "1" : "0" ) );
