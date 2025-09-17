@@ -2945,28 +2945,13 @@
         {
             "localized": [
                 {
-                    "en": "Manipuri (India)"
+                    "en": "Manipuri"
                 }
             ],
             "isocode": "mni",
             "enabled": true,
             "rtl": false,
             "rfc3066code": "mni-IN",
-            "ocr": {
-                "supported": true,
-                "not_supported_or_rtl": false
-            }
-        },
-        {
-            "localized": [
-                {
-                    "en": "Manipuri (Guinea)"
-                }
-            ],
-            "isocode": "mni",
-            "enabled": true,
-            "rtl": false,
-            "rfc3066code": "mni-GN",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
