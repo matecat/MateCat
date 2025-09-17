@@ -16,6 +16,7 @@ import CreateProjectActions from '../../../../../actions/CreateProjectActions'
 import ModalsActions from '../../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../../hooks/useProjectTemplates'
+import {DeepLGlossaryNoneRow} from './DeepLGlossaryNoneRow'
 
 const COLUMNS_TABLE = [
   {name: 'Active'},
@@ -25,9 +26,10 @@ const COLUMNS_TABLE = [
 ]
 
 export const DEEPL_GLOSSARY_CREATE_ROW_ID = 'createRow'
+export const DEEPL_GLOSSARY_ROW_NONE = ''
 
 export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
-  const {currentProjectTemplate, modifyingCurrentTemplate, projectTemplates} =
+  const {currentProjectTemplate, projectTemplates} =
     useContext(SettingsPanelContext)
 
   const {mt: {extra} = {}} = currentProjectTemplate ?? {}
@@ -138,13 +140,26 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
         if (!Array.isArray(newValue)) return prevState
 
-        return newValue.map((row) => ({
+        const newValueWithoutNoneRow = newValue.filter(
+          ({id}) => id !== DEEPL_GLOSSARY_ROW_NONE,
+        )
+
+        return [
+          {
+            id: DEEPL_GLOSSARY_ROW_NONE,
+            name: 'None',
+            isActive: newValueWithoutNoneRow.every(({isActive}) => !isActive),
+          },
+          ...newValueWithoutNoneRow,
+        ].map((row) => ({
           ...row,
           node:
             row.id === DEEPL_GLOSSARY_CREATE_ROW_ID ? (
               <DeepLGlossaryCreateRow
                 {...{engineId: id, row, setRows: updateRowsState}}
               />
+            ) : row.id === DEEPL_GLOSSARY_ROW_NONE ? (
+              <DeepLGlossaryNoneRow {...{row, setRows: updateRowsState}} />
             ) : (
               <DeepLGlossaryRow
                 key={row.id}
@@ -266,7 +281,7 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
     const activeRow = rows.find(({isActive}) => isActive)
 
     if (typeof activeRow?.id !== 'undefined') setGlossaries(activeRow.id)
-  }, [rows, isCattoolPage, modifyingCurrentTemplate, setGlossaries])
+  }, [rows, isCattoolPage, setGlossaries])
 
   const addGlossary = () => {
     const row = {

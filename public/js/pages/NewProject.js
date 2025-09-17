@@ -38,7 +38,7 @@ import useProjectTemplates, {SCHEMA_KEYS} from '../hooks/useProjectTemplates'
 import {TemplateSelect} from '../components/settingsPanel/ProjectTemplate/TemplateSelect'
 import {getMMTKeys} from '../api/getMMTKeys/getMMTKeys'
 import {AlertDeleteResourceProjectTemplates} from '../components/modals/AlertDeleteResourceProjectTemplates'
-import {checkGDriveEvents, handleCreationStatus} from '../utils/newProjectUtils'
+import {handleCreationStatus} from '../utils/newProjectUtils'
 import {ApplicationWrapperContext} from '../components/common/ApplicationWrapper/ApplicationWrapperContext'
 import {mountPage} from './mountPage'
 import {HomePageSection} from '../components/createProject/HomePageSection'
@@ -62,6 +62,7 @@ import {QF_SCHEMA_KEYS} from '../components/settingsPanel/Contents/QualityFramew
 import {ANALYSIS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/AnalysisTab'
 import {FILTERS_PARAMS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/FiltersParams/FiltersParams'
 import {XLIFF_SETTINGS_SCHEMA_KEYS} from '../components/settingsPanel/Contents/FileImportTab/XliffSettings/XliffSettings'
+import {DEEPL_GLOSSARY_ROW_NONE} from '../components/settingsPanel/Contents/MachineTranslationTab/DeepLGlossary/DeepLGlossary'
 
 const SELECT_HEIGHT = 324
 
@@ -82,7 +83,7 @@ const headerMountPoint = document.querySelector('header.upload-page-header')
 
 const NewProject = () => {
   const [tmKeys, setTmKeys] = useState()
-  const [mtEngines, setMtEngines] = useState([DEFAULT_ENGINE_MEMORY])
+  const [mtEngines, setMtEngines] = useState()
   const [projectSent, setProjectSent] = useState(false)
   const [errors, setErrors] = useState()
   const [warnings, setWarnings] = useState()
@@ -107,7 +108,7 @@ const NewProject = () => {
     setProjectTemplates,
     modifyingCurrentTemplate,
     checkSpecificTemplatePropsAreModified,
-  } = useProjectTemplates(tmKeys)
+  } = useProjectTemplates({tmKeys, mtEngines})
 
   // templates quality framework
   const qualityFrameworkTemplates = useTemplates(QF_SCHEMA_KEYS)
@@ -277,6 +278,7 @@ const NewProject = () => {
               ({mt}) =>
                 mt.id === engineId &&
                 typeof mt.extra?.deepl_id_glossary !== 'undefined' &&
+                mt.extra?.deepl_id_glossary !== DEEPL_GLOSSARY_ROW_NONE &&
                 !glossaries.some(
                   ({glossary_id}) =>
                     glossary_id === mt.extra?.deepl_id_glossary,
@@ -842,11 +844,11 @@ const NewProject = () => {
   const isLoadingTemplates = !projectTemplates.length
 
   checkMMTGlossariesWasCancelledIntoTemplates.current({
-    engineId: mtEngines.find(({engine_type}) => engine_type === 'MMT')?.id,
+    engineId: mtEngines?.find(({engine_type}) => engine_type === 'MMT')?.id,
     projectTemplates,
   })
   checkDeepLGlossaryWasCancelledIntoTemplates.current({
-    engineId: mtEngines.find(({engine_type}) => engine_type === 'DeepL')?.id,
+    engineId: mtEngines?.find(({engine_type}) => engine_type === 'DeepL')?.id,
     projectTemplates,
   })
 

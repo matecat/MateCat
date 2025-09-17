@@ -2,8 +2,9 @@ import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import ArrowDown from '../../../../../img/icons/ArrowDown'
 import {MMTOptions} from './MMTOptions'
-import {LaraOptions} from './LaraOptions/LaraOptions'
-import {DeepLOptions} from './DeepLOptions/DeepLOptions'
+import {LaraOptions} from './LaraOptions'
+import {DeepLOptions} from './DeepLOptions'
+import {BasicOptions} from './BasicOptions'
 
 const ContentComponent = {
   MMT: MMTOptions,
@@ -15,6 +16,8 @@ export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const OptionsContent = ContentComponent[activeMTEngineData.engine_type]
+    ? ContentComponent[activeMTEngineData.engine_type]
+    : BasicOptions
 
   return (
     <div

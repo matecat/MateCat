@@ -28,6 +28,8 @@ import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {OptionsContainer} from './OptionsContainer'
 import {ApplicationThreshold} from './ApplicationThreshold'
+import defaultMTOptions from '../../Contents/defaultTemplates/mtOptions.json'
+import {normalizeTemplatesWithNullProps} from '../../../../hooks/useTemplates'
 
 let engineIdFromFromQueryString = new URLSearchParams(
   window.location.search,
@@ -72,16 +74,29 @@ export const MachineTranslationTab = () => {
   ]
 
   const activeMTEngine = currentProjectTemplate.mt?.id
-  const setActiveMTEngine = ({id} = {}) =>
+  const setActiveMTEngine = ({id, engine_type} = {}) => {
+    const defaultExtra = defaultMTOptions[engine_type]
+    const mt = mtEngines.find((mt) => mt.id === id)
+
     modifyingCurrentTemplate((prevTemplate) => ({
       ...prevTemplate,
       mt:
         typeof id === 'number'
           ? {
               id,
+              ...(mt &&
+                defaultExtra && {
+                  extra: {
+                    ...normalizeTemplatesWithNullProps(
+                      [mt.extra],
+                      defaultExtra,
+                    )[0],
+                  },
+                }),
             }
           : {},
     }))
+  }
 
   const [addMTVisible, setAddMTVisible] = useState(
     typeof engineIdFromFromQueryString === 'string',
