@@ -20,15 +20,24 @@ class AnalysisFileMetadata implements JsonSerializable {
     protected string $key = "";
 
     /**
-     * @var mixed
+     * @var string
      */
-    protected $value;
+    protected string $value = "";
 
-    public function __construct( string $key, $value ) {
+    /**
+     * AnalysisFileMetadata constructor.
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function __construct( string $key, string $value ) {
         $this->key   = $key;
         $this->value = $value;
     }
 
+    /**
+     * @return array
+     */
     public function jsonSerialize(): array {
         return [
                 'key'   => $this->key,
