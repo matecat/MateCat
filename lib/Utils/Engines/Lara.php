@@ -216,7 +216,7 @@ class Lara extends AbstractEngine {
 
             $headers = new Headers();
 
-            if(!empty($_config[ 'tuid' ]) and is_string($_config[ 'tuid' ])){
+            if ( !empty( $_config[ 'tuid' ] ) and is_string( $_config[ 'tuid' ] ) ) {
                 $headers->setTuid( $_config[ 'tuid' ] );
             }
 
@@ -400,17 +400,17 @@ class Lara extends AbstractEngine {
             $time     = $time_end - $time_start;
 
             $this->logger->debug( [
-                    'LARA REQUEST'       => 'PUT https://api.laratranslate.com/memories/content',
-                    'timing'             => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
-                    'keys'               => $_keys,
-                    'source'             => $_config[ 'source' ],
-                    'target'             => $_config[ 'target' ],
-                    'sentence'           => $_config[ 'segment' ],
-                    'translation'        => $_config[ 'translation' ],
-                    'tuid'               => $_config[ 'tuid' ],
-                    'sentence_before'    => $_config[ 'context_before' ],
-                    'sentence_after'     => $_config[ 'context_after' ],
-                    'extra_headers'      => $headers->getArrayCopy(),
+                    'LARA REQUEST'    => 'PUT https://api.laratranslate.com/memories/content',
+                    'timing'          => [ 'Total Time' => $time, 'Get Start Time' => $time_start, 'Get End Time' => $time_end ],
+                    'keys'            => $_keys,
+                    'source'          => $_config[ 'source' ],
+                    'target'          => $_config[ 'target' ],
+                    'sentence'        => $_config[ 'segment' ],
+                    'translation'     => $_config[ 'translation' ],
+                    'tuid'            => $_config[ 'tuid' ],
+                    'sentence_before' => $_config[ 'context_before' ],
+                    'sentence_after'  => $_config[ 'context_after' ],
+                    'extra_headers'   => $headers->getArrayCopy(),
             ] );
 
         } catch ( Exception $e ) {
