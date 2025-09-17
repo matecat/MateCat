@@ -14,5 +14,3 @@ $klein->with( '/api/v1/projects/[:id_project]/[:password]', function () {
 } );
 
 route( '/api/v1/new', 'POST', [ 'Controller\API\V1\NewController', 'create' ] );
-
-route( '/api/new', 'POST', [ 'Controller\API\V1\NewController', 'create' ] ); //TODO remove after deprecation time elapsed
