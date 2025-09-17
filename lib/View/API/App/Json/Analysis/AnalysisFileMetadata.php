@@ -31,7 +31,6 @@ class AnalysisFileMetadata implements JsonSerializable {
      * @param string $value
      */
     public function __construct( string $key, string $value ) {
-
         $this->key   = $key;
         $this->value = $value;
     }
