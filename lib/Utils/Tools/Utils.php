@@ -914,11 +914,11 @@ class Utils {
     }
 
     /**
-     * @param $value
+     * @param string $value
      *
      * @return int|mixed
      */
-    public static function formatStringValue( $value ) {
+    public static function formatStringValue( string $value = "" ) {
         if ( is_numeric( $value ) ) {
             return (int)$value;
         }
