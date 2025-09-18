@@ -558,6 +558,11 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;
         }
 
+        // public_tm_penalty
+        if ( !empty( $queueElement->params->public_tm_penalty ) ) {
+            $_config[ 'public_tm_penalty' ] = $queueElement->params->public_tm_penalty;
+        }
+
         // penalty_key
         $penalty_key = [];
         $tm_keys     = TmKeyManager::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
