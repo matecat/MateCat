@@ -175,11 +175,13 @@ class Intento extends AbstractEngine {
         }
 
         // custom routing
-        $metadataDao   = new MetadataDao();
-        $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
+        if(isset($_config[ 'pid' ])){
+            $metadataDao   = new MetadataDao();
+            $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
 
-        if ( $customRouting !== null ) {
-            $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
+            if ( $customRouting !== null ) {
+                $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
+            }
         }
 
         $this->_setIntentoUserAgent(); //Set Intento User Agent
