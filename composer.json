@@ -12,7 +12,7 @@
         "matecat/simple-s3": "^1.5",
         "matecat/whole-text-finder": "^1.0",
         "matecat/xliff-parser": "^2.2",
-        "matecat/subfiltering": "^2.2",
+        "matecat/subfiltering": "~2.3",
         "monolog/monolog": "^2",
         "phpmailer/phpmailer": "~6.1",
         "phpoffice/phpspreadsheet": "~1.29",

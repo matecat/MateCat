@@ -3,7 +3,7 @@
 namespace Utils\Engines\Results\MyMemory;
 
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Created by PhpStorm.
@@ -11,7 +11,7 @@ use Utils\Logger\Log;
  * Date: 03/03/15
  * Time: 15.33
  */
-class TmxResponse extends TMSAbstractResponse {
+class FileImportAndStatusResponse extends TMSAbstractResponse {
 
     /*
     {
@@ -40,7 +40,7 @@ class TmxResponse extends TMSAbstractResponse {
         if ( $this->responseStatus == 200 || $this->responseStatus == 202 ) {
             $this->id = empty( $this->responseData[ 'uuid' ] ) ? $this->responseData[ 'UUID' ] : $this->responseData[ 'uuid' ];
         } else {
-            Log::doJsonLog( $response );
+            LoggerFactory::doJsonLog( $response );
         }
     }
 

@@ -134,8 +134,8 @@ class UpdateJobKeysController extends KleinController {
 
         $totalTmKeys = TmKeyManager::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
 
-        $this->log( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
-        $this->log( 'After: ' . json_encode( $totalTmKeys ) );
+        $this->logger->debug( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
+        $this->logger->debug( 'After: ' . json_encode( $totalTmKeys ) );
 
         if ( $this->jobOwnerIsMe( $request[ 'jobData' ][ 'owner' ] ) ) {
             $request[ 'jobData' ][ 'only_private_tm' ] = $request[ 'only_private' ];

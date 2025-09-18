@@ -512,7 +512,7 @@ class SetContributionMTWorkerTest extends AbstractTest implements SplObserver {
         $_worker->attach( $this );
 
         $this->expectException( EndQueueException::class );
-        $this->expectExceptionMessage( "EnginesFactory 91827364 not found" );
+        $this->expectExceptionMessage( "Engine 91827364 not found" );
         $this->expectExceptionCode( SetContributionWorker::ERR_NO_TM_ENGINE );
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_loadEngine' );

@@ -9,7 +9,6 @@
 namespace Model\QualityReport;
 
 use Exception;
-use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\AbstractDaoObjectStruct;
 use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
@@ -175,6 +174,12 @@ class QualityReportSegmentStruct extends AbstractDaoObjectStruct implements IDao
      * @throws Exception
      */
     public function getLocalWarning( FeatureSet $featureSet, JobStruct $chunk ): array {
+
+        // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+        // so that the local warning check is not displayed/needed
+        if ( is_null( $this->translation ) ) {
+            return [];
+        }
 
         $QA = new QA( $this->segment, $this->translation );
         $QA->setSourceSegLang( $chunk->source );

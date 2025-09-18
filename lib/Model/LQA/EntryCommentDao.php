@@ -66,7 +66,7 @@ class EntryCommentDao extends AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, EntryCommentStruct::class );
         $stmt->execute( [ $id ] );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     /**

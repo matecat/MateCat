@@ -23,7 +23,7 @@ use Utils\Constants\JobStatus;
 use Utils\Tools\Utils;
 use View\API\V2\Json\Chunk;
 
-class ChunkController extends KleinController {
+class JobsController extends KleinController {
     use ChunkNotFoundHandlerTrait;
 
     /**

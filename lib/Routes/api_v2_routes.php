@@ -38,7 +38,7 @@ $klein->with('/api/v2/activity', function () {
 
 $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
 
-    route( '', 'GET', [ 'Controller\API\V2\ChunkController', 'show' ] );
+    route( '', 'GET', [ 'Controller\API\V2\JobsController', 'show' ] );
     route( '/comments', 'GET', [ 'Controller\API\V2\CommentsController', 'index' ] );
 
     route( '/quality-report', 'GET', [ 'Controller\API\V3\QualityReportControllerAPI', 'show' ] );
@@ -68,10 +68,10 @@ $klein->with( '/api/v2/jobs/[:id_job]/[:password]', function () {
     route( '/options', 'POST', [ 'Controller\API\V2\ChunkOptionsController', 'update' ] );
 
 
-    route( '/delete', 'POST', [ 'Controller\API\V2\ChunkController', 'delete' ] );
-    route( '/cancel', 'POST', [ 'Controller\API\V2\ChunkController', 'cancel' ] );
-    route( '/archive', 'POST', [ 'Controller\API\V2\ChunkController', 'archive' ] );
-    route( '/active', 'POST', [ 'Controller\API\V2\ChunkController', 'active' ] );
+    route( '/delete', 'POST', [ 'Controller\API\V2\JobsController', 'delete' ] );
+    route( '/cancel', 'POST', [ 'Controller\API\V2\JobsController', 'cancel' ] );
+    route( '/archive', 'POST', [ 'Controller\API\V2\JobsController', 'archive' ] );
+    route( '/active', 'POST', [ 'Controller\API\V2\JobsController', 'active' ] );
 
 } );
 
@@ -79,7 +79,7 @@ $klein->with( '/api/v2/glossaries', function () {
 
     route( '/check/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'check' ] );
     route( '/import/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'import' ] );
-    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'uploadStatus' ] );
+    route( '/import/status/[:uuid]', 'GET', [ '\Controller\API\V2\GlossaryFilesController', 'importStatus' ] );
     route( '/export/', 'POST', [ '\Controller\API\V2\GlossaryFilesController', 'download' ] );
 
 } );
@@ -103,7 +103,6 @@ $klein->with( '/api/v2/teams', function () {
     route( '/[i:id_team]/projects/[i:id_project]', 'PUT', [ 'Controller\API\V2\TeamsProjectsController', 'update' ] );
     route( '/[i:id_team]/projects/[i:id_project]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'get' ] );
     route( '/[i:id_team]/projects/[:project_name]', 'GET', [ 'Controller\API\V2\TeamsProjectsController', 'getByName' ] );
-    route( '/[i:id_team]/projects', 'GET', [ '\Controller\API\V2\TeamsProjectsController', 'getAll' ] );
 
 } );
 

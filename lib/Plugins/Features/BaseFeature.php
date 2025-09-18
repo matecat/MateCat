@@ -6,11 +6,10 @@ use Exception;
 use Klein\Klein;
 use LogicException;
 use Model\FeaturesBase\BasicFeatureStruct;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 use Utils\Registry\AppConfig;
 
 
@@ -99,15 +98,12 @@ abstract class BaseFeature implements IBaseFeature {
     /**
      * gets a feature specific logger
      *
-     * @return Logger
+     * @return MatecatLogger
      * @throws Exception
      */
     public function getLogger() {
         if ( $this->log == null ) {
-            $this->log     = new Logger( $this->logger_name );
-            $streamHandler = new StreamHandler( $this->logFilePath(), Logger::INFO );
-            $streamHandler->setFormatter( new LineFormatter( "%message%\n", "", true, true ) );
-            $this->log->pushHandler( $streamHandler );
+            $this->log = LoggerFactory::getLogger( self::FEATURE_CODE, $this->logger_name );
         }
 
         return $this->log;

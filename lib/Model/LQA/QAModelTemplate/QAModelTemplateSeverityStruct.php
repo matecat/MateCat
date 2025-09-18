@@ -7,12 +7,12 @@ use Model\DataAccess\AbstractDaoSilentStruct;
 use Model\DataAccess\IDaoStruct;
 
 class QAModelTemplateSeverityStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
-    public ?int   $id      = null;
-    public int    $id_category;
+    public ?int   $id          = null;
+    public ?int   $id_category = null;
     public string $severity_code;
     public string $severity_label;
-    public ?float $penalty = 0.0;
-    public ?int    $sort = null;
+    public ?float $penalty     = 0.0;
+    public ?int   $sort        = null;
 
     /**
      * @inheritDoc

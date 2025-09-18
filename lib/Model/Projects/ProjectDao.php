@@ -14,7 +14,8 @@ use Model\Teams\TeamStruct;
 use Model\Users\UserStruct;
 use PDO;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Constants\ProjectStatus;
+use Utils\Logger\LoggerFactory;
 use Utils\Tools\Utils;
 
 class ProjectDao extends AbstractDao {
@@ -68,7 +69,7 @@ class ProjectDao extends AbstractDao {
     /**
      * @var string
      */
-    protected static string $_sql_get_projects_for_team = "SELECT * FROM projects WHERE id_team = :id_team ";
+    protected static string $_sql_get_projects_for_team = "SELECT * FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
     /**
      * @param ProjectStruct          $project
@@ -199,6 +200,8 @@ class ProjectDao extends AbstractDao {
 
         $values = [
                 'id_team' => $id_team,
+                'status1' => ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                'status2' => ProjectStatus::STATUS_NOT_TO_ANALYZE
         ];
 
         if ( $searchId ) {
@@ -211,7 +214,7 @@ class ProjectDao extends AbstractDao {
             $values[ 'name' ] = $searchName;
         }
 
-        if ( $limit and $offset ) {
+        if ( isset( $limit ) and isset( $offset ) ) {
             $query .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
         }
 
@@ -235,10 +238,12 @@ class ProjectDao extends AbstractDao {
         $searchId   = ( isset( $filter[ 'search' ][ 'id' ] ) ) ? $filter[ 'search' ][ 'id' ] : null;
         $searchName = ( isset( $filter[ 'search' ][ 'name' ] ) ) ? $filter[ 'search' ][ 'name' ] : null;
 
-        $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team ";
+        $query = "SELECT count(id) as totals FROM projects WHERE id_team = :id_team AND status_analysis NOT IN( :status1, :status2 ) ";
 
         $values = [
                 'id_team' => $id_team,
+                'status1' => ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                'status2' => ProjectStatus::STATUS_NOT_TO_ANALYZE
         ];
 
         if ( $searchId ) {
@@ -429,7 +434,7 @@ class ProjectDao extends AbstractDao {
                 AND jobs.id_project = :id_project
                 ";
 
-        Log::doJsonLog( $sql );
+        LoggerFactory::doJsonLog( $sql );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

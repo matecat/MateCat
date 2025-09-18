@@ -46,7 +46,6 @@ use Utils\Engines\DeepL;
 use Utils\Engines\EnginesFactory;
 use Utils\Langs\LanguageDomains;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -55,7 +54,6 @@ use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\TMS\TMSService;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
-use Utils\Validator\EngineValidator;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 use Utils\Validator\MMTValidator;
@@ -117,6 +115,7 @@ class NewController extends KleinController {
                 $request[ 'segmentation_rule' ],
                 $this->featureSet,
                 $request[ 'filters_extraction_parameters' ],
+                $request[ 'legacy_icu' ],
         );
 
         $converter->convertFiles();
@@ -303,6 +302,7 @@ class NewController extends KleinController {
         $mt_engine                                 = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $mt_evaluation                             = filter_var( $this->request->param( 'mt_evaluation' ), FILTER_VALIDATE_BOOLEAN );
         $mt_quality_value_in_editor                = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 86, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
+        $legacy_icu                                = filter_var( $this->request->param( 'legacy_icu' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_enable                     = filter_var( $this->request->param( 'mt_qe_workflow_enable' ), FILTER_VALIDATE_BOOLEAN );
         $mt_qe_workflow_template_id                = filter_var( $this->request->param( 'mt_qe_workflow_qe_model_id' ), FILTER_SANITIZE_NUMBER_INT ) ?: null;         // QE workflow parameters
         $mt_qe_workflow_template_raw_parameters    = filter_var( $this->request->param( 'mt_qe_workflow_template_raw_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) ?: null;  // QE workflow parameters in raw string JSON format
@@ -377,7 +377,7 @@ class NewController extends KleinController {
 
             // engines restrictions
             if ( $mt_engine <= 1 ) {
-                throw new InvalidArgumentException( "MT EnginesFactory id $mt_engine is not supported for QE Workflows" );
+                throw new InvalidArgumentException( "MT Engine id $mt_engine is not supported for QE Workflows" );
             }
 
             $metadata[ MetadataDao::MT_QE_WORKFLOW_ENABLED ]    = $mt_qe_workflow_enable;
@@ -458,7 +458,8 @@ class NewController extends KleinController {
                 'character_counter_count_tags'              => $character_counter_count_tags,
                 'character_counter_mode'                    => $character_counter_mode,
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
-                'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null
+                'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
+                'legacy_icu'                                => $legacy_icu,
         ];
     }
 
@@ -486,7 +487,6 @@ class NewController extends KleinController {
                 $metadata = $parsedMetadata;
             }
 
-            Log::doJsonLog( "Passed parameter metadata as json string." );
         } else {
             $metadata = [];
         }
@@ -532,17 +532,17 @@ class NewController extends KleinController {
     private function validateEngines( int $tms_engine, int $mt_engine ): array {
 
         if ( $tms_engine > 1 ) {
-            throw new InvalidArgumentException( "Invalid TM EnginesFactory.", -21 );
+            throw new InvalidArgumentException( "Invalid TM Engine.", -21 );
         }
 
         if ( $mt_engine > 1 ) {
 
             if ( !$this->userIsLogged ) {
-                throw new InvalidArgumentException( "Invalid MT EnginesFactory.", -2 );
+                throw new InvalidArgumentException( "Invalid MT Engine.", -2 );
             }
 
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }
@@ -780,7 +780,7 @@ class NewController extends KleinController {
                             [
                                     'key'     => $newUser->key,
                                     'name'    => 'New resource created for project {{pid}}',
-                                    'penalty' => $tm_key[ 'penalty' ] ?? null,
+                                    'penalty' => $tm_key[ 'penalty' ] ?? 0,
                                     'r'       => $tm_key[ 'r' ],
                                     'w'       => $tm_key[ 'w' ]
                             ];
@@ -798,7 +798,7 @@ class NewController extends KleinController {
                 $this_tm_key = [
                         'key'     => $tm_key[ 'key' ],
                         'name'    => null,
-                        'penalty' => $tm_key[ 'penalty' ] ?? null,
+                        'penalty' => $tm_key[ 'penalty' ] ?? 0,
                         'r'       => $tm_key[ 'r' ],
                         'w'       => $tm_key[ 'w' ]
                 ];
@@ -978,7 +978,7 @@ class NewController extends KleinController {
         // any other engine than Match
         if ( $mt_engine !== null and $mt_engine > 1 ) {
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage() );
             }

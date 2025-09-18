@@ -12,7 +12,7 @@ import ModalsActions from '../../../actions/ModalsActions'
 export const MarkAsCompleteButton = ({featureEnabled, isReview}) => {
   const button = useRef()
   const [markedAsComplete, setMarkedAsComplete] = useState(
-    config.job_marked_complete !== 0,
+    config.job_marked_complete,
   )
   const [buttonEnabled, setButtonEnabled] = useState(
     config.mark_as_complete_button_enabled,

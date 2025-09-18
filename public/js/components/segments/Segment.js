@@ -743,10 +743,7 @@ class Segment extends React.Component {
         <section
           ref={(section) => (this.section = section)}
           id={'segment-' + this.props.segment.sid}
-          className={
-            segment_classes.join(' ') +
-            ` source-${config.source_code} target-${config.target_code}`
-          }
+          className={`${segment_classes.join(' ')} source-${config.source_code} target-${config.target_code} ${config.isSourceRTL ? 'rtl-source' : ''} ${config.isTargetRTL ? 'rtl-target' : ''}`}
           data-autopropagated={this.state.autopropagated}
           data-split-group={split_group}
           data-split-original-id={originalId}

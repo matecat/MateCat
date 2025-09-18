@@ -33,12 +33,13 @@ use Model\LQA\ChunkReviewDao;
 use Model\Projects\ProjectDao;
 use Model\RemoteFiles\RemoteFileDao;
 use Model\Segments\SegmentDao;
-use Predis\Connection\ConnectionException;
 use ReflectionException;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 use Utils\XliffReplacer\XliffReplacerCallback;
@@ -70,29 +71,29 @@ class DownloadController extends AbstractDownloadController {
 
     const FILES_CHUNK_SIZE = 3;
 
-    protected $encoding;
-
     /**
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function index() {
         $this->downloadFile();
     }
 
     /**
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     public function forceXliff() {
         $this->downloadFile( true );
@@ -101,13 +102,14 @@ class DownloadController extends AbstractDownloadController {
     /**
      * @param bool $forceXliff
      *
-     * @throws ReflectionException
      * @throws AuthenticationError
+     * @throws EndQueueException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
-     * @throws ConnectionException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      */
     private function downloadFile( bool $forceXliff = false ) {
         $__postInput = filter_var_array( $this->request->params(), [
@@ -118,9 +120,6 @@ class DownloadController extends AbstractDownloadController {
                 'id_file'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'download_type' => [
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ],
-                'encoding' => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ],
                 'password'      => [
@@ -138,7 +137,6 @@ class DownloadController extends AbstractDownloadController {
         $this->id_file       = $__postInput[ 'id_file' ];
         $this->id_job        = $__postInput[ 'id_job' ];
         $this->download_type = $__postInput[ 'download_type' ];
-        $this->encoding      = $__postInput[ 'encoding' ];
         $this->password      = $__postInput[ 'password' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
@@ -162,32 +160,34 @@ class DownloadController extends AbstractDownloadController {
      * Process the download of the file
      *
      * @return void
-     * @throws ConnectionException
      * @throws AuthenticationError
-     * @throws ReflectionException
      * @throws NotFoundException
-     * @throws ValidationError
      * @throws NotSupportedVersionException
      * @throws NotValidFileException
+     * @throws ReflectionException
+     * @throws ValidationError
+     * @throws EndQueueException
+     * @throws ReQueueException
      * @throws Exception
      */
     private function processDownload() {
         // get Job Info, we need only a row of jobs (split)
-        $jobData = $this->job = JobDao::getByIdAndPassword( $this->id_job, $this->password );
+        $jobData = JobDao::getByIdAndPassword( $this->id_job, $this->password );
 
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
             $chunkReviewStruct = ChunkReviewDao::findByReviewPasswordAndJobId( $this->password, $this->id_job );
-            $jobData           = $this->job = $chunkReviewStruct->getChunk();
+            if ( empty( $chunkReviewStruct ) ) {
+                throw new NotFoundException( "Not found." );
+            }
+            $jobData = $chunkReviewStruct->getChunk();
         }
+
+        $this->job = $jobData;
 
         // check for Password correctness
         if ( empty( $jobData ) ) {
-            $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doJsonLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
-            return;
+            throw new NotFoundException( "Not found." );
         }
 
         $this->project = $this->job->getProject();
@@ -229,7 +229,7 @@ class DownloadController extends AbstractDownloadController {
 
                 //make dir if it doesn't exist
                 if ( !file_exists( dirname( $outputPath ) ) ) {
-                    Log::doJsonLog( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) );
+                    $this->logger->debug( 'Create Directory ' . escapeshellarg( dirname( $outputPath ) ) );
                     mkdir( dirname( $outputPath ), 0775, true );
                 }
 
@@ -270,7 +270,7 @@ class DownloadController extends AbstractDownloadController {
                     $xliffReplacerCallback = new XliffReplacerCallback( $this->featureSet, $this->job->source, $jobData[ 'target' ] );
 
                     // run xliff replacer
-                    Log::doJsonLog( "work on " . $fileID . " " . $current_filename );
+                    $this->logger->debug( "work on " . $fileID . " " . $current_filename );
                     $setSourceInTarget = $this->download_type === 'omegat';
                     $xsp->replaceTranslation( $xliffFilePath, $data, $transUnits, $jobData[ 'target' ], $outputPath, $setSourceInTarget, $xliffReplacerCallback );
 
@@ -325,9 +325,9 @@ class DownloadController extends AbstractDownloadController {
 
                 if ( empty( AppConfig::$FILTERS_ADDRESS ) || ( $file[ 'originalFilePath' ] == $file[ 'xliffFilePath' ] and $xliffWasNotConverted ) or $this->forceXliff ) {
                     $convertBackToOriginal = false;
-                    Log::doJsonLog( "SDLXLIFF: {$file['filename']} --- FALSE" );
+                    $this->logger->debug( "SDLXLIFF: {$file['filename']} --- FALSE" );
                 } else {
-                    Log::doJsonLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- TRUE" );
+                    $this->logger->debug( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- TRUE" );
                 }
 
                 if ( $convertBackToOriginal ) {
@@ -346,8 +346,7 @@ class DownloadController extends AbstractDownloadController {
             // check for errors and log them on fatal_errors.txt
             foreach ( $convertResult as $result ) {
                 if ( $result[ 'isSuccess' ] === false and isset( $result[ 'errorMessage' ] ) ) {
-                    Log::setLogFileName( 'fatal_errors.txt' );
-                    Log::doJsonLog( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
+                    $this->logger->debug( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
                 }
             }
 
@@ -471,9 +470,7 @@ class DownloadController extends AbstractDownloadController {
 
                 $msg = "\n\n Error retrieving file content, Conversion failed??? \n\n Error: {$e->getMessage()} \n\n" . var_export( $e->getTraceAsString(), true );
                 $msg .= "\n\n Get: " . var_export( $_REQUEST, true );
-                Log::setLogFileName( 'fatal_errors.txt' );
-                Log::doJsonLog( $msg );
-                Utils::sendErrMailReport( $msg );
+                LoggerFactory::getLogger( 'conversion' )->debug( $msg );
                 $this->unlockToken(
                         [
                                 "code"    => -110,
@@ -482,12 +479,12 @@ class DownloadController extends AbstractDownloadController {
                 );
 
                 throw $e; // avoid sent Headers and empty file content with finalize method
-            }
-
-            try {
-                Utils::deleteDir( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
-            } catch ( Exception $e ) {
-                Log::doJsonLog( 'Failed to delete dir:' . $e->getMessage() );
+            } finally {
+                try {
+                    Utils::deleteDir( AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+                } catch ( Exception $e ) {
+                    LoggerFactory::getLogger( 'conversion' )->debug( 'Failed to delete temporary directory ' . AppConfig::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+                }
             }
 
         }
@@ -845,7 +842,6 @@ class DownloadController extends AbstractDownloadController {
      * @param ZipContentObject[] $newInternalZipFiles
      *
      * @return string
-     * @throws ConnectionException
      * @throws ReflectionException
      * @throws Exception
      */
@@ -952,15 +948,14 @@ class DownloadController extends AbstractDownloadController {
     }
 
     /**
-     * @param $zipPath
-     * @param $tmpDir
+     * @param string $zipPath
+     * @param string $tmpDir
      *
      * @throws ReflectionException
-     * @throws ConnectionException
      */
-    public function transferZipFromS3ToTmpDir( $zipPath, $tmpDir ) {
+    public function transferZipFromS3ToTmpDir( string $zipPath, string $tmpDir ) {
 
-        Log::doJsonLog( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
+        $this->logger->debug( "Downloading original zip " . $zipPath . " from S3 to tmp dir " . $tmpDir );
 
         $s3Client            = S3FilesStorage::getStaticS3Client();
         $params[ 'bucket' ]  = AppConfig::$AWS_STORAGE_BASE_BUCKET;

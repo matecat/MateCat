@@ -8,6 +8,7 @@ use Controller\Views\TemplateDecorator\Arguments\CatDecoratorArguments;
 use Exception;
 use Model\ChunksCompletion\ChunkCompletionEventDao;
 use Model\Projects\MetadataDao;
+use Utils\Templating\PHPTalBoolean;
 use Utils\Tools\CatUtils;
 
 class CatDecorator extends AbstractDecorator {
@@ -32,24 +33,17 @@ class CatDecorator extends AbstractDecorator {
         $job             = $this->arguments->getJob();
 
         $this->stats = CatUtils::getFastStatsForJob( $this->arguments->getWordCountStruct() );
-        $completed   = $job->isMarkedComplete( [ 'is_review' => $this->arguments->isRevision() ] );
 
-        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord(
-                $job, [ 'is_review' => $this->arguments->isRevision() ]
-        );
+        $lastCompletionEvent = ChunkCompletionEventDao::lastCompletionRecord( $job, [ 'is_review' => $this->arguments->isRevision() ] );
 
         $dao                 = new ChunkCompletionEventDao();
         $this->current_phase = $dao->currentPhase( $this->arguments->getJob() );
 
-        $this->template->{'project_completion_feature_enabled'} = true;
-        $this->template->{'header_main_button_id'}              = 'markAsCompleteButton';
+        $this->template->{'project_completion_feature_enabled'} = new PHPTalBoolean( true );
         $this->template->{'job_completion_current_phase'}       = $this->current_phase;
 
         if ( $lastCompletionEvent ) {
             $this->template->{'job_completion_last_event_id'} = $lastCompletionEvent[ 'id_event' ];
-        }
-
-        if ( $completed ) {
             $this->varsForComplete();
         } else {
             $this->varsForUncomplete();
@@ -58,24 +52,18 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForUncomplete() {
-        $this->template->{'job_marked_complete'}      = false;
-        $this->template->{'header_main_button_class'} = 'notMarkedComplete';
+        $this->template->{'job_marked_complete'} = new PHPTalBoolean( false );
 
         if ( $this->completable() ) {
-            $this->template->{'header_main_button_enabled'}      = true;
-            $this->template->{'mark_as_complete_button_enabled'} = true;
-            $this->template->{'header_main_button_class'}        = " isMarkableAsComplete";
+            $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean( true );
         } else {
-            $this->template->{'mark_as_complete_button_enabled'} = false;
-            $this->template->{'header_main_button_enabled'}      = false;
+            $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean( false );
         }
     }
 
     private function varsForComplete() {
-        $this->template->{'job_marked_complete'}             = true;
-        $this->template->{'header_main_button_class'}        = 'isMarkedComplete';
-        $this->template->{'header_main_button_enabled'}      = false;
-        $this->template->{'mark_as_complete_button_enabled'} = false;
+        $this->template->{'job_marked_complete'}             = new PHPTalBoolean( true );
+        $this->template->{'mark_as_complete_button_enabled'} = new PHPTalBoolean( false );
     }
 
     private function completable(): bool {

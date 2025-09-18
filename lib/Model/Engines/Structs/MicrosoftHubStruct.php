@@ -37,7 +37,7 @@ class MicrosoftHubStruct extends EngineStruct {
     /**
      * @var array
      */
-    public array $others = [
+    public $others = [
             'oauth_url' => 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken'
     ];
 

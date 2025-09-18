@@ -16,7 +16,7 @@ use Plugins\Features\ReviewExtended\ReviewUtils;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
 
-class ChangePasswordController extends ChunkController {
+class ChangePasswordController extends JobsController {
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
     }

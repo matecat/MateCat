@@ -8,8 +8,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
-use Model\Projects\ProjectDao;
-use Model\Projects\ProjectStruct;
+use PDO;
 use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao {
@@ -39,7 +38,7 @@ class ChunkCompletionEventDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Model\ChunksCompletion\ChunkCompletionEventStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkCompletionEventStruct::class );
 
         $stmt->execute( [
                 'id_event' => $id_event,
@@ -132,14 +131,14 @@ class ChunkCompletionEventDao extends AbstractDao {
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  \Model\Jobs\JobStruct to examinate
+     * @param $chunk  JobStruct to examinate
      * @param $params array of params for query: is_review
      *
      * @return array
      *
      * @throws Exception
      */
-    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ) {
+    public static function lastCompletionRecord( JobStruct $chunk, array $params = [] ): array {
         $params    = Utils::ensure_keys( $params, [ 'is_review' ] );
         $is_review = $params[ 'is_review' ];
 
@@ -171,30 +170,7 @@ class ChunkCompletionEventDao extends AbstractDao {
                 ]
         );
 
-        // TODO: change this returned object to be a Struct
-        return $stmt->fetch();
-    }
-
-    public static function isChunkCompleted( JobStruct $chunk, array $params = [] ) {
-        $fetched = self::lastCompletionRecord( $chunk, $params );
-
-        return $fetched != false;
-    }
-
-    public static function isProjectCompleted( ProjectStruct $proj ) {
-        $uncompletedChunksByProjectId = ProjectDao::uncompletedChunksByProjectId( $proj->id );
-
-        return $uncompletedChunksByProjectId == false;
-    }
-
-    public static function isCompleted( $obj, array $params = [] ) {
-        if ( $obj instanceof JobStruct ) {
-            return self::isChunkCompleted( $obj, $params );
-        } elseif ( $obj instanceof ProjectStruct ) {
-            return self::isProjectCompleted( $obj );
-        } else {
-            throw new Exception( "Not a supported type" );
-        }
+        return $stmt->fetch() ?: [];
     }
 
     protected function _buildResult( array $array_result ) {

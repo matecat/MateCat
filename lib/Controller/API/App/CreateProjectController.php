@@ -36,7 +36,6 @@ use Utils\TmKeyManagement\TmKeyManager;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
 use Utils\Validator\Contracts\ValidatorObject;
-use Utils\Validator\EngineValidator;
 use Utils\Validator\JSONSchema\JSONValidator;
 use Utils\Validator\JSONSchema\JSONValidatorObject;
 use Utils\Validator\MMTValidator;
@@ -470,7 +469,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function validateUserMTEngine( int $mt_engine ): int {
         if ( $mt_engine > 1 ) {
             try {
-                EngineValidator::engineBelongsToUser( $mt_engine, $this->user->uid );
+                EnginesFactory::getInstanceByIdAndUser( $mt_engine, $this->user->uid );
             } catch ( Exception $exception ) {
                 throw new InvalidArgumentException( $exception->getMessage(), -2 );
             }

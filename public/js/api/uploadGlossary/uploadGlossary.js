@@ -35,7 +35,7 @@ export const uploadGlossary = async ({
   )
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/glossaries/import/`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/import/`,
     {
       method: 'POST',
       body: formData,

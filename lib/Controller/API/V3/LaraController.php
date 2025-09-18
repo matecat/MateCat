@@ -2,57 +2,42 @@
 
 namespace Controller\API\V3;
 
-use API\Commons\Validators\LoginValidator;
-use API\V2\BaseChunkController;
-use Engines_AbstractEngine;
-use Exception;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\EngineOwnershipValidator;
+use Controller\API\Commons\Validators\LoginValidator;
+use Lara\LaraException;
 use Utils\Engines\Lara;
-use Validator\EngineValidator;
 
-class LaraController extends BaseChunkController {
+class LaraController extends KleinController {
+
+    protected Lara $laraClient;
+
     protected function afterConstruct() {
         parent::afterConstruct();
-        $this->appendValidator( new LoginValidator( $this ) );
+
+        $loginValidator       = new LoginValidator( $this );
+        $engineOwnerValidator = new EngineOwnershipValidator( $this, filter_var( $this->request->param( 'engineId' ), FILTER_SANITIZE_NUMBER_INT ), Lara::class );
+
+        $loginValidator->onSuccess( function () use ( $engineOwnerValidator ) {
+            $engineOwnerValidator->validate();
+        } )->onSuccess( function () use ( $engineOwnerValidator ) {
+            $this->laraClient = $engineOwnerValidator->getEngine();
+        } );
+
+        $this->appendValidator( $loginValidator );
     }
 
     /**
      * Get all the customer's Lara glossaries
+     * @throws LaraException
      */
     public function glossaries() {
-        if ( !$this->isLoggedIn() ) {
-            $this->response->status()->setCode( 401 );
-            $this->response->json( [] );
-            exit();
-        }
 
-        try {
-            $engineId = filter_var( $this->request->engineId, FILTER_SANITIZE_NUMBER_INT );
+        $glossaries = $this->laraClient->getGlossaries();
 
-            /** @var Lara $LaraClient */
-            $LaraClient = $this->getLaraClient( $engineId );
-            $glossaries = $LaraClient->getGlossaries();
+        $this->response->status()->setCode( 200 );
+        $this->response->json( $glossaries );
 
-            $this->response->status()->setCode( 200 );
-            $this->response->json( $glossaries );
-            exit();
-
-        } catch ( Exception $exception ) {
-            $code = ( $exception->getCode() > 0 ) ? $exception->getCode() : 500;
-            $this->response->status()->setCode( $code );
-            $this->response->json( [
-                    'error' => $exception->getMessage()
-            ] );
-            exit();
-        }
     }
 
-    /**
-     * @param int $engineId
-     *
-     * @return Engines_AbstractEngine
-     * @throws Exception
-     */
-    private function getLaraClient( int $engineId ): Engines_AbstractEngine {
-        return EngineValidator::engineBelongsToUser( $engineId, $this->user->uid, Lara::class );
-    }
 }

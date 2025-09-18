@@ -53,9 +53,13 @@ class ProjectPasswordValidator extends Base {
      */
     public function _validate(): void {
 
+        if( !$this->password ) {
+            throw new NotFoundException( "No project found.", 404 );
+        }
+
         $this->project = ProjectDao::findByIdAndPassword(
                 $this->id_project,
-                $this->password ?? ''
+                $this->password
         );
 
     }

@@ -11,9 +11,10 @@ namespace Model\TmKeyManagement;
 use Exception;
 use Model\DataAccess\Database;
 use Model\Users\UserStruct;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class UserKeysModel {
 
@@ -45,7 +46,7 @@ class UserKeysModel {
 
         } catch ( Exception $e ) {
             $keyList = [];
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
         }
 
         $reverse_lookup_user_personal_keys = [ 'pos' => [], 'elements' => [] ];
@@ -59,7 +60,7 @@ class UserKeysModel {
         foreach ( $keyList as $_j => $key ) {
 
             /**
-             * @var $_client_tm_key \Utils\TmKeyManagement\TmKeyStruct
+             * @var $_client_tm_key TmKeyStruct
              */
 
             //create a reverse lookup

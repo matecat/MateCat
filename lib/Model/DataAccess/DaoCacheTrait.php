@@ -12,7 +12,7 @@ namespace Model\DataAccess;
 use Exception;
 use Predis\Client;
 use ReflectionException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Redis\RedisHandler;
 use Utils\Registry\AppConfig;
 
@@ -43,8 +43,6 @@ trait DaoCacheTrait {
                 self::$cache_con->get( 1 );
             } catch ( Exception $e ) {
                 self::$cache_con = null;
-                Log::doJsonLog( $e->getMessage() );
-                Log::doJsonLog( "No Redis server(s) configured." );
                 throw $e;
             }
 
@@ -53,12 +51,14 @@ trait DaoCacheTrait {
 
 
     protected function _logCache( $type, $key, $value, $sqlQuery ) {
-        Log::doJsonLog( [
-                "type" => $type,
-                "key"  => $key,
-                "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
-            //"result_set" => $value,
-        ], "query_cache.log" );
+        LoggerFactory::getLogger( 'query_cache' )->debug(
+                [
+                        "type" => $type,
+                        "key"  => $key,
+                        "sql"  => preg_replace( "/ +/", " ", str_replace( "\n", " ", $sqlQuery ) ),
+                    //"result_set" => $value,
+                ]
+        );
     }
 
     /**

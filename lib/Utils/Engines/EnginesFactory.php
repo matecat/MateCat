@@ -40,7 +40,7 @@ class EnginesFactory {
         $engineRecord = $eng[ 0 ] ?? null;
 
         if ( empty( $engineRecord ) ) {
-            throw new Exception( "EnginesFactory $id not found", -2 );
+            throw new Exception( "Engine $id not found", -2 );
         }
 
         $className = self::getFullyQualifiedClassName( $engineRecord->class_load );
@@ -69,12 +69,42 @@ class EnginesFactory {
         $className = 'Utils\Engines\\' . $_className; // guess for backward compatibility
         if ( !class_exists( $className ) ) {
             if ( !class_exists( $_className ) ) {
-                throw new Exception( "EnginesFactory Class $className not Found" );
+                throw new Exception( "Engine Class $className not Found" );
             }
             $className = $_className; // use the class name as is
         }
 
         return $className;
+    }
+
+    /**
+     * @template T of AbstractEngine
+     *
+     * @param int              $engineId
+     * @param int              $uid
+     * @param ?class-string<T> $engineClass
+     *
+     * @return T
+     * @throws Exception
+     */
+    public static function getInstanceByIdAndUser( int $engineId, int $uid, ?string $engineClass = null ): AbstractEngine {
+
+        $engine       = self::getInstance( $engineId );
+        $engineRecord = $engine->getEngineRecord();
+
+        if ( $engineRecord->uid != $uid ) {
+            throw new Exception( "Engine doesn't belong to the user" );
+        }
+
+        if ( $engineRecord->active == 0 ) {
+            throw new Exception( "Engine is no longer active" );
+        }
+
+        if ( $engineClass !== null and !is_a( $engine, $engineClass, true ) ) {
+            throw new Exception( $engineId . " is not the expected $engineClass engine instance" );
+        }
+
+        return $engine;
     }
 
 }

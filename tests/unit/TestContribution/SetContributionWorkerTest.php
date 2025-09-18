@@ -375,6 +375,12 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
                 ->onlyMethods( [ 'getProp', 'getJobStruct' ] )
                 ->getMock();
 
+        // "Typed property Utils\Contribution\SetContributionRequest::$id_job must not be accessed before initialization"
+        $contributionMockQueueObject->id_job = $this->contributionStruct->id_job;
+
+        // "Typed property Utils\Contribution\SetContributionRequest::$id_segment must not be accessed before initialization"
+        $contributionMockQueueObject->id_segment = $this->contributionStruct->id_segment;
+
         $contributionMockQueueObject->expects( $this->once() )->method( 'getProp' );
         $contributionMockQueueObject->expects( $this->once() )
                 ->method( 'getJobStruct' )

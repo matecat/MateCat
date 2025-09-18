@@ -162,7 +162,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         /** @var MatecatFilter $filter */
         $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
-        $suggestion = $bestMatch[ 'translation' ]; //No layering needed, whe use Layer 1 here
+        $suggestion = $bestMatch[ 'translation' ] ?? ''; //No layering needed, whe use Layer 1 here
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
 
@@ -220,13 +220,13 @@ class TMAnalysisWorker extends AbstractWorker {
         );
         $check->performConsistencyCheck();
 
-        if( !$check->thereAreErrors() ){
+        if ( !$check->thereAreErrors() ) {
             $suggestion = $check->getTrgNormalized();
         } else {
             $suggestion = $check->getTargetSeg();
         }
 
-        $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
+        $err_json2 = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
@@ -247,7 +247,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $tm_data[ 'mt_qe' ]                  = $bestMatch[ 'score' ] ?? null;
 
 
-        $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ];
+        $tm_data[ 'suggestion_source' ] = $bestMatch[ 'created_by' ] ?? null;
         if ( !empty( $tm_data[ 'suggestion_source' ] ) ) {
             if ( strpos( $tm_data[ 'suggestion_source' ], InternalMatchesConstants::MT ) === false ) {
                 $tm_data[ 'suggestion_source' ] = InternalMatchesConstants::TM;
@@ -257,7 +257,7 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         //check the value of suggestion_match
-        $tm_data[ 'suggestion_match' ] = $bestMatch[ 'match' ];
+        $tm_data[ 'suggestion_match' ] = $bestMatch[ 'match' ] ?? 0;
         $tm_data                       = $this->_lockAndPreTranslateStatusCheck( $tm_data, $queueElement->params );
 
         try {
@@ -286,7 +286,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // return $match if not MT and quality >= 75
             if (
                     !$this->isMtMatch( $match ) and
-                    (int)$match[ 'match' ] >= 75
+                    (int)( $match[ 'match' ] ?? 0 ) >= 75
             ) {
                 return $match;
             }
@@ -397,7 +397,7 @@ class TMAnalysisWorker extends AbstractWorker {
             array        $equivalentWordMapping
     ): array {
 
-        $tm_match_type         = ( $this->isMtMatch( $bestMatch ) ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] );
+        $tm_match_type         = ( $this->isMtMatch( $bestMatch ) ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] ?? InternalMatchesConstants::MT );
         $fast_match_type       = strtoupper( $queueElement->params->match_type );
         $fast_exact_match_type = $queueElement->params->fast_exact_match_type;
 
@@ -737,6 +737,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // set for lara engine in case this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
+            $config[ 'tuid' ]            = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
 
             if ( !isset( $config[ 'job_id' ] ) ) {
                 $config[ 'job_id' ] = $queueElement->params->id_job;

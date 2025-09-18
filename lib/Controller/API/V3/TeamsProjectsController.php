@@ -40,11 +40,11 @@ class TeamsProjectsController extends KleinController {
 
         $id_team = $this->request->param( 'id_team' );
         $page    = $this->request->param( 'page' ) ? $this->request->param( 'page' ) : 1;
-        $step    = $this->request->param( 'step' ) ? $this->request->param( 'step' ) : 20;
+        $step    = $this->request->param( 'step' ) ? ( $this->request->param( 'step' ) <=50 ? $this->request->param( 'step' ) : 50 ) : 20;
         $search  = $this->request->param( 'search' );
 
         $filter = [
-                'limit'  => $step,
+                'limit'  => (int)$step,
                 'offset' => $this->getOffset( $page, $step ),
         ];
 
@@ -84,11 +84,11 @@ class TeamsProjectsController extends KleinController {
      * @param int   $page
      * @param int   $totals
      * @param int   $step
-     * @param array $search
+     * @param ?array $search
      *
      * @return array
      */
-    private function _getPaginationLinks( int $page, int $totals, int $step = 20, array $search = [] ): array {
+    private function _getPaginationLinks( int $page, int $totals, int $step = 20, ?array $search = [] ): array {
 
         $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 

@@ -9,7 +9,7 @@ use Model\Filters\DTO\IDto;
 use Model\Jobs\JobStruct;
 use PDO;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Tools\Utils;
@@ -27,6 +27,9 @@ class Filters {
      * @return array
      */
     private static function sendToFilters( array $dataGroups, string $endpoint ): array {
+
+        $logger = LoggerFactory::getLogger( "conversion" );
+
         $multiCurl = new MultiCurlHandler();
 
         // Each group is a POST request
@@ -54,7 +57,7 @@ class Filters {
             }
 
             $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
-            Log::doJsonLog( "Calling: " . $url );
+            $logger->debug( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -145,15 +148,16 @@ class Filters {
     /**
      * Convert the source file to XLIFF
      *
-     * @param string    $filePath
-     * @param string    $sourceLang
-     * @param string    $targetLang
-     * @param ?string   $segmentation
-     * @param IDto|null $extractionParams
+     * @param string      $filePath
+     * @param string      $sourceLang
+     * @param string      $targetLang
+     * @param string|null $segmentation
+     * @param IDto|null   $extractionParams
+     * @param bool|null   $legacy_ice
      *
      * @return mixed
      */
-    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_ice = false ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -169,6 +173,11 @@ class Filters {
         if ( $extractionParams !== null ) {
             $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
+
+// Uncomment this when Filters APIs are ready!
+//        if ( $legacy_ice === true ) {
+//            $data['legacy_ice'] = true;
+//        }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 
@@ -262,8 +271,7 @@ class Filters {
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
                     ] );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
-
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
             return;
         }
 
@@ -297,9 +305,9 @@ class Filters {
         try {
             $preparedStatement = $conn->prepare( $query );
             $preparedStatement->execute( array_values( $info ) );
-            Log::doJsonLog( $info );
+            LoggerFactory::getLogger( "conversion" )->debug( $info );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
+            LoggerFactory::getLogger( "conversion" )->debug( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
         if ( $response[ 'successful' ] !== true ) {
@@ -330,7 +338,7 @@ class Filters {
         $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
 
         if ( !rename( $sentFile, $backupFile ) ) {
-            Log::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;
         }

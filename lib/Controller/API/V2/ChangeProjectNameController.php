@@ -12,7 +12,7 @@ use Model\Teams\MembershipDao;
 use Model\Users\UserStruct;
 use Utils\Tools\Utils;
 
-class ChangeProjectNameController extends ChunkController {
+class ChangeProjectNameController extends JobsController {
     /**
      * @var ProjectPasswordValidator
      */

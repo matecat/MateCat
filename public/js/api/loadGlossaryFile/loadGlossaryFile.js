@@ -2,7 +2,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 export const loadGlossaryFile = async ({id}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/v2/glossaries/import/status/${id}`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/import/status/${id}`,
     {
       credentials: 'include',
     },

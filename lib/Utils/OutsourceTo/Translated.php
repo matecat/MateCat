@@ -4,14 +4,13 @@ namespace Utils\OutsourceTo;
 
 use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
-
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
 use Model\Projects\ProjectDao;
 use ReflectionException;
 use Utils\Langs\LanguageDomains;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Network\MultiCurlHandler;
 use Utils\Registry\AppConfig;
 use Utils\Shop\Cart;
@@ -270,7 +269,7 @@ class Translated extends AbstractProvider {
         foreach ( $res as $jobCredentials => $outsourceInfo ) {
             $result_outsource = json_decode( $outsourceInfo, true );
 
-            Log::doJsonLog( $outsourceInfo );
+            LoggerFactory::doJsonLog( $outsourceInfo );
 
             // if some error occurred, or the job has not been outsourced yet, then skip this job
             if ( $result_outsource[ "code" ] != 1 || $result_outsource[ "outsourced" ] != 1 ) {
@@ -364,7 +363,7 @@ class Translated extends AbstractProvider {
                                 'of'            => 'json'
                         ], PHP_QUERY_RFC3986 );
 
-                Log::doJsonLog( "Not Found in Cache. Call url for Quote:  " . $url );
+                LoggerFactory::doJsonLog( "Not Found in Cache. Call url for Quote:  " . $url );
                 $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-" . $this->fixedDelivery );
             }
         }
@@ -382,16 +381,16 @@ class Translated extends AbstractProvider {
 
             // if some error occurred, log it and skip this job
             if ( $mh->hasError( $jpid ) ) {
-                Log::doJsonLog( $mh->getError( $jpid ) );
+                LoggerFactory::doJsonLog( $mh->getError( $jpid ) );
                 continue;
             }
 
-            Log::doJsonLog( $quote );
+            LoggerFactory::doJsonLog( $quote );
 
             // Parse the result and check if the vendor returned some error. In case, skip the quote
             $result_quote = json_decode( $quote, true );
             if ( $result_quote[ 'code' ] != 1 ) {
-                Log::doJsonLog( "HTS returned an error. Skip quote" );
+                LoggerFactory::doJsonLog( "HTS returned an error. Skip quote" );
                 continue;
             }
 
@@ -404,7 +403,7 @@ class Translated extends AbstractProvider {
             // See GUIDE->"NORMAL QUOTES vs OUTSOURCED QUOTES" for details
             $this->__addCartElement( $itemCart );
 
-            Log::doJsonLog( $itemCart );
+            LoggerFactory::doJsonLog( $itemCart );
         }
     }
 
@@ -417,7 +416,7 @@ class Translated extends AbstractProvider {
      * @param string $subject
      * @param array  $apiCallResult
      *
-     * @return \Utils\Shop\ItemHTSQuoteJob
+     * @return ItemHTSQuoteJob
      */
     private function __prepareOutsourcedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): ?ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
@@ -475,7 +474,7 @@ class Translated extends AbstractProvider {
      * @param string $subject
      * @param array  $apiCallResult
      *
-     * @return \Utils\Shop\ItemHTSQuoteJob
+     * @return ItemHTSQuoteJob
      */
     private function __prepareQuotedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
@@ -608,8 +607,8 @@ class Translated extends AbstractProvider {
      *  Translated::__addCartElementToCart function.
      *  Moreover, the cart element is added to the array of results, $this->_quote_result
      *
-     * @param \Utils\Shop\ItemHTSQuoteJob $cartElem
-     * @param bool                        $deleteOnPartialMatch
+     * @param ItemHTSQuoteJob $cartElem
+     * @param bool            $deleteOnPartialMatch
      *
      * @see Translated::__addCartElementToCart
      *
@@ -642,9 +641,9 @@ class Translated extends AbstractProvider {
      *      all the data about that job (regardless of the delivery date or whether it was outsourced or not) is deleted.
      *
      *
-     * @param \Utils\Shop\ItemHTSQuoteJob $cartElem
-     * @param string                      $cartName
-     * @param bool                        $deleteOnPartialMatch
+     * @param ItemHTSQuoteJob $cartElem
+     * @param string          $cartName
+     * @param bool            $deleteOnPartialMatch
      *
      * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *
