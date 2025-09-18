@@ -126,7 +126,7 @@ function useProjectTemplates({
                 ({id}) => id === template.mt?.id,
               )
 
-              const defaultExtra = defaultMTOptions[mt.engine_type]
+              const defaultExtra = defaultMTOptions[mt?.engine_type]
               if (mt && defaultExtra) {
                 return {
                   ...template,

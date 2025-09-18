@@ -14,5 +14,27 @@
     "deepl_formality": "default",
     "deepl_id_glossary": "",
     "deepl_engine_type": "prefer_quality_optimized"
+  },
+  "Intento": {
+    "pre_translate_files": false,
+    "intento_routing": ""
+  },
+  "Altlang": {
+    "pre_translate_files": false
+  },
+  "Apertium": {
+    "pre_translate_files": false
+  },
+  "GoogleTranslate": {
+    "pre_translate_files": false
+  },
+  "MicrosoftHub": {
+    "pre_translate_files": false
+  },
+  "SmartMATE": {
+    "pre_translate_files": false
+  },
+  "YandexTranslate": {
+    "pre_translate_files": false
   }
 }

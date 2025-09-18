@@ -140,17 +140,22 @@ export const DeepLGlossary = ({id, setGlossaries, isCattoolPage = false}) => {
         const newValue = typeof value === 'function' ? value(prevState) : value
         if (!Array.isArray(newValue)) return prevState
 
-        const newValueWithoutNoneRow = newValue.filter(
-          ({id}) => id !== DEEPL_GLOSSARY_ROW_NONE,
+        const newValueFiltered = newValue.filter(
+          ({id}) =>
+            id !== DEEPL_GLOSSARY_ROW_NONE &&
+            id !== DEEPL_GLOSSARY_CREATE_ROW_ID,
         )
-
+        const createRow = newValue.find(
+          ({id}) => id === DEEPL_GLOSSARY_CREATE_ROW_ID,
+        )
         return [
+          ...(createRow ? [createRow] : []),
           {
             id: DEEPL_GLOSSARY_ROW_NONE,
             name: 'None',
-            isActive: newValueWithoutNoneRow.every(({isActive}) => !isActive),
+            isActive: newValueFiltered.every(({isActive}) => !isActive),
           },
-          ...newValueWithoutNoneRow,
+          ...newValueFiltered,
         ].map((row) => ({
           ...row,
           node:

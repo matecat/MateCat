@@ -5,11 +5,13 @@ import {MMTOptions} from './MMTOptions'
 import {LaraOptions} from './LaraOptions'
 import {DeepLOptions} from './DeepLOptions'
 import {BasicOptions} from './BasicOptions'
+import {IntentoOptions} from './IntentoOptions'
 
 const ContentComponent = {
   MMT: MMTOptions,
   Lara: LaraOptions,
   DeepL: DeepLOptions,
+  Intento: IntentoOptions,
 }
 
 export const OptionsContainer = ({activeMTEngineData, isCattoolPage}) => {
