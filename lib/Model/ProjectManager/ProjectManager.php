@@ -786,7 +786,7 @@ class ProjectManager {
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         $totalFilesStructure = [];
         if ( isset( $linkFiles[ 'conversionHashes' ] ) and isset( $linkFiles[ 'conversionHashes' ][ 'sha' ] ) ) {
-            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
+            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $pos => $linkFile ) {
                 //converted file is inside cache directory
                 //get hash from file name inside UUID dir
                 $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
@@ -831,7 +831,7 @@ class ProjectManager {
                         throw new Exception( "Failed to find converted Xliff", -3 );
                     }
 
-                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
+                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName, $pos );
 
                     if ( count( $filesStructure ) === 0 ) {
                         throw new Exception( 'Files could not be saved in database.', -6 );
@@ -2364,11 +2364,12 @@ class ProjectManager {
      * @param $_originalFileNames
      * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
      * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
+     * @param $pos
      *
      * @return array
      * @throws Exception
      */
-    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ): array {
+    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName, $pos ): array {
         $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
@@ -2377,7 +2378,7 @@ class ProjectManager {
         //return structure
         $fileStructures = [];
 
-        foreach ( $_originalFileNames as $pos => $originalFileName ) {
+        foreach ( $_originalFileNames as $originalFileName ) {
 
             // avoid blank filenames
             if ( !empty( $originalFileName ) ) {
@@ -2410,8 +2411,8 @@ class ProjectManager {
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 // pdfAnalysis
-                if(!empty($meta['pdfAnalysis'])){
-                    $this->filesMetadataDao->insert($this->projectStructure['id_project'], $fid, 'pdfAnalysis', json_encode($meta['pdfAnalysis']) );
+                if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
+                    $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
                 }
 
                 $fileStructures[ $fid ] = [
