@@ -34,6 +34,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
+use Utils\Logger\Log;
 use Utils\LQA\PostProcess;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Commons\AbstractElement;

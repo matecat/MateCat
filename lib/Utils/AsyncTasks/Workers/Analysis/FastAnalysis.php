@@ -710,7 +710,7 @@ class FastAnalysis extends AbstractDaemon {
                         $public_tm_penalty = $jobsMetadataDao->get( $id_job, $password, 'public_tm_penalty', 10 * 60 );
 
                         if ( !empty( $public_tm_penalty ) ) {
-                            $queue_element[ 'public_tm_penalty' ] = $public_tm_penalty;
+                            $queue_element[ 'public_tm_penalty' ] = $public_tm_penalty->value;
                         }
 
                         if ( $tm_prioritization !== null ) {
