@@ -93,7 +93,7 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
 
     public array $penalty_key = [];
 
-    public ?int $public_tm_penalty;
+    public ?int $public_tm_penalty = null;
 
     ### NOT SERIALIZABLE Private members ###
 
