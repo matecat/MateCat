@@ -47,6 +47,11 @@ class ConversionHandler {
     private MatecatLogger $logger;
 
     /**
+     * @var bool|null
+     */
+    protected ?bool $legacy_icu;
+
+    /**
      * ConversionHandler constructor.
      */
     public function __construct() {
@@ -150,7 +155,8 @@ class ConversionHandler {
                 $this->source_lang,
                 $single_language,
                 $this->segmentation_rule,
-                $extraction_parameters
+                $extraction_parameters,
+                $this->legacy_icu
         );
         Filters::logConversionToXliff( $convertResult, $file_path, $this->source_lang, $this->target_lang, $this->segmentation_rule, $extraction_parameters );
 
@@ -184,7 +190,7 @@ class ConversionHandler {
 
             } catch ( FileSystemException $e ) {
 
-                $this->logger->debug( "FileSystem Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "FileSystem Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::FILESYSTEM_ERROR );
                 $this->result->setErrorMessage( $e->getMessage() );
@@ -193,7 +199,7 @@ class ConversionHandler {
 
             } catch ( Exception $e ) {
 
-                $this->logger->debug( "S3 Exception: Message: " . $e->getMessage() );
+                $this->logger->error( "S3 Exception: Message: " . $e->getMessage() );
 
                 $this->result->setErrorCode( ConversionHandlerStatus::S3_ERROR );
                 $this->result->setErrorMessage( 'Sorry, file name too long. Try shortening it and try again.' );
@@ -534,4 +540,10 @@ class ConversionHandler {
         $this->filters_extraction_parameters = $filters_extraction_parameters;
     }
 
+    /**
+     * @param bool|null $legacy_icu
+     */
+    public function setFiltersLegacyIcu( ?bool $legacy_icu = false ) {
+        $this->legacy_icu = $legacy_icu;
+    }
 }

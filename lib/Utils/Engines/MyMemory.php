@@ -179,7 +179,7 @@ class MyMemory extends AbstractEngine {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
-                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+                if ( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false ) {
                     $match->match = $this->getStandardMtPenaltyString();
                 }
             }
@@ -209,19 +209,30 @@ class MyMemory extends AbstractEngine {
 
         // TM prioritization
         $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
+        $penalties = [];
 
+        // TM penalties
         if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
-            $penalties = [];
-
             foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( is_numeric( $penalty ) ) {
-                    $penalties[] = $penalty / 100;
+                if ( isset( $penalty[ 'penalty' ] ) and is_numeric( $penalty[ 'penalty' ] ) ) {
+                    $penalties[] = [
+                            'key'     => $penalty[ 'key' ],
+                            'penalty' => $penalty[ 'penalty' ] / 100,
+                    ];
                 }
             }
+        }
 
-            if ( !empty( $penalties ) ) {
-                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
-            }
+        // public_tm_penalty
+        if ( isset($_config[ 'public_tm_penalty' ]) and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+            $penalties[] = [
+                    'key'     => 'public',
+                    'penalty' => $_config[ 'public_tm_penalty' ] / 100,
+            ];
+        }
+
+        if ( !empty( $penalties ) ) {
+            $parameters[ 'penalty_key' ] = json_encode($penalties);
         }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
@@ -382,7 +393,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-        
+
         return $this->result;
     }
 

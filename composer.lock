@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f8efcac1fdf27b9578af5611e50c2a06",
+    "content-hash": "3a4363b40d07fb489142e102d52a7dac",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1701,16 +1701,16 @@
         },
         {
             "name": "matecat/subfiltering",
-            "version": "v2.2.9",
+            "version": "v2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matecat/subfiltering.git",
-                "reference": "59b3945370c5ced5ca500ee0b9a49115b32b53c6"
+                "reference": "31b79b4b84677e724d045b6955896650d21fd142"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/59b3945370c5ced5ca500ee0b9a49115b32b53c6",
-                "reference": "59b3945370c5ced5ca500ee0b9a49115b32b53c6",
+                "url": "https://api.github.com/repos/matecat/subfiltering/zipball/31b79b4b84677e724d045b6955896650d21fd142",
+                "reference": "31b79b4b84677e724d045b6955896650d21fd142",
                 "shasum": ""
             },
             "require": {
@@ -1719,10 +1719,10 @@
                 "ext-xml": "*",
                 "matecat/emoji-to-entity-converter": "^1",
                 "matecat/xml-dom-parser": "^1",
-                "php": ">=5.6"
+                "php": ">=7.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.7.27"
+                "phpunit/phpunit": "^9"
             },
             "type": "library",
             "autoload": {
@@ -1755,9 +1755,9 @@
             ],
             "support": {
                 "issues": "https://github.com/matecat/subfiltering/issues",
-                "source": "https://github.com/matecat/subfiltering/tree/v2.2.9"
+                "source": "https://github.com/matecat/subfiltering/tree/v2.3.0"
             },
-            "time": "2025-07-29T15:40:49+00:00"
+            "time": "2025-09-18T11:34:03+00:00"
         },
         {
             "name": "matecat/whole-text-finder",

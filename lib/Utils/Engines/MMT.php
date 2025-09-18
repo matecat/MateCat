@@ -18,6 +18,7 @@ use SplFileObject;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\MMT\MMTServiceApi;
 use Utils\Engines\MMT\MMTServiceApiException;
+use Utils\Engines\MMT\MMTServiceApiRequestException;
 use Utils\Engines\Results\MyMemory\Matches;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\Registry\AppConfig;

@@ -8,8 +8,7 @@ use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Jobs\JobStruct;
-use Model\Projects\ProjectDao;
-use Model\Projects\ProjectStruct;
+use PDO;
 use Utils\Tools\Utils;
 
 class ChunkCompletionEventDao extends AbstractDao {
@@ -39,7 +38,7 @@ class ChunkCompletionEventDao extends AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Model\ChunksCompletion\ChunkCompletionEventStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, ChunkCompletionEventStruct::class );
 
         $stmt->execute( [
                 'id_event' => $id_event,
@@ -132,7 +131,7 @@ class ChunkCompletionEventDao extends AbstractDao {
      * chunk_completion_updates stores the last time a job was updated and is updated with a
      * timestamp every time an invalidating change is done to the job, like a translation.
      *
-     * @param $chunk  \Model\Jobs\JobStruct to examinate
+     * @param $chunk  JobStruct to examinate
      * @param $params array of params for query: is_review
      *
      * @return array

@@ -45,16 +45,14 @@ class Bootstrap {
         self::$_ROOT = realpath( dirname( __FILE__ ) . '/../' );
         include_once self::$_ROOT . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-        LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
+        //get the environment configuration
+        $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
+        $this->initRegistryClass();
+        $this->createSystemDirectories();
+        $this->setLoggers();
+
         set_exception_handler( [ Bootstrap::class, 'exceptionHandler' ] );
         register_shutdown_function( [ Bootstrap::class, 'shutdownFunctionHandler' ] );
-
-        $this->loadConfigurationFiles( $config_file, $task_runner_config_file );
-
-        //get the environment configuration
-        $this->initRegistryClass();
-
-        $this->setLoggers();
 
         $this->setErrorReporting();
 
@@ -66,7 +64,6 @@ class Bootstrap {
 
         $this->installApplicationSingletons();
 
-        $this->createSystemDirectories();
 
         $this->initMandatoryPlugins();
         $this->notifyBootCompleted();
@@ -76,6 +73,7 @@ class Bootstrap {
 
     private function setLoggers() {
         LoggerFactory::$uniqID = ( isset( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ] ) ? substr( $_COOKIE[ AppConfig::$PHP_SESSION_NAME ], 0, 13 ) : uniqid() );
+        LoggerFactory::getLogger( 'exception_handler', 'fatal_errors.txt' );
         LoggerFactory::getLogger( 'dao', 'dao.log' );
         LoggerFactory::getLogger( 'query_cache', 'query_cache.log' );
         LoggerFactory::getLogger( "conversion", "conversion.log" );
@@ -89,6 +87,8 @@ class Bootstrap {
         LoggerFactory::getLogger( 'project_manager', 'project_manager.log' );
         LoggerFactory::getLogger( "upload_handler", "upload.log" );
         LoggerFactory::getLogger( "tos_external_call", "tos.log" );
+        LoggerFactory::getLogger( 'engines', 'app_engines_call.log' ); //default handler for engines called by web node
+        LoggerFactory::getLogger( 'files', 'files_storage.log' );
     }
 
     /**
@@ -184,11 +184,11 @@ class Bootstrap {
                 break;
             case PDOException::class:
                 $code = 503;
-                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new View\API\Commons\Error( $exception ) )->render( true ) );
                 break;
             default:
                 $code = 500;
-                $logger->debug( json_encode( ( new View\API\Commons\Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new View\API\Commons\Error( $exception ) )->render( true ) );
                 break;
         }
 
