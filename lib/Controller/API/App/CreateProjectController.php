@@ -346,7 +346,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             throw new InvalidArgumentException( "Invalid pretranslate_101 value", -6 );
         }
 
-        $data[ 'public_tm_penalty' ]                     = $this->validatePublicTMPenalty( $public_tm_penalty );
+        $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -409,9 +409,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
      *
      * @return int|null
      */
-    private function validatePublicTMPenalty(?int $public_tm_penalty = null)
-    {
-        if($public_tm_penalty < 0 || $public_tm_penalty > 100){
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ) {
+        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
             throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }
 

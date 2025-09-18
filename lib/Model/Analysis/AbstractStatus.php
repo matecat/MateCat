@@ -187,7 +187,7 @@ abstract class AbstractStatus {
         foreach ( $this->_resultSet as $segInfo ) {
 
             if ( $project->getSummary()->getTotalFastAnalysis() == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
-                $project->getSummary()->setTotalFastAnalysis( $segInfo[ 'fast_analysis_wc' ] );
+                $project->getSummary()->setTotalFastAnalysis( (int)$segInfo[ 'fast_analysis_wc' ] );
             }
 
             /*
