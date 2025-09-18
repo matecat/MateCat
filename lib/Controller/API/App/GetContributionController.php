@@ -130,7 +130,7 @@ class GetContributionController extends KleinController {
         $public_tm_penalty = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60 );
 
         if ( $public_tm_penalty !== null ) {
-            $contributionRequest->public_tm_penalty = $public_tm_penalty->value;
+            $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
         }
 
         if ( $dialect_strict !== null ) {
