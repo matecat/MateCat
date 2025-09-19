@@ -345,7 +345,7 @@ class DownloadController extends AbstractDownloadController {
 
             // check for errors and log them on fatal_errors.txt
             foreach ( $convertResult as $result ) {
-                if ( $result[ 'isSuccess' ] === false and isset( $result[ 'errorMessage' ] ) ) {
+                if ( $result[ 'successful' ] === false and isset( $result[ 'errorMessage' ] ) ) {
                     $this->logger->debug( "FILE CONVERSION ERROR: " . $result[ 'errorMessage' ] );
                 }
             }

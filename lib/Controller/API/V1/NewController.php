@@ -706,7 +706,7 @@ class NewController extends KleinController {
                 $validatorObject       = new JSONValidatorObject();
                 $validatorObject->json = $private_tm_key_json;
 
-                $validator = new JSONValidator( $schema );
+                $validator = new JSONValidator( $schema, true );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
