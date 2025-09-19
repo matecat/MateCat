@@ -121,7 +121,8 @@ class GetSegmentsController extends KleinController {
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
+                    // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );

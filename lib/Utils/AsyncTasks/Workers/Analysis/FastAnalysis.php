@@ -472,14 +472,14 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _insertFastAnalysis(
             ProjectStruct $projectStruct,
-            string        $projectFeaturesString,
-            array         $equivalentWordMapping,
-            FeatureSet    $featureSet,
-            bool          $perform_Tms_Analysis = true,
-            ?bool         $mt_evaluation = false,
-            ?bool         $mt_qe_workflow_enabled = false,
-            ?string       $mt_qe_workflow_parameters = "",
-            ?int          $mt_quality_value_in_editor = 85
+            string $projectFeaturesString,
+            array $equivalentWordMapping,
+            FeatureSet $featureSet,
+            bool $perform_Tms_Analysis = true,
+            ?bool $mt_evaluation = false,
+            ?bool $mt_qe_workflow_enabled = false,
+            ?string $mt_qe_workflow_parameters = "",
+            ?int $mt_quality_value_in_editor = 85
     ): int {
 
         $pid               = $projectStruct->id;
@@ -704,6 +704,11 @@ class FastAnalysis extends AbstractDaemon {
                         $jobsMetadataDao   = new MetadataDao();
                         $tm_prioritization = $jobsMetadataDao->get( $id_job, $password, 'tm_prioritization', 10 * 60 );
                         $dialect_strict    = $jobsMetadataDao->get( $id_job, $password, 'dialect_strict', 10 * 60 );
+                        $public_tm_penalty = $jobsMetadataDao->get( $id_job, $password, 'public_tm_penalty', 10 * 60 );
+
+                        if ( !empty( $public_tm_penalty ) ) {
+                            $queue_element[ 'public_tm_penalty' ] = (int)$public_tm_penalty->value;
+                        }
 
                         if ( $tm_prioritization !== null ) {
                             $queue_element[ 'tm_prioritization' ] = $tm_prioritization->value == 1;

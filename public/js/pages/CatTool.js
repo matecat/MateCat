@@ -120,6 +120,7 @@ function CatTool() {
             ...prevTemplate,
             tm: updatedTmKeys.filter(({isActive}) => isActive),
             getPublicMatches: config.get_public_matches ?? true,
+            publicTmPenalty: config.public_tm_penalty,
           }
           return modifiedTemplate
         })

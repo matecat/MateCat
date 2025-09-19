@@ -125,7 +125,7 @@ class Executor implements SplObserver {
         $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . AppConfig::$INSTANCE_ID;
 
         $this->logger = LoggerFactory::getLogger( 'executor', $_context->loggerName );
-        LoggerFactory::setAliases( [ 'engines', 'project_manager', 'feature_set' ], $this->logger );
+        LoggerFactory::setAliases( [ 'engines', 'project_manager', 'feature_set', 'files' ], $this->logger ); // overriding the default engine logger
 
         $this->_executionContext = $_context;
 
@@ -233,7 +233,7 @@ class Executor implements SplObserver {
                 //set/increment the reQueue number
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
-                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
+                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext, $this->logger );
                 $amqHandlerPublisher->getClient()->disconnect();
 
             } catch ( EmptyElementException $e ) {
@@ -247,7 +247,7 @@ class Executor implements SplObserver {
 
                 $queueElement->reQueueNum = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher      = AMQHandler::getNewInstanceForDaemons();
-                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
+                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext, $this->logger );
                 $amqHandlerPublisher->getClient()->disconnect();
                 sleep( 2 );
 

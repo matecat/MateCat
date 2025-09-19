@@ -17,11 +17,11 @@ class MMTServiceApi {
 
     const DEFAULT_BASE_URL = 'https://api.modernmt.com';
 
-    private string                      $baseUrl;
-    private ?string                     $license         = null;
-    private int                         $client          = 0;
-    private ?string                     $platform        = null;
-    private ?string                     $platformVersion = null;
+    private string        $baseUrl;
+    private ?string       $license         = null;
+    private int           $client          = 0;
+    private ?string       $platform        = null;
+    private ?string       $platformVersion = null;
     private MatecatLogger $logger;
 
     /**
@@ -521,7 +521,7 @@ class MMTServiceApi {
             $headers[] = "MMT-PlatformVersion: $this->platformVersion";
         }
 
-        $handler          = new MultiCurlHandler();
+        $handler          = new MultiCurlHandler( $this->logger );
         $handler->verbose = true;
 
         $options = [

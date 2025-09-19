@@ -384,6 +384,10 @@ class GetContributionWorker extends AbstractWorker {
             $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
         }
 
+        if ( !empty( $contributionStruct->public_tm_penalty ) ) {
+            $_config[ 'public_tm_penalty' ] = $contributionStruct->public_tm_penalty;
+        }
+
         if ( $contributionStruct->concordanceSearch && $contributionStruct->fromTarget ) {
             //invert direction
             $_config[ 'target' ] = $jobStruct->source;

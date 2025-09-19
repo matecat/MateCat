@@ -14,9 +14,9 @@ use Klein\ServiceProvider;
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
+use Throwable;
 use Utils\Logger\LoggerFactory;
 use Utils\Logger\MatecatLogger;
-use Throwable;
 
 abstract class KleinController implements IController {
 
@@ -131,7 +131,7 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function performValidations() {
         $this->validateRequest();
@@ -140,7 +140,7 @@ abstract class KleinController implements IController {
     /**
      * @param string $method
      *
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function respond( string $method ) {
 

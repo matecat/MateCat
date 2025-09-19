@@ -743,7 +743,8 @@ class ProjectManager {
 
                 // make a cache package (with work/ only, empty orig/)
                 try {
-                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], false, $filePathName );
+                    $fs->makeCachePackage( $sha1, $this->projectStructure[ 'source_language' ], null, $filePathName );
+                    $this->logger->debug( "File $fileName converted to cache" );
                 } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = [
                             "code"    => -230,
@@ -830,7 +831,6 @@ class ProjectManager {
                     if ( !in_array( $info[ 'extension' ], [ 'xliff', 'sdlxliff', 'xlf' ] ) ) {
                         throw new Exception( "Failed to find converted Xliff", -3 );
                     }
-
 
                     $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
 
@@ -1455,6 +1455,11 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             $jobsMetadataDao = new \Model\Jobs\MetadataDao();
+
+            // public_tm_penalty
+            if ( isset ( $projectStructure[ 'public_tm_penalty' ] ) ) {
+                $jobsMetadataDao->set( $newJob->id, $newJob->password, 'public_tm_penalty', $projectStructure[ 'public_tm_penalty' ] );
+            }
 
             // character_counter_count_tags
             if ( isset( $projectStructure[ 'character_counter_count_tags' ] ) ) {
@@ -2370,11 +2375,12 @@ class ProjectManager {
      * @param $_originalFileNames
      * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
      * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
+     * @param $pos
      *
      * @return array
      * @throws Exception
      */
-    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ): array {
+    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName, $pos ): array {
         $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
@@ -2414,6 +2420,11 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
+
+                // pdfAnalysis
+                if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
+                    $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
+                }
 
                 $fileStructures[ $fid ] = [
                         'fid'               => $fid,
@@ -2769,6 +2780,13 @@ class ProjectManager {
 
                 $position = ( isset( $translation_row[ 6 ] ) ) ? $translation_row[ 6 ] : null;
                 $segment  = ( new SegmentDao() )->getById( $translation_row [ 0 ] );
+
+                //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
+                // SegmentDao::getById returns false if the id is not found in the database
+                // Skip the segment and lose the translation if the segment id is not found in the database
+                if( !$segment ) {
+                    continue;
+                }
 
                 if ( is_string( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ] ) ) {
                     $payable_rates = json_decode( $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ][ $jid ], true );
