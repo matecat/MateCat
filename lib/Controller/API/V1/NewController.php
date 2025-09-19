@@ -718,7 +718,7 @@ class NewController extends KleinController {
                                     'key'     => $item->key,
                                     'r'       => $item->read,
                                     'w'       => $item->write,
-                                    'penalty' => $item->penalty,
+                                    'penalty' => $item->penalty ?? 0,
                             ];
                         },
                         $jsonObject->decoded->keys
