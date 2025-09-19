@@ -22,16 +22,21 @@ use Utils\Tools\SimpleJWT;
 class InvitedUser {
 
     /**
-     * @var string
+     * @var array
      */
-    protected string $jwt;
+    protected array $jwt = [];
 
     protected Response $response;
 
     /**
+     * InvitedUser constructor.
+     *
+     * @param string   $jwt
+     * @param Response $response
+     *
      * @throws ValidationError
      */
-    public function __construct( $jwt, Response $response ) {
+    public function __construct( string $jwt, Response $response ) {
 
         try {
             $this->jwt = SimpleJWT::getValidPayload( $jwt );
