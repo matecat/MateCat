@@ -98,7 +98,7 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
             case NotFoundException::class:
             case Model\Exceptions\NotFoundException::class:
                 $logger->debug( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );
-                $logger->debug( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new Error( $exception ) )->render( true ) );
                 $klein->response()->code( 404 );
                 $klein->response()->json( ( new Error( $exception ) )->render() );
                 break;
@@ -108,12 +108,12 @@ $klein->onError( function ( Klein $klein, $err_msg, $err_type, Throwable $except
                 break;
             case PDOException::class:
                 $klein->response()->code( 503 );
-                $logger->debug( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->debug( ( new Error( $exception ) )->render( true ) );
                 break;
             default:
                 $httpCode = $exception->getCode() >= 400 ? $exception->getCode() : 500;
                 $klein->response()->code( $httpCode );
-                $logger->debug( json_encode( ( new Error( $exception ) )->render( true ) ) );
+                $logger->debug(( new Error( $exception ) )->render( true ) );
                 $klein->response()->json( new Error( $exception ) );
                 break;
         }
