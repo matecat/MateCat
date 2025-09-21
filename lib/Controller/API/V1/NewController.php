@@ -576,7 +576,7 @@ class NewController extends KleinController {
      *
      * @return int|null
      */
-    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ) {
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ): ?int {
         if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
             throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }

@@ -564,23 +564,16 @@ class TMAnalysisWorker extends AbstractWorker {
         }
 
         // penalty_key
-        $penalty_key = [];
-        $tm_keys     = TmKeyManager::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
+        $penalty_map = TmKeyManager::getPenaltyMap( $queueElement->params->tm_keys, 'r' );
 
-        if ( !empty( $tm_keys ) ) {
-            foreach ( $tm_keys as $tm_key ) {
-                $_config[ 'id_user' ][] = $tm_key->key;
-
-                if ( isset( $tm_key->penalty ) ) {
-                    $penalty_key[] = $tm_key->penalty;
-                } else {
-                    $penalty_key[] = 0;
-                }
+        if ( !empty( $penalty_map ) ) {
+            foreach ( $penalty_map as $tm_key ) {
+                $_config[ 'id_user' ][] = $tm_key->key; // set the keyset for the TM engine
             }
         }
 
-        if ( !empty( $penalty_key ) ) {
-            $_config[ 'penalty_key' ] = $penalty_key;
+        if ( !empty( $penalty_map ) ) {
+            $_config[ 'penalty_key' ] = $penalty_map;
         }
 
         $_config[ 'num_result' ] = 3;

@@ -25,6 +25,7 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
@@ -150,22 +151,6 @@ class GetContributionController extends KleinController {
             $contributionRequest->resultNum = 10;
         }
 
-        // penalty_key
-        $penalty_key = [];
-        $tmKeys      = json_decode( $jobStruct->tm_keys, true );
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( isset( $tmKey[ 'penalty' ] ) and is_numeric( $tmKey[ 'penalty' ] ) ) {
-                $penalty_key[] = [ 'key' => $tmKey[ 'key' ], 'penalty' => $tmKey[ 'penalty' ] ];
-            } else {
-                $penalty_key[] = [ 'key' => $tmKey[ 'key' ], 'penalty' => 0 ];
-            }
-        }
-
-        if ( !empty( $penalty_key ) ) {
-            $contributionRequest->penalty_key = $penalty_key;
-        }
-
         Get::contribution( $contributionRequest );
 
         $this->response->json( [
@@ -183,7 +168,6 @@ class GetContributionController extends KleinController {
                                 'userRole'          => $contributionRequest->userRole,
                                 'tm_prioritization' => $contributionRequest->tm_prioritization,
                                 'mt_evaluation'     => $contributionRequest->mt_evaluation,
-                                'penalty_key'       => $contributionRequest->penalty_key,
                                 'crossLangTargets'  => $contributionRequest->crossLangTargets,
                                 'fromTarget'        => $contributionRequest->fromTarget,
                                 'dialect_strict'    => $contributionRequest->dialect_strict,

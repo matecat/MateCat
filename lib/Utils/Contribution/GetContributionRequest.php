@@ -91,8 +91,6 @@ class GetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public bool    $mt_qe_workflow_enabled     = false;
     public ?string $mt_qe_workflow_parameters  = null;
 
-    public array $penalty_key = [];
-
     public ?int $public_tm_penalty = null;
 
     ### NOT SERIALIZABLE Private members ###
