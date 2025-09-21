@@ -101,6 +101,33 @@ class TmKeyManager {
     }
 
     /**
+     * Generates a list of penalty objects based on the provided translation memory keys.
+     *
+     * @param string   $jsonTmKeys      A JSON string representing the translation memory keys.
+     * @param string   $grant_level     The permission level for accessing the translation memory keys.
+     *                                  Defaults to 'rw'.
+     * @param string   $type            The type of translation memory. Defaults to "tm".
+     * @param int|null $uid             The user ID associated with the translation memory keys.
+     *                                  If null, a default value may be considered.
+     * @param string   $user_role       The role of the user affecting the translation memory keys
+     *
+     * @return array
+     * @throws Exception
+     */
+    public static function getPenaltyMap( string $jsonTmKeys, string $grant_level = 'rw', string $type = "tm", ?int $uid = null, string $user_role = Filter::ROLE_TRANSLATOR ): array {
+        $tmKeys              = self::getJobTmKeys( $jsonTmKeys, $grant_level, $type, $uid, $user_role );
+        $penalty_key_objects = [];
+        foreach ( $tmKeys as $tmKey ) {
+            $penalty_key_objects[] = (object)[
+                    'key'     => $tmKey->key,
+                    'penalty' => $tmKey->penalty / 100 ?? 0
+            ];
+        }
+
+        return $penalty_key_objects;
+    }
+
+    /**
      * Converts an array of strings representing a json_encoded array
      * of TmKeyStruct objects into the corresponding array.
      *

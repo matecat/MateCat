@@ -214,15 +214,15 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $project_name                  = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
-        $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $file_name               = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $project_name            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $job_subject             = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $due_date                = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_engine               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
+        $disable_tms_engine_flag = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
+//        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -245,47 +245,28 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $payable_rate_template_id      = filter_var( $this->request->param( 'payable_rate_template_id' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_quality_value_in_editor    = filter_var( $this->request->param( 'mt_quality_value_in_editor' ), FILTER_SANITIZE_NUMBER_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 85, 'min_range' => 76, 'max_range' => 102 ] ] ); // used to set the absolute value of an MT match (previously fixed to 85)
         $payable_rate_template         = filter_var( $this->request->param( 'payable_rate_template' ), FILTER_SANITIZE_STRING );
+        $private_keys_list             = filter_var( $this->request->param( 'private_keys_list' ), FILTER_SANITIZE_FULL_SPECIAL_CHARS, [ 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ] );
 
-        $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
-        $array_keys = array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] );
+        $array_keys = json_decode( $private_keys_list, true );
+        $array_keys = array_values( array_merge( $array_keys[ 'ownergroup' ], $array_keys[ 'mine' ], $array_keys[ 'anonymous' ] ) );
 
-        // if a string is sent by the client, transform it into a valid array
-        if ( !empty( $private_tm_key ) ) {
-            $private_tm_key = [
-                    [
-                            'key'  => trim( $private_tm_key ),
-                            'name' => null,
-                            'r'    => true,
-                            'w'    => true
-                    ]
-            ];
-        } else {
-            $private_tm_key = [];
-        }
-
-        if ( $array_keys ) { // some keys are selected from the panel
+        if ( !empty( $array_keys ) ) {
 
             //remove duplicates
-            foreach ( $array_keys as $value ) {
-                if ( isset( $this->postInput[ 'private_tm_key' ][ 0 ][ 'key' ] )
-                        && $private_tm_key[ 0 ][ 'key' ] == $value[ 'key' ]
-                ) {
-                    //the same key was get from keyring, remove
-                    $private_tm_key = [];
-                }
-            }
+            $_array_unique = array_map( function ( $v ) {
+                return $v[ 'key' ];
+            }, $array_keys );
 
-            //merge the arrays
-            $private_keyList = array_merge( $private_tm_key, $array_keys );
-        } else {
-            $private_keyList = $private_tm_key;
+            $_array_unique = array_unique( $_array_unique );
+
+            $array_keys = array_values( array_intersect_key( $array_keys, $_array_unique ) );
+
         }
 
-        $postPrivateTmKey = array_filter( $private_keyList, [ "self", "sanitizeTmKeyArr" ] );
-        $mt_engine        = ( $mt_engine != null ? $mt_engine : 0 );
-        $private_tm_key   = $postPrivateTmKey;
-        $only_private     = ( !is_null( $get_public_matches ) && !$get_public_matches );
-        $due_date         = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
+        $private_tm_key = array_filter( $array_keys, [ "self", "sanitizeTmKeyArr" ] );
+        $mt_engine      = ( $mt_engine != null ? $mt_engine : 0 );
+        $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
+        $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
         $data = [
                 'file_name'                     => $file_name,
@@ -315,7 +296,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
                 'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
                 'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'postPrivateTmKey'              => $postPrivateTmKey,
                 'mt_engine'                     => $mt_engine,
                 'disable_tms_engine_flag'       => $disable_tms_engine_flag,
                 'private_tm_key'                => $private_tm_key,
@@ -409,7 +389,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
      *
      * @return int|null
      */
-    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ) {
+    private function validatePublicTMPenalty( ?int $public_tm_penalty = null ): ?int {
         if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
             throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }

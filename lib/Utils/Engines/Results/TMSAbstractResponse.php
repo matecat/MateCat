@@ -59,8 +59,8 @@ abstract class TMSAbstractResponse {
          */
         $instance = new $class( $result, $dataRefMap );
 
-        if ( is_array( $result ) && array_key_exists( "error", $result ) ) {
-            $instance->error = new ErrorResponse( $result[ 'error' ] );
+        if ( is_array( $result ) && $result[ 'responseStatus' ] >= 400 ) {
+            $instance->error = new ErrorResponse( $result[ 'error' ] ?? $result[ 'responseDetails' ] );
         }
 
         if ( $featureSet !== null ) {

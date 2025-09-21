@@ -380,8 +380,10 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
         $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
 
-        if ( !empty( $contributionStruct->penalty_key ) ) {
-            $_config[ 'penalty_key' ] = $contributionStruct->penalty_key;
+        // penalty_key
+        $penalty_key = TmKeyManager::getPenaltyMap( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
+        if ( !empty( $penalty_key ) ) {
+            $_config[ 'penalty_key' ] = $penalty_key;
         }
 
         if ( !empty( $contributionStruct->public_tm_penalty ) ) {

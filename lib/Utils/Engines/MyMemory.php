@@ -208,31 +208,18 @@ class MyMemory extends AbstractEngine {
         $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
 
         // TM prioritization
-        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
-        $penalties = [];
-
-        // TM penalties
-        if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
-            foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( isset( $penalty[ 'penalty' ] ) and is_numeric( $penalty[ 'penalty' ] ) ) {
-                    $penalties[] = [
-                            'key'     => $penalty[ 'key' ],
-                            'penalty' => $penalty[ 'penalty' ] / 100,
-                    ];
-                }
-            }
-        }
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
 
         // public_tm_penalty
-        if ( isset($_config[ 'public_tm_penalty' ]) and is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
-            $penalties[] = [
+        if ( isset( $_config[ 'public_tm_penalty' ] ) && is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+            $_config[ 'penalty_key' ][] = [
                     'key'     => 'public',
                     'penalty' => $_config[ 'public_tm_penalty' ] / 100,
             ];
         }
 
-        if ( !empty( $penalties ) ) {
-            $parameters[ 'penalty_key' ] = json_encode($penalties);
+        if ( !empty( $_config[ 'penalty_key' ] ) ) {
+            $parameters[ 'penalty_key' ] = json_encode( $_config[ 'penalty_key' ] );
         }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
@@ -613,6 +600,7 @@ class MyMemory extends AbstractEngine {
                 "term"       => $term,
         ];
         $this->call( "glossary_update_relative_url", $payload, true, true );
+
         return $this->result;
     }
 
