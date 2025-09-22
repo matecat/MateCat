@@ -167,17 +167,17 @@ class Filters {
                 'utf8FileName' => $filename
         ];
 
-        if ( $extractionParams !== null ) {
-            $data[ 'extractionParams' ] = json_encode( $extractionParams );
-        }
-
         if ( $legacy_icu === true ) {
 
-            if ( !isset( $data[ 'extractionParams' ] ) ) {
-                $data[ 'extractionParams' ] = [];
+            if ( empty( $extractionParams ) ) {
+                $extractionParams = [];
             }
 
-            $data[ 'extractionParams' ][ 'legacy_icu' ] = true;
+            $extractionParams[ 'legacy_icu' ] = true;
+        }
+
+        if ( $extractionParams !== null ) {
+            $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
