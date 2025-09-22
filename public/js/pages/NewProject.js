@@ -488,6 +488,9 @@ const NewProject = () => {
       ),
     )
 
+    const {mmt_glossaries, lara_glossaries, deepl_id_glossary, ...mtExtra} =
+      mt?.extra ?? {}
+
     // update store recently used target languages
     setRecentlyUsedLanguages(targetLangs)
     const getParams = () => ({
@@ -514,17 +517,15 @@ const NewProject = () => {
         ? {payable_rate_template: payableRateTemplate}
         : {payable_rate_template_id: payableRateTemplateId}),
       get_public_matches: getPublicMatches,
-      ...(mt?.extra?.glossaries?.length && {
-        mmt_glossaries: JSON.stringify({
-          glossaries: mt.extra.glossaries,
-          ignore_glossary_case: !mt.extra.ignore_glossary_case,
-        }),
+      ...mtExtra,
+      ...(mmt_glossaries?.length && {
+        mmt_glossaries: JSON.stringify(mmt_glossaries),
       }),
-      ...(mt?.extra?.deepl_id_glossary && {
-        deepl_id_glossary: mt.extra.deepl_id_glossary,
+      ...(deepl_id_glossary && {
+        deepl_id_glossary,
       }),
-      ...(mt?.extra?.deepl_formality && {
-        deepl_formality: mt.extra.deepl_formality,
+      ...(lara_glossaries?.length && {
+        lara_glossaries: JSON.stringify(lara_glossaries),
       }),
       ...(typeof xliffParametersTemplate !== 'undefined'
         ? {xliff_parameters: xliffParametersTemplate}
@@ -544,9 +545,6 @@ const NewProject = () => {
         ),
       }),
       mt_quality_value_in_editor: mtQualityValueInEditor,
-      ...(mt?.extra?.lara_glossaries?.length && {
-        lara_glossaries: JSON.stringify(mt.extra.lara_glossaries),
-      }),
     })
 
     if (!projectSent) {
