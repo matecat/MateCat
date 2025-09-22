@@ -2376,12 +2376,11 @@ class ProjectManager {
      * @param $_originalFileNames
      * @param $sha1_original           (example: 917f7b03c8f54350fb65387bda25fbada43ff7d8)
      * @param $cachedXliffFilePathName (example: 91/7f/7b03c8f54350fb65387bda25fbada43ff7d8!!it-it/work/test_2.txt.sdlxliff)
-     * @param $pos
      *
      * @return array
      * @throws Exception
      */
-    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName, $pos ): array {
+    protected function _insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName ): array {
         $fs = FilesStorageFactory::create();
 
         $yearMonthPath    = date_create( $this->projectStructure[ 'create_date' ] )->format( 'Ymd' );
@@ -2396,7 +2395,6 @@ class ProjectManager {
             if ( !empty( $originalFileName ) ) {
 
                 // get metadata
-                $meta     = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
                 $mimeType = AbstractFilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                 $fid      = ProjectManagerModel::insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path, $meta );
 
@@ -2421,11 +2419,6 @@ class ProjectManager {
                 }
 
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
-
-                // pdfAnalysis
-                if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
-                    $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
-                }
 
                 $fileStructures[ $fid ] = [
                         'fid'               => $fid,
