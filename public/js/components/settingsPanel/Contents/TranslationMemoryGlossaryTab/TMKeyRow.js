@@ -538,9 +538,12 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {isOwner && row.isActive && (
-        <div className="align-center tm-row-penalty">{renderPenalty}</div>
-      )}
+      {isOwner &&
+        row.isActive &&
+        isLookup &&
+        ((isMMSharedKey && config.ownerIsMe) || !isMMSharedKey) && (
+          <div className="align-center tm-row-penalty">{renderPenalty}</div>
+        )}
       {!isMMSharedKey && isOwner && !row.isTmFromFile ? (
         <div className="align-center">
           <MenuButton
@@ -608,7 +611,9 @@ export const TMKeyRow = ({row, onExpandRow}) => {
             Import TMX
           </button>
         </div>
-      ) : undefined}
+      ) : (
+        <div />
+      )}
     </Fragment>
   )
 }
