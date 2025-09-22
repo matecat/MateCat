@@ -41,6 +41,7 @@ export const TEMPLATE_PROPS_BY_TAB = {
   [SETTINGS_PANEL_TABS.translationMemoryGlossary]: [
     SCHEMA_KEYS.tm,
     SCHEMA_KEYS.getPublicMatches,
+    SCHEMA_KEYS.publicTmPenalty,
     SCHEMA_KEYS.pretranslate100,
     SCHEMA_KEYS.tmPrioritization,
   ],
@@ -119,7 +120,7 @@ const DEFAULT_CONTENTS = (isCattool = config.is_cattool) => {
               'Customize the settings for Matecat\'s editor page to better suit your personal workflow and preferences. <a href="https://guides.matecat.com/editor-settings" target="_blank">Learn more</a>',
             component: <EditorSettingsTab />,
           },
-          ...(config.ownerIsMe === 1
+          ...(config.ownerIsMe
             ? [
                 {
                   id: SETTINGS_PANEL_TABS.editorOther,

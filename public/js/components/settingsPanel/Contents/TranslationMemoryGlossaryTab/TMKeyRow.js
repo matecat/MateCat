@@ -68,6 +68,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   const isMMSharedKey = row.id === SPECIAL_ROWS_ID.defaultTranslationMemory
   const isOwner = isOwnerOfKey(row.key)
   const getPublicMatches = currentProjectTemplate.get_public_matches
+  const publicTmPenalty = currentProjectTemplate.public_tm_penalty
 
   useEffect(() => {
     setIsLookup(row.r ?? false)
@@ -143,10 +144,17 @@ export const TMKeyRow = ({row, onExpandRow}) => {
                 ...specialRow,
                 r: isLookup,
                 w: isUpdating,
+                penalty:
+                  typeof penalty === 'number' ? penalty : specialRow.penalty,
               }
             : specialRow,
         ),
       )
+      modifyingCurrentTemplate((prevTemplate) => ({
+        ...prevTemplate,
+        publicTmPenalty:
+          typeof penalty === 'number' ? penalty : prevTemplate.publicTmPenalty,
+      }))
     }
   }
 
@@ -161,6 +169,29 @@ export const TMKeyRow = ({row, onExpandRow}) => {
   }
 
   const updateKeyName = () => {
+    const isAlreadyUsed = tmKeys
+      .filter((tm) => tm.id !== row.id)
+      .some((tm) => tm.name === name)
+
+    if (isAlreadyUsed) {
+      CatToolActions.addNotification({
+        title: 'Duplicated name',
+        type: 'error',
+        text: 'This name is already in use, please choose a different one',
+        position: 'br',
+        allowHtml: true,
+        timer: 5000,
+      })
+
+      setTmKeys((prevState) =>
+        prevState.map((tm) =>
+          tm.id === row.id ? {...tm, name: valueName.current} : tm,
+        ),
+      )
+      setName(valueName.current)
+      return
+    }
+
     if (valueChange.current) {
       if (name.trim() !== '') {
         updateTmKey({
@@ -197,6 +228,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
         if (config.is_cattool) {
           updateJobKeys({
             getPublicMatches,
+            publicTmPenalty,
             dataTm: getTmDataStructureToSendServer({tmKeys}),
           }).then(() => CatToolActions.onTMKeysChangeStatus())
         }
@@ -506,7 +538,7 @@ export const TMKeyRow = ({row, onExpandRow}) => {
       <div title={iconDetails.title} className="align-center tm-key-row-icons">
         {iconDetails.icon}
       </div>
-      {!isMMSharedKey && isOwner && row.isActive && (
+      {isOwner && row.isActive && (
         <div className="align-center tm-row-penalty">{renderPenalty}</div>
       )}
       {!isMMSharedKey && isOwner && !row.isTmFromFile ? (

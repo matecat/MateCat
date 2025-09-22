@@ -1,23 +1,15 @@
 <?php
 
-class Projects_MetadataStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+namespace Model\Projects;
 
-    public $id;
-    public $id_project;
-    public $key;
-    public $value;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 
-    /**
-     * @return mixed
-     */
-    public function getValue() {
+class MetadataStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-        $this->value = html_entity_decode($this->value);
+    public ?string $id = null;
+    public int     $id_project;
+    public string  $key;
+    public string  $value;
 
-        if ( Utils::isJson( $this->value ) ) {
-            return json_decode( $this->value );
-        }
-
-        return $this->value;
-    }
 }

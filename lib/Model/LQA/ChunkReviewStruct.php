@@ -1,29 +1,29 @@
 <?php
 
-namespace LQA;
+namespace Model\LQA;
 
-use Chunks_ChunkDao;
-use DataAccess\AbstractDaoSilentStruct;
-use DataAccess\IDaoStruct;
-use Jobs_JobStruct;
-use Utils;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Model\Jobs\ChunkDao;
+use Model\Jobs\JobStruct;
+use Utils\Tools\Utils;
 
 class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
 
-    public $id;
-    public $id_project;
-    public $id_job;
-    public $password;
-    public $review_password;
-    public $penalty_points       = 0;
-    public $source_page;
-    public $is_pass;
-    public $force_pass_at;
-    public $reviewed_words_count = 0;
-    public $undo_data;
-    public $advancement_wc       = 0;
-    public $total_tte            = 0;
-    public $avg_pee              = 0;
+    public ?int    $id                   = null;
+    public int     $id_project;
+    public int     $id_job;
+    public string  $password;
+    public ?string $review_password      = null;
+    public ?float  $penalty_points       = 0;
+    public int     $source_page;
+    public ?bool   $is_pass              = null;
+    public ?string $force_pass_at        = null;
+    public int     $reviewed_words_count = 0;
+    public ?string $undo_data            = null;
+    public ?float  $advancement_wc       = 0;
+    public int     $total_tte            = 0;
+    public int     $avg_pee              = 0;
 
     /**
      * Sets default values for an empty struct
@@ -35,25 +35,12 @@ class ChunkReviewStruct extends AbstractDaoSilentStruct implements IDaoStruct {
     }
 
     /**
-     * @return Jobs_JobStruct
+     * @return JobStruct
      */
-    public function getChunk(): Jobs_JobStruct {
-        $review = clone $this;
-
-        return $this->cachable( __FUNCTION__, $review, function ( $review ) {
-            return Chunks_ChunkDao::getByIdAndPassword( $review->id_job, $review->password );
+    public function getChunk(): JobStruct {
+        return $this->cachable( __METHOD__, function () {
+            return ChunkDao::getByIdAndPassword( $this->id_job, $this->password );
         } );
-    }
-
-    /**
-     * @return int
-     */
-    public function getReviewedPercentage() {
-        $count = $this->getChunk()->totalWordsCount();
-
-        return round( ( $this->reviewed_words_count /
-                ( empty( $count ) ? 1 : $count ) *
-                100 ), 2 );
     }
 
     public function getUndoData() {

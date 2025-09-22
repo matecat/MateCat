@@ -6,7 +6,7 @@
  * Time: 17:16
  */
 
-namespace Features\ProjectCompletion;
+namespace Plugins\Features\ProjectCompletion;
 
 
 interface IProjectCompletionStatus {

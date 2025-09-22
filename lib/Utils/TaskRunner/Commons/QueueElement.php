@@ -7,7 +7,7 @@
  *
  */
 
-namespace TaskRunner\Commons;
+namespace Utils\TaskRunner\Commons;
 
 /**
  * Class QueueElement
@@ -19,28 +19,21 @@ class QueueElement extends AbstractElement {
      * Worker class definition to be loaded by Executor
      * @var string
      */
-    public $classLoad;
+    public string $classLoad;
 
     /**
      * Data needed to execute the work
      *
      * @var Params
      */
-    public $params;
+    public Params $params;
 
     /**
      * Number of times the element is re-queued
      *
      * @var int
      */
-    public $reQueueNum = 0;
-
-    /**
-     * Optional message for the re-queue
-     *
-     * @var string
-     */
-    public $reQueueMessage = '';
+    public int $reQueueNum = 0;
 
     /**
      * Magic method to serialize this object

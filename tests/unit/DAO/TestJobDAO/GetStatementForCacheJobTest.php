@@ -1,11 +1,14 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Jobs\JobDao;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Jobs_JobDao::_getStatementForQuery
+ * @covers JobDao::_getStatementForQuery
  * User: dinies
  * Date: 31/05/16
  * Time: 12.32
@@ -18,7 +21,7 @@ class GetStatementForCacheJobTest extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $this->databaseInstance = new Jobs_JobDao( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $this->databaseInstance = new JobDao( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->method           = $this->reflector->getMethod( "_getStatementForQuery" );
         $this->method->setAccessible( true );

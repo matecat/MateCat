@@ -1,45 +1,48 @@
 <?php
 
-namespace Engines\DeepL;
+namespace Utils\Engines\DeepL;
 
 use InvalidArgumentException;
-use Log;
-use MultiCurlHandler;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+use Utils\Network\MultiCurlHandler;
 
 class DeepLApiClient {
     const DEFAULT_BASE_URL = 'https://api.deepl.com/v1';
 
-    private $apiKey;
+    private string        $apiKey;
+    private MatecatLogger $logger;
 
     /**
-     * @param $apiKey
+     * @param string $apiKey
      *
      * @return static
      */
-    public static function newInstance( $apiKey ) {
+    public static function newInstance( string $apiKey ): DeepLApiClient {
         return new static( $apiKey );
     }
 
     /**
      * DeepLApiClient constructor.
      *
-     * @param $apiKey
+     * @param string $apiKey
      */
-    private function __construct( $apiKey ) {
+    private function __construct( string $apiKey ) {
         $this->apiKey = $apiKey;
+        $this->logger = LoggerFactory::getLogger( 'engines' );
     }
 
     /**
-     * @param      $text
-     * @param      $sourceLang
-     * @param      $targetLang
-     * @param null $formality
-     * @param null $idGlossary
+     * @param string      $text
+     * @param string      $sourceLang
+     * @param string      $targetLang
+     * @param string|null $formality
+     * @param string|null $idGlossary
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function translate( $text, $sourceLang, $targetLang, $formality = null, $idGlossary = null ) {
+    public function translate( string $text, string $sourceLang, string $targetLang, ?string $formality = null, ?string $idGlossary = null ) {
         $args = [
                 'text'        => [
                         $text
@@ -68,55 +71,55 @@ class DeepLApiClient {
     }
 
     /**
-     * @param $data
+     * @param array $data
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function createGlossary( $data ) {
+    public function createGlossary( array $data ) {
         return $this->send( "POST", "/glossaries", $data );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function deleteGlossary( $id ) {
+    public function deleteGlossary( string $id ) {
         return $this->send( "DELETE", "/glossaries/$id" );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function getGlossary( $id ) {
+    public function getGlossary( string $id ) {
         return $this->send( "GET", "/glossaries/$id" );
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    public function getGlossaryEntries( $id ) {
+    public function getGlossaryEntries( string $id ) {
         return $this->send( "GET", "/glossaries/$id/entries" );
     }
 
     /**
-     * @param      $method
-     * @param      $url
-     * @param null $params
-     * @param null $timeout
+     * @param string     $method
+     * @param string     $url
+     * @param array|null $params
+     * @param int        $timeout
      *
      * @return mixed
      * @throws DeepLApiException
      */
-    private function send( $method, $url, $params = null, $timeout = null ) {
+    private function send( string $method, string $url, array $params = null, int $timeout = 0 ): array {
         $allowedHttpVerbs = [
                 'GET',
                 'POST',
@@ -160,7 +163,7 @@ class DeepLApiClient {
             $options[ CURLOPT_POSTFIELDS ] = json_encode( $params );
         }
 
-        if ( $timeout !== null ) {
+        if ( $timeout != 0 ) {
             $options[ CURLOPT_TIMEOUT ] = $timeout;
         }
 
@@ -172,7 +175,7 @@ class DeepLApiClient {
             if ( $handler->getError( $resourceHashId )[ 'errno' ] == 28 ) {
                 throw new DeepLApiException( "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})", 500 );
             } elseif ( $handler->getError( $resourceHashId )[ 'http_code' ] ) {
-                throw new DeepLApiException( "Request denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})", $handler->getError( $resourceHashId )[ 'http_code' ] );
+                throw new DeepLApiException( "Get denied ({$handler->getError( $resourceHashId )[ 'http_code' ]})", $handler->getError( $resourceHashId )[ 'http_code' ] );
             } else {
                 throw new DeepLApiException( "Unable to contact upstream server ({$handler->getError( $resourceHashId )[ 'errno' ]})", 500 );
             }
@@ -182,7 +185,7 @@ class DeepLApiClient {
         $log               = $handler->getSingleLog( $resourceHashId );
         $log[ 'response' ] = $result;
 
-        Log::doJsonLog( $log, "deepl.log" );
+        $this->logger->debug( $log );
 
         return $this->parse( $result );
     }
@@ -193,7 +196,7 @@ class DeepLApiClient {
      * @return mixed|null
      * @throws DeepLApiException
      */
-    private function parse( $body ) {
+    private function parse( string $body ) {
         $json = json_decode( $body, true );
 
         if ( json_last_error() != JSON_ERROR_NONE ) {

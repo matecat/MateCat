@@ -6,23 +6,24 @@
  * Time: 17:07
  */
 
-namespace Email;
+namespace Utils\Email;
 
 
 use Exception;
-use INIT;
-use Routes;
+use Model\Users\UserStruct;
+use Utils\Registry\AppConfig;
+use Utils\Url\CanonicalRoutes;
 
 class SignupEmail extends AbstractEmail {
 
     /**
-     * @var \Users_UserStruct
+     * @var UserStruct
      */
-    private $user;
+    private UserStruct $user;
 
-    protected $title = 'Confirm your registration with Matecat';
+    protected ?string $title = 'Confirm your registration with Matecat';
 
-    public function __construct( \Users_UserStruct $user ) {
+    public function __construct( UserStruct $user ) {
 
         $this->user = $user;
         $this->_setLayout( 'skeleton.html' );
@@ -47,8 +48,8 @@ class SignupEmail extends AbstractEmail {
     protected function _getTemplateVariables(): array {
         return [
                 'user'           => $this->user->toArray(),
-                'activation_url' => Routes::signupConfirmation( $this->user->confirmation_token ),
-                'signup_url'     => Routes::appRoot()
+                'activation_url' => CanonicalRoutes::signupConfirmation( $this->user->confirmation_token ),
+                'signup_url'     => CanonicalRoutes::appRoot()
         ];
     }
 
@@ -62,9 +63,9 @@ class SignupEmail extends AbstractEmail {
     protected function _getDefaultMailConf(): array {
         $mailConf = parent::_getDefaultMailConf();
 
-        $mailConf[ 'from' ]       = INIT::$MAILER_RETURN_PATH;
-        $mailConf[ 'sender' ]     = INIT::$MAILER_RETURN_PATH;
-        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+        $mailConf[ 'from' ]       = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf[ 'sender' ]     = AppConfig::$MAILER_RETURN_PATH;
+        $mailConf[ 'returnPath' ] = AppConfig::$MAILER_RETURN_PATH;
 
         return $mailConf;
     }

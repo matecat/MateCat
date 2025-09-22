@@ -1,31 +1,26 @@
 <?php
 
-namespace Validator;
+namespace Utils\Validator;
 
-use Exception;
-use Files\CSV;
-use Langs\Languages;
-use Utils;
-use Validator\Contracts\AbstractValidator;
-use Validator\Contracts\ValidatorObject;
+use Utils\Files\CSV;
+use Utils\Langs\Languages;
+use Utils\Tools\Utils;
+use Utils\Validator\Contracts\AbstractValidator;
+use Utils\Validator\Contracts\ValidatorObject;
 
 class GlossaryCSVValidator extends AbstractValidator {
 
     /**
      * @inheritDoc
      */
-    public function validate( ValidatorObject $object ) {
-
-        if ( !$object instanceof GlossaryCSVValidatorObject ) {
-            throw new Exception( 'Object given is not a valid instance of GlossaryCSVValidatorObject' );
-        }
+    public function validate( ValidatorObject $object ): ?ValidatorObject {
 
         $headers          = $this->getHeaders( $object->csv );
         $languagesHandler = Languages::getInstance();
 
         // 1. Validate languages
         if ( !$this->validateLanguages( $headers, $languagesHandler ) ) {
-            return false;
+            return null;
         }
 
         $allowedLanguagesRegex = strtolower( implode( "|", array_keys( $languagesHandler->getEnabledLanguages() ) ) );
@@ -37,30 +32,30 @@ class GlossaryCSVValidator extends AbstractValidator {
 
             $this->errors[] = 'The order of the headers is incorrect, please change it to the one set out in <a href="https://guides.matecat.com/glossary-file-format" target="_blank">this support article</a>.';
 
-            return false;
+            return null;
         }
 
-        return true;
+        return $object;
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
      *
      * @return array
      */
-    private function getHeaders( $filePath ): array {
+    private function getHeaders( string $filePath ): array {
         $headers = CSV::headers( $filePath );
-        $headers = array_map( 'Utils::trimAndLowerCase', $headers );
+        $headers = array_map( [ Utils::class, 'trimAndLowerCase' ], $headers );
 
         return Utils::removeEmptyStringFromTail( $headers );
     }
 
     /**
-     * @param $filePath
+     * @param string $filePath
      *
      * @return int
      */
-    public function getNumberOfLanguage( $filePath ) {
+    public function getNumberOfLanguage( string $filePath ): int {
 
         $headers  = $this->getHeaders( $filePath );
         $skipKeys = [

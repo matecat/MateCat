@@ -1,27 +1,30 @@
 <?php
 
-namespace PayableRates;
+namespace Model\PayableRates;
 
-use Analysis\PayableRates;
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
-use Date\DateTimeUtil;
 use DomainException;
 use Exception;
 use JsonSerializable;
-use Langs\Languages;
+use Model\Analysis\PayableRates;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+use Utils\Date\DateTimeUtil;
+use Utils\Langs\Languages;
 
-class CustomPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
+class CustomPayableRateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     const MAX_BREAKDOWN_SIZE = 65535;
 
-    public $id;
-    public $uid;
-    public $version;
-    public $name;
+    public ?int $id = null;
+    public ?int $uid = null;
+    public int $version;
+    public string $name;
+    /**
+     * @var string|array
+     */
     public $breakdowns;
-    public $created_at;
-    public $modified_at;
-    public $deleted_at;
+    public string $created_at;
+    public string $modified_at;
+    public ?string $deleted_at = null;
 
     /**
      * @return string
@@ -140,11 +143,11 @@ class CustomPayableRateStruct extends \DataAccess\AbstractDaoSilentStruct implem
      * @return array
      * @throws Exception
      */
-    public function jsonSerialize() {
+    public function jsonSerialize(): array {
         return [
                 'id'                         => (int)$this->id,
                 'uid'                        => (int)$this->uid,
-                'version'                    => (int)$this->version,
+                'version'                    => $this->version,
                 'payable_rate_template_name' => $this->name,
                 'breakdowns'                 => $this->getBreakdownsArray(),
                 'createdAt'                  => DateTimeUtil::formatIsoDate( $this->created_at ),

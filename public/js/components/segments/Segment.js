@@ -28,6 +28,7 @@ import CommentsStore from '../../stores/CommentsStore'
 import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {Shortcuts} from '../../utils/shortcuts'
+import SearchUtils from '../header/cattol/search/searchUtils'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext
@@ -79,7 +80,7 @@ class Segment extends React.Component {
   checkOpenSegmentComment() {
     if (
       CommentsStore.db.getCommentsCountBySegment &&
-      UI.currentSegmentId === this.props.segment.sid
+      SegmentStore.getCurrentSegmentId() === this.props.segment.sid
     ) {
       const comments_obj = CommentsStore.db.getCommentsCountBySegment(
         this.props.segment.sid,
@@ -109,7 +110,7 @@ class Segment extends React.Component {
       }
 
       // start old cache
-      UI.cacheObjects(this.$section)
+      SegmentActions.setCurrentSegmentId(this.props.segment.sid)
 
       $('html').trigger('open') // used by ui.review to open tab Revise in the footer next-unapproved
 
@@ -137,7 +138,6 @@ class Segment extends React.Component {
       this.checkOpenSegmentComment()
 
       /************/
-      UI.editStart = new Date()
       if (this.props.clientConnected) {
         SegmentActions.getGlossaryForSegment({
           sid: this.props.segment.sid,
@@ -252,7 +252,7 @@ class Segment extends React.Component {
     }
     if (
       this.props.segment.modified ||
-      this.props.segment.autopropagated_from !== '0'
+      this.props.segment.autopropagated_from !== 0
     ) {
       classes.push('modified')
     }
@@ -392,7 +392,7 @@ class Segment extends React.Component {
       ((this.props.sideOpen &&
         (!this.props.segment.opened || !this.props.segment.openIssues)) ||
         !this.props.sideOpen) &&
-      !(this.props.segment.readonly === 'true') &&
+      !this.props.segment.readonly &&
       (!this.isSplitted() || (this.isSplitted() && this.isFirstOfSplit())) &&
       this.props.segment.sid
     ) {
@@ -501,7 +501,7 @@ class Segment extends React.Component {
       (!this.props.segment.unlocked &&
         SegmentUtils.isIceSegment(this.props.segment))
     ) {
-      UI.handleClickOnReadOnly($(this.section).closest('section'))
+      SegmentActions.handleClickOnReadOnly(this.props.segment)
     } else if (this.props.segment.muted) {
       return
     } else if (!this.props.segment.opened) {
@@ -517,7 +517,7 @@ class Segment extends React.Component {
         this.props.segment.opened &&
         !this.props.segment.openComments &&
         !this.props.segment.openIssues &&
-        !UI.body.hasClass('search-open')
+        !SearchUtils.searchOpen
       ) {
         if (!this.props.segment.openSplit) {
           SegmentActions.closeSegment(this.props.segment.sid)
@@ -701,7 +701,7 @@ class Segment extends React.Component {
     let segment_classes = this.checkSegmentClasses()
 
     let split_group = this.props.segment.split_group || []
-    let autoPropagable = this.props.segment.repetitions_in_chunk !== '1'
+    let autoPropagable = this.props.segment.repetitions_in_chunk !== 1
     let originalId = this.props.segment.original_sid
 
     let translationIssues = this.getTranslationIssues()
@@ -743,12 +743,8 @@ class Segment extends React.Component {
         <section
           ref={(section) => (this.section = section)}
           id={'segment-' + this.props.segment.sid}
-          className={
-            segment_classes.join(' ') +
-            ` source-${config.source_code} target-${config.target_code}`
-          }
+          className={`${segment_classes.join(' ')} source-${config.source_code} target-${config.target_code} ${config.isSourceRTL ? 'rtl-source' : ''} ${config.isTargetRTL ? 'rtl-target' : ''}`}
           data-autopropagated={this.state.autopropagated}
-          data-propagable={autoPropagable}
           data-split-group={split_group}
           data-split-original-id={originalId}
           data-tagmode="crunched"
@@ -788,7 +784,7 @@ class Segment extends React.Component {
               />
             </div>
 
-            {this.props.segment.ice_locked !== '1' &&
+            {!this.props.segment.ice_locked &&
             config.splitSegmentEnabled &&
             this.props.segment.opened ? (
               !this.props.segment.openSplit ? (

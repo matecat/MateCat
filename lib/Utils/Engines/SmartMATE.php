@@ -1,5 +1,12 @@
 <?php
 
+namespace Utils\Engines;
+
+use Exception;
+use Model\Engines\Structs\SmartMATEStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Traits\Oauth;
+
 /**
  * Created by PhpStorm.
  * @property string client_secret
@@ -8,9 +15,9 @@
  * Time: 12.10
  *
  */
-class Engines_SmartMATE extends Engines_AbstractEngine {
+class SmartMATE extends AbstractEngine {
 
-    use \Engines\Traits\Oauth;
+    use Oauth;
 
     protected $_auth_parameters = [
             'client_id'     => null,
@@ -31,9 +38,12 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
             'target'      => null,
     ];
 
+    /**
+     * @throws Exception
+     */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
@@ -47,6 +57,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
     protected function _formatAuthenticateError( $objResponse ) {
 
         //format as a normal Translate Response and send to decoder to output the data
+        $objResponse[ 'error_description' ] = json_decode( $objResponse[ 'error' ][ 'response' ] )->error;
         return $objResponse;
 
     }
@@ -67,26 +78,30 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
                             ]
                     ]
             ];
+
+            return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
+
         } else {
+
 
             if ( $rawValue[ 'error' ][ 'code' ] == 0 && $rawValue[ 'responseStatus' ] >= 400 ) {
                 $rawValue[ 'error' ][ 'code' ] = -$rawValue[ 'responseStatus' ];
             }
 
-            $decoded = $rawValue; // already decoded in case of error
+            $this->logger->debug( $rawValue );
+            return $rawValue; // already decoded in case of error
         }
 
-        return $this->_composeMTResponseAsMatch( $all_args[ 1 ][ 'text' ], $decoded );
 
     }
 
-    protected function _getEngineStruct() {
+    protected function _getEngineStruct(): SmartMATEStruct {
 
-        return EnginesModel_SmartMATEStruct::getStruct();
+        return SmartMATEStruct::getStruct();
 
     }
 
-    protected function _setTokenEndLife( $expires_in_seconds = null ) {
+    protected function _setTokenEndLife( ?int $expires_in_seconds = null ) {
 
         if ( !is_null( $expires_in_seconds ) ) {
             $this->token_endlife = $expires_in_seconds;
@@ -103,36 +118,39 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
 
     }
 
-    protected function _checkAuthFailure() {
-        $expiration   = ( @stripos( $this->result[ 'error' ][ 'message' ], 'token is expired' ) !== false );
+    protected function _checkAuthFailure(): int {
+        $expiration   = ( stripos( $this->result[ 'error' ][ 'message' ] ?? '', 'token is expired' ) !== false );
         $auth_failure = $this->result[ 'error' ][ 'code' ] < 0;
 
         return $expiration | $auth_failure;
     }
 
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
         // SmartMATE does not have this method
         return true;
     }
 
-    public function update( $_config ) {
+    public function update( $_config ): bool {
         // SmartMATE does not have this method
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
         // SmartMATE does not have this method
         return true;
     }
 
-    protected function _formatRecursionError() {
+    /**
+     * @throws Exception
+     */
+    protected function _formatRecursionError(): array {
         return $this->_composeMTResponseAsMatch(
                 '',
                 [
                         'error'          => [
                                 'code'     => -499,
-                                'message'  => "Client Closed Request",
+                                'message'  => "Client Closed Get",
                                 'response' => 'Maximum recursion limit reached'
                             // Some useful info might still be contained in the response body
                         ],
@@ -141,7 +159,7 @@ class Engines_SmartMATE extends Engines_AbstractEngine {
         );
     }
 
-    protected function _fillCallParameters( $_config ) {
+    protected function _fillCallParameters( array $_config ): array {
         $parameters           = [];
         $parameters[ 'text' ] = $_config[ 'segment' ];
         $parameters[ 'from' ] = $_config[ 'source' ];

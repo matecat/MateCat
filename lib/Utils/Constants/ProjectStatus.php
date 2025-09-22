@@ -1,5 +1,6 @@
 <?php
 
+namespace Utils\Constants;
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -7,7 +8,7 @@
  * Time: 17.30
  *
  */
-class Constants_ProjectStatus {
+class ProjectStatus {
 
     const STATUS_NOT_READY_FOR_ANALYSIS = 'NOT_READY_FOR_ANALYSIS';
     const STATUS_NOT_TO_ANALYZE         = 'NOT_TO_ANALYZE';
@@ -19,7 +20,7 @@ class Constants_ProjectStatus {
 
     const PROJECT_QUEUE_HASH = 'project_completed:%u';
 
-    public static $ALLOWED_STATUSES = [
+    public static array $ALLOWED_STATUSES = [
             self::STATUS_DONE,
             self::STATUS_FAST_OK,
             self::STATUS_NEW,
@@ -29,7 +30,7 @@ class Constants_ProjectStatus {
             self::STATUS_NOT_READY_FOR_ANALYSIS,
     ];
 
-    public static function isAllowedStatus( $status ) {
+    public static function isAllowedStatus( $status ): bool {
         return in_array( strtoupper( $status ), self::$ALLOWED_STATUSES );
     }
 

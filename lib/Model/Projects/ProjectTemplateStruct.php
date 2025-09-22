@@ -1,13 +1,13 @@
 <?php
 
-namespace Projects;
+namespace Model\Projects;
 
-use \DataAccess\AbstractDaoSilentStruct;
-use \DataAccess\IDaoStruct;
 use JsonSerializable;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
 use stdClass;
 
-class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct, JsonSerializable {
+class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruct, JsonSerializable {
     public ?int    $id                           = null;
     public string  $name                         = "";
     public bool    $is_default                   = false;
@@ -17,6 +17,7 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
     public ?string $segmentation_rule            = null;
     public ?string $mt                           = null;
     public ?string $tm                           = null;
+    public int     $public_tm_penalty            = 0;
     public int     $payable_rate_template_id     = 0;
     public int     $qa_model_template_id         = 0;
     public int     $filters_template_id          = 0;
@@ -55,6 +56,7 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
         $this->pretranslate_101             = $json->pretranslate_101;
         $this->tm_prioritization            = $json->tm_prioritization;
         $this->dialect_strict               = $json->dialect_strict;
+        $this->public_tm_penalty            = $json->public_tm_penalty ?? 0;
         $this->get_public_matches           = $json->get_public_matches;
         $this->mt                           = json_encode( $json->mt );
         $this->tm                           = ( !empty( $json->tm ) ) ? json_encode( $json->tm ) : null;
@@ -130,11 +132,12 @@ class ProjectTemplateStruct extends \DataAccess\AbstractDaoSilentStruct implemen
                 'segmentation_rule'            => $this->getSegmentationRule(),
                 'mt'                           => $this->getMt(),
                 'tm'                           => $this->getTm(),
-                'payable_rate_template_id'     => $this->payable_rate_template_id ? (int)$this->payable_rate_template_id : 0,
-                'qa_model_template_id'         => $this->qa_model_template_id ? (int)$this->qa_model_template_id : 0,
-                'filters_template_id'          => $this->filters_template_id ? (int)$this->filters_template_id : 0,
-                'xliff_config_template_id'     => $this->xliff_config_template_id ? (int)$this->xliff_config_template_id : 0,
+                'payable_rate_template_id'     => $this->payable_rate_template_id ?: 0,
+                'qa_model_template_id'         => $this->qa_model_template_id ?: 0,
+                'filters_template_id'          => $this->filters_template_id ?: 0,
+                'xliff_config_template_id'     => $this->xliff_config_template_id ?: 0,
                 'get_public_matches'           => $this->get_public_matches,
+                'public_tm_penalty'            => $this->public_tm_penalty ?: 0,
                 'pretranslate_100'             => $this->pretranslate_100,
                 'pretranslate_101'             => $this->pretranslate_101,
                 'tm_prioritization'            => $this->tm_prioritization,

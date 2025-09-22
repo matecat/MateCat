@@ -1,24 +1,23 @@
 <?php
 
-namespace Features;
+namespace Plugins\Features;
 
-use BasicFeatureStruct;
 use Exception;
-use INIT;
 use Klein\Klein;
 use LogicException;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
+use Model\FeaturesBase\BasicFeatureStruct;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
+use Utils\Registry\AppConfig;
 
 
 abstract class BaseFeature implements IBaseFeature {
 
     const FEATURE_CODE = null;
 
-    protected $feature;
+    protected BasicFeatureStruct $feature;
 
     /**
      * @var ?LoggerInterface
@@ -33,23 +32,23 @@ abstract class BaseFeature implements IBaseFeature {
      *           If this property is true, the feature is added to project's metadata `features` string.
      *           This property is only used to activate features that come from owner_features records.
      */
-    protected $autoActivateOnProject = true;
+    protected bool $autoActivateOnProject = true;
 
     /**
      * @var bool This property defines if the feature is to be included in project features even if
      *           it's not defined in project features. This should be set to `true` when adding features
      *           that should be enabled systemwide, even on older projects.
      */
-    protected $forceOnProject = false;
+    protected bool $forceOnProject = false;
 
-    protected static $dependencies = [];
+    protected static array $dependencies = [];
 
-    protected static $conflictingDependencies = [];
+    protected static array $conflictingDependencies = [];
 
     /**
      * @return array
      */
-    public static function getConflictingDependencies() {
+    public static function getConflictingDependencies(): array {
         return static::$conflictingDependencies;
     }
 
@@ -84,41 +83,38 @@ abstract class BaseFeature implements IBaseFeature {
         $this->logger_name = $this->feature->feature_code . '_plugin';
     }
 
-    public function isAutoActivableOnProject() {
+    public function isAutoActivableOnProject(): bool {
         return $this->autoActivateOnProject;
     }
 
-    public function isForceableOnProject() {
+    public function isForceableOnProject(): bool {
         return $this->forceOnProject;
     }
 
-    public static function getDependencies() {
+    public static function getDependencies(): array {
         return static::$dependencies;
     }
 
     /**
      * gets a feature specific logger
      *
-     * @return Logger
+     * @return MatecatLogger
      * @throws Exception
      */
     public function getLogger() {
         if ( $this->log == null ) {
-            $this->log     = new Logger( $this->logger_name );
-            $streamHandler = new StreamHandler( $this->logFilePath(), Logger::INFO );
-            $streamHandler->setFormatter( new LineFormatter( "%message%\n", "", true, true ) );
-            $this->log->pushHandler( $streamHandler );
+            $this->log = LoggerFactory::getLogger( self::FEATURE_CODE, $this->logger_name );
         }
 
         return $this->log;
     }
 
     protected function logFilePath(): string {
-        return INIT::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
+        return AppConfig::$LOG_REPOSITORY . '/' . $this->logger_name . '.log';
     }
 
 
-    public static function getClassPath() {
+    public static function getClassPath(): string {
         $rc = new ReflectionClass( get_called_class() );
 
         return dirname( $rc->getFileName() ) . '/' . pathinfo( $rc->getFileName(), PATHINFO_FILENAME );
@@ -132,14 +128,14 @@ abstract class BaseFeature implements IBaseFeature {
         return static::getClassPath() . '/View';
     }
 
-    public function getFeatureStruct() {
+    public function getFeatureStruct(): BasicFeatureStruct {
         return $this->feature;
     }
 
     /**
      * @param Klein $klein
      *
-     * @see \Features::loadRoutes
+     * @see \Model\FeaturesBase\PluginsLoader::loadRoutes
      */
     public static function loadRoutes( Klein $klein ) {
     }

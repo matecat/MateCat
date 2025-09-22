@@ -1,16 +1,19 @@
 <?php
 
-namespace API\V3;
+namespace Controller\API\V3;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\Traits\ChunkNotFoundHandlerTrait;
+use Model\DataAccess\ShapelessConcreteStruct;
+use Model\Translations\SegmentTranslationDao;
+use ReflectionException;
 
-use API\Commons\Exceptions\NotFoundException;
-use API\V2\BaseChunkController;
-use DataAccess\ShapelessConcreteStruct;
-use Translations_SegmentTranslationDao;
-
-class IssueCheckController extends BaseChunkController {
+class IssueCheckController extends KleinController {
+    use ChunkNotFoundHandlerTrait;
 
     /**
      * @throws NotFoundException
+     * @throws ReflectionException
      */
     public function segments() {
 
@@ -35,7 +38,7 @@ class IssueCheckController extends BaseChunkController {
         $this->chunk = $job;
         $this->return404IfTheJobWasDeleted();
 
-        $modifiedSegments = ( new Translations_SegmentTranslationDao() )
+        $modifiedSegments = ( new SegmentTranslationDao() )
                 ->setCacheTTL( 60 * 5 )
                 ->getSegmentTranslationsModifiedByRevisorWithIssueCount( $id_job, $password, $source_page );
 

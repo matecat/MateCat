@@ -8,22 +8,27 @@
  *
  */
 
-use Engines\Traits\Oauth;
+namespace Utils\Engines;
+
+use DOMDocument;
+use Exception;
+use Model\Engines\Structs\MicrosoftHubStruct;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Traits\Oauth;
 
 /**
- * Class Engines_MicrosoftHub
+ * Class MicrosoftHub
  * @property string oauth_url
- * @property int    token_endlife
  * @property string token
  * @property string client_id
  * @property string client_secret
  */
-class Engines_MicrosoftHub extends Engines_AbstractEngine {
+class MicrosoftHub extends AbstractEngine {
 
     use Oauth;
 
-    private $rawXmlErrStruct = <<<TAG
-            <html>
+    private string $rawXmlErrStruct = <<<TAG
+            <html lang="en">
                 <body>
                     <h1>%s</h1>
                     <p>Method: %s</p>
@@ -49,7 +54,7 @@ TAG;
          * @see https://msdn.microsoft.com/en-us/library/hh454950.aspx
          */
             'grant_type' => "client_credentials",
-            'scope'      => "http://api.microsofttranslator.com"
+            'scope'      => "https://api.microsofttranslator.com"
     ];
 
     /**
@@ -57,7 +62,7 @@ TAG;
      */
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
@@ -77,7 +82,7 @@ TAG;
     }
 
 
-    protected function getAuthParameters() {
+    protected function getAuthParameters(): array {
         return [
                 CURLOPT_POST       => true,
                 CURLOPT_POSTFIELDS => "",
@@ -94,10 +99,10 @@ TAG;
      * @param array $parameters
      * @param null  $function
      *
-     * @return array|Engines_Results_MT
+     * @return array
      * @throws Exception
      */
-    protected function _decode( $rawValue, array $parameters = [], $function = null ) {
+    protected function _decode( $rawValue, array $parameters = [], $function = null ): array {
 
         $all_args = func_get_args();
 
@@ -116,6 +121,8 @@ TAG;
 
             return $decoded;
         }
+
+        $decoded = [];
 
         $xmlObj = simplexml_load_string( $rawValue, 'SimpleXMLElement', LIBXML_NOENT | LIBXML_NOEMPTYTAG );
 
@@ -158,35 +165,35 @@ TAG;
     }
 
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    public function update( $_config ) {
+    public function update( $_config ): bool {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
         // Microsoft Hub does not have this method
         return true;
     }
 
-    protected function _formatAuthenticateError( $objResponse ) {
+    protected function _formatAuthenticateError( array $objResponse ): string {
 
         //format as a normal Translate Response and send to decoder to output the data
         return sprintf( $this->rawXmlErrStruct, $objResponse[ 'error' ], 'getToken', $objResponse[ 'error_description' ] );
 
     }
 
-    protected function _getEngineStruct() {
+    protected function _getEngineStruct(): MicrosoftHubStruct {
 
-        return EnginesModel_MicrosoftHubStruct::getStruct();
+        return MicrosoftHubStruct::getStruct();
 
     }
 
-    protected function _setTokenEndLife( $expires_in_seconds = null ) {
+    protected function _setTokenEndLife( ?int $expires_in_seconds = null ) {
 
         /**
          * Gain a minute to not fallback into a recursion
@@ -197,18 +204,21 @@ TAG;
 
     }
 
-    protected function _checkAuthFailure() {
-        return ( @stripos( $this->result[ 'error' ][ 'message' ], 'token has expired' ) !== false );
+    protected function _checkAuthFailure(): bool {
+        return ( stripos( $this->result[ 'error' ][ 'message' ] ?? '', 'token has expired' ) !== false );
     }
 
-    protected function _formatRecursionError() {
+    /**
+     * @throws Exception
+     */
+    protected function _formatRecursionError(): array {
 
         return $this->_composeMTResponseAsMatch(
                 '',
                 [
                         'error'          => [
                                 'code'     => -499,
-                                'message'  => "Client Closed Request",
+                                'message'  => "Client Closed Get",
                                 'response' => 'Maximum recursion limit reached'
                             // Some useful info might still be contained in the response body
                         ],
@@ -218,7 +228,7 @@ TAG;
 
     }
 
-    protected function _fillCallParameters( $_config ) {
+    protected function _fillCallParameters( array $_config ): array {
         $parameters = [];
 
         $parameters[ 'appId' ]    = 'Bearer ' . $this->token;

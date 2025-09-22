@@ -1,11 +1,12 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
-use OutsourceTo_Translated;
+use ReflectionException;
+use Utils\OutsourceTo\Translated;
 
 class OutsourceToController extends KleinController {
 
@@ -13,6 +14,9 @@ class OutsourceToController extends KleinController {
         $this->appendValidator( new LoginValidator( $this ) );
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function outsource(): void {
 
         $request       = $this->validateTheRequest();
@@ -24,7 +28,7 @@ class OutsourceToController extends KleinController {
         $typeOfService = $request[ 'typeOfService' ];
         $jobList       = $request[ 'jobList' ];
 
-        $outsourceTo = new OutsourceTo_Translated();
+        $outsourceTo = new Translated();
         $outsourceTo->setPid( $pid )
                 ->setPpassword( $ppassword )
                 ->setCurrency( $currency )
@@ -62,7 +66,7 @@ class OutsourceToController extends KleinController {
                 'return_url' => [
                         'url_ok'       => $outsourceTo->getOutsourceLoginUrlOk(),
                         'url_ko'       => $outsourceTo->getOutsourceLoginUrlKo(),
-                        'confirm_urls' => $outsourceTo->getOutsourceConfirm(),
+                        'confirm_urls' => $outsourceTo->getOutsourceConfirmUrl(),
                 ]
         ] );
 
@@ -93,12 +97,12 @@ class OutsourceToController extends KleinController {
          *
          * <pre>
          * Ex:
-         *   array(
-         *      0 => array(
+         *   [
+         *      0 => [
          *          'id' => 5901,
          *          'jpassword' => '6decb661a182',
-         *      ),
-         *   );
+         *      ],
+         *   ];
          * </pre>
          */
         if ( empty( $jobList ) ) {

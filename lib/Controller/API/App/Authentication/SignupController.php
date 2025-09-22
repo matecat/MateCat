@@ -1,86 +1,36 @@
 <?php
 
-namespace API\App\Authentication;
+namespace Controller\API\App\Authentication;
 
-use AbstractControllers\AbstractStatefulKleinController;
-use CatUtils;
-use Controller\Authentication\AuthCookie;
-use Controller\Authentication\AuthenticationHelper;
-use CustomPageView;
+use Controller\Abstracts\AbstractStatefulKleinController;
+use Controller\Abstracts\Authentication\AuthCookie;
+use Controller\Abstracts\Authentication\AuthenticationHelper;
+use Controller\Abstracts\Authentication\SessionTokenStoreHandler;
+use Controller\Abstracts\FlashMessage;
+use Controller\API\Commons\Exceptions\ValidationError;
+use Controller\Traits\RateLimiterTrait;
+use Controller\Views\CustomPageView;
 use Exception;
-use FlashMessage;
-use INIT;
 use Klein\Response;
-use Teams\InvitedUser;
-use Traits\RateLimiterTrait;
-use Users\Authentication\SignupModel;
-use Users\RedeemableProject;
-use Utils;
+use Model\Teams\InvitedUser;
+use Model\Users\Authentication\PasswordRules;
+use Model\Users\Authentication\SignupModel;
+use Model\Users\RedeemableProject;
+use Utils\Registry\AppConfig;
+use Utils\Tools\CatUtils;
+use Utils\Tools\Utils;
 
 class SignupController extends AbstractStatefulKleinController {
 
     use RateLimiterTrait;
+    use PasswordRules;
 
     /**
      * @throws Exception
      */
     public function create() {
 
-        $user = filter_var_array(
-                (array)$this->request->param( 'user' ),
-                [
-                        'email'                 => [ 'filter' => FILTER_SANITIZE_EMAIL, 'options' => [] ],
-                        'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                        'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
-                        'first_name'            => [
-                            'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
-                                return CatUtils::stripMaliciousContentFromAName($firstName);
-                            }
-                        ],
-                        'last_name'             => [
-                            'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
-                                return CatUtils::stripMaliciousContentFromAName($lastName);
-                            }
-                        ],
-                        'wanted_url'            => [
-                                'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
-                                    $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
-
-                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( INIT::$HTTPHOST )[ 'host' ] ? INIT::$HTTPHOST : $wanted_url;
-                                }
-                        ]
-                ]
-        );
-
-        if(empty($user['email'])){
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => "Missing email"
-                ]
-            ] );
-            exit();
-        }
-
-        if(empty($user['first_name'])){
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => "First name must contain at least one letter"
-                ]
-            ] );
-            exit();
-        }
-
-        if(empty($user['last_name'])){
-            $this->response->code( 400 );
-            $this->response->json( [
-                'error' => [
-                    'message' => "Last name must contain at least one letter"
-                ]
-            ] );
-            exit();
-        }
+        $user = $this->validateCreationRequest();
 
         $userIp = Utils::getRealIpAddr();
 
@@ -104,18 +54,58 @@ class SignupController extends AbstractStatefulKleinController {
         $this->incrementRateLimitCounter( $userIp, '/api/app/user' );
         $this->incrementRateLimitCounter( $user[ 'email' ], '/api/app/user' );
 
-        // email
-        if ( $signup->valid() ) {
-            $signup->processSignup();
-            $this->response->code( 200 );
-        } else {
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => [
-                            'message' => $signup->getError()
-                    ]
-            ] );
+        $signup->processSignup();
+        $this->response->code( 200 );
+
+    }
+
+    /**
+     * @throws ValidationError
+     */
+    private function validateCreationRequest(): array {
+
+        $user = filter_var_array(
+                (array)$this->request->param( 'user' ),
+                [
+                        'email'                 => [ 'filter' => FILTER_SANITIZE_EMAIL, 'options' => [] ],
+                        'password'              => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
+                        'password_confirmation' => [ 'filter' => FILTER_SANITIZE_STRING, 'options' => FILTER_FLAG_STRIP_LOW ],
+                        'first_name'            => [
+                                'filter' => FILTER_CALLBACK, 'options' => function ( $firstName ) {
+                                    return CatUtils::stripMaliciousContentFromAName( $firstName );
+                                }
+                        ],
+                        'last_name'             => [
+                                'filter' => FILTER_CALLBACK, 'options' => function ( $lastName ) {
+                                    return CatUtils::stripMaliciousContentFromAName( $lastName );
+                                }
+                        ],
+                        'wanted_url'            => [
+                                'filter' => FILTER_CALLBACK, 'options' => function ( $wanted_url ) {
+                                    $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL );
+
+                                    return parse_url( $wanted_url )[ 'host' ] != parse_url( AppConfig::$HTTPHOST )[ 'host' ] ? AppConfig::$HTTPHOST : $wanted_url;
+                                }
+                        ]
+                ]
+        );
+
+        if ( empty( $user[ 'email' ] ) ) {
+            throw new ValidationError( 'Missing email' );
         }
+
+        if ( empty( $user[ 'first_name' ] ) ) {
+            throw new ValidationError( "First name must contain at least one letter" );
+        }
+
+        if ( empty( $user[ 'last_name' ] ) ) {
+            throw new ValidationError( "Last name must contain at least one letter" );
+        }
+
+        $this->validatePasswordRequirements( $user[ 'password' ], $user[ 'password_confirmation' ] );
+
+        return $user;
+
     }
 
     /**
@@ -123,13 +113,15 @@ class SignupController extends AbstractStatefulKleinController {
      */
     public function confirm() {
 
-        $signupModel = new SignupModel( [ 'token' => $this->request->param( 'token' ) ], $_SESSION );
+        $token = filter_var( $this->request->param( 'token' ), FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+
+        $signupModel = new SignupModel( [ 'token' => $token ], $_SESSION );
 
         try {
 
             $user = $signupModel->confirm();
 
-            AuthCookie::setCredentials( $user );
+            AuthCookie::setCredentials( $user, new SessionTokenStoreHandler() );
             AuthenticationHelper::getInstance( $_SESSION );
 
             if ( InvitedUser::hasPendingInvitations() ) {

@@ -1,12 +1,19 @@
 <?php
 
-use Comments\OpenThreadsStruct;
-use DataAccess\AbstractDao;
+namespace Model\Comments;
 
-class Comments_CommentDao extends AbstractDao {
+use Exception;
+use Model\DataAccess\AbstractDao;
+use Model\DataAccess\Database;
+use Model\Jobs\JobStruct;
+use Model\Users\UserDao;
+use PDO;
+use ReflectionException;
+
+class CommentDao extends AbstractDao {
 
     const TABLE       = "comments";
-    const STRUCT_TYPE = "Comments_CommentStruct";
+    const STRUCT_TYPE = "CommentStruct";
 
     protected static array $auto_increment_field = [ 'id' ];
     protected static array $primary_keys         = [ 'id' ];
@@ -48,17 +55,17 @@ class Comments_CommentDao extends AbstractDao {
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( $sql );
 
-        return $this->_fetchObject( $stmt, new OpenThreadsStruct(), [] );
+        return $this->_fetchObjectMap( $stmt, OpenThreadsStruct::class, [] );
 
     }
 
     /**
-     * @param Comments_BaseCommentStruct $comment
+     * @param BaseCommentStruct $comment
      *
      * @return bool
      * @throws ReflectionException
      */
-    public function deleteComment( Comments_BaseCommentStruct $comment ): bool {
+    public function deleteComment( BaseCommentStruct $comment ): bool {
         $sql  = "DELETE from comments WHERE id = :id";
         $con  = $this->database->getConnection();
         $stmt = $con->prepare( $sql );
@@ -81,11 +88,11 @@ class Comments_CommentDao extends AbstractDao {
         $stmt = $con->prepare( "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id" );
 
         return $this->_destroyObjectCache( $stmt,
-                Comments_BaseCommentStruct::class,
+                BaseCommentStruct::class,
                 [
                         'id_segment'           => $idSegment,
-                        'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
-                        'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+                        'message_type_comment' => CommentDao::TYPE_COMMENT,
+                        'message_type_resolve' => CommentDao::TYPE_RESOLVE,
                 ] );
     }
 
@@ -93,17 +100,17 @@ class Comments_CommentDao extends AbstractDao {
      * @param int $idSegment
      * @param int $ttl
      *
-     * @return Comments_BaseCommentStruct[]
+     * @return BaseCommentStruct[]
      * @throws ReflectionException
      */
     public function getBySegmentId( int $idSegment, int $ttl = 7200 ): array {
         $sql  = "SELECT * from comments WHERE id_segment = :id_segment and (message_type = :message_type_comment or message_type = :message_type_resolve) order by id";
         $stmt = $this->_getStatementForQuery( $sql );
 
-        return $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new Comments_BaseCommentStruct(), [
+        return $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, BaseCommentStruct::class, [
                 'id_segment'           => $idSegment,
-                'message_type_comment' => Comments_CommentDao::TYPE_COMMENT,
-                'message_type_resolve' => Comments_CommentDao::TYPE_RESOLVE,
+                'message_type_comment' => CommentDao::TYPE_COMMENT,
+                'message_type_resolve' => CommentDao::TYPE_RESOLVE,
         ] );
     }
 
@@ -111,14 +118,14 @@ class Comments_CommentDao extends AbstractDao {
      * @param     $id
      * @param int $ttl
      *
-     * @return Comments_BaseCommentStruct|null
+     * @return BaseCommentStruct|null
      * @throws ReflectionException
      */
-    public function getById( $id, int $ttl = 86400 ): ?Comments_BaseCommentStruct {
+    public function getById( $id, int $ttl = 86400 ): ?BaseCommentStruct {
         $stmt = $this->_getStatementForQuery( "SELECT * from comments WHERE id = :id" );
 
-        /** @var $res Comments_BaseCommentStruct */
-        $res = $this->setCacheTTL( $ttl )->_fetchObject( $stmt, new Comments_BaseCommentStruct(), [
+        /** @var $res BaseCommentStruct */
+        $res = $this->setCacheTTL( $ttl )->_fetchObjectMap( $stmt, BaseCommentStruct::class, [
                 'id' => $id
         ] )[ 0 ] ?? null;
 
@@ -126,12 +133,12 @@ class Comments_CommentDao extends AbstractDao {
     }
 
     /**
-     * @param Comments_CommentStruct $obj
+     * @param CommentStruct $obj
      *
-     * @return Comments_CommentStruct
+     * @return CommentStruct
      * @throws Exception
      */
-    public function saveComment( Comments_CommentStruct $obj ): Comments_CommentStruct {
+    public function saveComment( CommentStruct $obj ): CommentStruct {
 
         if ( $obj->message_type == null ) {
             $obj->message_type = self::TYPE_COMMENT;
@@ -163,7 +170,11 @@ class Comments_CommentDao extends AbstractDao {
         return $obj;
     }
 
-    public function resolveThread( Comments_CommentStruct $obj ): Comments_CommentStruct {
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function resolveThread( CommentStruct $obj ): CommentStruct {
 
         $obj->message_type = self::TYPE_RESOLVE;
         $obj->resolve_date = date( 'Y-m-d H:i:s' );
@@ -191,9 +202,7 @@ class Comments_CommentDao extends AbstractDao {
 
             $this->destroySegmentIdSegmentCache( $obj->id_segment );
 
-        } catch ( Exception $e ) {
-            $err = $e->getMessage();
-            Log::doJsonLog( "Error: " . var_export( $err, true ) );
+        } finally {
             $this->database->rollback();
         }
 
@@ -201,7 +210,7 @@ class Comments_CommentDao extends AbstractDao {
 
     }
 
-    public function getThreadContributorUids( Comments_CommentStruct $obj ) {
+    public function getThreadContributorUids( CommentStruct $obj ): array {
 
         $bind_values = [
                 'id_job'     => $obj->id_job,
@@ -226,7 +235,7 @@ class Comments_CommentDao extends AbstractDao {
 
     }
 
-    public function getThreadsBySegments( $segments_id, $job_id ) {
+    public function getThreadsBySegments( $segments_id, $job_id ): array {
 
         $prepare_str_segments_id = str_repeat( 'UNION SELECT ? ', count( $segments_id ) - 1 );
 
@@ -239,7 +248,7 @@ class Comments_CommentDao extends AbstractDao {
         WHERE message_type IN (1,2) AND id_job = ? ";
 
         $stmt = $db->prepare( $comments_query );
-        $stmt->setFetchMode( PDO::FETCH_CLASS, Comments_BaseCommentStruct::class );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, BaseCommentStruct::class );
         $stmt->execute( array_merge( $segments_id, [ $job_id ] ) );
 
         return $stmt->fetchAll();
@@ -247,13 +256,13 @@ class Comments_CommentDao extends AbstractDao {
 
     /**
      *
-     * @param Jobs_JobStruct $chunk
-     * @param array          $options
+     * @param \Model\Jobs\JobStruct $chunk
+     * @param array                 $options
      *
-     * @return Comments_BaseCommentStruct[]
+     * @return BaseCommentStruct[]
      */
 
-    public static function getCommentsForChunk( Jobs_JobStruct $chunk, array $options = [] ): array {
+    public static function getCommentsForChunk( JobStruct $chunk, array $options = [] ): array {
 
         $sql = "SELECT 
                   id, 
@@ -286,7 +295,7 @@ class Comments_CommentDao extends AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $params );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, Comments_BaseCommentStruct::class );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, BaseCommentStruct::class );
         $stmt->execute();
 
         return $stmt->fetchAll();
@@ -340,7 +349,7 @@ class Comments_CommentDao extends AbstractDao {
      */
     public static function placeholdContent( $content ) {
         $users_ids = self::getUsersIdFromContent( $content );
-        $userDao   = new Users_UserDao( Database::obtain() );
+        $userDao   = new UserDao( Database::obtain() );
         $users     = $userDao->getByUids( $users_ids );
         foreach ( $users as $user ) {
             $content = str_replace( "{@" . $user->uid . "@}", "@" . $user->first_name, $content );

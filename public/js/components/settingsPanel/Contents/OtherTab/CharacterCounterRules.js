@@ -66,7 +66,7 @@ export const CharacterCounterRules = () => {
       characterCounterMode: value,
     }))
 
-  const isComponentsDisabled = config.is_cattool && config.ownerIsMe !== 1
+  const isComponentsDisabled = config.is_cattool && !config.ownerIsMe
 
   return (
     <div className="characters-counter-box">

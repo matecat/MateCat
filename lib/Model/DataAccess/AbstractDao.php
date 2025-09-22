@@ -1,15 +1,13 @@
 <?php
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
-use Database;
 use Exception;
-use Exceptions\ValidationError;
-use IDatabase;
-use Log;
+use Model\Exceptions\ValidationError;
 use PDO;
 use PDOStatement;
 use ReflectionException;
+use Utils\Logger\LoggerFactory;
 
 /**
  * Created by PhpStorm.
@@ -87,16 +85,10 @@ abstract class AbstractDao {
     }
 
     /**
-     * @throws Exception
-     */
-    public function deleteList( array $obj_arr ) {
-        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
-    }
-
-    /**
+     * @template T of IDaoStruct
      * @param $input IDaoStruct The input object
      *
-     * @return IDaoStruct The input object, sanitized.
+     * @return T The input object, sanitized.
      * @throws Exception This function throws exception input is not a \DataAccess\IDaoStruct object
      */
     public function sanitize( IDaoStruct $input ) {
@@ -194,25 +186,6 @@ abstract class AbstractDao {
     }
 
     /**
-     * @param PDOStatement $stmt
-     * @param IDaoStruct   $fetchClass
-     * @param array        $bindParams
-     *
-     * @return IDaoStruct[]
-     * @throws ReflectionException
-     * @deprecated We should use the new cache system `AbstractDao::_fetchObjectMap`
-     *
-     */
-    protected function _fetchObject( PDOStatement $stmt, IDaoStruct $fetchClass, array $bindParams ): array {
-
-        $trace = debug_backtrace( !DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2 );
-
-        $keyMap = $trace[ 1 ][ 'class' ] . "::" . $trace[ 1 ][ 'function' ] . "-" . implode( ":", $bindParams );
-
-        return $this->_fetchObjectMap( $stmt, get_class( $fetchClass ), $bindParams, $keyMap );
-    }
-
-    /**
      * @throws ReflectionException
      */
     protected function _destroyObjectCache( PDOStatement $stmt, string $fetchClass, array $bindParams ): bool {
@@ -220,17 +193,19 @@ abstract class AbstractDao {
     }
 
     /**
-     * * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
+     * This method facilitates grouping cached queries into a hashset, making it easier to locate and delete the entire group in Redis.
      *
-     *  Replacement for deprecated `AbstractDao::_fetchObject`
+     * Replacement for deprecated `AbstractDao::_fetchObject`
      *
-     * @param PDOStatement $stmt
-     * @param string       $fetchClass
-     * @param array        $bindParams
+     * @template T of IDaoStruct
      *
-     * @param string|null  $keyMap
+     * @param PDOStatement    $stmt
+     * @param class-string<T> $fetchClass
+     * @param array           $bindParams
      *
-     * @return IDaoStruct[]
+     * @param string|null     $keyMap
+     *
+     * @return T[]
      * @throws ReflectionException
      */
     protected function _fetchObjectMap( PDOStatement $stmt, string $fetchClass, array $bindParams, string $keyMap = null ): array {
@@ -242,7 +217,7 @@ abstract class AbstractDao {
 
         $_cacheResult = $this->_getFromCacheMap( $keyMap, $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) . $fetchClass );
 
-        if ( !empty( $_cacheResult ) ) {
+        if ( !is_null( $_cacheResult ) ) {
             return $_cacheResult;
         }
 
@@ -408,7 +383,7 @@ abstract class AbstractDao {
                 self::structKeys( $struct )
         );
 
-        Log::doJsonLog( [
+        LoggerFactory::getLogger( 'dao' )->debug( [
                 'table'  => static::TABLE,
                 'sql'    => $sql,
                 'attr'   => $attrs,
@@ -456,7 +431,7 @@ abstract class AbstractDao {
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );
 
-        Log::doJsonLog( [ "SQL" => $sql, "values" => $data ] );
+        LoggerFactory::getLogger( 'dao' )->debug( [ "SQL" => $sql, "values" => $data ] );
 
         $stmt->execute( $data );
 
@@ -466,21 +441,6 @@ abstract class AbstractDao {
             return $stmt->rowCount();
         }
 
-    }
-
-    /**
-     *  Use this function whenever you want to make an empty result
-     * returned as null instead of PDO's default FALSE.
-     *
-     * @return mixed|null
-     *
-     */
-    public static function resultOrNull( $result ) {
-        if ( $result ) {
-            return $result;
-        } else {
-            return null;
-        }
     }
 
 }

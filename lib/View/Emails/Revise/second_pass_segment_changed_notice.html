@@ -51,7 +51,7 @@
                 <ul>
                     <?php foreach( $issue['comments'] as $comment ) { ?>
                     <li>
-                        <?= ( $comment['source_page'] == \Constants::SOURCE_PAGE_TRANSLATE ? 'Translator' : 'Reviewer' ) ?>
+                        <?= ( $comment['source_page'] == \Utils\Constants\SourcePages::SOURCE_PAGE_TRANSLATE ? 'Translator' : 'Reviewer' ) ?>
                         (<?php
                             $date = DateTime::createFromFormat('Y-m-d H:i:s', $comment['create_date']);
                             echo $date->format('M d, Y h:i A') ;

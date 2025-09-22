@@ -1796,6 +1796,23 @@ var spec = {
             in: 'path',
             required: true,
           },
+          {
+            in: "query",
+            name: 'page',
+            type: 'integer',
+            required: false,
+            default: 1,
+            description: "page (integer, optional) — The page number to retrieve. Defaults to 1. Use in combination with `step`  to navigate through paginated results."
+          },
+          {
+            in: "query",
+            name: 'step',
+            type: 'integer',
+            required: false,
+            default: 20,
+            maximum: 50,
+            description: "step (integer, optional) — Number of items to include in each page of results. Defaults to 20. Maximum 50. Use in combination with `page` to navigate through paginated results."
+          },
         ],
         responses: {
           200: {
@@ -2730,10 +2747,44 @@ var spec = {
         ],
         responses: {
           200: {
-            description: 'Check Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        }
+                      },
+                    },
+                  },
+                }
+              },
+              success: {
+                type: 'boolean',
+              }
+            },
+            description: 'Upload and check a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
@@ -2771,43 +2822,74 @@ var spec = {
         ],
         responses: {
           200: {
-            description: 'Import Glossary',
+            type: 'object',
+            properties: {
+              data: {
+                type: 'object',
+                properties: {
+                  uuids: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        uuid: {
+                          type: 'string',
+                          example: '1234-5678-90ab-cdef',
+                        },
+                        name: {
+                          type: 'string',
+                          example: 'This is a glossary name',
+                        },
+                        numberOfLanguages: {
+                          type: 'integer',
+                          example: 3,
+                        }
+                      },
+                    },
+                  },
+                }
+              },
+              success: {
+                type: 'boolean',
+              }
+            },
+            description: 'Check and import a glossary file',
           },
-          default: {
+          400: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
     },
-    '/api/v3/glossaries/import/status/{tm_key}': {
+    '/api/v3/glossaries/import/status/{uuid}': {
       get: {
         summary: 'Glossary Upload status.',
         description: 'Glossary Upload status.',
         parameters: [
           {
-            name: 'tm_key',
+            name: 'uuid',
             in: 'path',
-            description: 'The tm key.',
+            description: 'The UUID token received from `/api/v3/glossaries/import/` api.',
             required: true,
             type: 'string',
-          },
-          {
-            name: 'name',
-            in: 'query',
-            description: 'The file name.',
-            type: 'string',
-          },
+          }
         ],
         tags: ['Glossary'],
         responses: {
           200: {
             description: 'Glossary Upload status',
             schema: {
-              $ref: '#/definitions/UploadGlossaryStatusObject',
+              $ref: '#/definitions/UploadGlossaryStatus',
             },
           },
           default: {
             description: 'Unexpected error',
+            schema: {
+              $ref: '#/definitions/Error',
+            }
           },
         },
       },
@@ -2845,7 +2927,7 @@ var spec = {
         parameters: [],
         responses: {
           200: {
-            description: 'Engine List',
+            description: 'EnginesFactory List',
             schema: {
               $ref: '#/definitions/EnginesList',
             },
@@ -6403,23 +6485,6 @@ var spec = {
         },
       },
     },
-    UploadGlossaryStatusObject: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'array',
-          items: {
-            type: 'object',
-          },
-        },
-        data: {
-          $ref: '#/definitions/UploadGlossaryStatus',
-        },
-        success: {
-          type: 'boolean',
-        },
-      },
-    },
     UploadGlossaryStatus: {
       type: 'object',
       properties: {
@@ -6440,7 +6505,6 @@ var spec = {
         },
       },
     },
-
     Languages: {
       type: 'array',
       items: {
@@ -6710,6 +6774,43 @@ var spec = {
     ProjectList: {
       type: 'object',
       properties: {
+        _links: {
+          type: 'object',
+          properties: {
+            base: {
+              type: 'string',
+              description: 'Base URL for the API',
+            },
+            self: {
+              type: 'string',
+              description: 'Link to the current page of projects',
+            },
+            next: {
+              type: 'string',
+              description: 'Link to the next page of projects if available',
+            },
+            prev: {
+              type: 'string',
+              description: 'Link to the previous page of projects if available',
+            },
+            page: {
+              type: 'integer',
+              description: 'The current page number',
+            },
+            step: {
+              type: 'integer',
+              description: 'Number of projects per page',
+            },
+            totals: {
+              type: 'integer',
+              description: 'Total number of projects available',
+            },
+            total_pages: {
+              type: 'integer',
+              description: 'Total number of pages of projects available',
+            },
+          }
+        },
         projects: {
           type: 'array',
           items: {
@@ -7017,27 +7118,20 @@ var spec = {
 
     Error: {
       type: 'object',
+      description: 'This property contains any debug data that can serve for better understanding of the error',
       properties: {
         errors: {
           type: 'array',
           items: {
             type: 'object',
             properties: {
-              code: 'integer',
-              message: 'string',
+              code: {type: 'integer'},
+              message: {type: 'string'},
             },
           },
         },
-        data: {
-          type: 'array',
-          items: {type: 'object'},
-          description:
-            'This property contains any debug data that can ' +
-            'serve for better understanding of the error',
-        },
       },
     },
-
     Split: {
       type: 'object',
       properties: {
@@ -7055,11 +7149,11 @@ var spec = {
               items: {
                 type: 'object',
                 properties: {
-                  eq_word_count: 'integer',
-                  raw_word_count: 'integer',
-                  segment_start: 'integer',
-                  segment_end: 'integer',
-                  last_opened_segment: 'integer',
+                  eq_word_count: {type: 'integer'},
+                  raw_word_count: {type: 'integer'},
+                  segment_start: {type: 'integer'},
+                  segment_end: {type: 'integer'},
+                  last_opened_segment: {type: 'integer'},
                 },
               },
             },

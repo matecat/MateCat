@@ -23,7 +23,7 @@
     "uuid": "^10.0.0",
     "websocket": "1.0.34",
     "winston": "^3",
-    "winston-daily-rotate-file": "^4"
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "scripts": {
     "start": "node --max-semi-space-size=256 socketServer.js"

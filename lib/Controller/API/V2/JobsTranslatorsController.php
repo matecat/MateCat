@@ -7,33 +7,33 @@
  *
  */
 
-namespace API\V2;
+namespace Controller\API\V2;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\JobPasswordValidator;
-use API\Commons\Validators\LoginValidator;
-use API\V2\Json\JobTranslator;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\JobPasswordValidator;
+use Controller\API\Commons\Validators\LoginValidator;
 use InvalidArgumentException;
-use Jobs_JobStruct;
-use Outsource\ConfirmationDao;
-use Translators\TranslatorsModel;
+use Model\Jobs\JobStruct;
+use Model\Outsource\ConfirmationDao;
+use Model\Translators\TranslatorsModel;
+use View\API\V2\Json\JobTranslator;
 
 class JobsTranslatorsController extends KleinController {
 
     /**
-     * @var Jobs_JobStruct
+     * @var \Model\Jobs\JobStruct
      * @see JobsTranslatorsController::afterConstruct method
      */
     protected $jStruct;
 
     /**
-     * @var Jobs_JobStruct
+     * @var JobStruct
      */
     private $chunk;
 
-    public function add(){
+    public function add() {
 
         $this->params = filter_var_array( $this->params, [
                 'email'         => [ 'filter' => FILTER_SANITIZE_EMAIL ],
@@ -46,12 +46,12 @@ class JobsTranslatorsController extends KleinController {
                 ]
         ], true );
 
-        if( empty( $this->params[ 'email' ] ) ){
+        if ( empty( $this->params[ 'email' ] ) ) {
             throw new InvalidArgumentException( "Wrong parameter :email ", 400 );
         }
 
-        if($this->jStruct->isDeleted()){
-            throw new NotFoundException('No job found.');
+        if ( $this->jStruct->isDeleted() ) {
+            throw new NotFoundException( 'No job found.' );
         }
 
         $TranslatorsModel = new TranslatorsModel( $this->jStruct );
@@ -74,11 +74,11 @@ class JobsTranslatorsController extends KleinController {
 
     }
 
-    public function get(){
+    public function get() {
 
         $this->params = filter_var_array( $this->params, [
-                'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'password'      => [
+                'id_job'   => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'password' => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_BACKTICK
                 ]
@@ -91,8 +91,8 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
-        if($this->jStruct->isDeleted()){
-            throw new NotFoundException('No job found.');
+        if ( $this->jStruct->isDeleted() ) {
+            throw new NotFoundException( 'No job found.' );
         }
 
         //do not show outsourced translators
@@ -115,7 +115,7 @@ class JobsTranslatorsController extends KleinController {
     }
 
     protected function afterConstruct() {
-        $validJob = new JobPasswordValidator( $this );
+        $validJob      = new JobPasswordValidator( $this );
         $this->jStruct = $validJob->getJob();
         $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( $validJob );
@@ -125,9 +125,9 @@ class JobsTranslatorsController extends KleinController {
      * To maintain compatibility with JobPasswordValidator
      * (line 36)
      *
-     * @param Jobs_JobStruct $jobs_JobStruct
+     * @param JobStruct $jobs_JobStruct
      */
-    public function setChunk(\Jobs_JobStruct $jobs_JobStruct) {
+    public function setChunk( \Model\Jobs\JobStruct $jobs_JobStruct ) {
         $this->chunk = $jobs_JobStruct;
     }
 }

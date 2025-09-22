@@ -1,18 +1,18 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
 use CURLFile;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use Filters\DTO\IDto;
-use INIT;
-use Jobs_JobStruct;
-use Langs\Languages;
-use Log;
-use MultiCurlHandler;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\Filters\DTO\IDto;
+use Model\Jobs\JobStruct;
 use PDO;
-use Utils;
+use Utils\Langs\Languages;
+use Utils\Logger\LoggerFactory;
+use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class Filters {
 
@@ -27,34 +27,37 @@ class Filters {
      * @return array
      */
     private static function sendToFilters( array $dataGroups, string $endpoint ): array {
+
+        $logger = LoggerFactory::getLogger( "conversion" );
+
         $multiCurl = new MultiCurlHandler();
 
         // Each group is a POST request
         foreach ( $dataGroups as $id => $data ) {
             // Add to POST fields the version forced using the config file
             if ( $endpoint === self::SOURCE_TO_XLIFF_ENDPOINT
-                    && !empty( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
-                $data[ 'forceVersion' ] = INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
+                    && !empty( AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION ) ) {
+                $data[ 'forceVersion' ] = AppConfig::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION;
             }
 
             // Setup CURL options and add to MultiCURL
             $options = [
                     CURLOPT_POST           => true,
-                    CURLOPT_USERAGENT      => INIT::$FILTERS_USER_AGENT,
+                    CURLOPT_USERAGENT      => AppConfig::$FILTERS_USER_AGENT,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POSTFIELDS     => $data,
                 // Useful to debug the endpoint on the other end
                 //CURLOPT_COOKIE => 'XDEBUG_SESSION=PHPSTORM'
             ];
-            if ( !empty( INIT::$FILTERS_RAPIDAPI_KEY ) ) {
+            if ( !empty( AppConfig::$FILTERS_RAPIDAPI_KEY ) ) {
                 $options[ CURLOPT_HTTPHEADER ] = [
-                        'X-RapidAPI-Host: ' . parse_url( INIT::$FILTERS_ADDRESS )[ 'host' ],
-                        'X-RapidAPI-Key: ' . INIT::$FILTERS_RAPIDAPI_KEY,
+                        'X-RapidAPI-Host: ' . parse_url( AppConfig::$FILTERS_ADDRESS )[ 'host' ],
+                        'X-RapidAPI-Key: ' . AppConfig::$FILTERS_RAPIDAPI_KEY,
                 ];
             }
 
-            $url = rtrim( INIT::$FILTERS_ADDRESS, '/' ) . $endpoint;
-            Log::doJsonLog( "Calling: " . $url );
+            $url = rtrim( AppConfig::$FILTERS_ADDRESS, '/' ) . $endpoint;
+            $logger->debug( "Calling: " . $url );
             $multiCurl->createResource( $url, $options, $id );
             $multiCurl->setRequestHeader( $id );
         }
@@ -155,6 +158,7 @@ class Filters {
      * @return mixed
      */
     public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false ) {
+
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -174,6 +178,7 @@ class Filters {
         if ( $legacy_icu === true ) {
             $data[ 'legacy_icu' ] = true;
         }
+
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 
@@ -235,12 +240,12 @@ class Filters {
      *
      * @param                $response
      * @param string         $sentFile
-     * @param Jobs_JobStruct $jobData
+     * @param JobStruct      $jobData
      * @param array          $sourceFileData
      *
      * @throws Exception
      */
-    public static function logConversionToTarget( $response, string $sentFile, Jobs_JobStruct $jobData, array $sourceFileData ) {
+    public static function logConversionToTarget( $response, string $sentFile, JobStruct $jobData, array $sourceFileData ) {
         self::logConversion( $response, false, $sentFile, $jobData->toArray(), $sourceFileData );
     }
 
@@ -259,16 +264,15 @@ class Filters {
      */
     private static function logConversion( array $response, bool $toXliff, string $sentFile, array $jobData, array $sourceFileData ) {
         try {
-            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER,
-                    INIT::$DB_USER, INIT::$DB_PASS, [
+            $conn = new PDO( 'mysql:dbname=matecat_conversions_log;host=' . AppConfig::$DB_SERVER,
+                    AppConfig::$DB_USER, AppConfig::$DB_PASS, [
                             PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
                             PDO::ATTR_EMULATE_PREPARES   => false,
                             PDO::ATTR_ORACLE_NULLS       => true,
                             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION
                     ] );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
-
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to connect to matecat_conversions_log database: ' . $ex->getMessage() );
             return;
         }
 
@@ -302,14 +306,14 @@ class Filters {
         try {
             $preparedStatement = $conn->prepare( $query );
             $preparedStatement->execute( array_values( $info ) );
-            Log::doJsonLog( $info );
+            LoggerFactory::getLogger( "conversion" )->debug( $info );
         } catch ( Exception $ex ) {
-            Log::doJsonLog( "Unable to log the conversion: " . $ex->getMessage() );
+            LoggerFactory::getLogger( "conversion" )->debug( "Unable to log the conversion: " . $ex->getMessage() );
         }
 
         if ( $response[ 'successful' ] !== true ) {
 
-            if ( INIT::$FILTERS_EMAIL_FAILURES ) {
+            if ( AppConfig::$FILTERS_EMAIL_FAILURES ) {
                 Utils::sendErrMailReport( "Matecat: conversion failed.\n\n" . print_r( $info, true ) );
             }
 
@@ -325,7 +329,7 @@ class Filters {
      */
     private static function backupFailedConversion( string &$sentFile ) {
 
-        $backupDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR
+        $backupDir = AppConfig::$STORAGE_DIR . DIRECTORY_SEPARATOR
                 . 'conversion_errors' . DIRECTORY_SEPARATOR
                 . date( "Ymd" );
         if ( !is_dir( $backupDir ) ) {
@@ -335,7 +339,7 @@ class Filters {
         $backupFile = $backupDir . DIRECTORY_SEPARATOR . date( "His" ) . '-' . basename( $sentFile );
 
         if ( !rename( $sentFile, $backupFile ) ) {
-            Log::doJsonLog( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
+            LoggerFactory::getLogger( "conversion" )->debug( 'Unable to backup failed conversion source file ' . $sentFile . ' to ' . $backupFile );
         } else {
             $sentFile = $backupFile;
         }

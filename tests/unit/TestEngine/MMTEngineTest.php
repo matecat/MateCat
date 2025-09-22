@@ -1,7 +1,13 @@
 <?php
 
+use Model\DataAccess\Database;
+use Model\Engines\Structs\EngineStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
+use Utils\Engines\EnginesFactory;
+use Utils\Engines\MMT;
+use Utils\Engines\MMT\MMTServiceApi;
+use Utils\Registry\AppConfig;
 
 /**
  * Created by PhpStorm.
@@ -44,8 +50,8 @@ H;
 
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->engine_id . ";" );
         $this->database_instance->getConnection()->query( "DELETE FROM engines WHERE id=" . $this->not_valid_engine_id . ";" );
-        $flusher = new Predis\Client( INIT::$REDIS_SERVERS );
-        $flusher->select( INIT::$INSTANCE_ID );
+        $flusher = new Predis\Client( AppConfig::$REDIS_SERVERS );
+        $flusher->select( AppConfig::$INSTANCE_ID );
         $flusher->flushdb();
         parent::tearDown();
 
@@ -59,7 +65,7 @@ H;
 
         $this->expectException( Exception::class );
         $this->expectExceptionMessage( "Engine $this->not_valid_engine_id is not a MT engine, found TM -> MMT" );
-        Engine::getInstance( $this->not_valid_engine_id );
+        EnginesFactory::getInstance( $this->not_valid_engine_id );
 
     }
 
@@ -71,11 +77,11 @@ H;
         $stmt = $this->database_instance->getConnection()->prepare( "select * from engines where id = :id" );
         $stmt->execute( [ 'id' => $this->engine_id ] );
         $record    = $stmt->fetch( PDO::FETCH_ASSOC );
-        $mmtClient = @$this->getMockBuilder( '\Engines\MMT\MMTServiceApi' )->disableOriginalConstructor()->getMock();
+        $mmtClient = @$this->getMockBuilder( MMTServiceApi::class )->disableOriginalConstructor()->getMock();
         $mmtClient->expects( $invocation = $this->once() )->method( 'updateMemoryContent' );
 
-        $mmtEngine = @$this->getMockBuilder( '\Engines_MMT' )
-                ->setConstructorArgs( [ new EnginesModel_EngineStruct( $record ) ] )
+        $mmtEngine = @$this->getMockBuilder( MMT::class )
+                ->setConstructorArgs( [ new EngineStruct( $record ) ] )
                 ->onlyMethods( [ '_getClient' ] )->getMock();
 
         $mmtEngine->expects( $this->once() )

@@ -1,26 +1,26 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use Chunks_ChunkDao;
-use Engine;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
-use INIT;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Jobs\ChunkDao;
+use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
-use TmKeyManagement_Filter;
-use TmKeyManagement_TmKeyManagement;
-use TmKeyManagement_TmKeyStruct;
-use Translations_SegmentTranslationDao;
+use Utils\Engines\EnginesFactory;
+use Utils\Registry\AppConfig;
+use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
+use Utils\TmKeyManagement\TmKeyStruct;
 
 class DeleteContributionController extends KleinController {
 
-    protected        $id_job;
-    protected string $received_password;
+    use APISourcePageGuesserTrait;
 
     protected function afterConstruct() {
         $this->appendValidator( new LoginValidator( $this ) );
@@ -29,7 +29,7 @@ class DeleteContributionController extends KleinController {
     /**
      * @throws NotFoundException
      * @throws ReflectionException
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws Exception
      */
     public function delete(): void {
@@ -47,12 +47,12 @@ class DeleteContributionController extends KleinController {
         $received_password = $request[ 'received_password' ];
 
         //check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 
         $tm_keys = $jobStruct[ 'tm_keys' ];
 
-        $tms    = Engine::getInstance( $jobStruct[ 'id_tms' ] );
+        $tms    = EnginesFactory::getInstance( $jobStruct[ 'id_tms' ] );
         $config = $tms->getConfigStruct();
 
         /** @var MateCatFilter $Filter */
@@ -61,17 +61,17 @@ class DeleteContributionController extends KleinController {
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $target );
         $config[ 'source' ]      = $source_lang;
         $config[ 'target' ]      = $target_lang;
-        $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
+        $config[ 'email' ]       = AppConfig::$MYMEMORY_API_KEY;
         $config[ 'id_user' ]     = [];
         $config[ 'id_match' ]    = $id_match;
 
         //get job's TM keys
         try {
-            $userRole = ( $this->isRevision() ) ? TmKeyManagement_Filter::ROLE_REVISOR : TmKeyManagement_Filter::ROLE_TRANSLATOR;
+            $userRole = ( $this->isRevision() ) ? Filter::ROLE_REVISOR : Filter::ROLE_TRANSLATOR;
 
             //get TM keys with read grants
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $userRole );
-            $tm_keys = TmKeyManagement_TmKeyManagement::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
+            $tm_keys = TmKeyManager::getJobTmKeys( $tm_keys, 'w', 'tm', $this->user->uid, $userRole );
+            $tm_keys = TmKeyManager::filterOutByOwnership( $tm_keys, $this->user->email, $jobStruct[ 'owner' ] );
 
         } catch ( Exception $e ) {
             throw new NotFoundException( "Cannot retrieve TM keys info.", -11, $e );
@@ -81,7 +81,7 @@ class DeleteContributionController extends KleinController {
         $set_code = [];
 
         /**
-         * @var $tm_key TmKeyManagement_TmKeyStruct
+         * @var $tm_key TmKeyStruct
          */
 
         //if there's no key
@@ -167,8 +167,8 @@ class DeleteContributionController extends KleinController {
             throw new InvalidArgumentException( "missing job password", -6 );
         }
 
-        $this->id_job            = $id_job;
-        $this->received_password = $received_password;
+        $this->id_job           = $id_job;
+        $this->request_password = $received_password;
 
         return [
                 'id_segment'        => $id_segment,
@@ -194,7 +194,7 @@ class DeleteContributionController extends KleinController {
      * @throws  Exception
      */
     private function updateSuggestionsArray( $id_segment, $id_job, $id_match ): void {
-        $segmentTranslation  = Translations_SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
+        $segmentTranslation  = SegmentTranslationDao::findBySegmentAndJob( $id_segment, $id_job );
         $oldSuggestionsArray = json_decode( $segmentTranslation->suggestions_array );
 
         if ( !empty( $oldSuggestionsArray ) ) {
@@ -206,7 +206,7 @@ class DeleteContributionController extends KleinController {
                 }
             }
 
-            Translations_SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
+            SegmentTranslationDao::updateSuggestionsArray( $id_segment, $newSuggestionsArray );
         }
     }
 }

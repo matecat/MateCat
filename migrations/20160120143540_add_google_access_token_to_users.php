@@ -1,5 +1,7 @@
 <?php
 
+use migrations\AbstractMatecatMigration;
+
 class AddGoogleAccessTokenToUsers extends AbstractMatecatMigration {
     public $sql_up = "
 ALTER TABLE `users` ADD COLUMN `oauth_access_token` TEXT ;

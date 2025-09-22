@@ -44,10 +44,10 @@ export const registerUser = async ({
   // if (!response.ok) return Promise.reject(response)
 
   try {
-    const {error, ...data} = await response.json()
-    if (error) return Promise.reject(error)
+    const {errors, ...data} = await response.json()
+    if (errors) return Promise.reject(errors[0])
     return data
-  } catch (error) {
+  } catch (errors) {
     return response
   }
 }

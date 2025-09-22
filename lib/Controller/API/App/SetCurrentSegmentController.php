@@ -1,20 +1,20 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use CatUtils;
-use Chunks_ChunkDao;
-use Constants_TranslationStatus;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
+use Model\DataAccess\Database;
+use Model\Exceptions\NotFoundException;
+use Model\Jobs\ChunkDao;
+use Model\Segments\SegmentDao;
+use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
 use ReflectionException;
-use Segments_SegmentDao;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
+use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class SetCurrentSegmentController extends KleinController {
 
@@ -37,17 +37,17 @@ class SetCurrentSegmentController extends KleinController {
         $split_num       = $request[ 'split_num' ];
 
         //get Job Info, we need only a row of jobs (split)
-        Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
+        ChunkDao::getByIdAndPassword( $id_job, $password );
 
         if ( empty( $id_segment ) ) {
             throw new InvalidArgumentException( "missing segment id", -1 );
         }
 
-        $segmentStruct             = new TranslationsSplit_SplitStruct();
+        $segmentStruct             = new SegmentSplitStruct();
         $segmentStruct->id_segment = (int)$id_segment;
         $segmentStruct->id_job     = $id_job;
 
-        $translationDao  = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $translationDao  = new SplitDAO( Database::obtain() );
         $currSegmentInfo = $translationDao->read( $segmentStruct );
 
         /**
@@ -74,14 +74,14 @@ class SetCurrentSegmentController extends KleinController {
          */
         if ( !$isASplittedSegment or $isLastSegmentChunk ) {
 
-            $segmentList = Segments_SegmentDao::getNextSegment( $id_segment, $id_job, $password, $revision_number );
+            $segmentList = SegmentDao::getNextSegment( $id_segment, $id_job, $password, (bool)$revision_number );
 
             if ( !$revision_number ) {
                 $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList );
             } else {
-                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
+                $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, TranslationStatus::STATUS_TRANSLATED );
                 if ( !$nextSegmentId ) {
-                    $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+                    $nextSegmentId = CatUtils::fetchStatus( $id_segment, $segmentList, TranslationStatus::STATUS_APPROVED );
                 }
             }
         }

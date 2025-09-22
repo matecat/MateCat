@@ -8,7 +8,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const deleteGlossaryItem = async (dataRequest) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/_delete`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/_delete`,
     {
       method: 'POST',
       credentials: 'include',

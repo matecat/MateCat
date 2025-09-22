@@ -151,7 +151,7 @@ class OutsourceVendor extends React.Component {
           })
           setTimeout(() => {
             let date = this.getDeliveryDate()
-            if (date.time2) {
+            if (date?.time2) {
               this.setState({
                 selectedTime: date.time2.split(':')[0],
               })
