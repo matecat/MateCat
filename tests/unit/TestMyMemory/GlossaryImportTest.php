@@ -158,14 +158,14 @@ class GlossaryImportTest extends AbstractTest {
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
-                'responseStatus' => 0
+                'responseStatus' => 401
         ];
 
         /**
          * @var $this ->engine_MyMemory Match
          *            mocking _call
          */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->willReturn( $rawValue_error );
 
 
@@ -178,7 +178,7 @@ class GlossaryImportTest extends AbstractTest {
         $result = $this->engine_MyMemory->glossaryImport( $this->path_of_file_for_test, $this->key_param, "GlossaryInvalidHeaderCopy.csv" );
 
         $this->assertNull( $result->id );
-        $this->assertEquals( 0, $result->responseStatus );
+        $this->assertEquals( 401, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
         $this->assertEquals( "", $result->responseData );
         $this->assertTrue( $result->error instanceof ErrorResponse );

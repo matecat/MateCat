@@ -59,7 +59,9 @@ abstract class TMSAbstractResponse {
          */
         $instance = new $class( $result, $dataRefMap );
 
-        if ( is_array( $result ) && $result[ 'responseStatus' ] >= 400 ) {
+
+
+        if ( is_array( $result ) && isset($result[ 'responseStatus' ]) && $result[ 'responseStatus' ] >= 400 ) {
             $instance->error = new ErrorResponse( $result[ 'error' ] ?? $result[ 'responseDetails' ] );
         }
 
