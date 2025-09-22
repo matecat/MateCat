@@ -786,7 +786,8 @@ class ProjectManager {
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         $totalFilesStructure = [];
         if ( isset( $linkFiles[ 'conversionHashes' ] ) and isset( $linkFiles[ 'conversionHashes' ][ 'sha' ] ) ) {
-            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $pos => $linkFile ) {
+            foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
+
                 //converted file is inside cache directory
                 //get hash from file name inside UUID dir
                 $hashFile = AbstractFilesStorage::basename_fix( $linkFile );
@@ -831,10 +832,20 @@ class ProjectManager {
                         throw new Exception( "Failed to find converted Xliff", -3 );
                     }
 
-                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName, $pos );
+                    $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
 
                     if ( count( $filesStructure ) === 0 ) {
                         throw new Exception( 'Files could not be saved in database.', -6 );
+                    }
+
+                    // pdfAnalysis
+                    foreach ($filesStructure as $fid => $fileStructure){
+                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                        $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
+
+                        if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
+                            $this->filesMetadataDao->insert( $this->projectStructure[ 'id_project' ], $fid, 'pdfAnalysis', json_encode( $meta[ 'pdfAnalysis' ] ) );
+                        }
                     }
 
                 } catch ( Exception $e ) {
