@@ -150,11 +150,11 @@ class Filters {
      * @param string      $targetLang
      * @param string|null $segmentation
      * @param IDto|null   $extractionParams
-     * @param bool|null   $legacy_ice
+     * @param bool|null   $legacy_icu
      *
      * @return mixed
      */
-    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_ice = false ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -171,10 +171,9 @@ class Filters {
             $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
 
-// Uncomment this when Filters APIs are ready!
-//        if ( $legacy_ice === true ) {
-//            $data['legacy_ice'] = true;
-//        }
+        if ( $legacy_icu === true ) {
+            $data[ 'legacy_icu' ] = true;
+        }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 
