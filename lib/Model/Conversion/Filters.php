@@ -172,7 +172,12 @@ class Filters {
         }
 
         if ( $legacy_icu === true ) {
-            $data[ 'legacy_icu' ] = true;
+
+            if ( !isset( $data[ 'extractionParams' ] ) ) {
+                $data[ 'extractionParams' ] = [];
+            }
+
+            $data[ 'extractionParams' ][ 'legacy_icu' ] = true;
         }
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
