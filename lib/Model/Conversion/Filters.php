@@ -167,12 +167,9 @@ class Filters {
                 'utf8FileName' => $filename
         ];
 
+        // The legacy_icu option overrides any other extractionParams
         if ( $legacy_icu === true ) {
-
-            if ( empty( $extractionParams ) ) {
-                $extractionParams = [];
-            }
-
+            $extractionParams = [];
             $extractionParams[ 'legacy_icu' ] = true;
         }
 
