@@ -127,7 +127,7 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
      *
      * @throws ValidationError
      */
-    public function getJobStruct(): JobStruct {
+    public function getJobStruct(): ?JobStruct {
 
         if ( empty( $this->id_job ) ) {
             throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );

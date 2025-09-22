@@ -78,6 +78,10 @@ class SetContributionWorker extends AbstractWorker {
 
         $jobStruct = $contributionStruct->getJobStruct();
 
+        if($jobStruct === null){
+            return;
+        }
+
         $this->_loadEngine( $jobStruct );
 
         /**
