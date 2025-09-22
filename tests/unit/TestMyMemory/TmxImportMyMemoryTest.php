@@ -2,7 +2,7 @@
 
 /**
  * @group  regression
- * @covers Engines_MyMemory
+ * @covers MyMemory
  * User: dinies
  * Date: 16/05/16
  * Time: 19.35
@@ -17,8 +17,17 @@
  */
 
 
-use Langs\Languages;
+use Model\DataAccess\Database;
+use Model\Engines\EngineDAO;
+use Model\Engines\Structs\EngineStruct;
+use Model\Users\UserStruct;
 use TestHelpers\AbstractTest;
+use Utils\Engines\MyMemory;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
+use Utils\Langs\Languages;
+use Utils\Network\MultiCurlHandler;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 error_reporting( ~E_DEPRECATED );
 
@@ -35,30 +44,30 @@ class TmxImportMyMemoryTest extends AbstractTest {
     }
 
     /**
-     * @covers Engines_MyMemory::importMemory
-     * @covers Engines_MyMemory::getStatus
-     * @covers Engines_MyMemory::createExport
-     * @covers Engines_MyMemory::checkExport
-     * @covers Engines_MyMemory::downloadExport
+     * @covers MyMemory::importMemory
+     * @covers MyMemory::getImportStatus
+     * @covers MyMemory::createExport
+     * @covers MyMemory::checkExport
+     * @covers MyMemory::downloadExport
      */
     public function test_about_best_case_scenario_of_TMX_import() {
 
         /**
-         * Engine creation
+         * EnginesFactory creation
          */
 
 
-        $engineDAO         = new EnginesModel_EngineDAO( Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
-        $engine_struct     = EnginesModel_EngineStruct::getStruct();
+        $engineDAO         = new EngineDAO( Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE ) );
+        $engine_struct     = EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng               = $engineDAO->read( $engine_struct );
 
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * @var $engineRecord EngineStruct
          */
         $engine_struct_param = $eng[ 0 ];
 
-        $engine_MyMemory = new Engines_MyMemory( $engine_struct_param );
+        $engine_MyMemory = new MyMemory( $engine_struct_param );
 
         Languages::getInstance();
 
@@ -67,7 +76,7 @@ class TmxImportMyMemoryTest extends AbstractTest {
          * Path File initialization
          */
 
-        $path_of_the_original_file = INIT::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
+        $path_of_the_original_file = AppConfig::$ROOT . '/tests/resources/files/tmx/exampleForTestOriginal.tmx';
 
         $file_param = $path_of_the_original_file;
         $key_param  = "a6043e606ac9b5d7ff24";
@@ -77,10 +86,10 @@ class TmxImportMyMemoryTest extends AbstractTest {
         /**
          * Importing
          */
-        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new Users_UserStruct() );
+        $result = $engine_MyMemory->importMemory( $file_param, $key_param, new UserStruct() );
 
 
-        $this->assertTrue( $result instanceof Engines_Results_MyMemory_TmxResponse );
+        $this->assertTrue( $result instanceof FileImportAndStatusResponse );
         $this->assertTrue( Utils::isTokenValid( $result->id ) );
         $this->assertEquals( 202, $result->responseStatus );
         $this->assertEquals( "", $result->responseDetails );
@@ -101,13 +110,13 @@ class TmxImportMyMemoryTest extends AbstractTest {
         while ( ( !$ready ) && ( $time < 100 ) ) {
             usleep( 500000 );//0.5 sec
             $time++;
-            $importResult = $engine_MyMemory->getStatus( $result->id );
+            $importResult = $engine_MyMemory->getImportStatus( $result->id );
             if ( $importResult->responseData[ 'status' ] == 1 ) {
                 $ready = true;
             }
         }
 
-        $this->assertTrue( $importResult instanceof Engines_Results_MyMemory_TmxResponse );
+        $this->assertTrue( $importResult instanceof FileImportAndStatusResponse );
         $this->assertTrue( Utils::isTokenValid( $importResult->id ) );
         $this->assertEquals( $importResult->id, $importResult->id );
         $this->assertEquals( 200, $importResult->responseStatus );

@@ -1,13 +1,18 @@
 <?php
+
+namespace Utils\Engines;
+
+use Exception;
+use Utils\Constants\EngineConstants;
+use Utils\Engines\Results\MTResponse;
+
 /**
  * Created by PhpStorm.
  * User: vincenzoruffa
  * Date: 28/12/2017
  * Time: 17:25
  */
-
-
-class Engines_GoogleTranslate extends Engines_AbstractEngine {
+class GoogleTranslate extends AbstractEngine {
 
     protected array $_config = [
             'q'      => null,
@@ -17,7 +22,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     public function __construct( $engineRecord ) {
         parent::__construct( $engineRecord );
-        if ( $this->getEngineRecord()->type != Constants_Engines::MT ) {
+        if ( $this->getEngineRecord()->type != EngineConstants::MT ) {
             throw new Exception( "Engine {$this->getEngineRecord()->id} is not a MT engine, found {$this->getEngineRecord()->type} -> {$this->getEngineRecord()->class_load}" );
         }
     }
@@ -27,7 +32,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
      * @param array $parameters
      * @param null  $function
      *
-     * @return array|Engines_Results_MT|mixed
+     * @return array|MTResponse|mixed
      * @throws Exception
      */
     protected function _decode( $rawValue, array $parameters = [], $function = null ) {
@@ -60,7 +65,7 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     }
 
-    public function get( $_config ) {
+    public function get( array $_config ) {
 
         $parameters = [];
 
@@ -72,9 +77,9 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
             $parameters[ 'key' ] = $_config[ 'key' ];
         }
 
-        $parameters[ 'target' ]     = $this->_fixLangCode( $_config[ 'target' ] );
-        $parameters[ 'source' ]     = $this->_fixLangCode( $_config[ 'source' ] );
-        $parameters[ 'q' ]          = $_config[ 'segment' ];
+        $parameters[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
+        $parameters[ 'source' ] = $this->_fixLangCode( $_config[ 'source' ] );
+        $parameters[ 'q' ]      = $_config[ 'segment' ];
 
         $this->_setAdditionalCurlParams(
                 [
@@ -89,19 +94,19 @@ class Engines_GoogleTranslate extends Engines_AbstractEngine {
 
     }
 
-    public function set( $_config ) {
+    public function set( $_config ): bool {
 
         //if engine does not implement SET method, exit
         return true;
     }
 
-    public function update( $config ) {
+    public function update( $_config ): bool {
 
         //if engine does not implement UPDATE method, exit
         return true;
     }
 
-    public function delete( $_config ) {
+    public function delete( $_config ): bool {
 
         //if engine does not implement DELETE method, exit
         return true;

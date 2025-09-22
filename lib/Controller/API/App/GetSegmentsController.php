@@ -1,27 +1,27 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\AuthenticationError;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use CatUtils;
-use Chunks_ChunkDao;
-use Conversion\ZipArchiveHandler;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthenticationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\ValidationError;
 use InvalidArgumentException;
-use Langs\Languages;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Conversion\ZipArchiveHandler;
+use Model\Exceptions\ValidationError;
+use Model\Jobs\ChunkDao;
+use Model\Segments\ContextGroupDao;
+use Model\Segments\SegmentDao;
+use Model\Segments\SegmentMetadataDao;
+use Model\Segments\SegmentNoteDao;
+use Model\Segments\SegmentUIStruct;
 use ReflectionException;
-use Segments\ContextGroupDao;
-use Segments\SegmentUIStruct;
-use Segments_SegmentDao;
-use Segments_SegmentMetadataDao;
-use Segments_SegmentNoteDao;
-use TaskRunner\Exceptions\EndQueueException;
-use TaskRunner\Exceptions\ReQueueException;
+use Utils\Langs\Languages;
+use Utils\TaskRunner\Exceptions\EndQueueException;
+use Utils\TaskRunner\Exceptions\ReQueueException;
+use Utils\Tools\CatUtils;
 
 class GetSegmentsController extends KleinController {
 
@@ -36,7 +36,7 @@ class GetSegmentsController extends KleinController {
      * @throws AuthenticationError
      * @throws ReQueueException
      * @throws ValidationError
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws EndQueueException
      * @throws ReflectionException
      * @throws NotFoundException
@@ -51,7 +51,7 @@ class GetSegmentsController extends KleinController {
         $password   = $request[ 'password' ];
         $where      = $request[ 'where' ];
 
-        $job = Chunks_ChunkDao::getByIdAndPassword( $jid, $password );
+        $job = ChunkDao::getByIdAndPassword( $jid, $password );
 
         $project    = $job->getProject();
         $featureSet = $this->getFeatureSet();
@@ -64,7 +64,7 @@ class GetSegmentsController extends KleinController {
             $parsedIdSegment[ 'id_segment' ] = 0;
         }
 
-        $sDao = new Segments_SegmentDao();
+        $sDao = new SegmentDao();
         $data = $sDao->getPaginationSegments(
                 $job,
                 min( $step, self::DEFAULT_PER_PAGE ),
@@ -121,13 +121,14 @@ class GetSegmentsController extends KleinController {
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] )
+                    // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+                    CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer1ToLayer2( $Filter->realignIDInLayer1( $seg[ 'segment' ], $seg[ 'translation' ] ) );
             $seg[ 'segment' ]     = $Filter->fromLayer1ToLayer2( $seg[ 'segment' ] );
 
-            $seg[ 'metadata' ] = Segments_SegmentMetadataDao::getAll( $seg[ 'sid' ] );
+            $seg[ 'metadata' ] = SegmentMetadataDao::getAll( $seg[ 'sid' ] );
 
             $this->attachNotes( $seg, $segment_notes );
             $this->attachContexts( $seg, $contexts );
@@ -203,7 +204,7 @@ class GetSegmentsController extends KleinController {
      *
      * @return array
      * @throws AuthenticationError
-     * @throws \Exceptions\NotFoundException
+     * @throws \Model\Exceptions\NotFoundException
      * @throws ValidationError
      * @throws EndQueueException
      * @throws ReQueueException
@@ -215,7 +216,7 @@ class GetSegmentsController extends KleinController {
             $stop  = $last[ 'sid' ];
 
             if ( $this->featureSet->filter( 'prepareAllNotes', false ) ) {
-                $segment_notes = Segments_SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop );
+                $segment_notes = SegmentNoteDao::getAllAggregatedBySegmentIdInInterval( $start, $stop );
                 foreach ( $segment_notes as $k => $noteObj ) {
                     $segment_notes[ $k ][ 0 ][ 'json' ] = json_decode( $noteObj[ 0 ][ 'json' ], true );
                 }
@@ -223,7 +224,7 @@ class GetSegmentsController extends KleinController {
                 return $this->featureSet->filter( 'processExtractedJsonNotes', $segment_notes );
             }
 
-            return Segments_SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
+            return SegmentNoteDao::getAggregatedBySegmentIdInInterval( $start, $stop );
         }
 
         return [];
@@ -233,6 +234,7 @@ class GetSegmentsController extends KleinController {
      * @param $segments
      *
      * @return array
+     * @throws ReflectionException
      */
     private function getContextGroups( $segments ): array {
         if ( !empty( $segments[ 0 ] ) ) {

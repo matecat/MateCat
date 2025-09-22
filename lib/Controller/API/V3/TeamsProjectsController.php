@@ -6,24 +6,24 @@
  * Time: 10:06
  */
 
-namespace API\V3;
+namespace Controller\API\V3;
 
 
-use AbstractControllers\KleinController;
-use API\Commons\Exceptions\NotFoundException;
-use API\Commons\Validators\LoginValidator;
-use API\Commons\Validators\TeamAccessValidator;
-use API\V2\Json\Project;
-use INIT;
-use Projects_ProjectDao;
-use Teams\TeamStruct;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Validators\LoginValidator;
+use Controller\API\Commons\Validators\TeamAccessValidator;
+use Exception;
+use Model\Projects\ProjectDao;
+use Model\Projects\ProjectStruct;
+use Model\Teams\TeamStruct;
+use Utils\Registry\AppConfig;
+use View\API\V2\Json\Project;
 
 class TeamsProjectsController extends KleinController {
 
-    protected $project;
-
     /** @var TeamStruct */
-    protected $team;
+    protected TeamStruct $team;
 
     protected function afterConstruct() {
         parent::afterConstruct();
@@ -33,18 +33,18 @@ class TeamsProjectsController extends KleinController {
 
     /**
      * @throws NotFoundException
-     * @throws \Exceptions\NotFoundException
-     * @throws \Exception
+     * @throws \Model\Exceptions\NotFoundException
+     * @throws Exception
      */
     public function getPaginated() {
 
         $id_team = $this->request->param( 'id_team' );
         $page    = $this->request->param( 'page' ) ? $this->request->param( 'page' ) : 1;
-        $step    = $this->request->param( 'step' ) ? $this->request->param( 'step' ) : 20;
+        $step    = $this->request->param( 'step' ) ? ( $this->request->param( 'step' ) <=50 ? $this->request->param( 'step' ) : 50 ) : 20;
         $search  = $this->request->param( 'search' );
 
         $filter = [
-                'limit'  => $step,
+                'limit'  => (int)$step,
                 'offset' => $this->getOffset( $page, $step ),
         ];
 
@@ -53,14 +53,12 @@ class TeamsProjectsController extends KleinController {
         }
 
         $this->featureSet->loadFromUserEmail( $this->user->email );
-        $projectsList = Projects_ProjectDao::findByTeamId( $id_team, $filter );
 
-        $formatted     = new Project( $projectsList );
-        $formatted->setUser( $this->user );
+        /** @var ProjectStruct[] $projectsList */
+        $projectsList = ProjectDao::findByTeamId( $id_team, $filter );
+        $projectsList = ( new Project( $projectsList ) )->render();
 
-        $projectsList = $formatted->render();
-
-        $totals      = \Projects_ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
+        $totals      = ProjectDao::getTotalCountByTeamId( $id_team, $filter, 60 * 5 );
         $total_pages = $this->getTotalPages( $step, $totals );
 
         if ( $totals == 0 ) {
@@ -83,22 +81,23 @@ class TeamsProjectsController extends KleinController {
     }
 
     /**
-     * @param int $page
-     * @param int $totals
-     * @param int $step
+     * @param int   $page
+     * @param int   $totals
+     * @param int   $step
+     * @param ?array $search
      *
      * @return array
      */
-    private function _getPaginationLinks( $page, $totals, $step = 20, $search = [] ) {
+    private function _getPaginationLinks( int $page, int $totals, int $step = 20, ?array $search = [] ): array {
 
         $url = parse_url( $_SERVER[ 'REQUEST_URI' ] );
 
         $links = [
-                "base"        => INIT::$HTTPHOST,
+                "base"        => AppConfig::$HTTPHOST,
                 "self"        => $_SERVER[ 'REQUEST_URI' ],
-                "page"        => (int)$page,
-                "step"        => (int)$step,
-                "totals"      => (int)$totals,
+                "page"        => $page,
+                "step"        => $step,
+                "totals"      => $totals,
                 "total_pages" => $total_pages = $this->getTotalPages( $step, $totals ),
         ];
 
@@ -122,7 +121,7 @@ class TeamsProjectsController extends KleinController {
      *
      * @return int
      */
-    private function getOffset( $page, $step ) {
+    private function getOffset( int $page, int $step ) {
 
         if ( $page === 1 ) {
             return 0;
@@ -137,8 +136,8 @@ class TeamsProjectsController extends KleinController {
      *
      * @return int
      */
-    private function getTotalPages( $step, $totals ) {
-        return (int)ceil( (int)$totals / (int)$step );
+    private function getTotalPages( int $step, int $totals ): int {
+        return (int)ceil( $totals / $step );
     }
 
     /**

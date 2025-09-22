@@ -7,7 +7,7 @@
  *
  */
 
-namespace API\App\Json\Analysis;
+namespace View\API\App\Json\Analysis;
 
 use JsonSerializable;
 use Model\Analysis\Constants\ConstantsInterface;
@@ -40,20 +40,29 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
      * @var int
      */
     protected int $total_raw = 0;
+
     /**
      * @var float
      */
     protected float $total_equivalent = 0;
 
-    public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass ) {
+    protected array $metadata = [];
+
+    public function __construct( $id, $id_file_part, $name, $original_name, ConstantsInterface $matchConstantsClass, array $metadata = [] ) {
         $this->id            = (int)$id;
         $this->id_file_part  = $id_file_part;
         $this->name          = $name;
         $this->original_name = $original_name;
+
         foreach ( $matchConstantsClass::forValue() as $matchType ) {
             $this->matches[ $matchType ] = AnalysisMatch::forName( $matchType, $matchConstantsClass );
         }
 
+        foreach ($metadata as $metadatum){
+            if(isset($metadatum->key) and isset($metadatum->value)){
+                $this->metadata[] = new AnalysisFileMetadata($metadatum->key, $metadatum->value);
+            }
+        }
     }
 
     public function jsonSerialize(): array {
@@ -64,7 +73,8 @@ class AnalysisFile implements MatchContainerInterface, JsonSerializable {
                 'original_name'    => $this->original_name,
                 'total_raw'        => $this->total_raw,
                 'total_equivalent' => round( $this->total_equivalent ),
-                'matches'          => array_values( $this->matches )
+                'matches'          => array_values( $this->matches ),
+                'metadata'         => $this->metadata
         ];
     }
 

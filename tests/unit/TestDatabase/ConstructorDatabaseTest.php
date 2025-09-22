@@ -1,11 +1,13 @@
 <?php
 
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
  * @group  regression
- * @covers Database::__construct
+ * @covers \Model\DataAccess\Database::__construct
  * User: dinies
  * Date: 11/04/16
  * Time: 17.51
@@ -16,7 +18,7 @@ class ConstructorDatabaseTest extends AbstractTest {
 
     public function setUp(): void {
         parent::setUp();
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->databaseInstance->close();
 
         $this->reflector = new ReflectionClass( $this->databaseInstance );

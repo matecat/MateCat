@@ -8,22 +8,22 @@
 
 route(
         '/webhooks/gdrive/open', 'POST',
-        [ 'ConnectedServices\GDrive\GDriveController', 'open' ]
+        [ 'Controller\API\GDrive\GDriveController', 'open' ]
 );
 
 route( '/gdrive/oauth/response', 'GET',
-        [ 'ConnectedServices\GDrive\OAuthController', 'response' ]
+        [ 'Controller\API\GDrive\OAuthController', 'response' ]
 );
 
 route(
         '/gdrive/list', 'GET',
-        [ 'ConnectedServices\GDrive\GDriveController', 'listImportedFiles' ]
+        [ 'Controller\API\GDrive\GDriveController', 'listImportedFiles' ]
 );
 route(
-        '/gdrive/change', 'POST',
-        [ 'ConnectedServices\GDrive\GDriveController', 'changeConversionParameters' ]
+        '/gdrive/change', 'GET',
+        [ 'Controller\API\GDrive\GDriveController', 'changeConversionParameters' ]
 );
 route(
         '/gdrive/delete/[:fileId]', 'GET',
-        [ 'ConnectedServices\GDrive\GDriveController', 'deleteImportedFile' ]
+        [ 'Controller\API\GDrive\GDriveController', 'deleteImportedFile' ]
 );

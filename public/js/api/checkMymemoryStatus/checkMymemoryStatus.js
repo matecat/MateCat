@@ -9,7 +9,7 @@ import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
  */
 export const checkMymemoryStatus = async ({uuid}) => {
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/mymemory/status/${uuid}`,
+    `${getMatecatApiDomain()}api/app/mymemory/entry/status/${uuid}`,
     {
       method: 'GET',
       credentials: 'include',

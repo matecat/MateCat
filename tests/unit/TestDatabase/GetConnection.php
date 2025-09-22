@@ -1,6 +1,8 @@
 <?php
 
+use Model\DataAccess\Database;
 use TestHelpers\AbstractTest;
+use Utils\Registry\AppConfig;
 
 
 /**
@@ -13,7 +15,7 @@ use TestHelpers\AbstractTest;
 class GetConnection extends AbstractTest {
     protected $reflector;
     /**
-     * @var Database
+     * @var \Model\DataAccess\Database
      */
     protected $instance_after_reset;
     protected $expected_value;
@@ -23,10 +25,10 @@ class GetConnection extends AbstractTest {
     public function setUp(): void {
         parent::setUp();
 
-        $copy_server          = INIT::$DB_SERVER;
-        $copy_user            = INIT::$DB_USER;
-        $copy_password        = INIT::$DB_PASS;
-        $copy_database        = INIT::$DB_DATABASE;
+        $copy_server          = AppConfig::$DB_SERVER;
+        $copy_user            = AppConfig::$DB_USER;
+        $copy_password        = AppConfig::$DB_PASS;
+        $copy_database        = AppConfig::$DB_DATABASE;
         $this->expected_value = new PDO(
                 "mysql:host={$copy_server};dbname={$copy_database};charset=UTF8",
                 $copy_user,
@@ -36,19 +38,19 @@ class GetConnection extends AbstractTest {
                 ] );
 
 
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->reflector        = new ReflectionClass( $this->databaseInstance );
         $this->property         = $this->reflector->getProperty( 'instance' );
         $this->databaseInstance->close();
         $this->property->setAccessible( true );
         $this->property->setValue( $this->databaseInstance, null );
-        $this->instance_after_reset = $this->databaseInstance->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->instance_after_reset = $this->databaseInstance->obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
 
 
     }
 
     public function tearDown(): void {
-        $this->databaseInstance = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->databaseInstance = Database::obtain( AppConfig::$DB_SERVER, AppConfig::$DB_USER, AppConfig::$DB_PASS, AppConfig::$DB_DATABASE );
         $this->databaseInstance->close();
         startConnection();
         parent::tearDown();

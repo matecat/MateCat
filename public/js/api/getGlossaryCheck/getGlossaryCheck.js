@@ -39,7 +39,7 @@ export const getGlossaryCheck = async ({
   }
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/_check`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/_check`,
     {
       method: 'POST',
       credentials: 'include',

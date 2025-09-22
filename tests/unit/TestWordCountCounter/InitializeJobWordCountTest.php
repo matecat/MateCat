@@ -1,11 +1,11 @@
 <?php
 
 
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCounterDao;
+use Model\WordCount\WordCountStruct;
 use TestHelpers\AbstractTest;
 use TestHelpers\InvocationInspector;
-use WordCount\CounterModel;
-use WordCount\WordCounterDao;
-use WordCount\WordCountStruct;
 
 /**
  * @covers CounterModel::initializeJobWordCount

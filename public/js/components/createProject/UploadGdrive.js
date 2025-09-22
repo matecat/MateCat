@@ -183,7 +183,7 @@ export const UploadGdrive = () => {
 
       setLoading(true)
       openGDriveFiles({
-        encodedJson: encodeURIComponent(JSON.stringify(jsonDoc)),
+        stateJson: JSON.stringify(jsonDoc),
         sourceLang: sourceLang.code,
         targetLang: targetLangs.map((lang) => lang.id).join(),
         segmentation_rule: segmentationRule,

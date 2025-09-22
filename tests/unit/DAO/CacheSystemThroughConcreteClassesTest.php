@@ -9,15 +9,15 @@
 
 namespace unit\DAO;
 
-use Database;
 use Exception;
-use INIT;
-use RedisHandler;
+use Model\DataAccess\Database;
+use Model\Users\UserDao;
+use Model\Users\UserStruct;
 use ReflectionException;
 use TestHelpers\AbstractTest;
-use Users_UserDao;
-use Users_UserStruct;
-use Utils;
+use Utils\Redis\RedisHandler;
+use Utils\Registry\AppConfig;
+use Utils\Tools\Utils;
 
 class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     private static string $email;
@@ -33,11 +33,11 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
          * user insertion
          */
         self::$email     = Utils::uuid4() . "bar@foo.net";
-        $sql_insert_user = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . self::$email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
+        $sql_insert_user = "INSERT INTO " . AppConfig::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name` ) VALUES (NULL, '" . self::$email . "', '12345', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo' );";
         Database::obtain()->getConnection()->query( $sql_insert_user );
         self::$uid = Database::obtain()->getConnection()->lastInsertId();
 
-        self::$sql_delete_user = "DELETE FROM " . INIT::$DB_DATABASE . ".`users` WHERE uid='" . self::$uid . "';";
+        self::$sql_delete_user = "DELETE FROM " . AppConfig::$DB_DATABASE . ".`users` WHERE uid='" . self::$uid . "';";
 
     }
 
@@ -59,16 +59,16 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     public function test_shouldSetAndGetFromCache() {
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( UserDao::class . "::getByUid-" . self::$uid );
         $this->assertEmpty( $map );
 
-        $underTest = new Users_UserDao();
+        $underTest = new UserDao();
 
         $underTest->setCacheTTL( 600 );
 
         $user = $underTest->getByUid( self::$uid );
 
-        $this->assertTrue( $user instanceof Users_UserStruct );
+        $this->assertTrue( $user instanceof UserStruct );
         $this->assertEquals( self::$uid, $user->uid );
         $this->assertEquals( self::$email, $user->email );
         $this->assertEquals( "12345", $user->salt );
@@ -78,7 +78,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
         $this->assertEquals( "Foo", $user->last_name );
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( UserDao::class . "::getByUid-" . self::$uid );
         $this->assertNotEmpty( $map );
         $this->assertTrue( is_array( $map ) );
 
@@ -87,7 +87,7 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
 
         $key    = array_keys( $map )[ 0 ];
         $keyMap = $client->get( $key );
-        $this->assertEquals( "Users_UserDao::getByUid-" . self::$uid, $keyMap );
+        $this->assertEquals( UserDao::class . "::getByUid-" . self::$uid, $keyMap );
 
     }
 
@@ -99,19 +99,19 @@ class CacheSystemThroughConcreteClassesTest extends AbstractTest {
     public function test_shouldDestroyCache() {
 
         $client = ( new RedisHandler )->getConnection();
-        $map    = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map    = $client->hgetall( UserDao::class . "::getByUid-" . self::$uid );
         $this->assertNotEmpty( $map );
 
         $key    = array_keys( $map )[ 0 ];
         $keyMap = $client->get( $key );
-        $this->assertEquals( "Users_UserDao::getByUid-" . self::$uid, $keyMap );
+        $this->assertEquals( UserDao::class . "::getByUid-" . self::$uid, $keyMap );
 
 
-        $underTest = new Users_UserDao();
+        $underTest = new UserDao();
         $underTest->destroyCacheByUid( self::$uid );
 
 
-        $map = $client->hgetall( "Users_UserDao::getByUid-" . self::$uid );
+        $map = $client->hgetall( UserDao::class . "::getByUid-" . self::$uid );
         $this->assertEmpty( $map );
 
     }

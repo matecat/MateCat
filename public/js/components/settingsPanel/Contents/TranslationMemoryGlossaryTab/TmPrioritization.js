@@ -34,7 +34,7 @@ export const TmPrioritization = () => {
       <Switch
         onChange={onChange}
         active={isActive}
-        disabled={config.ownerIsMe === 0}
+        disabled={!config.ownerIsMe}
       />
     </div>
   )

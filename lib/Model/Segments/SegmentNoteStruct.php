@@ -1,11 +1,16 @@
 <?php
 
-class Segments_SegmentNoteStruct extends \DataAccess\AbstractDaoSilentStruct implements \DataAccess\IDaoStruct {
+namespace Model\Segments;
 
-    public $id;
-    public $id_segment;
-    public $internal_id;
-    public $note;
-    public $json;
+use Model\DataAccess\AbstractDaoSilentStruct;
+use Model\DataAccess\IDaoStruct;
+
+class SegmentNoteStruct extends AbstractDaoSilentStruct implements IDaoStruct {
+
+    public ?int    $id          = null;
+    public int     $id_segment;
+    public ?string $internal_id = null;
+    public ?string $note        = null;
+    public ?string $json        = null;
 
 }

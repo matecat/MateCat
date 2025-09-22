@@ -1,7 +1,7 @@
 import {getMatecatApiDomain} from '../../utils/getMatecatApiDomain'
 
 /**
- * Retrieve domains list from MyMemory
+ * Retrieve domains list from Match
  *
  * @param {Object} options
  * @param {Array} options.keys
@@ -33,7 +33,7 @@ export const getDomainsList = async ({
   }
 
   const response = await fetch(
-    `${getMatecatApiDomain()}api/app/glossary/_domains`,
+    `${getMatecatApiDomain()}api/app/mymemory/glossary/_domains`,
     {
       method: 'POST',
       credentials: 'include',

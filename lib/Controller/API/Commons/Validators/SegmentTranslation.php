@@ -1,35 +1,26 @@
 <?php
 
-namespace API\Commons\Validators;
+namespace Controller\API\Commons\Validators;
 
-use Exceptions\NotFoundException;
+use Model\Exceptions\NotFoundException;
+use Model\Translations\SegmentTranslationDao;
+use Model\Translations\SegmentTranslationStruct;
 use ReflectionException;
-use Translations_SegmentTranslationDao;
-use Translations_SegmentTranslationStruct;
 
 class SegmentTranslation extends Base {
 
     /**
-     * @var Translations_SegmentTranslationStruct
+     * @var SegmentTranslationStruct|null
      */
-    public $translation;
+    public ?SegmentTranslationStruct $translation = null;
 
     /**
      * @return void
      * @throws NotFoundException
-     */
-    protected function _validate(): void {
-        $this->ensureTranslationExists();
-    }
-
-    /**
-     *
-     * @throws NotFoundException
      * @throws ReflectionException
      */
-
-    private function ensureTranslationExists() {
-        $this->translation = Translations_SegmentTranslationDao::findBySegmentAndJob( $this->request->id_segment, $this->request->id_job );
+    protected function _validate(): void {
+        $this->translation = SegmentTranslationDao::findBySegmentAndJob( $this->request->param( 'id_segment' ), $this->request->param( 'id_job' ) );
         if ( !$this->translation ) {
             throw new NotFoundException( 'translation not found' );
         }

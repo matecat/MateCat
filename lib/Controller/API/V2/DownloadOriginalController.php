@@ -1,19 +1,19 @@
 <?php
 
-namespace API\V2;
+namespace Controller\API\V2;
 
-use ActivityLog\Activity;
-use ActivityLog\ActivityLogStruct;
-use Conversion\ZipArchiveHandler;
+use Controller\Abstracts\AbstractDownloadController;
 use Exception;
-use FilesStorage\AbstractFilesStorage;
-use FilesStorage\FilesStorageFactory;
-use Jobs_JobDao;
-use Log;
-use LQA\ChunkReviewDao;
-use Projects_ProjectDao;
-use Utils;
-use ZipContentObject;
+use Model\ActivityLog\Activity;
+use Model\ActivityLog\ActivityLogStruct;
+use Model\Conversion\ZipArchiveHandler;
+use Model\FilesStorage\AbstractFilesStorage;
+use Model\FilesStorage\FilesStorageFactory;
+use Model\Jobs\JobDao;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectDao;
+use Utils\Tools\Utils;
+use View\API\Commons\ZipContentObject;
 
 set_time_limit( 180 );
 
@@ -49,7 +49,7 @@ class DownloadOriginalController extends AbstractDownloadController {
         $this->password                = $__postInput[ 'password' ];
 
         // get Job Info, we need only a row of jobs ( split )
-        $jobData = Jobs_JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
+        $jobData = JobDao::getByIdAndPassword( (int)$this->id_job, $this->password );
 
         // if no job was found, check if the provided password is a password_review
         if ( empty( $jobData ) ) {
@@ -60,9 +60,7 @@ class DownloadOriginalController extends AbstractDownloadController {
         // check for Password correctness
         if ( empty( $jobData ) ) {
             $msg = "Error : wrong password provided for download \n\n " . var_export( $_POST, true ) . "\n";
-            Log::doJsonLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
+            $this->logger->debug( $msg );
             return null;
         }
 
@@ -73,7 +71,7 @@ class DownloadOriginalController extends AbstractDownloadController {
         //take the project ID and creation date, array index zero is good, all id are equals
         $id_project = $files_job[ 0 ][ 'id_project' ];
 
-        $this->project = Projects_ProjectDao::findById( $id_project );
+        $this->project = ProjectDao::findById( $id_project );
 
         $output_content = [];
 

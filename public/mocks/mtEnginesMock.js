@@ -10,7 +10,7 @@ export const mtEnginesMock = [
     id: 6,
     name: 'Test MT',
     type: 'MT',
-    description: 'AltLang Engine',
+    description: 'AltLang EnginesFactory',
     engine_type: 'AltLang',
   },
   {

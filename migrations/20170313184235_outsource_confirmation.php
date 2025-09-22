@@ -1,6 +1,8 @@
 <?php
 
 
+use migrations\AbstractMatecatMigration;
+
 class OutsourceConfirmation extends AbstractMatecatMigration {
 
     public $sql_up = "

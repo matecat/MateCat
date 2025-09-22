@@ -1,14 +1,14 @@
 <?php
 
 
-namespace ConnectedServices;
+namespace Model\ConnectedServices;
 
-use DataAccess\AbstractDao;
 use Exception;
-use Exceptions\ValidationError;
+use Model\DataAccess\AbstractDao;
+use Model\Exceptions\ValidationError;
+use Model\Users\UserStruct;
 use PDO;
-use Users_UserStruct;
-use Utils;
+use Utils\Tools\Utils;
 
 class ConnectedServiceDao extends AbstractDao {
 
@@ -85,12 +85,12 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct       $user
      * @param                  $id_service
      *
      * @return ?ConnectedServiceStruct
      */
-    public function findServiceByUserAndId( Users_UserStruct $user, $id_service ): ?ConnectedServiceStruct {
+    public function findServiceByUserAndId( UserStruct $user, $id_service ): ?ConnectedServiceStruct {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -103,16 +103,16 @@ class ConnectedServiceDao extends AbstractDao {
                 [ 'uid' => $user->uid, 'id' => $id_service ]
         );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
 
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct $user
      *
      * @return ConnectedServiceStruct[]
      */
-    public function findServicesByUser( Users_UserStruct $user ): array {
+    public function findServicesByUser( UserStruct $user ): array {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -129,13 +129,13 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct       $user
      * @param                  $name
      *
      * @return ConnectedServiceStruct[]
      *
      */
-    public function findServicesByUserAndName( Users_UserStruct $user, $name ) {
+    public function findServicesByUserAndName( UserStruct $user, $name ) {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -152,13 +152,13 @@ class ConnectedServiceDao extends AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct       $user
      * @param                  $name
      *
      * @return ConnectedServiceStruct|null
      */
 
-    public function findDefaultServiceByUserAndName( Users_UserStruct $user, $name ): ?ConnectedServiceStruct {
+    public function findDefaultServiceByUserAndName( UserStruct $user, $name ): ?ConnectedServiceStruct {
         $conn = $this->database->getConnection();
 
         $stmt = $conn->prepare(
@@ -171,25 +171,19 @@ class ConnectedServiceDao extends AbstractDao {
                 [ 'uid' => $user->uid, 'service' => $name ]
         );
 
-        $result = $stmt->fetch();
-        if ( empty( $result ) ) {
-            return null;
-        }
-
-        /** @var $result ConnectedServiceStruct */
-        return $result;
+        return $stmt->fetch() ?: null;
 
     }
 
 
     /**
-     * @param Users_UserStruct $user
+     * @param UserStruct       $user
      * @param                  $service
      * @param                  $email
      *
      * @return ?ConnectedServiceStruct
      */
-    public function findUserServicesByNameAndEmail( Users_UserStruct $user, $service, $email ): ?ConnectedServiceStruct {
+    public function findUserServicesByNameAndEmail( UserStruct $user, $service, $email ): ?ConnectedServiceStruct {
         $stmt = $this->database->getConnection()->prepare(
                 " SELECT * FROM connected_services WHERE " .
                 " uid = :uid AND service = :service AND email = :email "
@@ -202,7 +196,7 @@ class ConnectedServiceDao extends AbstractDao {
                 'email'   => $email
         ] );
 
-        return $stmt->fetch();
+        return $stmt->fetch() ?: null;
     }
 
     public function findByRemoteIdAndCode( $remote_id, $service ) {

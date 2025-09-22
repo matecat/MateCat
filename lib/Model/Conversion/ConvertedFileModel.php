@@ -1,9 +1,9 @@
 <?php
 
-namespace Conversion;
+namespace Model\Conversion;
 
-use Constants\ConversionHandlerStatus;
 use Exception;
+use Utils\Constants\ConversionHandlerStatus;
 
 class ConvertedFileModel {
     /**
@@ -29,6 +29,8 @@ class ConvertedFileModel {
     private int $size = 0;
 
     private bool $isZipContent = false;
+
+    private array $pdfAnalysis = [];
 
     /**
      * ConvertFileModel constructor.
@@ -140,6 +142,20 @@ class ConvertedFileModel {
     }
 
     /**
+     * @return array
+     */
+    public function getPdfAnalysis(): array {
+        return $this->pdfAnalysis;
+    }
+
+    /**
+     * @param array $pdfAnalysis
+     */
+    public function setPdfAnalysis( array $pdfAnalysis ): void {
+        $this->pdfAnalysis = $pdfAnalysis;
+    }
+
+    /**
      * @param InternalHashPaths $data
      *
      * @return void
@@ -169,8 +185,9 @@ class ConvertedFileModel {
 
     public function getResult(): array {
         return [
-                'name' => $this->getName(),
-                'size' => $this->getSize(),
+                'name'        => $this->getName(),
+                'size'        => $this->getSize(),
+                'pdfAnalysis' => $this->getPdfAnalysis(),
         ];
     }
 

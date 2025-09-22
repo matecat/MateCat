@@ -1,20 +1,19 @@
 <?php
 
-namespace API\App;
+namespace Controller\API\App;
 
-use AbstractControllers\KleinController;
-use API\Commons\Validators\LoginValidator;
-use CatUtils;
-use Chunks_ChunkDao;
-use Constants_TranslationStatus;
-use Database;
+use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
-use Exceptions\NotFoundException;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\DataAccess\Database;
+use Model\Jobs\ChunkDao;
+use Model\TranslationsSplit\SegmentSplitStruct;
+use Model\TranslationsSplit\SplitDAO;
 use RuntimeException;
-use TranslationsSplit_SplitDAO;
-use TranslationsSplit_SplitStruct;
+use Utils\Constants\TranslationStatus;
+use Utils\Tools\CatUtils;
 
 class SplitSegmentController extends KleinController {
 
@@ -29,29 +28,29 @@ class SplitSegmentController extends KleinController {
 
         $request = $this->validateTheRequest();
 
-        $translationStruct             = TranslationsSplit_SplitStruct::getStruct();
+        $translationStruct             = SegmentSplitStruct::getStruct();
         $translationStruct->id_segment = $request[ 'id_segment' ];
         $translationStruct->id_job     = $request[ 'id_job' ];
 
         $featureSet = $this->getFeatureSet();
 
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $request[ 'jobStruct' ]->source, $request[ 'jobStruct' ]->target, [] );
-        [ $request[ 'segment' ], $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request[ 'segment' ], '', $Filter );
+        $Filter = MateCatFilter::getInstance( $featureSet, $request[ 'jobStruct' ]->source, $request[ 'jobStruct' ]->target );
+        [ , $translationStruct->source_chunk_lengths ] = CatUtils::parseSegmentSplit( $request[ 'segment' ], '', $Filter );
 
         /* Fill the statuses with DEFAULT DRAFT VALUES */
         $pieces                                  = ( count( $translationStruct->source_chunk_lengths ) > 1 ? count( $translationStruct->source_chunk_lengths ) - 1 : 1 );
         $translationStruct->target_chunk_lengths = [
                 'len'      => [ 0 ],
-                'statuses' => array_fill( 0, $pieces, Constants_TranslationStatus::STATUS_DRAFT )
+                'statuses' => array_fill( 0, $pieces, TranslationStatus::STATUS_DRAFT )
         ];
 
-        $translationDao = new TranslationsSplit_SplitDAO( Database::obtain() );
+        $translationDao = new SplitDAO( Database::obtain() );
         $result         = $translationDao->atomicUpdate( $translationStruct );
 
         if ( !$result ) {
-            $this->log( "Failed while splitting/merging segment." );
-            $this->log( $translationStruct );
+            $this->logger->debug( "Failed while splitting/merging segment." );
+            $this->logger->debug( $translationStruct );
             throw new RuntimeException( "Failed while splitting/merging segment." );
         }
 
@@ -91,11 +90,7 @@ class SplitSegmentController extends KleinController {
         }
 
         // check Job password
-        $jobStruct = Chunks_ChunkDao::getByIdAndPassword( $id_job, $password );
-
-        if ( is_null( $jobStruct ) ) {
-            throw new NotFoundException( "Job not found" );
-        }
+        $jobStruct = ChunkDao::getByIdAndPassword( $id_job, $password );
 
         $this->featureSet->loadForProject( $jobStruct->getProject() );
 

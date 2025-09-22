@@ -1,13 +1,11 @@
 <?php
 
-namespace Validator\Contracts;
-
-use Validator\Errors\JsonValidatorExceptionInterface;
+namespace Utils\Validator\Contracts;
 
 class ValidatorErrorObject {
 
     /**
-     * @var JsonValidatorExceptionInterface
+     * @var ValidatorExceptionInterface
      */
-    public $error;
+    public ValidatorExceptionInterface $error;
 }

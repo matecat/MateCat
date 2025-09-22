@@ -6,19 +6,19 @@
  * Time: 17:44
  */
 
-namespace Features\ReviewExtended;
+namespace Plugins\Features\ReviewExtended;
 
 use Exception;
-use Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
-use Features\TranslationEvents\Model\TranslationEvent;
-use Jobs_JobStruct;
-use Log;
-use LQA\ChunkReviewDao;
-use Projects_ProjectStruct;
+use Model\Jobs\JobStruct;
+use Model\LQA\ChunkReviewDao;
+use Model\Projects\ProjectStruct;
+use Model\WordCount\CounterModel;
+use Model\WordCount\WordCountStruct;
+use Plugins\Features\ReviewExtended\Email\BatchReviewProcessorAlertEmail;
+use Plugins\Features\RevisionFactory;
+use Plugins\Features\TranslationEvents\Model\TranslationEvent;
 use ReflectionException;
-use RevisionFactory;
-use WordCount\CounterModel;
-use WordCount\WordCountStruct;
+use Utils\Logger\LoggerFactory;
 
 class BatchReviewProcessor {
 
@@ -29,7 +29,7 @@ class BatchReviewProcessor {
     /**
      * @var mixed
      */
-    private Jobs_JobStruct $chunk;
+    private JobStruct $chunk;
 
     /**
      * @var TranslationEvent[]
@@ -40,11 +40,11 @@ class BatchReviewProcessor {
     }
 
     /**
-     * @param Jobs_JobStruct $chunk
+     * @param JobStruct $chunk
      *
      * @return $this
      */
-    public function setChunk( Jobs_JobStruct $chunk ): BatchReviewProcessor {
+    public function setChunk( JobStruct $chunk ): BatchReviewProcessor {
         $this->chunk          = $chunk;
         $old_wStruct          = WordCountStruct::loadFromJob( $chunk );
         $this->jobWordCounter = new CounterModel( $old_wStruct );
@@ -66,7 +66,7 @@ class BatchReviewProcessor {
     /**
      * @throws ReflectionException
      */
-    private function getOrCreateChunkReviews( Projects_ProjectStruct $project ): array {
+    private function getOrCreateChunkReviews( ProjectStruct $project ): array {
 
         $chunkReviews = ( new ChunkReviewDao() )->findChunkReviews( $this->chunk );
 
@@ -92,7 +92,7 @@ class BatchReviewProcessor {
             ( new ChunkReviewModel( $chunkReview ) )->recountAndUpdatePassFailResult( $project );
             $chunkReviews[] = $chunkReview;
 
-            Log::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );
+            LoggerFactory::doJsonLog( 'Batch review processor created a new chunkReview (id ' . $chunkReview->id . ') for chunk with id ' . $this->chunk->id );
 
             $alertEmail = new BatchReviewProcessorAlertEmail( $this->chunk, $chunkReview );
             $alertEmail->send();
@@ -117,7 +117,7 @@ class BatchReviewProcessor {
 
         foreach ( $this->prepared_events as $translationEvent ) {
 
-            $segmentTranslationModel = $revisionFactory->getReviewedWordCountModel( $translationEvent, $chunkReviews, $this->jobWordCounter );
+            $segmentTranslationModel = new ReviewedWordCountModel( $translationEvent, $this->jobWordCounter, $chunkReviews );
 
             // here we process and count the reviewed word count and
             $segmentTranslationModel->evaluateChunkReviewEventTransitions();

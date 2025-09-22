@@ -7,13 +7,13 @@
  *
  */
 
-namespace DataAccess;
+namespace Model\DataAccess;
 
-use stdClass;
 use Countable;
 use DomainException;
 use ReflectionObject;
 use ReflectionProperty;
+use stdClass;
 
 abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, Countable {
 
@@ -66,17 +66,18 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
      * This method makes it possible to define methods on child classes
      * whose result is cached on the instance.
      *
-     * @param $method_name
-     * @param $params
-     * @param $function
+     * @param string   $cache_key_name
+     * @param callable $function
      *
      * @return mixed
      *
      */
-    protected function cachable( string $method_name, $params, callable $function ) {
-        $resultset = $this->cached_results[ $method_name ] ?? null;
+    protected function cachable( string $cache_key_name, callable $function ) {
+        /** @var  $resultset ?T */
+        $resultset = $this->cached_results[ $cache_key_name ] ?? null;
         if ( $resultset == null ) {
-            $resultset = $this->cached_results[ $method_name ] = call_user_func( $function, $params );
+            /** @var  $resultset ?T */
+            $resultset = $this->cached_results[ $cache_key_name ] = call_user_func( $function );
         }
 
         return $resultset;
@@ -114,6 +115,5 @@ abstract class AbstractDaoObjectStruct extends stdClass implements IDaoStruct, C
 
         return count( $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) );
     }
-
 
 } 

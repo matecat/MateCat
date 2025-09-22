@@ -2,7 +2,7 @@
 
 namespace TestHelpers;
 
-use IDatabase;
+use Model\DataAccess\IDatabase;
 use PHPUnit\Framework\TestCase;
 
 /**

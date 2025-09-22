@@ -1,5 +1,5 @@
 import {saveAs} from 'file-saver'
-import {Base64} from 'js-base64'
+// import {Base64} from 'js-base64'
 
 /**
  * Export TMX
@@ -25,6 +25,6 @@ export const downloadFile = async ({
   let filename = parts[1].split('=')[1]
   filename = filename.replace(/"/g, '')
   const blob = await response.blob()
-  saveAs(blob, Base64.decode(filename))
+  saveAs(blob, filename)
   return Promise.resolve()
 }
