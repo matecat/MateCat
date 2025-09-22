@@ -832,6 +832,7 @@ class ProjectManager {
                         throw new Exception( "Failed to find converted Xliff", -3 );
                     }
 
+
                     $filesStructure = $this->_insertFiles( $_originalFileNames, $sha1_original, $cachedXliffFilePathName );
 
                     if ( count( $filesStructure ) === 0 ) {
