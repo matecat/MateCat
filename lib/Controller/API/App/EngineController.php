@@ -371,11 +371,12 @@ class EngineController extends KleinController {
 
         $this->response->json( [
                 'data'   => [
-                        'id'          => $newCreatedDbRowStruct->id,
-                        'name'        => $newCreatedDbRowStruct->name,
-                        'description' => $newCreatedDbRowStruct->description,
-                        'type'        => $newCreatedDbRowStruct->type,
-                        'engine_type' => $engine_type,
+                        'id'               => $newCreatedDbRowStruct->id,
+                        'name'             => $newCreatedDbRowStruct->name,
+                        'description'      => $newCreatedDbRowStruct->description,
+                        'type'             => $newCreatedDbRowStruct->type,
+                        'extra_parameters' => $newEngineStruct->extra_parameters,
+                        'engine_type'      => $engine_type,
                 ],
                 'errors' => [],
         ] );
