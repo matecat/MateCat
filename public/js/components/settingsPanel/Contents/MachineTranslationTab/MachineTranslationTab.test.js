@@ -135,7 +135,7 @@ test('Add MT', async () => {
   await userEvent.click(select)
   const container = screen.getByTestId('add-mt-provider')
   engineListMock.forEach((en) => {
-    const mtName = within(container).getByText(en.name)
+    const mtName = within(container).getAllByText(en.name)[0]
     expect(mtName).toBeInTheDocument()
   })
 })
@@ -434,7 +434,6 @@ test('DeepL and glossary', async () => {
 
   await user.click(screen.getByText('Formal'))
 
-  console.log(modifiedTemplate, currentProjectTemplate)
   expect(modifiedTemplate).toEqual({
     ...currentProjectTemplate,
     mt: {

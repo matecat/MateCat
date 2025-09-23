@@ -4,7 +4,9 @@ import {Controller} from 'react-hook-form'
 import Switch from '../../../../common/Switch'
 import {Select} from '../../../../common/Select'
 
-const PROVIDERS = Object.values(config.intento_providers)
+const PROVIDERS = config.intento_providers
+  ? Object.values(config.intento_providers)
+  : []
 
 export const IntentoOptions = () => {
   const {control} = useOptions()

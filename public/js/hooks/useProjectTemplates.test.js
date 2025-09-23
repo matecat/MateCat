@@ -29,7 +29,7 @@ beforeEach(() => {
 
 test('Get templates', async () => {
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
 
   await waitFor(() => {
@@ -42,7 +42,7 @@ test('Get templates', async () => {
 
 test('Change current template', async () => {
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
   const {setProjectTemplates} = result.current
 
@@ -64,7 +64,7 @@ test('Change current template', async () => {
 
 test('Modyfing current template', async () => {
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
   const {modifyingCurrentTemplate} = result.current
 
@@ -97,7 +97,7 @@ test('Modyfing current template', async () => {
 
 test('Modifyng current template with wrong prop', async () => {
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
   const {modifyingCurrentTemplate} = result.current
 
@@ -117,7 +117,7 @@ test('Modifyng current template with wrong prop', async () => {
 
 test('Check is modified specific property', async () => {
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
   const {modifyingCurrentTemplate, checkSpecificTemplatePropsAreModified} =
     result.current
@@ -146,7 +146,7 @@ test('Cattool page', async () => {
   global.config.is_cattool = true
 
   const {result} = renderHook(() =>
-    useProjectTemplates({tmKeys: tmKeysMock.tm_keys}),
+    useProjectTemplates({tmKeys: tmKeysMock.tm_keys, mtEngines: []}),
   )
 
   await waitFor(() => {
