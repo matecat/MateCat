@@ -45,6 +45,12 @@ class SetContributionWorker extends AbstractWorker {
         $this->_engine = $_tms;
     }
 
+    private function toSetContributionRequest( QueueElement $queueElement ): SetContributionRequest {
+        $queueElement->params->jobStruct = new JobStruct( $queueElement->params->jobStruct->toArray() );
+
+        return new SetContributionRequest( $queueElement->params->toArray() );
+    }
+
     /**
      * @param AbstractElement $queueElement
      *
@@ -60,11 +66,11 @@ class SetContributionWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $contributionStruct = new SetContributionRequest( $queueElement->params->toArray() );
-
         $this->_checkDatabaseConnection();
 
-        $this->_execContribution( $contributionStruct );
+        $this->_execContribution(
+                $this->toSetContributionRequest( $queueElement )
+        );
 
     }
 
@@ -78,10 +84,6 @@ class SetContributionWorker extends AbstractWorker {
     protected function _execContribution( SetContributionRequest $contributionStruct ) {
 
         $jobStruct = $contributionStruct->getJobStruct();
-
-        if($jobStruct === null){
-            return;
-        }
 
         $this->_loadEngine( $jobStruct );
 
