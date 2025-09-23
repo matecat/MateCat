@@ -51,7 +51,7 @@ T;
         /**
          * creation of the engine
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
 
 
@@ -68,9 +68,8 @@ T;
         $this->assertFalse( isset( $result->responseDetails ) );
         $this->assertFalse( isset( $result->responseData ) );
 
-        $this->assertTrue( $result->error instanceof ErrorResponse );
-        $this->assertEquals( 0, $result->error->code );
-        $this->assertEquals( "", $result->error->message );
+        $this->assertNull( $result->error  );
+
         /**
          * check of protected property
          */
@@ -102,7 +101,7 @@ T;
                         'message'  => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
                         'response' => "",
                 ],
-                'responseStatus' => 0
+                'responseStatus' => 401
         ];
 
 
@@ -120,7 +119,7 @@ T;
          * creation of the engine
          * @var Match
          */
-        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->setMethods( [ '_call' ] )->getMock();
+        $engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
 
         $engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $rawValue_error );
 

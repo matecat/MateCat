@@ -9,6 +9,7 @@ use Controller\Traits\APISourcePageGuesserTrait;
 use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\Database;
 use Model\EditLog\EditLogSegmentStruct;
 use Model\Exceptions\NotFoundException;
@@ -145,8 +146,8 @@ class SetTranslationController extends AbstractStatefulKleinController {
 
             $old_translation = $this->getOldTranslation();
 
-            $client_suggestion_array = json_decode( $this->data[ 'suggestion_array' ] );
-            $client_old_suggestion   = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
+            $client_suggestion_array  = json_decode( $this->data[ 'suggestion_array' ] );
+            $client_chosen_suggestion = $this->data[ 'chosen_suggestion_index' ] !== null ? $client_suggestion_array[ $this->data[ 'chosen_suggestion_index' ] - 1 ] : null;
 
             $new_translation                         = new SegmentTranslationStruct();
             $new_translation->id_segment             = $this->data[ 'id_segment' ];
@@ -164,12 +165,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
             $new_translation->suggestion_match       = $old_translation->suggestion_match;
 
             // update suggestion
-            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_old_suggestion ) ) {
+            if ( $this->canUpdateSuggestion( $new_translation, $old_translation, $client_chosen_suggestion ) ) {
 
-                $new_translation->suggestion = !empty( $client_old_suggestion ) ? $client_old_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
+                $new_translation->suggestion = !empty( $client_chosen_suggestion ) ? $client_chosen_suggestion->raw_translation : $old_translation->suggestion; //IMPORTANT: raw_translation is in layer 0 and suggestion too
 
                 // update suggestion match
-                if ( $client_old_suggestion->match == "MT" ) {
+                if ( $client_chosen_suggestion->match == EngineConstants::MT ) {
 
                     /**
                      * @var $project ProjectStruct
@@ -178,12 +179,12 @@ class SetTranslationController extends AbstractStatefulKleinController {
                     // case 1. is MT
                     $new_translation->suggestion_match  = $project->getMetadataValue( MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ) ?? 85;
                     $new_translation->suggestion_source = EngineConstants::MT;
-                } elseif ( $client_old_suggestion->match == 'NO_MATCH' ) {
+                } elseif ( $client_chosen_suggestion->match == InternalMatchesConstants::NO_MATCH ) {
                     // case 2. no match
-                    $new_translation->suggestion_source = 'NO_MATCH';
+                    $new_translation->suggestion_source = InternalMatchesConstants::NO_MATCH;
                 } else {
                     // case 3. otherwise is TM
-                    $new_translation->suggestion_match  = (int)$client_old_suggestion->match; // cast '71%' to int 71
+                    $new_translation->suggestion_match  = (int)$client_chosen_suggestion->match; // cast '71%' to int 71
                     $new_translation->suggestion_source = EngineConstants::TM;
                 }
             }
@@ -372,7 +373,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 } catch ( Exception $e ) {
                     $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
                     $redisHandler->getConnection()->del( 'job_completeness:' . $this->data[ 'id_job' ] );
-                    $this->log( $msg );
+                    $this->logger->debug( $msg );
                 }
 
             }
@@ -483,7 +484,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
                 'project'                 => $chunk->getProject()
         ];
 
-        $this->log( $data );
+        $this->logger->debug( $data );
 
         return $data;
     }
@@ -526,7 +527,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         [ $__translation, $this->data[ 'split_chunk_lengths' ] ] = CatUtils::parseSegmentSplit( $this->data[ 'translation' ], '', $this->filter );
 
         if ( is_null( $__translation ) || $__translation === '' ) {
-            $this->log( "Empty Translation \n\n" . var_export( $_POST, true ) );
+            $this->logger->debug( "Empty Translation \n\n" . var_export( $_POST, true ) );
             throw new RuntimeException( "Empty Translation \n\n" . var_export( $_POST, true ), 0 );
         }
 
@@ -667,17 +668,18 @@ class SetTranslationController extends AbstractStatefulKleinController {
             return false;
         }
 
-        $allowedStatuses = [
+        if ( !in_array( $new_translation->status, [
                 TranslationStatus::STATUS_NEW,
                 TranslationStatus::STATUS_DRAFT,
                 TranslationStatus::STATUS_TRANSLATED,
-        ];
-
-        if ( !in_array( $new_translation->status, $allowedStatuses ) ) {
+        ] ) ) {
             return false;
         }
 
-        if ( !in_array( $old_translation->status, $allowedStatuses ) ) {
+        if ( !in_array( $old_translation->status, [
+                TranslationStatus::STATUS_NEW,
+                TranslationStatus::STATUS_DRAFT,
+        ] ) ) {
             return false;
         }
 
@@ -782,12 +784,18 @@ class SetTranslationController extends AbstractStatefulKleinController {
     }
 
     /**
-     * @param $_Translation
-     * @param $old_translation
+     * @param SegmentTranslationStruct $_Translation
+     * @param SegmentTranslationStruct $old_translation
      *
+     * @throws AuthenticationError
+     * @throws EndQueueException
+     * @throws NotFoundException
+     * @throws ReQueueException
+     * @throws ReflectionException
+     * @throws ValidationError
      * @throws Exception
      */
-    private function evalSetContribution( $_Translation, $old_translation ): void {
+    private function evalSetContribution( SegmentTranslationStruct $_Translation, SegmentTranslationStruct $old_translation ): void {
         if ( in_array( $this->data[ 'status' ], [
                 TranslationStatus::STATUS_DRAFT,
                 TranslationStatus::STATUS_NEW
@@ -814,6 +822,7 @@ class SetTranslationController extends AbstractStatefulKleinController {
         $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
         $contributionStruct->oldSegment           = $this->filter->fromLayer0ToLayer1( $this->data[ 'segment' ][ 'segment' ] ); //
         $contributionStruct->oldTranslation       = $this->filter->fromLayer0ToLayer1( $old_translation[ 'translation' ] );
+        $contributionStruct->translation_origin   = $this->getOriginalSuggestionProvider( $_Translation, $old_translation );
 
         /*
          * This parameter is not used by the application, but we use it to for information integrity
@@ -850,4 +859,47 @@ class SetTranslationController extends AbstractStatefulKleinController {
             Set::contributionMT( $contributionStruct );
         }
     }
+
+    /**
+     * Determines the original suggestion provider for a given segment translation.
+     *
+     * This method evaluates the suggestion array and position based on the status
+     * of the old translation. If the old translation's status is `STATUS_NEW` or
+     * `STATUS_DRAFT`, it retrieves the `created_by` field from the suggestion array
+     * of the new translation. The provider information is extracted from the
+     * `created_by` field.
+     *
+     * - If the `suggestion_position` is set, the `created_by` field is retrieved
+     *   from the corresponding suggestion.
+     * - If the `suggestion_position` is not set, the first suggestion in the array
+     *   is used as a fallback.
+     * - If no valid `created_by` field is found, the default value is `EngineConstants::MT`.
+     *
+     * @param SegmentTranslationStruct $new_translation The new translation structure containing the suggestion array.
+     * @param SegmentTranslationStruct $old_translation The old translation structure used to determine the status.
+     *
+     * @return string The original translation provider extracted from the `created_by` field, or a default value if unavailable.
+     */
+    protected function getOriginalSuggestionProvider( SegmentTranslationStruct $new_translation, SegmentTranslationStruct $old_translation ): string {
+
+        // Default to Translation Memory (TM) as the provider.
+        $created_by = EngineConstants::TM;
+
+        // Check if the old translation's status is `STATUS_NEW` or `STATUS_DRAFT`.
+        if ( in_array( $old_translation->status, [ TranslationStatus::STATUS_NEW, TranslationStatus::STATUS_DRAFT ] ) ) {
+            // Decode the suggestion array from the new translation.
+            $suggestion_array = json_decode( $new_translation->suggestions_array );
+
+            // Retrieve the `created_by` field based on the suggestion position, or use the first suggestion as a fallback.
+            if ( $new_translation->suggestion_position ) {
+                $created_by = $suggestion_array[ $new_translation->suggestion_position - 1 ]->created_by ?? EngineConstants::MT;
+            } else {
+                $created_by = $suggestion_array[ 0 ]->created_by ?? EngineConstants::MT;
+            }
+        }
+
+        // Extract and return the provider information from the `created_by` field.
+        return $created_by == EngineConstants::TM ? $created_by : explode( '-', $created_by )[ 1 ] ?? EngineConstants::MT;
+    }
+
 }

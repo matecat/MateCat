@@ -3,6 +3,9 @@
 namespace Controller\API\App;
 
 use Controller\Abstracts\KleinController;
+use Controller\API\Commons\Exceptions\AuthorizationError;
+use Controller\API\Commons\Exceptions\NotFoundException;
+use Controller\API\Commons\Exceptions\ValidationError;
 use DomainException;
 use Exception;
 use Model\TmKeyManagement\UserKeysModel;
@@ -12,12 +15,10 @@ use Swaggest\JsonSchema\InvalidValue;
 use Utils\ActiveMQ\WorkerClient;
 use Utils\AsyncTasks\Workers\GlossaryWorker;
 use Utils\Langs\Languages;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TmKeyManagement\ClientTmKeyStruct;
 use Utils\TmKeyManagement\Filter;
 use Utils\Tools\CatUtils;
-use Utils\Tools\Utils;
 use Utils\Validator\JSONSchema\Errors\JSONValidatorException;
 use Utils\Validator\JSONSchema\Errors\JsonValidatorGenericException;
 use Utils\Validator\JSONSchema\JSONValidator;
@@ -363,6 +364,8 @@ class GlossaryController extends KleinController {
     /**
      * @param array               $keys
      * @param ClientTmKeyStruct[] $userKeys
+     *
+     * @throws Exception
      */
     private function checkWritePermissions( array $keys, array $userKeys ) {
         $allowedKeys = [];
@@ -376,34 +379,24 @@ class GlossaryController extends KleinController {
 
             // check if $key is allowed
             if ( !in_array( $key, $allowedKeys ) ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " does not belong to this job"
-                ] );
-                die();
+                throw new NotFoundException( "Key " . $key . " does not belong to this job" );
             }
 
             // check key permissions
-            $keyIsUse = array_filter( $userKeys, function ( ClientTmKeyStruct $userKey ) use ( $key ) {
-                return $userKey->key === $key;
-            } )[ 0 ];
+            $keyIsUse = array_values(
+                    array_filter( $userKeys, function ( ClientTmKeyStruct $userKey ) use ( $key ) {
+                        return $userKey->key === $key;
+                    } )
+            )[ 0 ];
 
             // is a glossary key?
             if ( $keyIsUse->glos === false ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " is not a glossary key"
-                ] );
-                die();
+                throw new NotFoundException( "Key " . $key . " is not a glossary key" );
             }
 
             // write permissions?
             if ( $keyIsUse->edit === false || empty( $keyIsUse->w ) ) {
-                $this->response->code( 500 );
-                $this->response->json( [
-                        'error' => "Key " . $key . " has not write permissions"
-                ] );
-                die();
+                throw new AuthorizationError( "Key " . $key . " has not write permissions" );
             }
         }
     }
@@ -425,28 +418,20 @@ class GlossaryController extends KleinController {
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {
-
             $error = $validator->getExceptions()[ 0 ]->error;
-
-            $this->response->code( 400 );
-            $this->response->json( [
-                    'error' => $error->getMessage()
-            ] );
-            die();
+            throw new JSONValidatorException( $error->getMessage() );
         }
     }
 
     /**
      * @param $language
+     *
+     * @throws ValidationError
      */
     private function validateLanguage( $language ) {
         $languages = Languages::getInstance();
         if ( !$languages->isValidLanguage( $language ) ) {
-            $this->response->code( 500 );
-            $this->response->json( [
-                    'error' => $language . ' is not an allowed language'
-            ] );
-            die();
+            throw new ValidationError( $language . ' is not a valid language' );
         }
     }
 
@@ -459,15 +444,6 @@ class GlossaryController extends KleinController {
      * @throws Exception
      */
     private function enqueueWorker( $queue, $params ) {
-        try {
-            WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-        } catch ( Exception $e ) {
-            # Handle the error, logging, ...
-            $output = "**** Glossary enqueue request failed. AMQ Connection Error. ****\n\t";
-            $output .= "{$e->getMessage()}";
-            $output .= var_export( $params, true );
-            Log::doJsonLog( $output );
-            Utils::sendErrMailReport( $output );
-        }
+        WorkerClient::enqueue( $queue, GlossaryWorker::class, $params, [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
     }
 }

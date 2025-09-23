@@ -11,11 +11,12 @@ use Klein\App;
 use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
-
 use Model\ApiKeys\ApiKeyStruct;
 use Model\FeaturesBase\FeatureSet;
 use ReflectionException;
-use Utils\Logger\Log;
+use Throwable;
+use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 
 abstract class KleinController implements IController {
 
@@ -56,6 +57,8 @@ abstract class KleinController implements IController {
      * @var ?FeatureSet
      */
     protected ?FeatureSet $featureSet = null;
+
+    protected MatecatLogger $logger;
 
     /**
      * @return FeatureSet
@@ -112,6 +115,8 @@ abstract class KleinController implements IController {
         $this->identifyUser( $this->useSession );
         $this->afterConstruct();
 
+        $this->logger = LoggerFactory::getLogger();
+
     }
 
     /**
@@ -126,7 +131,7 @@ abstract class KleinController implements IController {
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function performValidations() {
         $this->validateRequest();
@@ -135,7 +140,7 @@ abstract class KleinController implements IController {
     /**
      * @param string $method
      *
-     * @throws Exception
+     * @throws Exception|Throwable
      */
     public function respond( string $method ) {
 
@@ -159,6 +164,7 @@ abstract class KleinController implements IController {
 
     /**
      * @throws Exception
+     * @throws Throwable
      */
     protected function validateRequest() {
         foreach ( $this->validators as $validator ) {
@@ -206,11 +212,4 @@ abstract class KleinController implements IController {
         ];
     }
 
-    /**
-     * @param      $message
-     * @param null $filename
-     */
-    protected function log( $message, $filename = null ): void {
-        Log::doJsonLog( $message, $filename );
-    }
 }

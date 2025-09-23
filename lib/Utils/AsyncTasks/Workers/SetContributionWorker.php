@@ -16,6 +16,7 @@ use Utils\Contribution\SetContributionRequest;
 use Utils\Engines\AbstractEngine;
 use Utils\Engines\EngineInterface;
 use Utils\Engines\EnginesFactory;
+use Utils\Engines\Lara\Headers;
 use Utils\TaskRunner\Commons\AbstractElement;
 use Utils\TaskRunner\Commons\AbstractWorker;
 use Utils\TaskRunner\Commons\QueueElement;
@@ -178,7 +179,12 @@ class SetContributionWorker extends AbstractWorker {
         $config[ 'translation' ]    = $contributionStruct->oldTranslation;
         $config[ 'context_after' ]  = $contributionStruct->context_after;
         $config[ 'context_before' ] = $contributionStruct->context_before;
-        $config[ 'prop' ]           = json_encode( $contributionStruct->getProp() );
+        $config[ 'prop' ]           = json_encode(
+                array_merge(
+                        $contributionStruct->getProp(),
+                        ( new Headers( $contributionStruct->id_job . ":" . $contributionStruct->id_segment, $contributionStruct->translation_origin ) )->getArrayCopy()
+                )
+        );
         $config[ 'set_mt' ]         = !( ( $id_mt_engine != 1 ) );
 
         $config[ 'newsegment' ]     = $contributionStruct->segment;

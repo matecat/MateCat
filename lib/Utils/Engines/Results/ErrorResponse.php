@@ -13,8 +13,8 @@ class ErrorResponse {
     public function __construct( $result = [] ) {
         if ( !empty( $result ) ) {
             $this->http_code = $result[ 'http_code' ] ?? null;
-            $this->code      = $result[ 'code' ];
-            $this->message   = $result[ 'message' ];
+            $this->code      = $result[ 'code' ] ?? 0;
+            $this->message   = $result[ 'message' ] ?? null;
         }
     }
 

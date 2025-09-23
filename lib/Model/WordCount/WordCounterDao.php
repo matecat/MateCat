@@ -14,7 +14,7 @@ use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use PDO;
 use PDOException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class WordCounterDao extends AbstractDao {
 
@@ -73,7 +73,7 @@ class WordCounterDao extends AbstractDao {
             $stmt = $db->getConnection()->prepare( $query );
             $stmt->execute( $bind_keys );
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
 
             return $e->getCode() * -1;
         }
@@ -109,7 +109,7 @@ class WordCounterDao extends AbstractDao {
         try {
             $db->update( 'jobs', $data, $where );
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
 
             return $e->getCode() * -1;
         }

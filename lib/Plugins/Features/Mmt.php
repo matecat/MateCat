@@ -36,7 +36,7 @@ use Utils\Engines\AbstractEngine;
 use Utils\Engines\EnginesFactory;
 use Utils\Engines\MMT as MMTEngine;
 use Utils\Engines\MMT\MMTServiceApiException;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -192,7 +192,7 @@ class Mmt extends BaseFeature {
             $keyList = $_keyDao->read( $dh );
         } catch ( Exception $e ) {
             $keyList = [];
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
         }
 
         return $keyList;

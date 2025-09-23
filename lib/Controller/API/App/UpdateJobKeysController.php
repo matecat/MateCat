@@ -134,8 +134,8 @@ class UpdateJobKeysController extends KleinController {
 
         $totalTmKeys = TmKeyManager::mergeJsonKeys( $tm_keys, $request[ 'jobData' ][ 'tm_keys' ], $userRole, $this->user->uid );
 
-        $this->log( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
-        $this->log( 'After: ' . json_encode( $totalTmKeys ) );
+        $this->logger->debug( 'Before: ' . $request[ 'jobData' ][ 'tm_keys' ] );
+        $this->logger->debug( 'After: ' . json_encode( $totalTmKeys ) );
 
         if ( $this->jobOwnerIsMe( $request[ 'jobData' ][ 'owner' ] ) ) {
             $request[ 'jobData' ][ 'only_private_tm' ] = $request[ 'only_private' ];
@@ -172,6 +172,11 @@ class UpdateJobKeysController extends KleinController {
             $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'character_counter_mode', $request[ 'character_counter_mode' ] );
         }
 
+        // update character_counter_mode job metadata
+        if ( $request[ 'public_tm_penalty' ] !== null ) {
+            $jobsMetadataDao->set( $request[ 'job_id' ], $request[ 'job_pass' ], 'public_tm_penalty', $request[ 'public_tm_penalty' ] );
+        }
+
         $this->response->json( [
                 'data' => 'OK'
         ] );
@@ -187,6 +192,7 @@ class UpdateJobKeysController extends KleinController {
         $character_counter_mode       = ( $this->request->param( 'character_counter_mode' ) !== null ) ? filter_var( $this->request->param( 'character_counter_mode' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] ) : null;
         $character_counter_count_tags = ( $this->request->param( 'character_counter_count_tags' ) !== null ) ? filter_var( $this->request->param( 'character_counter_count_tags' ), FILTER_VALIDATE_BOOLEAN ) : null;
         $tm_prioritization            = ( $this->request->param( 'tm_prioritization' ) !== null ) ? filter_var( $this->request->param( 'tm_prioritization' ), FILTER_VALIDATE_BOOLEAN ) : null;
+        $public_tm_penalty            = ( $this->request->param( 'public_tm_penalty' ) !== null ) ? filter_var( $this->request->param( 'public_tm_penalty' ), FILTER_VALIDATE_INT ) : null;
         $job_id                       = filter_var( $this->request->param( 'job_id' ), FILTER_SANITIZE_NUMBER_INT );
         $job_pass                     = filter_var( $this->request->param( 'job_pass' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
         $current_password             = filter_var( $this->request->param( 'current_password' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ] );
@@ -200,6 +206,10 @@ class UpdateJobKeysController extends KleinController {
 
         if ( empty( $job_pass ) ) {
             throw new InvalidArgumentException( "Job password missing", -2 );
+        }
+
+        if($public_tm_penalty < 0 || $public_tm_penalty > 100){
+            throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }
 
         // Get Job Info, we need only a row of job
@@ -220,6 +230,7 @@ class UpdateJobKeysController extends KleinController {
                 'job_pass'                     => $job_pass,
                 'jobData'                      => $jobData,
                 'current_password'             => $current_password,
+                'public_tm_penalty'            => $public_tm_penalty,
                 'get_public_matches'           => $get_public_matches,
                 'tm_keys'                      => $tm_keys, // this will be filtered inside the TmKeyManagement class
                 'only_private'                 => !$get_public_matches,
