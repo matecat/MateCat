@@ -3683,6 +3683,36 @@
         {
             "localized": [
                 {
+                    "en": "Pökoot (Kenya)"
+                }
+            ],
+            "isocode": "pko",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pko-KE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Pökoot (Uganda)"
+                }
+            ],
+            "isocode": "pko",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pko-UG",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Potawatomi"
                 }
             ],
