@@ -52,6 +52,11 @@ class ConversionHandler {
     protected ?bool $legacy_icu;
 
     /**
+     * @var bool|null
+     */
+    protected ?bool $legacy_icu;
+
+    /**
      * ConversionHandler constructor.
      */
     public function __construct() {

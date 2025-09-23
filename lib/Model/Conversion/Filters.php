@@ -158,7 +158,6 @@ class Filters {
      * @return mixed
      */
     public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false ) {
-
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -170,6 +169,12 @@ class Filters {
                 'segmentation' => $segmentation,
                 'utf8FileName' => $filename
         ];
+
+        // The legacy_icu option overrides any other extractionParams
+        if ( $legacy_icu === true ) {
+            $extractionParams = [];
+            $extractionParams[ 'legacy_icu' ] = true;
+        }
 
         if ( $extractionParams !== null ) {
             $data[ 'extractionParams' ] = json_encode( $extractionParams );
