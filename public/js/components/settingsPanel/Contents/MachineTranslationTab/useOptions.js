@@ -60,8 +60,6 @@ function useOptions() {
       )
   }, [currentProjectTemplate.mt?.id, setValue])
 
-  console.log(formData)
-
   return {control, setValue}
 }
 

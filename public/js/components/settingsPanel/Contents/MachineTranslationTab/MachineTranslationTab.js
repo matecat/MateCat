@@ -23,8 +23,6 @@ import {DeleteResource} from './DeleteResource'
 import ModalsActions from '../../../../actions/ModalsActions'
 import {ConfirmDeleteResourceProjectTemplates} from '../../../modals/ConfirmDeleteResourceProjectTemplates'
 import {SCHEMA_KEYS} from '../../../../hooks/useProjectTemplates'
-import IconClose from '../../../icons/IconClose'
-import {BUTTON_TYPE, Button} from '../../../common/Button/Button'
 import {Lara} from './MtEngines/Lara'
 import {OptionsContainer} from './OptionsContainer'
 import {ApplicationThreshold} from './ApplicationThreshold'
@@ -103,8 +101,9 @@ export const MachineTranslationTab = () => {
   )
   const [activeAddEngine, setActiveAddEngine] = useState(() => {
     const initialState =
-      typeof engineIdFromFromQueryString === 'string' &&
-      enginesList.find((mt) => mt.id === engineIdFromFromQueryString)
+      typeof engineIdFromFromQueryString === 'string'
+        ? enginesList.find((mt) => mt.id === engineIdFromFromQueryString)
+        : enginesList.find(({id}) => id === 'mmt')
 
     engineIdFromFromQueryString = false
     return initialState
@@ -315,16 +314,11 @@ export const MachineTranslationTab = () => {
                 setError()
               }}
             />
-            <Button
-              type={BUTTON_TYPE.WARNING}
-              onClick={() => setAddMTVisible(false)}
-            >
-              <IconClose size={11} />
-            </Button>
           </div>
           {activeAddEngine ? (
             <activeAddEngine.component
               addMTEngine={addMTEngineRequest}
+              setAddMTVisible={setAddMTVisible}
               error={error}
               isRequestInProgress={isAddMTEngineRequestInProgress}
             />

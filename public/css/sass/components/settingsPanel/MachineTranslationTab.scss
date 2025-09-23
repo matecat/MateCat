@@ -49,10 +49,10 @@
     display: flex;
     padding-top: 15px;
     align-items: flex-start;
+    gap: 40px;
     .add-provider-fields {
       width: 50%;
       text-align: left;
-      padding: 15px 15px 0 0;
       .provider-data {
         //&.provider-data-lara {
         //  .provider-field:last-child {
@@ -110,15 +110,24 @@
         .mt-error {
           color: colors.$redDefault;
         }
+
+        &.container-actions {
+          flex-direction: row;
+          justify-content: flex-end;
+          gap: 8px;
+        }
       }
     }
     .add-provider-message {
       width: 50%;
       text-align: left;
-      padding: 15px;
-      background: colors.$grey5;
+      padding: 16px;
+      background: colors.$grey4;
       display: flex;
       flex-direction: column;
+      border: 1px solid colors.$grey3;
+      border-radius: 8px;
+
       .button {
         margin-top: 20px;
       }
@@ -126,6 +135,7 @@
         list-style: circle;
         padding-left: 25px;
         padding-top: 6px;
+        margin-bottom: 16px;
       }
       p {
         line-height: 26px;
@@ -137,6 +147,15 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .green-button {
+    background-color: #33b079 !important;
+    color: white !important;
+
+    &:hover {
+      background-color: rgba($color: #33b079, $alpha: 0.9) !important;
+    }
   }
 }
 .machine-translation-tab-table-title {
@@ -198,10 +217,6 @@
     height: 37px;
   }
 
-  .add-mt-provider .select-with-label__wrapper {
-    margin-right: 30px;
-  }
-
   .provider-license-label-with-icon {
     display: flex;
     gap: 5px;
@@ -212,7 +227,7 @@
       margin-top: 62px !important;
     }
 
-    .provider-field {
+    .provider-field:not(.container-actions) {
       gap: 15px !important;
     }
   }
