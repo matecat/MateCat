@@ -25,6 +25,7 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
+use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
@@ -123,9 +124,14 @@ class GetContributionController extends KleinController {
             $contributionRequest->userRole = Filter::ROLE_TRANSLATOR;
         }
 
-        $jobsMetadataDao = new MetadataDao();
-        $dialect_strict  = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
-        $mt_evaluation   = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $jobsMetadataDao   = new MetadataDao();
+        $dialect_strict    = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'dialect_strict', 10 * 60 );
+        $mt_evaluation     = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'mt_evaluation', 10 * 60 );
+        $public_tm_penalty = $jobsMetadataDao->get( $jobStruct->id, $jobStruct->password, 'public_tm_penalty', 10 * 60 );
+
+        if ( $public_tm_penalty !== null ) {
+            $contributionRequest->public_tm_penalty = (int)$public_tm_penalty->value;
+        }
 
         if ( $dialect_strict !== null ) {
             $contributionRequest->dialect_strict = $dialect_strict->value == 1;
@@ -145,22 +151,6 @@ class GetContributionController extends KleinController {
             $contributionRequest->resultNum = 10;
         }
 
-        // penalty_key
-        $penalty_key = [];
-        $tmKeys      = json_decode( $jobStruct->tm_keys, true );
-
-        foreach ( $tmKeys as $tmKey ) {
-            if ( isset( $tmKey[ 'penalty' ] ) and is_numeric( $tmKey[ 'penalty' ] ) ) {
-                $penalty_key[] = $tmKey[ 'penalty' ];
-            } else {
-                $penalty_key[] = 0;
-            }
-        }
-
-        if ( !empty( $penalty_key ) ) {
-            $contributionRequest->penalty_key = $penalty_key;
-        }
-
         Get::contribution( $contributionRequest );
 
         $this->response->json( [
@@ -178,7 +168,6 @@ class GetContributionController extends KleinController {
                                 'userRole'          => $contributionRequest->userRole,
                                 'tm_prioritization' => $contributionRequest->tm_prioritization,
                                 'mt_evaluation'     => $contributionRequest->mt_evaluation,
-                                'penalty_key'       => $contributionRequest->penalty_key,
                                 'crossLangTargets'  => $contributionRequest->crossLangTargets,
                                 'fromTarget'        => $contributionRequest->fromTarget,
                                 'dialect_strict'    => $contributionRequest->dialect_strict,

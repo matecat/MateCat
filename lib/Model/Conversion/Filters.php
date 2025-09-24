@@ -148,15 +148,16 @@ class Filters {
     /**
      * Convert the source file to XLIFF
      *
-     * @param string    $filePath
-     * @param string    $sourceLang
-     * @param string    $targetLang
-     * @param ?string   $segmentation
-     * @param IDto|null $extractionParams
+     * @param string      $filePath
+     * @param string      $sourceLang
+     * @param string      $targetLang
+     * @param string|null $segmentation
+     * @param IDto|null   $extractionParams
+     * @param bool|null   $legacy_icu
      *
      * @return mixed
      */
-    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null ) {
+    public static function sourceToXliff( string $filePath, string $sourceLang, string $targetLang, ?string $segmentation = null, IDto $extractionParams = null, ?bool $legacy_icu = false ) {
         $basename  = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = AbstractFilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
         $filename  = "$basename.$extension";
@@ -169,9 +170,20 @@ class Filters {
                 'utf8FileName' => $filename
         ];
 
+        // The legacy_icu option overrides any other extractionParams
+        if ( $legacy_icu === true ) {
+            $extractionParams = [];
+            $extractionParams[ 'legacy_icu' ] = true;
+        }
+
         if ( $extractionParams !== null ) {
             $data[ 'extractionParams' ] = json_encode( $extractionParams );
         }
+
+        if ( $legacy_icu === true ) {
+            $data[ 'legacy_icu' ] = true;
+        }
+
 
         $filtersResponse = self::sendToFilters( [ $data ], self::SOURCE_TO_XLIFF_ENDPOINT );
 

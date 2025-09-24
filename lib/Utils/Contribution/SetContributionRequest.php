@@ -11,13 +11,8 @@ namespace Utils\Contribution;
 
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\DataAccess\AbstractDaoObjectStruct;
-use Model\DataAccess\Database;
 use Model\DataAccess\IDaoStruct;
-use Model\Exceptions\ValidationError;
-use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
-use Model\Users\UserDao;
-use Model\Users\UserStruct;
 use Utils\Constants\TranslationStatus;
 use Utils\TaskRunner\Commons\Params;
 
@@ -124,35 +119,24 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
     public string $translation_origin = InternalMatchesConstants::TM;
 
     /**
-     * Global-Cached record for jobs metadata
+     * @var JobStruct
+     */
+    public JobStruct $jobStruct;
+
+    /**
+     * Retrieves the `JobStruct` object associated with this instance.
      *
-     * WARNING these values are cached only globally and not locally by the "cachable" method (in the running process)
-     * because we want to control the cache eviction from other entrypoints.
+     * This method provides access to the `JobStruct` object, which contains
+     * detailed information about the job related to this contribution request.
      *
-     * @return JobStruct
-     *
-     * @throws ValidationError
+     * @return JobStruct The `JobStruct` instance associated with this object.
      */
     public function getJobStruct(): JobStruct {
-
-        if ( empty( $this->id_job ) ) {
-            throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );
-        }
-
-        return $this->cachable( __METHOD__, function () {
-            $JobDao              = new JobDao( Database::obtain() );
-            $jobStruct           = new JobStruct();
-            $jobStruct->id       = $this->id_job;
-            $jobStruct->password = $this->job_password;
-
-            return $JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct )[ 0 ];
-        } );
-
+        return $this->jobStruct;
     }
 
     /**
      * @return array
-     * @throws ValidationError
      */
     public function getProp(): array {
         $jobStruct = $this->getJobStruct();
@@ -165,41 +149,6 @@ class SetContributionRequest extends AbstractDaoObjectStruct implements IDaoStru
         }
 
         return array_merge( $jobStruct->getTMProps(), $props );
-    }
-
-    /**
-     * Global and Local Cached record for user metadata
-     *
-     * WARNING these values are cached
-     *
-     * @return mixed
-     *
-     * @throws ValidationError
-     */
-    public function getUserInfo() {
-
-        if ( empty( $this->uid ) ) {
-            throw new ValidationError( "Property " . get_class( $this ) . "::uid required." );
-        }
-
-        return $this->cachable( __METHOD__, function () {
-            $userDao              = new UserDao( Database::obtain() );
-            $userCredentials      = new UserStruct();
-            $userCredentials->uid = $this->uid;
-
-            return $userDao->setCacheTTL( 60 * 60 * 24 * 30 )->read( $userCredentials );
-        } );
-
-    }
-
-    public function getProject() {
-
-        return $this->cachable( __METHOD__, function () {
-            $jobStruct = $this->getJobStruct();
-
-            return $jobStruct->getProject( 60 * 60 * 24 );
-        } );
-
     }
 
     /**

@@ -9,6 +9,7 @@
  */
 
 use Model\DataAccess\Database;
+use Model\Jobs\JobStruct;
 use TestHelpers\AbstractTest;
 use Utils\ActiveMQ\AMQHandler;
 use Utils\ActiveMQ\WorkerClient;
@@ -108,6 +109,7 @@ class SetContributionTest extends AbstractTest {
     public function testSetContributionEnqueue() {
 
         $contributionStruct                       = new SetContributionRequest();
+        $contributionStruct->jobStruct            = new JobStruct();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->id_file              = 1999999;
@@ -148,6 +150,7 @@ class SetContributionTest extends AbstractTest {
     public function testSetContributionEnqueueException() {
 
         $contributionStruct                       = new SetContributionRequest();
+        $contributionStruct->jobStruct            = new JobStruct();
         $contributionStruct->fromRevision         = true;
         $contributionStruct->id_job               = 1999999;
         $contributionStruct->id_file              = 1999999;

@@ -4,7 +4,6 @@ namespace Utils\OutsourceTo;
 
 use Controller\Abstracts\Authentication\SessionStarter;
 use Exception;
-
 use Model\Analysis\Status;
 use Model\Jobs\JobDao;
 use Model\Jobs\JobStruct;
@@ -417,7 +416,7 @@ class Translated extends AbstractProvider {
      * @param string $subject
      * @param array  $apiCallResult
      *
-     * @return \Utils\Shop\ItemHTSQuoteJob
+     * @return ItemHTSQuoteJob
      */
     private function __prepareOutsourcedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): ?ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
@@ -475,7 +474,7 @@ class Translated extends AbstractProvider {
      * @param string $subject
      * @param array  $apiCallResult
      *
-     * @return \Utils\Shop\ItemHTSQuoteJob
+     * @return ItemHTSQuoteJob
      */
     private function __prepareQuotedJobCart( string $jpid, array $volAnalysis, string $subject, array $apiCallResult ): ItemHTSQuoteJob {
         // $jpid is always in the form "JOBID-JOBPASSWORD-outsourced". Get job id and password from it
@@ -608,8 +607,8 @@ class Translated extends AbstractProvider {
      *  Translated::__addCartElementToCart function.
      *  Moreover, the cart element is added to the array of results, $this->_quote_result
      *
-     * @param \Utils\Shop\ItemHTSQuoteJob $cartElem
-     * @param bool                        $deleteOnPartialMatch
+     * @param ItemHTSQuoteJob $cartElem
+     * @param bool            $deleteOnPartialMatch
      *
      * @see Translated::__addCartElementToCart
      *
@@ -642,9 +641,9 @@ class Translated extends AbstractProvider {
      *      all the data about that job (regardless of the delivery date or whether it was outsourced or not) is deleted.
      *
      *
-     * @param \Utils\Shop\ItemHTSQuoteJob $cartElem
-     * @param string                      $cartName
-     * @param bool                        $deleteOnPartialMatch
+     * @param ItemHTSQuoteJob $cartElem
+     * @param string          $cartName
+     * @param bool            $deleteOnPartialMatch
      *
      * @see Translated::__processOutsourcedJobs for when parameter $deleteOnPartialMatch is set to true
      *

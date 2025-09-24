@@ -7,6 +7,7 @@ namespace Utils\Network;
 
 use LogicException;
 use Utils\Logger\LoggerFactory;
+use Utils\Logger\MatecatLogger;
 
 /**
  * Manager for a Multi Curl connection
@@ -66,17 +67,19 @@ class MultiCurlHandler {
      */
     protected array $multi_curl_log = [];
 
-    public bool $verbose        = false;
-    public bool $high_verbosity = false;
+    public bool            $verbose        = false;
+    public bool            $high_verbosity = false;
+    private ?MatecatLogger $logger;
 
     /**
      * Class Constructor, init the multi curl handler
      *
      */
-    public function __construct() {
+    public function __construct( ?MatecatLogger $logger = null ) {
         $this->multi_handler = curl_multi_init();
         // Default is 10
         curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
+        $this->logger = $logger;
     }
 
     /**
@@ -209,6 +212,11 @@ class MultiCurlHandler {
     }
 
     protected function _log( $logging ) {
+        if ( !empty( $this->logger ) ) {
+            $this->logger->debug( $logging );
+
+            return;
+        }
         LoggerFactory::doJsonLog( $logging );
     }
 

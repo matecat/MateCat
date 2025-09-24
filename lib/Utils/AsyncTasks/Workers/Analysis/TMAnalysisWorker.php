@@ -220,13 +220,13 @@ class TMAnalysisWorker extends AbstractWorker {
         );
         $check->performConsistencyCheck();
 
-        if( !$check->thereAreErrors() ){
+        if ( !$check->thereAreErrors() ) {
             $suggestion = $check->getTrgNormalized();
         } else {
             $suggestion = $check->getTargetSeg();
         }
 
-        $err_json2  = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
+        $err_json2 = ( $check->thereAreErrors() ) ? $check->getErrorsJSON() : '';
 
         $suggestion = $filter->fromLayer1ToLayer0( $suggestion );
 
@@ -558,24 +558,22 @@ class TMAnalysisWorker extends AbstractWorker {
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;
         }
 
+        // public_tm_penalty
+        if ( !empty( $queueElement->params->public_tm_penalty ) ) {
+            $_config[ 'public_tm_penalty' ] = $queueElement->params->public_tm_penalty;
+        }
+
         // penalty_key
-        $penalty_key = [];
-        $tm_keys     = TmKeyManager::getJobTmKeys( $queueElement->params->tm_keys, 'r' );
+        $penalty_map = TmKeyManager::getPenaltyMap( $queueElement->params->tm_keys, 'r' );
 
-        if ( !empty( $tm_keys ) ) {
-            foreach ( $tm_keys as $tm_key ) {
-                $_config[ 'id_user' ][] = $tm_key->key;
-
-                if ( isset( $tm_key->penalty ) ) {
-                    $penalty_key[] = $tm_key->penalty;
-                } else {
-                    $penalty_key[] = 0;
-                }
+        if ( !empty( $penalty_map ) ) {
+            foreach ( $penalty_map as $tm_key ) {
+                $_config[ 'id_user' ][] = $tm_key->key; // set the keyset for the TM engine
             }
         }
 
-        if ( !empty( $penalty_key ) ) {
-            $_config[ 'penalty_key' ] = $penalty_key;
+        if ( !empty( $penalty_map ) ) {
+            $_config[ 'penalty_key' ] = $penalty_map;
         }
 
         $_config[ 'num_result' ] = 3;
@@ -732,6 +730,7 @@ class TMAnalysisWorker extends AbstractWorker {
             // set for lara engine in case this is needed to catch all owner keys
             $config[ 'all_job_tm_keys' ] = $queueElement->params->tm_keys;
             $config[ 'include_score' ]   = $queueElement->params->mt_evaluation ?? false;
+            $config[ 'tuid' ]            = $queueElement->params->id_job . ":" . $queueElement->params->id_segment;
 
             if ( !isset( $config[ 'job_id' ] ) ) {
                 $config[ 'job_id' ] = $queueElement->params->id_job;

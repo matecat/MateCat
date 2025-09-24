@@ -77,30 +77,72 @@ class MatecatLogger implements LoggerInterface {
         return new MatecatLogger( $this->logger->withName( $name ) );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function emergency( $message, array $context = [] ) {
         $this->log( Logger::EMERGENCY, $message, $context );;
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function alert( $message, array $context = [] ) {
         $this->log( Logger::ALERT, $message, $context );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function critical( $message, array $context = [] ) {
         $this->log( Logger::CRITICAL, $message, $context );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function error( $message, array $context = [] ) {
         $this->log( Logger::ERROR, $message, $context );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function warning( $message, array $context = [] ) {
         $this->log( Logger::WARNING, $message, $context );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function notice( $message, array $context = [] ) {
         $this->log( Logger::NOTICE, $message, $context );
     }
 
+    /**
+     * @param mixed $message
+     * @param array $context
+     *
+     * @return void
+     */
     public function info( $message, array $context = [] ) {
         $this->log( Logger::INFO, $message, $context );
     }

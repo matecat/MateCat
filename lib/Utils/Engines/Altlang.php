@@ -7,7 +7,6 @@ use Exception;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Utils\Constants\EngineConstants;
-use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
