@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -114,6 +115,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
         $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
+        $projectStructure[ 'subfiltering' ]                          = $this->data[ 'subfiltering' ];
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
         $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
@@ -218,6 +220,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $project_name            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $source_lang             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $subfiltering            = filter_var( $this->request->param( 'subfiltering' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $job_subject             = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $due_date                = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
         $mt_engine               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
@@ -327,6 +330,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
+        $data[ 'subfiltering' ]                          = ( !empty( $subfiltering ) ) ? $this->validateSubfilteringString( $subfiltering ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -395,6 +399,44 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $public_tm_penalty;
+    }
+
+    /**
+     * @param null $subfiltering
+     *
+     * @return string|null
+     */
+    private function validateSubfilteringString( $subfiltering = null ): ?string {
+
+        if ( !empty( $subfiltering ) ) {
+
+            $allowedTags = [
+                    InjectableFiltersTags::markup,
+                    InjectableFiltersTags::percent_double_curly,
+                    InjectableFiltersTags::twig,
+                    InjectableFiltersTags::ruby_on_rails,
+                    InjectableFiltersTags::double_snail,
+                    InjectableFiltersTags::double_square,
+                    InjectableFiltersTags::dollar_curly,
+                    InjectableFiltersTags::single_curly,
+                    InjectableFiltersTags::objective_c_ns,
+                    InjectableFiltersTags::double_percent,
+                    InjectableFiltersTags::square_sprintf,
+                    InjectableFiltersTags::sprintf,
+            ];
+
+            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
+            $subfilteringArray = explode( ",", $subfiltering );
+            $check             = array_diff( $subfilteringArray, $allowedTags );
+
+            if ( !empty( $check ) ) {
+                foreach ( $check as $tag ) {
+                    throw new InvalidArgumentException( $tag . " is not a valid Subfiltering tag" );
+                }
+            }
+        }
+
+        return $subfiltering;
     }
 
     /**

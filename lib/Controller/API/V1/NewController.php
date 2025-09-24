@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -156,6 +157,7 @@ class NewController extends KleinController {
         $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
         $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
+        $projectStructure[ 'subfiltering' ]             = $request[ 'subfiltering' ];
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
         $projectStructure[ 'public_tm_penalty' ]        = $request[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
@@ -323,6 +325,7 @@ class NewController extends KleinController {
         $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
         $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $subfiltering                              = filter_var( $this->request->param( 'subfiltering' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
@@ -358,6 +361,7 @@ class NewController extends KleinController {
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
         [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
+        $subfiltering                          = $this->validateSubfilteringString( $subfiltering );
         $team                                  = $this->validateTeam( $id_team );
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
@@ -460,6 +464,7 @@ class NewController extends KleinController {
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
                 'legacy_icu'                                => $legacy_icu,
+                'subfiltering'                              => $subfiltering,
         ];
     }
 
@@ -849,6 +854,44 @@ class NewController extends KleinController {
         $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
+    }
+
+    /**
+     * @param null $subfiltering
+     *
+     * @return string|null
+     */
+    private function validateSubfilteringString( $subfiltering = null ): ?string {
+
+        if ( !empty( $subfiltering ) ) {
+
+            $allowedTags = [
+                    InjectableFiltersTags::markup,
+                    InjectableFiltersTags::percent_double_curly,
+                    InjectableFiltersTags::twig,
+                    InjectableFiltersTags::ruby_on_rails,
+                    InjectableFiltersTags::double_snail,
+                    InjectableFiltersTags::double_square,
+                    InjectableFiltersTags::dollar_curly,
+                    InjectableFiltersTags::single_curly,
+                    InjectableFiltersTags::objective_c_ns,
+                    InjectableFiltersTags::double_percent,
+                    InjectableFiltersTags::square_sprintf,
+                    InjectableFiltersTags::sprintf,
+            ];
+
+            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
+            $subfilteringArray = explode( ",", $subfiltering );
+            $check             = array_diff( $subfilteringArray, $allowedTags );
+
+            if ( !empty( $check ) ) {
+                foreach ( $check as $tag ) {
+                    throw new InvalidArgumentException( $tag . " is not a valid Subfiltering tag" );
+                }
+            }
+        }
+
+        return $subfiltering;
     }
 
     /**

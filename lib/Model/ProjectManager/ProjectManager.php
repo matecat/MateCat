@@ -246,7 +246,8 @@ class ProjectManager {
                             'filters_extraction_parameters'          => new RecursiveArrayObject(),
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
-                            'mt_qe_workflow_payable_rate'            => null
+                            'mt_qe_workflow_payable_rate'            => null,
+                            'subfiltering'                           => null,
                     ] );
         }
 
@@ -266,8 +267,9 @@ class ProjectManager {
         }
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
-        $this->filter = $filter;
+        $customHandlers = ( !empty( $this->projectStructure[ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'subfiltering' ] ) : [];
+        $filter         = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [], $customHandlers );
+        $this->filter   = $filter;
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -840,8 +842,8 @@ class ProjectManager {
                     }
 
                     // pdfAnalysis
-                    foreach ($filesStructure as $fid => $fileStructure){
-                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                    foreach ( $filesStructure as $fid => $fileStructure ) {
+                        $pos  = array_search( $fileStructure[ 'original_filename' ], $this->projectStructure[ 'array_files' ] );
                         $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
                         if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
@@ -2778,7 +2780,7 @@ class ProjectManager {
                 //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
                 // Skip the segment and lose the translation if the segment id is not found in the database
-                if( !$segment ) {
+                if ( !$segment ) {
                     continue;
                 }
 
