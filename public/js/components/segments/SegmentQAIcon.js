@@ -2,6 +2,7 @@ import React, {useEffect} from 'react'
 import SegmentStore from '../../stores/SegmentStore'
 import SegmentConstants from '../../constants/SegmentConstants'
 import SegmentActions from '../../actions/SegmentActions'
+import SegmentQA from '../../../img/icons/SegmentQA'
 
 export const SegmentQAIcon = ({sid}) => {
   const [hasGlobalWarnings, setHasGlobalWarnings] = React.useState(false)
@@ -38,7 +39,7 @@ export const SegmentQAIcon = ({sid}) => {
             SegmentActions.openSegment(sid)
           }}
         >
-          <i className="icon-cancel-circle icon"></i>
+          <SegmentQA />
         </div>
       )}
     </>

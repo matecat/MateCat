@@ -317,11 +317,9 @@ a.mbc-view-link:visited {
 .segment-side-buttons .txt {
   /* styles based on .sid 401 style.css */
   cursor: pointer;
-  padding-left: 7px;
-  position: absolute;
-  width: 50px;
+  padding-left: 8px;
+  position: relative;
   display: block !important;
-  top: 0px;
 }
 
 /*
@@ -330,7 +328,18 @@ a.mbc-view-link:visited {
  ******
  */
 .mbc-comment-icon {
-  font-size: 23px;
+  position: relative;
+  background-color: colors.$black100;
+  display: flex;
+  padding: 4px;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  align-self: stretch;
+  cursor: pointer;
+  border-radius: 8px;
+  width: 16px;
+  height: 16px;
 }
 
 /*
@@ -340,24 +349,6 @@ a.mbc-view-link:visited {
  ******
  ******
  */
-
-/*
- ******
- Common highlight element properties
- ******
- */
-.mbc-comment-notification {
-  border: 1px solid #fff;
-  border-radius: 14px;
-  display: block;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 0px 7px;
-  text-align: center;
-  width: 8px;
-  height: 15px;
-  line-height: 1.5;
-}
 
 /*
  Highlight element unique properties
@@ -375,15 +366,6 @@ a.mbc-view-link:visited {
   position: absolute;
 }
 
-/*
- Highlight element in segment unique properties
- */
-.mbc-comment-highlight-segment {
-  left: 35px;
-  position: absolute;
-  top: 5px;
-}
-
 
 /*
  ******
@@ -395,7 +377,7 @@ article .mbc-comment-balloon-outer {
   padding-right: 15px;
   margin-bottom: 30px;
   position: absolute;
-  bottom: -45px;
+  top: -75px;
   width: 100%;
   z-index: 1;
   cursor: auto;

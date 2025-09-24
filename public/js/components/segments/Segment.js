@@ -838,6 +838,7 @@ class Segment extends React.Component {
 
           {/*//!-- TODO: place this element here only if it's not a split --*/}
           <div className="segment-side-buttons">
+            <SegmentQAIcon sid={this.props.segment.sid} />
             {config.comments_enabled &&
             (!this.props.segment.openComments || !this.props.segment.opened) ? (
               <SegmentsCommentsIcon />
@@ -852,7 +853,6 @@ class Segment extends React.Component {
                 {translationIssues}
               </div>
             )}
-            <SegmentQAIcon sid={this.props.segment.sid} />
           </div>
           <div className="segment-side-container">
             {config.comments_enabled && this.props.segment.openComments ? (
