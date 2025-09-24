@@ -79,7 +79,7 @@ body.cattool {
   width: 7%;
   top: 0;
   height: 100%;
-  gap: 8px;
+  gap: 6px;
   .icon-warning-sign.qa-icon {
     background-color: colors.$red800;
     display: flex;
@@ -90,8 +90,8 @@ body.cattool {
     align-self: stretch;
     cursor: pointer;
     border-radius: 8px;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     margin-left: 8px;
   }
   .badge-icon {

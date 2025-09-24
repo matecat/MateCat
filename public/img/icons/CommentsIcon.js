@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const CommentsIcon = ({size = 16}) => {
+const CommentsIcon = ({size = 18}) => {
   return (
-    <svg width={size} height={size} fill="none">
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
       <path
         fill="#29292D"
         fillRule="evenodd"
