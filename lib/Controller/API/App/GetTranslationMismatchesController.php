@@ -6,6 +6,7 @@ use Controller\Abstracts\KleinController;
 use Controller\API\Commons\Validators\LoginValidator;
 use Exception;
 use InvalidArgumentException;
+use Model\Jobs\JobDao;
 use Model\Projects\ProjectDao;
 use Model\Segments\SegmentDao;
 use ReflectionException;
@@ -42,7 +43,7 @@ class GetTranslationMismatchesController extends KleinController {
         $this->response->json( [
                 'errors' => [],
                 'code'   => 1,
-                'data'   => ( new SegmentTranslationMismatches( $Translation_mismatches, count( $Translation_mismatches ), $this->featureSet ) )->render()
+                'data'   => ( new SegmentTranslationMismatches( $Translation_mismatches, (int)$request['jobStruct']->id_project, count( $Translation_mismatches ), $this->featureSet ) )->render()
         ] );
 
     }
@@ -68,10 +69,17 @@ class GetTranslationMismatchesController extends KleinController {
             throw new InvalidArgumentException( "No job password provided", -1 );
         }
 
+        $jobStruct = JobDao::getByIdAndPassword( $id_segment, $password );
+
+        if ( empty( $jobStruct ) ) {
+            throw new InvalidArgumentException( "Wrong Job id/password provided", -1 );
+        }
+
         return [
                 'id_job'     => $id_job,
                 'id_segment' => $id_segment,
                 'password'   => $password,
+                'jobStruct'   => $jobStruct,
         ];
     }
 }
