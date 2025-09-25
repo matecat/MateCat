@@ -8,9 +8,40 @@ const PROVIDERS = config.intento_providers
   ? Object.values(config.intento_providers)
   : []
 
-export const IntentoOptions = () => {
-  const {control} = useOptions()
+const ROUTING = [
+  {id: '1', name: 'routing 1'},
+  {id: '2', name: 'routing 2'},
+  {id: '3', name: 'routing 3'},
+  {id: '4', name: 'routing 4'},
+  {id: '5', name: 'routing 5'},
+]
 
+const ALL_OPTIONS = [...ROUTING, ...PROVIDERS]
+
+export const IntentoOptions = () => {
+  const {control, watch} = useOptions()
+
+  const activeOption = watch('intento_routing')
+
+  const getOptionsChildren = ({id}) => {
+    const isFirstRouting =
+      ROUTING.filter((item) => item.id !== activeOption).findIndex(
+        (item) => item.id === id,
+      ) === 0
+    const isFirstProviders =
+      PROVIDERS.filter((item) => item.id !== activeOption).findIndex(
+        (item) => item.id === id,
+      ) === 0
+
+    return {
+      ...(isFirstRouting && {
+        beforeRow: <h4>Routing</h4>,
+      }),
+      ...(isFirstProviders && {
+        beforeRow: <h4>Providers</h4>,
+      }),
+    }
+  }
   return (
     <div className="options-container-content">
       <div className="mt-params-option">
@@ -46,12 +77,15 @@ export const IntentoOptions = () => {
             <Select
               name={name}
               placeholder="Select provider"
-              options={PROVIDERS}
-              activeOption={PROVIDERS.find(({id}) => id === value)}
+              options={ALL_OPTIONS}
+              activeOption={ALL_OPTIONS.find(({id}) => id === value)}
               onSelect={(option) => onChange(option.id)}
               isPortalDropdown={true}
+              dropdownClassName="select-intento-routing-providers"
               maxHeightDroplist={260}
-            />
+            >
+              {getOptionsChildren}
+            </Select>
           )}
         />
       </div>

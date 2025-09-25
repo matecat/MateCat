@@ -60,7 +60,7 @@ function useOptions() {
       )
   }, [currentProjectTemplate.mt?.id, setValue])
 
-  return {control, setValue}
+  return {control, setValue, watch}
 }
 
 export default useOptions

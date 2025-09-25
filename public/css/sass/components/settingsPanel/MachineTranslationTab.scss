@@ -664,3 +664,32 @@
     background-color: colors.$grey9;
   }
 }
+
+.select-intento-routing-providers {
+  h4 {
+    text-align: left;
+    padding: 5px 10px;
+    margin: 0;
+
+    position: sticky;
+    top: 0;
+    background: colors.$grey5;
+
+    &::after {
+      display: block;
+      height: 1px;
+      content: '';
+      margin-top: 3px;
+      background: linear-gradient(
+        90deg,
+        rgba(colors.$grey8, 0.6) 0%,
+        rgba(colors.$grey8, 0.6) 75%,
+        rgba(colors.$grey8, 0) 100%
+      );
+    }
+  }
+
+  .dropdown__option {
+    padding: 5px 20px;
+  }
+}

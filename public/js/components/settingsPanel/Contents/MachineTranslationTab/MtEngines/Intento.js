@@ -78,50 +78,6 @@ export const Intento = ({
               <span className="field-error">Required field</span>
             )}
           </div>
-          <div className="provider-field">
-            <label>
-              Providers<sup>*</sup>
-            </label>
-            <Controller
-              name="provider"
-              control={control}
-              rules={{required: true}}
-              render={({
-                field: {onChange, value, name},
-                fieldState: {error},
-              }) => (
-                <Select
-                  name={name}
-                  placeholder="Choose provider"
-                  options={selectOptions}
-                  activeOption={value}
-                  onSelect={(option) => onChange(option)}
-                  error={error}
-                />
-              )}
-            />
-            {errors.provider && (
-              <span className="field-error">Required field</span>
-            )}
-          </div>
-          <div className="provider-field">
-            <label>Provider auth data</label>
-            <input
-              className="required"
-              type="text"
-              {...register('providerkey')}
-            />
-            <span>{provider ? `Example: ${provider.auth_example}` : null}</span>
-          </div>
-          <div className="provider-field">
-            <label>Custom Model</label>
-            <input
-              className="required"
-              name="providercategory"
-              type="text"
-              {...register('providercategory')}
-            />
-          </div>
 
           <div className="provider-field container-actions">
             <Button
