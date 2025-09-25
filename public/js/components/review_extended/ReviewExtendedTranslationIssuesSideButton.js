@@ -3,6 +3,7 @@ import SegmentActions from '../../actions/SegmentActions'
 import $ from 'jquery'
 import {Shortcuts} from '../../utils/shortcuts'
 import SegmentUtils from '../../utils/segmentUtils'
+import ReviseIssuesIcon from '../../../img/icons/ReviseIssuesIcon'
 
 class ReviewExtendedTranslationIssuesSideButton extends React.Component {
   getIssueCount() {
@@ -20,26 +21,21 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
   handleClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    $(this.button).addClass('open')
     SegmentActions.openIssuesPanel({sid: this.props.sid}, true)
   }
 
   render() {
     const issuesCount = this.getIssueCount()
     let openClass = this.props.open ? 'open-issues' : ''
-    let plus = config.isReview ? (
-      <span className="revise-button-counter">+</span>
-    ) : null
     if (issuesCount > 0) {
       return (
-        <div title="Add Issues" onClick={this.handleClick.bind(this)}>
-          <a
-            ref={(button) => (this.button = button)}
-            className={'revise-button has-object ' + openClass}
-          >
-            <span className="icon-error_outline" />
-            <span className="revise-button-counter">{issuesCount}</span>
-          </a>
+        <div
+          className="revise-button has-object"
+          title="Add Issues"
+          onClick={this.handleClick.bind(this)}
+        >
+          <ReviseIssuesIcon />
+          <div className="badge-icon badge-red ">{issuesCount}</div>
         </div>
       )
     } else if (
@@ -51,6 +47,7 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
     ) {
       return (
         <div
+          className="revise-button"
           title={
             'Show Issues (' +
             Shortcuts.cattol.events.openIssuesPanel.keystrokes[
@@ -60,13 +57,8 @@ class ReviewExtendedTranslationIssuesSideButton extends React.Component {
           }
           onClick={this.handleClick.bind(this)}
         >
-          <a
-            ref={(button) => (this.button = button)}
-            className={'revise-button ' + openClass}
-          >
-            <span className="icon-error_outline" />
-            {plus}
-          </a>
+          <ReviseIssuesIcon />
+          <div className="badge-icon badge-red ">+</div>
         </div>
       )
     } else {

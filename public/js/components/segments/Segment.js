@@ -29,6 +29,7 @@ import {SEGMENTS_STATUS} from '../../constants/Constants'
 import {ApplicationWrapperContext} from '../common/ApplicationWrapper/ApplicationWrapperContext'
 import {Shortcuts} from '../../utils/shortcuts'
 import SearchUtils from '../header/cattol/search/searchUtils'
+import {SegmentQAIcon} from './SegmentQAIcon'
 
 class Segment extends React.Component {
   static contextType = ApplicationWrapperContext
@@ -837,6 +838,7 @@ class Segment extends React.Component {
 
           {/*//!-- TODO: place this element here only if it's not a split --*/}
           <div className="segment-side-buttons">
+            <SegmentQAIcon sid={this.props.segment.sid} />
             {config.comments_enabled &&
             (!this.props.segment.openComments || !this.props.segment.opened) ? (
               <SegmentsCommentsIcon />
