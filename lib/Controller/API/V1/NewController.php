@@ -411,6 +411,10 @@ class NewController extends KleinController {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
         }
 
+        if ( !empty( $subfiltering ) ) {
+            $metadata[ 'subfiltering' ] = $subfiltering;
+        }
+
         $metadata[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
 
         if ( $mt_evaluation ) {

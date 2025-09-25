@@ -307,8 +307,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
         ];
 
-        $this->setMetadataFromPostInput( $data );
-
         if ( $disable_tms_engine_flag ) {
             $data[ 'tms_engine' ] = 0; //remove default Match
         }
@@ -345,6 +343,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
 
+        $this->setMetadataFromPostInput( $data );
+
         return $data;
     }
 
@@ -374,6 +374,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
+        }
+
+        if ( isset( $data[ 'subfiltering' ] ) and !empty($data[ 'subfiltering' ]) ) {
+            $options[ 'subfiltering' ] = $data[ 'subfiltering' ];
         }
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
