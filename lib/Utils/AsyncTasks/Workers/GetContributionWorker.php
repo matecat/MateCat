@@ -464,7 +464,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 /** @var GetMemoryResponse $temp_matches */
-                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
+                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ], $jobStruct->id_project );
             }
         }
 

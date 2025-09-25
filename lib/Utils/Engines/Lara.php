@@ -319,7 +319,7 @@ class Lara extends AbstractEngine {
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
                 'score'           => $score ?? null
-        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ] );
+        ] ) )->getMatches( 1, [], $_config[ 'source' ], $_config[ 'target' ], $_config[ 'project_id' ] );
     }
 
     /**
