@@ -10,6 +10,7 @@ use Exception;
 use InvalidArgumentException;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\Jobs\ChunkDao;
+use Model\Projects\MetadataDao;
 use Model\Translations\SegmentTranslationDao;
 use ReflectionException;
 use Utils\Engines\EnginesFactory;
@@ -56,7 +57,8 @@ class DeleteContributionController extends KleinController {
         $config = $tms->getConfigStruct();
 
         /** @var MateCatFilter $Filter */
-        $Filter                  = MateCatFilter::getInstance( $this->getFeatureSet(), $source_lang, $target_lang );
+        $metadata                = new MetadataDao();
+        $Filter                  = MateCatFilter::getInstance( $this->getFeatureSet(), $source_lang, $target_lang, [], $metadata->getSubfilteringCustomHandlers((int)$jobStruct->getProject()->id) );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $source );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $target );
         $config[ 'source' ]      = $source_lang;

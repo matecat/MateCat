@@ -8,6 +8,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Matecat\SubFiltering\Utils\DataRefReplacer;
 use Matecat\XliffParser\XliffReplacer\XliffReplacerCallbackInterface;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\MetadataDao;
 use Utils\LQA\QA;
 
 class XliffReplacerCallback implements XliffReplacerCallbackInterface {
@@ -29,6 +30,10 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     private string $targetLang;
 
     private FeatureSet $featureSet;
+    /**
+     * @var int
+     */
+    private int $idProject;
 
     /**
      * XliffReplacerCallback constructor.
@@ -37,13 +42,15 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      * @param string     $sourceLang
      * @param string     $targetLang
      *
-     * @throws Exception
+     * @param int        $idProject
      */
-    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang ) {
-        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
+    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, int $idProject ) {
+        $metadataDao      = new MetadataDao();
+        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $metadataDao->getSubfilteringCustomHandlers((int)$idProject) );
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
+        $this->idProject  = $idProject;
     }
 
     /**

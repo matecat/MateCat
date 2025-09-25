@@ -2812,7 +2812,8 @@ class ProjectManager {
                 $target = $translation_row [ 2 ];
 
                 /** @var $filter MateCatFilter filter */
-                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
+                $customHandlers = ( !empty( $this->projectStructure[ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'subfiltering' ] ) : [];
+                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ), $customHandlers );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );
 

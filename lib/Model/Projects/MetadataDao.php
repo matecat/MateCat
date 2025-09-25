@@ -2,6 +2,7 @@
 
 namespace Model\Projects;
 
+use Exception;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Exceptions\NotFoundException;
@@ -170,5 +171,26 @@ class MetadataDao extends AbstractDao {
     }
 
     protected function _buildResult( array $array_result ) {
+    }
+
+    /**
+     * @param $id_project
+     *
+     * @return array
+     */
+    public function getSubfilteringCustomHandlers( int $id_project ): array {
+
+        try {
+            $customHandlers = [];
+            $subfiltering   = $this->get( $id_project, 'subfiltering', 86400 );
+
+            if ( !empty( $subfiltering->value ) ) {
+                $customHandlers = explode( ",", $subfiltering->value );
+            }
+
+            return $customHandlers;
+        } catch ( Exception $exception ) {
+            return [];
+        }
     }
 }

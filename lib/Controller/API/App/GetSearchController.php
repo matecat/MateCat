@@ -11,6 +11,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\DataAccess\Database;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Search\ReplaceEventStruct;
 use Model\Search\SearchModel;
@@ -218,7 +219,8 @@ class GetSearchController extends AbstractStatefulKleinController {
      */
     private function getSearchModel( SearchQueryParamsStruct $queryParams, JobStruct $jobStruct ): SearchModel {
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target );
+        $metadata = new MetadataDao();
+        $filter   = MateCatFilter::getInstance( $this->getFeatureSet(), $jobStruct->source, $jobStruct->target, [], $metadata->getSubfilteringCustomHandlers( (int)$jobStruct->id_project ) );
 
         return new SearchModel( $queryParams, $filter );
     }
@@ -375,7 +377,8 @@ class GetSearchController extends AbstractStatefulKleinController {
                 }
             }
 
-            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target, [] );
+            $metadata            = new MetadataDao();
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( (int)$chunk->id_project ) );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->getReplacedSegmentTranslation( $tRow[ 'translation' ], $queryParams ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 

@@ -20,6 +20,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\WordCount\CounterModel;
@@ -159,9 +160,10 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
         $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
+        $metadataDao = new MetadataDao();
 
         /** @var MatecatFilter $filter */
-        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
+        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [], $metadataDao->getSubfilteringCustomHandlers((int)$queueElement->params->pid) );
         $suggestion = $bestMatch[ 'translation' ] ?? ''; //No layering needed, whe use Layer 1 here
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
