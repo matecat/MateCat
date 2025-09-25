@@ -43,6 +43,7 @@ use Utils\Templating\PHPTalBoolean;
 use Utils\Templating\PHPTalMap;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
+use Utils\Url\CanonicalRoutes;
 
 class CattoolController extends BaseKleinViewController {
 
@@ -111,6 +112,9 @@ class CattoolController extends BaseKleinViewController {
      * @throws Exception
      */
     public function renderView() {
+
+
+        $rul = CanonicalRoutes::inviteToTeamConfirm( [                         'invited_by_uid' => 1,                         'email'          => "mauro@translated.net",                         'team_id'        => 1                 ] );
 
         $chunkAndPasswords = new stdClass();
         $request           = $this->validateTheRequest();

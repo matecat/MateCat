@@ -92,12 +92,12 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     }
 
     /**
-     * @param $jwtString
+     * @param string $jwtString
      *
      * @return mixed
      * @throws DomainException
      */
-    public static function getValidPayload( $jwtString ) {
+    public static function getValidPayload( string $jwtString ) {
 
         if ( self::$secretKey == null ) {
             SimpleJWT::setSecretKey( AppConfig::$AUTHSECRET );
