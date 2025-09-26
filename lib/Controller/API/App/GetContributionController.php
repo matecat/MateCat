@@ -67,8 +67,7 @@ class GetContributionController extends KleinController {
         $contributionRequest = new GetContributionRequest();
         $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $metadata                = new ProjectsMetadataDao();
-        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, [], $metadata->getSubfilteringCustomHandlers((int)$projectStruct->id) );
+        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
 
         $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
             return $Filter->fromLayer2ToLayer1( $context );

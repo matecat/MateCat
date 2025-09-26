@@ -82,13 +82,11 @@ class QALocalWarning extends QAWarning {
             $malformedStructs = $this->QA->getMalformedXmlStructs();
 
             /** * @var MateCatFilter $Filter */
-            $metadataDao = new MetadataDao();
             $Filter      = MateCatFilter::getInstance(
                     $this->QA->getFeatureSet(),
                     $this->QA->getSourceSegLang(),
                     $this->QA->getTargetSegLang(),
-                    SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment ),
-                    $metadataDao->getSubfilteringCustomHandlers( (int)$metadataDao->getSubfilteringCustomHandlers( (int)$this->idProject ) )
+                    SegmentOriginalDataDao::getSegmentDataRefMap( $this->id_segment )
             );
 
             foreach ( $malformedStructs[ 'source' ] as $k => $rawSource ) {

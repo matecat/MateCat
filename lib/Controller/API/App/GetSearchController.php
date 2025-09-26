@@ -377,8 +377,7 @@ class GetSearchController extends AbstractStatefulKleinController {
                 }
             }
 
-            $metadata            = new MetadataDao();
-            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( (int)$chunk->id_project ) );
+            $filter              = MateCatFilter::getInstance( $this->getFeatureSet(), $chunk->source, $chunk->target  );
             $replacedTranslation = $filter->fromLayer1ToLayer0( $this->getReplacedSegmentTranslation( $tRow[ 'translation' ], $queryParams ) );
             $replacedTranslation = Utils::stripBOM( $replacedTranslation );
 

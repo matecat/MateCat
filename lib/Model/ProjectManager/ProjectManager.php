@@ -2810,11 +2810,8 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                /** @var $filter MateCatFilter filter */
-                $customHandlers = ( !empty( $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) : [];
-                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ), $customHandlers );
-                $source = $filter->fromLayer0ToLayer1( $source );
-                $target = $filter->fromLayer0ToLayer1( $target );
+                $source = $this->filter->fromLayer0ToLayer1( $source );
+                $target = $this->filter->fromLayer0ToLayer1( $target );
 
                 $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
@@ -2835,8 +2832,8 @@ class ProjectManager {
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
                         'status'                 => $rule->asEditorStatus(),
-                        'translation'            => $filter->fromLayer1ToLayer0( $translation ),
-                        'suggestion'             => $filter->fromLayer1ToLayer0( $translation ),
+                        'translation'            => $this->filter->fromLayer1ToLayer0( $translation ),
+                        'suggestion'             => $this->filter->fromLayer1ToLayer0( $translation ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
                         'eq_word_count'          => $rule->asEquivalentWordCount( $segment->raw_word_count, $payable_rates ),

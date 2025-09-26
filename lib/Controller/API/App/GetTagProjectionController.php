@@ -43,8 +43,7 @@ class GetTagProjectionController extends KleinController {
 
         $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $request[ 'id_segment' ] );
         /** @var MateCatFilter $Filter */
-        $metadata = new MetadataDao();
-        $Filter   = MateCatFilter::getInstance( $this->getFeatureSet(), $request[ 'source_lang' ], $request[ 'target_lang' ], $dataRefMap, $metadata->getSubfilteringCustomHandlers( (int)$jobStruct->id_project ) );
+        $Filter   = MateCatFilter::getInstance( $this->getFeatureSet(), $request[ 'source_lang' ], $request[ 'target_lang' ], $dataRefMap );
 
         $config                  = [];
         $config[ 'dataRefMap' ]  = $dataRefMap;

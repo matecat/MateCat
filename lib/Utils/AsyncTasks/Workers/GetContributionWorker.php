@@ -137,15 +137,13 @@ class GetContributionWorker extends AbstractWorker {
         }
 
         $jobStruct = $contributionStruct->getJobStruct();
-        $metadataDao = new MetadataDao();
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
             $featureSet,
             $jobStruct->source,
             $targetLang,
-            $contributionStruct->dataRefMap,
-            $metadataDao->getSubfilteringCustomHandlers((int)$jobStruct->id_project)
+            $contributionStruct->dataRefMap
         );
 
         foreach ( $content as &$match ) {

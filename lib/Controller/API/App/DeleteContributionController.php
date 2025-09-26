@@ -57,8 +57,7 @@ class DeleteContributionController extends KleinController {
         $config = $tms->getConfigStruct();
 
         /** @var MateCatFilter $Filter */
-        $metadata                = new MetadataDao();
-        $Filter                  = MateCatFilter::getInstance( $this->getFeatureSet(), $source_lang, $target_lang, [], $metadata->getSubfilteringCustomHandlers((int)$jobStruct->getProject()->id) );
+        $Filter                  = MateCatFilter::getInstance( $this->getFeatureSet(), $source_lang, $target_lang );
         $config[ 'segment' ]     = $Filter->fromLayer2ToLayer0( $source );
         $config[ 'translation' ] = $Filter->fromLayer2ToLayer0( $target );
         $config[ 'source' ]      = $source_lang;
