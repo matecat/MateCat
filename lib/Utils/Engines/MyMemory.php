@@ -207,7 +207,6 @@ class MyMemory extends AbstractEngine {
         $parameters[ 'mt' ]         = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]     = $_config[ 'num_result' ];
         $parameters[ 'client_id' ]  = $_config[ 'uid' ] ?? 0;
-        $parameters[ 'id_project' ] = $_config[ 'id_project' ] ?? null;
 
         // TM prioritization
         $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
@@ -248,7 +247,7 @@ class MyMemory extends AbstractEngine {
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
         // We use the JSON to pass a nullable value.
-        $parameters[ MetadataDao::SUBFILTERING_HANDLERS ] = $_config[ MetadataDao::SUBFILTERING_HANDLERS ] ?? null; // null coalescing operator to avoid warnings, we want null when it is not set.
+        $parameters[ MetadataDao::SUBFILTERING_HANDLERS ] = $_config[ MetadataDao::SUBFILTERING_HANDLERS ] ?? 'null'; // null coalescing operator to avoid warnings, we want null when it is not set.
 
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
 

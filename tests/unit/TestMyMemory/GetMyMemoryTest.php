@@ -235,15 +235,15 @@ TAB;
         $curl_mock_param                        = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'            => 'Ciascuna copia è dotata di un numero di serie univoco.',
-                                'langpair'     => 'it-IT|en-US',
-                                'de'           => 'demo@matecat.com',
-                                'mt'           => true,
-                                'numres'       => 10,
-                                'key'          => 'a6043e606ac9b5d7ff24',
-                                'client_id'    => 0,
-                                'priority_key' => 0,
-                                'subfiltering' => 'null'
+                                'q'                     => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair'              => 'it-IT|en-US',
+                                'de'                    => 'demo@matecat.com',
+                                'mt'                    => true,
+                                'numres'                => 10,
+                                'key'                   => 'a6043e606ac9b5d7ff24',
+                                'client_id'             => 0,
+                                'priority_key'          => 0,
+                                'subfiltering_handlers' => 'null'
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
@@ -386,15 +386,15 @@ TAB;
         $curl_mock_param                        = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'            => 'Ciascuna copia è dotata di un numero di serie univoco.',
-                                'langpair'     => 'it-IT|en-US',
-                                'de'           => 'demo@matecat.com',
-                                'mt'           => true,
-                                'numres'       => 10,
-                                'key'          => 'a6043e606ac9b5d7ff24',
-                                'client_id'    => 0,
-                                'priority_key' => 0,
-                                'subfiltering' => 'null'
+                                'q'                     => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair'              => 'it-IT|en-US',
+                                'de'                    => 'demo@matecat.com',
+                                'mt'                    => true,
+                                'numres'                => 10,
+                                'key'                   => 'a6043e606ac9b5d7ff24',
+                                'client_id'             => 0,
+                                'priority_key'          => 0,
+                                'subfiltering_handlers' => 'null'
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
