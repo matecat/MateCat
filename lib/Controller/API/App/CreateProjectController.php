@@ -8,6 +8,7 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\ConnectedServices\GDrive\Session;
 use Model\DataAccess\Database;
 use Model\FeaturesBase\BasicFeatureStruct;
@@ -322,8 +323,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'subfiltering_handlers'         => $this->validateSubfilteringOptions( $this->request->param( 'subfiltering_handlers', '[]' ) ),
         ];
 
-        $this->setMetadataFromPostInput( $data );
-
         if ( $disable_tms_engine_flag ) {
             $data[ 'tms_engine' ] = 0; //remove default Match
         }
@@ -345,6 +344,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
+        $data[ 'subfiltering' ]                          = ( !empty( $subfiltering ) ) ? $this->validateSubfilteringString( $subfiltering ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -358,6 +358,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'project_features' ]                      = $this->appendFeaturesToProject( $data[ 'project_completion' ], $data[ 'mt_engine' ] );
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
+
+        $this->setMetadataFromPostInput( $data );
 
         return $data;
     }
@@ -423,6 +425,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
         }
 
+        if ( isset( $data[ 'subfiltering' ] ) and !empty($data[ 'subfiltering' ]) ) {
+            $options[ 'subfiltering' ] = $data[ 'subfiltering' ];
+        }
+
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
             $options[ 'segmentation_rule' ] = $data[ 'segmentation_rule' ];
         }
@@ -446,6 +452,44 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $public_tm_penalty;
+    }
+
+    /**
+     * @param null $subfiltering
+     *
+     * @return string|null
+     */
+    private function validateSubfilteringString( $subfiltering = null ): ?string {
+
+        if ( !empty( $subfiltering ) ) {
+
+            $allowedTags = [
+                    InjectableFiltersTags::markup,
+                    InjectableFiltersTags::percent_double_curly,
+                    InjectableFiltersTags::twig,
+                    InjectableFiltersTags::ruby_on_rails,
+                    InjectableFiltersTags::double_snail,
+                    InjectableFiltersTags::double_square,
+                    InjectableFiltersTags::dollar_curly,
+                    InjectableFiltersTags::single_curly,
+                    InjectableFiltersTags::objective_c_ns,
+                    InjectableFiltersTags::double_percent,
+                    InjectableFiltersTags::square_sprintf,
+                    InjectableFiltersTags::sprintf,
+            ];
+
+            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
+            $subfilteringArray = explode( ",", $subfiltering );
+            $check             = array_diff( $subfilteringArray, $allowedTags );
+
+            if ( !empty( $check ) ) {
+                foreach ( $check as $tag ) {
+                    throw new InvalidArgumentException( $tag . " is not a valid Subfiltering tag" );
+                }
+            }
+        }
+
+        return $subfiltering;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Utils\Engines\Results\MyMemory;
 use Exception;
 use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
+use Model\Projects\MetadataDao;
 use ReflectionObject;
 use ReflectionProperty;
 
@@ -46,6 +47,8 @@ class Matches {
 
     public $match;
 
+    private $id_project;
+
     /**
      * Matches constructor.
      *
@@ -84,21 +87,22 @@ class Matches {
 
     /**
      * @param int   $layerNum
-     *
      * @param array $dataRefMap
      * @param null  $source
      * @param null  $target
+     * @param null  $id_project
      *
      * @return array
      * @throws Exception
      */
-    public function getMatches( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ): array {
+    public function getMatches( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null, $id_project = null ): array {
 
         if ( $source and $target ) {
             $this->source = $source;
             $this->target = $target;
         }
 
+        $this->id_project      = $id_project;
         $this->segment         = $this->getLayer( $this->raw_segment, $layerNum, $dataRefMap );
         $this->translation     = $this->getLayer( $this->raw_translation, $layerNum, $dataRefMap );
         $this->raw_segment     = $this->getLayer( $this->raw_segment, 0, $dataRefMap ); //raw_segment must be in layer 0
@@ -118,9 +122,16 @@ class Matches {
      */
     protected function getLayer( $string, $layerNum, array $dataRefMap = [] ) {
 
-        $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $featureSet                 = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+        $metadataDao                = new MetadataDao();
+        $subfilteringCustomHandlers = [];
+
+        if ( !empty( $this->id_project ) ) {
+            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( (int)$this->id_project );
+        }
+
         /** @var MateCatFilter $filter */
-        $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
+        $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap, $subfilteringCustomHandlers );
         switch ( $layerNum ) {
             case 0:
                 return $filter->fromLayer1ToLayer0( $string ?? '' );

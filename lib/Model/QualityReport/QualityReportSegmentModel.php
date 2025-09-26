@@ -18,6 +18,7 @@ use Model\LQA\CategoryStruct;
 use Model\LQA\ChunkReviewDao;
 use Model\LQA\ChunkReviewStruct;
 use Model\LQA\EntryCommentDao;
+use Model\Projects\MetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentOriginalDataDao;
 use Plugins\Features\ReviewExtended\ReviewUtils;
@@ -180,9 +181,10 @@ class QualityReportSegmentModel {
         foreach ( $data as $index => $seg ) {
 
             $dataRefMap = SegmentOriginalDataDao::getSegmentDataRefMap( $seg->sid );
+            $metadataDao = new MetadataDao();
 
             /** @var MateCatFilter $Filter */
-            $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap );
+            $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, $dataRefMap, $metadataDao->getSubfilteringCustomHandlers((int)$this->chunk->id_project) );
 
             $seg->dataRefMap = $dataRefMap;
 

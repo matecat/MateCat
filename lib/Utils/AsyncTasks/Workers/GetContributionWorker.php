@@ -14,6 +14,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\Users\UserStruct;
 use ReflectionException;
@@ -135,12 +136,14 @@ class GetContributionWorker extends AbstractWorker {
             $type = 'cross_language_matches';
         }
 
+        $jobStruct = $contributionStruct->getJobStruct();
+
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
-                $featureSet,
-                $contributionStruct->getJobStruct()->source,
-                $targetLang,
-                $contributionStruct->dataRefMap
+            $featureSet,
+            $jobStruct->source,
+            $targetLang,
+            $contributionStruct->dataRefMap
         );
 
         foreach ( $content as &$match ) {
@@ -459,7 +462,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 /** @var GetMemoryResponse $temp_matches */
-                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ] );
+                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ], $jobStruct->id_project );
             }
         }
 

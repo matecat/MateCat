@@ -34,6 +34,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
     public ?string $target_language              = null;
     public bool    $character_counter_count_tags = false;
     public ?string $character_counter_mode       = null;
+    public ?string $subfiltering                 = null;
     public ?int    $mt_quality_value_in_editor   = null;
 
     /**
@@ -67,6 +68,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
         $this->character_counter_count_tags = $json->character_counter_count_tags;
         $this->character_counter_mode       = $json->character_counter_mode;
         $this->subject                      = $json->subject;
+        $this->subfiltering                 = $json->subfiltering ?? null;
         $this->source_language              = $json->source_language;
         $this->target_language              = ( !empty( $json->target_language ) ) ? serialize( $json->target_language ) : null;
         $this->mt_quality_value_in_editor   = ( !empty( $json->mt_quality_value_in_editor ) ) ? (int)$json->mt_quality_value_in_editor : null;
@@ -146,6 +148,7 @@ class ProjectTemplateStruct extends AbstractDaoSilentStruct implements IDaoStruc
                 'character_counter_count_tags' => $this->character_counter_count_tags,
                 'character_counter_mode'       => $this->character_counter_mode,
                 'subject'                      => $this->subject,
+                'subfiltering'                 => $this->subfiltering,
                 'source_language'              => $this->source_language,
                 'target_language'              => $this->getTargetLanguage(),
                 'created_at'                   => date_create( $this->created_at )->format( DATE_RFC822 ),

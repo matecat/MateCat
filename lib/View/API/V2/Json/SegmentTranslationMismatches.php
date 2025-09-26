@@ -10,30 +10,34 @@
 namespace View\API\V2\Json;
 
 use Matecat\SubFiltering\MateCatFilter;
+use Model\Projects\MetadataDao;
 
 class SegmentTranslationMismatches {
 
     protected $data;
     protected $thereArePropagations;
     protected $featureSet;
+    private   $idProject;
 
     /**
      * SegmentTranslationMismatches constructor.
      * from query: getWarning( id_job, password )
      *
-     * @param                  $Translation_mismatches
-     * @param                  $thereArePropagations
+     * @param                                     $Translation_mismatches
+     * @param                                     $idProject
+     * @param                                     $thereArePropagations
      * @param \Model\FeaturesBase\FeatureSet|null $featureSet
      *
      * @throws \Exception
      */
-    public function __construct( $Translation_mismatches, $thereArePropagations, \Model\FeaturesBase\FeatureSet $featureSet = null ) {
+    public function __construct( $Translation_mismatches, $idProject, $thereArePropagations, \Model\FeaturesBase\FeatureSet $featureSet = null ) {
         $this->data                 = $Translation_mismatches;
         $this->thereArePropagations = $thereArePropagations;
         if ( $featureSet == null ) {
             $featureSet = new \Model\FeaturesBase\FeatureSet();
         }
         $this->featureSet = $featureSet;
+        $this->idProject = $idProject;
     }
 
     /**
@@ -49,10 +53,11 @@ class SegmentTranslationMismatches {
         ];
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new \Model\FeaturesBase\FeatureSet();
+        $metadataDao = new MetadataDao();
 
         foreach ( $this->data as $position => $row ) {
 
-            $Filter = MateCatFilter::getInstance( $featureSet, $row[ 'source' ], $row[ 'target' ], [] );
+            $Filter = MateCatFilter::getInstance( $featureSet, $row[ 'source' ], $row[ 'target' ], [], $metadataDao->getSubfilteringCustomHandlers((int)$this->idProject) );
 
             if ( $row[ 'editable' ] ) {
                 $result[ 'editable' ][] = [

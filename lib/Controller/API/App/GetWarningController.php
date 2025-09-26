@@ -12,6 +12,7 @@ use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
 use Model\Jobs\JobStruct;
+use Model\Projects\MetadataDao;
 use Model\Segments\SegmentDao;
 use Model\Translations\WarningDao;
 use Utils\LQA\QA;
@@ -110,7 +111,8 @@ class GetWarningController extends KleinController {
 
         $chunk      = $this->getChunk( $id_job, $password );
         $featureSet = $this->getFeatureSet();
-        $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [] );
+        $metadata   = new MetadataDao();
+        $Filter     = MateCatFilter::getInstance( $featureSet, $chunk->source, $chunk->target, [], $metadata->getSubfilteringCustomHandlers( (int)$chunk->id_project ) );
 
         $src_content = $Filter->fromLayer0ToLayer2( $src_content );
         $trg_content = $Filter->fromLayer0ToLayer2( $trg_content );
@@ -134,7 +136,7 @@ class GetWarningController extends KleinController {
                         'errors' => []
                 ],
                 $this->invokeLocalWarningsOnFeatures( $chunk, $src_content, $trg_content ),
-                ( new QALocalWarning( $QA, $id ) )->render()
+                ( new QALocalWarning( $QA, $id, $chunk->id_project ) )->render()
         );
 
         $this->response->json( $result );

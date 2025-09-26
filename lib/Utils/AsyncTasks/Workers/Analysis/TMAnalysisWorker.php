@@ -20,6 +20,7 @@ use Model\Exceptions\ValidationError;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobDao;
 use Model\MTQE\Templates\DTO\MTQEWorkflowParams;
+use Model\Projects\MetadataDao;
 use Model\Projects\ProjectDao;
 use Model\Translations\SegmentTranslationDao;
 use Model\WordCount\CounterModel;
@@ -158,10 +159,11 @@ class TMAnalysisWorker extends AbstractWorker {
     protected function _updateRecord( QueueElement $queueElement ) {
 
         //This function is necessary to prevent TM matches with a value of 75-84% from being overridden by the MT, which has a default value of 86.
-        $bestMatch = $this->getHighestNotMT_OrPickTheFirstOne();
+        $bestMatch   = $this->getHighestNotMT_OrPickTheFirstOne();
+        $metadataDao = new MetadataDao();
 
         /** @var MatecatFilter $filter */
-        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target );
+        $filter     = MateCatFilter::getInstance( $this->featureSet, $queueElement->params->source, $queueElement->params->target, [], $metadataDao->getSubfilteringCustomHandlers( (int)$queueElement->params->pid ) );
         $suggestion = $bestMatch[ 'translation' ] ?? ''; //No layering needed, whe use Layer 1 here
 
         $equivalentWordMapping = array_change_key_case( json_decode( $queueElement->params->payable_rates, true ), CASE_UPPER );
@@ -392,9 +394,9 @@ class TMAnalysisWorker extends AbstractWorker {
      * @return array
      */
     protected function _getNewMatchTypeAndEquivalentWordDiscount(
-            array        $bestMatch,
+            array $bestMatch,
             QueueElement $queueElement,
-            array        $equivalentWordMapping
+            array $equivalentWordMapping
     ): array {
 
         $tm_match_type         = ( $this->isMtMatch( $bestMatch ) ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] ?? InternalMatchesConstants::MT );
@@ -541,12 +543,13 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected function _getMatches( QueueElement $queueElement ): array {
 
-        $_config              = [];
-        $_config[ 'pid' ]     = $queueElement->params->pid;
-        $_config[ 'segment' ] = $queueElement->params->segment;
-        $_config[ 'source' ]  = $queueElement->params->source;
-        $_config[ 'target' ]  = $queueElement->params->target;
-        $_config[ 'email' ]   = AppConfig::$MYMEMORY_TM_API_KEY;
+        $_config                 = [];
+        $_config[ 'pid' ]        = $queueElement->params->pid;
+        $_config[ 'id_project' ] = $queueElement->params->pid;
+        $_config[ 'segment' ]    = $queueElement->params->segment;
+        $_config[ 'source' ]     = $queueElement->params->source;
+        $_config[ 'target' ]     = $queueElement->params->target;
+        $_config[ 'email' ]      = AppConfig::$MYMEMORY_TM_API_KEY;
 
         $_config[ 'context_before' ]    = $queueElement->params->context_before;
         $_config[ 'context_after' ]     = $queueElement->params->context_after;

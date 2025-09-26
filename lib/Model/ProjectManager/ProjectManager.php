@@ -246,7 +246,7 @@ class ProjectManager {
                             'filters_extraction_parameters'          => new RecursiveArrayObject(),
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
-                            'mt_qe_workflow_payable_rate'            => null
+                            'mt_qe_workflow_payable_rate'            => null,
                     ] );
         }
 
@@ -266,8 +266,9 @@ class ProjectManager {
         }
 
         /** @var MateCatFilter $filter */
-        $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ] );
-        $this->filter = $filter;
+        $customHandlers = ( !empty( $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) : [];
+        $filter         = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [], $customHandlers );
+        $this->filter   = $filter;
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',
@@ -840,8 +841,8 @@ class ProjectManager {
                     }
 
                     // pdfAnalysis
-                    foreach ($filesStructure as $fid => $fileStructure){
-                        $pos  = array_search($fileStructure['original_filename'], $this->projectStructure[ 'array_files' ]);
+                    foreach ( $filesStructure as $fid => $fileStructure ) {
+                        $pos  = array_search( $fileStructure[ 'original_filename' ], $this->projectStructure[ 'array_files' ] );
                         $meta = isset( $this->projectStructure[ 'array_files_meta' ][ $pos ] ) ? $this->projectStructure[ 'array_files_meta' ][ $pos ] : null;
 
                         if ( $meta !== null and isset( $meta[ 'pdfAnalysis' ] ) ) {
@@ -2778,7 +2779,7 @@ class ProjectManager {
                 //XXX This condition is meant to debug an issue with the segment id that returns false from dao.
                 // SegmentDao::getById returns false if the id is not found in the database
                 // Skip the segment and lose the translation if the segment id is not found in the database
-                if( !$segment ) {
+                if ( !$segment ) {
                     continue;
                 }
 
@@ -2809,10 +2810,8 @@ class ProjectManager {
                 $source = $segment->segment;
                 $target = $translation_row [ 2 ];
 
-                /** @var $filter MateCatFilter filter */
-                $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ) );
-                $source = $filter->fromLayer0ToLayer1( $source );
-                $target = $filter->fromLayer0ToLayer1( $target );
+                $source = $this->filter->fromLayer0ToLayer1( $source );
+                $target = $this->filter->fromLayer0ToLayer1( $target );
 
                 $check = new QA( $source, $target );
                 $check->setFeatureSet( $this->features );
@@ -2833,8 +2832,8 @@ class ProjectManager {
                         'id_job'                 => $jid,
                         'segment_hash'           => $translation_row [ 3 ],
                         'status'                 => $rule->asEditorStatus(),
-                        'translation'            => $filter->fromLayer1ToLayer0( $translation ),
-                        'suggestion'             => $filter->fromLayer1ToLayer0( $translation ),
+                        'translation'            => $this->filter->fromLayer1ToLayer0( $translation ),
+                        'suggestion'             => $this->filter->fromLayer1ToLayer0( $translation ),
                         'locked'                 => 0, // not allowed to change locked status for pre-translations
                         'match_type'             => $rule->asMatchType(),
                         'eq_word_count'          => $rule->asEquivalentWordCount( $segment->raw_word_count, $payable_rates ),

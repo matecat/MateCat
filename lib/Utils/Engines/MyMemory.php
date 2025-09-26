@@ -134,7 +134,13 @@ class MyMemory extends AbstractEngine {
                 $result_object = KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tags_projection' :
-                $result_object = TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
+                $id_project = $parameters[ 'id_project' ] ?? null;
+
+                if(!empty($id_project)){
+                    $id_project = (int)$id_project;
+                }
+
+                $result_object = TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap, $id_project );
                 break;
             case 'api_key_check_auth_url':
                 $result_object = AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
@@ -199,13 +205,14 @@ class MyMemory extends AbstractEngine {
      */
     public function get( array $_config ): GetMemoryResponse {
 
-        $parameters                = [];
-        $parameters[ 'q' ]         = $_config[ 'segment' ];
-        $parameters[ 'langpair' ]  = $_config[ 'source' ] . "|" . $_config[ 'target' ];
-        $parameters[ 'de' ]        = $_config[ 'email' ];
-        $parameters[ 'mt' ]        = $_config[ 'get_mt' ];
-        $parameters[ 'numres' ]    = $_config[ 'num_result' ];
-        $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
+        $parameters                 = [];
+        $parameters[ 'q' ]          = $_config[ 'segment' ];
+        $parameters[ 'langpair' ]   = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+        $parameters[ 'de' ]         = $_config[ 'email' ];
+        $parameters[ 'mt' ]         = $_config[ 'get_mt' ];
+        $parameters[ 'numres' ]     = $_config[ 'num_result' ];
+        $parameters[ 'client_id' ]  = $_config[ 'uid' ] ?? 0;
+        $parameters[ 'id_project' ] = $_config[ 'id_project' ] ?? null;
 
         // TM prioritization
         $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
