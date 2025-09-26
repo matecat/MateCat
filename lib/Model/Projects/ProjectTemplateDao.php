@@ -24,6 +24,8 @@ use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -74,9 +76,10 @@ class ProjectTemplateDao extends AbstractDao {
         // MT
         $default->mt = json_encode( self::getUserDefaultMt() );
 
-        $default->tm          = json_encode( [] );
-        $default->created_at  = date( "Y-m-d H:i:s" );
-        $default->modified_at = date( "Y-m-d H:i:s" );
+        $default->tm                    = json_encode( [] );
+        $default->created_at            = date( "Y-m-d H:i:s" );
+        $default->modified_at           = date( "Y-m-d H:i:s" );
+        $default->subfiltering_handlers = json_encode( [] );
 
         return $default;
     }
@@ -108,16 +111,16 @@ class ProjectTemplateDao extends AbstractDao {
     }
 
     /**
-     * @param string     $json
+     * @param object     $decodedObject
      * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function createFromJSON( string $json, UserStruct $user ): ProjectTemplateStruct {
+    public static function createFromJSON( object $decodedObject, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct = new ProjectTemplateStruct();
-        $projectTemplateStruct->hydrateFromJSON( $json, $user->uid );
+        $projectTemplateStruct->hydrateFromJSON( $decodedObject, $user->uid );
 
         self::checkValues( $projectTemplateStruct, $user );
 
@@ -135,6 +138,7 @@ class ProjectTemplateDao extends AbstractDao {
      */
     public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, UserStruct $user ): ProjectTemplateStruct {
 
+        $json = json_decode( $json );
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
         self::checkValues( $projectTemplateStruct, $user );
@@ -160,6 +164,13 @@ class ProjectTemplateDao extends AbstractDao {
      * @throws Exception
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
+
+        // check subfiltering string
+        if ( $projectTemplateStruct->subfiltering_handlers !== null ) {
+            $validatorObject = new JSONValidatorObject( $projectTemplateStruct->subfiltering_handlers );
+            $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+            $validator->validate( $validatorObject );
+        }
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
@@ -381,9 +392,9 @@ class ProjectTemplateDao extends AbstractDao {
     public
     static function save( ProjectTemplateStruct $projectTemplateStruct ): ProjectTemplateStruct {
         $sql = "INSERT INTO " . self::TABLE .
-                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `created_at` ) " .
+                " ( `name`, `is_default`, `uid`, `id_team`, `segmentation_rule`, `tm`, `mt`, `payable_rate_template_id`,`qa_model_template_id`, `filters_template_id`, `xliff_config_template_id`, `pretranslate_100`, `pretranslate_101`, `tm_prioritization`, `dialect_strict`, `get_public_matches`, `public_tm_penalty`, `subject`, `source_language`, `target_language`, `character_counter_count_tags`, `character_counter_mode`, `mt_quality_value_in_editor`, `subfiltering`, `created_at` ) " .
                 " VALUES " .
-                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :now ); ";
+                " ( :name, :is_default, :uid, :id_team, :segmentation_rule, :tm, :mt, :payable_rate_template_id, :qa_model_template_id, :filters_template_id, :xliff_config_template_id, :pretranslate_100, :pretranslate_101, :tm_prioritization, :dialect_strict, :get_public_matches, :public_tm_penalty, :subject, :source_language, :target_language, :character_counter_count_tags, :character_counter_mode, :mt_quality_value_in_editor, :subfiltering, :now ); ";
 
         $now = ( new DateTime() )->format( 'Y-m-d H:i:s' );
 
@@ -391,6 +402,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
                 "name"                         => $projectTemplateStruct->name,
+                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,
@@ -444,6 +456,7 @@ class ProjectTemplateDao extends AbstractDao {
             `is_default` = :is_default, 
             `uid` = :uid, 
             `id_team` = :id_team, 
+            `subfiltering` = :subfiltering, 
             `segmentation_rule` = :segmentation_rule, 
             `tm` = :tm, 
             `mt` = :mt, 
@@ -471,6 +484,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt->execute( [
                 "id"                           => $projectTemplateStruct->id,
                 "name"                         => $projectTemplateStruct->name,
+                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,

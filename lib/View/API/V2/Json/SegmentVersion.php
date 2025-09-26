@@ -8,6 +8,7 @@ use Model\DataAccess\IDaoStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\JobStruct;
 use Model\LQA\EntryStruct;
+use Model\Projects\MetadataDao;
 
 class SegmentVersion {
 
@@ -151,7 +152,8 @@ class SegmentVersion {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target );
+        $metadataDao      = new MetadataDao();
+        $Filter = MateCatFilter::getInstance( $featureSet, $this->chunk->source, $this->chunk->target, [], $metadataDao->getSubfilteringCustomHandlers((int)$this->chunk->id_project) );
 
         return [
                 'id'              => (int)$version->id,

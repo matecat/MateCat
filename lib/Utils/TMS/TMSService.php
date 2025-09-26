@@ -13,6 +13,8 @@ use Model\Conversion\UploadElement;
 use Model\Engines\Structs\EngineStruct;
 use Model\FeaturesBase\FeatureSet;
 use Model\Jobs\ChunkDao;
+use Model\Jobs\JobDao;
+use Model\Projects\MetadataDao as ProjectMetadataDao;
 use Model\TMSService\TMSServiceDao;
 use Model\Users\MetadataDao;
 use Model\Users\UserStruct;
@@ -397,8 +399,11 @@ class TMSService {
     public function exportJobAsTMX( int $jid, string $jPassword, string $sourceLang, string $targetLang, int $uid = null ): SplFileInfo {
 
         $featureSet = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
+
+        $jobStruct = JobDao::getByIdAndPassword($jid, $jPassword);
+        $metadata  = new ProjectMetadataDao();
         /** @var MateCatFilter $Filter */
-        $Filter  = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang );
+        $Filter  = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $metadata->getSubfilteringCustomHandlers((int)$jobStruct->id_project) );
         $tmpFile = new SplTempFileObject( 15 * 1024 * 1024 /* 5MB */ );
 
         $tmpFile->fwrite( '<?xml version="1.0" encoding="UTF-8"?>

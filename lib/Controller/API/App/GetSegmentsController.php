@@ -12,6 +12,7 @@ use Matecat\SubFiltering\MateCatFilter;
 use Model\Conversion\ZipArchiveHandler;
 use Model\Exceptions\ValidationError;
 use Model\Jobs\ChunkDao;
+use Model\Projects\MetadataDao;
 use Model\Segments\ContextGroupDao;
 use Model\Segments\SegmentDao;
 use Model\Segments\SegmentMetadataDao;
@@ -114,14 +115,15 @@ class GetSegmentsController extends KleinController {
             $seg[ 'data_ref_map' ] = $data_ref_map;
 
             /** @var MateCatFilter $Filter */
-            $Filter = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [] );
+            $metadata = new MetadataDao();
+            $Filter   = MateCatFilter::getInstance( $featureSet, $job->source, $job->target, null !== $data_ref_map ? $data_ref_map : [], $metadata->getSubfilteringCustomHandlers( (int)$job->id_project ) );
 
             $seg[ 'segment' ] = $Filter->fromLayer0ToLayer1(
                     CatUtils::reApplySegmentSplit( $seg[ 'segment' ], $seg[ 'source_chunk_lengths' ] )
             );
 
             $seg[ 'translation' ] = $Filter->fromLayer0ToLayer1(
-                    // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
+            // When the query for segments is performed, a condition is added to get NULL instead of the translation when the status is NEW
                     CatUtils::reApplySegmentSplit( $seg[ 'translation' ], $seg[ 'target_chunk_lengths' ][ 'len' ] ) ?? ''  // use the null coalescing operator
             );
 

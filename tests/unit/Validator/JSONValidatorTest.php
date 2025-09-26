@@ -21,9 +21,8 @@ class JSONValidatorTest extends AbstractTest {
         $jsonSchema  = file_get_contents( __DIR__ . '/../../resources/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents( __DIR__ . '/../../resources/files/json/files/invalid.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $invalidFile;
-        $validator             = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $invalidFile );
+        $validator       = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         $this->assertFalse( $validator->isValid() );
@@ -33,9 +32,8 @@ class JSONValidatorTest extends AbstractTest {
         $jsonSchema  = file_get_contents( __DIR__ . '/../../resources/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents( __DIR__ . '/../../resources/files/json/files/invalid_maxItems.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $invalidFile;
-        $validator             = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $invalidFile );
+        $validator       = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         $error = $validator->getExceptions()[ 0 ]->error;
@@ -48,9 +46,8 @@ class JSONValidatorTest extends AbstractTest {
         $jsonSchema  = file_get_contents( __DIR__ . '/../../resources/files/json/schema/schema_1.json' );
         $invalidFile = file_get_contents( __DIR__ . '/../../resources/files/json/files/valid.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $invalidFile;
-        $validator             = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $invalidFile );
+        $validator       = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         $this->assertTrue( $validator->isValid() );
@@ -60,9 +57,8 @@ class JSONValidatorTest extends AbstractTest {
         $jsonSchema  = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
         $uberQaModel = file_get_contents( __DIR__ . '/../../resources/files/json/files/uber_qa_model.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $uberQaModel;
-        $validator             = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $uberQaModel );
+        $validator       = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         $this->assertTrue( $validator->isValid() );

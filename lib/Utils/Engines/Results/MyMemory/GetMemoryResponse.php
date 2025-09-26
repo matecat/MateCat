@@ -77,19 +77,20 @@ class GetMemoryResponse extends TMSAbstractResponse {
     /**
      * Get matches as array
      *
-     * @param int   $layerNum
-     * @param array $dataRefMap
-     * @param null  $source
-     * @param null  $target
+     * @param int        $layerNum
+     * @param array      $dataRefMap
+     * @param null       $source
+     * @param null       $target
+     * @param array|null $subfiltering_handlers
      *
      * @return array
      * @throws Exception
      */
-    public function get_matches_as_array( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null ): array {
+    public function get_matches_as_array( int $layerNum = 2, array $dataRefMap = [], $source = null, $target = null, ?array $subfiltering_handlers = [] ): array {
         $matchesArray = [];
 
         foreach ( $this->matches as $match ) {
-            $item           = $match->getMatches( $layerNum, $dataRefMap, $source, $target );
+            $item           = $match->getMatches( $layerNum, $dataRefMap, $source, $target, $subfiltering_handlers );
             $matchesArray[] = $item;
         }
 

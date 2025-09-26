@@ -175,9 +175,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $projectStructure[ 'payable_rate_model_id' ] = $this->data[ 'payable_rate_model_template' ]->id;
         }
 
-        //TODO enable from CONFIG
-        $projectStructure[ 'metadata' ] = $this->metadata;
-
+        $projectStructure[ 'metadata' ]     = $this->metadata;
         $projectStructure[ 'userIsLogged' ] = true;
         $projectStructure[ 'uid' ]          = $this->user->uid;
         $projectStructure[ 'id_customer' ]  = $this->user->email;
@@ -214,15 +212,14 @@ class CreateProjectController extends AbstractStatefulKleinController {
      * @throws Exception
      */
     private function validateTheRequest(): array {
-        $file_name               = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $project_name            = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $source_lang             = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $target_lang             = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $job_subject             = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $due_date                = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
-        $mt_engine               = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
-        $disable_tms_engine_flag = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
-//        $private_tm_key                = filter_var( $this->request->param( 'private_tm_key' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $file_name                     = filter_var( $this->request->param( 'file_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $project_name                  = filter_var( $this->request->param( 'project_name' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $source_lang                   = filter_var( $this->request->param( 'source_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $target_lang                   = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $job_subject                   = filter_var( $this->request->param( 'job_subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $due_date                      = filter_var( $this->request->param( 'due_date' ), FILTER_SANITIZE_NUMBER_INT );
+        $mt_engine                     = filter_var( $this->request->param( 'mt_engine' ), FILTER_SANITIZE_NUMBER_INT );
+        $disable_tms_engine_flag       = filter_var( $this->request->param( 'disable_tms_engine' ), FILTER_VALIDATE_BOOLEAN );
         $pretranslate_100              = filter_var( $this->request->param( 'pretranslate_100' ), FILTER_SANITIZE_NUMBER_INT );
         $pretranslate_101              = filter_var( $this->request->param( 'pretranslate_101' ), FILTER_SANITIZE_NUMBER_INT );
         $tm_prioritization             = filter_var( $this->request->param( 'tm_prioritization' ), FILTER_SANITIZE_NUMBER_INT );
@@ -268,43 +265,62 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $only_private   = ( !is_null( $get_public_matches ) && !$get_public_matches );
         $due_date       = ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) );
 
+        /**
+         * Represents a generic data variable that can hold a variety of information.
+         *
+         * This variable can be used to store different types of data, such as strings,
+         * integers, arrays, or objects, depending on the context where it is applied.
+         * Its value and type are dynamic and determined during runtime based on usage.
+         *
+         * @var mixed $data The data container allowing for versatile usage scenarios.
+         */
         $data = [
-                'file_name'                     => $file_name,
-                'project_name'                  => $project_name,
-                'source_lang'                   => $source_lang,
-                'target_lang'                   => $target_lang,
-                'job_subject'                   => $job_subject,
-                'pretranslate_100'              => $pretranslate_100,
-                'pretranslate_101'              => $pretranslate_101,
-                'tm_prioritization'             => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
-                'id_team'                       => $id_team,
-                'mmt_glossaries'                => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
-                'lara_glossaries'               => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
-                'deepl_id_glossary'             => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
-                'deepl_formality'               => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
-                'project_completion'            => $project_completion,
-                'get_public_matches'            => $get_public_matches,
-                'public_tm_penalty'             => $public_tm_penalty,
-                'character_counter_count_tags'  => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
-                'character_counter_mode'        => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
-                'dialect_strict'                => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
-                'filters_extraction_parameters' => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
-                'xliff_parameters'              => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
-                'xliff_parameters_template_id'  => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
-                'qa_model_template'             => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
-                'qa_model_template_id'          => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
-                'payable_rate_template'         => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
-                'payable_rate_template_id'      => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
-                'array_keys'                    => ( !empty( $array_keys ) ) ? $array_keys : [],
-                'mt_engine'                     => $mt_engine,
-                'disable_tms_engine_flag'       => $disable_tms_engine_flag,
-                'private_tm_key'                => $private_tm_key,
-                'only_private'                  => $only_private,
-                'mt_quality_value_in_editor'    => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
-                'due_date'                      => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
-        ];
+                'file_name'                        => $file_name,
+                'project_name'                     => $project_name,
+                'source_lang'                      => $source_lang,
+                'target_lang'                      => $target_lang,
+                'job_subject'                      => $job_subject,
+                'pretranslate_100'                 => $pretranslate_100,
+                'pretranslate_101'                 => $pretranslate_101,
+                'tm_prioritization'                => ( !empty( $tm_prioritization ) ) ? $tm_prioritization : null,
+                'id_team'                          => $id_team,
+                'mmt_glossaries'                   => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
+                'lara_glossaries'                  => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
+                'deepl_id_glossary'                => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,
+                'deepl_formality'                  => ( !empty( $deepl_formality ) ) ? $deepl_formality : null,
+                'project_completion'               => $project_completion,
+                'get_public_matches'               => $get_public_matches,
+                'public_tm_penalty'                => $public_tm_penalty,
+                'character_counter_count_tags'     => ( !empty( $character_counter_count_tags ) ) ? $character_counter_count_tags : null,
+                'character_counter_mode'           => ( !empty( $character_counter_mode ) ) ? $character_counter_mode : null,
+                'dialect_strict'                   => ( !empty( $dialect_strict ) ) ? $dialect_strict : null,
+                'filters_extraction_parameters'    => ( !empty( $filters_extraction_parameters ) ) ? $filters_extraction_parameters : null,
+                'xliff_parameters'                 => ( !empty( $xliff_parameters ) ) ? $xliff_parameters : null,
+                'xliff_parameters_template_id'     => ( !empty( $xliff_parameters_template_id ) ) ? $xliff_parameters_template_id : null,
+                'qa_model_template'                => ( !empty( $qa_model_template ) ) ? $qa_model_template : null,
+                'qa_model_template_id'             => ( !empty( $qa_model_template_id ) ) ? $qa_model_template_id : null,
+                'payable_rate_template'            => ( !empty( $payable_rate_template ) ) ? $payable_rate_template : null,
+                'payable_rate_template_id'         => ( !empty( $payable_rate_template_id ) ) ? $payable_rate_template_id : null,
+                'array_keys'                       => ( !empty( $array_keys ) ) ? $array_keys : [],
+                'mt_engine'                        => $mt_engine,
+                'disable_tms_engine_flag'          => $disable_tms_engine_flag,
+                'private_tm_key'                   => $private_tm_key,
+                'only_private'                     => $only_private,
+                'mt_quality_value_in_editor'       => ( !empty( $mt_quality_value_in_editor ) ) ? $mt_quality_value_in_editor : 85,
+                'due_date'                         => ( empty( $due_date ) ? null : Utils::mysqlTimestamp( $due_date ) ),
 
-        $this->setMetadataFromPostInput( $data );
+            /**
+             * Subfiltering configuration (as string input):
+             *
+             * 1. String "null" or "" (empty string): subfiltering is disabled
+             * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+             * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+             *
+             * Note:
+             * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+             */
+                MetadataDao::SUBFILTERING_HANDLERS => $this->validateSubfilteringOptions( $this->request->param( MetadataDao::SUBFILTERING_HANDLERS, '[]' ) ),
+        ];
 
         if ( $disable_tms_engine_flag ) {
             $data[ 'tms_engine' ] = 0; //remove default Match
@@ -341,8 +357,41 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $data[ 'target_language_mt_engine_association' ] = $this->generateTargetEngineAssociation( $data[ 'target_lang' ], $data[ 'mt_engine' ] );
         $data[ 'team' ]                                  = $this->setTeam( $id_team );
 
+        $this->setMetadataFromPostInput( $data );
+
         return $data;
     }
+
+    /**
+     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     *
+     * This method ensures that the input string is a valid JSON-encoded structure.
+     * If the decoding process encounters an error, it returns an empty array to enforce
+     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     *
+     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
+     *
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @throws Exception
+     */
+    private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
+
+        if ( $subfiltering_handlers == 'none' ) {
+            // subfiltering is disabled
+            $subfiltering_handlers = 'null';
+        }
+
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers, true );
+        $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+        $validator->validate( $validatorObject );
+
+        if ( is_null( $validatorObject->getValue() ) ) {
+            return null;
+        }
+
+        return $validatorObject->getValue();
+    }
+
 
     /**
      * @param $elem
@@ -367,6 +416,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
     private function setMetadataFromPostInput( array $data = [] ) {
         // new raw counter model
         $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
+
+        $options[ MetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $data[ MetadataDao::SUBFILTERING_HANDLERS ] );
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
@@ -530,10 +581,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
 
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/qa_model.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
             $QAModelTemplateStruct = new QAModelTemplateStruct();
@@ -573,10 +622,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $json   = html_entity_decode( $payable_rate_template );
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/payable_rate.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
             $payableRateModelTemplate = new CustomPayableRateStruct();
@@ -640,13 +687,11 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $json   = html_entity_decode( $filters_extraction_parameters );
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
-            $filters_extraction_parameters = $validatorObject->decoded;
+            $filters_extraction_parameters = $validatorObject->object_expected;
         }
 
         return $filters_extraction_parameters;
@@ -664,10 +709,8 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $json   = html_entity_decode( $xliff_parameters );
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_wrapper.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $json;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $json );
+            $validator       = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
             $xliffConfigTemplate = new XliffConfigTemplateStruct();
