@@ -84,6 +84,9 @@
     },
     "dialect_strict": {
       "type":  ["null", "boolean"]
+    },
+    "subfiltering": {
+      "type":  ["null", "string"]
     }
   },
   "required": [

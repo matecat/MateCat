@@ -242,7 +242,8 @@ TAB;
                                 'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0,
-                                'priority_key' => 0
+                                'priority_key' => 0,
+                                'id_project'  => null,
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
@@ -393,7 +394,8 @@ TAB;
                                 'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
                                 'client_id' => 0,
-                                'priority_key' => 0
+                                'priority_key' => 0,
+                                'id_project'  => null,
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
@@ -538,7 +540,8 @@ TAB;
                                 'mt'        => true,
                                 'numres'    => 10,
                                 'key'       => 'a6043e606ac9b5d7ff24',
-                                'client_id' => 0
+                                'client_id' => 0,
+                                'id_project'  => null,
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
