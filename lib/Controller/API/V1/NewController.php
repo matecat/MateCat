@@ -157,7 +157,6 @@ class NewController extends KleinController {
         $projectStructure[ 'tms_engine' ]               = $request[ 'tms_engine' ];
         $projectStructure[ 'status' ]                   = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'owner' ]                    = $this->user->email;
-        $projectStructure[ 'subfiltering' ]             = $request[ 'subfiltering' ];
         $projectStructure[ 'metadata' ]                 = $request[ 'metadata' ];
         $projectStructure[ 'public_tm_penalty' ]        = $request[ 'public_tm_penalty' ];
         $projectStructure[ 'pretranslate_100' ]         = (int)!!$request[ 'pretranslate_100' ]; // Force pretranslate_100 to be 0 or 1
@@ -468,7 +467,6 @@ class NewController extends KleinController {
                 'target_language_mt_engine_association'     => $target_language_mt_engine_association,
                 'mt_qe_workflow_payable_rate'               => $mt_qe_PayableRate ?? null,
                 'legacy_icu'                                => $legacy_icu,
-                'subfiltering'                              => $subfiltering,
         ];
     }
 

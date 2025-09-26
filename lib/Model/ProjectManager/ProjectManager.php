@@ -247,7 +247,6 @@ class ProjectManager {
                             'xliff_parameters'                       => new RecursiveArrayObject(),
                             'tm_prioritization'                      => null,
                             'mt_qe_workflow_payable_rate'            => null,
-                            'subfiltering'                           => null,
                     ] );
         }
 
@@ -267,7 +266,7 @@ class ProjectManager {
         }
 
         /** @var MateCatFilter $filter */
-        $customHandlers = ( !empty( $this->projectStructure[ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'subfiltering' ] ) : [];
+        $customHandlers = ( !empty( $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) : [];
         $filter         = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [], $customHandlers );
         $this->filter   = $filter;
 
@@ -2812,7 +2811,7 @@ class ProjectManager {
                 $target = $translation_row [ 2 ];
 
                 /** @var $filter MateCatFilter filter */
-                $customHandlers = ( !empty( $this->projectStructure[ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'subfiltering' ] ) : [];
+                $customHandlers = ( !empty( $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) : [];
                 $filter = MateCatFilter::getInstance( $this->features, $chunk->source, $chunk->target, SegmentOriginalDataDao::getSegmentDataRefMap( $translation_row [ 0 ] ), $customHandlers );
                 $source = $filter->fromLayer0ToLayer1( $source );
                 $target = $filter->fromLayer0ToLayer1( $target );

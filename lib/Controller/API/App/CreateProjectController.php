@@ -115,7 +115,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $projectStructure[ 'source_language' ]                       = $this->data[ 'source_lang' ];
         $projectStructure[ 'target_language' ]                       = explode( ',', $this->data[ 'target_lang' ] );
         $projectStructure[ 'job_subject' ]                           = $this->data[ 'job_subject' ];
-        $projectStructure[ 'subfiltering' ]                          = $this->data[ 'subfiltering' ];
         $projectStructure[ 'mt_engine' ]                             = $this->data[ 'mt_engine' ];
         $projectStructure[ 'tms_engine' ]                            = $this->data[ 'tms_engine' ] ?? 1;
         $projectStructure[ 'status' ]                                = ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
