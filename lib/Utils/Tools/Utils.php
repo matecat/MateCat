@@ -919,6 +919,7 @@ class Utils {
      * @return int|mixed
      */
     public static function formatStringValue( string $value = "" ) {
+
         if ( is_numeric( $value ) ) {
             return (int)$value;
         }
