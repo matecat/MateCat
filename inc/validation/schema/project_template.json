@@ -85,8 +85,8 @@
     "dialect_strict": {
       "type":  ["null", "boolean"]
     },
-    "subfiltering": {
-      "type":  ["null", "string"]
+    "subfiltering_handlers": {
+      "$ref": "subfiltering_handlers.json"
     }
   },
   "required": [

@@ -140,10 +140,10 @@ class GetContributionWorker extends AbstractWorker {
 
         /** @var MateCatFilter $Filter */
         $Filter = MateCatFilter::getInstance(
-            $featureSet,
-            $jobStruct->source,
-            $targetLang,
-            $contributionStruct->dataRefMap
+                $featureSet,
+                $jobStruct->source,
+                $targetLang,
+                $contributionStruct->dataRefMap
         );
 
         foreach ( $content as &$match ) {
@@ -380,8 +380,9 @@ class GetContributionWorker extends AbstractWorker {
         $_config[ 'num_result' ]     = $contributionStruct->resultNum;
         $_config[ 'isConcordance' ]  = $contributionStruct->concordanceSearch;
 
-        $_config[ 'dialect_strict' ] = $contributionStruct->dialect_strict;
-        $_config[ 'priority_key' ]   = $contributionStruct->tm_prioritization;
+        $_config[ 'dialect_strict' ]                   = $contributionStruct->dialect_strict;
+        $_config[ 'priority_key' ]                     = $contributionStruct->tm_prioritization;
+        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = $contributionStruct->subfiltering_handlers;
 
         // penalty_key
         $penalty_key = TmKeyManager::getPenaltyMap( $contributionStruct->getJobStruct()->tm_keys, 'r', 'tm', $contributionStruct->getUser()->uid, $contributionStruct->userRole );
@@ -462,7 +463,7 @@ class GetContributionWorker extends AbstractWorker {
 
                 $dataRefMap = $contributionStruct->dataRefMap ?: [];
                 /** @var GetMemoryResponse $temp_matches */
-                $tms_match = $temp_matches->get_matches_as_array( 1, $dataRefMap, $_config[ 'source' ], $_config[ 'target' ], $jobStruct->id_project );
+                $tms_match = $temp_matches->get_matches_as_array( 1 );
             }
         }
 

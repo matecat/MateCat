@@ -394,9 +394,9 @@ class TMAnalysisWorker extends AbstractWorker {
      * @return array
      */
     protected function _getNewMatchTypeAndEquivalentWordDiscount(
-            array $bestMatch,
+            array        $bestMatch,
             QueueElement $queueElement,
-            array $equivalentWordMapping
+            array        $equivalentWordMapping
     ): array {
 
         $tm_match_type         = ( $this->isMtMatch( $bestMatch ) ? InternalMatchesConstants::MT : $bestMatch[ 'match' ] ?? InternalMatchesConstants::MT );
@@ -551,11 +551,12 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'target' ]     = $queueElement->params->target;
         $_config[ 'email' ]      = AppConfig::$MYMEMORY_TM_API_KEY;
 
-        $_config[ 'context_before' ]    = $queueElement->params->context_before;
-        $_config[ 'context_after' ]     = $queueElement->params->context_after;
-        $_config[ 'additional_params' ] = $queueElement->params->additional_params ?? null;
-        $_config[ 'priority_key' ]      = $queueElement->params->tm_prioritization ?? null;
-        $_config[ 'job_id' ]            = $queueElement->params->id_job ?? null;
+        $_config[ 'context_before' ]                   = $queueElement->params->context_before;
+        $_config[ 'context_after' ]                    = $queueElement->params->context_after;
+        $_config[ 'additional_params' ]                = $queueElement->params->additional_params ?? null;
+        $_config[ 'priority_key' ]                     = $queueElement->params->tm_prioritization ?? null;
+        $_config[ 'job_id' ]                           = $queueElement->params->id_job ?? null;
+        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = $queueElement->params->subfiltering_handlers;
 
         if ( $queueElement->params->dialect_strict ?? false ) { //null coalesce operator when dialect_strict is not set
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;

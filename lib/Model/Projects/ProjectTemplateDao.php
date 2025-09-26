@@ -4,7 +4,6 @@ namespace Model\Projects;
 
 use DateTime;
 use Exception;
-use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -25,6 +24,8 @@ use Utils\Engines\EnginesFactory;
 use Utils\Langs\Languages;
 use Utils\TmKeyManagement\TmKeyStruct;
 use Utils\Tools\Utils;
+use Utils\Validator\JSONSchema\JSONValidator;
+use Utils\Validator\JSONSchema\JSONValidatorObject;
 
 class ProjectTemplateDao extends AbstractDao {
     const TABLE = 'project_templates';
@@ -75,10 +76,10 @@ class ProjectTemplateDao extends AbstractDao {
         // MT
         $default->mt = json_encode( self::getUserDefaultMt() );
 
-        $default->tm           = json_encode( [] );
-        $default->created_at   = date( "Y-m-d H:i:s" );
-        $default->modified_at  = date( "Y-m-d H:i:s" );
-        $default->subfiltering = null;
+        $default->tm                    = json_encode( [] );
+        $default->created_at            = date( "Y-m-d H:i:s" );
+        $default->modified_at           = date( "Y-m-d H:i:s" );
+        $default->subfiltering_handlers = json_encode( [] );
 
         return $default;
     }
@@ -110,16 +111,16 @@ class ProjectTemplateDao extends AbstractDao {
     }
 
     /**
-     * @param string     $json
+     * @param object     $decodedObject
      * @param UserStruct $user
      *
      * @return ProjectTemplateStruct
-     * @throws Exception
+     * @throws ReflectionException
      */
-    public static function createFromJSON( string $json, UserStruct $user ): ProjectTemplateStruct {
+    public static function createFromJSON( object $decodedObject, UserStruct $user ): ProjectTemplateStruct {
 
         $projectTemplateStruct = new ProjectTemplateStruct();
-        $projectTemplateStruct->hydrateFromJSON( $json, $user->uid );
+        $projectTemplateStruct->hydrateFromJSON( $decodedObject, $user->uid );
 
         self::checkValues( $projectTemplateStruct, $user );
 
@@ -137,6 +138,7 @@ class ProjectTemplateDao extends AbstractDao {
      */
     public static function editFromJSON( ProjectTemplateStruct $projectTemplateStruct, string $json, int $id, UserStruct $user ): ProjectTemplateStruct {
 
+        $json = json_decode( $json );
         $projectTemplateStruct->hydrateFromJSON( $json, $user->uid, $id );
 
         self::checkValues( $projectTemplateStruct, $user );
@@ -164,32 +166,10 @@ class ProjectTemplateDao extends AbstractDao {
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
 
         // check subfiltering string
-        if ( $projectTemplateStruct->subfiltering !== null ) {
-            $allowedTags = [
-                    InjectableFiltersTags::markup,
-                    InjectableFiltersTags::percent_double_curly,
-                    InjectableFiltersTags::twig,
-                    InjectableFiltersTags::ruby_on_rails,
-                    InjectableFiltersTags::double_snail,
-                    InjectableFiltersTags::double_square,
-                    InjectableFiltersTags::dollar_curly,
-                    InjectableFiltersTags::single_curly,
-                    InjectableFiltersTags::objective_c_ns,
-                    InjectableFiltersTags::double_percent,
-                    InjectableFiltersTags::square_sprintf,
-                    InjectableFiltersTags::sprintf,
-            ];
-
-            $subfiltering      = $projectTemplateStruct->subfiltering;
-            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
-            $subfilteringArray = explode( ",", $subfiltering );
-            $check             = array_diff( $subfilteringArray, $allowedTags );
-
-            if ( !empty( $check ) ) {
-                foreach ( $check as $tag ) {
-                    throw new Exception( $tag . " is not a valid Subfiltering tag" );
-                }
-            }
+        if ( $projectTemplateStruct->subfiltering_handlers !== null ) {
+            $validatorObject = new JSONValidatorObject( $projectTemplateStruct->subfiltering_handlers );
+            $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
+            $validator->validate( $validatorObject );
         }
 
         // check id_team
@@ -422,7 +402,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt = $conn->prepare( $sql );
         $stmt->execute( [
                 "name"                         => $projectTemplateStruct->name,
-                "subfiltering"                 => $projectTemplateStruct->subfiltering,
+                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,
@@ -504,7 +484,7 @@ class ProjectTemplateDao extends AbstractDao {
         $stmt->execute( [
                 "id"                           => $projectTemplateStruct->id,
                 "name"                         => $projectTemplateStruct->name,
-                "subfiltering"                 => $projectTemplateStruct->subfiltering,
+                "subfiltering"                 => $projectTemplateStruct->subfiltering_handlers,
                 "is_default"                   => $projectTemplateStruct->is_default,
                 "uid"                          => $projectTemplateStruct->uid,
                 "id_team"                      => $projectTemplateStruct->id_team,

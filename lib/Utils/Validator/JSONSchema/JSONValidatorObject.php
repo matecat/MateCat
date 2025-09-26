@@ -101,7 +101,7 @@ class JSONValidatorObject extends ValidatorObject {
             return $this->decoded;
         }
 
-        $this->decoded   = json_decode( $this->json, $this->associative );
+        $this->decoded   = json_decode( $this->json == '' ? 'null' : $this->json, $this->associative );
         $this->isDecoded = true;
         Utils::raiseJsonExceptionError();
         if ( is_array( $this->decoded ) ) {
@@ -121,7 +121,7 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function getValue(){
+    public function getValue() {
         return $this->decode();
     }
 

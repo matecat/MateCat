@@ -160,7 +160,7 @@ class FastAnalysis extends AbstractDaemon {
                 continue;
             }
 
-            $this->_logTimeStampedMsg( "Projects found",  $projects_list );
+            $this->_logTimeStampedMsg( "Projects found", $projects_list );
 
             $featureSet = new FeatureSet();
 
@@ -257,6 +257,7 @@ class FastAnalysis extends AbstractDaemon {
                     $mt_qe_workflow_enabled     = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_ENABLED );
                     $mt_qe_workflow_parameters  = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QE_WORKFLOW_PARAMETERS );
                     $mt_quality_value_in_editor = $projectStruct->getMetadataValue( ProjectsMetadataDao::MT_QUALITY_VALUE_IN_EDITOR );
+                    $subfiltering_handlers      = ( new ProjectsMetadataDao )->getSubfilteringCustomHandlers( $projectStruct->id );
                     Database::obtain()->getConnection()->commit();
 
                     $insertReportRes = $this->_insertFastAnalysis(
@@ -268,7 +269,8 @@ class FastAnalysis extends AbstractDaemon {
                             $mt_evaluation,
                             $mt_qe_workflow_enabled,
                             $mt_qe_workflow_parameters,
-                            $mt_quality_value_in_editor
+                            $mt_quality_value_in_editor,
+                            $subfiltering_handlers
                     );
 
                 } catch ( Exception $e ) {
@@ -472,14 +474,15 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _insertFastAnalysis(
             ProjectStruct $projectStruct,
-            string $projectFeaturesString,
-            array $equivalentWordMapping,
-            FeatureSet $featureSet,
-            bool $perform_Tms_Analysis = true,
-            ?bool $mt_evaluation = false,
-            ?bool $mt_qe_workflow_enabled = false,
-            ?string $mt_qe_workflow_parameters = "",
-            ?int $mt_quality_value_in_editor = 85
+            string        $projectFeaturesString,
+            array         $equivalentWordMapping,
+            FeatureSet    $featureSet,
+            bool          $perform_Tms_Analysis = true,
+            ?bool         $mt_evaluation = false,
+            ?bool         $mt_qe_workflow_enabled = false,
+            ?string       $mt_qe_workflow_parameters = "",
+            ?int          $mt_quality_value_in_editor = 85,
+            ?array        $subfiltering_handlers = []
     ): int {
 
         $pid               = $projectStruct->id;
@@ -727,6 +730,8 @@ class FastAnalysis extends AbstractDaemon {
                             $queue_element[ 'mt_qe_workflow_parameters' ] = $mt_qe_workflow_parameters;
                         }
                         $queue_element[ 'mt_quality_value_in_editor' ] = $mt_quality_value_in_editor ?? false;
+
+                        $queue_element[ ProjectsMetadataDao::SUBFILTERING_HANDLERS ] = $subfiltering_handlers;
 
                         $element            = new QueueElement();
                         $element->params    = new Params( $queue_element );

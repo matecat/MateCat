@@ -10,7 +10,7 @@ use ReflectionException;
 trait ChunkNotFoundHandlerTrait {
 
     /**
-     * @var \Model\Jobs\JobStruct
+     * @var JobStruct
      */
     protected JobStruct $chunk;
 

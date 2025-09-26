@@ -24,13 +24,16 @@ class ProjectTemplateController extends KleinController {
     /**
      * @param $json
      *
+     * @return object
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
+     * @throws Exception
      */
-    private function validateJSON( $json ) {
+    private function validateJSON( $json ): object {
         $validatorObject = new JSONValidatorObject( $json );
         $validator       = new JSONValidator( 'project_template.json', true );
         $validator->validate( $validatorObject );
+        return $validatorObject->getValue();
     }
 
     /**
@@ -107,9 +110,9 @@ class ProjectTemplateController extends KleinController {
             }
 
             $json = $this->request->body();
-            $this->validateJSON( $json );
+            $decodedObject = $this->validateJSON( $json );
 
-            $struct = ProjectTemplateDao::createFromJSON( $json, $this->getUser() );
+            $struct = ProjectTemplateDao::createFromJSON( $decodedObject, $this->getUser() );
 
             $this->response->code( 201 );
 
@@ -164,7 +167,7 @@ class ProjectTemplateController extends KleinController {
             $id   = (int)$this->request->param( 'id' );
             $uid  = $this->getUser()->uid;
             $json = $this->request->body();
-            $this->validateJSON( $json );
+            $decodedObject = $this->validateJSON( $json );
 
             // mark all templates as not default
             if ( $id == 0 ) {
@@ -179,7 +182,7 @@ class ProjectTemplateController extends KleinController {
                 throw new Exception( 'Model not found', 404 );
             }
 
-            $struct = ProjectTemplateDao::editFromJSON( $model, $json, $id, $this->getUser() );
+            $struct = ProjectTemplateDao::editFromJSON( $model, $decodedObject, $id, $this->getUser() );
 
             $this->response->code( 200 );
 
@@ -255,6 +258,10 @@ class ProjectTemplateController extends KleinController {
      * @return string
      */
     private function getProjectTemplateModelSchema(): string {
-        return file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/project_template.json' );
+        $skeletonSchema                                    = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/project_template.json' ) );
+        $contentSchema                                     = JSONValidator::getValidJSONSchema( file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/subfiltering_handlers.json' ) );
+        $skeletonSchema->properties->subfiltering_handlers = $contentSchema;
+
+        return $skeletonSchema;
     }
 }

@@ -8,7 +8,6 @@ use Controller\API\Commons\Validators\LoginValidator;
 use Controller\Traits\ScanDirectoryForConvertedFiles;
 use Exception;
 use InvalidArgumentException;
-use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\Conversion\FilesConverter;
 use Model\Conversion\Upload;
 use Model\DataAccess\Database;
@@ -426,7 +425,7 @@ class NewController extends KleinController {
             $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
 
-        $metadata[ MetadataDao::SUBFILTERING_HANDLERS ] = $subfiltering_handlers;
+        $metadata[ MetadataDao::SUBFILTERING_HANDLERS ] = json_encode( $subfiltering_handlers );
 
         return [
                 'project_info'                              => $project_info,
@@ -708,13 +707,13 @@ class NewController extends KleinController {
      */
     private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
 
-        if ( $subfiltering_handlers == 'none' || $subfiltering_handlers == '' ) {
+        if ( $subfiltering_handlers == 'none' ) {
             // subfiltering is disabled
             $subfiltering_handlers = 'null';
         }
 
         $validatorObject = new JSONValidatorObject( $subfiltering_handlers, true );
-        $validator       = new JSONValidator( 'subfiltering_options.json', true );
+        $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
         $validator->validate( $validatorObject );
 
         if ( is_null( $validatorObject->getValue() ) ) {

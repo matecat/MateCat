@@ -44,7 +44,6 @@ class DeepL extends AbstractEngine {
         $source      = $parameters[ 'source_lang' ];
         $target      = $parameters[ 'target_lang' ];
         $segment     = $parameters[ 'text' ][ 0 ];
-        $projectId   = $parameters[ 'project_id' ] ?? null;
 
         return ( new Matches( [
                 'source'          => $source,
@@ -54,7 +53,7 @@ class DeepL extends AbstractEngine {
                 'match'           => "85%",
                 'created-by'      => $this->getMTName(),
                 'create-date'     => date( "Y-m-d" ),
-        ] ) )->getMatches( 1, [], $source, $target, $projectId );
+        ] ) )->getMatches( 1 );
     }
 
     /**
@@ -91,7 +90,6 @@ class DeepL extends AbstractEngine {
                     'text'        => [
                             $_config[ 'segment' ],
                     ],
-                    'project_id ' => $_config[ 'pid' ] ?? null,
                     'source_lang' => $source[ 0 ],
                     'target_lang' => $target[ 0 ],
                     'formality'   => ( $_config[ 'formality' ] ?: null ),

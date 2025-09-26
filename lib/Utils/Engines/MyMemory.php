@@ -7,6 +7,7 @@ use Exception;
 use Model\Analysis\Constants\InternalMatchesConstants;
 use Model\Exceptions\NotFoundException;
 use Model\Exceptions\ValidationError;
+use Model\Projects\MetadataDao;
 use Model\Users\UserStruct;
 use Utils\Constants\EngineConstants;
 use Utils\Engines\Results\MyMemory\AnalyzeResponse;
@@ -134,13 +135,7 @@ class MyMemory extends AbstractEngine {
                 $result_object = KeysGlossaryResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'tags_projection' :
-                $id_project = $parameters[ 'id_project' ] ?? null;
-
-                if(!empty($id_project)){
-                    $id_project = (int)$id_project;
-                }
-
-                $result_object = TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap, $id_project );
+                $result_object = TagProjectionResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
                 break;
             case 'api_key_check_auth_url':
                 $result_object = AuthKeyResponse::getInstance( $decoded, $this->featureSet, $dataRefMap );
@@ -253,7 +248,7 @@ class MyMemory extends AbstractEngine {
         // Here we pass the subfiltering configuration to the API.
         // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
         // We use the JSON to pass a nullable value.
-        $parameters[ 'subfiltering' ] = json_encode( $_config[ 'subfiltering' ] ?? null ); // null coalescing operator to avoid warnings, we want null when it is not set.
+        $parameters[ MetadataDao::SUBFILTERING_HANDLERS ] = $_config[ MetadataDao::SUBFILTERING_HANDLERS ] ?? null; // null coalescing operator to avoid warnings, we want null when it is not set.
 
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
 

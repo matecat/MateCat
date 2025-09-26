@@ -179,17 +179,12 @@ class MetadataDao extends AbstractDao {
      *
      * @return array
      */
-    public function getSubfilteringCustomHandlers( int $id_project ): array {
+    public function getSubfilteringCustomHandlers( int $id_project ): ?array {
 
         try {
-            $customHandlers = [];
-            $subfiltering   = $this->get( $id_project, MetadataDao::SUBFILTERING_HANDLERS, 86400 );
+            $subfiltering = $this->get( $id_project, MetadataDao::SUBFILTERING_HANDLERS, 86400 );
 
-            if ( !empty( $subfiltering->value ) ) {
-                $customHandlers = explode( ",", $subfiltering->value );
-            }
-
-            return $customHandlers;
+            return json_decode( $subfiltering->value );
         } catch ( Exception $exception ) {
             return [];
         }
