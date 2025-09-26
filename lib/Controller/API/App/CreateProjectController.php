@@ -320,7 +320,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
              * Note:
              * - The values above are expected as strings (e.g., "[]"), not native PHP types.
              */
-                'subfiltering_handlers'         => $this->validateSubfilteringOptions( $this->request->param( 'subfiltering_handlers', '[]' ) ),
+                MetadataDao::SUBFILTERING_HANDLERS        => $this->validateSubfilteringOptions( $this->request->param( MetadataDao::SUBFILTERING_HANDLERS, '[]' ) ),
         ];
 
         if ( $disable_tms_engine_flag ) {
@@ -344,7 +344,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         $data[ 'public_tm_penalty' ]                     = ( !empty( $public_tm_penalty ) ) ? $this->validatePublicTMPenalty( (int)$public_tm_penalty ) : null;
-        $data[ 'subfiltering' ]                          = ( !empty( $subfiltering ) ) ? $this->validateSubfilteringString( $subfiltering ) : null;
         $data[ 'source_lang' ]                           = $this->validateSourceLang( Languages::getInstance(), $data[ 'source_lang' ] );
         $data[ 'target_lang' ]                           = $this->validateTargetLangs( Languages::getInstance(), $data[ 'target_lang' ] );
         $data[ 'mt_engine' ]                             = $this->validateUserMTEngine( $data[ 'mt_engine' ] );
@@ -419,14 +418,10 @@ class CreateProjectController extends AbstractStatefulKleinController {
         // new raw counter model
         $options = [ MetadataDao::WORD_COUNT_TYPE_KEY => MetadataDao::WORD_COUNT_RAW ];
 
-        $options[ MetadataDao::SUBFILTERING_HANDLERS ] = $data[ 'subfiltering_handlers' ];
+        $options[ MetadataDao::SUBFILTERING_HANDLERS ] = $data[ MetadataDao::SUBFILTERING_HANDLERS ];
 
         if ( isset( $data[ 'speech2text' ] ) ) {
             $options[ 'speech2text' ] = $data[ 'speech2text' ];
-        }
-
-        if ( isset( $data[ 'subfiltering' ] ) and !empty($data[ 'subfiltering' ]) ) {
-            $options[ 'subfiltering' ] = $data[ 'subfiltering' ];
         }
 
         if ( isset( $data[ 'segmentation_rule' ] ) ) {
@@ -452,44 +447,6 @@ class CreateProjectController extends AbstractStatefulKleinController {
         }
 
         return $public_tm_penalty;
-    }
-
-    /**
-     * @param null $subfiltering
-     *
-     * @return string|null
-     */
-    private function validateSubfilteringString( $subfiltering = null ): ?string {
-
-        if ( !empty( $subfiltering ) ) {
-
-            $allowedTags = [
-                    InjectableFiltersTags::markup,
-                    InjectableFiltersTags::percent_double_curly,
-                    InjectableFiltersTags::twig,
-                    InjectableFiltersTags::ruby_on_rails,
-                    InjectableFiltersTags::double_snail,
-                    InjectableFiltersTags::double_square,
-                    InjectableFiltersTags::dollar_curly,
-                    InjectableFiltersTags::single_curly,
-                    InjectableFiltersTags::objective_c_ns,
-                    InjectableFiltersTags::double_percent,
-                    InjectableFiltersTags::square_sprintf,
-                    InjectableFiltersTags::sprintf,
-            ];
-
-            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
-            $subfilteringArray = explode( ",", $subfiltering );
-            $check             = array_diff( $subfilteringArray, $allowedTags );
-
-            if ( !empty( $check ) ) {
-                foreach ( $check as $tag ) {
-                    throw new InvalidArgumentException( $tag . " is not a valid Subfiltering tag" );
-                }
-            }
-        }
-
-        return $subfiltering;
     }
 
     /**

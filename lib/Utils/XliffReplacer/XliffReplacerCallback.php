@@ -32,30 +32,23 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     private FeatureSet $featureSet;
 
     /**
-     * @var int|null
-     */
-    private ?int $idProject = null;
-
-    /**
      * XliffReplacerCallback constructor.
      *
      * @param FeatureSet $featureSet
      * @param string     $sourceLang
      * @param string     $targetLang
      *
-     * @param int        $idProject
+     * @param int|null   $idProject
      */
     public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, ?int $idProject = null ) {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
 
-
         $subfilteringCustomHandlers = [];
         if ( $idProject !== null ) {
-            $this->idProject            = $idProject;
             $metadataDao                = new MetadataDao();
-            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( (int)$idProject );
+            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( $idProject );
         }
 
         $this->filter = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers );

@@ -266,9 +266,8 @@ class ProjectManager {
         }
 
         /** @var MateCatFilter $filter */
-        $customHandlers = ( !empty( $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) ) ? explode( ",", $this->projectStructure[ 'metadata' ][ 'subfiltering' ] ) : [];
-        $filter         = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [], $customHandlers );
-        $this->filter   = $filter;
+        $filter       = MateCatFilter::getInstance( $this->features, $this->projectStructure[ 'source_language' ], $this->projectStructure[ 'target_language' ], [], $this->projectStructure[ 'metadata' ][ ProjectsMetadataDao::SUBFILTERING_HANDLERS ] );
+        $this->filter = $filter;
 
         $this->projectStructure[ 'array_files' ] = $this->features->filter(
                 'filter_project_manager_array_files',

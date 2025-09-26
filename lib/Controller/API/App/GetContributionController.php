@@ -25,7 +25,6 @@ use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
 use Utils\TmKeyManagement\Filter;
-use Utils\TmKeyManagement\TmKeyManager;
 
 class GetContributionController extends KleinController {
 
@@ -67,7 +66,7 @@ class GetContributionController extends KleinController {
         $contributionRequest = new GetContributionRequest();
         $featureSet          = ( $this->featureSet !== null ) ? $this->featureSet : new FeatureSet();
         /** @var MateCatFilter $Filter */
-        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target );
+        $Filter = MateCatFilter::getInstance( $featureSet, $jobStruct->source, $jobStruct->target, $dataRefMap, ( new ProjectsMetadataDao )->getSubfilteringCustomHandlers( $projectStruct->id ) );
 
         $context_list_before = array_map( function ( string $context ) use ( $Filter ) {
             return $Filter->fromLayer2ToLayer1( $context );

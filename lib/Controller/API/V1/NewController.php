@@ -324,7 +324,6 @@ class NewController extends KleinController {
         $speech2text                               = filter_var( $this->request->param( 'speech2text' ), FILTER_VALIDATE_BOOLEAN );
         $subject                                   = filter_var( $this->request->param( 'subject' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $target_lang                               = filter_var( $this->request->param( 'target_lang' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
-        $subfiltering                              = filter_var( $this->request->param( 'subfiltering' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $tms_engine                                = filter_var( $this->request->param( 'tms_engine' ), FILTER_VALIDATE_INT, [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => [ 'default' => 1, 'min_range' => 0 ] ] );
         $xliff_parameters                          = filter_var( $this->request->param( 'xliff_parameters' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_NO_ENCODE_QUOTES ] );
         $xliff_parameters_template_id              = filter_var( $this->request->param( 'xliff_parameters_template_id' ), FILTER_SANITIZE_NUMBER_INT );
@@ -360,7 +359,6 @@ class NewController extends KleinController {
         $subject           = $this->validateSubject( $subject );
         $segmentation_rule = $this->validateSegmentationRules( $segmentation_rule );
         [ $private_tm_user, $private_tm_pass, $private_tm_key, $new_keys, $tm_prioritization ] = $this->validateTmAndKeys( $private_tm_key, $private_tm_key_json );
-        $subfiltering                          = $this->validateSubfilteringString( $subfiltering );
         $team                                  = $this->validateTeam( $id_team );
         $qaModelTemplate                       = $this->validateQaModelTemplate( $id_qa_model_template );
         $payableRateModelTemplate              = $this->validatePayableRateTemplate( $payable_rate_template_name, $payable_rate_template_id );
@@ -386,7 +384,7 @@ class NewController extends KleinController {
          * Note:
          * - The values above are expected as strings (e.g., "[]"), not native PHP types.
          */
-        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( 'subfiltering_handlers', '[]' ) ); // string value or default '[]'
+        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( MetadataDao::SUBFILTERING_HANDLERS, '[]' ) ); // string value or default '[]'
 
         if ( $mt_qe_workflow_enable ) {
 
@@ -420,10 +418,6 @@ class NewController extends KleinController {
 
         if ( !empty( $segmentation_rule ) ) {
             $metadata[ 'segmentation_rule' ] = $segmentation_rule;
-        }
-
-        if ( !empty( $subfiltering ) ) {
-            $metadata[ 'subfiltering' ] = $subfiltering;
         }
 
         $metadata[ MetadataDao::MT_QUALITY_VALUE_IN_EDITOR ] = $mt_quality_value_in_editor;
@@ -898,44 +892,6 @@ class NewController extends KleinController {
         $elem                     = TmKeyManager::sanitize( $element );
 
         return $elem->toArray();
-    }
-
-    /**
-     * @param null $subfiltering
-     *
-     * @return string|null
-     */
-    private function validateSubfilteringString( $subfiltering = null ): ?string {
-
-        if ( !empty( $subfiltering ) ) {
-
-            $allowedTags = [
-                    InjectableFiltersTags::markup,
-                    InjectableFiltersTags::percent_double_curly,
-                    InjectableFiltersTags::twig,
-                    InjectableFiltersTags::ruby_on_rails,
-                    InjectableFiltersTags::double_snail,
-                    InjectableFiltersTags::double_square,
-                    InjectableFiltersTags::dollar_curly,
-                    InjectableFiltersTags::single_curly,
-                    InjectableFiltersTags::objective_c_ns,
-                    InjectableFiltersTags::double_percent,
-                    InjectableFiltersTags::square_sprintf,
-                    InjectableFiltersTags::sprintf,
-            ];
-
-            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
-            $subfilteringArray = explode( ",", $subfiltering );
-            $check             = array_diff( $subfilteringArray, $allowedTags );
-
-            if ( !empty( $check ) ) {
-                foreach ( $check as $tag ) {
-                    throw new InvalidArgumentException( $tag . " is not a valid Subfiltering tag" );
-                }
-            }
-        }
-
-        return $subfiltering;
     }
 
     /**
