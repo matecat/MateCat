@@ -26,6 +26,7 @@ class MetadataDao extends AbstractDao {
     const MT_EVALUATION              = 'mt_evaluation';
     const MT_QE_WORKFLOW_ENABLED     = 'mt_qe_workflow_enabled';
     const MT_QE_WORKFLOW_PARAMETERS  = 'mt_qe_workflow_parameters';
+    const SUBFILTERING_HANDLERS = 'subfiltering_handlers';
 
     protected static string $_query_get_metadata = "SELECT * FROM project_metadata WHERE id_project = :id_project ";
 

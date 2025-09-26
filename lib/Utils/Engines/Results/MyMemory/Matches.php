@@ -123,11 +123,11 @@ class Matches {
         $filter = MateCatFilter::getInstance( $featureSet, $this->source, $this->target, $dataRefMap );
         switch ( $layerNum ) {
             case 0:
-                return $filter->fromLayer1ToLayer0( $string );
+                return $filter->fromLayer1ToLayer0( $string ?? '' );
             case 1:
                 return $string;
             case 2:
-                return $filter->fromLayer1ToLayer2( $string );
+                return $filter->fromLayer1ToLayer2( $string ?? '' );
         }
     }
 

@@ -411,10 +411,8 @@ class GlossaryController extends KleinController {
      * @throws JsonValidatorGenericException
      */
     private function validateJson( $json, $jsonSchema ) {
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $json;
-
-        $validator = new JSONValidator( $jsonSchema );
+        $validatorObject = new JSONValidatorObject( $json );
+        $validator       = new JSONValidator( $jsonSchema );
         $validator->validate( $validatorObject );
 
         if ( !$validator->isValid() ) {

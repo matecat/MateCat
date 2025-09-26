@@ -235,14 +235,15 @@ TAB;
         $curl_mock_param                        = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'         => 'Ciascuna copia è dotata di un numero di serie univoco.',
-                                'langpair'  => 'it-IT|en-US',
-                                'de'        => 'demo@matecat.com',
-                                'mt'        => true,
-                                'numres'    => 10,
-                                'key'       => 'a6043e606ac9b5d7ff24',
-                                'client_id' => 0,
-                                'priority_key' => 0
+                                'q'            => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair'     => 'it-IT|en-US',
+                                'de'           => 'demo@matecat.com',
+                                'mt'           => true,
+                                'numres'       => 10,
+                                'key'          => 'a6043e606ac9b5d7ff24',
+                                'client_id'    => 0,
+                                'priority_key' => 0,
+                                'subfiltering' => 'null'
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
@@ -281,7 +282,6 @@ TAB;
         $this->assertTrue( $result->matches[ 2 ] instanceof Matches );
 
         $result->matches = $result->get_matches_as_array();
-
 
 
         /**
@@ -386,14 +386,15 @@ TAB;
         $curl_mock_param                        = [
                 CURLOPT_POSTFIELDS  =>
                         [
-                                'q'         => 'Ciascuna copia è dotata di un numero di serie univoco.',
-                                'langpair'  => 'it-IT|en-US',
-                                'de'        => 'demo@matecat.com',
-                                'mt'        => true,
-                                'numres'    => 10,
-                                'key'       => 'a6043e606ac9b5d7ff24',
-                                'client_id' => 0,
-                                'priority_key' => 0
+                                'q'            => 'Ciascuna copia è dotata di un numero di serie univoco.',
+                                'langpair'     => 'it-IT|en-US',
+                                'de'           => 'demo@matecat.com',
+                                'mt'           => true,
+                                'numres'       => 10,
+                                'key'          => 'a6043e606ac9b5d7ff24',
+                                'client_id'    => 0,
+                                'priority_key' => 0,
+                                'subfiltering' => 'null'
                         ],
                 CURLINFO_HEADER_OUT => true,
                 CURLOPT_TIMEOUT     => 120
@@ -409,7 +410,7 @@ TAB;
          * @var Match
          */
         $this->engine_MyMemory = $this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $this->engine_struct_param ] )->onlyMethods( [ '_call' ] )->getMock();
-        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with(  $url_mock_param, $curl_mock_param  )->willReturn( $mock_json_return );
+        $this->engine_MyMemory->expects( $this->once() )->method( '_call' )->with( $url_mock_param, $curl_mock_param )->willReturn( $mock_json_return );
 
         /**
          * IMPORTANT: the penalty is set to 5 in order to have the TM match with id 484523811 as the second match after the TM match with id 0

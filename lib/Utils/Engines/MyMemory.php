@@ -243,6 +243,11 @@ class MyMemory extends AbstractEngine {
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
+        // Here we pass the subfiltering configuration to the API.
+        // This value can be an array or null, if null, no filters will be loaded, if the array is empty, the default filters list will be loaded.
+        // We use the JSON to pass a nullable value.
+        $parameters[ 'subfiltering' ] = json_encode( $_config[ 'subfiltering' ] ?? null ); // null coalescing operator to avoid warnings, we want null when it is not set.
+
         $parameters = $this->featureSet->filter( 'filterMyMemoryGetParameters', $parameters, $_config );
 
         $this->call( "translate_relative_url", $parameters, true );
@@ -270,8 +275,8 @@ class MyMemory extends AbstractEngine {
         $parameters[ 'prop' ]      = $_config[ 'prop' ];
 
         if ( !empty( $_config[ 'context_after' ] ) || !empty( $_config[ 'context_before' ] ) ) {
-            $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_after' ] );
-            $parameters[ 'context_before' ] = preg_replace( "/^(-?@-?)/", "", @$_config[ 'context_before' ] );
+            $parameters[ 'context_after' ]  = preg_replace( "/^(-?@-?)/", "", $_config[ 'context_after' ] ?? '' );
+            $parameters[ 'context_before' ] = preg_replace( "/^(-?@-?)/", "", $_config[ 'context_before' ] ?? '' );
         }
 
         if ( !empty( $_config[ 'id_user' ] ) ) {

@@ -83,7 +83,7 @@ class NewController extends KleinController {
         $fs         = FilesStorageFactory::create();
         $uploadFile = new Upload();
 
-        $stdResult = $uploadFile->uploadFiles( $_FILES );
+        $stdResult = $uploadFile->uploadFiles( $this->request->files()->all() );
 
         $arFiles = [];
 
@@ -342,7 +342,7 @@ class NewController extends KleinController {
             $instructions = $this->featureSet->filter( 'encodeInstructions', $instructions ?? null );
         }
 
-        if ( empty( $_FILES ) ) {
+        if ( $this->request->files()->isEmpty() ) {
             throw new InvalidArgumentException( "Missing file. Not Sent." );
         }
 
@@ -372,6 +372,18 @@ class NewController extends KleinController {
         $character_counter_mode                = $this->validateCharacterCounterMode( $character_counter_mode );
         $project_features                      = $this->appendFeaturesToProject( (bool)$project_completion, $mt_engine );
         $target_language_mt_engine_association = $this->generateTargetEngineAssociation( $target_lang, $mt_engine );
+
+        /**
+         * Subfiltering configuration (as string input):
+         *
+         * 1. String "none" or "" (empty string) string or String "null": subfiltering is disabled
+         * 2. '[]' (JSON string empty array) or parameter omitted: default subfiltering is applied.
+         * 3. JSON-encoded options (e.g., "[\"markup\",\"twig\"]"): custom subfiltering is applied using the provided handlers.
+         *
+         * Note:
+         * - The values above are expected as strings (e.g., "[]"), not native PHP types.
+         */
+        $subfiltering_handlers = $this->validateSubfilteringOptions( $this->request->param( 'subfiltering_handlers', '[]' ) ); // string value or default '[]'
 
         if ( $mt_qe_workflow_enable ) {
 
@@ -412,6 +424,8 @@ class NewController extends KleinController {
         if ( $mt_evaluation ) {
             $metadata[ MetadataDao::MT_EVALUATION ] = true;
         }
+
+        $metadata[ MetadataDao::SUBFILTERING_HANDLERS ] = $subfiltering_handlers;
 
         return [
                 'project_info'                              => $project_info,
@@ -680,6 +694,36 @@ class NewController extends KleinController {
     }
 
     /**
+     * Validates the provided subfiltering options by attempting to decode them as JSON.
+     *
+     * This method ensures that the input string is a valid JSON-encoded structure.
+     * If the decoding process encounters an error, it returns an empty array to enforce
+     * the default subfiltering behavior. Otherwise, it returns the decoded JSON data.
+     *
+     * @param string $subfiltering_handlers A JSON-encoded string representing subfiltering options.
+     *
+     * @return ?array The decoded JSON data as an associative array, or an empty array if an error occurs.
+     * @throws Exception
+     */
+    private function validateSubfilteringOptions( string $subfiltering_handlers ): ?array {
+
+        if ( $subfiltering_handlers == 'none' || $subfiltering_handlers == '' ) {
+            // subfiltering is disabled
+            $subfiltering_handlers = 'null';
+        }
+
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers, true );
+        $validator       = new JSONValidator( 'subfiltering_options.json', true );
+        $validator->validate( $validatorObject );
+
+        if ( is_null( $validatorObject->getValue() ) ) {
+            return null;
+        }
+
+        return $validatorObject->getValue();
+    }
+
+    /**
      * @param string $private_tm_key
      * @param string $private_tm_key_json
      *
@@ -703,14 +747,12 @@ class NewController extends KleinController {
 
                 $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
 
-                $validatorObject       = new JSONValidatorObject();
-                $validatorObject->json = $private_tm_key_json;
-
-                $validator = new JSONValidator( $schema, true );
+                $validatorObject = new JSONValidatorObject( $private_tm_key_json );
+                $validator       = new JSONValidator( $schema, true );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
-                $tm_prioritization = $jsonObject->decoded->tm_prioritization;
+                $tm_prioritization = $jsonObject->decode()->tm_prioritization;
 
                 $private_tm_key = array_map(
                         function ( $item ) {
@@ -721,7 +763,7 @@ class NewController extends KleinController {
                                     'penalty' => $item->penalty ?? 0,
                             ];
                         },
-                        $jsonObject->decoded->keys
+                        $jsonObject->decode()->keys
                 );
 
             } else {
@@ -1096,10 +1138,8 @@ class NewController extends KleinController {
 
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $filters_extraction_parameters;
-
-            $validator = new JSONValidator( $schema );
+            $validatorObject = new JSONValidatorObject( $filters_extraction_parameters );
+            $validator       = new JSONValidator( $schema );
             $validator->validate( $validatorObject );
 
             $config = new FiltersConfigTemplateStruct();
@@ -1143,14 +1183,12 @@ class NewController extends KleinController {
 
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/mt_qe_workflow_params.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $mt_qe_workflow_template_raw_parameters;
-
-            $validator  = new JSONValidator( $schema, true );
-            $jsonObject = $validator->validate( $validatorObject );
+            $validatorObject = new JSONValidatorObject( $mt_qe_workflow_template_raw_parameters );
+            $validator       = new JSONValidator( $schema, true );
+            $jsonObject      = $validator->validate( $validatorObject );
 
             /** @var JSONValidatorObject $jsonObject */
-            return new MTQEWorkflowParams( (array)( $jsonObject->decoded ) );
+            return new MTQEWorkflowParams( (array)( $jsonObject->decode() ) );
 
         } elseif ( !empty( $mt_qe_workflow_template_id ) ) {
 
@@ -1209,13 +1247,11 @@ class NewController extends KleinController {
 
             $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
 
-            $validatorObject       = new JSONValidatorObject();
-            $validatorObject->json = $xliff_parameters;
-
-            $validator = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $xliff_parameters, true );
+            $validator       = new JSONValidator( $schema, true );
             $validator->validate( $validatorObject );
 
-            return json_decode( $xliff_parameters, true ); // decode again because we need an associative array and not stdClass
+            return $validatorObject->decode();
         }
 
         if ( !empty( $xliff_parameters_template_id ) ) {

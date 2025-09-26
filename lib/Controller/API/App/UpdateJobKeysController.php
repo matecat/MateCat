@@ -208,7 +208,7 @@ class UpdateJobKeysController extends KleinController {
             throw new InvalidArgumentException( "Job password missing", -2 );
         }
 
-        if($public_tm_penalty < 0 || $public_tm_penalty > 100){
+        if ( $public_tm_penalty < 0 || $public_tm_penalty > 100 ) {
             throw new InvalidArgumentException( "Invalid public_tm_penalty value (must be between 0 and 100)", -6 );
         }
 
@@ -260,10 +260,8 @@ class UpdateJobKeysController extends KleinController {
     private function validateTMKeysArray( $tm_keys ) {
         $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/job_keys.json' );
 
-        $validatorObject       = new JSONValidatorObject();
-        $validatorObject->json = $tm_keys;
-
-        $validator = new JSONValidator( $schema );
+        $validatorObject = new JSONValidatorObject( $tm_keys );
+        $validator       = new JSONValidator( $schema );
         $validator->validate( $validatorObject );
     }
 }
