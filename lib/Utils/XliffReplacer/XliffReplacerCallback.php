@@ -30,10 +30,11 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
     private string $targetLang;
 
     private FeatureSet $featureSet;
+
     /**
-     * @var int
+     * @var int|null
      */
-    private int $idProject;
+    private ?int $idProject = null;
 
     /**
      * XliffReplacerCallback constructor.
@@ -44,13 +45,20 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
      *
      * @param int        $idProject
      */
-    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, int $idProject ) {
-        $metadataDao      = new MetadataDao();
-        $this->filter     = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $metadataDao->getSubfilteringCustomHandlers((int)$idProject) );
+    public function __construct( FeatureSet $featureSet, string $sourceLang, string $targetLang, ?int $idProject = null ) {
         $this->featureSet = $featureSet;
         $this->sourceLang = $sourceLang;
         $this->targetLang = $targetLang;
-        $this->idProject  = $idProject;
+
+
+        $subfilteringCustomHandlers = [];
+        if ( $idProject !== null ) {
+            $this->idProject            = $idProject;
+            $metadataDao                = new MetadataDao();
+            $subfilteringCustomHandlers = $metadataDao->getSubfilteringCustomHandlers( (int)$idProject );
+        }
+
+        $this->filter = MateCatFilter::getInstance( $featureSet, $sourceLang, $targetLang, [], $subfilteringCustomHandlers );
     }
 
     /**
@@ -111,5 +119,5 @@ class XliffReplacerCallback implements XliffReplacerCallbackInterface {
         $this->filter = $filter;
 
         return $this;
-}
+    }
 }
