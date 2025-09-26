@@ -4,6 +4,7 @@ namespace Model\Projects;
 
 use DateTime;
 use Exception;
+use Matecat\SubFiltering\Enum\InjectableFiltersTags;
 use Model\DataAccess\AbstractDao;
 use Model\DataAccess\Database;
 use Model\Filters\FiltersConfigTemplateDao;
@@ -74,9 +75,9 @@ class ProjectTemplateDao extends AbstractDao {
         // MT
         $default->mt = json_encode( self::getUserDefaultMt() );
 
-        $default->tm          = json_encode( [] );
-        $default->created_at  = date( "Y-m-d H:i:s" );
-        $default->modified_at = date( "Y-m-d H:i:s" );
+        $default->tm           = json_encode( [] );
+        $default->created_at   = date( "Y-m-d H:i:s" );
+        $default->modified_at  = date( "Y-m-d H:i:s" );
         $default->subfiltering = null;
 
         return $default;
@@ -161,6 +162,35 @@ class ProjectTemplateDao extends AbstractDao {
      * @throws Exception
      */
     private static function checkValues( ProjectTemplateStruct $projectTemplateStruct, UserStruct $user ) {
+
+        // check subfiltering string
+        if ( $projectTemplateStruct->subfiltering !== null ) {
+            $allowedTags = [
+                    InjectableFiltersTags::markup,
+                    InjectableFiltersTags::percent_double_curly,
+                    InjectableFiltersTags::twig,
+                    InjectableFiltersTags::ruby_on_rails,
+                    InjectableFiltersTags::double_snail,
+                    InjectableFiltersTags::double_square,
+                    InjectableFiltersTags::dollar_curly,
+                    InjectableFiltersTags::single_curly,
+                    InjectableFiltersTags::objective_c_ns,
+                    InjectableFiltersTags::double_percent,
+                    InjectableFiltersTags::square_sprintf,
+                    InjectableFiltersTags::sprintf,
+            ];
+
+            $subfiltering      = $projectTemplateStruct->subfiltering;
+            $subfiltering      = preg_replace( '/\s+/', '', $subfiltering );
+            $subfilteringArray = explode( ",", $subfiltering );
+            $check             = array_diff( $subfilteringArray, $allowedTags );
+
+            if ( !empty( $check ) ) {
+                foreach ( $check as $tag ) {
+                    throw new Exception( $tag . " is not a valid Subfiltering tag" );
+                }
+            }
+        }
 
         // check id_team
         $team = ( new MembershipDao() )->setCacheTTL( 60 * 5 )->findTeamByIdAndUser(
