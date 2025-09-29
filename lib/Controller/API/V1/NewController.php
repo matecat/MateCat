@@ -712,7 +712,7 @@ class NewController extends KleinController {
             $subfiltering_handlers = 'null';
         }
 
-        $validatorObject = new JSONValidatorObject( $subfiltering_handlers, true );
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers );
         $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
         $validator->validate( $validatorObject );
 
@@ -745,10 +745,8 @@ class NewController extends KleinController {
                     throw new Exception( "private_tm_key_json is not a valid JSON" );
                 }
 
-                $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/private_tm_key_json.json' );
-
                 $validatorObject = new JSONValidatorObject( $private_tm_key_json );
-                $validator       = new JSONValidator( $schema, true );
+                $validator       = new JSONValidator( 'private_tm_key_json.json', true );
                 /** @var JSONValidatorObject $jsonObject */
                 $jsonObject = $validator->validate( $validatorObject );
 
@@ -1131,19 +1129,12 @@ class NewController extends KleinController {
     private function validateFiltersExtractionParameters( $filters_extraction_parameters = null, $filters_extraction_parameters_template_id = null ): ?FiltersConfigTemplateStruct {
         if ( !empty( $filters_extraction_parameters ) ) {
 
-            // first check if `filters_extraction_parameters` is a valid JSON
-            if ( !Utils::isJson( $filters_extraction_parameters ) ) {
-                throw new InvalidArgumentException( "filters_extraction_parameters is not a valid JSON" );
-            }
-
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/filters_extraction_parameters.json' );
-
             $validatorObject = new JSONValidatorObject( $filters_extraction_parameters );
-            $validator       = new JSONValidator( $schema );
+            $validator       = new JSONValidator( 'filters_extraction_parameters.json', true );
             $validator->validate( $validatorObject );
 
             $config = new FiltersConfigTemplateStruct();
-            $config->hydrateAllDto( json_decode( $filters_extraction_parameters, true ) );
+            $config->hydrateAllDto( $validatorObject->getValue( true ) );
 
             return $config;
 
@@ -1245,13 +1236,11 @@ class NewController extends KleinController {
                 throw new InvalidArgumentException( "xliff_parameters is not a valid JSON" );
             }
 
-            $schema = file_get_contents( AppConfig::$ROOT . '/inc/validation/schema/xliff_parameters_rules_content.json' );
-
-            $validatorObject = new JSONValidatorObject( $xliff_parameters, true );
-            $validator       = new JSONValidator( $schema, true );
+            $validatorObject = new JSONValidatorObject( $xliff_parameters );
+            $validator       = new JSONValidator( 'xliff_parameters_rules_content.json', true );
             $validator->validate( $validatorObject );
 
-            return $validatorObject->decode();
+            return $validatorObject->getValue( true );
         }
 
         if ( !empty( $xliff_parameters_template_id ) ) {

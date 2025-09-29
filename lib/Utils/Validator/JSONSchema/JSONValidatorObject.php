@@ -2,9 +2,8 @@
 
 namespace Utils\Validator\JSONSchema;
 
-use Elastic\Transport\Exception\RuntimeException;
 use Exception;
-use Utils\Tools\Utils;
+use stdClass;
 use Utils\Validator\Contracts\ValidatorObject;
 
 /**
@@ -35,7 +34,7 @@ class JSONValidatorObject extends ValidatorObject {
      * Decoded JSON value after validation (memoized).
      * Can be an array, object, scalar, or null depending on the JSON input.
      *
-     * @var mixed|null
+     * @var ?mixed The decoded JSON value or NULL when the JSON is null or an empty string.
      */
     protected $decoded;
 
@@ -46,38 +45,12 @@ class JSONValidatorObject extends ValidatorObject {
     protected bool $isDecoded = false;
 
     /**
-     * True if the decoded value is an array.
-     * @var bool
-     */
-    protected bool $isArray = false;
-
-    /**
-     * True if a decoded value is an object.
-     * @var bool
-     */
-    protected bool $isObject = false;
-
-    /**
-     * True if the decoded value is neither array nor object (i.e., scalar or null).
-     * @var bool
-     */
-    protected bool $isPrimitive = false;
-
-    /**
-     * If true, json_decode will return associative arrays instead of stdClass objects.
-     * @var bool
-     */
-    protected bool $associative;
-
-    /**
      * JSONValidatorObject constructor.
      *
-     * @param string $json        The JSON string to be validated/decoded.
-     * @param bool   $associative When true, objects are decoded as associative arrays.
+     * @param string $json The JSON string to be validated/decoded.
      */
-    public function __construct( string $json, bool $associative = false ) {
-        $this->json        = $json;
-        $this->associative = $associative;
+    public function __construct( string $json ) {
+        $this->json = $json;
     }
 
     /**
@@ -101,16 +74,8 @@ class JSONValidatorObject extends ValidatorObject {
             return $this->decoded;
         }
 
-        $this->decoded   = json_decode( $this->json == '' ? 'null' : $this->json, $this->associative );
+        $this->decoded   = json_decode( $this->json == '' ? 'null' : $this->json, false, 512, JSON_THROW_ON_ERROR );
         $this->isDecoded = true;
-        Utils::raiseJsonExceptionError();
-        if ( is_array( $this->decoded ) ) {
-            $this->isArray = true;
-        } elseif ( is_object( $this->decoded ) ) {
-            $this->isObject = true;
-        } else {
-            $this->isPrimitive = true;
-        }
 
         return $this->decoded;
     }
@@ -121,52 +86,51 @@ class JSONValidatorObject extends ValidatorObject {
      * @return mixed|null The decoded JSON value (array|object|scalar|null).
      * @throws Exception  If decoding fails or JSON is invalid.
      */
-    public function getValue() {
-        return $this->decode();
+    public function getValue( bool $associative = false ) {
+        $val = $this->decode();
+
+        if ( $val === null ) {
+            return null;
+        }
+
+        if ( $associative ) {
+            return $this->toArray( $val );
+        }
+
+        return $val;
+
     }
 
     /**
-     * Check if the validated JSON decodes to an array.
+     * Converts the given object into an associative array.
      *
-     * @return bool True, when decoded value is an array.
-     * @throws RuntimeException If called before getValid().
+     * This method recursively traverses the properties of the input object and converts them into an associative array.
+     * If a property is itself an object or an array, the method calls itself recursively to handle nested structures.
+     * Non-structured values (scalars) are directly added to the resulting array.
+     *
+     * @param object $object The object to be converted into an associative array.
+     *                       Numeric indexed arrays are cast to objects to ensure
+     *                       compatibility with the function signature.
+     *
+     * @return array An associative array representing the structure and data of the input object.
      */
-    public function isArray(): bool {
-        if ( !$this->isDecoded ) {
-            throw new RuntimeException( 'Object not validated. Call JSONValidatorObject::getValid() first.' );
+    private function toArray( object $object ): array {
+        $collector = [];
+        foreach ( $object as $key => $value ) {
+
+            // Determine if the value is structured (array or object).
+            $isStructured = is_array( $value ) || is_object( $value );
+
+            if ( $isStructured ) {
+                // Recursively convert structured values into arrays.
+                $collector[ $key ] = $this->toArray( (object)$value ); // Force cast to object to respect the function signature.
+            } else {
+                // Add scalar values directly to the resulting array.
+                $collector[ $key ] = $value;
+            }
         }
 
-        return $this->isArray;
-    }
-
-    /**
-     * Check if the validated JSON decodes to an object.
-     *
-     * Note: When $associative is true, JSON objects decode to arrays, so this will be false.
-     *
-     * @return bool True, when decoded value is an object.
-     * @throws RuntimeException If called before getValid().
-     */
-    public function isObject(): bool {
-        if ( !$this->isDecoded ) {
-            throw new RuntimeException( 'Object not validated. Call JSONValidatorObject::getValid() first.' );
-        }
-
-        return $this->isObject;
-    }
-
-    /**
-     * Check if the validated JSON decodes to a primitive value (scalar or null).
-     *
-     * @return bool True, when decoded value is primitive (not array/object).
-     * @throws RuntimeException If called before getValid().
-     */
-    public function isPrimitive(): bool {
-        if ( !$this->isDecoded ) {
-            throw new RuntimeException( 'Object not validated. Call JSONValidatorObject::getValid() first.' );
-        }
-
-        return $this->isPrimitive;
+        return $collector;
     }
 
 }

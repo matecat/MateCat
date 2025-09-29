@@ -381,7 +381,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
             $subfiltering_handlers = 'null';
         }
 
-        $validatorObject = new JSONValidatorObject( $subfiltering_handlers, true );
+        $validatorObject = new JSONValidatorObject( $subfiltering_handlers );
         $validator       = new JSONValidator( 'subfiltering_handlers.json', true );
         $validator->validate( $validatorObject );
 

@@ -556,7 +556,7 @@ class TMAnalysisWorker extends AbstractWorker {
         $_config[ 'additional_params' ]                = $queueElement->params->additional_params ?? null;
         $_config[ 'priority_key' ]                     = $queueElement->params->tm_prioritization ?? null;
         $_config[ 'job_id' ]                           = $queueElement->params->id_job ?? null;
-        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = $queueElement->params->subfiltering_handlers;
+        $_config[ MetadataDao::SUBFILTERING_HANDLERS ] = isset( $queueElement->params->subfiltering_handlers ) ? $queueElement->params->subfiltering_handlers->toArray() : null;
 
         if ( $queueElement->params->dialect_strict ?? false ) { //null coalesce operator when dialect_strict is not set
             $_config[ 'dialect_strict' ] = $queueElement->params->dialect_strict;

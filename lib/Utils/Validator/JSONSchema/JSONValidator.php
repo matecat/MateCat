@@ -75,11 +75,11 @@ class JSONValidator extends AbstractValidator {
     /**
      * @param ValidatorObject $object
      *
-     * @return ValidatorObject|null
+     * @return JSONValidatorObject|null
      * @throws JSONValidatorException
      * @throws JsonValidatorGenericException
      */
-    public function validate( ValidatorObject $object ): ?ValidatorObject {
+    public function validate( ValidatorObject $object ): ?JSONValidatorObject {
 
         try {
             /** @var JSONValidatorObject $object */
