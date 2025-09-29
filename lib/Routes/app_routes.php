@@ -91,6 +91,11 @@ $klein->with( '/api/app/glossary', function () {
     route( '/_update', 'POST', [ '\Controller\API\App\GlossaryController', 'update' ] );
 } );
 
+// Intento
+$klein->with( '/api/app/intento', function () {
+    route( '/routing/[:engineId]', 'GET', [ '\Controller\API\App\IntentoController', 'routingList' ] );
+} );
+
 // Match
 $klein->with( '/api/app/mymemory', function () {
     route( '/status/[:uuid]', 'GET', [ '\Controller\API\App\MyMemoryController', 'status' ] );
