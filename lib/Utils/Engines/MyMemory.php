@@ -16,6 +16,7 @@ use Utils\Engines\Results\MyMemory\CreateUserResponse;
 use Utils\Engines\Results\MyMemory\DeleteGlossaryResponse;
 use Utils\Engines\Results\MyMemory\DomainsResponse;
 use Utils\Engines\Results\MyMemory\ExportResponse;
+use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Engines\Results\MyMemory\GetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\Engines\Results\MyMemory\KeysGlossaryResponse;
@@ -24,10 +25,8 @@ use Utils\Engines\Results\MyMemory\SearchGlossaryResponse;
 use Utils\Engines\Results\MyMemory\SetContributionResponse;
 use Utils\Engines\Results\MyMemory\SetGlossaryResponse;
 use Utils\Engines\Results\MyMemory\TagProjectionResponse;
-use Utils\Engines\Results\MyMemory\FileImportAndStatusResponse;
 use Utils\Engines\Results\MyMemory\UpdateGlossaryResponse;
 use Utils\Engines\Results\TMSAbstractResponse;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\TaskRunner\Exceptions\EndQueueException;
 use Utils\TaskRunner\Exceptions\ReQueueException;
@@ -180,7 +179,7 @@ class MyMemory extends AbstractEngine {
         if ( !empty( $this->result->matches ) ) {
             /** @var $match Matches */
             foreach ( $this->result->matches as $match ) {
-                if( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false){
+                if ( stripos( $match->created_by, InternalMatchesConstants::MT ) !== false ) {
                     $match->match = $this->getStandardMtPenaltyString();
                 }
             }
@@ -209,20 +208,18 @@ class MyMemory extends AbstractEngine {
         $parameters[ 'client_id' ] = $_config[ 'uid' ] ?? 0;
 
         // TM prioritization
-        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) and $_config[ 'priority_key' ] ) ? 1 : 0;
+        $parameters[ 'priority_key' ] = ( isset( $_config[ 'priority_key' ] ) && $_config[ 'priority_key' ] ) ? 1 : 0;
 
-        if ( isset( $_config[ 'penalty_key' ] ) and !empty( $_config[ 'penalty_key' ] ) ) {
-            $penalties = [];
+        // public_tm_penalty
+        if ( isset( $_config[ 'public_tm_penalty' ] ) && is_numeric( $_config[ 'public_tm_penalty' ] ) ) {
+            $_config[ 'penalty_key' ][] = [
+                    'key'     => 'public',
+                    'penalty' => $_config[ 'public_tm_penalty' ] / 100,
+            ];
+        }
 
-            foreach ( $_config[ 'penalty_key' ] as $penalty ) {
-                if ( is_numeric( $penalty ) ) {
-                    $penalties[] = $penalty / 100;
-                }
-            }
-
-            if ( !empty( $penalties ) ) {
-                $parameters[ 'penalty_key' ] = implode( ",", $penalties );
-            }
+        if ( !empty( $_config[ 'penalty_key' ] ) ) {
+            $parameters[ 'penalty_key' ] = json_encode( $_config[ 'penalty_key' ] );
         }
 
         if ( isset( $_config[ 'dialect_strict' ] ) ) {
@@ -383,7 +380,7 @@ class MyMemory extends AbstractEngine {
         );
 
         $this->call( "entry_status_relative_url", [ 'uuid' => $uuid ] );
-        
+
         return $this->result;
     }
 
@@ -603,6 +600,7 @@ class MyMemory extends AbstractEngine {
                 "term"       => $term,
         ];
         $this->call( "glossary_update_relative_url", $payload, true, true );
+
         return $this->result;
     }
 
@@ -669,7 +667,7 @@ class MyMemory extends AbstractEngine {
             throw new Exception( $this->result->error->message, $this->result->responseStatus );
         }
 
-        Log::doJsonLog( 'TMX exported to E-mail.' );
+        $this->logger->debug( 'TMX exported to E-mail.' );
 
         return $this->result;
     }
@@ -716,7 +714,7 @@ class MyMemory extends AbstractEngine {
         $this->call( 'api_key_check_auth_url', $postFields );
 
         if ( !$this->result->responseStatus == 200 ) {
-            Log::doJsonLog( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
+            $this->logger->debug( "Error: The check for Match private key correctness failed: " . $this->result[ 'error' ][ 'message' ] . " ErrNum: " . $this->result[ 'error' ][ 'code' ] );
             throw new Exception( "Error: The private TM key you entered ($apiKey) appears to be invalid. Please check that the key is correct.", -2 );
         }
 

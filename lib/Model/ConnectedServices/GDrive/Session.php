@@ -33,7 +33,6 @@ use RecursiveIteratorIterator;
 use ReflectionException;
 use RuntimeException;
 use Utils\Constants\Constants;
-use Utils\Logger\Log;
 use Utils\Registry\AppConfig;
 use Utils\Tools\CatUtils;
 use Utils\Tools\Utils;
@@ -355,7 +354,6 @@ class Session {
      * @param int         $filtersTemplate
      *
      * @return bool
-     * @throws ConnectionException
      * @throws ReflectionException
      */
     public function removeFile( string $fileId, string $source, ?string $segmentationRule = null, int $filtersTemplate = 0 ): bool {
@@ -395,8 +393,6 @@ class Session {
             }
 
             unset( $this->session[ self::FILE_LIST ] [ $fileId ] );
-
-            Log::doJsonLog( 'File ' . $fileId . ' removed.' );
 
             $success = true;
         }

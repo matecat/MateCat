@@ -101,8 +101,8 @@ class QualityReportSegmentModel {
 
         if ( $isForUI ) {
             $seg->segment     = $Filter->fromLayer0ToLayer2( $seg->segment );
-            $seg->translation = $Filter->fromLayer0ToLayer2( $seg->translation );
-            $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->suggestion );
+            $seg->translation = $Filter->fromLayer0ToLayer2( $seg->translation ?? '' );
+            $seg->suggestion  = $Filter->fromLayer0ToLayer2( $seg->suggestion ?? '' );
         }
     }
 

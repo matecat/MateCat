@@ -24,7 +24,7 @@ use ReflectionException;
 use Utils\Constants\Constants;
 use Utils\Constants\ProjectStatus;
 use Utils\Constants\TranslationStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 use Utils\Validator\Contracts\ValidatorObject;
 use Utils\Validator\IsJobRevisionValidator;
 
@@ -390,11 +390,12 @@ class CatUtils {
             $ctype = str_replace( '"', '', $ctype );
             $ctype = str_replace( 'ctype=', '', $ctype );
 
-            if ( $ctype !== CTypeEnum::HTML ) {
-                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
-            } else {
+            if ( in_array( $ctype, [ CTypeEnum::HTML, CTypeEnum::XML ] ) ) {
                 $string = str_replace( $match[ 0 ], '', $string ); // count html snippets as zero words
+            } else {
+                $string = str_replace( $match[ 0 ], $variables_placeholder, $string ); // count variables as one word
             }
+
         }
 
         // remove all residual xliff tags
@@ -465,7 +466,7 @@ class CatUtils {
         file_put_contents( $tmpOrigFName, $documentContent );
 
         $cmd = "file -i $tmpOrigFName";
-        Log::doJsonLog( $cmd );
+        LoggerFactory::doJsonLog( $cmd );
 
         $file_info = shell_exec( $cmd );
         [ , $charset ] = explode( "=", $file_info );
@@ -594,7 +595,7 @@ class CatUtils {
         if ( $wStruct->getTotal() == 0 && ( $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_DONE || $projectStruct[ 'status_analysis' ] == ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
             $wCounter = new CounterModel();
             $wStruct  = $wCounter->initializeJobWordCount( $job[ 'id' ], $job[ 'password' ] );
-            Log::doJsonLog( "BackWard compatibility set Counter." );
+            LoggerFactory::doJsonLog( "BackWard compatibility set Counter." );
 
             return $wStruct;
         }
@@ -1024,9 +1025,8 @@ class CatUtils {
      *
      * @return string
      */
-    public static function encodeFileName($filename)
-    {
-        return rtrim(strtr(base64_encode(gzdeflate($filename, 9)), '+/', '-_'), '=');
+    public static function encodeFileName( $filename ) {
+        return rtrim( strtr( base64_encode( gzdeflate( $filename, 9 ) ), '+/', '-_' ), '=' );
     }
 
     /**
@@ -1034,9 +1034,8 @@ class CatUtils {
      *
      * @return false|string
      */
-    public static function decodeFileName($filename)
-    {
-        return gzinflate(base64_decode(strtr($filename, '-_', '+/')));
+    public static function decodeFileName( $filename ) {
+        return gzinflate( base64_decode( strtr( $filename, '-_', '+/' ) ) );
     }
 }
 

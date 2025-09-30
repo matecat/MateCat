@@ -59,8 +59,8 @@ class CallAbstractMyMemoryTest extends AbstractTest {
 
         $engine_struct_MyMemory = ( new EngineDAO() )->read( $engine_struct_MyMemory )[ 0 ];
 
-        /** @var $engine_MyMemory PHPUnit_Framework_MockObject_MockObject | Match */
-        $this->engine_MyMemory = @$this->getMockBuilder( '\Utils\Engines\MyMemory' )->setConstructorArgs( [ $engine_struct_MyMemory ] )->setMethods( [ '_call' ] )->getMock();
+        /** @var $engine_MyMemory MyMemory */
+        $this->engine_MyMemory = @$this->getMockBuilder( MyMemory::class )->setConstructorArgs( [ $engine_struct_MyMemory ] )->onlyMethods( [ '_call' ] )->getMock();
 
         $reflector            = new ReflectionClass( $this->engine_MyMemory );
         $this->resultProperty = $reflector->getProperty( "result" );

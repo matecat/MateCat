@@ -571,7 +571,7 @@ class AnalyzeChunksResume extends React.Component {
                 <div className="title-standard-words">
                   <h5>
                     Industry weighted
-                    <span data-tooltip="As counted by other CAT tools">
+                    <span data-tooltip="As counted by other CAT tools: no discount applied for machine-translation words.">
                       <i className="icon-info icon" />
                     </span>
                   </h5>

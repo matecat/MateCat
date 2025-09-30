@@ -11,7 +11,7 @@
             "rtl": false,
             "rfc3066code": "ace-ID",
             "ocr": {
-                "supported": false,
+                    "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -41,7 +41,7 @@
             "rtl": false,
             "rfc3066code": "ak-GH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -71,7 +71,7 @@
             "rtl": false,
             "rfc3066code": "am-ET",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -86,7 +86,7 @@
             "rtl": false,
             "rfc3066code": "aig-AG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -101,8 +101,8 @@
             "rtl": true,
             "rfc3066code": "ar-SA",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -116,8 +116,8 @@
             "rtl": true,
             "rfc3066code": "ar-AE",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -131,8 +131,8 @@
             "rtl": true,
             "rfc3066code": "ar-EG",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -146,8 +146,8 @@
             "rtl": true,
             "rfc3066code": "ar-JO",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -161,7 +161,7 @@
             "rtl": false,
             "rfc3066code": "an-ES",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -176,7 +176,7 @@
             "rtl": false,
             "rfc3066code": "hy-AM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -191,7 +191,7 @@
             "rtl": false,
             "rfc3066code": "as-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -236,7 +236,7 @@
             "rtl": false,
             "rfc3066code": "awa-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -251,7 +251,7 @@
             "rtl": false,
             "rfc3066code": "quy-PE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -266,7 +266,7 @@
             "rtl": false,
             "rfc3066code": "az-AZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             },
             "languageRegionCode": "az-Latn-AZ"
@@ -282,7 +282,7 @@
             "rtl": false,
             "rfc3066code": "bah-BS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -297,7 +297,7 @@
             "rtl": false,
             "rfc3066code": "bjs-BB",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -312,7 +312,7 @@
             "rtl": false,
             "rfc3066code": "ban-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -327,7 +327,7 @@
             "rtl": false,
             "rfc3066code": "rmn-BG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -342,7 +342,7 @@
             "rtl": false,
             "rfc3066code": "bal-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -357,7 +357,7 @@
             "rtl": false,
             "rfc3066code": "bm-ML",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -372,7 +372,7 @@
             "rtl": false,
             "rfc3066code": "bjn-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -387,7 +387,7 @@
             "rtl": false,
             "rfc3066code": "ba-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -432,7 +432,7 @@
             "rtl": false,
             "rfc3066code": "fr-BE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -447,7 +447,7 @@
             "rtl": false,
             "rfc3066code": "bem-ZM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -462,7 +462,7 @@
             "rtl": false,
             "rfc3066code": "bn-BD",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -477,7 +477,7 @@
             "rtl": false,
             "rfc3066code": "bn-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -492,7 +492,7 @@
             "rtl": false,
             "rfc3066code": "bho-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -507,7 +507,7 @@
             "rtl": false,
             "rfc3066code": "bh-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -522,11 +522,25 @@
             "rtl": false,
             "rfc3066code": "bi-VU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
         {
+            "localized": [
+                {
+                    "en": "Bodo (India)"
+                }
+            ],
+            "isocode": "brx",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "brx-IN",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },{
             "localized": [
                 {
                     "en": "Borana"
@@ -537,7 +551,7 @@
             "rtl": false,
             "rfc3066code": "gax-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -568,7 +582,7 @@
             "rtl": false,
             "rfc3066code": "bs-Cyrl-BA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             },
             "languageRegionCode": "bs-Cyrl-BA"
@@ -599,7 +613,7 @@
             "rtl": false,
             "rfc3066code": "bug-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -614,7 +628,7 @@
             "rtl": false,
             "rfc3066code": "bg-BG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -629,7 +643,7 @@
             "rtl": false,
             "rfc3066code": "my-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -689,7 +703,7 @@
             "rtl": false,
             "rfc3066code": "tzm-MA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -704,7 +718,7 @@
             "rtl": false,
             "rfc3066code": "ayr-BO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -719,7 +733,7 @@
             "rtl": false,
             "rfc3066code": "knc-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -734,7 +748,7 @@
             "rtl": true,
             "rfc3066code": "shu-TD",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -749,7 +763,22 @@
             "rtl": false,
             "rfc3066code": "ch-GU",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chechen (Russia)"
+                }
+            ],
+            "isocode": "ce",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ce-RU",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -764,7 +793,7 @@
             "rtl": false,
             "rfc3066code": "chr-US",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -779,7 +808,7 @@
             "rtl": false,
             "rfc3066code": "hne-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -794,7 +823,7 @@
             "rtl": false,
             "rfc3066code": "zh-CN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -809,7 +838,7 @@
             "rtl": false,
             "rfc3066code": "zh-HK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -824,7 +853,7 @@
             "rtl": false,
             "rfc3066code": "zh-SG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -839,7 +868,7 @@
             "rtl": false,
             "rfc3066code": "zh-TW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -854,7 +883,7 @@
             "rtl": false,
             "rfc3066code": "zh-MO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -869,7 +898,7 @@
             "rtl": false,
             "rfc3066code": "ctg-BD",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -884,7 +913,7 @@
             "rtl": false,
             "rfc3066code": "cjk-AO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -899,7 +928,22 @@
             "rtl": false,
             "rfc3066code": "cac-GT",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Chuukese (Micronesia)"
+                }
+            ],
+            "isocode": "chk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "chk-FM",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -914,7 +958,7 @@
             "rtl": false,
             "rfc3066code": "grc-GR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -929,7 +973,7 @@
             "rtl": false,
             "rfc3066code": "zdj-KM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -944,7 +988,7 @@
             "rtl": false,
             "rfc3066code": "cop-EG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -959,7 +1003,7 @@
             "rtl": false,
             "rfc3066code": "crh-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -974,7 +1018,7 @@
             "rtl": false,
             "rfc3066code": "pov-GW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1034,7 +1078,7 @@
             "rtl": true,
             "rfc3066code": "prs-AF",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1049,7 +1093,22 @@
             "rtl": false,
             "rfc3066code": "diq-TR",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Dogri (India)"
+                }
+            ],
+            "isocode": "doi",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "doi-IN",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1079,7 +1138,7 @@
             "rtl": false,
             "rfc3066code": "dyu-CI",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1094,7 +1153,7 @@
             "rtl": false,
             "rfc3066code": "dz-BT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1109,7 +1168,7 @@
             "rtl": true,
             "rfc3066code": "ydd-US",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1124,7 +1183,7 @@
             "rtl": false,
             "rfc3066code": "vmw-MZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1168,6 +1227,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "en-CA",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "English (Hong Kong)"
+                }
+            ],
+            "isocode": "en",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "en-HK",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
@@ -1304,7 +1378,7 @@
             "rtl": false,
             "rfc3066code": "ee-GH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1319,7 +1393,7 @@
             "rtl": false,
             "rfc3066code": "fn-FNG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1349,7 +1423,7 @@
             "rtl": false,
             "rfc3066code": "fj-FJ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1364,7 +1438,7 @@
             "rtl": false,
             "rfc3066code": "fil-PH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1386,6 +1460,21 @@
         {
             "localized": [
                 {
+                    "en": "Fula (Guinea)"
+                }
+            ],
+            "isocode": "ff",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ff-GN",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Dutch (Belgium)"
                 }
             ],
@@ -1394,7 +1483,7 @@
             "rtl": false,
             "rfc3066code": "nl-BE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1409,7 +1498,7 @@
             "rtl": false,
             "rfc3066code": "fon-BJ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1469,7 +1558,7 @@
             "rtl": false,
             "rfc3066code": "fur-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1484,7 +1573,7 @@
             "rtl": false,
             "rfc3066code": "ff-FUL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1514,7 +1603,7 @@
             "rtl": false,
             "rfc3066code": "mfi-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1529,7 +1618,7 @@
             "rtl": false,
             "rfc3066code": "grt-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1544,7 +1633,7 @@
             "rtl": false,
             "rfc3066code": "ka-GE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1574,7 +1663,7 @@
             "rtl": false,
             "rfc3066code": "gil-KI",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1589,7 +1678,7 @@
             "rtl": false,
             "rfc3066code": "glw-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1604,7 +1693,7 @@
             "rtl": false,
             "rfc3066code": "el-GR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1619,7 +1708,7 @@
             "rtl": false,
             "rfc3066code": "gcl-GD",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1634,7 +1723,7 @@
             "rtl": false,
             "rfc3066code": "gn-PY",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1649,7 +1738,7 @@
             "rtl": false,
             "rfc3066code": "gu-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1664,7 +1753,7 @@
             "rtl": false,
             "rfc3066code": "gyn-GY",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1679,7 +1768,7 @@
             "rtl": false,
             "rfc3066code": "ht-HT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1694,7 +1783,7 @@
             "rtl": false,
             "rfc3066code": "khk-MN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1709,8 +1798,8 @@
             "rtl": false,
             "rfc3066code": "ha-NE",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -1739,8 +1828,8 @@
             "rtl": true,
             "rfc3066code": "he-IL",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -1754,7 +1843,7 @@
             "rtl": false,
             "rfc3066code": "hig-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1769,7 +1858,7 @@
             "rtl": false,
             "rfc3066code": "hil-PH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1784,7 +1873,7 @@
             "rtl": false,
             "rfc3066code": "mrj-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1799,7 +1888,7 @@
             "rtl": false,
             "rfc3066code": "hi-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1814,7 +1903,7 @@
             "rtl": false,
             "rfc3066code": "hi-FJ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1829,7 +1918,7 @@
             "rtl": false,
             "rfc3066code": "hmn-CN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1844,7 +1933,7 @@
             "rtl": false,
             "rfc3066code": "hoc-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1889,7 +1978,7 @@
             "rtl": false,
             "rfc3066code": "ig-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1904,7 +1993,7 @@
             "rtl": false,
             "rfc3066code": "ilo-PH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1934,7 +2023,7 @@
             "rtl": false,
             "rfc3066code": "kl-GL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -1994,7 +2083,7 @@
             "rtl": false,
             "rfc3066code": "jam-JM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2009,7 +2098,7 @@
             "rtl": false,
             "rfc3066code": "ja-JP",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2024,8 +2113,8 @@
             "rtl": false,
             "rfc3066code": "jv-ID",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -2039,7 +2128,7 @@
             "rtl": false,
             "rfc3066code": "kac-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2054,7 +2143,7 @@
             "rtl": false,
             "rfc3066code": "quc-GT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2069,7 +2158,7 @@
             "rtl": false,
             "rfc3066code": "kbp-TG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2084,7 +2173,7 @@
             "rtl": false,
             "rfc3066code": "kea-CV",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2099,7 +2188,7 @@
             "rtl": false,
             "rfc3066code": "kab-DZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2114,7 +2203,7 @@
             "rtl": false,
             "rfc3066code": "kln-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2129,7 +2218,7 @@
             "rtl": false,
             "rfc3066code": "kam-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2144,7 +2233,7 @@
             "rtl": false,
             "rfc3066code": "kjb-GT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2159,7 +2248,7 @@
             "rtl": false,
             "rfc3066code": "kn-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2174,8 +2263,8 @@
             "rtl": false,
             "rfc3066code": "kr-KAU",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -2189,7 +2278,7 @@
             "rtl": false,
             "rfc3066code": "kar-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2204,7 +2293,7 @@
             "rtl": false,
             "rfc3066code": "ks-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2219,7 +2308,7 @@
             "rtl": true,
             "rfc3066code": "kas-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2234,7 +2323,7 @@
             "rtl": false,
             "rfc3066code": "ks-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2249,7 +2338,7 @@
             "rtl": false,
             "rfc3066code": "kk-KZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2264,7 +2353,7 @@
             "rtl": false,
             "rfc3066code": "kha-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2279,7 +2368,7 @@
             "rtl": false,
             "rfc3066code": "km-KH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2294,7 +2383,7 @@
             "rtl": false,
             "rfc3066code": "ki-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2309,7 +2398,7 @@
             "rtl": false,
             "rfc3066code": "kmb-AO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2324,7 +2413,7 @@
             "rtl": false,
             "rfc3066code": "rw-RW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2339,7 +2428,7 @@
             "rtl": false,
             "rfc3066code": "rn-BI",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2354,7 +2443,7 @@
             "rtl": false,
             "rfc3066code": "guz-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2369,7 +2458,7 @@
             "rtl": false,
             "rfc3066code": "kg-CG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2384,7 +2473,7 @@
             "rtl": false,
             "rfc3066code": "kok-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2399,7 +2488,7 @@
             "rtl": false,
             "rfc3066code": "ko-KR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2414,7 +2503,7 @@
             "rtl": false,
             "rfc3066code": "kmr-TR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2429,8 +2518,8 @@
             "rtl": true,
             "rfc3066code": "ckb-IQ",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -2444,7 +2533,7 @@
             "rtl": false,
             "rfc3066code": "ky-KG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2459,7 +2548,7 @@
             "rtl": false,
             "rfc3066code": "lo-LA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2474,7 +2563,7 @@
             "rtl": false,
             "rfc3066code": "ltg-LV",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2489,7 +2578,7 @@
             "rtl": false,
             "rfc3066code": "la-XN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2519,7 +2608,7 @@
             "rtl": false,
             "rfc3066code": "lij-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2534,7 +2623,7 @@
             "rtl": false,
             "rfc3066code": "li-NL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2549,7 +2638,7 @@
             "rtl": false,
             "rfc3066code": "ln-LIN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2579,7 +2668,7 @@
             "rtl": false,
             "rfc3066code": "lmo-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2594,7 +2683,7 @@
             "rtl": false,
             "rfc3066code": "lua-CD",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2609,7 +2698,7 @@
             "rtl": false,
             "rfc3066code": "lg-UG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2624,7 +2713,7 @@
             "rtl": false,
             "rfc3066code": "luy-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2639,7 +2728,7 @@
             "rtl": false,
             "rfc3066code": "luo-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2654,7 +2743,7 @@
             "rtl": false,
             "rfc3066code": "lb-LU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2669,7 +2758,7 @@
             "rtl": false,
             "rfc3066code": "mas-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2684,7 +2773,7 @@
             "rtl": false,
             "rfc3066code": "mk-MK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2699,7 +2788,7 @@
             "rtl": false,
             "rfc3066code": "mag-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2714,7 +2803,7 @@
             "rtl": false,
             "rfc3066code": "mai-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2729,7 +2818,7 @@
             "rtl": false,
             "rfc3066code": "mg-MG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2759,7 +2848,7 @@
             "rtl": false,
             "rfc3066code": "ml-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2774,8 +2863,8 @@
             "rtl": true,
             "rfc3066code": "dv-MV",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -2804,7 +2893,7 @@
             "rtl": false,
             "rfc3066code": "mam-GT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2819,7 +2908,37 @@
             "rtl": false,
             "rfc3066code": "mfi-CM",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mandinka (Gambia)"
+                }
+            ],
+            "isocode": "mnk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mnk-GM",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Mandjak (Senegal)"
+                }
+            ],
+            "isocode": "mfv",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "mfv-SN",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2834,7 +2953,7 @@
             "rtl": false,
             "rfc3066code": "mni-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2849,7 +2968,7 @@
             "rtl": false,
             "rfc3066code": "gv-IM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2879,7 +2998,7 @@
             "rtl": false,
             "rfc3066code": "mr-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2894,7 +3013,7 @@
             "rtl": false,
             "rfc3066code": "mrt-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2909,7 +3028,7 @@
             "rtl": false,
             "rfc3066code": "mhr-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2924,7 +3043,7 @@
             "rtl": false,
             "rfc3066code": "mh-MH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2939,7 +3058,7 @@
             "rtl": false,
             "rfc3066code": "men-SL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2954,7 +3073,7 @@
             "rtl": false,
             "rfc3066code": "mer-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2969,7 +3088,7 @@
             "rtl": false,
             "rfc3066code": "nyf-KE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2984,7 +3103,7 @@
             "rtl": false,
             "rfc3066code": "min-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -2999,7 +3118,7 @@
             "rtl": false,
             "rfc3066code": "lus-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3014,7 +3133,7 @@
             "rtl": false,
             "rfc3066code": "mn-MN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3045,7 +3164,7 @@
             "rtl": false,
             "rfc3066code": "mfe-MU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3060,7 +3179,7 @@
             "rtl": true,
             "rfc3066code": "ar-MA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3075,7 +3194,7 @@
             "rtl": false,
             "rfc3066code": "mos-BF",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3090,7 +3209,7 @@
             "rtl": false,
             "rfc3066code": "ndc-MZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3105,7 +3224,7 @@
             "rtl": false,
             "rfc3066code": "ne-NP",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3120,7 +3239,7 @@
             "rtl": false,
             "rfc3066code": "fuv-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3135,7 +3254,7 @@
             "rtl": false,
             "rfc3066code": "niu-NU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3150,7 +3269,7 @@
             "rtl": false,
             "rfc3066code": "azj-AZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3165,7 +3284,7 @@
             "rtl": false,
             "rfc3066code": "kmr-TR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3196,7 +3315,7 @@
             "rtl": false,
             "rfc3066code": "nso-ZA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3211,7 +3330,7 @@
             "rtl": false,
             "rfc3066code": "uzn-UZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3256,7 +3375,7 @@
             "rtl": false,
             "rfc3066code": "nus-SS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3271,7 +3390,7 @@
             "rtl": false,
             "rfc3066code": "nup-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3286,7 +3405,7 @@
             "rtl": false,
             "rfc3066code": "ny-MW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3331,7 +3450,7 @@
             "rtl": false,
             "rfc3066code": "or-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3346,7 +3465,22 @@
             "rtl": false,
             "rfc3066code": "ory-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Oromo (Ethiopia)"
+                }
+            ],
+            "isocode": "om",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "om-ET",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3361,7 +3495,7 @@
             "rtl": true,
             "rfc3066code": "ur-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3376,7 +3510,7 @@
             "rtl": false,
             "rfc3066code": "pau-PW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3391,7 +3525,7 @@
             "rtl": false,
             "rfc3066code": "pi-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3406,7 +3540,7 @@
             "rtl": false,
             "rfc3066code": "pag-PH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3421,7 +3555,7 @@
             "rtl": false,
             "rfc3066code": "pap-CW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3437,8 +3571,8 @@
             "languageRegionCode": "ps-AF",
             "rfc3066code": "ps-PK",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -3452,8 +3586,8 @@
             "rtl": true,
             "rfc3066code": "fa-IR",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -3467,7 +3601,7 @@
             "rtl": false,
             "rfc3066code": "pis-SB",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3482,7 +3616,7 @@
             "rtl": false,
             "rfc3066code": "plt-MG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3496,6 +3630,21 @@
             "enabled": true,
             "rtl": false,
             "rfc3066code": "pl-PL",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Pohnpeian (Micronesia)"
+                }
+            ],
+            "isocode": "pon",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pon-FM",
             "ocr": {
                 "supported": true,
                 "not_supported_or_rtl": false
@@ -3534,6 +3683,36 @@
         {
             "localized": [
                 {
+                    "en": "Pökoot (Kenya)"
+                }
+            ],
+            "isocode": "pko",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pko-KE",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Pökoot (Uganda)"
+                }
+            ],
+            "isocode": "pko",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "pko-UG",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Potawatomi"
                 }
             ],
@@ -3542,7 +3721,22 @@
             "rtl": false,
             "rfc3066code": "pot-US",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Pulaar (Senegal)"
+                }
+            ],
+            "isocode": "fuc",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "fuc-SN",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3557,7 +3751,7 @@
             "rtl": false,
             "rfc3066code": "pa-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3572,7 +3766,7 @@
             "rtl": true,
             "rfc3066code": "pa-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3602,7 +3796,7 @@
             "rtl": true,
             "rfc3066code": "rhg-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3617,7 +3811,7 @@
             "rtl": false,
             "rfc3066code": "rhl-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3647,7 +3841,7 @@
             "rtl": false,
             "rfc3066code": "roh-CH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3662,7 +3856,7 @@
             "rtl": false,
             "rfc3066code": "run-BI",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3677,7 +3871,22 @@
             "rtl": false,
             "rfc3066code": "ru-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Saho (Eritrea)"
+                }
+            ],
+            "isocode": "ssy",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ssy-ER",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3692,7 +3901,7 @@
             "rtl": false,
             "rfc3066code": "acf-LC",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3707,7 +3916,7 @@
             "rtl": false,
             "rfc3066code": "sm-WS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3722,7 +3931,7 @@
             "rtl": false,
             "rfc3066code": "sg-CF",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3737,7 +3946,7 @@
             "rtl": false,
             "rfc3066code": "sa-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3752,7 +3961,7 @@
             "rtl": false,
             "rfc3066code": "sat-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3767,7 +3976,7 @@
             "rtl": false,
             "rfc3066code": "sc-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3782,7 +3991,7 @@
             "rtl": false,
             "rfc3066code": "gd-GB",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3797,7 +4006,7 @@
             "rtl": false,
             "rfc3066code": "seh-ZW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3812,7 +4021,7 @@
             "rtl": false,
             "rfc3066code": "sr-Cyrl-RS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             },
             "languageRegionCode": "sr-Cyrl-RS"
@@ -3836,6 +4045,21 @@
         {
             "localized": [
                 {
+                    "en": "Serbo-Croatian (Croatia)"
+                }
+            ],
+            "isocode": "sh",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sh-HR",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
                     "en": "Seselwa Creole French"
                 }
             ],
@@ -3844,7 +4068,7 @@
             "rtl": false,
             "rfc3066code": "crs-SC",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3859,7 +4083,37 @@
             "rtl": false,
             "rfc3066code": "nso-ZA",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "S'gaw Karen (Myanmar)"
+                }
+            ],
+            "isocode": "ksw",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "ksw-MM",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Sinte Romani (Netherlands)"
+                }
+            ],
+            "isocode": "rmo",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "rmo-NL",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3874,7 +4128,7 @@
             "rtl": false,
             "rfc3066code": "tn-ZA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3889,7 +4143,7 @@
             "rtl": false,
             "rfc3066code": "shn-MM",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3904,7 +4158,7 @@
             "rtl": false,
             "rfc3066code": "sn-ZW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3919,7 +4173,7 @@
             "rtl": false,
             "rfc3066code": "scn-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3934,7 +4188,7 @@
             "rtl": false,
             "rfc3066code": "szl-PL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3949,7 +4203,7 @@
             "rtl": true,
             "rfc3066code": "sd-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -3964,7 +4218,7 @@
             "rtl": false,
             "rfc3066code": "si-LK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4009,8 +4263,23 @@
             "rtl": false,
             "rfc3066code": "so-SO",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Soninke (Mali)"
+                }
+            ],
+            "isocode": "snk",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "snk-ML",
+            "ocr": {
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -4024,7 +4293,7 @@
             "rtl": false,
             "rfc3066code": "st-LS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4039,7 +4308,7 @@
             "rtl": true,
             "rfc3066code": "azb-AZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4054,7 +4323,7 @@
             "rtl": true,
             "rfc3066code": "pbt-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4069,7 +4338,7 @@
             "rtl": false,
             "rfc3066code": "nr-ZA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             },
             "languageRegionCode": "nso-ZA"
@@ -4085,7 +4354,7 @@
             "rtl": false,
             "rfc3066code": "dik-SS",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4235,7 +4504,7 @@
             "rtl": false,
             "rfc3066code": "srn-SR",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4250,7 +4519,7 @@
             "rtl": false,
             "rfc3066code": "lvs-LV",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4280,7 +4549,22 @@
             "rtl": false,
             "rfc3066code": "su-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
+                "not_supported_or_rtl": false
+            }
+        },
+        {
+            "localized": [
+                {
+                    "en": "Susu (Guinea)"
+                }
+            ],
+            "isocode": "sus",
+            "enabled": true,
+            "rtl": false,
+            "rfc3066code": "sus-GN",
+            "ocr": {
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4311,7 +4595,7 @@
             "rtl": false,
             "rfc3066code": "ss-SZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4356,8 +4640,8 @@
             "rtl": true,
             "rfc3066code": "syc-TR",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -4386,7 +4670,7 @@
             "rtl": false,
             "rfc3066code": "ty-PF",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4401,7 +4685,7 @@
             "rtl": false,
             "rfc3066code": "tg-TJ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4416,8 +4700,8 @@
             "rtl": true,
             "rfc3066code": "tmh-DZ",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -4431,7 +4715,7 @@
             "rtl": false,
             "rfc3066code": "taq-ML",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4447,7 +4731,7 @@
             "languageRegionCode": "ta-IN",
             "rfc3066code": "ta-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4463,7 +4747,7 @@
             "languageRegionCode": "ta-LK",
             "rfc3066code": "ta-LK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4478,7 +4762,7 @@
             "rtl": false,
             "rfc3066code": "trv-TW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4508,7 +4792,7 @@
             "rtl": false,
             "rfc3066code": "te-IN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4523,7 +4807,7 @@
             "rtl": false,
             "rfc3066code": "tet-TL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4538,7 +4822,7 @@
             "rtl": false,
             "rfc3066code": "th-TH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4553,7 +4837,7 @@
             "rtl": false,
             "rfc3066code": "bo-CN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4568,7 +4852,7 @@
             "rtl": false,
             "rfc3066code": "ti-ET",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4583,7 +4867,7 @@
             "rtl": false,
             "rfc3066code": "tiv-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4598,7 +4882,7 @@
             "rtl": false,
             "rfc3066code": "tpi-PG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4613,7 +4897,7 @@
             "rtl": false,
             "rfc3066code": "tkl-TK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4628,7 +4912,7 @@
             "rtl": false,
             "rfc3066code": "to-TO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4643,7 +4927,7 @@
             "rtl": false,
             "rfc3066code": "als-AL",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4673,7 +4957,7 @@
             "rtl": false,
             "rfc3066code": "tsc-MZ",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4688,7 +4972,7 @@
             "rtl": false,
             "rfc3066code": "tn-BW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4703,7 +4987,7 @@
             "rtl": false,
             "rfc3066code": "tum-MW",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4748,7 +5032,7 @@
             "rtl": false,
             "rfc3066code": "tvl-TV",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4763,7 +5047,7 @@
             "rtl": false,
             "rfc3066code": "tw-GH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4778,7 +5062,7 @@
             "rtl": false,
             "rfc3066code": "udm-RU",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4793,7 +5077,7 @@
             "rtl": false,
             "rfc3066code": "uk-UA",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4808,7 +5092,7 @@
             "rtl": false,
             "rfc3066code": "ppk-ID",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4823,7 +5107,7 @@
             "rtl": false,
             "rfc3066code": "umb-AO",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4838,7 +5122,7 @@
             "rtl": true,
             "rfc3066code": "ur-PK",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4853,7 +5137,7 @@
             "rtl": true,
             "rfc3066code": "ug-CN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4884,7 +5168,7 @@
             "rtl": false,
             "rfc3066code": "vec-IT",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4914,7 +5198,7 @@
             "rtl": false,
             "rfc3066code": "svc-VC",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4929,7 +5213,7 @@
             "rtl": false,
             "rfc3066code": "vic-US",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4944,7 +5228,7 @@
             "rtl": false,
             "rfc3066code": "wls-WF",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4959,7 +5243,7 @@
             "rtl": false,
             "rfc3066code": "war-PH",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -4989,7 +5273,7 @@
             "rtl": false,
             "rfc3066code": "gaz-ET",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -5004,7 +5288,7 @@
             "rtl": false,
             "rfc3066code": "vls-BE",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -5019,7 +5303,7 @@
             "rtl": false,
             "rfc3066code": "wo-SN",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },
@@ -5049,8 +5333,8 @@
             "rtl": true,
             "rfc3066code": "yi-YD",
             "ocr": {
-                "supported": false,
-                "not_supported_or_rtl": true
+                "supported": true,
+                "not_supported_or_rtl": false
             }
         },
         {
@@ -5064,7 +5348,7 @@
             "rtl": false,
             "rfc3066code": "yo-NG",
             "ocr": {
-                "supported": false,
+                "supported": true,
                 "not_supported_or_rtl": false
             }
         },

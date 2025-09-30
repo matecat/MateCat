@@ -15,7 +15,7 @@ use PDO;
 use PDOException;
 use RuntimeException;
 use Utils\Constants\TranslationStatus;
-use Utils\Logger\Log;
+use Utils\Logger\LoggerFactory;
 
 class TMSServiceDao {
 
@@ -94,7 +94,7 @@ class TMSServiceDao {
             ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
 
             throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
         }
@@ -144,7 +144,7 @@ class TMSServiceDao {
             ] );
             $results = $stmt->fetchAll();
         } catch ( PDOException $e ) {
-            Log::doJsonLog( $e->getMessage() );
+            LoggerFactory::doJsonLog( $e->getMessage() );
             throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
         }
 
