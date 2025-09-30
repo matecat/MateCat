@@ -142,7 +142,7 @@ class FilesInfoUtility {
 
         if ( FileDao::isFileInProject( $id_file, $this->project->id ) ) {
             $metadataDao = new MetadataDao;
-            if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', null, 60 * 5 ) ) {
+            if ( $metadataDao->get( $this->project->id, $id_file, 'instructions', null, 0 ) ) {
                 $metadataDao->update( $this->project->id, $id_file, 'instructions', $instructions );
             } else {
                 $metadataDao->insert( $this->project->id, $id_file, 'instructions', $instructions );

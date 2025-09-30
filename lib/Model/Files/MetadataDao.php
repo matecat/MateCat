@@ -113,17 +113,25 @@ class MetadataDao extends AbstractDao {
      */
     public function update( int $id_project, int $id_file, string $key, string $value, ?int $filePartsId = null ): ?MetadataStruct {
 
-        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key AND `files_parts_id` = :files_parts_id ";
+        $sql = "UPDATE file_metadata SET `value` = :value WHERE id_project = :id_project AND id_file = :id_file AND `key` = :key  ";
+
+        $args = [
+                'id_project' => $id_project,
+                'id_file'    => $id_file,
+                'key'        => $key,
+                'value'      => $value
+        ];
+
+        if ( !empty( $filePartsId ) ) {
+            $sql                      .= "AND `files_parts_id` = :files_parts_id";
+            $args[ 'files_parts_id' ] = $filePartsId;
+        }
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute( [
-                'id_project'     => $id_project,
-                'id_file'        => $id_file,
-                'files_parts_id' => $filePartsId,
-                'key'            => $key,
-                'value'          => $value
-        ] );
+
+
+        $stmt->execute( $args );
 
         return $this->get( $id_project, $id_file, $key, $filePartsId );
     }
