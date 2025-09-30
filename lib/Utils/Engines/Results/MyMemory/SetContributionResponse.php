@@ -16,7 +16,7 @@ class SetContributionResponse extends TMSAbstractResponse {
 
         $this->responseData    = $response[ 'responseData' ] ?? '';
         $this->responseDetails = $response[ 'responseDetails' ] ?? '';
-        $this->responseStatus  = $response[ 'responseStatus' ] ?? '';
+        $this->responseStatus  = (int)( $response[ 'responseStatus' ] ?? 200 );
 
     }
 

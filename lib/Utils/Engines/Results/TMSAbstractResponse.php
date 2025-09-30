@@ -14,7 +14,7 @@ use ReflectionProperty;
  */
 abstract class TMSAbstractResponse {
 
-    public string $responseStatus = "";
+    public int $responseStatus = 200;
 
     /**
      * @var string|array
