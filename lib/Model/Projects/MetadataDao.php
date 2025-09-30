@@ -88,12 +88,10 @@ class MetadataDao extends AbstractDao {
         /**
          * @var $result MetadataStruct[]
          */
-        $result = $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
+        return $this->_fetchObjectMap( $stmt, MetadataStruct::class, [
                 'id_project' => $id_project,
                 'key'        => $key
-        ] );
-
-        return !empty( $result ) ? $result[ 0 ] : null;
+        ] )[ 0 ] ?? null;
 
     }
 
@@ -184,7 +182,7 @@ class MetadataDao extends AbstractDao {
         try {
             $subfiltering = $this->get( $id_project, MetadataDao::SUBFILTERING_HANDLERS, 86400 );
 
-            return json_decode( $subfiltering->value );
+            return json_decode( $subfiltering->value ?? '[]' ); //null coalescing with an empty array for project backward compatibility, load all handlers by default
         } catch ( Exception $exception ) {
             return [];
         }

@@ -22,6 +22,7 @@ use Utils\AsyncTasks\Workers\Traits\MatchesComparator;
 use Utils\Constants\EngineConstants;
 use Utils\Constants\TranslationStatus;
 use Utils\Contribution\GetContributionRequest;
+use Utils\Engines\MyMemory;
 use Utils\Engines\Results\MyMemory\GetMemoryResponse;
 use Utils\LQA\PostProcess;
 use Utils\Registry\AppConfig;
@@ -449,6 +450,7 @@ class GetContributionWorker extends AbstractWorker {
 
         if ( isset( $_TMS ) ) {
 
+            /** @var MyMemory $tmEngine */
             $tmEngine = $contributionStruct->getTMEngine( $featureSet );
             $config   = array_merge( $tmEngine->getConfigStruct(), $_config );
 
