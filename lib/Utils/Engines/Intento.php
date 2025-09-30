@@ -167,29 +167,23 @@ class Intento extends AbstractEngine {
         $parameters[ 'context' ][ 'from' ] = $_config[ 'source' ];
         $parameters[ 'context' ][ 'to' ]   = $_config[ 'target' ];
         $parameters[ 'context' ][ 'text' ] = $_config[ 'segment' ];
-        $provider                          = $this->provider;
-        $providerKey                       = $this->providerKey;
-        $providerCategory                  = $this->providerCategory;
 
-        if ( !empty( $provider ) ) {
-            $parameters[ 'service' ][ 'async' ]    = true;
-            $parameters[ 'service' ][ 'provider' ] = $provider[ 'id' ];
-
-            if ( !empty( $providerKey ) ) {
-                $parameters[ 'service' ][ 'auth' ][ $provider[ 'id' ] ] = [ json_decode( $providerKey, true ) ];
-            }
-
-            if ( !empty( $providerCategory ) ) {
-                $parameters[ 'context' ][ 'category' ] = $providerCategory;
-            }
-        }
-
-        // custom routing
         if ( isset( $_config[ 'pid' ] ) ) {
             $metadataDao   = new MetadataDao();
+
+            // custom provider
+            $customProvider = $metadataDao->get( $_config[ 'pid' ], 'intento_provider', 86400 );
+
+            if ( $customProvider !== null ) {
+                $parameters[ 'service' ][ 'async' ]    = true;
+                $parameters[ 'service' ][ 'provider' ] = $customProvider->value;
+            }
+
+            // custom routing
             $customRouting = $metadataDao->get( $_config[ 'pid' ], 'intento_routing', 86400 );
 
             if ( $customRouting !== null ) {
+                $parameters[ 'service' ][ 'async' ]   = true;
                 $parameters[ 'service' ][ 'routing' ] = $customRouting->value;
             }
         }
@@ -374,6 +368,7 @@ class Intento extends AbstractEngine {
         return [
                 'pre_translate_files',
                 'intento_routing',
+                'intento_provider',
         ];
     }
 }

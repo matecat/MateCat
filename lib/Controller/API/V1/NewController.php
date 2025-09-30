@@ -320,6 +320,7 @@ class NewController extends KleinController {
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
         $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
+        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $deepl_formality                        = filter_var( $this->request->param( 'deepl_formality' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -423,6 +424,7 @@ class NewController extends KleinController {
                 'mmt_glossaries'                            => $mmt_glossaries,
                 'mmt_activate_context_analyzer'             => $mmt_activate_context_analyzer,
                 'intento_routing'                           => $intento_routing,
+                'intento_provider'                          => $intento_provider,
                 'lara_glossaries'                           => $lara_glossaries,
                 'deepl_id_glossary'                         => $deepl_id_glossary,
                 'deepl_formality'                           => $deepl_formality,

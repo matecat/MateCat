@@ -235,6 +235,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
         $mmt_pre_import_tm                      = filter_var( $this->request->param( 'mmt_pre_import_tm' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_glossaries                         = filter_var( $this->request->param( 'mmt_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $mmt_activate_context_analyzer          = filter_var( $this->request->param( 'mmt_activate_context_analyzer' ), FILTER_VALIDATE_BOOLEAN );
+        $intento_provider                       = filter_var( $this->request->param( 'intento_provider' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $intento_routing                        = filter_var( $this->request->param( 'intento_routing' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $lara_glossaries                        = filter_var( $this->request->param( 'lara_glossaries' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
         $deepl_id_glossary                      = filter_var( $this->request->param( 'deepl_id_glossary' ), FILTER_SANITIZE_STRING, [ 'flags' => FILTER_FLAG_STRIP_LOW ] );
@@ -297,6 +298,7 @@ class CreateProjectController extends AbstractStatefulKleinController {
                 'mmt_pre_import_tm'                      => ( !empty( $mmt_pre_import_tm ) ) ? $mmt_pre_import_tm : null,
                 'mmt_glossaries'                         => ( !empty( $mmt_glossaries ) ) ? $mmt_glossaries : null,
                 'mmt_activate_context_analyzer'          => ( !empty( $mmt_activate_context_analyzer ) ) ? $mmt_activate_context_analyzer : null,
+                'intento_provider'                       => ( !empty( $intento_provider ) ) ? $intento_provider : null,
                 'intento_routing'                        => ( !empty( $intento_routing ) ) ? $intento_routing : null,
                 'lara_glossaries'                        => ( !empty( $lara_glossaries ) ) ? $lara_glossaries : null,
                 'deepl_id_glossary'                      => ( !empty( $deepl_id_glossary ) ) ? $deepl_id_glossary : null,

@@ -250,6 +250,7 @@ class ProjectManager {
                             'lara_glossaries'                        => null,
                             'deepl_engine_type'                      => null,
                             'intento_routing'                        => null,
+                            'intento_provider'                       => null,
                     ] );
         }
 
@@ -491,6 +492,7 @@ class ProjectManager {
                 'deepl_formality',
                 'deepl_id_glossary',
                 'deepl_engine_type',
+                'intento_provider',
                 'intento_routing',
         ];
 
